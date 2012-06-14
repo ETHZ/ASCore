@@ -370,7 +370,8 @@ void SSDLPlotter::doAnalysis(){
 	
 	makeAllClosureTests();
 	makeAllIntPredictions();
-	// makeDiffPrediction();
+        
+	makeDiffPrediction();
 	// makeTTWDiffPredictions();
 	// printAllYieldTables();
 	
@@ -960,264 +961,263 @@ void SSDLPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(SSDL
 	Util::PrintNoEPS(c00, tag + "ObservedNt00", fOutputDir + fOutputSubDir, fOutputFile);
 }
 //____________________________________________________________________________
-// MARC void SSDLPlotter::makeRelIsoTTSigPlots(){
-// MARC 	char cmd[100];
-// MARC     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-// MARC     system(cmd);
-// MARC 
-// MARC 	TLatex *lat = new TLatex();
-// MARC 	lat->SetNDC(kTRUE);
-// MARC 	lat->SetTextColor(kBlack);
-// MARC 	lat->SetTextSize(0.04);
-// MARC 
-// MARC 	TLatex *el_lat = new TLatex();
-// MARC 	el_lat->SetNDC(kTRUE);
-// MARC 	el_lat->SetTextColor(kBlack);
-// MARC 	el_lat->SetTextSize(0.04);
-// MARC 
-// MARC 	// Create histograms
-// MARC 	TH1D * hiso_ttbar  = new TH1D("MuIsoTTbar_"   , "Muon Isolation in TTbar for " , IsoPlots::nbins[0], 0., 1.);
-// MARC 	TH1D * hiso_signal = new TH1D("MuIsoSignal_"  , "Muon Isolation in Signal for ", IsoPlots::nbins[0], 0., 1.);
-// MARC 	hiso_ttbar ->Sumw2();
-// MARC 	hiso_signal->Sumw2();
-// MARC 	TH1D * el_hiso_ttbar  = new TH1D("ElIsoTTbar_"   , "Electron Isolation in TTbar for " , IsoPlots::nbins[0], 0., 0.6);
-// MARC 	TH1D * el_hiso_signal = new TH1D("ElIsoSignal_"  , "Electron Isolation in Signal for ", IsoPlots::nbins[0], 0., 0.6);
-// MARC 	el_hiso_ttbar ->Sumw2();
-// MARC 	el_hiso_signal->Sumw2();
-// MARC 
-// MARC 	////////////////////////////////////////////////////
-// MARC 	// Fill ttbar histos
-// MARC 	TTree *ttbar_tree = fSamples[TTJets]->getTree();
-// MARC 	ttbar_tree->ResetBranchAddresses();
-// MARC 	Init(ttbar_tree);
-// MARC 
-// MARC 	// Event loop muons and electrons
-// MARC 	if (fChain == 0) return;
-// MARC 	Long64_t tt_nentries = fChain->GetEntriesFast();
-// MARC 	for (Long64_t jentry=0; jentry<tt_nentries;jentry++) {
-// MARC 		printProgress(jentry, tt_nentries, fSamples[TTJets]->name);
-// MARC 
-// MARC 		ttbar_tree->GetEntry(jentry);
-// MARC 		//Long64_t ientry = LoadTree(jentry);
-// MARC 		//if (ientry < 0) break;
-// MARC 		
-// MARC 		int muind1(-1), muind2(-1);
-// MARC 		if(hasLooseMuons(muind1, muind2) > 0) {
-// MARC 			// Common event selections
-// MARC 			if(passesJet50Cut()) { // make trigger 100% efficient
-// MARC 				// Common object selections
-// MARC 				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
-// MARC 					if(MuPt[muind1] > fC_minMu2pt) {
-// MARC 					// match muons to susy or vector boson
-// MARC 						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
-// MARC 							hiso_ttbar->Fill(MuPFIso[muind1]); // MARC
-// MARC 						}
-// MARC 						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
-// MARC 						//	hiso_ttbar->Fill(MuIso[muind2]);
-// MARC 						//}
-// MARC 					}
-// MARC 				}
-// MARC 			}
-// MARC 		}
-// MARC 		int elind1(-1), elind2(-1);
-// MARC 		if(hasLooseElectrons(elind1, elind2) > 0) {
-// MARC 			// Common event selections
-// MARC 			if(passesJet50Cut()) { // make trigger 100% efficient
-// MARC 				// Common object selections
-// MARC 				if(isLooseElectron(elind1) ) { //&& isLooseElectron(elind2)) {
-// MARC 					if(ElPt[elind1] > fC_minEl2pt) {
-// MARC 						// match electrons to susy particle or vector boson
-// MARC 						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
-// MARC 							el_hiso_ttbar->Fill(ElPFIso[elind1]); // MARC
-// MARC 						}
-// MARC 						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
-// MARC 						//	el_hiso_ttbar->Fill(ElPFIso[elind2]);
-// MARC 						//}
-// MARC 					}
-// MARC 				}
-// MARC 			}
-// MARC 		}
-// MARC 	} // end loop over all events
-// MARC 	fSamples[TTJets]->cleanUp();
-// MARC 	cout << endl;
-// MARC 	////////////////////////////////////////////////////
-// MARC 
-// MARC 	////////////////////////////////////////////////////
-// MARC 	// Fill signal histos
-// MARC 	TTree *signal_tree = fSamples[LM6]->getTree();
-// MARC 	signal_tree->ResetBranchAddresses();
-// MARC 	Init(signal_tree);
-// MARC 	// Event loop
-// MARC 
-// MARC 	// Event loop muons and electrons
-// MARC 	if (fChain == 0) return;
-// MARC 	Long64_t sig_nentries = fChain->GetEntriesFast();
-// MARC 	for (Long64_t jentry=0; jentry<sig_nentries;jentry++) {
-// MARC 		printProgress(jentry, sig_nentries, fSamples[LM6]->name);
-// MARC 
-// MARC 		signal_tree->GetEntry(jentry);
-// MARC 		//Long64_t ientry = LoadTree(jentry);
-// MARC 		//if (ientry < 0) break;
-// MARC 		
-// MARC 		int muind1(-1), muind2(-1);
-// MARC 		if(hasLooseMuons(muind1, muind2) > 0) {
-// MARC 			// Common event selections
-// MARC 			if(passesJet50Cut()) { // make trigger 100% efficient
-// MARC 				// Common object selections
-// MARC 				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
-// MARC 					if(MuPt[muind1] > fC_minMu2pt) {
-// MARC 					// match muons to susy or vector boson
-// MARC 						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
-// MARC 							hiso_signal->Fill(MuPFIso[muind1]); // MARC
-// MARC 						}
-// MARC 						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
-// MARC 						//	hiso_signal->Fill(MuIso[muind2]);
-// MARC 						//}
-// MARC 					}
-// MARC 				}
-// MARC 			}
-// MARC 		}
-// MARC 		int elind1(-1), elind2(-1);
-// MARC 		if(hasLooseElectrons(elind1, elind2) > 0) {
-// MARC 			// Common event selections
-// MARC 			if(passesJet50Cut()) { // make trigger 100% efficient
-// MARC 				// Common object selections
-// MARC 				if(isLooseElectron(elind1) ){ //&& isLooseElectron(elind2)) {
-// MARC 					if(ElPt[elind1] > fC_minEl2pt) {
-// MARC 						// match electrons to susy particle or vector boson
-// MARC 						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
-// MARC 							el_hiso_signal->Fill(ElPFIso[elind1]); // MARC
-// MARC 						}
-// MARC 						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
-// MARC 						//	el_hiso_signal->Fill(ElPFIso[elind2]);
-// MARC 						//}
-// MARC 					}
-// MARC 				}
-// MARC 			}
-// MARC 		}
-// MARC 	} // end loop over all events
-// MARC 	fSamples[LM6]->cleanUp();
-// MARC 	cout << endl;
-// MARC 	////////////////////////////////////////////////////
-// MARC 	
-// MARC 	//--------------------------------------------------------------------------------------
-// MARC 	// Format and calculate muon histos
-// MARC 	hiso_ttbar->SetXTitle("rel Iso muons");
-// MARC 	hiso_ttbar->SetLineWidth(2);
-// MARC 	//hiso_ttbar->SetFillColor(kWhite);
-// MARC 	//hiso_ttbar->SetLineColor(kRed);
-// MARC 	hiso_ttbar->SetMarkerStyle(20);
-// MARC 	hiso_ttbar->SetMarkerColor(kBlue-3);
-// MARC 	hiso_ttbar->SetMarkerSize(1.15);
-// MARC 		
-// MARC 	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
-// MARC 	hiso_signal->SetLineWidth(2);
-// MARC 	//hiso_signal->SetLineColor(kBlue);
-// MARC 	hiso_signal->SetMarkerStyle(21);
-// MARC 	hiso_signal->SetMarkerColor(kRed+1);
-// MARC 	hiso_signal->SetMarkerSize(1.15);
-// MARC 		
-// MARC 	//double max1 = hiso_mc_s[i]->GetMaximum();
-// MARC 	//double max2 = hiso_data[i]->GetMaximum();
-// MARC 	//double max = max1>max2?max1:max2;
-// MARC 	//hiso_mc_s[i]->SetMaximum(1.5*max);
-// MARC 	//hiso_data[i]->SetMaximum(1.5*max);
-// MARC 
-// MARC 	int bin0   = hiso_ttbar->FindBin(0.0);
-// MARC 	int bin015 = hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
-// MARC 	int bin1   = hiso_ttbar->FindBin(1.0)  - 1;
-// MARC 	float ratio_signal = hiso_signal ->Integral(bin0, bin015) / hiso_signal ->Integral(bin0, bin1);
-// MARC 	float ratio_ttbar  = hiso_ttbar  ->Integral(bin0, bin015) / hiso_ttbar  ->Integral(bin0, bin1);
-// MARC 
-// MARC 	
-// MARC 	hiso_signal ->Scale(1/hiso_signal->Integral());
-// MARC 	hiso_ttbar  ->Scale(1/hiso_ttbar ->Integral());
-// MARC 	
-// MARC 
-// MARC 	TCanvas *c_temp = new TCanvas("MuIso" , "Muon Isolation in TTJets and Signal", 0, 0, 800, 600);
-// MARC 	c_temp->cd();
-// MARC 
-// MARC 	TLegend *leg = new TLegend(0.30,0.65,0.55,0.88);
-// MARC 	// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-// MARC 	leg->AddEntry(hiso_signal, "Signal","p");
-// MARC 	leg->AddEntry(hiso_ttbar , "TTbar","p");
-// MARC 	leg->SetFillStyle(0);
-// MARC 	leg->SetTextFont(42);
-// MARC 	leg->SetBorderSize(0);
-// MARC 
-// MARC 	gPad->SetLogy();
-// MARC 	hiso_ttbar->Draw("pe");
-// MARC 	hiso_signal->Draw("same");
-// MARC 	leg->Draw();
-// MARC 	lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-// MARC 	lat->SetTextColor(kRed+1);
-// MARC 	lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", ratio_signal));
-// MARC 	lat->SetTextColor(kBlue-3);
-// MARC 	lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-// MARC 	
-// MARC 
-// MARC 	Util::PrintPDF(c_temp, "MuIso" , fOutputDir + fOutputSubDir);
-// MARC 
-// MARC 	//--------------------------------------------------------------------------------------
-// MARC 	// Format and calculate electron histos
-// MARC 	el_hiso_ttbar->SetXTitle("rel Iso electrons");
-// MARC 	el_hiso_ttbar->SetLineWidth(2);
-// MARC 	//hiso_ttbar->SetFillColor(kWhite);
-// MARC 	//hiso_ttbar->SetLineColor(kRed);
-// MARC 	el_hiso_ttbar->SetMarkerStyle(20);
-// MARC 	el_hiso_ttbar->SetMarkerColor(kBlue-3);
-// MARC 	el_hiso_ttbar->SetMarkerSize(1.15);
-// MARC 
-// MARC 	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
-// MARC 	el_hiso_signal->SetLineWidth(2);
-// MARC 	//hiso_signal->SetLineColor(kBlue);
-// MARC 	el_hiso_signal->SetMarkerStyle(21);
-// MARC 	el_hiso_signal->SetMarkerColor(kRed+1);
-// MARC 	el_hiso_signal->SetMarkerSize(1.15);
-// MARC 		
-// MARC 	//double max1 = el_hiso_mc_s[i]->GetMaximum();
-// MARC 	//double max2 = el_hiso_data[i]->GetMaximum();
-// MARC 	//double max = max1>max2?max1:max2;
-// MARC 	//el_hiso_mc_s[i]->SetMaximum(1.5*max);
-// MARC 	//el_hiso_data[i]->SetMaximum(1.5*max);
-// MARC 
-// MARC 	int el_bin0   = el_hiso_ttbar->FindBin(0.0);
-// MARC 	int el_bin015 = el_hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
-// MARC 	//int el_bin1   = el_hiso_ttbar->FindBin(1.0)  - 1;
-// MARC 	int el_bin1   = el_hiso_ttbar->FindBin(0.6)  - 1;
-// MARC 	float el_ratio_signal = el_hiso_signal ->Integral(el_bin0, el_bin015) / el_hiso_signal ->Integral(el_bin0, el_bin1);
-// MARC 	float el_ratio_ttbar  = el_hiso_ttbar  ->Integral(el_bin0, el_bin015) / el_hiso_ttbar  ->Integral(el_bin0, el_bin1);
-// MARC 
-// MARC 	
-// MARC 	el_hiso_signal ->Scale(1/el_hiso_signal->Integral());
-// MARC 	el_hiso_ttbar  ->Scale(1/el_hiso_ttbar ->Integral());
-// MARC 	
-// MARC 
-// MARC 	TCanvas *el_temp = new TCanvas("ElIso" , "Electron Isolation in TTJets and Signal", 0, 0, 800, 600);
-// MARC 	el_temp->cd();
-// MARC 
-// MARC 	TLegend *el_leg = new TLegend(0.30,0.65,0.55,0.88);
-// MARC 	el_leg->AddEntry(el_hiso_signal, "Signal","p");
-// MARC 	el_leg->AddEntry(el_hiso_ttbar , "TTbar","p");
-// MARC 	el_leg->SetFillStyle(0);
-// MARC 	el_leg->SetTextFont(42);
-// MARC 	el_leg->SetBorderSize(0);
-// MARC 
-// MARC 	gPad->SetLogy();
-// MARC 	el_hiso_ttbar->Draw("");
-// MARC 	el_hiso_signal->Draw("same");
-// MARC 	el_leg->Draw();
-// MARC 	el_lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-// MARC 	el_lat->SetTextColor(kRed+1);
-// MARC 	el_lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", el_ratio_signal));
-// MARC 	el_lat->SetTextColor(kBlue-3);
-// MARC 	el_lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", el_ratio_ttbar));
-// MARC 	
-// MARC 
-// MARC 	// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
-// MARC 	Util::PrintPDF(el_temp, "ElIso" , fOutputDir + fOutputSubDir);
-// MARC 
-// MARC }
+// void SSDLPlotter::makeRelIsoTTSigPlots(){
+// 	char cmd[100];
+//     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+//     system(cmd);
+
+// 	TLatex *lat = new TLatex();
+// 	lat->SetNDC(kTRUE);
+// 	lat->SetTextColor(kBlack);
+// 	lat->SetTextSize(0.04);
+
+// 	TLatex *el_lat = new TLatex();
+// 	el_lat->SetNDC(kTRUE);
+// 	el_lat->SetTextColor(kBlack);
+// 	el_lat->SetTextSize(0.04);
+
+// 	// Create histograms
+// 	TH1D * hiso_ttbar  = new TH1D("MuIsoTTbar_"   , "Muon Isolation in TTbar for " , IsoPlots::nbins[0], 0., 1.);
+// 	TH1D * hiso_signal = new TH1D("MuIsoSignal_"  , "Muon Isolation in Signal for ", IsoPlots::nbins[0], 0., 1.);
+// 	hiso_ttbar ->Sumw2();
+// 	hiso_signal->Sumw2();
+// 	TH1D * el_hiso_ttbar  = new TH1D("ElIsoTTbar_"   , "Electron Isolation in TTbar for " , IsoPlots::nbins[0], 0., 0.6);
+// 	TH1D * el_hiso_signal = new TH1D("ElIsoSignal_"  , "Electron Isolation in Signal for ", IsoPlots::nbins[0], 0., 0.6);
+// 	el_hiso_ttbar ->Sumw2();
+//  	el_hiso_signal->Sumw2();
+
+// 	////////////////////////////////////////////////////
+// 	// Fill ttbar histos
+// 	TTree *ttbar_tree = fSamples[TTJets]->getTree();
+// 	ttbar_tree->ResetBranchAddresses();
+// 	Init(ttbar_tree);
+
+// 	// Event loop muons and electrons
+// 	if (fChain == 0) return;
+// 	Long64_t tt_nentries = fChain->GetEntriesFast();
+// 	for (Long64_t jentry=0; jentry<tt_nentries;jentry++) {
+// 		printProgress(jentry, tt_nentries, fSamples[TTJets]->name);
+
+// 		ttbar_tree->GetEntry(jentry);
+// 		//Long64_t ientry = LoadTree(jentry);
+// 		//if (ientry < 0) break;
+		
+// 		int muind1(-1), muind2(-1);
+// 		if(hasLooseMuons(muind1, muind2) > 0) {
+// 			// Common event selections
+// 			if(passesJet50Cut()) { // make trigger 100% efficient
+// 				// Common object selections
+// 				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
+// 					if(MuPt[muind1] > fC_minMu2pt) {
+// 					// match muons to susy or vector boson
+// 						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
+// 							hiso_ttbar->Fill(MuPFIso[muind1]); // MARC
+// 						}
+// 						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
+// 						//	hiso_ttbar->Fill(MuIso[muind2]);
+// 						//}
+// 					}
+// 				}
+// 			}
+// 		}
+// 		int elind1(-1), elind2(-1);
+// 		if(hasLooseElectrons(elind1, elind2) > 0) {
+// 			// Common event selections
+// 			if(passesJet50Cut()) { // make trigger 100% efficient
+// 				// Common object selections
+// 				if(isLooseElectron(elind1) ) { //&& isLooseElectron(elind2)) {
+// 					if(ElPt[elind1] > fC_minEl2pt) {
+// 						// match electrons to susy particle or vector boson
+// 						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
+// 							el_hiso_ttbar->Fill(ElPFIso[elind1]); // MARC
+// 						}
+// 						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
+// 						//	el_hiso_ttbar->Fill(ElPFIso[elind2]);
+// 						//}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	} // end loop over all events
+// 	fSamples[TTJets]->cleanUp();
+// 	cout << endl;
+// 	////////////////////////////////////////////////////
+
+// 	////////////////////////////////////////////////////
+// 	// Fill signal histos
+// 	TTree *signal_tree = fSamples[LM6]->getTree();
+// 	signal_tree->ResetBranchAddresses();
+// 	Init(signal_tree);
+// 	// Event loop
+
+// 	// Event loop muons and electrons
+// 	if (fChain == 0) return;
+// 	Long64_t sig_nentries = fChain->GetEntriesFast();
+// 	for (Long64_t jentry=0; jentry<sig_nentries;jentry++) {
+// 		printProgress(jentry, sig_nentries, fSamples[LM6]->name);
+
+// 		signal_tree->GetEntry(jentry);
+// 		//Long64_t ientry = LoadTree(jentry);
+// 		//if (ientry < 0) break;
+		
+// 		int muind1(-1), muind2(-1);
+// 		if(hasLooseMuons(muind1, muind2) > 0) {
+// 			// Common event selections
+// 			if(passesJet50Cut()) { // make trigger 100% efficient
+// 				// Common object selections
+// 				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
+// 					if(MuPt[muind1] > fC_minMu2pt) {
+// 					// match muons to susy or vector boson
+// 						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
+// 							hiso_signal->Fill(MuPFIso[muind1]); // MARC
+// 						}
+// 						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
+// 						//	hiso_signal->Fill(MuIso[muind2]);
+// 						//}
+// 					}
+// 				}
+// 			}
+// 		}
+// 		int elind1(-1), elind2(-1);
+// 		if(hasLooseElectrons(elind1, elind2) > 0) {
+// 			// Common event selections
+// 			if(passesJet50Cut()) { // make trigger 100% efficient
+// 				// Common object selections
+// 				if(isLooseElectron(elind1) ){ //&& isLooseElectron(elind2)) {
+// 					if(ElPt[elind1] > fC_minEl2pt) {
+// 						// match electrons to susy particle or vector boson
+// 						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
+// 							el_hiso_signal->Fill(ElPFIso[elind1]); // MARC
+// 						}
+// 						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
+// 						//	el_hiso_signal->Fill(ElPFIso[elind2]);
+// 						//}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	} // end loop over all events
+// 	fSamples[LM6]->cleanUp();
+// 	cout << endl;
+// 	////////////////////////////////////////////////////
+	
+// 	//--------------------------------------------------------------------------------------
+// 	// Format and calculate muon histos
+// 	hiso_ttbar->SetXTitle("rel Iso muons");
+// 	hiso_ttbar->SetLineWidth(2);
+// 	//hiso_ttbar->SetFillColor(kWhite);
+// 	//hiso_ttbar->SetLineColor(kRed);
+// 	hiso_ttbar->SetMarkerStyle(20);
+// 	hiso_ttbar->SetMarkerColor(kBlue-3);
+// 	hiso_ttbar->SetMarkerSize(1.15);
+		
+// 	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
+// 	hiso_signal->SetLineWidth(2);
+// 	//hiso_signal->SetLineColor(kBlue);
+// 	hiso_signal->SetMarkerStyle(21);
+// 	hiso_signal->SetMarkerColor(kRed+1);
+// 	hiso_signal->SetMarkerSize(1.15);
+		
+// 	//double max1 = hiso_mc_s[i]->GetMaximum();
+// 	//double max2 = hiso_data[i]->GetMaximum();
+// 	//double max = max1>max2?max1:max2;
+// 	//hiso_mc_s[i]->SetMaximum(1.5*max);
+// 	//hiso_data[i]->SetMaximum(1.5*max);
+
+// 	int bin0   = hiso_ttbar->FindBin(0.0);
+// 	int bin015 = hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
+// 	int bin1   = hiso_ttbar->FindBin(1.0)  - 1;
+// 	float ratio_signal = hiso_signal ->Integral(bin0, bin015) / hiso_signal ->Integral(bin0, bin1);
+// 	float ratio_ttbar  = hiso_ttbar  ->Integral(bin0, bin015) / hiso_ttbar  ->Integral(bin0, bin1);
+
+	
+// 	hiso_signal ->Scale(1/hiso_signal->Integral());
+// 	hiso_ttbar  ->Scale(1/hiso_ttbar ->Integral());
+	
+
+// 	TCanvas *c_temp = new TCanvas("MuIso" , "Muon Isolation in TTJets and Signal", 0, 0, 800, 600);
+// 	c_temp->cd();
+
+// 	TLegend *leg = new TLegend(0.30,0.65,0.55,0.88);
+// 	// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+// 	leg->AddEntry(hiso_signal, "Signal","p");
+// 	leg->AddEntry(hiso_ttbar , "TTbar","p");
+// 	leg->SetFillStyle(0);
+// 	leg->SetTextFont(42);
+// 	leg->SetBorderSize(0);
+
+// 	gPad->SetLogy();
+// 	hiso_ttbar->Draw("pe");
+// 	hiso_signal->Draw("same");
+// 	leg->Draw();
+// 	lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+// 	lat->SetTextColor(kRed+1);
+// 	lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", ratio_signal));
+// 	lat->SetTextColor(kBlue-3);
+// 	lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+	
+
+// 	Util::PrintPDF(c_temp, "MuIso" , fOutputDir + fOutputSubDir);
+
+// 	//--------------------------------------------------------------------------------------
+// 	// Format and calculate electron histos
+// 	el_hiso_ttbar->SetXTitle("rel Iso electrons");
+// 	el_hiso_ttbar->SetLineWidth(2);
+// 	//hiso_ttbar->SetFillColor(kWhite);
+// 	//hiso_ttbar->SetLineColor(kRed);
+// 	el_hiso_ttbar->SetMarkerStyle(20);
+// 	el_hiso_ttbar->SetMarkerColor(kBlue-3);
+// 	el_hiso_ttbar->SetMarkerSize(1.15);
+
+// 	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
+// 	el_hiso_signal->SetLineWidth(2);
+// 	//hiso_signal->SetLineColor(kBlue);
+// 	el_hiso_signal->SetMarkerStyle(21);
+// 	el_hiso_signal->SetMarkerColor(kRed+1);
+// 	el_hiso_signal->SetMarkerSize(1.15);
+		
+// 	//double max1 = el_hiso_mc_s[i]->GetMaximum();
+// 	//double max2 = el_hiso_data[i]->GetMaximum();
+// 	//double max = max1>max2?max1:max2;
+// 	//el_hiso_mc_s[i]->SetMaximum(1.5*max);
+// 	//el_hiso_data[i]->SetMaximum(1.5*max);
+
+// 	int el_bin0   = el_hiso_ttbar->FindBin(0.0);
+// 	int el_bin015 = el_hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
+// 	//int el_bin1   = el_hiso_ttbar->FindBin(1.0)  - 1;
+// 	int el_bin1   = el_hiso_ttbar->FindBin(0.6)  - 1;
+// 	float el_ratio_signal = el_hiso_signal ->Integral(el_bin0, el_bin015) / el_hiso_signal ->Integral(el_bin0, el_bin1);
+// 	float el_ratio_ttbar  = el_hiso_ttbar  ->Integral(el_bin0, el_bin015) / el_hiso_ttbar  ->Integral(el_bin0, el_bin1);
+
+	
+// 	el_hiso_signal ->Scale(1/el_hiso_signal->Integral());
+// 	el_hiso_ttbar  ->Scale(1/el_hiso_ttbar ->Integral());
+	
+
+// 	TCanvas *el_temp = new TCanvas("ElIso" , "Electron Isolation in TTJets and Signal", 0, 0, 800, 600);
+// 	el_temp->cd();
+
+// 	TLegend *el_leg = new TLegend(0.30,0.65,0.55,0.88);
+// 	el_leg->AddEntry(el_hiso_signal, "Signal","p");
+// 	el_leg->AddEntry(el_hiso_ttbar , "TTbar","p");
+// 	el_leg->SetFillStyle(0);
+// 	el_leg->SetTextFont(42);
+// 	el_leg->SetBorderSize(0);
+
+// 	gPad->SetLogy();
+// 	el_hiso_ttbar->Draw("");
+// 	el_hiso_signal->Draw("same");
+// 	el_leg->Draw();
+// 	el_lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+// 	el_lat->SetTextColor(kRed+1);
+// 	el_lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", el_ratio_signal));
+// 	el_lat->SetTextColor(kBlue-3);
+// 	el_lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", el_ratio_ttbar));
+	
+
+// 	// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
+// 	Util::PrintPDF(el_temp, "ElIso" , fOutputDir + fOutputSubDir);
+// }
 
 //____________________________________________________________________________
 void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
@@ -2299,7 +2299,7 @@ void SSDLPlotter::makeElIdPlots(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 
-	vector<int> mcsamples = fMCBG;
+	vector<int> mcsamples = fMCBGEMEnr;
 	vector<int> datasamples = fEGData;
 	
 	TH1D    *data [4] [gNSels];
@@ -4101,7 +4101,7 @@ void SSDLPlotter::make2DRatioPlots(gChannel chan){
 	c_temp->cd();
 
 	// gPad->SetLogy();
-	histo->DrawCopy("colz");
+	histo->DrawCopy("colz text");
 	drawTopLine();
 
 	Util::PrintPDF(c_temp, "FRatio2D_" + name, fOutputDir + fOutputSubDir);
@@ -5483,6 +5483,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	// Abbreviations
 	float fbb(0.),fee(0.),feb(0.);
 	float fbbE(0.),feeE(0.),febE(0.);
+
+
+	float fbb_mc(0.),fee_mc(0.),feb_mc(0.);
+	float fbbE_mc(0.),feeE_mc(0.),febE_mc(0.);
 // 	float fbb  = gEChMisIDBB;
 //  	float fbbE = gEChMisIDBB_E;
 //  	float fee  = gEChMisIDEE;
@@ -5494,6 +5498,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	calculateChMisIdProb(fEGData, EB, feb, febE);
 	calculateChMisIdProb(fEGData, EE, fee, feeE);
 
+	calculateChMisIdProb(fMCBG, BB, fbb_mc, fbbE_mc);
+	calculateChMisIdProb(fMCBG, EB, feb_mc, febE_mc);
+	calculateChMisIdProb(fMCBG, EE, fee_mc, feeE_mc);
+	
   	// Simple error propagation assuming error on number of events is sqrt(N)
  	nt2_ee_chmid    = 2*fbb*nt2_ee_BB_os                           + 2*fee*nt2_ee_EE_os                      + 2*feb*nt2_ee_EB_os;
  	nt2_ee_chmid_e1 = sqrt( 4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)  + 4*fee*fee*FR->getEStat2(nt2_ee_EE_os)   + 4*feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
@@ -5513,6 +5521,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << setw(8) << setprecision(2) << fbb  << " +/- " << setw(8) << setprecision(2) << fbbE  << " |";
  	OUT << setw(8) << setprecision(2) << feb  << " +/- " << setw(8) << setprecision(2) << febE  << " |";
  	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << "  ||";
+ 	OUT << setw(8) << setprecision(2) << fbb_mc  << " +/- " << setw(8) << setprecision(2) << fbbE_mc  << " |";
+ 	OUT << setw(8) << setprecision(2) << feb_mc  << " +/- " << setw(8) << setprecision(2) << febE_mc  << " |";
+ 	OUT << setw(8) << setprecision(2) << fee_mc  << " +/- " << setw(8) << setprecision(2) << feeE_mc  << "  ||";
  	OUT << endl;
  	OUT << "--------------------------------------------------------------" << endl << endl;
  
@@ -7420,849 +7431,849 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 }
 
-// MARC void SSDLPlotter::makeDiffPrediction(){
-// MARC 	fOutputSubDir = "DiffPredictionPlots/";
-// MARC 	TLatex *lat = new TLatex();
-// MARC 	lat->SetNDC(kTRUE);
-// MARC 	lat->SetTextColor(kBlack);
-// MARC 	lat->SetTextSize(0.04);
-// MARC 
-// MARC 	vector<int> musamples;
-// MARC 	vector<int> elsamples;
-// MARC 	vector<int> emusamples;
-// MARC 
-// MARC 	musamples = fMuData;
-// MARC 	elsamples = fEGData;
-// MARC 	emusamples = fMuEGData;
-// MARC 
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// RATIOS /////////////////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	float mufratio_data(0.),  mufratio_data_e(0.);
-// MARC 	float mupratio_data(0.),  mupratio_data_e(0.);
-// MARC 	float elfratio_data(0.),  elfratio_data_e(0.);
-// MARC 	float elpratio_data(0.),  elpratio_data_e(0.);
-// MARC 
-// MARC 	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
-// MARC 	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
-// MARC 
-// MARC 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
-// MARC 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
-// MARC 
-// MARC 	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
-// MARC 	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
-// MARC 	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
-// MARC 
-// MARC 	// Loop on the different variables
-// MARC 	for(size_t j = 0; j < gNDiffVars; ++j){
-// MARC 		TString varname    = DiffPredYields::var_name[j];
-// MARC 		const int nbins    = DiffPredYields::nbins[j];
-// MARC 		const double *bins = DiffPredYields::bins[j];
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// OBSERVATIONS ///////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		TH1D *nt11 = new TH1D(Form("NT11_%s", varname.Data()), varname, nbins, bins); nt11->Sumw2();
-// MARC 
-// MARC 		TH1D *nt11_mm = new TH1D(Form("NT11_MM_%s", varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
-// MARC 		TH1D *nt10_mm = new TH1D(Form("NT10_MM_%s", varname.Data()), varname, nbins, bins); nt10_mm->Sumw2();
-// MARC 		TH1D *nt01_mm = new TH1D(Form("NT01_MM_%s", varname.Data()), varname, nbins, bins); nt01_mm->Sumw2();
-// MARC 		TH1D *nt00_mm = new TH1D(Form("NT00_MM_%s", varname.Data()), varname, nbins, bins); nt00_mm->Sumw2();
-// MARC 		TH1D *nt11_ee = new TH1D(Form("NT11_EE_%s", varname.Data()), varname, nbins, bins); nt11_ee->Sumw2();
-// MARC 		TH1D *nt10_ee = new TH1D(Form("NT10_EE_%s", varname.Data()), varname, nbins, bins); nt10_ee->Sumw2();
-// MARC 		TH1D *nt01_ee = new TH1D(Form("NT01_EE_%s", varname.Data()), varname, nbins, bins); nt01_ee->Sumw2();
-// MARC 		TH1D *nt00_ee = new TH1D(Form("NT00_EE_%s", varname.Data()), varname, nbins, bins); nt00_ee->Sumw2();
-// MARC 		TH1D *nt11_em = new TH1D(Form("NT11_EM_%s", varname.Data()), varname, nbins, bins); nt11_em->Sumw2();
-// MARC 		TH1D *nt10_em = new TH1D(Form("NT10_EM_%s", varname.Data()), varname, nbins, bins); nt10_em->Sumw2();
-// MARC 		TH1D *nt01_em = new TH1D(Form("NT01_EM_%s", varname.Data()), varname, nbins, bins); nt01_em->Sumw2();
-// MARC 		TH1D *nt00_em = new TH1D(Form("NT00_EM_%s", varname.Data()), varname, nbins, bins); nt00_em->Sumw2();
-// MARC 
-// MARC 		// OS yields
-// MARC 		TH1D *nt2_os_ee_bb = new TH1D(Form("NT2_OS_EE_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_bb->Sumw2();
-// MARC 		TH1D *nt2_os_ee_eb = new TH1D(Form("NT2_OS_EE_EB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_eb->Sumw2();
-// MARC 		TH1D *nt2_os_ee_ee = new TH1D(Form("NT2_OS_EE_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_ee->Sumw2();
-// MARC 		TH1D *nt2_os_em_bb = new TH1D(Form("NT2_OS_EM_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_em_bb->Sumw2();
-// MARC 		TH1D *nt2_os_em_ee = new TH1D(Form("NT2_OS_EM_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_em_ee->Sumw2();
-// MARC 
-// MARC 		for(size_t i = 0; i < musamples.size(); ++i){
-// MARC 			Sample *S = fSamples[musamples[i]];
-// MARC 			nt11_mm->Add(S->diffyields[Muon].hnt11[j]);
-// MARC 			nt10_mm->Add(S->diffyields[Muon].hnt10[j]);
-// MARC 			nt01_mm->Add(S->diffyields[Muon].hnt01[j]);
-// MARC 			nt00_mm->Add(S->diffyields[Muon].hnt00[j]);
-// MARC 		}
-// MARC 		for(size_t i = 0; i < elsamples.size(); ++i){
-// MARC 			Sample *S = fSamples[elsamples[i]];
-// MARC 			nt11_ee->Add(S->diffyields[Elec].hnt11[j]);
-// MARC 			nt10_ee->Add(S->diffyields[Elec].hnt10[j]);
-// MARC 			nt01_ee->Add(S->diffyields[Elec].hnt01[j]);
-// MARC 			nt00_ee->Add(S->diffyields[Elec].hnt00[j]);
-// MARC 
-// MARC 			nt2_os_ee_bb->Add(S->diffyields[Elec].hnt2_os_BB[j]);
-// MARC 			nt2_os_ee_eb->Add(S->diffyields[Elec].hnt2_os_EB[j]);
-// MARC 			nt2_os_ee_ee->Add(S->diffyields[Elec].hnt2_os_EE[j]);
-// MARC 		}
-// MARC 		for(size_t i = 0; i < emusamples.size(); ++i){
-// MARC 			Sample *S = fSamples[emusamples[i]];
-// MARC 			nt11_em->Add(S->diffyields[ElMu].hnt11[j]);
-// MARC 			nt10_em->Add(S->diffyields[ElMu].hnt10[j]);
-// MARC 			nt01_em->Add(S->diffyields[ElMu].hnt01[j]);
-// MARC 			nt00_em->Add(S->diffyields[ElMu].hnt00[j]);
-// MARC 
-// MARC 			nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[j]);
-// MARC 			nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[j]);
-// MARC 		}
-// MARC 		
-// MARC 		nt11->Add(nt11_mm);
-// MARC 		nt11->Add(nt11_ee);
-// MARC 		nt11->Add(nt11_em);
-// MARC 
-// MARC 		
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// Errors /////////////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// Save the squared sum of total error in the bin errors of these histos,
-// MARC 		// then apply square root before plotting
-// MARC 		TH1D *totbg    = new TH1D(Form("TotBG_%s",    varname.Data()), varname, nbins, bins); totbg   ->Sumw2();
-// MARC 		TH1D *totbg_mm = new TH1D(Form("TotBG_mm_%s", varname.Data()), varname, nbins, bins); totbg_mm->Sumw2();
-// MARC 		TH1D *totbg_em = new TH1D(Form("TotBG_em_%s", varname.Data()), varname, nbins, bins); totbg_em->Sumw2();
-// MARC 		TH1D *totbg_ee = new TH1D(Form("TotBG_ee_%s", varname.Data()), varname, nbins, bins); totbg_ee->Sumw2();
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// MC Predictions /////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// TH1D *nt11_mc = new TH1D(Form("NT11_MC_%s", varname.Data()), varname, nbins, bins); nt11_mc->Sumw2();
-// MARC 		// 
-// MARC 		// TH1D *nt11_mm_mc = new TH1D(Form("NT11_MM_MC_%s", varname.Data()), varname, nbins, bins); nt11_mm_mc->Sumw2();
-// MARC 		// TH1D *nt11_ee_mc = new TH1D(Form("NT11_EE_MC_%s", varname.Data()), varname, nbins, bins); nt11_ee_mc->Sumw2();
-// MARC 		// TH1D *nt11_em_mc = new TH1D(Form("NT11_EM_MC_%s", varname.Data()), varname, nbins, bins); nt11_em_mc->Sumw2();
-// MARC 		// 
-// MARC 		// for(size_t i = 0; i < fMCBG.size(); ++i){
-// MARC 		// 	Sample *S = fSamples[fMCBG[i]];
-// MARC 		// 	float scale = fLumiNorm / S->getLumi();
-// MARC 		// 	nt11_mm_mc->Add(S->diffyields[Muon].hnt11[j], scale);
-// MARC 		// 	nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
-// MARC 		// 	nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
-// MARC 		// }
-// MARC 		// 
-// MARC 		// nt11_mc->Add(nt11_mm_mc);
-// MARC 		// nt11_mc->Add(nt11_ee_mc);
-// MARC 		// nt11_mc->Add(nt11_em_mc);
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// RARE SM MC /////////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		TH1D *nt11_ss = new TH1D(Form("NT11_SS_%s", varname.Data()), varname, nbins, bins); nt11_ss->Sumw2();
-// MARC 
-// MARC 		TH1D *nt11_mm_ss = new TH1D(Form("NT11_MM_SS_%s", varname.Data()), varname, nbins, bins); nt11_mm_ss->Sumw2();
-// MARC 		TH1D *nt11_ee_ss = new TH1D(Form("NT11_EE_SS_%s", varname.Data()), varname, nbins, bins); nt11_ee_ss->Sumw2();
-// MARC 		TH1D *nt11_em_ss = new TH1D(Form("NT11_EM_SS_%s", varname.Data()), varname, nbins, bins); nt11_em_ss->Sumw2();
-// MARC 
-// MARC 		for(size_t i = 0; i < fMCRareSM.size(); ++i){
-// MARC 			Sample *S = fSamples[fMCRareSM[i]];
-// MARC 			float scale = fLumiNorm / S->getLumi();
-// MARC 			nt11_mm_ss->Add(S->diffyields[Muon].hnt11[j], scale);
-// MARC 			nt11_ee_ss->Add(S->diffyields[Elec].hnt11[j], scale);
-// MARC 			nt11_em_ss->Add(S->diffyields[ElMu].hnt11[j], scale);
-// MARC 
-// MARC 			// Errors
-// MARC 			for(size_t b = 0; b < nbins; ++b){
-// MARC 				float ss_mm = S->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
-// MARC 				float ss_ee = S->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
-// MARC 				float ss_em = S->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
-// MARC 
-// MARC 				float esyst2_mm = 0.25 * ss_mm*ss_mm*scale*scale;
-// MARC 				float esyst2_ee = 0.25 * ss_ee*ss_ee*scale*scale;
-// MARC 				float esyst2_em = 0.25 * ss_em*ss_em*scale*scale;
-// MARC 
-// MARC 				float estat2_mm = scale*scale*S->getError2(ss_mm);
-// MARC 				float estat2_ee = scale*scale*S->getError2(ss_ee);
-// MARC 				float estat2_em = scale*scale*S->getError2(ss_em);
-// MARC 				// float estat2_mm = scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight*S->getError2(ss_mm); // which region to take for weighing of mc errors?
-// MARC 				// float estat2_ee = scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight*S->getError2(ss_ee);
-// MARC 				// float estat2_em = scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight*S->getError2(ss_em);
-// MARC 
-// MARC 				float prev    = totbg   ->GetBinError(b+1);
-// MARC 				float prev_mm = totbg_mm->GetBinError(b+1);
-// MARC 				float prev_em = totbg_em->GetBinError(b+1);
-// MARC 				float prev_ee = totbg_ee->GetBinError(b+1);
-// MARC 
-// MARC 				totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
-// MARC 				totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
-// MARC 				totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
-// MARC 				totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
-// MARC 			}
-// MARC 		}
-// MARC 
-// MARC 		nt11_ss->Add(nt11_mm_ss);
-// MARC 		nt11_ss->Add(nt11_ee_ss);
-// MARC 		nt11_ss->Add(nt11_em_ss);
-// MARC 
-// MARC 		totbg   ->Add(nt11_ss);
-// MARC 		totbg_mm->Add(nt11_mm_ss);
-// MARC 		totbg_em->Add(nt11_em_ss);
-// MARC 		totbg_ee->Add(nt11_ee_ss);
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// WZ PRODUCTION //////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		TH1D *nt11_wz = new TH1D(Form("NT11_WZ_%s", varname.Data()), varname, nbins, bins); nt11_wz->Sumw2();
-// MARC 
-// MARC 		TH1D *nt11_mm_wz = new TH1D(Form("NT11_MM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_mm_wz->Sumw2();
-// MARC 		TH1D *nt11_ee_wz = new TH1D(Form("NT11_EE_WZ_%s", varname.Data()), varname, nbins, bins); nt11_ee_wz->Sumw2();
-// MARC 		TH1D *nt11_em_wz = new TH1D(Form("NT11_EM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_em_wz->Sumw2();
-// MARC 
-// MARC 		// MARC float wzscale = fLumiNorm / fSamples[WZ]->getLumi();
-// MARC 		// MARC nt11_mm_wz->Add(fSamples[WZ]->diffyields[Muon].hnt11[j], wzscale);
-// MARC 		// MARC nt11_ee_wz->Add(fSamples[WZ]->diffyields[Elec].hnt11[j], wzscale);
-// MARC 		// MARC nt11_em_wz->Add(fSamples[WZ]->diffyields[ElMu].hnt11[j], wzscale);
-// MARC 
-// MARC 		// Errors
-// MARC 		for(size_t b = 0; b < nbins; ++b){
-// MARC 			float ss_mm = fSamples[WZ]->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
-// MARC 			float ss_ee = fSamples[WZ]->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
-// MARC 			float ss_em = fSamples[WZ]->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
-// MARC 
-// MARC 			float esyst2_mm = 0.25 * ss_mm*ss_mm*wzscale*wzscale;
-// MARC 			float esyst2_ee = 0.25 * ss_ee*ss_ee*wzscale*wzscale;
-// MARC 			float esyst2_em = 0.25 * ss_em*ss_em*wzscale*wzscale;
-// MARC 
-// MARC 			float estat2_mm = wzscale*wzscale*fSamples[WZ]->getError2(ss_mm);
-// MARC 			float estat2_ee = wzscale*wzscale*fSamples[WZ]->getError2(ss_ee);
-// MARC 			float estat2_em = wzscale*wzscale*fSamples[WZ]->getError2(ss_em);
-// MARC 			// float estat2_mm = wzscale*wzscale*fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->getError2(ss_mm);
-// MARC 			// float estat2_ee = wzscale*wzscale*fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->getError2(ss_ee);
-// MARC 			// float estat2_em = wzscale*wzscale*fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->getError2(ss_em);
-// MARC 
-// MARC 			float prev    = totbg   ->GetBinError(b+1);
-// MARC 			float prev_mm = totbg_mm->GetBinError(b+1);
-// MARC 			float prev_em = totbg_em->GetBinError(b+1);
-// MARC 			float prev_ee = totbg_ee->GetBinError(b+1);
-// MARC 
-// MARC 			totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
-// MARC 			totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
-// MARC 			totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
-// MARC 			totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
-// MARC 		}
-// MARC 
-// MARC 		nt11_wz->Add(nt11_mm_wz);
-// MARC 		nt11_wz->Add(nt11_ee_wz);
-// MARC 		nt11_wz->Add(nt11_em_wz);
-// MARC 
-// MARC 		totbg   ->Add(nt11_wz);
-// MARC 		totbg_mm->Add(nt11_mm_wz);
-// MARC 		totbg_em->Add(nt11_em_wz);
-// MARC 		totbg_ee->Add(nt11_ee_wz);
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// FAKE PREDICTIONS ///////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		TH1D *nt11_sf = new TH1D(Form("NT11_SF_%s", varname.Data()), varname, nbins, bins); nt11_sf->Sumw2();
-// MARC 		TH1D *nt11_df = new TH1D(Form("NT11_DF_%s", varname.Data()), varname, nbins, bins); nt11_df->Sumw2();
-// MARC 
-// MARC 		TH1D *nt11_mm_sf = new TH1D(Form("NT11_MM_SF_%s", varname.Data()), varname, nbins, bins); nt11_mm_sf->Sumw2();
-// MARC 		TH1D *nt11_ee_sf = new TH1D(Form("NT11_EE_SF_%s", varname.Data()), varname, nbins, bins); nt11_ee_sf->Sumw2();
-// MARC 		TH1D *nt11_em_sf = new TH1D(Form("NT11_EM_SF_%s", varname.Data()), varname, nbins, bins); nt11_em_sf->Sumw2();
-// MARC 		TH1D *nt11_mm_df = new TH1D(Form("NT11_MM_DF_%s", varname.Data()), varname, nbins, bins); nt11_mm_df->Sumw2();
-// MARC 		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
-// MARC 		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
-// MARC 
-// MARC 		/////////////////////////////////////////////////////
-// MARC 		// Differential ratios
-// MARC 		for(size_t i = 0; i < musamples.size(); ++i){
-// MARC 			Sample *S = fSamples[musamples[i]];
-// MARC 			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-// MARC 			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-// MARC 			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-// MARC 		}
-// MARC 		for(size_t i = 0; i < elsamples.size(); ++i){
-// MARC 			Sample *S = fSamples[elsamples[i]];
-// MARC 			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-// MARC 			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-// MARC 			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-// MARC 		}
-// MARC 		for(size_t i = 0; i < emusamples.size(); ++i){
-// MARC 			Sample *S = fSamples[emusamples[i]];
-// MARC 			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-// MARC 			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-// MARC 			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-// MARC 		}
-// MARC 		/////////////////////////////////////////////////////
-// MARC 
-// MARC 		for(size_t i = 0; i < nbins; ++i){
-// MARC 			const float FakeESyst2 = 0.25;
-// MARC 			FakeRatios *FR = new FakeRatios();
-// MARC 			FR->setNToyMCs(100); // speedup
-// MARC 			FR->setAddESyst(0.5); // additional systematics
-// MARC 
-// MARC 			FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
-// MARC 			FR->setEFRatio(elfratio_data, elfratio_data_e);
-// MARC 			FR->setMPRatio(mupratio_data, mupratio_data_e);
-// MARC 			FR->setEPRatio(elpratio_data, elpratio_data_e);
-// MARC 
-// MARC 			FR->setMMNtl(nt11_mm->GetBinContent(i+1), nt10_mm->GetBinContent(i+1) + nt01_mm->GetBinContent(i+1), nt00_mm->GetBinContent(i+1));
-// MARC 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
-// MARC 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
-// MARC 			
-// MARC 			///////////////////////////////////////////////////////
-// MARC 			// Flat ratios:
-// MARC 			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-// MARC 			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-// MARC 			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-// MARC 			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-// MARC 			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-// MARC 			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
-// MARC 			///////////////////////////////////////////////////////
-// MARC 			
-// MARC 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
-// MARC 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
-// MARC 			float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
-// MARC 			float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
-// MARC 			
-// MARC 			// Errors (add total errors of fakes)
-// MARC 			float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
-// MARC 			float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
-// MARC 			float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
-// MARC 			float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
-// MARC 			float estat2_mm  = FR->getMMTotEStat()*FR->getMMTotEStat();
-// MARC 			float estat2_ee  = FR->getEETotEStat()*FR->getEETotEStat();
-// MARC 			float estat2_em  = FR->getEMTotEStat()*FR->getEMTotEStat();
-// MARC 			float estat2_tot = FR->getTotEStat()  *FR->getTotEStat();
-// MARC 
-// MARC 			float prev    = totbg   ->GetBinError(i+1);
-// MARC 			float prev_mm = totbg_mm->GetBinError(i+1);
-// MARC 			float prev_em = totbg_em->GetBinError(i+1);
-// MARC 			float prev_ee = totbg_ee->GetBinError(i+1);
-// MARC 
-// MARC 			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
-// MARC 			totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
-// MARC 			totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
-// MARC 			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
-// MARC 			
-// MARC 			delete FR;
-// MARC 		}
-// MARC 		
-// MARC 		nt11_sf->Add(nt11_mm_sf);
-// MARC 		nt11_sf->Add(nt11_ee_sf);
-// MARC 		nt11_sf->Add(nt11_em_sf);
-// MARC 
-// MARC 		nt11_df->Add(nt11_mm_df);
-// MARC 		nt11_df->Add(nt11_ee_df);
-// MARC 		nt11_df->Add(nt11_em_df);
-// MARC 
-// MARC 		totbg   ->Add(nt11_sf);
-// MARC 		totbg   ->Add(nt11_df);
-// MARC 		totbg_mm->Add(nt11_mm_sf);
-// MARC 		totbg_mm->Add(nt11_mm_df);
-// MARC 		totbg_em->Add(nt11_em_sf);
-// MARC 		totbg_em->Add(nt11_em_df);
-// MARC 		totbg_ee->Add(nt11_ee_sf);
-// MARC 		totbg_ee->Add(nt11_ee_df);
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// E-CHARGE MISID /////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		TH1D *nt11_cm = new TH1D(Form("NT11_CM_%s", varname.Data()), varname, nbins, bins); nt11_cm->Sumw2();
-// MARC 
-// MARC 		TH1D *nt11_ee_cm = new TH1D(Form("NT11_EE_CM_%s", varname.Data()), varname, nbins, bins); nt11_ee_cm->Sumw2();
-// MARC 		TH1D *nt11_em_cm = new TH1D(Form("NT11_EM_CM_%s", varname.Data()), varname, nbins, bins); nt11_em_cm->Sumw2();
-// MARC 
-// MARC 		// Abbreviations
-// MARC 		float fb  = gEChMisIDB;
-// MARC 		float fbE = gEChMisIDB_E;
-// MARC 		float fe  = gEChMisIDE;
-// MARC 		float feE = gEChMisIDE_E;
-// MARC 
-// MARC 		for(size_t i = 0; i < nbins; ++i){
-// MARC 			float nt2_ee_BB_os = nt2_os_ee_bb->GetBinContent(i+1);
-// MARC 			float nt2_ee_EB_os = nt2_os_ee_eb->GetBinContent(i+1);
-// MARC 			float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
-// MARC 			float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
-// MARC 			float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
-// MARC 			
-// MARC 			// Errors
-// MARC 			FakeRatios *FR = new FakeRatios();
-// MARC 
-// MARC 			// Simple error propagation assuming error on number of events is FR->getEStat2()
-// MARC 			nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os);
-// MARC 			float nt11_ee_cm_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-// MARC 			float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
-// MARC 
-// MARC 			nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
-// MARC 			float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
-// MARC 			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
-// MARC 			
-// MARC 			float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
-// MARC 			float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
-// MARC 			float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
-// MARC 			float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
-// MARC 			float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
-// MARC 			float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
-// MARC 
-// MARC 			float prev    = totbg   ->GetBinError(i+1);
-// MARC 			float prev_em = totbg_em->GetBinError(i+1);
-// MARC 			float prev_ee = totbg_ee->GetBinError(i+1);
-// MARC 
-// MARC 			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
-// MARC 			totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
-// MARC 			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
-// MARC 			delete FR;
-// MARC 		}
-// MARC 
-// MARC 		nt11_cm->Add(nt11_ee_cm);
-// MARC 		nt11_cm->Add(nt11_em_cm);
-// MARC 
-// MARC 		totbg   ->Add(nt11_cm);
-// MARC 		totbg_em->Add(nt11_em_cm);
-// MARC 		totbg_ee->Add(nt11_ee_cm);
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// SIGNAL /////////////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		gSample sigsam = LM11;
-// MARC 		TH1D *nt11_sig    = new TH1D(Form("NT11_Sig%s",    varname.Data()), varname, nbins, bins); nt11_sig   ->Sumw2();
-// MARC 		TH1D *nt11_mm_sig = new TH1D(Form("NT11_mm_Sig%s", varname.Data()), varname, nbins, bins); nt11_mm_sig->Sumw2();
-// MARC 		TH1D *nt11_em_sig = new TH1D(Form("NT11_em_Sig%s", varname.Data()), varname, nbins, bins); nt11_em_sig->Sumw2();
-// MARC 		TH1D *nt11_ee_sig = new TH1D(Form("NT11_ee_Sig%s", varname.Data()), varname, nbins, bins); nt11_ee_sig->Sumw2();
-// MARC 		nt11_mm_sig->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 		nt11_ee_sig->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 		nt11_em_sig->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-// MARC 
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		// OUTPUT /////////////////////////////////////////////////////////////////////////
-// MARC 		///////////////////////////////////////////////////////////////////////////////////
-// MARC 		nt11->SetMarkerColor(kBlack);
-// MARC 		nt11->SetMarkerStyle(20);
-// MARC 		nt11->SetMarkerSize(2.0);
-// MARC 		nt11->SetLineWidth(2);
-// MARC 		nt11->SetLineColor(kBlack);
-// MARC 		nt11->SetFillColor(kBlack);
-// MARC 		nt11_mm->SetMarkerColor(kBlack);
-// MARC 		nt11_mm->SetMarkerStyle(20);
-// MARC 		nt11_mm->SetMarkerSize(2.0);
-// MARC 		nt11_mm->SetLineWidth(2);
-// MARC 		nt11_mm->SetLineColor(kBlack);
-// MARC 		nt11_mm->SetFillColor(kBlack);
-// MARC 		nt11_ee->SetMarkerColor(kBlack);
-// MARC 		nt11_ee->SetMarkerStyle(20);
-// MARC 		nt11_ee->SetMarkerSize(2.0);
-// MARC 		nt11_ee->SetLineWidth(2);
-// MARC 		nt11_ee->SetLineColor(kBlack);
-// MARC 		nt11_ee->SetFillColor(kBlack);
-// MARC 		nt11_em->SetMarkerColor(kBlack);
-// MARC 		nt11_em->SetMarkerStyle(20);
-// MARC 		nt11_em->SetMarkerSize(2.0);
-// MARC 		nt11_em->SetLineWidth(2);
-// MARC 		nt11_em->SetLineColor(kBlack);
-// MARC 		nt11_em->SetFillColor(kBlack);
-// MARC 
-// MARC 		nt11_sf->SetLineWidth(1);
-// MARC 		nt11_df->SetLineWidth(1);
-// MARC 		nt11_ss->SetLineWidth(1);
-// MARC 		nt11_wz->SetLineWidth(1);
-// MARC 		nt11_sf->SetLineColor(50);
-// MARC 		nt11_sf->SetFillColor(50);
-// MARC 		nt11_df->SetLineColor(38);
-// MARC 		nt11_df->SetFillColor(38);
-// MARC 		nt11_cm->SetLineColor(42);
-// MARC 		nt11_cm->SetFillColor(42);
-// MARC 		nt11_ss->SetLineColor(31);
-// MARC 		nt11_ss->SetFillColor(31);
-// MARC 		nt11_wz->SetLineColor(29);
-// MARC 		nt11_wz->SetFillColor(29);
-// MARC 
-// MARC 		nt11_mm_sf->SetLineWidth(1);
-// MARC 		nt11_mm_df->SetLineWidth(1);
-// MARC 		nt11_mm_ss->SetLineWidth(1);
-// MARC 		nt11_mm_wz->SetLineWidth(1);
-// MARC 		nt11_mm_sf->SetLineColor(50);
-// MARC 		nt11_mm_sf->SetFillColor(50);
-// MARC 		nt11_mm_df->SetLineColor(38);
-// MARC 		nt11_mm_df->SetFillColor(38);
-// MARC 		nt11_mm_ss->SetLineColor(31);
-// MARC 		nt11_mm_ss->SetFillColor(31);
-// MARC 		nt11_mm_wz->SetLineColor(29);
-// MARC 		nt11_mm_wz->SetFillColor(29);
-// MARC 
-// MARC 		nt11_ee_sf->SetLineWidth(1);
-// MARC 		nt11_ee_df->SetLineWidth(1);
-// MARC 		nt11_ee_ss->SetLineWidth(1);
-// MARC 		nt11_ee_wz->SetLineWidth(1);
-// MARC 		nt11_ee_sf->SetLineColor(50);
-// MARC 		nt11_ee_sf->SetFillColor(50);
-// MARC 		nt11_ee_df->SetLineColor(38);
-// MARC 		nt11_ee_df->SetFillColor(38);
-// MARC 		nt11_ee_cm->SetLineColor(42);
-// MARC 		nt11_ee_cm->SetFillColor(42);
-// MARC 		nt11_ee_ss->SetLineColor(31);
-// MARC 		nt11_ee_ss->SetFillColor(31);
-// MARC 		nt11_ee_wz->SetLineColor(29);
-// MARC 		nt11_ee_wz->SetFillColor(29);
-// MARC 
-// MARC 		nt11_em_sf->SetLineWidth(1);
-// MARC 		nt11_em_df->SetLineWidth(1);
-// MARC 		nt11_em_ss->SetLineWidth(1);
-// MARC 		nt11_em_wz->SetLineWidth(1);
-// MARC 		nt11_em_sf->SetLineColor(50);
-// MARC 		nt11_em_sf->SetFillColor(50);
-// MARC 		nt11_em_df->SetLineColor(38);
-// MARC 		nt11_em_df->SetFillColor(38);
-// MARC 		nt11_em_cm->SetLineColor(42);
-// MARC 		nt11_em_cm->SetFillColor(42);
-// MARC 		nt11_em_ss->SetLineColor(31);
-// MARC 		nt11_em_ss->SetFillColor(31);
-// MARC 		nt11_em_wz->SetLineColor(29);
-// MARC 		nt11_em_wz->SetFillColor(29);
-// MARC 		
-// MARC 		nt11_sig   ->SetLineWidth(2);
-// MARC 		nt11_mm_sig->SetLineWidth(2);
-// MARC 		nt11_em_sig->SetLineWidth(2);
-// MARC 		nt11_ee_sig->SetLineWidth(2);
-// MARC 
-// MARC 		nt11_sig   ->SetLineColor(kBlue);
-// MARC 		nt11_mm_sig->SetLineColor(kBlue);
-// MARC 		nt11_em_sig->SetLineColor(kBlue);
-// MARC 		nt11_ee_sig->SetLineColor(kBlue);
-// MARC 		
-// MARC 		nt11_sig   ->SetFillStyle(0);
-// MARC 		nt11_mm_sig->SetFillStyle(0);
-// MARC 		nt11_em_sig->SetFillStyle(0);
-// MARC 		nt11_ee_sig->SetFillStyle(0);
-// MARC 		
-// MARC 		totbg   ->SetLineWidth(1);
-// MARC 		totbg_mm->SetLineWidth(1);
-// MARC 		totbg_em->SetLineWidth(1);
-// MARC 		totbg_ee->SetLineWidth(1);
-// MARC 
-// MARC 
-// MARC 		totbg   ->SetFillColor(12);
-// MARC 		totbg_mm->SetFillColor(12);
-// MARC 		totbg_em->SetFillColor(12);
-// MARC 		totbg_ee->SetFillColor(12);
-// MARC 		totbg   ->SetFillStyle(3005);
-// MARC 		totbg_mm->SetFillStyle(3005);
-// MARC 		totbg_em->SetFillStyle(3005);
-// MARC 		totbg_ee->SetFillStyle(3005);
-// MARC 
-// MARC 		// Take square root of sum of squared errors:
-// MARC 		// (stored the SQUARED errors before)
-// MARC 		for(size_t i = 0; i < nbins; ++i){
-// MARC 			float prev    = totbg   ->GetBinError(i+1);
-// MARC 			float prev_mm = totbg_mm->GetBinError(i+1);
-// MARC 			float prev_em = totbg_em->GetBinError(i+1);
-// MARC 			float prev_ee = totbg_ee->GetBinError(i+1);
-// MARC 
-// MARC 			totbg   ->SetBinError(i+1, sqrt(prev)   );
-// MARC 			totbg_mm->SetBinError(i+1, sqrt(prev_mm));
-// MARC 			totbg_em->SetBinError(i+1, sqrt(prev_em));
-// MARC 			totbg_ee->SetBinError(i+1, sqrt(prev_ee));
-// MARC 		}
-// MARC 
-// MARC 		// Normalize everything to binwidth
-// MARC 		nt11_sf    = normHistBW(nt11_sf, binwidthscale[j]);
-// MARC 		nt11_df    = normHistBW(nt11_df, binwidthscale[j]);
-// MARC 		nt11_ss    = normHistBW(nt11_ss, binwidthscale[j]);
-// MARC 		nt11_wz    = normHistBW(nt11_wz, binwidthscale[j]);
-// MARC 		nt11_cm    = normHistBW(nt11_cm, binwidthscale[j]);
-// MARC 
-// MARC 		nt11_mm_sf = normHistBW(nt11_mm_sf, binwidthscale[j]);
-// MARC 		nt11_mm_df = normHistBW(nt11_mm_df, binwidthscale[j]);
-// MARC 		nt11_mm_ss = normHistBW(nt11_mm_ss, binwidthscale[j]);
-// MARC 		nt11_mm_wz = normHistBW(nt11_mm_wz, binwidthscale[j]);
-// MARC 
-// MARC 		nt11_ee_sf = normHistBW(nt11_ee_sf, binwidthscale[j]);
-// MARC 		nt11_ee_df = normHistBW(nt11_ee_df, binwidthscale[j]);
-// MARC 		nt11_ee_ss = normHistBW(nt11_ee_ss, binwidthscale[j]);
-// MARC 		nt11_ee_wz = normHistBW(nt11_ee_wz, binwidthscale[j]);
-// MARC 		nt11_ee_cm = normHistBW(nt11_ee_cm, binwidthscale[j]);
-// MARC 		
-// MARC 		nt11_em_sf = normHistBW(nt11_em_sf, binwidthscale[j]);
-// MARC 		nt11_em_df = normHistBW(nt11_em_df, binwidthscale[j]);
-// MARC 		nt11_em_ss = normHistBW(nt11_em_ss, binwidthscale[j]);
-// MARC 		nt11_em_wz = normHistBW(nt11_em_wz, binwidthscale[j]);
-// MARC 		nt11_em_cm = normHistBW(nt11_em_cm, binwidthscale[j]);
-// MARC 		
-// MARC 		totbg      = normHistBW(totbg,    binwidthscale[j]);
-// MARC 		totbg_mm   = normHistBW(totbg_mm, binwidthscale[j]);
-// MARC 		totbg_em   = normHistBW(totbg_em, binwidthscale[j]);
-// MARC 		totbg_ee   = normHistBW(totbg_ee, binwidthscale[j]);
-// MARC 
-// MARC 		nt11       = normHistBW(nt11,    binwidthscale[j]);
-// MARC 		nt11_mm    = normHistBW(nt11_mm, binwidthscale[j]);
-// MARC 		nt11_em    = normHistBW(nt11_em, binwidthscale[j]);
-// MARC 		nt11_ee    = normHistBW(nt11_ee, binwidthscale[j]);
-// MARC 
-// MARC 		// Fill stacks
-// MARC 		THStack *nt11_tot    = new THStack("NT11_TotalBG", "NT11_TotalBG");
-// MARC 		THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
-// MARC 		THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
-// MARC 		THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
-// MARC 		
-// MARC 		nt11_tot->Add(nt11_sf);
-// MARC 		nt11_tot->Add(nt11_df);
-// MARC 		nt11_tot->Add(nt11_ss);
-// MARC 		nt11_tot->Add(nt11_wz);
-// MARC 		nt11_tot->Add(nt11_cm);
-// MARC 
-// MARC 		nt11_mm_tot->Add(nt11_mm_sf);
-// MARC 		nt11_mm_tot->Add(nt11_mm_df);
-// MARC 		nt11_mm_tot->Add(nt11_mm_ss);
-// MARC 		nt11_mm_tot->Add(nt11_mm_wz);
-// MARC 
-// MARC 		nt11_ee_tot->Add(nt11_ee_sf);
-// MARC 		nt11_ee_tot->Add(nt11_ee_df);
-// MARC 		nt11_ee_tot->Add(nt11_ee_ss);
-// MARC 		nt11_ee_tot->Add(nt11_ee_wz);
-// MARC 		nt11_ee_tot->Add(nt11_ee_cm);
-// MARC 
-// MARC 		nt11_em_tot->Add(nt11_em_sf);
-// MARC 		nt11_em_tot->Add(nt11_em_df);
-// MARC 		nt11_em_tot->Add(nt11_em_ss);
-// MARC 		nt11_em_tot->Add(nt11_em_wz);
-// MARC 		nt11_em_tot->Add(nt11_em_cm);
-// MARC 
-// MARC 		// Signal
-// MARC 		// nt11_tot->Add(nt11_sig);
-// MARC 		// nt11_mm_tot->Add(nt11_mm_sig);
-// MARC 		// nt11_ee_tot->Add(nt11_ee_sig);
-// MARC 		// nt11_em_tot->Add(nt11_em_sig);
-// MARC 
-// MARC 		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
-// MARC 		if(j==4 || j==8 || j==10) ytitle = "Events";
-// MARC 		nt11_tot->Draw("goff");
-// MARC 		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
-// MARC 		nt11_tot->GetYaxis()->SetTitle(ytitle);
-// MARC 		nt11_mm_tot->Draw("goff");
-// MARC 		nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
-// MARC 		nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
-// MARC 		nt11_ee_tot->Draw("goff");
-// MARC 		nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
-// MARC 		nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
-// MARC 		nt11_em_tot->Draw("goff");
-// MARC 		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
-// MARC 		nt11_em_tot->GetYaxis()->SetTitle(ytitle);
-// MARC 
-// MARC 		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
-// MARC 		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
-// MARC 		nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum());
-// MARC 		nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum());
-// MARC 
-// MARC 		double max = nt11->Integral();
-// MARC 		nt11    ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_sf ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_df ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_cm ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_ss ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_wz ->SetMaximum(max>1?max+1:1.);
-// MARC 		nt11_tot->SetMaximum(max>1?max+1:1.);
-// MARC 
-// MARC 		double max_mm = nt11_mm->Integral();
-// MARC 		nt11_mm    ->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 		nt11_mm_sf ->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 		nt11_mm_df ->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 		nt11_mm_ss ->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 		nt11_mm_wz ->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 		nt11_mm_tot->SetMaximum(max_mm>1?max_mm+1:1.);
-// MARC 
-// MARC 		double max_ee = nt11_ee->Integral();
-// MARC 		nt11_ee    ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_sf ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_df ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_cm ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_ss ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_wz ->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 		nt11_ee_tot->SetMaximum(max_ee>1?max_ee+1:1.);
-// MARC 
-// MARC 		double max_em = nt11_em->Integral();
-// MARC 		nt11_em    ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_sf ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_df ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_cm ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_wz ->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
-// MARC 		
-// MARC 		fOutputSubDir = "DiffPredictionPlots/";
-// MARC 		/////////////////////////////////////////////////////////////////
-// MARC 		TLegend *leg = new TLegend(0.60,0.65,0.90,0.88);
-// MARC 		leg->AddEntry(nt11,    "Observed","p");
-// MARC 		leg->AddEntry(nt11_sf, "Single Fakes","f");
-// MARC 		leg->AddEntry(nt11_df, "Double Fakes","f");
-// MARC 		leg->AddEntry(nt11_ss, "Irreducible (MC)","f");
-// MARC 		leg->AddEntry(nt11_wz, "WZ Production (MC)","f");
-// MARC 		leg->AddEntry(nt11_cm, "Charge MisID","f");
-// MARC 		leg->AddEntry(totbg,   "Total Uncertainty","f");
-// MARC 		// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
-// MARC 		leg->SetFillStyle(0);
-// MARC 		leg->SetTextFont(42);
-// MARC 		leg->SetBorderSize(0);
-// MARC 		
-// MARC 		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
-// MARC 		c_temp->cd();
-// MARC 		gPad->SetLogy();
-// MARC 		
-// MARC 		nt11_tot->Draw("hist");
-// MARC 		// nt11_error->DrawCopy("X0 E1 same");
-// MARC 		nt11->DrawCopy("PE X0 same");
-// MARC 		totbg->DrawCopy("0 E2 same");
-// MARC 		// nt11_sig->DrawCopy("hist same");
-// MARC 		leg->Draw();
-// MARC 		lat->SetTextSize(0.04);
-// MARC 		lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
-// MARC 		drawDiffCuts(j);
-// MARC 		drawTopLine();
-// MARC 		
-// MARC 		gPad->RedrawAxis();
-// MARC 		Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
-// MARC 		gPad->SetLogy(0);
-// MARC 		float minopt, maxopt;
-// MARC 		vector<TH1D*> histvec;
-// MARC 		histvec.push_back(nt11);
-// MARC 		histvec.push_back(totbg);
-// MARC 		getPlottingRange(minopt, maxopt, histvec, 0.1);
-// MARC 		nt11_tot->SetMinimum(0);
-// MARC 		nt11_tot->SetMaximum(maxopt);
-// MARC 		Util::PrintPDF(c_temp, "ObsPred_" + varname + "_lin", fOutputDir + fOutputSubDir + "lin/");
-// MARC 
-// MARC 		fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
-// MARC 		/////////////////////////////////////////////////////////////////
-// MARC 		TLegend *leg_mm = new TLegend(0.60,0.67,0.90,0.88);
-// MARC 		leg_mm->AddEntry(nt11_mm,    "Observed","p");
-// MARC 		leg_mm->AddEntry(nt11_mm_sf, "Single Fakes","f");
-// MARC 		leg_mm->AddEntry(nt11_mm_df, "Double Fakes","f");
-// MARC 		leg_mm->AddEntry(nt11_mm_ss, "Irreducible (MC)","f");
-// MARC 		leg_mm->AddEntry(totbg_mm,   "Total Uncertainty","f");
-// MARC 		// leg_mm->AddEntry(nt11_mm_sig,fSamples[sigsam]->sname,"l");
-// MARC 		leg_mm->SetFillStyle(0);
-// MARC 		leg_mm->SetTextFont(42);
-// MARC 		leg_mm->SetBorderSize(0);
-// MARC 		
-// MARC 		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
-// MARC 		c_temp->cd();
-// MARC 		gPad->SetLogy();
-// MARC 		
-// MARC 		nt11_mm_tot->Draw("hist");
-// MARC 		// nt11_error->DrawCopy("X0 E1 same");
-// MARC 		nt11_mm->DrawCopy("PE X0 same");
-// MARC 		totbg_mm->DrawCopy("0 E2 same");
-// MARC 		// nt11_mm_sig->DrawCopy("hist same");
-// MARC 		leg_mm->Draw();
-// MARC 		lat->SetTextSize(0.04);
-// MARC 		lat->DrawLatex(0.65,0.92, "#mu#mu");
-// MARC 		drawDiffCuts(j);
-// MARC 		drawTopLine();
-// MARC 		
-// MARC 		gPad->RedrawAxis();
-// MARC 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
-// MARC 
-// MARC 		histvec.clear();
-// MARC 		histvec.push_back(nt11_mm);
-// MARC 		histvec.push_back(totbg_mm);
-// MARC 		getPlottingRange(minopt, maxopt, histvec, 0.1);
-// MARC 		nt11_mm_tot->SetMinimum(0);
-// MARC 		nt11_mm_tot->SetMaximum(maxopt);
-// MARC 		gPad->SetLogy(0);
-// MARC 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
-// MARC 
-// MARC 		/////////////////////////////////////////////////////////////////
-// MARC 		TLegend *leg_ee = new TLegend(0.60,0.67,0.90,0.88);
-// MARC 		leg_ee->AddEntry(nt11_ee,    "Observed","p");
-// MARC 		leg_ee->AddEntry(nt11_ee_sf, "Single Fakes","f");
-// MARC 		leg_ee->AddEntry(nt11_ee_df, "Double Fakes","f");
-// MARC 		leg_ee->AddEntry(nt11_ee_ss, "Irreducible (MC)","f");
-// MARC 		leg_ee->AddEntry(nt11_ee_cm, "Charge MisID","f");
-// MARC 		leg_ee->AddEntry(totbg_ee,   "Total Uncertainty","f");
-// MARC 		// leg_mm->AddEntry(nt11_ee_sig,fSamples[sigsam]->sname,"l");
-// MARC 		leg_ee->SetFillStyle(0);
-// MARC 		leg_ee->SetTextFont(42);
-// MARC 		leg_ee->SetBorderSize(0);
-// MARC 		
-// MARC 		c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
-// MARC 		c_temp->cd();
-// MARC 		gPad->SetLogy();
-// MARC 		
-// MARC 		nt11_ee_tot->Draw("hist");
-// MARC 		// nt11_error->DrawCopy("X0 E1 same");
-// MARC 		nt11_ee->DrawCopy("PE X0 same");
-// MARC 		totbg_ee->DrawCopy("0 E2 same");
-// MARC 		// nt11_ee_sig->DrawCopy("hist same");
-// MARC 		leg_ee->Draw();
-// MARC 		lat->SetTextSize(0.04);
-// MARC 		lat->DrawLatex(0.65,0.92, "ee");
-// MARC 		drawDiffCuts(j);
-// MARC 		drawTopLine();
-// MARC 		
-// MARC 		gPad->RedrawAxis();
-// MARC 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
-// MARC 
-// MARC 		histvec.clear();
-// MARC 		histvec.push_back(nt11_ee);
-// MARC 		histvec.push_back(totbg_ee);
-// MARC 		getPlottingRange(minopt, maxopt, histvec, 0.1);
-// MARC 		nt11_ee_tot->SetMinimum(0);
-// MARC 		nt11_ee_tot->SetMaximum(maxopt);
-// MARC 		gPad->SetLogy(0);
-// MARC 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
-// MARC 
-// MARC 		/////////////////////////////////////////////////////////////////
-// MARC 		TLegend *leg_em = new TLegend(0.60,0.67,0.90,0.88);
-// MARC 		leg_em->AddEntry(nt11_em,    "Observed","p");
-// MARC 		leg_em->AddEntry(nt11_em_sf, "Single Fakes","f");
-// MARC 		leg_em->AddEntry(nt11_em_df, "Double Fakes","f");
-// MARC 		leg_em->AddEntry(nt11_em_ss, "Irreducible (MC)","f");
-// MARC 		leg_em->AddEntry(nt11_em_cm, "Charge MisID","f");
-// MARC 		leg_em->AddEntry(totbg_em,   "Total Uncertainty","f");
-// MARC 		// leg_mm->AddEntry(nt11_em_sig,fSamples[sigsam]->sname,"l");
-// MARC 		leg_em->SetFillStyle(0);
-// MARC 		leg_em->SetTextFont(42);
-// MARC 		leg_em->SetBorderSize(0);
-// MARC 		
-// MARC 		c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
-// MARC 		c_temp->cd();
-// MARC 		gPad->SetLogy();
-// MARC 		
-// MARC 		nt11_em_tot->Draw("hist");
-// MARC 		totbg_em->DrawCopy("0 E2 same");
-// MARC 		nt11_em->DrawCopy("PE X0 same");
-// MARC 		// nt11_em_sig->DrawCopy("hist same");
-// MARC 		leg_em->Draw();
-// MARC 		lat->SetTextSize(0.04);
-// MARC 		lat->DrawLatex(0.65,0.92, "e#mu");
-// MARC 		drawDiffCuts(j);
-// MARC 		drawTopLine();
-// MARC 		
-// MARC 		gPad->RedrawAxis();
-// MARC 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
-// MARC 
-// MARC 		histvec.clear();
-// MARC 		histvec.push_back(nt11_em);
-// MARC 		histvec.push_back(totbg_em);
-// MARC 		getPlottingRange(minopt, maxopt, histvec, 0.1);
-// MARC 		nt11_em_tot->SetMinimum(0);
-// MARC 		nt11_em_tot->SetMaximum(maxopt);
-// MARC 		gPad->SetLogy(0);
-// MARC 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
-// MARC 
-// MARC 		// Cleanup
-// MARC 		delete c_temp, leg, leg_mm, leg_em, leg_ee;
-// MARC 		delete nt11, nt11_mm, nt11_ee, nt11_em;
-// MARC 		delete nt11_sig, nt11_mm_sig, nt11_ee_sig, nt11_em_sig;
-// MARC 		delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
-// MARC 		delete nt2_os_ee_bb, nt2_os_ee_eb, nt2_os_ee_ee, nt2_os_em_bb, nt2_os_em_ee;
-// MARC 		delete nt11_ss, nt11_mm_ss, nt11_em_ss, nt11_ee_ss;
-// MARC 		delete nt11_wz, nt11_mm_wz, nt11_em_wz, nt11_ee_wz;
-// MARC 		delete nt11_sf, nt11_mm_sf, nt11_em_sf, nt11_ee_sf;
-// MARC 		delete nt11_df, nt11_mm_df, nt11_em_df, nt11_ee_df;
-// MARC 		delete nt11_cm, nt11_em_cm, nt11_ee_cm;
-// MARC 		// delete nt11_mc, nt11_mm_mc, nt11_ee_mc, nt11_em_mc;
-// MARC 		delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
-// MARC 		delete totbg, totbg_mm, totbg_em, totbg_ee;
-// MARC 	}
-// MARC 	fOutputSubDir = "";
-// MARC }
+void SSDLPlotter::makeDiffPrediction(){
+	fOutputSubDir = "DiffPredictionPlots/";
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	vector<int> musamples;
+	vector<int> elsamples;
+	vector<int> emusamples;
+
+	musamples = fMuData;
+	elsamples = fEGData;
+	emusamples = fMuEGData;
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// RATIOS /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float mufratio_data(0.),  mufratio_data_e(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.);
+
+	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
+	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
+
+	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
+	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
+
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
+	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
+
+	// Loop on the different variables
+	for(size_t j = 0; j < gNDiffVars; ++j){
+		TString varname    = DiffPredYields::var_name[j];
+		const int nbins    = DiffPredYields::nbins[j];
+		const double *bins = DiffPredYields::bins[j];
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// OBSERVATIONS ///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11 = new TH1D(Form("NT11_%s", varname.Data()), varname, nbins, bins); nt11->Sumw2();
+
+		TH1D *nt11_mm = new TH1D(Form("NT11_MM_%s", varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
+		TH1D *nt10_mm = new TH1D(Form("NT10_MM_%s", varname.Data()), varname, nbins, bins); nt10_mm->Sumw2();
+		TH1D *nt01_mm = new TH1D(Form("NT01_MM_%s", varname.Data()), varname, nbins, bins); nt01_mm->Sumw2();
+		TH1D *nt00_mm = new TH1D(Form("NT00_MM_%s", varname.Data()), varname, nbins, bins); nt00_mm->Sumw2();
+		TH1D *nt11_ee = new TH1D(Form("NT11_EE_%s", varname.Data()), varname, nbins, bins); nt11_ee->Sumw2();
+		TH1D *nt10_ee = new TH1D(Form("NT10_EE_%s", varname.Data()), varname, nbins, bins); nt10_ee->Sumw2();
+		TH1D *nt01_ee = new TH1D(Form("NT01_EE_%s", varname.Data()), varname, nbins, bins); nt01_ee->Sumw2();
+		TH1D *nt00_ee = new TH1D(Form("NT00_EE_%s", varname.Data()), varname, nbins, bins); nt00_ee->Sumw2();
+		TH1D *nt11_em = new TH1D(Form("NT11_EM_%s", varname.Data()), varname, nbins, bins); nt11_em->Sumw2();
+		TH1D *nt10_em = new TH1D(Form("NT10_EM_%s", varname.Data()), varname, nbins, bins); nt10_em->Sumw2();
+		TH1D *nt01_em = new TH1D(Form("NT01_EM_%s", varname.Data()), varname, nbins, bins); nt01_em->Sumw2();
+		TH1D *nt00_em = new TH1D(Form("NT00_EM_%s", varname.Data()), varname, nbins, bins); nt00_em->Sumw2();
+
+		// OS yields
+		TH1D *nt2_os_ee_bb = new TH1D(Form("NT2_OS_EE_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_bb->Sumw2();
+		TH1D *nt2_os_ee_eb = new TH1D(Form("NT2_OS_EE_EB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_eb->Sumw2();
+		TH1D *nt2_os_ee_ee = new TH1D(Form("NT2_OS_EE_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_ee->Sumw2();
+		TH1D *nt2_os_em_bb = new TH1D(Form("NT2_OS_EM_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_em_bb->Sumw2();
+		TH1D *nt2_os_em_ee = new TH1D(Form("NT2_OS_EM_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_em_ee->Sumw2();
+
+		for(size_t i = 0; i < musamples.size(); ++i){
+			Sample *S = fSamples[musamples[i]];
+			nt11_mm->Add(S->diffyields[Muon].hnt11[j]);
+			nt10_mm->Add(S->diffyields[Muon].hnt10[j]);
+			nt01_mm->Add(S->diffyields[Muon].hnt01[j]);
+			nt00_mm->Add(S->diffyields[Muon].hnt00[j]);
+		}
+		for(size_t i = 0; i < elsamples.size(); ++i){
+			Sample *S = fSamples[elsamples[i]];
+			nt11_ee->Add(S->diffyields[Elec].hnt11[j]);
+			nt10_ee->Add(S->diffyields[Elec].hnt10[j]);
+			nt01_ee->Add(S->diffyields[Elec].hnt01[j]);
+			nt00_ee->Add(S->diffyields[Elec].hnt00[j]);
+
+			nt2_os_ee_bb->Add(S->diffyields[Elec].hnt2_os_BB[j]);
+			nt2_os_ee_eb->Add(S->diffyields[Elec].hnt2_os_EB[j]);
+			nt2_os_ee_ee->Add(S->diffyields[Elec].hnt2_os_EE[j]);
+		}
+		for(size_t i = 0; i < emusamples.size(); ++i){
+			Sample *S = fSamples[emusamples[i]];
+			nt11_em->Add(S->diffyields[ElMu].hnt11[j]);
+			nt10_em->Add(S->diffyields[ElMu].hnt10[j]);
+			nt01_em->Add(S->diffyields[ElMu].hnt01[j]);
+			nt00_em->Add(S->diffyields[ElMu].hnt00[j]);
+
+			nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[j]);
+			nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[j]);
+		}
+		
+		nt11->Add(nt11_mm);
+		nt11->Add(nt11_ee);
+		nt11->Add(nt11_em);
+
+		
+		///////////////////////////////////////////////////////////////////////////////////
+		// Errors /////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		// Save the squared sum of total error in the bin errors of these histos,
+		// then apply square root before plotting
+		TH1D *totbg    = new TH1D(Form("TotBG_%s",    varname.Data()), varname, nbins, bins); totbg   ->Sumw2();
+		TH1D *totbg_mm = new TH1D(Form("TotBG_mm_%s", varname.Data()), varname, nbins, bins); totbg_mm->Sumw2();
+		TH1D *totbg_em = new TH1D(Form("TotBG_em_%s", varname.Data()), varname, nbins, bins); totbg_em->Sumw2();
+		TH1D *totbg_ee = new TH1D(Form("TotBG_ee_%s", varname.Data()), varname, nbins, bins); totbg_ee->Sumw2();
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// MC Predictions /////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		// TH1D *nt11_mc = new TH1D(Form("NT11_MC_%s", varname.Data()), varname, nbins, bins); nt11_mc->Sumw2();
+		// 
+		// TH1D *nt11_mm_mc = new TH1D(Form("NT11_MM_MC_%s", varname.Data()), varname, nbins, bins); nt11_mm_mc->Sumw2();
+		// TH1D *nt11_ee_mc = new TH1D(Form("NT11_EE_MC_%s", varname.Data()), varname, nbins, bins); nt11_ee_mc->Sumw2();
+		// TH1D *nt11_em_mc = new TH1D(Form("NT11_EM_MC_%s", varname.Data()), varname, nbins, bins); nt11_em_mc->Sumw2();
+		// 
+		// for(size_t i = 0; i < fMCBG.size(); ++i){
+		// 	Sample *S = fSamples[fMCBG[i]];
+		// 	float scale = fLumiNorm / S->getLumi();
+		// 	nt11_mm_mc->Add(S->diffyields[Muon].hnt11[j], scale);
+		// 	nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
+		// 	nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
+		// }
+		// 
+		// nt11_mc->Add(nt11_mm_mc);
+		// nt11_mc->Add(nt11_ee_mc);
+		// nt11_mc->Add(nt11_em_mc);
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// RARE SM MC /////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_ss = new TH1D(Form("NT11_SS_%s", varname.Data()), varname, nbins, bins); nt11_ss->Sumw2();
+
+		TH1D *nt11_mm_ss = new TH1D(Form("NT11_MM_SS_%s", varname.Data()), varname, nbins, bins); nt11_mm_ss->Sumw2();
+		TH1D *nt11_ee_ss = new TH1D(Form("NT11_EE_SS_%s", varname.Data()), varname, nbins, bins); nt11_ee_ss->Sumw2();
+		TH1D *nt11_em_ss = new TH1D(Form("NT11_EM_SS_%s", varname.Data()), varname, nbins, bins); nt11_em_ss->Sumw2();
+
+		for(size_t i = 0; i < fMCRareSM.size(); ++i){
+			Sample *S = fSamples[fMCRareSM[i]];
+			float scale = fLumiNorm / S->getLumi();
+			nt11_mm_ss->Add(S->diffyields[Muon].hnt11[j], scale);
+			nt11_ee_ss->Add(S->diffyields[Elec].hnt11[j], scale);
+			nt11_em_ss->Add(S->diffyields[ElMu].hnt11[j], scale);
+
+			// Errors
+			for(size_t b = 0; b < nbins; ++b){
+				float ss_mm = S->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
+				float ss_ee = S->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
+				float ss_em = S->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
+
+				float esyst2_mm = 0.25 * ss_mm*ss_mm*scale*scale;
+				float esyst2_ee = 0.25 * ss_ee*ss_ee*scale*scale;
+				float esyst2_em = 0.25 * ss_em*ss_em*scale*scale;
+
+				float estat2_mm = scale*scale*S->getError2(ss_mm);
+				float estat2_ee = scale*scale*S->getError2(ss_ee);
+				float estat2_em = scale*scale*S->getError2(ss_em);
+				// float estat2_mm = scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight*S->getError2(ss_mm); // which region to take for weighing of mc errors?
+				// float estat2_ee = scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight*S->getError2(ss_ee);
+				// float estat2_em = scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight*S->getError2(ss_em);
+
+				float prev    = totbg   ->GetBinError(b+1);
+				float prev_mm = totbg_mm->GetBinError(b+1);
+				float prev_em = totbg_em->GetBinError(b+1);
+				float prev_ee = totbg_ee->GetBinError(b+1);
+
+				totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+				totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+				totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+				totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+			}
+		}
+
+		nt11_ss->Add(nt11_mm_ss);
+		nt11_ss->Add(nt11_ee_ss);
+		nt11_ss->Add(nt11_em_ss);
+
+		totbg   ->Add(nt11_ss);
+		totbg_mm->Add(nt11_mm_ss);
+		totbg_em->Add(nt11_em_ss);
+		totbg_ee->Add(nt11_ee_ss);
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// WZ PRODUCTION //////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_wz = new TH1D(Form("NT11_WZ_%s", varname.Data()), varname, nbins, bins); nt11_wz->Sumw2();
+
+		TH1D *nt11_mm_wz = new TH1D(Form("NT11_MM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_mm_wz->Sumw2();
+		TH1D *nt11_ee_wz = new TH1D(Form("NT11_EE_WZ_%s", varname.Data()), varname, nbins, bins); nt11_ee_wz->Sumw2();
+		TH1D *nt11_em_wz = new TH1D(Form("NT11_EM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_em_wz->Sumw2();
+
+		float wzscale = fLumiNorm / fSamples[WZ]->getLumi();
+		nt11_mm_wz->Add(fSamples[WZ]->diffyields[Muon].hnt11[j], wzscale);
+		nt11_ee_wz->Add(fSamples[WZ]->diffyields[Elec].hnt11[j], wzscale);
+		nt11_em_wz->Add(fSamples[WZ]->diffyields[ElMu].hnt11[j], wzscale);
+
+		// Errors
+		for(size_t b = 0; b < nbins; ++b){
+			float ss_mm = fSamples[WZ]->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
+			float ss_ee = fSamples[WZ]->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
+			float ss_em = fSamples[WZ]->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
+
+			float esyst2_mm = 0.25 * ss_mm*ss_mm*wzscale*wzscale;
+			float esyst2_ee = 0.25 * ss_ee*ss_ee*wzscale*wzscale;
+			float esyst2_em = 0.25 * ss_em*ss_em*wzscale*wzscale;
+
+			float estat2_mm = wzscale*wzscale*fSamples[WZ]->getError2(ss_mm);
+			float estat2_ee = wzscale*wzscale*fSamples[WZ]->getError2(ss_ee);
+			float estat2_em = wzscale*wzscale*fSamples[WZ]->getError2(ss_em);
+			// float estat2_mm = wzscale*wzscale*fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->getError2(ss_mm);
+			// float estat2_ee = wzscale*wzscale*fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->getError2(ss_ee);
+			// float estat2_em = wzscale*wzscale*fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->getError2(ss_em);
+
+			float prev    = totbg   ->GetBinError(b+1);
+			float prev_mm = totbg_mm->GetBinError(b+1);
+			float prev_em = totbg_em->GetBinError(b+1);
+			float prev_ee = totbg_ee->GetBinError(b+1);
+
+			totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+			totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+			totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+			totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+		}
+
+		nt11_wz->Add(nt11_mm_wz);
+		nt11_wz->Add(nt11_ee_wz);
+		nt11_wz->Add(nt11_em_wz);
+
+		totbg   ->Add(nt11_wz);
+		totbg_mm->Add(nt11_mm_wz);
+		totbg_em->Add(nt11_em_wz);
+		totbg_ee->Add(nt11_ee_wz);
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// FAKE PREDICTIONS ///////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_sf = new TH1D(Form("NT11_SF_%s", varname.Data()), varname, nbins, bins); nt11_sf->Sumw2();
+		TH1D *nt11_df = new TH1D(Form("NT11_DF_%s", varname.Data()), varname, nbins, bins); nt11_df->Sumw2();
+
+		TH1D *nt11_mm_sf = new TH1D(Form("NT11_MM_SF_%s", varname.Data()), varname, nbins, bins); nt11_mm_sf->Sumw2();
+		TH1D *nt11_ee_sf = new TH1D(Form("NT11_EE_SF_%s", varname.Data()), varname, nbins, bins); nt11_ee_sf->Sumw2();
+		TH1D *nt11_em_sf = new TH1D(Form("NT11_EM_SF_%s", varname.Data()), varname, nbins, bins); nt11_em_sf->Sumw2();
+		TH1D *nt11_mm_df = new TH1D(Form("NT11_MM_DF_%s", varname.Data()), varname, nbins, bins); nt11_mm_df->Sumw2();
+		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
+		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
+
+		/////////////////////////////////////////////////////
+		// Differential ratios
+		for(size_t i = 0; i < musamples.size(); ++i){
+			Sample *S = fSamples[musamples[i]];
+			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		}
+		for(size_t i = 0; i < elsamples.size(); ++i){
+			Sample *S = fSamples[elsamples[i]];
+			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		}
+		for(size_t i = 0; i < emusamples.size(); ++i){
+			Sample *S = fSamples[emusamples[i]];
+			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		}
+		/////////////////////////////////////////////////////
+
+		for(size_t i = 0; i < nbins; ++i){
+			const float FakeESyst2 = 0.25;
+			FakeRatios *FR = new FakeRatios();
+			FR->setNToyMCs(100); // speedup
+			FR->setAddESyst(0.5); // additional systematics
+
+			FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+			FR->setEFRatio(elfratio_data, elfratio_data_e);
+			FR->setMPRatio(mupratio_data, mupratio_data_e);
+			FR->setEPRatio(elpratio_data, elpratio_data_e);
+
+			FR->setMMNtl(nt11_mm->GetBinContent(i+1), nt10_mm->GetBinContent(i+1) + nt01_mm->GetBinContent(i+1), nt00_mm->GetBinContent(i+1));
+			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
+			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
+			
+			///////////////////////////////////////////////////////
+			// Flat ratios:
+			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			///////////////////////////////////////////////////////
+			
+			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
+			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
+			float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
+			float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
+			
+			// Errors (add total errors of fakes)
+			float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+			float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+			float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+			float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+			float estat2_mm  = FR->getMMTotEStat()*FR->getMMTotEStat();
+			float estat2_ee  = FR->getEETotEStat()*FR->getEETotEStat();
+			float estat2_em  = FR->getEMTotEStat()*FR->getEMTotEStat();
+			float estat2_tot = FR->getTotEStat()  *FR->getTotEStat();
+
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_mm = totbg_mm->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+			totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+			totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+			
+			delete FR;
+		}
+		
+		nt11_sf->Add(nt11_mm_sf);
+		nt11_sf->Add(nt11_ee_sf);
+		nt11_sf->Add(nt11_em_sf);
+
+		nt11_df->Add(nt11_mm_df);
+		nt11_df->Add(nt11_ee_df);
+		nt11_df->Add(nt11_em_df);
+
+		totbg   ->Add(nt11_sf);
+		totbg   ->Add(nt11_df);
+		totbg_mm->Add(nt11_mm_sf);
+		totbg_mm->Add(nt11_mm_df);
+		totbg_em->Add(nt11_em_sf);
+		totbg_em->Add(nt11_em_df);
+		totbg_ee->Add(nt11_ee_sf);
+		totbg_ee->Add(nt11_ee_df);
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// E-CHARGE MISID /////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_cm = new TH1D(Form("NT11_CM_%s", varname.Data()), varname, nbins, bins); nt11_cm->Sumw2();
+
+		TH1D *nt11_ee_cm = new TH1D(Form("NT11_EE_CM_%s", varname.Data()), varname, nbins, bins); nt11_ee_cm->Sumw2();
+		TH1D *nt11_em_cm = new TH1D(Form("NT11_EM_CM_%s", varname.Data()), varname, nbins, bins); nt11_em_cm->Sumw2();
+
+		// Abbreviations
+		float fb  = gEChMisIDB;
+		float fbE = gEChMisIDB_E;
+		float fe  = gEChMisIDE;
+		float feE = gEChMisIDE_E;
+
+		for(size_t i = 0; i < nbins; ++i){
+			float nt2_ee_BB_os = nt2_os_ee_bb->GetBinContent(i+1);
+			float nt2_ee_EB_os = nt2_os_ee_eb->GetBinContent(i+1);
+			float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
+			float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
+			float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
+			
+			// Errors
+			FakeRatios *FR = new FakeRatios();
+
+			// Simple error propagation assuming error on number of events is FR->getEStat2()
+			nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os);
+			float nt11_ee_cm_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+			float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+			nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
+			float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
+			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+			
+			float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+			float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+			float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+			float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+			float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+			float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+			totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+			delete FR;
+		}
+
+		nt11_cm->Add(nt11_ee_cm);
+		nt11_cm->Add(nt11_em_cm);
+
+		totbg   ->Add(nt11_cm);
+		totbg_em->Add(nt11_em_cm);
+		totbg_ee->Add(nt11_ee_cm);
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// SIGNAL /////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+// 		gSample sigsam = LM11;
+// 		TH1D *nt11_sig    = new TH1D(Form("NT11_Sig%s",    varname.Data()), varname, nbins, bins); nt11_sig   ->Sumw2();
+// 		TH1D *nt11_mm_sig = new TH1D(Form("NT11_mm_Sig%s", varname.Data()), varname, nbins, bins); nt11_mm_sig->Sumw2();
+// 		TH1D *nt11_em_sig = new TH1D(Form("NT11_em_Sig%s", varname.Data()), varname, nbins, bins); nt11_em_sig->Sumw2();
+// 		TH1D *nt11_ee_sig = new TH1D(Form("NT11_ee_Sig%s", varname.Data()), varname, nbins, bins); nt11_ee_sig->Sumw2();
+// 		nt11_mm_sig->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+// 		nt11_ee_sig->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+// 		nt11_em_sig->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+// 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+// 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+// 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+
+		///////////////////////////////////////////////////////////////////////////////////
+		// OUTPUT /////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		nt11->SetMarkerColor(kBlack);
+		nt11->SetMarkerStyle(20);
+		nt11->SetMarkerSize(2.0);
+		nt11->SetLineWidth(2);
+		nt11->SetLineColor(kBlack);
+		nt11->SetFillColor(kBlack);
+		nt11_mm->SetMarkerColor(kBlack);
+		nt11_mm->SetMarkerStyle(20);
+		nt11_mm->SetMarkerSize(2.0);
+		nt11_mm->SetLineWidth(2);
+		nt11_mm->SetLineColor(kBlack);
+		nt11_mm->SetFillColor(kBlack);
+		nt11_ee->SetMarkerColor(kBlack);
+		nt11_ee->SetMarkerStyle(20);
+		nt11_ee->SetMarkerSize(2.0);
+		nt11_ee->SetLineWidth(2);
+		nt11_ee->SetLineColor(kBlack);
+		nt11_ee->SetFillColor(kBlack);
+		nt11_em->SetMarkerColor(kBlack);
+		nt11_em->SetMarkerStyle(20);
+		nt11_em->SetMarkerSize(2.0);
+		nt11_em->SetLineWidth(2);
+		nt11_em->SetLineColor(kBlack);
+		nt11_em->SetFillColor(kBlack);
+
+		nt11_sf->SetLineWidth(1);
+		nt11_df->SetLineWidth(1);
+		nt11_ss->SetLineWidth(1);
+		nt11_wz->SetLineWidth(1);
+		nt11_sf->SetLineColor(50);
+		nt11_sf->SetFillColor(50);
+		nt11_df->SetLineColor(38);
+		nt11_df->SetFillColor(38);
+		nt11_cm->SetLineColor(42);
+		nt11_cm->SetFillColor(42);
+		nt11_ss->SetLineColor(31);
+		nt11_ss->SetFillColor(31);
+		nt11_wz->SetLineColor(29);
+		nt11_wz->SetFillColor(29);
+
+		nt11_mm_sf->SetLineWidth(1);
+		nt11_mm_df->SetLineWidth(1);
+		nt11_mm_ss->SetLineWidth(1);
+		nt11_mm_wz->SetLineWidth(1);
+		nt11_mm_sf->SetLineColor(50);
+		nt11_mm_sf->SetFillColor(50);
+		nt11_mm_df->SetLineColor(38);
+		nt11_mm_df->SetFillColor(38);
+		nt11_mm_ss->SetLineColor(31);
+		nt11_mm_ss->SetFillColor(31);
+		nt11_mm_wz->SetLineColor(29);
+		nt11_mm_wz->SetFillColor(29);
+
+		nt11_ee_sf->SetLineWidth(1);
+		nt11_ee_df->SetLineWidth(1);
+		nt11_ee_ss->SetLineWidth(1);
+		nt11_ee_wz->SetLineWidth(1);
+		nt11_ee_sf->SetLineColor(50);
+		nt11_ee_sf->SetFillColor(50);
+		nt11_ee_df->SetLineColor(38);
+		nt11_ee_df->SetFillColor(38);
+		nt11_ee_cm->SetLineColor(42);
+		nt11_ee_cm->SetFillColor(42);
+		nt11_ee_ss->SetLineColor(31);
+		nt11_ee_ss->SetFillColor(31);
+		nt11_ee_wz->SetLineColor(29);
+		nt11_ee_wz->SetFillColor(29);
+
+		nt11_em_sf->SetLineWidth(1);
+		nt11_em_df->SetLineWidth(1);
+		nt11_em_ss->SetLineWidth(1);
+		nt11_em_wz->SetLineWidth(1);
+		nt11_em_sf->SetLineColor(50);
+		nt11_em_sf->SetFillColor(50);
+		nt11_em_df->SetLineColor(38);
+		nt11_em_df->SetFillColor(38);
+		nt11_em_cm->SetLineColor(42);
+		nt11_em_cm->SetFillColor(42);
+		nt11_em_ss->SetLineColor(31);
+		nt11_em_ss->SetFillColor(31);
+		nt11_em_wz->SetLineColor(29);
+		nt11_em_wz->SetFillColor(29);
+		
+// 		nt11_sig   ->SetLineWidth(2);
+// 		nt11_mm_sig->SetLineWidth(2);
+// 		nt11_em_sig->SetLineWidth(2);
+// 		nt11_ee_sig->SetLineWidth(2);
+
+// 		nt11_sig   ->SetLineColor(kBlue);
+// 		nt11_mm_sig->SetLineColor(kBlue);
+// 		nt11_em_sig->SetLineColor(kBlue);
+// 		nt11_ee_sig->SetLineColor(kBlue);
+		
+// 		nt11_sig   ->SetFillStyle(0);
+// 		nt11_mm_sig->SetFillStyle(0);
+// 		nt11_em_sig->SetFillStyle(0);
+// 		nt11_ee_sig->SetFillStyle(0);
+		
+		totbg   ->SetLineWidth(1);
+		totbg_mm->SetLineWidth(1);
+		totbg_em->SetLineWidth(1);
+		totbg_ee->SetLineWidth(1);
+
+
+		totbg   ->SetFillColor(12);
+		totbg_mm->SetFillColor(12);
+		totbg_em->SetFillColor(12);
+		totbg_ee->SetFillColor(12);
+		totbg   ->SetFillStyle(3005);
+		totbg_mm->SetFillStyle(3005);
+		totbg_em->SetFillStyle(3005);
+		totbg_ee->SetFillStyle(3005);
+
+		// Take square root of sum of squared errors:
+		// (stored the SQUARED errors before)
+		for(size_t i = 0; i < nbins; ++i){
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_mm = totbg_mm->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, sqrt(prev)   );
+			totbg_mm->SetBinError(i+1, sqrt(prev_mm));
+			totbg_em->SetBinError(i+1, sqrt(prev_em));
+			totbg_ee->SetBinError(i+1, sqrt(prev_ee));
+		}
+
+		// Normalize everything to binwidth
+		nt11_sf    = normHistBW(nt11_sf, binwidthscale[j]);
+		nt11_df    = normHistBW(nt11_df, binwidthscale[j]);
+		nt11_ss    = normHistBW(nt11_ss, binwidthscale[j]);
+		nt11_wz    = normHistBW(nt11_wz, binwidthscale[j]);
+		nt11_cm    = normHistBW(nt11_cm, binwidthscale[j]);
+
+		nt11_mm_sf = normHistBW(nt11_mm_sf, binwidthscale[j]);
+		nt11_mm_df = normHistBW(nt11_mm_df, binwidthscale[j]);
+		nt11_mm_ss = normHistBW(nt11_mm_ss, binwidthscale[j]);
+		nt11_mm_wz = normHistBW(nt11_mm_wz, binwidthscale[j]);
+
+		nt11_ee_sf = normHistBW(nt11_ee_sf, binwidthscale[j]);
+		nt11_ee_df = normHistBW(nt11_ee_df, binwidthscale[j]);
+		nt11_ee_ss = normHistBW(nt11_ee_ss, binwidthscale[j]);
+		nt11_ee_wz = normHistBW(nt11_ee_wz, binwidthscale[j]);
+		nt11_ee_cm = normHistBW(nt11_ee_cm, binwidthscale[j]);
+		
+		nt11_em_sf = normHistBW(nt11_em_sf, binwidthscale[j]);
+		nt11_em_df = normHistBW(nt11_em_df, binwidthscale[j]);
+		nt11_em_ss = normHistBW(nt11_em_ss, binwidthscale[j]);
+		nt11_em_wz = normHistBW(nt11_em_wz, binwidthscale[j]);
+		nt11_em_cm = normHistBW(nt11_em_cm, binwidthscale[j]);
+		
+		totbg      = normHistBW(totbg,    binwidthscale[j]);
+		totbg_mm   = normHistBW(totbg_mm, binwidthscale[j]);
+		totbg_em   = normHistBW(totbg_em, binwidthscale[j]);
+		totbg_ee   = normHistBW(totbg_ee, binwidthscale[j]);
+
+		nt11       = normHistBW(nt11,    binwidthscale[j]);
+		nt11_mm    = normHistBW(nt11_mm, binwidthscale[j]);
+		nt11_em    = normHistBW(nt11_em, binwidthscale[j]);
+		nt11_ee    = normHistBW(nt11_ee, binwidthscale[j]);
+
+		// Fill stacks
+		THStack *nt11_tot    = new THStack("NT11_TotalBG", "NT11_TotalBG");
+		THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
+		THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
+		THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
+		
+		nt11_tot->Add(nt11_sf);
+		nt11_tot->Add(nt11_df);
+		nt11_tot->Add(nt11_ss);
+		nt11_tot->Add(nt11_wz);
+		nt11_tot->Add(nt11_cm);
+
+		nt11_mm_tot->Add(nt11_mm_sf);
+		nt11_mm_tot->Add(nt11_mm_df);
+		nt11_mm_tot->Add(nt11_mm_ss);
+		nt11_mm_tot->Add(nt11_mm_wz);
+
+		nt11_ee_tot->Add(nt11_ee_sf);
+		nt11_ee_tot->Add(nt11_ee_df);
+		nt11_ee_tot->Add(nt11_ee_ss);
+		nt11_ee_tot->Add(nt11_ee_wz);
+		nt11_ee_tot->Add(nt11_ee_cm);
+
+		nt11_em_tot->Add(nt11_em_sf);
+		nt11_em_tot->Add(nt11_em_df);
+		nt11_em_tot->Add(nt11_em_ss);
+		nt11_em_tot->Add(nt11_em_wz);
+		nt11_em_tot->Add(nt11_em_cm);
+
+		// Signal
+		// nt11_tot->Add(nt11_sig);
+		// nt11_mm_tot->Add(nt11_mm_sig);
+		// nt11_ee_tot->Add(nt11_ee_sig);
+		// nt11_em_tot->Add(nt11_em_sig);
+
+		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
+		if(j==4 || j==8 || j==10) ytitle = "Events";
+		nt11_tot->Draw("goff");
+		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_tot->GetYaxis()->SetTitle(ytitle);
+		nt11_mm_tot->Draw("goff");
+		nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
+		nt11_ee_tot->Draw("goff");
+		nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
+		nt11_em_tot->Draw("goff");
+		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_em_tot->GetYaxis()->SetTitle(ytitle);
+
+		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
+		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
+		nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum());
+		nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum());
+
+		double max = nt11->Integral();
+		nt11    ->SetMaximum(max>1?max+1:1.);
+		nt11_sf ->SetMaximum(max>1?max+1:1.);
+		nt11_df ->SetMaximum(max>1?max+1:1.);
+		nt11_cm ->SetMaximum(max>1?max+1:1.);
+		nt11_ss ->SetMaximum(max>1?max+1:1.);
+		nt11_wz ->SetMaximum(max>1?max+1:1.);
+		nt11_tot->SetMaximum(max>1?max+1:1.);
+
+		double max_mm = nt11_mm->Integral();
+		nt11_mm    ->SetMaximum(max_mm>1?max_mm+1:1.);
+		nt11_mm_sf ->SetMaximum(max_mm>1?max_mm+1:1.);
+		nt11_mm_df ->SetMaximum(max_mm>1?max_mm+1:1.);
+		nt11_mm_ss ->SetMaximum(max_mm>1?max_mm+1:1.);
+		nt11_mm_wz ->SetMaximum(max_mm>1?max_mm+1:1.);
+		nt11_mm_tot->SetMaximum(max_mm>1?max_mm+1:1.);
+
+		double max_ee = nt11_ee->Integral();
+		nt11_ee    ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_sf ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_df ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_cm ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_ss ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_wz ->SetMaximum(max_ee>1?max_ee+1:1.);
+		nt11_ee_tot->SetMaximum(max_ee>1?max_ee+1:1.);
+
+		double max_em = nt11_em->Integral();
+		nt11_em    ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_sf ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_df ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_cm ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_wz ->SetMaximum(max_em>1?max_em+1:1.);
+		nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
+		
+		fOutputSubDir = "DiffPredictionPlots/";
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg = new TLegend(0.60,0.65,0.90,0.88);
+		leg->AddEntry(nt11,    "Observed","p");
+		leg->AddEntry(nt11_sf, "Single Fakes","f");
+		leg->AddEntry(nt11_df, "Double Fakes","f");
+		leg->AddEntry(nt11_ss, "Irreducible (MC)","f");
+		leg->AddEntry(nt11_wz, "WZ Production (MC)","f");
+		leg->AddEntry(nt11_cm, "Charge MisID","f");
+		leg->AddEntry(totbg,   "Total Uncertainty","f");
+		// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetBorderSize(0);
+		
+		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp->cd();
+		gPad->SetLogy();
+		
+		nt11_tot->Draw("hist");
+		// nt11_error->DrawCopy("X0 E1 same");
+		nt11->DrawCopy("PE X0 same");
+		totbg->DrawCopy("0 E2 same");
+		// nt11_sig->DrawCopy("hist same");
+		leg->Draw();
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
+		drawDiffCuts(j);
+		drawTopLine();
+		
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
+		gPad->SetLogy(0);
+		float minopt, maxopt;
+		vector<TH1D*> histvec;
+		histvec.push_back(nt11);
+		histvec.push_back(totbg);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_tot->SetMinimum(0);
+		nt11_tot->SetMaximum(maxopt);
+		Util::PrintPDF(c_temp, "ObsPred_" + varname + "_lin", fOutputDir + fOutputSubDir + "lin/");
+
+		fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_mm = new TLegend(0.60,0.67,0.90,0.88);
+		leg_mm->AddEntry(nt11_mm,    "Observed","p");
+		leg_mm->AddEntry(nt11_mm_sf, "Single Fakes","f");
+		leg_mm->AddEntry(nt11_mm_df, "Double Fakes","f");
+		leg_mm->AddEntry(nt11_mm_ss, "Irreducible (MC)","f");
+		leg_mm->AddEntry(totbg_mm,   "Total Uncertainty","f");
+		// leg_mm->AddEntry(nt11_mm_sig,fSamples[sigsam]->sname,"l");
+		leg_mm->SetFillStyle(0);
+		leg_mm->SetTextFont(42);
+		leg_mm->SetBorderSize(0);
+		
+		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp->cd();
+		gPad->SetLogy();
+		
+		nt11_mm_tot->Draw("hist");
+		// nt11_error->DrawCopy("X0 E1 same");
+		nt11_mm->DrawCopy("PE X0 same");
+		totbg_mm->DrawCopy("0 E2 same");
+		// nt11_mm_sig->DrawCopy("hist same");
+		leg_mm->Draw();
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "#mu#mu");
+		drawDiffCuts(j);
+		drawTopLine();
+		
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_mm);
+		histvec.push_back(totbg_mm);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_mm_tot->SetMinimum(0);
+		nt11_mm_tot->SetMaximum(maxopt);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_ee = new TLegend(0.60,0.67,0.90,0.88);
+		leg_ee->AddEntry(nt11_ee,    "Observed","p");
+		leg_ee->AddEntry(nt11_ee_sf, "Single Fakes","f");
+		leg_ee->AddEntry(nt11_ee_df, "Double Fakes","f");
+		leg_ee->AddEntry(nt11_ee_ss, "Irreducible (MC)","f");
+		leg_ee->AddEntry(nt11_ee_cm, "Charge MisID","f");
+		leg_ee->AddEntry(totbg_ee,   "Total Uncertainty","f");
+		// leg_mm->AddEntry(nt11_ee_sig,fSamples[sigsam]->sname,"l");
+		leg_ee->SetFillStyle(0);
+		leg_ee->SetTextFont(42);
+		leg_ee->SetBorderSize(0);
+		
+		c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp->cd();
+		gPad->SetLogy();
+		
+		nt11_ee_tot->Draw("hist");
+		// nt11_error->DrawCopy("X0 E1 same");
+		nt11_ee->DrawCopy("PE X0 same");
+		totbg_ee->DrawCopy("0 E2 same");
+		// nt11_ee_sig->DrawCopy("hist same");
+		leg_ee->Draw();
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "ee");
+		drawDiffCuts(j);
+		drawTopLine();
+		
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_ee);
+		histvec.push_back(totbg_ee);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_ee_tot->SetMinimum(0);
+		nt11_ee_tot->SetMaximum(maxopt);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_em = new TLegend(0.60,0.67,0.90,0.88);
+		leg_em->AddEntry(nt11_em,    "Observed","p");
+		leg_em->AddEntry(nt11_em_sf, "Single Fakes","f");
+		leg_em->AddEntry(nt11_em_df, "Double Fakes","f");
+		leg_em->AddEntry(nt11_em_ss, "Irreducible (MC)","f");
+		leg_em->AddEntry(nt11_em_cm, "Charge MisID","f");
+		leg_em->AddEntry(totbg_em,   "Total Uncertainty","f");
+		// leg_mm->AddEntry(nt11_em_sig,fSamples[sigsam]->sname,"l");
+		leg_em->SetFillStyle(0);
+		leg_em->SetTextFont(42);
+		leg_em->SetBorderSize(0);
+		
+		c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp->cd();
+		gPad->SetLogy();
+		
+		nt11_em_tot->Draw("hist");
+		totbg_em->DrawCopy("0 E2 same");
+		nt11_em->DrawCopy("PE X0 same");
+		// nt11_em_sig->DrawCopy("hist same");
+		leg_em->Draw();
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "e#mu");
+		drawDiffCuts(j);
+		drawTopLine();
+		
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_em);
+		histvec.push_back(totbg_em);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_em_tot->SetMinimum(0);
+		nt11_em_tot->SetMaximum(maxopt);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+		// Cleanup
+		delete c_temp, leg, leg_mm, leg_em, leg_ee;
+		delete nt11, nt11_mm, nt11_ee, nt11_em;
+		//		delete nt11_sig, nt11_mm_sig, nt11_ee_sig, nt11_em_sig;
+		delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
+		delete nt2_os_ee_bb, nt2_os_ee_eb, nt2_os_ee_ee, nt2_os_em_bb, nt2_os_em_ee;
+		delete nt11_ss, nt11_mm_ss, nt11_em_ss, nt11_ee_ss;
+		delete nt11_wz, nt11_mm_wz, nt11_em_wz, nt11_ee_wz;
+		delete nt11_sf, nt11_mm_sf, nt11_em_sf, nt11_ee_sf;
+		delete nt11_df, nt11_mm_df, nt11_em_df, nt11_ee_df;
+		delete nt11_cm, nt11_em_cm, nt11_ee_cm;
+		// delete nt11_mc, nt11_mm_mc, nt11_ee_mc, nt11_em_mc;
+		delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
+		delete totbg, totbg_mm, totbg_em, totbg_ee;
+	}
+	fOutputSubDir = "";
+}
 
 // MARC void SSDLPlotter::makeTTWDiffPredictions(){
 // MARC 	for(size_t i = 0; i < gNDiffVars; ++i){

@@ -153,7 +153,7 @@ public:
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
 
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
-	// MARC void makeDiffPrediction();
+        void makeDiffPrediction();
 	// MARC void makeTTWDiffPredictions();
 	void makeDiffPredictionTTW(int);
 
@@ -161,7 +161,7 @@ public:
 	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
 
 	void makeTTbarClosure();
-	// MARC void makeRelIsoTTSigPlots();
+        void makeRelIsoTTSigPlots();
 	
 	void storeWeightedPred();
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only
