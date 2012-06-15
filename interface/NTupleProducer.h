@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.21 2012/05/21 17:14:46 paktinat Exp $
+// $Id: NTupleProducer.h,v 1.114.2.22 2012/05/30 14:38:14 mdunser Exp $
 //
 //
 
@@ -71,6 +71,7 @@
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/LeptonFillerPat.h"
+#include "DiLeptonAnalysis/NTupleProducer/interface/PFFiller.h"
 
 #include "h2gglobe/VertexAnalysis/interface/HggVertexFromConversions.h"
 #include "h2gglobe/VertexAnalysis/interface/PhotonInfo.h"
@@ -149,6 +150,7 @@ private:
   std::vector<PatMuonFiller*>     muonFillers;
   std::vector<PatElectronFiller*> electronFillers;
   std::vector<PatTauFiller*>      tauFillers;
+  std::vector<PFFiller*>          pfFillers;
 
   bool fIsRealData;
   bool fIsModelScan;

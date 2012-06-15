@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.26 2012/05/21 17:14:56 paktinat Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.27 2012/05/30 14:38:14 mdunser Exp $
 //
 //
 
@@ -259,7 +259,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     else if ( type == "tau" ) 
       tauFillers.push_back( new PatTauFiller(lConfigs[i], fIsRealData) );
    }
-        
+
+  // Create PF candidate fillers
+  std::vector<edm::ParameterSet> pfConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("pfCandidates");
+  for (size_t i=0; i<pfConfigs.size(); ++i) pfFillers.push_back( new PFFiller(pfConfigs[i], fIsRealData) );
 
   // Get list of trigger paths to store the triggering object info. of
   //std::vector<std::string> v(iConfig.getParameter<std::vector<std::string> >("hlt_labels"));
@@ -303,6 +306,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     for ( PPI ip = list.begin();  ip != list.end(); ++ip )
       produces<edm::InEvent>( ip->first, ip->second );
   }
+  for ( std::vector<PFFiller*>::iterator it = pfFillers.begin(); 
+        it != pfFillers.end(); ++it ) {
+    list = (*it)->declareProducts();
+    for ( PPI ip = list.begin();  ip != list.end(); ++ip )
+      produces<edm::InEvent>( ip->first, ip->second );
+  }
 
 }
 
@@ -342,6 +351,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     (*it)->resetProducts();
   for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
         it != tauFillers.end(); ++it ) 
+    (*it)->resetProducts();
+  for ( std::vector<PFFiller*>::iterator it = pfFillers.begin(); 
+        it != pfFillers.end(); ++it ) 
     (*it)->resetProducts();
 
 
@@ -3294,6 +3306,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
         it != tauFillers.end(); ++it ) 
     (*it)->fillProducts(iEvent,iSetup);
+  for ( std::vector<PFFiller*>::iterator it = pfFillers.begin(); 
+        it != pfFillers.end(); ++it ) 
+    (*it)->fillProducts(iEvent,iSetup);
   
   ///////////////////////////////////////////////////////////////////////////////
   // Fill Tree //////////////////////////////////////////////////////////////////
@@ -3309,6 +3324,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     (*it)->putProducts(iEvent);
   for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
         it != tauFillers.end(); ++it ) 
+    (*it)->putProducts(iEvent);
+  for ( std::vector<PFFiller*>::iterator it = pfFillers.begin(); 
+        it != pfFillers.end(); ++it ) 
     (*it)->putProducts(iEvent);
   
   fNFillTree++;

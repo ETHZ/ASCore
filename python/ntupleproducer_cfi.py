@@ -100,6 +100,7 @@ analyze = cms.EDFilter('NTupleProducer',
 	# Additional collections
 	jets    = cms.VPSet(),
         leptons = cms.VPSet(),
+        pfCandidates = cms.VPSet(),
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
 	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')

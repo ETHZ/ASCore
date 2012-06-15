@@ -93,7 +93,7 @@ process.ModelScan = cms.untracked.PSet( input = cms.untracked.bool(options.Model
 # Output
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
-                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+                               #SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
                                splitLevel = cms.untracked.int32(99),  # Turn on split level (smaller files???)
                                dropMetaData = cms.untracked.string('ALL'), # Get rid of metadata related to dropped collections
                                outputCommands = cms.untracked.vstring() # Will be overwritten by PAT: we overwrite at the end
@@ -214,7 +214,16 @@ process.analyze.jets = (
                sel_maxeta = process.analyze.sel_maxjeta,
                corrections = cms.string('ak5CaloL2L3'),
                ), )
+# Add PF candidates
+process.analyze.pfCandidates = (
+     cms.PSet( prefix = cms.string('PFC'),
+     tag = cms.InputTag('particleFlow'),
+     sel_minpt = cms.double(5.0),
+     sel_maxeta = cms.double(5.0), # Not actually used
+     ),
+)
 
+# Add taus
 process.analyze.leptons = (
     cms.PSet( type = cms.string('tau'),
               prefix = cms.string('Tau'),
