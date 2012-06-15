@@ -218,8 +218,6 @@ void SSDLDumper::init(){
 
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
-
-	runlist = new GoodRunList("/shome/mdunser/jsons/Cert_190456-195396_8TeV_PromptReco_Collisions12_JSON_v2.txt");
 }
 
 void SSDLDumper::readDatacard(TString cardfile){
@@ -340,9 +338,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
 		// if(jentry > 10000) break;
 		/////////////////////////////////////////////
-		if (S->datamc == 0) 
-		  if (!runlist->CheckRunLumi(Run, LumiSec)) continue;
-		
+
 		/////////////////////////////////////////////
 		// Event modifications
 		// MARC how come this function is called here..?? scaleBTags(S, 0);

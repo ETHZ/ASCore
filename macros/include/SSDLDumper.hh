@@ -9,7 +9,6 @@
 #include "helper/AnaClass.hh"
 #include "helper/Monitor.hh"
 #include "helper/BTagSFUtil/BTagSFUtil.h"
-#include "helper/GoodRunList.h"
 
 #include "TLorentzVector.h"
 
@@ -853,8 +852,6 @@ public:
 	TRandom3 *fRand3;
 	
 	bool isTChiSlepSnu;
-        GoodRunList *runlist;  
-
 	private:
 	
 	Monitor fCounter[3];	
