@@ -810,14 +810,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(mumuSignalTrigger()){ // Trigger selection
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		if(isSSLLMuEvent(mu1, mu2)){
 			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
 			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
@@ -840,7 +840,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
@@ -855,14 +855,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elelSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
@@ -885,7 +885,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
@@ -900,14 +900,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
@@ -936,7 +936,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
@@ -955,14 +955,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
@@ -985,7 +985,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
@@ -999,14 +999,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
@@ -1035,7 +1035,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(Baseline);
+		setRegionCuts(HT80MET30);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
