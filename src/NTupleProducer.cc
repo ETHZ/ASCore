@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.2 2012/06/08 15:07:54 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.3 2012/06/12 13:09:33 chanon Exp $
 //
 //
 
@@ -1709,6 +1709,35 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		fTnEBhits++;
 	}
+
+
+
+
+
+	////////////////////////////////////////////////////////
+	// PfCandidates Variables:
+
+
+	int pfcandIndex(0);
+	for( reco::PFCandidateCollection::const_iterator ip = pfCandidates->begin();
+	     ip != pfCandidates->end(); ++ip, ++pfcandIndex ){
+	  
+	  fTPfCandPdgId[pfcandIndex] = ip->pdgId();
+	  fTPfCandEta[pfcandIndex] = ip->eta();
+	  fTPfCandPhi[pfcandIndex] = ip->phi();
+	  fTPfCandPx[pfcandIndex] = ip->px();
+	  fTPfCandPy[pfcandIndex] = ip->py();
+	  fTPfCandPz[pfcandIndex] = ip->pz();	  
+	  fTPfCandEnergy[pfcandIndex] = ip->energy();
+	  fTPfCandPt[pfcandIndex] = ip->pt();
+	  fTPfCandVx[pfcandIndex] = ip->vx();
+	  fTPfCandVy[pfcandIndex] = ip->vy();
+	  fTPfCandVz[pfcandIndex] = ip->vz();
+
+	}
+
+
+
 
 
 
@@ -3702,6 +3731,20 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElGenGMEta"                  ,&fTGenElGMEta      ,"ElGenGMEta[NEles]/F");
 	fEventTree->Branch("ElGenGMPhi"                  ,&fTGenElGMPhi      ,"ElGenGMPhi[NEles]/F");
 	fEventTree->Branch("ElGenGME"                    ,&fTGenElGME        ,"ElGenGME[NEles]/F");
+
+	//PfCandidates:
+	fEventTree->Branch("fTPfCandPdgId"                 ,&fTPfCandPdgId     ,"fTPfCandPdgId[NPfCand]/F");
+	fEventTree->Branch("fTPfCandEta"                   ,&fTPfCandEta       ,"fTPfCandEta[NPfCand]/F");
+	fEventTree->Branch("fTPfCandPhi"                   ,&fTPfCandPhi       ,"fTPfCandPhi[NPfCand]/F");
+	fEventTree->Branch("fTPfCandPx"                    ,&fTPfCandPx        ,"fTPfCandPx[NPfCand]/F");
+	fEventTree->Branch("fTPfCandPy"                    ,&fTPfCandPy        ,"fTPfCandPy[NPfCand]/F");
+	fEventTree->Branch("fTPfCandPz"                    ,&fTPfCandPz        ,"fTPfCandPz[NPfCand]/F");
+	fEventTree->Branch("fTPfCandEnergy"                ,&fTPfCandEnergy    ,"fTPfCandEnergy[NPfCand]/F");
+	fEventTree->Branch("fTPfCandPt"                    ,&fTPfCandPt        ,"fTPfCandPt[NPfCand]/F");
+	fEventTree->Branch("fTPfCandVx"                    ,&fTPfCandVx        ,"fTPfCandVx[NPfCand]/F");
+	fEventTree->Branch("fTPfCandVy"                    ,&fTPfCandVy        ,"fTPfCandVy[NPfCand]/F");
+	fEventTree->Branch("fTPfCandVz"                    ,&fTPfCandVz        ,"fTPfCandVz[NPfCand]/F");
+
 
 	// Photons:
 	fEventTree->Branch("NPhotons"         ,&fTnphotons          ,"NPhotons/I");

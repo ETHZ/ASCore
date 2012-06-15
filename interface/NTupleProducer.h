@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.2 2012/06/08 15:07:54 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.3 2012/06/12 13:09:33 chanon Exp $
 //
 //
 
@@ -195,6 +195,7 @@ private:
 	static const int gMaxnEBhits  = 20;
         static const int gMaxngenvtx = 60;
         static const int nStoredGenParticles = 2000;
+        static const int gMaxnpfcand = 2000;
 
   static const int gMax_vertexing_diphoton_pairs = 10;
   static const int gMax_vertexing_vtxes = 5;
@@ -741,6 +742,19 @@ private:
 	float fTGenElGMEta[gMaxneles];
 	float fTGenElGMPhi[gMaxneles];
 	float fTGenElGME[gMaxneles];
+
+  //PfCand
+  float  fTPfCandPdgId[gMaxnpfcand];
+  float  fTPfCandEta[gMaxnpfcand];
+  float  fTPfCandPhi[gMaxnpfcand];
+  float  fTPfCandPx[gMaxnpfcand];
+  float  fTPfCandPy[gMaxnpfcand];
+  float  fTPfCandPz[gMaxnpfcand];  
+  float  fTPfCandEnergy[gMaxnpfcand];
+  float  fTPfCandPt[gMaxnpfcand];
+  float  fTPfCandVx[gMaxnpfcand];
+  float  fTPfCandVy[gMaxnpfcand];
+  float  fTPfCandVz[gMaxnpfcand];
 
 // Photons:
 	int fTnphotons;
