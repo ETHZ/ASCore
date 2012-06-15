@@ -3073,15 +3073,17 @@ float SSDLDumper::singleMuPrescale(){
 bool SSDLDumper::singleElTrigger(){
   // Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return ((HLT_ELE8_JET30 > 0) || (HLT_ELE8_JET30_TIGHT > 0) ||
-		(HLT_ELE8 > 0) || (HLT_ELE17 > 0));
+	return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
   if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	if( HLT_ELE8_JET30_PS > 0 ) return HLT_ELE8_JET30_PS;
+	if( HLT_ELE17_JET30_TIGHT_PS > 0 ) return HLT_ELE8_JET30_PS;
+	if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_PS;
+	if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE8_JET30_PS;
+	if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_JET30_PS;
 	return 1.;
 }
 
@@ -4458,29 +4460,30 @@ bool SSDLDumper::isGoodEleForTTZ(int ele, float pt){
 }
 bool SSDLDumper::isLooseElectron(int ele){
 	if(isGoodElectron(ele) == false) return false;
-	if(ElPFIso[ele] > 0.60) return false;
+	if(ElPFIso[ele] > 1.0) return false;
 	if(ElChIsCons[ele] != 1) return false;
 	
 	// Additional cuts for CaloIsoVL and TrkIsoVL
-	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+	// if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	// if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	// if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
 
 	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	
 	// Additional cuts for CaloIdVL and TrkIdVL:
-	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
-		if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
-		if(ElSigmaIetaIeta[ele]  > 0.01) return false; // CaloIdT
-		if(fabs(ElDPhi    [ele]) > 0.15)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.007)  return false; // TrkIdVL // this is looser than WP90
-	}
-	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
-		if(ElHoverE[ele] > 0.075)        return false; // MARC CaloIdT, what about tight??
-		if(ElSigmaIetaIeta[ele]  > 0.03) return false; // CaloIdT
-		if(fabs(ElDPhi    [ele]) > 0.10)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.009)  return false; // TrkIdVL // this is looser than WP90
-	}
+	// if(ElIsGoodTriggerEl[ele] != 1) return false;
+	// if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
+	// 	if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
+	// 	if(ElSigmaIetaIeta[ele]  > 0.01) return false; // CaloIdT
+	// 	if(fabs(ElDPhi    [ele]) > 0.15)  return false; // TrkIdVL
+	// 	if(fabs(ElDEta    [ele]) > 0.007)  return false; // TrkIdVL // this is looser than WP90
+	// }
+	// if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
+	// 	if(ElHoverE[ele] > 0.075)        return false; // MARC CaloIdT, what about tight??
+	// 	if(ElSigmaIetaIeta[ele]  > 0.03) return false; // CaloIdT
+	// 	if(fabs(ElDPhi    [ele]) > 0.10)  return false; // TrkIdVL
+	// 	if(fabs(ElDEta    [ele]) > 0.009)  return false; // TrkIdVL // this is looser than WP90
+	// }
 	return true;
 }
 bool SSDLDumper::isTightElectron(int ele){

@@ -79,6 +79,7 @@ public:
 
     // Electron Selectors
     virtual bool IsGoodBasicEl(int);
+    virtual bool IsGoodTriggerEl(int);
     virtual bool IsGoodElId_MediumWP(int);
     virtual bool IsGoodElId_LooseWP(int);
     virtual bool ElPassesConvRej(int);

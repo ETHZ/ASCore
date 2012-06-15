@@ -234,6 +234,7 @@ void SSDLAnalysis::BookTree(){
 	// MARC fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_LooseWP",      &fTElIsGoodElId_LooseWP,   "ElIsGoodElId_LooseWP[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_MediumWP",     &fTElIsGoodElId_MediumWP,  "ElIsGoodElId_MediumWP[NEls]/I");
+	fAnalysisTree->Branch("ElIsGoodTriggerEl",     &fTElIsGoodTriggerEl,  "ElIsGoodTrigger[NEls]/I");
 	fAnalysisTree->Branch("ElGenID",                &fTElGenID,             "ElGenID[NEls]/I");
 	fAnalysisTree->Branch("ElGenMID",               &fTElGenMID,            "ElGenMID[NEls]/I");
 	fAnalysisTree->Branch("ElGenGMID",              &fTElGenGMID,           "ElGenGMID[NEls]/I");
@@ -489,10 +490,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTElHoverE         [ind] = fTR->ElHcalOverEcal             [elindex];
 		fTElEPthing          [ind] = fabs(1/fTR->ElCaloEnergy[elindex] - fTR->ElESuperClusterOverP[elindex]/fTR->ElCaloEnergy[elindex]);
 		
-		// MARC fTElIsGoodElId_WP80[ind] = IsGoodElId_WP80(elindex);
-		// MARC fTElIsGoodElId_WP90[ind] = IsGoodElId_WP90(elindex);
 		fTElIsGoodElId_LooseWP [ind] = IsGoodElId_LooseWP (elindex);
 		fTElIsGoodElId_MediumWP[ind] = IsGoodElId_MediumWP(elindex);
+		fTElIsGoodTriggerEl    [ind] = IsGoodTriggerEl    (elindex);
 	}
 
 	fAnalysisTree->Fill();
@@ -620,6 +620,7 @@ void SSDLAnalysis::ResetTree(){
 		fTElEPthing           [i] = -999.99;
 		fTElIsGoodElId_LooseWP [i] = -999;
 		fTElIsGoodElId_MediumWP[i] = -999;
+		fTElIsGoodTriggerEl    [i] = -999;
 		fTElMT              [i] = -999.99;
 		fTElGenID           [i] = -999;
 		fTElGenMID          [i] = -999;

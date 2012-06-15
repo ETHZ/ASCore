@@ -180,6 +180,7 @@ private:
 	// MARC int   fTElIsGoodElId_WP90[fMaxNeles];
 	int   fTElIsGoodElId_LooseWP[fMaxNeles];
 	int   fTElIsGoodElId_MediumWP[fMaxNeles];
+	int   fTElIsGoodTriggerEl[fMaxNeles];
 	float fTElMT             [fMaxNeles];
 	int   fTElGenID          [fMaxNeles];
 	int   fTElGenMID         [fMaxNeles];

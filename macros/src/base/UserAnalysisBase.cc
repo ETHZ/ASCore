@@ -385,6 +385,31 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
     return true;
 }
 
+bool UserAnalysisBase::IsGoodTriggerEl(int index){
+    // Electrons with Veto WP (corresponds to WP 95 from 2011)
+    // if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
+    if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+        if(fTR->ElSigmaIetaIeta            [index] > 0.011 ) return false;
+        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.15 ) return false;
+        if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.01) return false;
+        if(fTR->ElHcalOverEcal             [index] > 0.10 ) return false;	
+    }
+    if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
+        if(fTR->ElSigmaIetaIeta            [index] > 0.031 ) return false;
+        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.10 ) return false;
+        if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.01 ) return false;
+        if(fTR->ElHcalOverEcal             [index] > 0.075 ) return false;	
+    }
+	
+    // ECAL gap veto
+    if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
+
+    // if(fabs(fTR->ElD0PV[index]) > 0.04) return false;
+    // if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
+
+    return true;
+}
+
 bool UserAnalysisBase::ElPassesConvRej(int index){
     // if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
     // if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
