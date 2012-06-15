@@ -376,6 +376,9 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		// marcs try on the b-tag scale factors:
 		if( S->datamc!=0 ) {
+			bool isFastsim = false;
+			if (S->datamc == 3) isFastsim = true;
+			// if (isFastsim) cout << "Sample name, should be only fastsim samples: " << S->sname << endl;
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
 			float myweight1(1.), myweight2(1.);
@@ -391,15 +394,15 @@ void SSDLDumper::loopEvents(Sample *S){
 					cout << endl;
 				}
 				if (nbtags == 2) {
-					myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]));
+					myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]), isFastsim);
 				}
 				if (nbtags == 3) {
-					myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]));
-					myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]));
+					myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
+					myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
 				}
 				if (nbtags  > 3) {
-					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
-					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
+					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
+					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
 				}
 				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 2 btags in region: " << myweight1 << endl << endl;
 				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 3 btags in region: " << myweight2 << endl << endl;
@@ -3080,10 +3083,10 @@ float SSDLDumper::singleElPrescale(){
   if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	if( HLT_ELE17_JET30_TIGHT_PS > 0 ) return HLT_ELE8_JET30_PS;
-	if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_PS;
-	if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE8_JET30_PS;
-	if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_JET30_PS;
+	if( HLT_ELE17_JET30_TIGHT_PS > 0 ) return HLT_ELE17_JET30_TIGHT_PS;
+	if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_TIGHT_PS;
+	if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE17_TIGHT_PS;
+	if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_TIGHT_PS;
 	return 1.;
 }
 

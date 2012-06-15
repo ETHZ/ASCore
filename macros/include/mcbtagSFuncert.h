@@ -1,8 +1,13 @@
 #ifndef MCBTAGSFUNCERT_H
 #define MCBTAGSFUNCERT_H
 
-double btagScaleFactor(double jetpt, std::string algo = "CSVM");
-double btagScaleFactorError(double jetpt, std::string algo = "CSVM");
+enum SMSFastSim {
+  SMS_None = 0,
+  SMS_T1tttt = 1
+};
+// if useFastSim is enabled, follow prescription at https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2011_FastSim_Correction_Factors
+double btagScaleFactor(double jetpt, std::string algo = "CSVM", bool useFastSim = false);
+double btagScaleFactorError(double jetpt, std::string algo = "CSVM", bool useFastSim = false, SMSFastSim systType  = SMS_None);
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -34,8 +39,7 @@ double btagEff(double jetpt);
 // pt4    = pt of the fourth btegged jet
 // (note: these do not need to be truth matched)
 // Returns a negative number if something goes wrong
-double btagEventWeight(int nbjets, double pt1, double pt2, double pt3=0., double pt4=0.);
-
+double btagEventWeight(int nbjets, double pt1, double pt2, double pt3=0., double pt4=0., bool useFastSim = false);
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
@@ -52,7 +56,7 @@ double btagEventWeight(int nbjets, double pt1, double pt2, double pt3=0., double
 // eta2   = eta of the second b quark
 // eta3   = eta of the third  b quark
 // eta4   = eta of the fourth b quark
-double btagEventUncertainty(int nbjets, double pt1, double eta1, double pt2, double eta2, double pt3=0., double eta3=0., double pt4=0., double eta4=0.);
+double btagEventUncertainty(int nbjets, double pt1, double eta1, double pt2, double eta2, double pt3=0., double eta3=0., double pt4=0., double eta4=0., bool useFastSim = false, SMSFastSim systType = SMS_None);
 
 //------------------------------------------------------------------------
 // Here comes btagEventWeight3
@@ -66,7 +70,8 @@ double btagEventUncertainty(int nbjets, double pt1, double eta1, double pt2, dou
 // pt4    = pt of the fourth btegged jet
 // (note: these do not need to be truth matched)
 // Returns a negative number if something goes wrong
-double btagEventWeight3(int nbjets, double pt1, double pt2, double pt3, double pt4=0.);
+double btagEventWeight3(int nbjets, double pt1, double pt2, double pt3, double pt4=0., 
+			bool useFastSim = false);
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
@@ -81,6 +86,7 @@ double btagEventWeight3(int nbjets, double pt1, double pt2, double pt3, double p
 // eta2   = eta of the second b quark
 // eta3   = eta of the third  b quark
 // eta4   = eta of the fourth b quark
-double btagEventUncertainty3(int nbjets, double pt1, double eta1, double pt2, double eta2, double pt3, double eta3, double pt4=0., double eta4=0.);
+double btagEventUncertainty3(int nbjets, double pt1, double eta1, double pt2, double eta2, double pt3, double eta3, double pt4=0., double eta4=0.,
+			     bool useFastSim = false, SMSFastSim systType = SMS_None);
 
 #endif
