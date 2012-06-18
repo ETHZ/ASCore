@@ -487,7 +487,7 @@ float UserAnalysisBase::Aeff(float eta) {
 
 float UserAnalysisBase::ElPFIso(int index){
 	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
-	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElEta[index]);
+	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[index]);
     double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
     return iso;
 }
