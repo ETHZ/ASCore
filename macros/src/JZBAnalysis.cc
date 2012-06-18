@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.37 $";
+string sjzbversion="$Revision: 1.70.2.38 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.37 2012/06/11 09:21:32 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.38 2012/06/13 16:00:25 buchmann Exp $
 */
 
 
@@ -951,7 +951,7 @@ void JZBAnalysis::Analyze() {
       } else {
 	//don't attempt to do PURW for model scans
 	nEvent.PUweight   = GetPUWeight(fTR->PUnumTrueInteractions);
-	nEvent.weight     = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.weight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	weight_histo->Fill(1,nEvent.PUweight);
       }
       
