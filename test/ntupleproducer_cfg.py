@@ -55,7 +55,7 @@ options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.ro
 #options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
-options.maxEvents = 100# If it is different from -1, string "_numEventXX" will be added to the output file name 
+options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_52X_'+options.runon+'.root'
