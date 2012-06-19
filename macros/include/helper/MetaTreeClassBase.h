@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri May 11 10:17:29 2012 by ROOT version 5.27/06b
+// Tue Jun 19 14:59:39 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -120,6 +120,7 @@ public :
    Float_t         JetPt[40];   //[NJets]
    Float_t         JetEta[40];   //[NJets]
    Float_t         JetPhi[40];   //[NJets]
+   Float_t         JetEnergy[40];   //[NJets]
    Float_t         JetSSVHPBTag[40];   //[NJets]
    Float_t         JetSSVHEBTag[40];   //[NJets]
    Float_t         JetTCHPBTag[40];   //[NJets]
@@ -234,6 +235,7 @@ public :
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
+   TBranch        *b_JetEnergy;   //!
    TBranch        *b_JetSSVHPBTag;   //!
    TBranch        *b_JetSSVHEBTag;   //!
    TBranch        *b_JetTCHPBTag;   //!
@@ -264,9 +266,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -419,6 +421,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+   fChain->SetBranchAddress("JetEnergy", JetEnergy, &b_JetEnergy);
    fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
    fChain->SetBranchAddress("JetSSVHEBTag", JetSSVHEBTag, &b_JetSSVHEBTag);
    fChain->SetBranchAddress("JetTCHPBTag", JetTCHPBTag, &b_JetTCHPBTag);

@@ -115,6 +115,7 @@ private:
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
+	float fTJetenergy[fMaxNjets];
 	float fTJetbtag1[fMaxNjets]; // SSVHP tight WP: > 2.
 	float fTJetbtag2[fMaxNjets]; // SSVHE
 	float fTJetbtag3[fMaxNjets]; // TCHP

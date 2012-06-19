@@ -241,6 +241,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetPt",         &fTJetpt,       "JetPt[NJets]/F");
 	fAnalysisTree->Branch("JetEta",        &fTJeteta,      "JetEta[NJets]/F");
 	fAnalysisTree->Branch("JetPhi",        &fTJetphi,      "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,   "JetEnergy[NJets]/F");
 	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1,    "JetSSVHPBTag[NJets]/F");
 	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2,    "JetSSVHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
@@ -337,6 +338,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetpt      [ind] = fTR->JPt[jetindex];
 		fTJeteta     [ind] = fTR->JEta[jetindex];
 		fTJetphi     [ind] = fTR->JPhi[jetindex];
+		fTJetenergy  [ind] = fTR->JE[jetindex];
 		fTJetbtag1   [ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
 		fTJetbtag2   [ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
 		fTJetbtag3   [ind] = fTR->JbTagProbTkCntHighPur[jetindex];
@@ -605,6 +607,7 @@ void SSDLAnalysis::ResetTree(){
 		fTJetpt [i]       = -999.99;
 		fTJeteta[i]       = -999.99;
 		fTJetphi[i]       = -999.99;
+		fTJetenergy[i]    = -999.99;
 		fTJetbtag1[i]     = -999.99;
 		fTJetbtag2[i]     = -999.99;
 		fTJetbtag3[i]     = -999.99;
@@ -771,7 +774,7 @@ int SSDLAnalysis::JetPartonMatch(int index){
 
 	////////////////////////////
 	////////////////////////////
-	//return -2;
+	// return -2;
 	////////////////////////////
 	////////////////////////////
 
