@@ -82,7 +82,8 @@ void SSDLPlotter::init(TString filename){
 	if(fVerbose > 0) cout << "Initializing SSDLPlotter ... " << endl;
 	Util::SetStyle();
 	gStyle->SetOptStat(0);
-	
+	gStyle->SetPadTickY(1);
+	gStyle->SetPadTickX(1);	
 
 	readDatacard(filename);
 
@@ -335,7 +336,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeDiffPrediction();
 
 	makeTTWIntPredictions();
-	// makeTTWDiffPredictions();
+	makeTTWDiffPredictions();
 
 	// printAllYieldTables();
 	
@@ -3338,8 +3339,8 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
-	// TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
+	//TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
 	leg->AddEntry(hmetvsht_da_ee, "ee","p");
 	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
@@ -3351,9 +3352,9 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 ///////////// FROM SIGEVENTS TREE
 
 	// TGraphs:
-	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 0);
-	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 0);
-	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 0);
+	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 1);
+	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 1);
+	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 1);
 	// TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, HT0MET120);
 	// TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, HT0MET120);
 	// TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, HT0MET120);
@@ -3475,9 +3476,9 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 
 	hmetvsht_da_mm->DrawCopy("axis");
 
-	gmetvsht_da_mm_ex->Draw("P");
-	gmetvsht_da_ee_ex->Draw("P");
-	gmetvsht_da_em_ex->Draw("P");
+	//gmetvsht_da_mm_ex->Draw("P");
+	//gmetvsht_da_ee_ex->Draw("P");
+	//gmetvsht_da_em_ex->Draw("P");
 
 	lowhtbox ->Draw();
 	lowmetbox->Draw();
@@ -3491,11 +3492,11 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
-	// gmetvsht_da_mt->Draw("P");
-	// gmetvsht_da_et->Draw("P");
+	gmetvsht_da_mt->Draw("P");
+	gmetvsht_da_et->Draw("P");
 	
 	leg->Draw();
-	// leg2->Draw();
+	leg2->Draw();
 	regleg->Draw();
 
 	drawTopLine(0.55);
@@ -3511,8 +3512,8 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gPad->RedrawAxis();
 
 	// Util::PrintPDF(c_temp, "HTvsMET_NoHT", fOutputDir + fOutputSubDir);
-	Util::PrintPDF(c_temp, "HTvsMET_NoHT_3V", fOutputDir + fOutputSubDir);
-	// Util::PrintPDF(c_temp, "HTvsMET_NoHT_Tau", fOutputDir + fOutputSubDir);
+	//	Util::PrintPDF(c_temp, "HTvsMET_NoHT_3V", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, "HTvsMET_NoHT_Tau", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
@@ -6648,9 +6649,9 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	TH1D    *h_obs        = new TH1D("h_observed",      "Observed number of events",  4, 0., 4.);
-	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake",    "Predicted single fakes",     4, 0., 4.);
-	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake",    "Predicted double fakes",     4, 0., 4.);
+	TH1D    *h_pred_sfake = new TH1D("h_pred_fakes",    "Predicted fakes",            4, 0., 4.);
 	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid",    "Predicted charge mis id",    4, 0., 4.);
+	TH1D    *h_pred_wz    = new TH1D("h_pred_wz",       "Predicted WZ",               4, 0., 4.);
 	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",       "Predicted Rare SM",          4, 0., 4.);
 	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",      "Predicted ttW",              4, 0., 4.);
 	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz",      "Predicted ttZ",              4, 0., 4.);
@@ -6659,31 +6660,31 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	
 	h_obs->SetMarkerColor(kBlack);
 	h_obs->SetMarkerStyle(20);
-	h_obs->SetMarkerSize(2.5);
+	h_obs->SetMarkerSize(2);
 	h_obs->SetLineWidth(2);
 	h_obs->SetLineColor(kBlack);
 	h_obs->SetFillColor(kBlack);
 	
 	h_pred_sfake->SetLineWidth(1);
-	h_pred_dfake->SetLineWidth(1);
 	h_pred_chmid->SetLineWidth(1);
+	h_pred_wz   ->SetLineWidth(1);
 	h_pred_mc   ->SetLineWidth(1);
 	h_pred_ttw  ->SetLineWidth(1);
 	h_pred_ttz  ->SetLineWidth(1);
-	h_pred_sfake->SetLineColor(50);
-	h_pred_sfake->SetFillColor(50);
-	h_pred_dfake->SetLineColor(38);
-	h_pred_dfake->SetFillColor(38);
-	h_pred_chmid->SetLineColor(42);
-	h_pred_chmid->SetFillColor(42);
-	h_pred_mc   ->SetLineColor(44);
-	h_pred_mc   ->SetFillColor(44);
-	h_pred_ttw  ->SetLineColor(29);
-	h_pred_ttw  ->SetFillColor(29);
-	h_pred_ttz  ->SetLineColor(30);
-	h_pred_ttz  ->SetFillColor(30);
+	h_pred_sfake->SetFillColor(46);
+	h_pred_chmid->SetFillColor(49);
+	h_pred_wz   ->SetFillColor(39);
+	h_pred_mc   ->SetFillColor(38);
+	h_pred_ttw  ->SetFillColor(44);
+	h_pred_ttz  ->SetFillColor(42);
+	// h_pred_sfake->SetFillColor(39);
+	// h_pred_chmid->SetFillColor(38);
+	// h_pred_wz   ->SetFillColor(49);
+	// h_pred_mc   ->SetFillColor(46);
+	// h_pred_ttw  ->SetFillColor(44);
+	// h_pred_ttz  ->SetFillColor(42);
 
-	h_pred_tot  ->SetLineWidth(1);
+	h_pred_tot  ->SetLineWidth(3);
 	// h_pred_tot  ->SetFillColor(kBlack);
 	// h_pred_tot  ->SetFillStyle(3013);
 	h_pred_tot  ->SetFillColor(12);
@@ -6698,49 +6699,45 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
 	gr_obs->SetMarkerColor(kBlack);
 	gr_obs->SetMarkerStyle(20);
-	gr_obs->SetMarkerSize(2.5);
+	gr_obs->SetMarkerSize(2.0);
 	gr_obs->SetLineWidth(2);
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
 
 	
-	h_pred_sfake->SetBinContent(1, npf_ee);
-	h_pred_sfake->SetBinContent(2, npf_mm);
-	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
-	h_pred_sfake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em);
-	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
-	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
-	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
-	h_pred_sfake->GetXaxis()->SetBinLabel(4, "Total");
-	
-	h_pred_dfake->SetBinContent(1, nff_ee);
-	h_pred_dfake->SetBinContent(2, nff_mm);
-	h_pred_dfake->SetBinContent(3, nff_em);
-	h_pred_dfake->SetBinContent(4, nff_ee+nff_mm+nff_em);
+	h_pred_sfake->SetBinContent(1, npf_ee + nff_ee);
+	h_pred_sfake->SetBinContent(2, npf_mm + nff_mm);
+	h_pred_sfake->SetBinContent(3, npf_em+nfp_em + nff_em);
+	h_pred_sfake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em + nff_ee+nff_mm+nff_em);
 	
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
 	h_pred_chmid->SetBinContent(4, nt2_ee_chmid+nt2_em_chmid);
 	
-	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee + wz_nt2_ee);
-	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm + wz_nt2_mm);
-	h_pred_mc->SetBinContent(3, nt2_rare_mc_em + wz_nt2_em);
-	h_pred_mc->SetBinContent(4, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em + wz_nt2_ee + wz_nt2_mm + wz_nt2_em);
+	h_pred_wz   ->SetBinContent(1, wz_nt2_ee);
+	h_pred_wz   ->SetBinContent(2, wz_nt2_mm);
+	h_pred_wz   ->SetBinContent(3, wz_nt2_em);
+	h_pred_wz   ->SetBinContent(4, wz_nt2_ee + wz_nt2_mm + wz_nt2_em);
 	
-	h_pred_ttw->SetBinContent(1, ttw_nt2_ee);
-	h_pred_ttw->SetBinContent(2, ttw_nt2_mm);
-	h_pred_ttw->SetBinContent(3, ttw_nt2_em);
-	h_pred_ttw->SetBinContent(4, ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em);
+	h_pred_mc   ->SetBinContent(1, nt2_rare_mc_ee);
+	h_pred_mc   ->SetBinContent(2, nt2_rare_mc_mm);
+	h_pred_mc   ->SetBinContent(3, nt2_rare_mc_em);
+	h_pred_mc   ->SetBinContent(4, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em);
+	
+	h_pred_ttw  ->SetBinContent(1, ttw_nt2_ee);
+	h_pred_ttw  ->SetBinContent(2, ttw_nt2_mm);
+	h_pred_ttw  ->SetBinContent(3, ttw_nt2_em);
+	h_pred_ttw  ->SetBinContent(4, ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em);
 
-	h_pred_ttz->SetBinContent(1, ttz_nt2_ee);
-	h_pred_ttz->SetBinContent(2, ttz_nt2_mm);
-	h_pred_ttz->SetBinContent(3, ttz_nt2_em);
-	h_pred_ttz->SetBinContent(4, ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em);
+	h_pred_ttz  ->SetBinContent(1, ttz_nt2_ee);
+	h_pred_ttz  ->SetBinContent(2, ttz_nt2_mm);
+	h_pred_ttz  ->SetBinContent(3, ttz_nt2_em);
+	h_pred_ttz  ->SetBinContent(4, ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em);
 	
 	h_pred_tot->Add(h_pred_sfake);
-	h_pred_tot->Add(h_pred_dfake);
 	h_pred_tot->Add(h_pred_chmid);
+	h_pred_tot->Add(h_pred_wz);
 	h_pred_tot->Add(h_pred_mc);
 	// h_pred_tot->Add(h_pred_ttw);
 	// h_pred_tot->Add(h_pred_ttz);
@@ -6749,10 +6746,10 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	h_pred_tot->SetBinError(3, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
 	h_pred_tot->SetBinError(4, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
 	
-	hs_pred->Add(h_pred_sfake);
-	hs_pred->Add(h_pred_dfake);
-	hs_pred->Add(h_pred_chmid);
 	hs_pred->Add(h_pred_mc);
+	hs_pred->Add(h_pred_wz);
+	hs_pred->Add(h_pred_chmid);
+	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_ttw);
 	hs_pred->Add(h_pred_ttz);
 	
@@ -6762,8 +6759,8 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	
 	h_obs       ->SetMaximum(max>1?max+1:1.);
 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
-	h_pred_dfake->SetMaximum(max>1?max+1:1.);
 	h_pred_chmid->SetMaximum(max>1?max+1:1.);
+	h_pred_wz   ->SetMaximum(max>1?max+1:1.);
 	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
 	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
 	h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
@@ -6777,32 +6774,40 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	hs_pred->GetXaxis()->SetBinLabel(4, "Total");
 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
 	hs_pred->GetXaxis()->SetLabelFont(42);
-	hs_pred->GetXaxis()->SetLabelSize(0.1);
+	hs_pred->GetXaxis()->SetLabelSize(0.08);
+
+	hs_pred->GetYaxis()->SetLabelSize(0.045);
+	hs_pred->GetYaxis()->SetTitle("Events");
+	hs_pred->GetYaxis()->SetTitleOffset(1.25);
+	hs_pred->GetYaxis()->SetTitleSize(0.045);
 	
-	TLegend *leg = new TLegend(0.15,0.60,0.50,0.88);
-	leg->AddEntry(h_obs,        "Observed","p");
-	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
-	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
+	TLegend *leg = new TLegend(0.16,0.43,0.48,0.85);
+	leg->AddEntry(h_obs,        "Data","p");
+	leg->AddEntry(h_pred_ttz,   "t#bar{t} + Z","f");
+	leg->AddEntry(h_pred_ttw,   "t#bar{t} + W","f");
+	leg->AddEntry(h_pred_sfake, "Fakes","f");
 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
-	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
-	leg->AddEntry(h_pred_ttw,   "ttW Production","f");
-	leg->AddEntry(h_pred_ttz,   "ttZ Production","f");
-	leg->AddEntry(h_pred_tot,   "Total Uncertainty","f");
+	leg->AddEntry(h_pred_wz,    "WZ","f");
+	leg->AddEntry(h_pred_mc,    "Rare SM","f");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
-	leg->SetTextSize(0.03);
+	leg->SetTextSize(0.038);
 	leg->SetBorderSize(0);
 	
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
+	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
+	h_pred_tot->SetFillStyle(0);
+	h_pred_tot->DrawCopy("hist same");
 	gr_obs->Draw("P same");
 	leg->Draw();
 	
-	drawRegionSel(reg);
-	drawTopLine(0.50, 1.0, 0.11);
+	// drawRegionSel(reg);
+	drawTopLine(0.49, 1.0, 0.13);
 	
 	gPad->RedrawAxis();
 
@@ -6810,7 +6815,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 		
 	delete c_temp;	
-	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_ttz, h_pred_tot, hs_pred;
+	delete h_obs, h_pred_sfake, h_pred_chmid, h_pred_mc, h_pred_wz, h_pred_ttw, h_pred_ttz, h_pred_tot, hs_pred;
 	delete gr_obs;
 	delete FR;
 	
@@ -8741,14 +8746,9 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	// FAKE PREDICTIONS ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	TH1D *nt11_sf = new TH1D(Form("NT11_SF_%s", varname.Data()), varname, nbins, bins); nt11_sf->Sumw2();
-	TH1D *nt11_df = new TH1D(Form("NT11_DF_%s", varname.Data()), varname, nbins, bins); nt11_df->Sumw2();
-
 	TH1D *nt11_mm_sf = new TH1D(Form("NT11_MM_SF_%s", varname.Data()), varname, nbins, bins); nt11_mm_sf->Sumw2();
 	TH1D *nt11_ee_sf = new TH1D(Form("NT11_EE_SF_%s", varname.Data()), varname, nbins, bins); nt11_ee_sf->Sumw2();
 	TH1D *nt11_em_sf = new TH1D(Form("NT11_EM_SF_%s", varname.Data()), varname, nbins, bins); nt11_em_sf->Sumw2();
-	TH1D *nt11_mm_df = new TH1D(Form("NT11_MM_DF_%s", varname.Data()), varname, nbins, bins); nt11_mm_df->Sumw2();
-	TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
-	TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
 
 	/////////////////////////////////////////////////////
 	// Differential ratios
@@ -8756,19 +8756,19 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		Sample *S = fSamples[musamples[i]];
 		nt11_mm_sf->Add(S->diffyields[Muon].hnpf[varbin]);
 		nt11_mm_sf->Add(S->diffyields[Muon].hnfp[varbin]);
-		nt11_mm_df->Add(S->diffyields[Muon].hnff[varbin]);
+		nt11_mm_sf->Add(S->diffyields[Muon].hnff[varbin]);
 	}
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
 		nt11_ee_sf->Add(S->diffyields[Elec].hnpf[varbin]);
 		nt11_ee_sf->Add(S->diffyields[Elec].hnfp[varbin]);
-		nt11_ee_df->Add(S->diffyields[Elec].hnff[varbin]);
+		nt11_ee_sf->Add(S->diffyields[Elec].hnff[varbin]);
 	}
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
 		nt11_em_sf->Add(S->diffyields[ElMu].hnpf[varbin]);
 		nt11_em_sf->Add(S->diffyields[ElMu].hnfp[varbin]);
-		nt11_em_df->Add(S->diffyields[ElMu].hnff[varbin]);
+		nt11_em_sf->Add(S->diffyields[ElMu].hnff[varbin]);
 	}
 	/////////////////////////////////////////////////////
 
@@ -8787,19 +8787,9 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 		FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 		
-		///////////////////////////////////////////////////////
-		// Flat ratios:
-		// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-		// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-		// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-		// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-		// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-		// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
-		///////////////////////////////////////////////////////
-		
-		float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
-		float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
-		float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
+		float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1);
+		float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1);
+		float em_tot_fakes = nt11_em_sf->GetBinContent(i+1);
 		float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
 		
 		// Errors (add total errors of fakes)
@@ -8829,18 +8819,10 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_sf->Add(nt11_ee_sf);
 	nt11_sf->Add(nt11_em_sf);
 
-	nt11_df->Add(nt11_mm_df);
-	nt11_df->Add(nt11_ee_df);
-	nt11_df->Add(nt11_em_df);
-
 	totbg   ->Add(nt11_sf);
-	totbg   ->Add(nt11_df);
 	totbg_mm->Add(nt11_mm_sf);
-	totbg_mm->Add(nt11_mm_df);
 	totbg_em->Add(nt11_em_sf);
-	totbg_em->Add(nt11_em_df);
 	totbg_ee->Add(nt11_ee_sf);
-	totbg_ee->Add(nt11_ee_df);
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
@@ -8917,6 +8899,13 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	///////////////////////////////////////////////////////////////////////////////////
 	// OUTPUT /////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
+	Color_t col_fake = 46;
+	Color_t col_cmid = 49;
+	Color_t col_wz   = 39;
+	Color_t col_rare = 38;
+	Color_t col_ttw  = 44;
+	Color_t col_ttz  = 42;
+	
 	nt11->SetMarkerColor(kBlack);
 	nt11->SetMarkerStyle(20);
 	nt11->SetMarkerSize(2.0);
@@ -8943,91 +8932,59 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_em->SetFillColor(kBlack);
 
 	nt11_sf->SetLineWidth(1);
-	nt11_df->SetLineWidth(1);
+	nt11_cm->SetLineWidth(1);
 	nt11_ss->SetLineWidth(1);
 	nt11_wz->SetLineWidth(1);
 	nt11_ttw->SetLineWidth(1);
 	nt11_ttz->SetLineWidth(1);
-	nt11_sf->SetLineColor(50);
-	nt11_sf->SetFillColor(50);
-	nt11_df->SetLineColor(38);
-	nt11_df->SetFillColor(38);
-	nt11_cm->SetLineColor(42);
-	nt11_cm->SetFillColor(42);
-	nt11_ss->SetLineColor(31);
-	nt11_ss->SetFillColor(31);
-	nt11_wz->SetLineColor(39);
-	nt11_wz->SetFillColor(39);
-	nt11_ttw->SetLineColor(29);
-	nt11_ttw->SetFillColor(29);
-	nt11_ttz->SetLineColor(30);
-	nt11_ttz->SetFillColor(30);
+	nt11_sf ->SetFillColor(col_fake);
+	nt11_cm ->SetFillColor(col_cmid);
+	nt11_ss ->SetFillColor(col_rare);
+	nt11_wz ->SetFillColor(col_wz);
+	nt11_ttw->SetFillColor(col_ttw);
+	nt11_ttz->SetFillColor(col_ttz);
 
 	nt11_mm_sf->SetLineWidth(1);
-	nt11_mm_df->SetLineWidth(1);
 	nt11_mm_ss->SetLineWidth(1);
 	nt11_mm_wz->SetLineWidth(1);
 	nt11_mm_ttw->SetLineWidth(1);
 	nt11_mm_ttz->SetLineWidth(1);
-	nt11_mm_sf->SetLineColor(50);
-	nt11_mm_sf->SetFillColor(50);
-	nt11_mm_df->SetLineColor(38);
-	nt11_mm_df->SetFillColor(38);
-	nt11_mm_ss->SetLineColor(31);
-	nt11_mm_ss->SetFillColor(31);
-	nt11_mm_wz->SetLineColor(39);
-	nt11_mm_wz->SetFillColor(39);
-	nt11_mm_ttw->SetLineColor(29);
-	nt11_mm_ttw->SetFillColor(29);
-	nt11_mm_ttz->SetLineColor(30);
-	nt11_mm_ttz->SetFillColor(30);
+	nt11_mm_sf ->SetFillColor(col_fake);
+	nt11_mm_ss ->SetFillColor(col_rare);
+	nt11_mm_wz ->SetFillColor(col_wz);
+	nt11_mm_ttw->SetFillColor(col_ttw);
+	nt11_mm_ttz->SetFillColor(col_ttz);
 
 	nt11_ee_sf->SetLineWidth(1);
-	nt11_ee_df->SetLineWidth(1);
+	nt11_ee_cm->SetLineWidth(1);
 	nt11_ee_ss->SetLineWidth(1);
 	nt11_ee_wz->SetLineWidth(1);
 	nt11_ee_ttw->SetLineWidth(1);
 	nt11_ee_ttz->SetLineWidth(1);
-	nt11_ee_sf->SetLineColor(50);
-	nt11_ee_sf->SetFillColor(50);
-	nt11_ee_df->SetLineColor(38);
-	nt11_ee_df->SetFillColor(38);
-	nt11_ee_cm->SetLineColor(42);
-	nt11_ee_cm->SetFillColor(42);
-	nt11_ee_ss->SetLineColor(31);
-	nt11_ee_ss->SetFillColor(31);
-	nt11_ee_wz->SetLineColor(39);
-	nt11_ee_wz->SetFillColor(39);
-	nt11_ee_ttw->SetLineColor(29);
-	nt11_ee_ttw->SetFillColor(29);
-	nt11_ee_ttz->SetLineColor(30);
-	nt11_ee_ttz->SetFillColor(30);
+	nt11_ee_sf ->SetFillColor(col_fake);
+	nt11_ee_cm ->SetFillColor(col_cmid);
+	nt11_ee_ss ->SetFillColor(col_rare);
+	nt11_ee_wz ->SetFillColor(col_wz);
+	nt11_ee_ttw->SetFillColor(col_ttw);
+	nt11_ee_ttz->SetFillColor(col_ttz);
 
 	nt11_em_sf->SetLineWidth(1);
-	nt11_em_df->SetLineWidth(1);
+	nt11_em_cm->SetLineWidth(1);
 	nt11_em_ss->SetLineWidth(1);
 	nt11_em_wz->SetLineWidth(1);
 	nt11_em_ttw->SetLineWidth(1);
 	nt11_em_ttz->SetLineWidth(1);
-	nt11_em_sf->SetLineColor(50);
-	nt11_em_sf->SetFillColor(50);
-	nt11_em_df->SetLineColor(38);
-	nt11_em_df->SetFillColor(38);
-	nt11_em_cm->SetLineColor(42);
-	nt11_em_cm->SetFillColor(42);
-	nt11_em_ss->SetLineColor(31);
-	nt11_em_ss->SetFillColor(31);
-	nt11_em_wz->SetLineColor(39);
-	nt11_em_wz->SetFillColor(39);
-	nt11_em_ttw->SetLineColor(29);
-	nt11_em_ttw->SetFillColor(29);
-	nt11_em_ttz->SetLineColor(30);
-	nt11_em_ttz->SetFillColor(30);
+	nt11_em_sf ->SetFillColor(col_fake);
+	nt11_em_cm ->SetFillColor(col_cmid);
+	nt11_em_ss ->SetFillColor(col_rare);
+	nt11_em_wz ->SetFillColor(col_wz);
+	nt11_em_ttw->SetFillColor(col_ttw);
+	nt11_em_ttz->SetFillColor(col_ttz);
 	
-	totbg   ->SetLineWidth(1);
-	totbg_mm->SetLineWidth(1);
-	totbg_em->SetLineWidth(1);
-	totbg_ee->SetLineWidth(1);
+	totbg   ->SetLineWidth(3);
+	totbg_mm->SetLineWidth(3);
+	totbg_em->SetLineWidth(3);
+	totbg_ee->SetLineWidth(3);
 
 	totbg   ->SetFillColor(12);
 	totbg_mm->SetFillColor(12);
@@ -9054,7 +9011,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 
 	// Normalize everything to binwidth
 	nt11_sf    = normHistBW(nt11_sf,  binwidthscale[varbin]);
-	nt11_df    = normHistBW(nt11_df,  binwidthscale[varbin]);
 	nt11_ss    = normHistBW(nt11_ss,  binwidthscale[varbin]);
 	nt11_wz    = normHistBW(nt11_wz,  binwidthscale[varbin]);
 	nt11_ttw   = normHistBW(nt11_ttw, binwidthscale[varbin]);
@@ -9062,14 +9018,12 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_cm    = normHistBW(nt11_cm,  binwidthscale[varbin]);
 
 	nt11_mm_sf  = normHistBW(nt11_mm_sf, binwidthscale[varbin]);
-	nt11_mm_df  = normHistBW(nt11_mm_df, binwidthscale[varbin]);
 	nt11_mm_ss  = normHistBW(nt11_mm_ss, binwidthscale[varbin]);
 	nt11_mm_wz  = normHistBW(nt11_mm_wz, binwidthscale[varbin]);
 	nt11_mm_ttw = normHistBW(nt11_mm_ttw, binwidthscale[varbin]);
 	nt11_mm_ttz = normHistBW(nt11_mm_ttz, binwidthscale[varbin]);
 
 	nt11_ee_sf  = normHistBW(nt11_ee_sf, binwidthscale[varbin]);
-	nt11_ee_df  = normHistBW(nt11_ee_df, binwidthscale[varbin]);
 	nt11_ee_ss  = normHistBW(nt11_ee_ss, binwidthscale[varbin]);
 	nt11_ee_wz  = normHistBW(nt11_ee_wz, binwidthscale[varbin]);
 	nt11_ee_ttw = normHistBW(nt11_ee_ttw, binwidthscale[varbin]);
@@ -9077,7 +9031,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_ee_cm  = normHistBW(nt11_ee_cm, binwidthscale[varbin]);
 	
 	nt11_em_sf  = normHistBW(nt11_em_sf, binwidthscale[varbin]);
-	nt11_em_df  = normHistBW(nt11_em_df, binwidthscale[varbin]);
 	nt11_em_ss  = normHistBW(nt11_em_ss, binwidthscale[varbin]);
 	nt11_em_ttw = normHistBW(nt11_em_ttw, binwidthscale[varbin]);
 	nt11_em_ttz = normHistBW(nt11_em_ttz, binwidthscale[varbin]);
@@ -9100,34 +9053,30 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
 	THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
 	
-	nt11_tot->Add(nt11_sf);
-	nt11_tot->Add(nt11_df);
-	nt11_tot->Add(nt11_cm);
 	nt11_tot->Add(nt11_ss);
 	nt11_tot->Add(nt11_wz);
+	nt11_tot->Add(nt11_cm);
+	nt11_tot->Add(nt11_sf);
 	nt11_tot->Add(nt11_ttw);
 	nt11_tot->Add(nt11_ttz);
 
-	nt11_mm_tot->Add(nt11_mm_sf);
-	nt11_mm_tot->Add(nt11_mm_df);
 	nt11_mm_tot->Add(nt11_mm_ss);
 	nt11_mm_tot->Add(nt11_mm_wz);
+	nt11_mm_tot->Add(nt11_mm_sf);
 	nt11_mm_tot->Add(nt11_mm_ttw);
 	nt11_mm_tot->Add(nt11_mm_ttz);
 
-	nt11_ee_tot->Add(nt11_ee_sf);
-	nt11_ee_tot->Add(nt11_ee_df);
-	nt11_ee_tot->Add(nt11_ee_cm);
 	nt11_ee_tot->Add(nt11_ee_ss);
 	nt11_ee_tot->Add(nt11_ee_wz);
+	nt11_ee_tot->Add(nt11_ee_cm);
+	nt11_ee_tot->Add(nt11_ee_sf);
 	nt11_ee_tot->Add(nt11_ee_ttw);
 	nt11_ee_tot->Add(nt11_ee_ttz);
 
-	nt11_em_tot->Add(nt11_em_sf);
-	nt11_em_tot->Add(nt11_em_df);
-	nt11_em_tot->Add(nt11_em_cm);
 	nt11_em_tot->Add(nt11_em_ss);
 	nt11_em_tot->Add(nt11_em_wz);
+	nt11_em_tot->Add(nt11_em_cm);
+	nt11_em_tot->Add(nt11_em_sf);
 	nt11_em_tot->Add(nt11_em_ttw);
 	nt11_em_tot->Add(nt11_em_ttz);
 
@@ -9139,30 +9088,50 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 
 	nt11_tot->Draw("goff");
 	nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
-	nt11_tot->GetYaxis()->SetTitle(ytitle);
 	nt11_tot->GetXaxis()->SetTitleOffset(1.07);
-	nt11_tot->GetYaxis()->SetTitleOffset(1.3);
+	nt11_tot->GetYaxis()->SetTitle(ytitle);
+	nt11_tot->GetYaxis()->SetTitleSize(0.045);
+	nt11_tot->GetXaxis()->SetTitleSize(0.045);
+	nt11_tot->GetYaxis()->SetLabelSize(0.045);
+	nt11_tot->GetXaxis()->SetLabelSize(0.045);
+	nt11_tot->GetYaxis()->SetTitleOffset(1.25);
+	nt11_tot->GetXaxis()->SetTitleOffset(1.065);
 	if(varbin==2) nt11_tot->GetYaxis()->SetTitleOffset(1.4);
 
 	nt11_mm_tot->Draw("goff");
 	nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
 	nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
 	nt11_mm_tot->GetXaxis()->SetTitleOffset(1.07);
-	nt11_mm_tot->GetYaxis()->SetTitleOffset(1.3);
+	nt11_mm_tot->GetYaxis()->SetTitleSize(0.045);
+	nt11_mm_tot->GetXaxis()->SetTitleSize(0.045);
+	nt11_mm_tot->GetYaxis()->SetLabelSize(0.045);
+	nt11_mm_tot->GetXaxis()->SetLabelSize(0.045);
+	nt11_mm_tot->GetYaxis()->SetTitleOffset(1.25);
+	nt11_mm_tot->GetXaxis()->SetTitleOffset(1.065);
 	if(varbin==2) nt11_mm_tot->GetYaxis()->SetTitleOffset(1.4);
 
 	nt11_ee_tot->Draw("goff");
 	nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
 	nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
 	nt11_ee_tot->GetXaxis()->SetTitleOffset(1.07);
-	nt11_ee_tot->GetYaxis()->SetTitleOffset(1.3);
+	nt11_ee_tot->GetYaxis()->SetTitleSize(0.045);
+	nt11_ee_tot->GetXaxis()->SetTitleSize(0.045);
+	nt11_ee_tot->GetYaxis()->SetLabelSize(0.045);
+	nt11_ee_tot->GetXaxis()->SetLabelSize(0.045);
+	nt11_ee_tot->GetYaxis()->SetTitleOffset(1.25);
+	nt11_ee_tot->GetXaxis()->SetTitleOffset(1.065);
 	if(varbin==2) nt11_ee_tot->GetYaxis()->SetTitleOffset(1.4);
 
 	nt11_em_tot->Draw("goff");
 	nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
 	nt11_em_tot->GetYaxis()->SetTitle(ytitle);
 	nt11_em_tot->GetXaxis()->SetTitleOffset(1.07);
-	nt11_em_tot->GetYaxis()->SetTitleOffset(1.3);
+	nt11_em_tot->GetYaxis()->SetTitleSize(0.045);
+	nt11_em_tot->GetXaxis()->SetTitleSize(0.045);
+	nt11_em_tot->GetYaxis()->SetLabelSize(0.045);
+	nt11_em_tot->GetXaxis()->SetLabelSize(0.045);
+	nt11_em_tot->GetYaxis()->SetTitleOffset(1.25);
+	nt11_em_tot->GetXaxis()->SetTitleOffset(1.065);
 	if(varbin==2) nt11_em_tot->GetYaxis()->SetTitleOffset(1.4);
 
 	if(intlabel){
@@ -9170,14 +9139,18 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_mm_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
 		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_ee_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
 		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_em_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
-		nt11_tot   ->GetXaxis()->SetLabelSize(0.06);
-		nt11_mm_tot->GetXaxis()->SetLabelSize(0.06);
-		nt11_ee_tot->GetXaxis()->SetLabelSize(0.06);
-		nt11_em_tot->GetXaxis()->SetLabelSize(0.06);
-		nt11_tot   ->GetXaxis()->SetTitleOffset(1.1);
-		nt11_mm_tot->GetXaxis()->SetTitleOffset(1.1);
-		nt11_ee_tot->GetXaxis()->SetTitleOffset(1.1);
-		nt11_em_tot->GetXaxis()->SetTitleOffset(1.1);
+		nt11_tot   ->GetXaxis()->SetLabelSize(0.07);
+		nt11_mm_tot->GetXaxis()->SetLabelSize(0.07);
+		nt11_ee_tot->GetXaxis()->SetLabelSize(0.07);
+		nt11_em_tot->GetXaxis()->SetLabelSize(0.07);
+		nt11_tot   ->GetXaxis()->SetTitleSize(0.045);
+		nt11_mm_tot->GetXaxis()->SetTitleSize(0.045);
+		nt11_ee_tot->GetXaxis()->SetTitleSize(0.045);
+		nt11_em_tot->GetXaxis()->SetTitleSize(0.045);
+		nt11_tot   ->GetXaxis()->SetTitleOffset(1.07);
+		nt11_mm_tot->GetXaxis()->SetTitleOffset(1.07);
+		nt11_ee_tot->GetXaxis()->SetTitleOffset(1.07);
+		nt11_em_tot->GetXaxis()->SetTitleOffset(1.07);
 	}
 
 	nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
@@ -9188,7 +9161,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	double max = nt11->Integral();
 	nt11    ->SetMaximum(max>1?max+1:1.);
 	nt11_sf ->SetMaximum(max>1?max+1:1.);
-	nt11_df ->SetMaximum(max>1?max+1:1.);
 	nt11_cm ->SetMaximum(max>1?max+1:1.);
 	nt11_ss ->SetMaximum(max>1?max+1:1.);
 	nt11_wz ->SetMaximum(max>1?max+1:1.);
@@ -9199,7 +9171,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	double max_mm = nt11_mm->Integral();
 	nt11_mm    ->SetMaximum(max_mm>1?max_mm+1:1.);
 	nt11_mm_sf ->SetMaximum(max_mm>1?max_mm+1:1.);
-	nt11_mm_df ->SetMaximum(max_mm>1?max_mm+1:1.);
 	nt11_mm_ss ->SetMaximum(max_mm>1?max_mm+1:1.);
 	nt11_mm_wz ->SetMaximum(max_mm>1?max_mm+1:1.);
 	nt11_mm_ttw->SetMaximum(max_mm>1?max_mm+1:1.);
@@ -9209,7 +9180,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	double max_ee = nt11_ee->Integral();
 	nt11_ee    ->SetMaximum(max_ee>1?max_ee+1:1.);
 	nt11_ee_sf ->SetMaximum(max_ee>1?max_ee+1:1.);
-	nt11_ee_df ->SetMaximum(max_ee>1?max_ee+1:1.);
 	nt11_ee_cm ->SetMaximum(max_ee>1?max_ee+1:1.);
 	nt11_ee_ss ->SetMaximum(max_ee>1?max_ee+1:1.);
 	nt11_ee_wz ->SetMaximum(max_ee>1?max_ee+1:1.);
@@ -9220,7 +9190,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	double max_em = nt11_em->Integral();
 	nt11_em    ->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_sf ->SetMaximum(max_em>1?max_em+1:1.);
-	nt11_em_df ->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_cm ->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_wz ->SetMaximum(max_em>1?max_em+1:1.);
@@ -9230,21 +9199,20 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	
 	fOutputSubDir = "DiffPredictionPlots/";
 	/////////////////////////////////////////////////////////////////
-	TLegend *leg = new TLegend(0.60,0.62,0.90,0.88);
-	leg->AddEntry(nt11,     "Observed","p");
-	leg->AddEntry(nt11_ttz, "TTZ Production","f");
-	leg->AddEntry(nt11_ttw, "TTW Production","f");
-	leg->AddEntry(nt11_wz,  "WZ Production","f");
-	leg->AddEntry(nt11_ss,  "Rare SM","f");
+	TLegend *leg = new TLegend(0.60,0.43,0.90,0.85);
+	leg->AddEntry(nt11,     "Data",        "p");
+	leg->AddEntry(nt11_ttz, "t#bar{t} + Z","f");
+	leg->AddEntry(nt11_ttw, "t#bar{t} + W","f");
+	leg->AddEntry(nt11_sf,  "Fakes",       "f");
 	leg->AddEntry(nt11_cm,  "Charge MisID","f");
-	leg->AddEntry(nt11_df,  "Double Fakes","f");
-	leg->AddEntry(nt11_sf,  "Single Fakes","f");
-	leg->AddEntry(totbg,    "Total Uncertainty","f");
+	leg->AddEntry(nt11_wz,  "WZ",          "f");
+	leg->AddEntry(nt11_ss,  "Rare SM",     "f");
 	// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
+	leg->SetTextSize(0.038);
 	leg->SetBorderSize(0);
-	
+
 	FakeRatios *FR = new FakeRatios();
 	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(nt11);
 	gr_obs->SetMarkerColor(kBlack);
@@ -9253,23 +9221,21 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs->SetLineWidth(2);
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
-		
-	TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
-	c_temp->cd();
+
+	TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
+	c_temp->cd();
 	gPad->SetLogy();
 	
 	nt11_tot->Draw("hist");
-	// nt11_error->DrawCopy("X0 E1 same");
-	// nt11->DrawCopy("PE X0 same");
-	gr_obs->Draw("P same");
-	totbg->DrawCopy("0 E2 same");
-	// nt11_sig->DrawCopy("hist same");
+	totbg   ->DrawCopy("0 E2 same");
+	totbg   ->SetFillStyle(0);
+	totbg   ->DrawCopy("hist same");
+	gr_obs  ->Draw("P same");
 	leg->Draw();
-	lat->SetTextSize(0.04);
-	// lat->DrawLatex(0.50,0.92, "#mu#mu/ee/e#mu");
 	drawDiffCuts(varbin);
-	drawTopLine(0.5, 0.9);
+	drawTopLine(0.49, 1.0, 0.13);
 	
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
@@ -9285,19 +9251,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 
 	fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
 	/////////////////////////////////////////////////////////////////
-	TLegend *leg_mm = new TLegend(0.60,0.64,0.90,0.88);
-	leg_mm->AddEntry(nt11_mm,     "Observed","p");
-	leg_mm->AddEntry(nt11_mm_ttz, "TTZ Production","f");
-	leg_mm->AddEntry(nt11_mm_ttw, "TTW Production","f");
-	leg_mm->AddEntry(nt11_mm_wz,  "WZ Production","f");
-	leg_mm->AddEntry(nt11_mm_ss,  "Rare SM","f");
-	leg_mm->AddEntry(nt11_mm_df,  "Double Fakes","f");
-	leg_mm->AddEntry(nt11_mm_sf,  "Single Fakes","f");
-	leg_mm->AddEntry(totbg_mm,    "Total Uncertainty","f");
-	// leg_mm->AddEntry(nt11_mm_sig,fSamples[sigsam]->sname,"l");
-	leg_mm->SetFillStyle(0);
-	leg_mm->SetTextFont(42);
-	leg_mm->SetBorderSize(0);
 	
 	TGraphAsymmErrors* gr_obs_mm = FR->getGraphPoissonErrors(nt11_mm);
 	gr_obs_mm->SetMarkerColor(kBlack);
@@ -9307,22 +9260,22 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_mm->SetLineColor(kBlack);
 	gr_obs_mm->SetFillColor(kBlack);
 	
-	c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
+	c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
-	
+
 	nt11_mm_tot->Draw("hist");
-	// nt11_error->DrawCopy("X0 E1 same");
-	// nt11_mm->DrawCopy("PE X0 same");
-	gr_obs_mm->Draw("P same");
-	totbg_mm->DrawCopy("0 E2 same");
-	// nt11_mm_sig->DrawCopy("hist same");
-	leg_mm->Draw();
+	totbg_mm   ->DrawCopy("0 E2 same");
+	totbg_mm   ->SetFillStyle(0);
+	totbg_mm   ->DrawCopy("hist same");
+	gr_obs_mm  ->Draw("P same");
+	leg->Draw();
 	lat->SetTextSize(0.04);
 	lat->DrawLatex(0.55,0.92, "#mu#mu");
 	drawDiffCuts(varbin);
-	drawTopLine(0.5, 0.9);
+	drawTopLine(0.39, 1.0, 0.13);
 	
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
@@ -9337,20 +9290,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 	/////////////////////////////////////////////////////////////////
-	TLegend *leg_ee = new TLegend(0.60,0.62,0.90,0.88);
-	leg_ee->AddEntry(nt11_ee,     "Observed","p");
-	leg_ee->AddEntry(nt11_ee_ttz, "TTZ Production","f");
-	leg_ee->AddEntry(nt11_ee_ttw, "TTW Production","f");
-	leg_ee->AddEntry(nt11_ee_wz,  "WZ Production","f");
-	leg_ee->AddEntry(nt11_ee_ss,  "Rare SM","f");
-	leg_ee->AddEntry(nt11_ee_cm,  "Charge MisID","f");
-	leg_ee->AddEntry(nt11_ee_df,  "Double Fakes","f");
-	leg_ee->AddEntry(nt11_ee_sf,  "Single Fakes","f");
-	leg_ee->AddEntry(totbg_ee,    "Total Uncertainty","f");
-	// leg_mm->AddEntry(nt11_ee_sig,fSamples[sigsam]->sname,"l");
-	leg_ee->SetFillStyle(0);
-	leg_ee->SetTextFont(42);
-	leg_ee->SetBorderSize(0);
 	
 	TGraphAsymmErrors* gr_obs_ee = FR->getGraphPoissonErrors(nt11_ee);
 	gr_obs_ee->SetMarkerColor(kBlack);
@@ -9360,22 +9299,22 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_ee->SetLineColor(kBlack);
 	gr_obs_ee->SetFillColor(kBlack);
 	
-	c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
+	c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
 	
 	nt11_ee_tot->Draw("hist");
-	// nt11_error->DrawCopy("X0 E1 same");
-	// nt11_ee->DrawCopy("PE X0 same");
-	gr_obs_ee->Draw("P same");
-	totbg_ee->DrawCopy("0 E2 same");
-	// nt11_ee_sig->DrawCopy("hist same");
-	leg_ee->Draw();
+	totbg_ee   ->DrawCopy("0 E2 same");
+	totbg_ee   ->SetFillStyle(0);
+	totbg_ee   ->DrawCopy("hist same");
+	gr_obs_ee  ->Draw("P same");
+	leg->Draw();
 	lat->SetTextSize(0.04);
 	lat->DrawLatex(0.55,0.92, "ee");
 	drawDiffCuts(varbin);
-	drawTopLine(0.5, 0.9);
+	drawTopLine(0.49, 1.0, 0.13);
 	
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
@@ -9390,20 +9329,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 	/////////////////////////////////////////////////////////////////
-	TLegend *leg_em = new TLegend(0.60,0.62,0.90,0.88);
-	leg_em->AddEntry(nt11_em,     "Observed","p");
-	leg_em->AddEntry(nt11_em_ttz, "TTZ Production","f");
-	leg_em->AddEntry(nt11_em_ttw, "TTW Production","f");
-	leg_em->AddEntry(nt11_em_wz,  "WZ Production","f");
-	leg_em->AddEntry(nt11_em_ss,  "Rare SM","f");
-	leg_em->AddEntry(nt11_em_cm,  "Charge MisID","f");
-	leg_em->AddEntry(nt11_em_df,  "Double Fakes","f");
-	leg_em->AddEntry(nt11_em_sf,  "Single Fakes","f");
-	leg_em->AddEntry(totbg_em,    "Total Uncertainty","f");
-	// leg_mm->AddEntry(nt11_em_sig,fSamples[sigsam]->sname,"l");
-	leg_em->SetFillStyle(0);
-	leg_em->SetTextFont(42);
-	leg_em->SetBorderSize(0);
 	
 	TGraphAsymmErrors* gr_obs_em = FR->getGraphPoissonErrors(nt11_em);
 	gr_obs_em->SetMarkerColor(kBlack);
@@ -9413,21 +9338,22 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_em->SetLineColor(kBlack);
 	gr_obs_em->SetFillColor(kBlack);
 	
-	c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
+	c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
 	
 	nt11_em_tot->Draw("hist");
-	totbg_em->DrawCopy("0 E2 same");
-	// nt11_em->DrawCopy("PE X0 same");
-	gr_obs_em->Draw("P same");
-	// nt11_em_sig->DrawCopy("hist same");
-	leg_em->Draw();
+	totbg_em   ->DrawCopy("0 E2 same");
+	totbg_em   ->SetFillStyle(0);
+	totbg_em   ->DrawCopy("hist same");
+	gr_obs_em  ->Draw("P same");
+	leg->Draw();
 	lat->SetTextSize(0.04);
 	lat->DrawLatex(0.55,0.92, "e#mu");
 	drawDiffCuts(varbin);
-	drawTopLine(0.5, 0.9);
+	drawTopLine(0.49, 1.0, 0.13);
 	
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
@@ -9442,7 +9368,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 	// Cleanup
-	delete c_temp, leg, leg_mm, leg_em, leg_ee;
+	delete c_temp, leg;
 	delete nt11, nt11_mm, nt11_ee, nt11_em;
 	// delete nt11_sig, nt11_mm_sig, nt11_ee_sig, nt11_em_sig;
 	delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
@@ -9452,7 +9378,6 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	delete nt11_ttw, nt11_mm_ttw, nt11_em_ttw, nt11_ee_ttw;
 	delete nt11_ttz, nt11_mm_ttz, nt11_em_ttz, nt11_ee_ttz;
 	delete nt11_sf, nt11_mm_sf, nt11_em_sf, nt11_ee_sf;
-	delete nt11_df, nt11_mm_df, nt11_em_df, nt11_ee_df;
 	delete nt11_cm, nt11_em_cm, nt11_ee_cm;
 	// delete nt11_mc, nt11_mm_mc, nt11_ee_mc, nt11_em_mc;
 	delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
@@ -11762,10 +11687,11 @@ void SSDLPlotter::printOriginSummary2L(vector<int> samples, int toggle, gChannel
 //____________________________________________________________________________
 void SSDLPlotter::drawTopLine(float rightedge, float scale, float leftedge){
 	fLatex->SetTextFont(62);
-	fLatex->SetTextSize(scale*0.05);
+	// fLatex->SetTextSize(scale*0.05);
+	fLatex->SetTextSize(scale*0.045);
 	fLatex->DrawLatex(leftedge,0.92, "CMS Preliminary");
 	fLatex->SetTextFont(42);
-	fLatex->SetTextSize(scale*0.04);
+	fLatex->SetTextSize(scale*0.045);
 	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.2f fb^{-1} at #sqrt{s} = 7 TeV", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	return;
