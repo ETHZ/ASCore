@@ -28,8 +28,7 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, const bool& isRealD
   fTag             = config.getParameter<edm::InputTag>("tag");
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
-  fJetTracksTag    = config.getParameter<edm::InputTag>("tag_jetTracks");
-  fBtagNames        = config.getParameter<std::vector<std::string> >("list_btags");
+  fBtagNames       = config.getParameter<std::vector<std::string> >("list_btags");
 
   // Check on number of allowed tags
   if ( fBtagNames.size()>gMaxNBtags )
@@ -54,14 +53,6 @@ void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup
   Handle<View<pat::Jet> > jetsHandle;
   iEvent.getByLabel(fTag,jetsHandle);
   View<pat::Jet> jets = *jetsHandle;
-
-  // Jet tracks association (already done in PAT)
-  Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
-  iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
-
-  // Get Transient Track Builder
-  ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
 
   // PFJetIDSelectionFunctor for LooseID.
   PFJetIDSelectionFunctor PFjetIDLoose( PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::LOOSE );

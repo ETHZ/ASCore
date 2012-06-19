@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerPat.h,v 1.3.2.1 2012/01/27 15:07:21 fronga Exp $
+// $Id: JetFillerPat.h,v 1.3.2.2 2012/04/04 12:21:32 fronga Exp $
 //
 //
 
@@ -42,9 +42,6 @@ private:
 
   //- Configuration parameters
   edm::InputTag fTag; 
-  edm::InputTag fJetID;	
-  edm::InputTag fJetTracksTag;
-  std::string fJetCorrs; 
 
   // Pre-selection
   double fMinpt;
