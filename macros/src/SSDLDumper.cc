@@ -126,15 +126,14 @@ TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]"
                                                                    "b-Jet Multiplicity (medium)"};
 
 //////////////////////////////////////////////////////////////////////////////////
-double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = { 0., 100., 200., 300., 400., 500., 600.};
-double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,  20.,  40.,  60.,  80., 100., 120.};
-double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 0., 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
-double SSDLDumper::gDiffMT2Bins [gNDiffMT2Bins+1]  = { 0.,  25.,  50., 100.};
+double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = { 80., 120., 200., 320., 400., 500., 600.};
+double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,   30.,  50.,  70.,  80., 100., 120.};
+double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 0.,    1.,   2.,   3.,   4.,   5.,   6.}; // fill NJets + 0.5 to hit the right bin
+double SSDLDumper::gDiffMT2Bins [gNDiffMT2Bins+1]  = { 0.,   25.,  50., 100.                  };
 double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100., 120., 140., 160., 180., 200.};
-double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.};
+double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.      };
 double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
-double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
-
+double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.    };
 double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -806,14 +805,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(mumuSignalTrigger()){ // Trigger selection
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		if(isSSLLMuEvent(mu1, mu2)){
 			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
 			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
@@ -836,7 +835,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
@@ -851,14 +850,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elelSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
@@ -875,13 +874,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts();
 		fC_minMet = 30.;
 		fC_minHT =  0.;
-		fC_minNjets = 0;
+		fC_minNjets = 0.;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getMET(), 7, Elec);
 		resetHypLeptons();
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
@@ -896,14 +895,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
@@ -932,7 +931,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
@@ -951,14 +950,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
@@ -981,7 +980,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
@@ -995,14 +994,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
@@ -1031,7 +1030,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT80MET30);
+		setRegionCuts(Baseline);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
@@ -1450,7 +1449,7 @@ void SSDLDumper::fillKinPlots(Sample *S){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	//SANTI 	setRegionCuts(Baseline);
-	setRegionCuts(HT80MET0b);
+	setRegionCuts(HT80MET30);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
@@ -4367,7 +4366,7 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 	if(ptcut < 0.) ptcut = fC_minEl2pt;
 	if(ElPt[ele] < ptcut) return false;
 
-	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // when using "CaloIsoVL" triggers
+	//	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // when using "CaloIsoVL" triggers
 
 	// Reject electrons closer than 0.1 in DR to tight muons
 	for(size_t i = 0; i < NMus; ++i){
@@ -4467,7 +4466,8 @@ bool SSDLDumper::isLooseElectron(int ele){
 	// if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	// if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
 
-	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
+	if(ElIsGoodTriggerEl[ele] != 1) return false;
+	//	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	// if(ElIsGoodTriggerEl[ele] != 1) return false;

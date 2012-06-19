@@ -109,7 +109,7 @@ void SSDLPlotter::init(TString filename){
 	
 	// Luminosity
 	// fLumiNorm = 4680.; // Full 2011B
-	fLumiNorm = 2968.;     // this id for JSON of June 8th! JSON from May19 ---> 920 /pb
+	fLumiNorm = 3950.;   
 
 	// Cuts:
 	fC_minMu1pt = 20.;
@@ -133,7 +133,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(SingleTbar_t);
 	fMCBG.push_back(SingleT_tW);
 	fMCBG.push_back(SingleTbar_tW);
-	// MARC fMCBG.push_back(SingleT_s);
+	fMCBG.push_back(SingleT_s);
 	fMCBG.push_back(SingleTbar_s);
 	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
@@ -150,14 +150,14 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(TTbarG);
 	// MARC fMCBG.push_back(WpWp);
 	// MARC fMCBG.push_back(WmWm);
-	// MARC fMCBG.push_back(WWZ);
+	fMCBG.push_back(WWZ);
 	fMCBG.push_back(WZZ);
 	fMCBG.push_back(WWG);
 	fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
-// 	fMCBG.push_back(QCDMuEnr15);
-// 	fMCBG.push_back(EMEnr20);
-// 	fMCBG.push_back(EMEnr30);
+//SANTI  	fMCBG.push_back(QCDMuEnr15);
+//SANTI  	fMCBG.push_back(EMEnr20);
+//SANTI  	fMCBG.push_back(EMEnr30);
 
 	// MARC fMCBG.push_back(QCD15);
 	// MARC fMCBG.push_back(QCD30);
@@ -178,7 +178,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_t);
 	fMCBGNoQCDNoGJets.push_back(SingleT_tW);
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_tW);
-	// MARC fMCBGNoQCDNoGJets.push_back(SingleT_s);
+	fMCBGNoQCDNoGJets.push_back(SingleT_s);
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_s);
 	fMCBGNoQCDNoGJets.push_back(WJets);
 	fMCBGNoQCDNoGJets.push_back(DYJets);
@@ -192,7 +192,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(TTbarG);
 	// MARC fMCBGNoQCDNoGJets.push_back(WpWp);
 	// MARC fMCBGNoQCDNoGJets.push_back(WmWm);
-	// MARC fMCBGNoQCDNoGJets.push_back(WWZ);
+	fMCBGNoQCDNoGJets.push_back(WWZ);
 	fMCBGNoQCDNoGJets.push_back(WZZ);
 	fMCBGNoQCDNoGJets.push_back(WWG);
 	fMCBGNoQCDNoGJets.push_back(WWW);
@@ -200,7 +200,7 @@ void SSDLPlotter::init(TString filename){
 
 	// MARC fMCBGSig = fMCBG;
 	// MARC fMCBGSig.push_back(LM6);
-	// MARC fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
+	fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
 	// MARC fMCBGNoQCDNoGJetsSig.push_back(LM6);
 
 	fMCBGMuEnr.push_back(TTJets);
@@ -208,7 +208,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(SingleTbar_t);
 	fMCBGMuEnr.push_back(SingleT_tW);
 	fMCBGMuEnr.push_back(SingleTbar_tW);
-	// MARC fMCBGMuEnr.push_back(SingleT_s);
+	fMCBGMuEnr.push_back(SingleT_s);
 	fMCBGMuEnr.push_back(SingleTbar_s);
 	fMCBGMuEnr.push_back(WJets);
 	fMCBGMuEnr.push_back(DYJets);
@@ -225,7 +225,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(TTbarG);
 	// MARC fMCBGMuEnr.push_back(WpWp);
 	// MARC fMCBGMuEnr.push_back(WmWm);
-	// MARC fMCBGMuEnr.push_back(WWZ);
+	fMCBGMuEnr.push_back(WWZ);
 	fMCBGMuEnr.push_back(WZZ);
 	fMCBGMuEnr.push_back(WWG);
 	fMCBGMuEnr.push_back(WWW);
@@ -239,7 +239,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(SingleTbar_t);
 	fMCBGEMEnr.push_back(SingleT_tW);
 	fMCBGEMEnr.push_back(SingleTbar_tW);
-	// MARC fMCBGEMEnr.push_back(SingleT_s);
+	fMCBGEMEnr.push_back(SingleT_s);
 	fMCBGEMEnr.push_back(SingleTbar_s);
 	fMCBGEMEnr.push_back(WJets);
 	fMCBGEMEnr.push_back(DYJets);
@@ -256,7 +256,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(TTbarG);
 	// MARC fMCBGEMEnr.push_back(WpWp);
 	// MARC fMCBGEMEnr.push_back(WmWm);
-	// MARC fMCBGEMEnr.push_back(WWZ);
+	fMCBGEMEnr.push_back(WWZ);
 	fMCBGEMEnr.push_back(WZZ);
 	fMCBGEMEnr.push_back(WWG);
 	fMCBGEMEnr.push_back(WWW);
@@ -269,16 +269,17 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnrSig = fMCBGMuEnr;
 	// MARC fMCBGMuEnrSig.push_back(LM6);
 
-	if(!gEWKino) fMCRareSM.push_back(WZ);
+	//SANTI	if(!gEWKino) fMCRareSM.push_back(WZ);
+	fMCRareSM.push_back(WZ);
 	fMCRareSM.push_back(ZZ);
 	// MARC fMCRareSM.push_back(GVJets);
 	// MARC fMCRareSM.push_back(DPSWW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
-	// MARC fMCRareSM.push_back(TTbarG);
+	fMCRareSM.push_back(TTbarG);
 	// MARC fMCRareSM.push_back(WpWp);
-	// MARC fMCRareSM.push_back(WmWm);get
-	// MARC fMCRareSM.push_back(WWZ);
+	// MARC fMCRareSM.push_back(WmWm);
+	fMCRareSM.push_back(WWZ);
 	fMCRareSM.push_back(WZZ);
 	fMCRareSM.push_back(WWG);
 	fMCRareSM.push_back(WWW);
@@ -344,36 +345,36 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(Baseline);
 	// printOrigins(Baseline);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	// makeNT2KinPlots(false);
-	// makeNT2KinPlots(true);
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeNT2KinPlots(false);
+	makeNT2KinPlots(true);
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
+	makeRatioPlots(Muon);
+        makeRatioPlots(Elec);
 	// make2DRatioPlots(Muon);
 	// make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 	
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
- 	// makeFRvsPtPlots(Elec, ZDecay);
- 	// makeFRvsEtaPlots(Muon);
- 	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+ 	makeFRvsPtPlots(Elec, ZDecay);
+ 	makeFRvsEtaPlots(Muon);
+ 	makeFRvsEtaPlots(Elec);
 	
-	// makeAllClosureTests();
-	// makeAllIntPredictions();
+	makeAllClosureTests();
+	makeAllIntPredictions();
         
 	makeDiffPrediction();
 	// makeTTWDiffPredictions();
-	// printAllYieldTables();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -4101,7 +4102,7 @@ void SSDLPlotter::make2DRatioPlots(gChannel chan){
 	c_temp->cd();
 
 	// gPad->SetLogy();
-	histo->DrawCopy("colz text");
+	histo->DrawCopy("colz");
 	drawTopLine();
 
 	Util::PrintPDF(c_temp, "FRatio2D_" + name, fOutputDir + fOutputSubDir);
@@ -5484,16 +5485,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	float fbb(0.),fee(0.),feb(0.);
 	float fbbE(0.),feeE(0.),febE(0.);
 
-
 	float fbb_mc(0.),fee_mc(0.),feb_mc(0.);
 	float fbbE_mc(0.),feeE_mc(0.),febE_mc(0.);
-// 	float fbb  = gEChMisIDBB;
-//  	float fbbE = gEChMisIDBB_E;
-//  	float fee  = gEChMisIDEE;
-//  	float feeE = gEChMisIDEE_E;
-//  	float feb  = gEChMisIDEB;
-//  	float febE = gEChMisIDEB_E;
-	
+
 	calculateChMisIdProb(fEGData, BB, fbb, fbbE);
 	calculateChMisIdProb(fEGData, EB, feb, febE);
 	calculateChMisIdProb(fEGData, EE, fee, feeE);
@@ -5603,8 +5597,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	mcbkg.push_back(TTbarG);
 // MARC 	mcbkg.push_back(WpWp);
 // MARC 	mcbkg.push_back(WmWm);
-// MARC 	mcbkg.push_back(WWZ);
- 	mcbkg.push_back(WZZ);
+ 	mcbkg.push_back(WWZ);
+       	mcbkg.push_back(WZZ);
  	mcbkg.push_back(WWG);
  	mcbkg.push_back(WWW);
  	mcbkg.push_back(ZZZ);
@@ -9562,22 +9556,24 @@ void SSDLPlotter::makeDiffPrediction(){
  	
  	// Charge MisID Predictions
  	// Abbreviations
- 	float fb  = gEChMisIDB;
- 	float fbE = gEChMisIDB_E;
- 	float fe  = gEChMisIDE;
- 	float feE = gEChMisIDE_E;
+	float fbb(0.),fee(0.),feb(0.);
+	float fbbE(0.),feeE(0.),febE(0.);
  	
+	calculateChMisIdProb(fMCBG, BB, fbb, fbbE);
+	calculateChMisIdProb(fMCBG, EB, feb, febE);
+	calculateChMisIdProb(fMCBG, EE, fee, feeE);
+	
  	vector<float> ntt_cm_ee, ntt_cm_em;
  	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
  	for(size_t i = 0; i < nsamples; ++i){
  		Sample *S = fSamples[samples[i]];
- 		ntt_cm_ee.push_back(2*fb*ntt_os_BB_ee[i] + 2*fe*ntt_os_EE_ee[i] + (fb+fe)*ntt_os_EB_ee[i]);
- 		ntt_cm_ee_e1.push_back((4*fb*fb* S->getError(ntt_os_BB_ee[i])) + (4*fe*fe*S->getError(ntt_os_EE_ee[i])) + (fb+fe)*(fb+fe)*S->getError(ntt_os_EB_ee[i])
- 		    + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbE*fbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feE*feE) + (fbE*fbE+feE*feE)*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
+ 		ntt_cm_ee.push_back(2*fbb*ntt_os_BB_ee[i] + 2*fee*ntt_os_EE_ee[i] + 2*feb*ntt_os_EB_ee[i]);
+ 		ntt_cm_ee_e1.push_back((4*fbb*fbb* S->getError(ntt_os_BB_ee[i])) + (4*fee*fee*S->getError(ntt_os_EE_ee[i])) + 4*feb*feb*S->getError(ntt_os_EB_ee[i])
+ 		    + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbbE*fbbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
  
- 		ntt_cm_em.push_back(  fb*ntt_os_BB_em[i] +   fe*ntt_os_EE_em[i]);
- 		ntt_cm_em_e1.push_back(fb*fb*S->getError(ntt_os_BB_em[i]) + fe*fe*S->getError(ntt_os_EE_em[i]) 
- 		    + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbE*fbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feE*feE);
+ 		ntt_cm_em.push_back(  fbb*ntt_os_BB_em[i] +   fee*ntt_os_EE_em[i]);
+ 		ntt_cm_em_e1.push_back(fbb*fbb*S->getError(ntt_os_BB_em[i]) + fee*fee*S->getError(ntt_os_EE_em[i]) 
+ 		    + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbbE*fbbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feeE*feeE);
  	}
  
  	// Sums
