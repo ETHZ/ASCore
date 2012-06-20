@@ -54,28 +54,58 @@ struct SSDLPrediction {
 
 struct TTWZPrediction {
 	int obs;
-	float ttwz;
-	float ttw;
-	float ttz;
+	int obs_mm;
+	int obs_ee;
+	int obs_em;
 
+	float ttw;
+	float ttw_mm;
+	float ttw_ee;
+	float ttw_em;
+
+	float ttz;
+	float ttz_mm;
+	float ttz_ee;
+	float ttz_em;
+
+	float ttwz;
 	float ttwz_mm;
 	float ttwz_ee;
 	float ttwz_em;
 
 	float fake;
+	float fake_mm;
+	float fake_ee;
+	float fake_em;
 	float fake_err;
+	float fake_err_mm;
+	float fake_err_ee;
+	float fake_err_em;
+
 	float cmid;
+	float cmid_ee;
+	float cmid_em;
 	float cmid_err;
+	float cmid_err_ee;
+	float cmid_err_em;
+
 	float wz;
 	float wz_mm;
 	float wz_ee;
 	float wz_em;
 	float wz_err;
+	float wz_err_mm;
+	float wz_err_ee;
+	float wz_err_em;
+
 	float rare;
 	float rare_mm;
 	float rare_ee;
 	float rare_em;
 	float rare_err;
+	float rare_err_mm;
+	float rare_err_ee;
+	float rare_err_em;
 };
 
 
@@ -156,6 +186,8 @@ public:
 
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
+	
+	void makeM3Plot();
 	
 	void storeWeightedPred();
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only

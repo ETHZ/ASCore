@@ -78,7 +78,7 @@ public:
 		GJets40, GJets100, GJets200,
 		GVJets, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
-		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
+		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		QCD1000, QCD1400, QCD1800,
@@ -108,29 +108,7 @@ public:
 		TTbarWSelJU, TTbarWSelJD, TTbarWSelJS, TTbarWSelBU, TTbarWSelBD, TTbarWSelLU, TTbarWSelLD,
 		gNREGIONS
 	};
-	// enum gRegion {
-	// 	region_begin,
-	// 	Baseline = region_begin,
-	// 	Control,
-	// 	HT80MET120,
-	// 	HT80MET120x,  // exclusive (HT < 200)
-	// 	HT200MET30,
-	// 	HT200MET120,
-	// 	HT200MET120x, // exclusive (HT < 450)
-	// 	HT450MET50,
-	// 	HT450MET50x,  // exclusive (MET < 120)
-	// 	HT450MET120,
-	// 	HT450MET0,
-	// 	HT0MET120,
-	// 	HT0MET200,
-	// 	HT0MET120JV,  // Jet veto
-	// 	HT0MET200JV,
-	// 	HT80MET302b,  // > 1 bjet
-	// 	HT200MET302b,
-	// 	HT80MET1202b,
-	// 	// HT0MET02b,
-	// 	gNREGIONS
-	// };
+
 	enum gChannel {
 		channels_begin,
 		Muon = channels_begin,
@@ -579,6 +557,7 @@ public:
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
 	virtual float getMETPhi();
+	virtual float getM3();
 	virtual int getNJets();
 	virtual int getNBTags();
 	virtual int getNBTagsMed();
@@ -637,6 +616,7 @@ public:
 	virtual bool isSSLLElMuEvent(int&, int&);
 
 	virtual bool passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan);
+	virtual bool passesSel(float HT, float MET, int njets, int nbjets, int nbjetsmed, float pT1, float pT2, gRegion reg, gChannel chan);
 	
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
@@ -756,6 +736,7 @@ public:
 	int         fSETree_ttZSel;  // passes ttz sel
 	float       fSETree_HT;
 	float       fSETree_MET;
+	float       fSETree_M3;
 	int         fSETree_NM; // number of tight muons
 	int         fSETree_NE; // number of tight electrons
 	int         fSETree_NJ;

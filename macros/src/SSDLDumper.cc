@@ -34,22 +34,24 @@
 #include <time.h> // access to date/time
 
 
-int gDEBUG_EVENTNUMBER_ = -1;
 int gDEBUG_RUNNUMBER_ = -1;
+int gDEBUG_EVENTNUMBER_ = -1;
+// int gDEBUG_RUNNUMBER_ = 172822;
+// int gDEBUG_EVENTNUMBER_ = 1238207696;
 
 
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const float gMaxJetEta  = 2.5;
-static const float gMuMaxIso   = 0.10;
-static const float gElMaxIso   = 0.10;
-static const float gMinJetPt   = 40.;
-static const bool  gApplyZVeto = true;
+static const float gMaxJetEta  = 2.4;
+static const float gMuMaxIso   = 0.05;
+static const float gElMaxIso   = 0.05;
+static const float gMinJetPt   = 20.;
+static const bool  gApplyZVeto = false;
 static bool  gSmearMET         = false;
 
-static const bool gDoSystStudies = false;
+static const bool gDoSystStudies = true;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -320,7 +322,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		// DEBUG
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
-		// if(jentry > 10000) break;
+		// if(jentry > 1000) break;
 		/////////////////////////////////////////////
 
 		/////////////////////////////////////////////
@@ -345,6 +347,8 @@ void SSDLDumper::loopEvents(Sample *S){
 		gHLTSF = 1.;
 		gBtagSF = 1.;
 
+		fDoCounting = false;
+
 		if( S->datamc!=0 ) {
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
@@ -359,7 +363,14 @@ void SSDLDumper::loopEvents(Sample *S){
 
 
 		fillKinPlots(S);
-		for(gRegion r = region_begin; r < TTbarWSelJU; r=gRegion(r+1)) fillYields(S, r);
+		for(gRegion r = region_begin; r < TTbarWPresel; r=gRegion(r+1)) fillYields(S, r);
+		
+		fillYields(S, TTbarWPresel);
+		fillYields(S, TTbarWSelIncl);
+		
+		fDoCounting = true;
+		fillYields(S, TTbarWSel);
+		fDoCounting = false;
 
 		fillSigEventTree(S, 0);
 		fillDiffYields(S);
@@ -463,7 +474,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[17]); // ... both muons pass tight cut
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline){
+				if(S->datamc == 0 && reg == TTbarWSel){
 					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
@@ -552,7 +563,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[17]); // " ... both electrons pass tight cut
 				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
 				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
+				if(S->datamc == 0 && reg == TTbarWSel){
 					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
@@ -652,7 +663,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[17]);
 				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
 				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
+				if(S->datamc == 0 && reg == TTbarWSel){
 					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
@@ -1183,6 +1194,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
 	if(mumuSignalTrigger() && isSSLLMuEvent(ind1, ind2)){ // trigger && select loose mu/mu pair
+		fSETree_M3      = getM3();
 		fSETree_MT2     = getMT2(ind1, ind2, Muon);
 		fSETree_Mll     = getMll(ind1, ind2, Muon);
 		fSETree_HT      = getHT();
@@ -1227,6 +1239,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// EMU CHANNEL:  ///////////////////////////////////////////////////////////////////////////////////////
 	else if(elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
+		fSETree_M3     = getM3();
 		fSETree_MT2    = getMT2(ind1, ind2, ElMu);
 		fSETree_Mll    = getMll(ind1, ind2, ElMu);
 		fSETree_HT     = getHT();
@@ -1271,6 +1284,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// EE CHANNEL:  ////////////////////////////////////////////////////////////////////////////////////////
 	else if(elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
+		fSETree_M3     = getM3();
 		fSETree_MT2    = getMT2(ind1, ind2, Elec);
 		fSETree_Mll    = getMll(ind1, ind2, Elec);
 		fSETree_HT     = getHT();
@@ -1319,6 +1333,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		// EM CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
 		if (elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
 			if ( isTightMuon(ind1) && isTightElectron(ind2)) {
+				fSETree_M3      = getM3();
 				fSETree_MT2     = getMT2(ind1, ind2, ElMu);
 				fSETree_Mll     = getMll(ind1, ind2, ElMu);
 				fSETree_HT      = getHT();
@@ -1344,6 +1359,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		// EE CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
 		if (elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
 			if ( isTightElectron(ind1) && isTightElectron(ind2)) {
+				fSETree_M3      = getM3();
 				fSETree_MT2     = getMT2(ind1, ind2, Elec);
 				fSETree_Mll     = getMll(ind1, ind2, Elec);
 				fSETree_HT      = getHT();
@@ -1933,8 +1949,8 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(Muon, DoubleMu1, DoubleMu5);
 	printCutFlow(Muon, TTJets, GJets200);
 	printCutFlow(Muon, GVJets, WmWm);
-	printCutFlow(Muon, LM0, LM6);
-	printCutFlow(Muon, LM7, LM13);
+	// printCutFlow(Muon, LM0, LM6);
+	// printCutFlow(Muon, LM7, LM13);
 	printCutFlow(Muon, QCDMuEnr10, QCD470);
 	printCutFlow(Muon, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
@@ -1943,8 +1959,8 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(ElMu, MuEG1, MuEG5);
 	printCutFlow(ElMu, TTJets, GJets200);
 	printCutFlow(ElMu, GVJets, WmWm);
-	printCutFlow(ElMu, LM0, LM6);
-	printCutFlow(ElMu, LM7, LM13);
+	// printCutFlow(ElMu, LM0, LM6);
+	// printCutFlow(ElMu, LM7, LM13);
 	printCutFlow(ElMu, QCDMuEnr10, QCD470);
 	printCutFlow(ElMu, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
@@ -1953,8 +1969,8 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(Elec, DoubleEle1, DoubleEle5);
 	printCutFlow(Elec, TTJets, GJets200);
 	printCutFlow(Elec, GVJets, WmWm);
-	printCutFlow(Elec, LM0, LM6);
-	printCutFlow(Elec, LM7, LM13);
+	// printCutFlow(Elec, LM0, LM6);
+	// printCutFlow(Elec, LM7, LM13);
 	printCutFlow(Elec, QCDMuEnr10, QCD470);
 	printCutFlow(Elec, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
@@ -1983,6 +1999,7 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("PassZVeto",   &fSETree_ZVeto   , "PassZVeto/I");
 	fSigEv_Tree->Branch("HT",          &fSETree_HT      , "HT/F");
 	fSigEv_Tree->Branch("MET",         &fSETree_MET     , "MET/F");
+	fSigEv_Tree->Branch("M3",          &fSETree_M3      , "M3/F");
 	fSigEv_Tree->Branch("NM",          &fSETree_NM      , "NM/I");
 	fSigEv_Tree->Branch("NE",          &fSETree_NE      , "NE/I");
 	fSigEv_Tree->Branch("NJ",          &fSETree_NJ      , "NJ/I");
@@ -2014,6 +2031,7 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_ttZSel   = -1;
 	fSETree_HT       = -1.;
 	fSETree_MET      = -1.;
+	fSETree_M3       = -1.;
 	fSETree_NM       = -1;
 	fSETree_NE       = -1;
 	fSETree_NJ       = -1;
@@ -3163,6 +3181,32 @@ float SSDLDumper::getMETPhi(){
 	float phi = pfMETPhi;
 	return phi;
 }
+float SSDLDumper::getM3(){
+	// Return M3
+	int njets = getNJets();
+	if(njets < 3) return -1.;
+
+	float triJetPtMax = 0.;
+	float m3 = 0.;
+	for(size_t i = 0; i < NJets; ++i){
+		if(!isGoodJet(i)) continue;
+		for(size_t j = i+1; j < NJets; ++j){
+			if(!isGoodJet(j)) continue;
+			for(size_t k = j+1; k < NJets; ++k){
+				if(!isGoodJet(k)) continue;
+				TLorentzVector jet1; jet1.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+				TLorentzVector jet2; jet2.SetPtEtaPhiE(JetPt[j], JetEta[j], JetPhi[j], JetEnergy[j]);
+				TLorentzVector jet3; jet3.SetPtEtaPhiE(JetPt[k], JetEta[k], JetPhi[k], JetEnergy[k]);
+				TLorentzVector triJet = jet1 + jet2 + jet3;
+				if( triJet.Pt() > triJetPtMax ){
+					triJetPtMax = triJet.Pt();
+					m3 = triJet.M();
+				}
+			}
+		}
+	}	
+	return m3;
+}
 int SSDLDumper::getNJets(){
 	int njets(0);
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) njets++;
@@ -3761,6 +3805,7 @@ bool SSDLDumper::passes3rdLepVeto(){
 bool SSDLDumper::passesTTZSel(){
 	int ind1(-1), ind2(-1);
 	gChannel chan = Muon;
+	bool pass = true;
 
 	// OS Dilepton:
 	// Store leptons in vectors
@@ -3814,9 +3859,13 @@ bool SSDLDumper::passesTTZSel(){
 			if(l1.type == 1) chan = Elec;
 		}
 	}
-	if(bestMZ > 1000) return false;
+	if(bestMZ > 1000) pass = false;
 	tmp_Leptons_p.clear();
 	tmp_Leptons_m.clear();
+	
+	// Want to use hyp leptons only temporary! Have to set them to original later
+	lepton orig_hyplep1 = lepton(fHypLepton1.p, fHypLepton1.charge, fHypLepton1.type, fHypLepton1.index);
+	lepton orig_hyplep2 = lepton(fHypLepton2.p, fHypLepton2.charge, fHypLepton2.type, fHypLepton2.index);
 	
 	setHypLepton1(ind1, chan);
 	setHypLepton2(ind2, chan);
@@ -3847,14 +3896,18 @@ bool SSDLDumper::passesTTZSel(){
 			break;
 		}
 	}
-	if(found3rd == false) return false;
+	if(found3rd == false) pass = false;
 	
 	// Cut on jets and btags
-	if(getNJets() < 3)     return false;
-	if(getHT() < 120.)     return false;
-	if(getNBTags() < 2)    return false;
-	if(getNBTagsMed() < 1) return false;
-	return true;
+	if(getNJets() < 3)     pass = false;
+	if(getHT() < 120.)     pass = false;
+	if(getNBTags() < 2)    pass = false;
+	if(getNBTagsMed() < 1) pass = false;
+
+	resetHypLeptons();
+	lepton fHypLepton1 = lepton(orig_hyplep1.p, orig_hyplep1.charge, orig_hyplep1.type, orig_hyplep1.index);
+	lepton fHypLepton2 = lepton(orig_hyplep2.p, orig_hyplep2.charge, orig_hyplep2.type, orig_hyplep2.index);
+	return pass;
 }
 
 //____________________________________________________________________________
@@ -4154,6 +4207,16 @@ bool SSDLDumper::passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan){
 		if(chan == Elec && pT1 < Region::minEl1pt[reg]) return false;
 		if(chan == Elec && pT2 < Region::minEl2pt[reg]) return false;
 	}
+	return true;
+}
+bool SSDLDumper::passesSel(float HT, float MET, int njets, int nbjets, int nbjetsmed, float pT1, float pT2, gRegion reg, gChannel chan){
+	if(HT     < Region::minHT    [reg] || HT  > Region::maxHT [reg]) return false;
+	if(MET    < Region::minMet   [reg] || MET > Region::maxMet[reg]) return false;
+	if(njets  < Region::minNjets [reg]) return false;
+	if(nbjets < Region::minNbjets[reg]) return false;
+	if(nbjetsmed < Region::minNbjmed[reg]) return false;
+
+	if(passesPtCuts(pT1, pT2, reg, chan) == false) return false;
 	return true;
 }
 

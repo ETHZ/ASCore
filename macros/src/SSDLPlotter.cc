@@ -192,9 +192,9 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(ZZZ);
 
 	fMCBGSig = fMCBG;
-	fMCBGSig.push_back(LM6);
+	// fMCBGSig.push_back(LM6);
 	fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
-	fMCBGNoQCDNoGJetsSig.push_back(LM6);
+	// fMCBGNoQCDNoGJetsSig.push_back(LM6);
 
 	fMCBGMuEnr.push_back(TTJets);
 	fMCBGMuEnr.push_back(TJets_t);
@@ -226,7 +226,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(QCDMuEnr10);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
-	fMCBGMuEnrSig.push_back(LM6);
+	// fMCBGMuEnrSig.push_back(LM6);
 
 	if(!gEWKino) fMCRareSM.push_back(WZ);
 	fMCRareSM.push_back(ZZ);
@@ -293,8 +293,8 @@ void SSDLPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	fillRatios(fMuData, fEGData, 0);
-	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	fillRatios(fMuData,    fEGData, 0);
+	fillRatios(fMCBGMuEnr, fMCBG,   1);
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -346,6 +346,8 @@ void SSDLPlotter::doAnalysis(){
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0., 7000., 200., 7000., 20., 10.); // MET 200 region , no HT cut
+
+	// makeM3Plot();
 }
 
 //____________________________________________________________________________
@@ -1010,7 +1012,9 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 
 	////////////////////////////////////////////////////
 	// Fill signal histos
-	TTree *signal_tree = fSamples[LM6]->getTree();
+	// gSample sigsam = LM6;
+	gSample sigsam = TTbarW;
+	TTree *signal_tree = fSamples[sigsam]->getTree();
 	signal_tree->ResetBranchAddresses();
 	Init(signal_tree);
 	// Event loop
@@ -1019,7 +1023,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	if (fChain == 0) return;
 	Long64_t sig_nentries = fChain->GetEntriesFast();
 	for (Long64_t jentry=0; jentry<sig_nentries;jentry++) {
-		printProgress(jentry, sig_nentries, fSamples[LM6]->name);
+		printProgress(jentry, sig_nentries, fSamples[sigsam]->name);
 
 		signal_tree->GetEntry(jentry);
 		//Long64_t ientry = LoadTree(jentry);
@@ -1062,7 +1066,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 			}
 		}
 	} // end loop over all events
-	fSamples[LM6]->cleanUp();
+	fSamples[sigsam]->cleanUp();
 	cout << endl;
 	////////////////////////////////////////////////////
 	
@@ -5154,6 +5158,138 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	                    1.0+(ttwzpreds[ijs].ttwz-ttwzpreds[inm].ttwz)/ttwzpreds[inm].ttwz,
 	                    1.0+(ttwzpreds[ijs].wz  -ttwzpreds[inm].wz  )/ttwzpreds[inm].wz,
 	                    1.0+(ttwzpreds[ijs].rare-ttwzpreds[inm].rare)/ttwzpreds[inm].rare) << endl;
+	const float pu_syst = 1.03;
+	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              pu_syst, pu_syst, pu_syst) << endl;
+	const float match_syst_up = 1.01485;
+	const float match_syst_dn = 0.997558;
+	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
+	const float scale_syst_up = 1.02302;
+	const float scale_syst_dn = 0.965962;
+	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
+	fOUTSTREAM << endl;
+	fOUTSTREAM.close();
+	
+	datacard = outputdir + "datacard_TTWZ_split.txt";
+	fOUTSTREAM.open(datacard.Data(), ios::trunc);
+	fOUTSTREAM <<      "#=========================================================================================" << endl;
+	fOUTSTREAM <<      "# Systematics table for ttW/Z analysis, same-sign channel, subchannels" << endl;
+	fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
+	fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM <<      "imax 3" << endl;
+	fOUTSTREAM <<      "jmax 4" << endl;
+	fOUTSTREAM <<      "kmax *" << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "bin\t\t1\t2\t3" << endl;
+	fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds[inm].obs_mm, ttwzpreds[inm].obs_em, ttwzpreds[inm].obs_ee) << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t2\t\t2\t\t2\t\t2\t\t2\t\t3\t\t3\t\t3\t\t3\t\t3" << endl;
+	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
+	fOUTSTREAM <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4\t\t0\t\t1\t\t2\t\t3\t\t4\t\t0\t\t1\t\t2\t\t3\t\t4" << endl;
+	fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+	              ttwzpreds[inm].ttwz_mm, ttwzpreds[inm].fake_mm, 0.0                   , ttwzpreds[inm].wz_mm, ttwzpreds[inm].rare_mm,
+	              ttwzpreds[inm].ttwz_em, ttwzpreds[inm].fake_em, ttwzpreds[inm].cmid_em, ttwzpreds[inm].wz_em, ttwzpreds[inm].rare_em,
+	              ttwzpreds[inm].ttwz_ee, ttwzpreds[inm].fake_ee, ttwzpreds[inm].cmid_ee, ttwzpreds[inm].wz_ee, ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("# separate signal yields: [mm] %5.3f (ttW), %5.3f (ttZ); [em] %5.3f (ttW), %5.3f (ttZ); [ee] %5.3f (ttW), %5.3f (ttZ);",
+	              ttwzpreds[inm].ttw_mm, ttwzpreds[inm].ttz_mm,
+	              ttwzpreds[inm].ttw_em, ttwzpreds[inm].ttz_em,
+	              ttwzpreds[inm].ttw_ee, ttwzpreds[inm].ttz_ee) << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "#syst" << endl;
+	fOUTSTREAM <<      "lumi     lnN\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022" << endl;
+	fOUTSTREAM << Form("bgUncfak lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-",
+	              1.0+ttwzpreds[inm].fake_err_mm/ttwzpreds[inm].fake_mm,
+	              1.0+ttwzpreds[inm].fake_err_em/ttwzpreds[inm].fake_em,
+	              1.0+ttwzpreds[inm].fake_err_ee/ttwzpreds[inm].fake_ee) << endl;
+	fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-",
+	              1.0+ttwzpreds[inm].cmid_err_em/ttwzpreds[inm].cmid_em,
+	              1.0+ttwzpreds[inm].cmid_err_ee/ttwzpreds[inm].cmid_ee) << endl;
+	fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-",
+	              1.0+ttwzpreds[inm].wz_err_mm  /ttwzpreds[inm].wz_mm,
+	              1.0+ttwzpreds[inm].wz_err_em  /ttwzpreds[inm].wz_em,
+	              1.0+ttwzpreds[inm].wz_err_ee  /ttwzpreds[inm].wz_ee)   << endl;
+	fOUTSTREAM << Form("bgUncrar lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t%5.3f",
+	              1.0+ttwzpreds[inm].rare_err_mm/ttwzpreds[inm].rare_mm,
+	              1.0+ttwzpreds[inm].rare_err_em/ttwzpreds[inm].rare_em,
+	              1.0+ttwzpreds[inm].rare_err_ee/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("lept     lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              1.0+(ttwzpreds[ild].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ilu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ild].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ilu].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ild].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ilu].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ild].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ilu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ild].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ilu].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ild].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ilu].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ild].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ilu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ild].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ilu].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ild].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+	              1.0+(ttwzpreds[ilu].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("btag     lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+                  1.0+(ttwzpreds[ibd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibd].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ibu].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ibd].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ibu].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ibd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibd].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ibu].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ibd].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ibu].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ibd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibd].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ibu].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ibd].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+                  1.0+(ttwzpreds[ibu].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("jes      lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+                  1.0+(ttwzpreds[ijd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[iju].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ijd].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[iju].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ijd].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[iju].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ijd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[iju].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ijd].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[iju].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ijd].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[iju].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ijd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[iju].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ijd].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[iju].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ijd].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+                  1.0+(ttwzpreds[iju].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("jer      lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              1.0+(ttwzpreds[ijs].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ijs].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ijs].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ijs].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ijs].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ijs].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ijs].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ijs].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ijs].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst) << endl;
+	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, 
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
+	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, 
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
@@ -6624,26 +6760,59 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	///////////////////////////////////////////////////////////////////////////////////	
 	TTWZPrediction pred;
 	pred.obs      = nt2_mm+nt2_em+nt2_ee;
+	pred.obs_mm   = nt2_mm;
+	pred.obs_ee   = nt2_ee;
+	pred.obs_em   = nt2_em;
+
 	pred.ttw      = ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em;
+	pred.ttw_mm   = ttw_nt2_mm;
+	pred.ttw_ee   = ttw_nt2_ee;
+	pred.ttw_em   = ttw_nt2_em;
+
 	pred.ttz      = ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em;
+	pred.ttz_mm   = ttz_nt2_mm;
+	pred.ttz_ee   = ttz_nt2_ee;
+	pred.ttz_em   = ttz_nt2_em;
+
 	pred.ttwz     = pred.ttw + pred.ttz;
 	pred.ttwz_mm  = ttw_nt2_mm + ttz_nt2_mm;
 	pred.ttwz_ee  = ttw_nt2_ee + ttz_nt2_ee;
 	pred.ttwz_em  = ttw_nt2_em + ttz_nt2_em;
+
 	pred.fake     = nF;
-	pred.fake_err = sqrt(FR->getTotEStat()*FR->getTotEStat() + FakeESyst2*nF*nF);
-	pred.cmid     = nt2_ee_chmid + nt2_em_chmid;
-	pred.cmid_err = sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
-	pred.wz       = wz_nt2_ee + wz_nt2_mm + wz_nt2_em;
-	pred.wz_mm    = wz_nt2_mm;
-	pred.wz_ee    = wz_nt2_ee;
-	pred.wz_em    = wz_nt2_em;
-	pred.wz_err   = sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em));
-	pred.rare     = nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em;
-	pred.rare_mm  = nt2_rare_mc_mm;
-	pred.rare_ee  = nt2_rare_mc_ee;
-	pred.rare_em  = nt2_rare_mc_em;
-	pred.rare_err = sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
+	pred.fake_mm  = nF_mm;
+	pred.fake_ee  = nF_ee;
+	pred.fake_em  = nF_em;
+
+	pred.fake_err    = sqrt(FR->getTotEStat()*FR->getTotEStat() + FakeESyst2*nF*nF);
+	pred.fake_err_mm = sqrt(FR->getMMTotEStat()*FR->getMMTotEStat() + FakeESyst2*nF_mm*nF_mm);
+	pred.fake_err_ee = sqrt(FR->getEETotEStat()*FR->getEETotEStat() + FakeESyst2*nF_ee*nF_ee);
+	pred.fake_err_em = sqrt(FR->getEMTotEStat()*FR->getEMTotEStat() + FakeESyst2*nF_em*nF_em);
+
+	pred.cmid        = nt2_ee_chmid + nt2_em_chmid;
+	pred.cmid_ee     = nt2_ee_chmid;
+	pred.cmid_em     = nt2_em_chmid;
+	pred.cmid_err    = sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+	pred.cmid_err_ee = sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2);
+	pred.cmid_err_em = sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+
+	pred.wz        = wz_nt2_ee + wz_nt2_mm + wz_nt2_em;
+	pred.wz_mm     = wz_nt2_mm;
+	pred.wz_ee     = wz_nt2_ee;
+	pred.wz_em     = wz_nt2_em;
+	pred.wz_err    = sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em));
+	pred.wz_err_mm = sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm);
+	pred.wz_err_ee = sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee);
+	pred.wz_err_em = sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em);
+
+	pred.rare        = nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em;
+	pred.rare_mm     = nt2_rare_mc_mm;
+	pred.rare_ee     = nt2_rare_mc_ee;
+	pred.rare_em     = nt2_rare_mc_em;
+	pred.rare_err    = sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
+	pred.rare_err_mm = sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm);
+	pred.rare_err_ee = sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee);
+	pred.rare_err_em = sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em);
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
@@ -7962,17 +8131,18 @@ void SSDLPlotter::makeDiffPrediction(){
 		///////////////////////////////////////////////////////////////////////////////////
 		// SIGNAL /////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
-		gSample sigsam = LM11;
+		// gSample sigsam = LM11;
+		gSample sigsam = TTbarW;
 		TH1D *nt11_sig    = new TH1D(Form("NT11_Sig%s",    varname.Data()), varname, nbins, bins); nt11_sig   ->Sumw2();
 		TH1D *nt11_mm_sig = new TH1D(Form("NT11_mm_Sig%s", varname.Data()), varname, nbins, bins); nt11_mm_sig->Sumw2();
 		TH1D *nt11_em_sig = new TH1D(Form("NT11_em_Sig%s", varname.Data()), varname, nbins, bins); nt11_em_sig->Sumw2();
 		TH1D *nt11_ee_sig = new TH1D(Form("NT11_ee_Sig%s", varname.Data()), varname, nbins, bins); nt11_ee_sig->Sumw2();
-		nt11_mm_sig->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-		nt11_ee_sig->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-		nt11_em_sig->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
-		nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
+		nt11_mm_sig->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
+		nt11_ee_sig->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
+		nt11_em_sig->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
+		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Muon].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
+		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
+		nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[sigsam]->getLumi());
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// OUTPUT /////////////////////////////////////////////////////////////////////////
@@ -10364,31 +10534,32 @@ void SSDLPlotter::storeWeightedPred(){
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
 
 	string *sname = 0;
-	int flag;
+	int flag, passttz;
 	int   stype, flav, cat, njets, nbjets, nbjetsmed;
 	float puweight, slumi, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
 	int event, run;
 
-	sigtree->SetBranchAddress("SystFlag", &flag);
-	sigtree->SetBranchAddress("Event",    &event);
-	sigtree->SetBranchAddress("Run",      &run);
-	sigtree->SetBranchAddress("SName",    &sname);
-	sigtree->SetBranchAddress("SType",    &stype);
-	sigtree->SetBranchAddress("SLumi",    &slumi);
-	sigtree->SetBranchAddress("PUWeight", &puweight);
-	sigtree->SetBranchAddress("Flavor",   &flav);
-	sigtree->SetBranchAddress("pT1",      &pT1);
-	sigtree->SetBranchAddress("pT2",      &pT2);
-	sigtree->SetBranchAddress("eta1",     &eta1);
-	sigtree->SetBranchAddress("eta2",     &eta2);
-	sigtree->SetBranchAddress("TLCat",    &cat);
-	sigtree->SetBranchAddress("HT",       &HT);
-	sigtree->SetBranchAddress("MET",      &MET);
-	sigtree->SetBranchAddress("MT2",      &MT2);
-	sigtree->SetBranchAddress("NJ",       &njets);
-	sigtree->SetBranchAddress("NbJ",      &nbjets);
-	sigtree->SetBranchAddress("NbJmed",   &nbjetsmed);
+	sigtree->SetBranchAddress("SystFlag",   &flag);
+	sigtree->SetBranchAddress("PassTTZSel", &passttz);
+	sigtree->SetBranchAddress("Event",      &event);
+	sigtree->SetBranchAddress("Run",        &run);
+	sigtree->SetBranchAddress("SName",      &sname);
+	sigtree->SetBranchAddress("SType",      &stype);
+	sigtree->SetBranchAddress("SLumi",      &slumi);
+	sigtree->SetBranchAddress("PUWeight",   &puweight);
+	sigtree->SetBranchAddress("Flavor",     &flav);
+	sigtree->SetBranchAddress("pT1",        &pT1);
+	sigtree->SetBranchAddress("pT2",        &pT2);
+	sigtree->SetBranchAddress("eta1",       &eta1);
+	sigtree->SetBranchAddress("eta2",       &eta2);
+	sigtree->SetBranchAddress("TLCat",      &cat);
+	sigtree->SetBranchAddress("HT",         &HT);
+	sigtree->SetBranchAddress("MET",        &MET);
+	sigtree->SetBranchAddress("MT2",        &MT2);
+	sigtree->SetBranchAddress("NJ",         &njets);
+	sigtree->SetBranchAddress("NbJ",        &nbjets);
+	sigtree->SetBranchAddress("NbJmed",     &nbjetsmed);
 	
 	FakeRatios *FR = new FakeRatios();
 
@@ -10426,6 +10597,8 @@ void SSDLPlotter::storeWeightedPred(){
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		if( flav > 2 ) continue; // OS events
+		// if( passttz > 0 ) continue; // veto ttz
+
 		Sample *S = fSampleMap[TString(*sname)];
 
 		int datamc = S->datamc;
@@ -10467,6 +10640,7 @@ void SSDLPlotter::storeWeightedPred(){
 			if(njets  < Region::minNjets [r]) continue;
 			if(nbjets < Region::minNbjets[r]) continue;
 			if(nbjetsmed < Region::minNbjmed[r]) continue;
+			if( passttz > 0 ) continue; // veto ttz
 
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
 
@@ -10497,6 +10671,7 @@ void SSDLPlotter::storeWeightedPred(){
            MET       <  Region::maxMet   [TTbarWPresel] &&
            nbjets    >= Region::minNbjets[TTbarWPresel] &&
            nbjetsmed >= Region::minNbjmed[TTbarWPresel] &&
+		// passttz == 0 &&
            passespt)
 		{
 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
@@ -10559,6 +10734,132 @@ void SSDLPlotter::storeWeightedPred(){
 		tree_opt->Write();
 		file_opt->Close();
 	}
+	delete FR;
+}
+
+void SSDLPlotter::makeM3Plot(){
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+
+	string *sname = 0;
+	int flag;
+	int   stype, flav, cat, njets, nbjets, nbjetsmed;
+	float puweight, slumi, pT1, pT2, HT, MET, M3;
+	float eta1, eta2;
+	int event, run;
+	int PassTTZSel;
+
+	sigtree->SetBranchAddress("SystFlag",   &flag);
+	sigtree->SetBranchAddress("Event",      &event);
+	sigtree->SetBranchAddress("Run",        &run);
+	sigtree->SetBranchAddress("SName",      &sname);
+	sigtree->SetBranchAddress("SType",      &stype);
+	sigtree->SetBranchAddress("SLumi",      &slumi);
+	sigtree->SetBranchAddress("PUWeight",   &puweight);
+	sigtree->SetBranchAddress("Flavor",     &flav);
+	sigtree->SetBranchAddress("pT1",        &pT1);
+	sigtree->SetBranchAddress("pT2",        &pT2);
+	sigtree->SetBranchAddress("eta1",       &eta1);
+	sigtree->SetBranchAddress("eta2",       &eta2);
+	sigtree->SetBranchAddress("TLCat",      &cat);
+	sigtree->SetBranchAddress("HT",         &HT);
+	sigtree->SetBranchAddress("MET",        &MET);
+	sigtree->SetBranchAddress("M3",         &M3);
+	sigtree->SetBranchAddress("NJ",         &njets);
+	sigtree->SetBranchAddress("NbJ",        &nbjets);
+	sigtree->SetBranchAddress("NbJmed",     &nbjetsmed);
+	sigtree->SetBranchAddress("PassTTZSel", &PassTTZSel);
+	
+	TH1D *h_m3_data = new TH1D("m3_data", "M3_data", 17, 0., 680.);
+	TH1D *h_m3_sig  = new TH1D("m3_sig",  "M3_sig",  17, 0., 680.);
+	TH1D *h_m3_bg   = new TH1D("m3_bg",   "M3_bg",   17, 0., 680.);
+	
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		if( flav > 2 ) continue; // OS events
+		if( flag > 0 ) continue;
+		Sample *S = fSampleMap[TString(*sname)];
+
+		int datamc = S->datamc;
+		
+		gChannel chan = gChannel(flav);
+		
+		if(PassTTZSel) continue;
+		if(cat != 0) continue;
+		
+		// Preselection
+		if(njets  < 3) continue;
+		if(pT1 < 20 || pT2 < 20) continue;
+		
+		if(S->getProc() == 10 || S->getProc() == 11) fillWithoutOF(h_m3_sig, M3, puweight);
+		else if(datamc != 0)                         fillWithoutOF(h_m3_bg,  M3, puweight);
+		
+		// Signal Selection:
+		if(HT     < 100)  continue;
+		if(nbjets < 1)    continue;
+		if(nbjetsmed < 1) continue;
+		if(passesPtCuts(pT1, pT2, TTbarWSel, chan) == false) continue;
+
+		if(stype < 3) fillWithoutOF(h_m3_data,  M3);
+	}
+	
+	Color_t col_sig = kRed;
+	Color_t col_bg  = kBlue;
+	h_m3_sig->SetLineWidth(2);
+	h_m3_bg ->SetLineWidth(2);
+
+	h_m3_sig->SetLineColor(col_sig);
+	h_m3_bg ->SetLineColor(col_bg);
+	h_m3_sig->SetFillColor(col_sig);
+	h_m3_bg ->SetFillColor(col_bg);
+	h_m3_sig->SetFillStyle(3004);
+	h_m3_bg ->SetFillStyle(3005);
+
+	h_m3_data->SetMaximum(h_m3_data->GetMaximum() * 2);
+	h_m3_sig ->SetMaximum(h_m3_data->GetMaximum() * 2);
+	h_m3_bg  ->SetMaximum(h_m3_data->GetMaximum() * 2);
+	
+	h_m3_data->SetXTitle("M3 [GeV]");
+	h_m3_data->SetYTitle("Events / 40 GeV");
+
+	h_m3_sig->Scale(h_m3_data->Integral()/h_m3_sig->Integral());
+	h_m3_bg->Scale( h_m3_data->Integral()/h_m3_bg->Integral());
+	
+	FakeRatios *FR = new FakeRatios();
+	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(h_m3_data);
+	gr_obs->SetMarkerColor(kBlack);
+	gr_obs->SetMarkerStyle(20);
+	gr_obs->SetMarkerSize(1.4);
+	gr_obs->SetLineWidth(2);
+	gr_obs->SetLineColor(kBlack);
+	gr_obs->SetFillColor(kBlack);
+	
+	TLegend *leg = new TLegend(0.55,0.67,0.88,0.85);
+	leg->AddEntry(gr_obs,   "Data","p");
+	leg->AddEntry(h_m3_sig, "t#bar{t} + W/Z","f");
+	leg->AddEntry(h_m3_bg,  "Background","f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetTextSize(0.038);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("M3_Plot", "Data vs. MC", 0, 0, 600, 600);
+	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.04);
+	c_temp->cd();
+	
+	h_m3_data ->Draw("axis");
+	h_m3_bg   ->DrawCopy("hist same");
+	h_m3_sig  ->DrawCopy("hist same");
+	gr_obs ->Draw("P same");
+	leg->Draw();
+	drawTopLine(0.49, 1.0, 0.13);
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, "M3_data_vs_sig_bg", fOutputDir + fOutputSubDir);
+	
+	delete leg;
+	delete h_m3_data, h_m3_sig, h_m3_bg;
 	delete FR;
 }
 
@@ -10815,19 +11116,21 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 		cout << endl;
 	}
 	cout << "-------------------------------------------------------------------------------------------------------------------" << endl;
-	cout << setw(9) << fSamples[LM0]->sname << " || ";
-	float scale = luminorm / fSamples[LM0]->getLumi();
+	// gSample sigsam = LM0;
+	gSample sigsam = TTbarW;
+	cout << setw(9) << fSamples[sigsam]->sname << " || ";
+	float scale = luminorm / fSamples[sigsam]->getLumi();
 	if(luminorm < 0) scale = 1;
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Muon]    .nt2  << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Muon]    .nt10 << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Muon]    .nt0  << " || ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][ElMu]     .nt2  << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][ElMu]     .nt10 << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][ElMu]     .nt01 << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][ElMu]     .nt0  << " || ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Elec].nt2  << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Elec].nt10 << " | ";
-	cout << setw(7) << scale * fSamples[LM0]->numbers[Baseline][Elec].nt0  << " || ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Muon]    .nt2  << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Muon]    .nt10 << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Muon]    .nt0  << " || ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][ElMu]     .nt2  << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][ElMu]     .nt10 << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][ElMu]     .nt01 << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][ElMu]     .nt0  << " || ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Elec].nt2  << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Elec].nt10 << " | ";
+	cout << setw(7) << scale * fSamples[sigsam]->numbers[Baseline][Elec].nt0  << " || ";
 	cout << endl;
 	cout << "-------------------------------------------------------------------------------------------------------------------" << endl;
 	cout << setw(9) << "data"  << " || ";
