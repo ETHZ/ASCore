@@ -51,8 +51,8 @@ options.register ('perEvtMvaWeights',
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-#options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
-options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
+options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+# options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
@@ -128,7 +128,6 @@ process.pfNoPileUpPFCHS.enable = True ## pfNoPU enabled
 process.pfNoElectronPFCHS.enable = False 
 process.pfNoMuonPFCHS.enable = False
 process.pfNoTauPFCHS.enable = False
-process.patJetCorrFactorsPFCHS.rho = "kt6PFJets:rho" # fix rho to be taken from reco: temporary fix... to be confirmed
 
 # L1 Fast-jet corrections (only PF jets)
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -152,49 +151,40 @@ process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 
 process.metCorSequence = cms.Sequence(process.pfJetMETcorr + process.pfType1CorrectedMet + process.metMuonJESCorAK5)
 
-### Cleaning ###################################################################
-# flag HB/HE noise
-# https://twiki.cern.ch/twiki/bin/view/CMS/HcalNoiseInfoLibrary
-# https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
-# the next two lines produce the HCAL noise summary flag
-from CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi import *
-# std config with cut on iso:
-process.HBHENoiseFilterResultProducerIso = HBHENoiseFilterResultProducer.clone() 
-# HCAL DPG recomended config:
-process.HBHENoiseFilterResultProducerStd = HBHENoiseFilterResultProducer.clone()
-process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumE        = cms.double(999999.)
-process.HBHENoiseFilterResultProducerStd.minNumIsolatedNoiseChannels = cms.int32(999999)
-process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumEt       = cms.double(999999.)
 
-# RA2 RecHitFilter: tagging mode
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
-process.load('SandBox.Skims.recovRecHitFilter_cfi')
-process.recovRecHitFilter.TaggingMode           = cms.bool(True)
-
-# ECAL dead cells: this is not a filter. Only a flag is stored.
-from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
-process.ecalDeadCellTPfilter                           = EcalDeadCellEventFilter.clone()
-process.ecalDeadCellTPfilter.tpDigiCollection          = 'ecalTPSkim'
-process.ecalDeadCellTPfilter.etValToBeFlagged          = 63.75
-process.ecalDeadCellTPfilter.ebReducedRecHitCollection = 'reducedEcalRecHitsEB'
-process.ecalDeadCellTPfilter.eeReducedRecHitCollection = 'reducedEcalRecHitsEE'
-process.ecalDeadCellTPfilter.taggingMode               = True
-
-# See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
-# require scraping filter
-process.scrapingVeto = cms.EDFilter("FilterOutScraping",
-     applyfilter = cms.untracked.bool(True),
-     debugOn = cms.untracked.bool(False),
-     numtrack = cms.untracked.uint32(10),
-     thresh = cms.untracked.double(0.25)
-     )
-
-# Get a list of good primary vertices, in 42x, these are DAF vertices
+######### Get a list of good primary vertices, in 42x, these are DAF vertices ################
 process.goodVertices = cms.EDFilter("VertexSelector",
 	src = cms.InputTag("offlinePrimaryVertices"),
 	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
 	filter = cms.bool(True)
 )
+
+### Cleaning ###################################################################
+
+## The iso-based HBHE noise filter ___________________________________________||
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+
+## The HCAL laser filter _____________________________________________________||
+process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+process.hcalLaserEventFilter.vetoByRunEventNumber=cms.untracked.bool(False)
+process.hcalLaserEventFilter.vetoByHBHEOccupancy=cms.untracked.bool(True)
+process.hcalLaserEventFilter.taggingMode=cms.bool(True)
+
+## The ECAL dead cell trigger primitive filter _______________________________||
+process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+## For AOD and RECO recommendation to use recovered rechits
+process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(True)
+
+## The EE bad SuperCrystal filter ____________________________________________||
+process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+process.eeBadScFilter.taggingMode = cms.bool(True)
+
+## The tracking failure filter _______________________________________________||
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+process.trackingFailureFilter.taggingMode = cms.bool(True)
+
+
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
@@ -265,22 +255,6 @@ if options.runon == 'data':
     process.patJetCorrFactorsPFCHS.levels.extend( ['L2L3Residual'] )
 	
               
-## Colins Bernet's Particle Based Noise Rejection Filter
-#process.load('SandBox.Skims.jetIDFailureFilter_cfi')
-#process.jetIDFailure.taggingMode   = cms.bool(True) # events are not filtered, but tagged
-#process.jetIDFailure.JetSource     = cms.InputTag('patJetsPF3')
-              
-# RA2 TrackingFailureFilter
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
-process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-process.trackingFailureFilter.JetSource             = 'ak5PFJets'
-process.trackingFailureFilter.TrackSource           = 'generalTracks'
-process.trackingFailureFilter.VertexSource          = 'goodVertices'
-process.trackingFailureFilter.DzTrVtxMax            = 1.0
-process.trackingFailureFilter.DxyTrVtxMax           = 0.2
-process.trackingFailureFilter.MinSumPtOverHT        = 0.10
-process.trackingFailureFilter.taggingMode           = True
-
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
 	src = cms.InputTag("partonGenJets"),
@@ -310,9 +284,9 @@ process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
 #process.Tracer = cms.Service("Tracer")
-#process.options = cms.untracked.PSet(
-# 	wantSummary = cms.untracked.bool(True)
-#)
+process.options = cms.untracked.PSet(
+ 	wantSummary = cms.untracked.bool(True)
+)
 
 
 ###############################################################################
@@ -519,16 +493,19 @@ process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoD
 #### Path ######################################################################
 
 process.p = cms.Path(
-	process.scrapingVeto * # Filter
         process.goodVertices * # Filter
         (
          (process.photonPartonMatch
 #	*process.printGenParticles*process.printPhotons*process.printPartons
 	 )
-       	+ process.HBHENoiseFilterResultProducerIso
-       	+ process.HBHENoiseFilterResultProducerStd
-	+ process.ecalDeadCellTPfilter
-	+ process.recovRecHitFilter
+	# cleaning 
+	+ process.HBHENoiseFilterResultProducer              # tagging mode
+	+ process.hcalLaserEventFilter                       # tagging mode
+	+ process.EcalDeadCellTriggerPrimitiveFilter         # tagging mode
+	+ process.trackingFailureFilter                      # tagging mode
+	+ process.eeBadScFilter                              # tagging mode
+#	+ process.dump  
+	# end cleaning 
 	+ process.pfIsolationAllSequence
 	+ process.kt6PFJetsForIso
 	+ process.newBtaggingSequence
@@ -536,19 +513,25 @@ process.p = cms.Path(
        	+ process.mygenjets
        	+ process.simpleEleIdSequence
        	+ process.metCorSequence
-	+ process.trackingFailureFilter
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
         + process.PFTau
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
-#	+ process.jetIDFailure
-#	+ process.dump  
 	+ process.analyze
        	)
    )
 
-process.out.outputCommands = ['drop *', 'keep *_analyze_*_'+process.name_()] 
+process.out.outputCommands = ['drop *', 
+                              'keep *_analyze_*_'+process.name_(),
+			      'keep *_HBHENoiseFilterResultProducer_*_'+process.name_(),
+			      'keep *_EcalDeadCellTriggerPrimitiveFilter_*_'+process.name_(),
+			      'keep *_hcalLaserEventFilter_*_'+process.name_(),
+			      'keep *_trackingFailureFilter_*_'+process.name_(),
+			      'keep *_eeBadScFilter_*_'+process.name_()
+			      ] 
+
+
 process.outpath = cms.EndPath(process.out)
 
 
@@ -556,8 +539,5 @@ process.outpath = cms.EndPath(process.out)
 if options.runon=='data':
     process.p.remove(process.mygenjets)
     process.p.remove(process.photonPartonMatch)
-if options.runon!='data':
-    process.p.remove(process.scrapingVeto)
 if options.ModelScan==True:
-    process.p.remove(process.HBHENoiseFilterResultProducerIso)
-    process.p.remove(process.HBHENoiseFilterResultProducerStd)
+    process.p.remove(process.hcalLaserEventFilter)

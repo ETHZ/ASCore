@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.27 2012/05/30 14:38:14 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.28 2012/06/15 15:51:00 fronga Exp $
 //
 //
 
@@ -170,8 +170,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fGenJetTag           = iConfig.getParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag        = iConfig.getParameter<edm::InputTag>("tag_l1trig");
   fHLTTrigEventTag     = iConfig.getParameter<edm::InputTag>("tag_hlttrigevent");
-  if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getParameter<edm::InputTag>("tag_hcalnoise");
-  if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getParameter<edm::InputTag>("tag_hcalnoiseIso");
   fSrcRho              = iConfig.getParameter<edm::InputTag>("tag_srcRho");
   fSrcRhoForIso        = iConfig.getParameter<edm::InputTag>("tag_srcRhoForIso");
   pfphotonsProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfphotonsProducer");
@@ -383,7 +381,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
   iEvent.getByLabel("BeamHaloSummary",TheBeamHaloSummary);
   const BeamHaloSummary TheSummary = (*TheBeamHaloSummary.product());
-  *fTCSCTightHaloID = static_cast<int>  (TheSummary.CSCTightHaloId());
+  *fTCSCTightHaloID = (TheSummary.CSCTightHaloId()) ? 0:1;
 
   // collect information for b-tagging (4 tags)
   Handle<JetTagCollection> jetsBtag[gMaxNBtags];
@@ -494,25 +492,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   CrackCorrFunc->init(iSetup);
   LocalCorrFunc->init(iSetup);
 
-  // ECAL dead cell Trigger Primitive filter
-  edm::Handle<bool> EcalDeadTPFilterFlag;
-  iEvent.getByLabel("ecalDeadCellTPfilter",EcalDeadTPFilterFlag);
-  *fTEcalDeadTPFilterFlag = (*EcalDeadTPFilterFlag) ? 1 : 0;
-	
-  // Stevens recovRecHitFilter
-  // http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/lowette/SandBox/Skims/python/recovRecHitFilter_cfi.py?sortby=date&view=log
-  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
-  edm::Handle<bool> RecovRecHitFilterFlag;
-  iEvent.getByLabel("recovRecHitFilter","Result",RecovRecHitFilterFlag);
-  *fTRecovRecHitFilterFlag = (*RecovRecHitFilterFlag) ? 1 : 0;
-
-  // RA2 tracking tailure filter
-  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
-  // http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/seema/SandBox/Skims/python/trackingFailureFilter_cfi.py?hideattic=0&revision=1.3&view=markup&pathrev=MAIN
-  edm::Handle<bool> RA2TrackingFailureFlag;
-  iEvent.getByLabel("trackingFailureFilter",RA2TrackingFailureFlag);
-  *fTRA2TrackingFailureFilterFlag = (int) *RA2TrackingFailureFlag;
-
   // type-I corrected MET for 2012 analyses
   edm::Handle<View<PFMET> > typeICorMET;
   iEvent.getByLabel("pfType1CorrectedMet",typeICorMET);
@@ -524,77 +503,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTPFType1METSignificance = (typeICorMET->front()).significance();
   *fTPFType1SumEt           = (typeICorMET->front()).sumEt();
 
-  // Colin's PBNR filter
-  edm::Handle<bool> ParticleBasedNoiseRejectionFlag;
-  //FR: this requires modifications in the CVS code. Disabled.
-  //iEvent.getByLabel("jetIDFailure",ParticleBasedNoiseRejectionFlag);
-  //fPBNRFlag = (int) *ParticleBasedNoiseRejectionFlag;
-
-  /*
-  // TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
-
-  // Ecal dead cells: boundary energy check:
-  // fTEcalDeadCellBEFlag ==0 if >24 dead cells with >10 GeV boundary energy
-  edm::InputTag ecalAnomalousFilterTag("EcalAnomalousEventFilter","anomalousECALVariables");
-  Handle<AnomalousECALVariables> anomalousECALvarsHandle;
-  iEvent.getByLabel(ecalAnomalousFilterTag, anomalousECALvarsHandle);
-  AnomalousECALVariables anomalousECALvars;
-  if (anomalousECALvarsHandle.isValid()) {
-  anomalousECALvars = *anomalousECALvarsHandle;
-  } else {
-  edm::LogError("NTP") << " anomalous ECAL Vars not valid/found ";
-  }
-  // default call to isEcalNoise() returns true if
-  //      1. highestEnergyDepositAroundDeadCell > 10 (maxBoundaryEnergy)
-  //   && 2. DeadClusterSize > 24 (minDeadClusterSize)
-  //   to change default values: call isEcalNoise(minDeadClusterSize, maxBoundaryEnergy)
-  if(anomalousECALvars.isEcalNoise()==1){
-  fTEcalDeadCellBEFlag = 0;
-  }else{
-  fTEcalDeadCellBEFlag = 1;
-  }
-  // ------------------------------
-  // ECAL GAP energy
-  // minimal BE spefified as cutBoundEnergyGapEE/cutBoundEnergyGapEB in cfi.py
-  fTnECALGapClusters=0;
-  // EB
-  for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EB.size(); ++i) {
-  BoundaryInformation bInfo =anomalousECALvars.v_enNeighboursGap_EB[i];
-  fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
-  fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
-  fTnECALGapClusters++;
-  if(fTnECALGapClusters >= gMaxnECALGapClusters){
-  edm::LogWarning("NTP") << "@SUB=analyze()"
-  << "More than " << static_cast<int>(gMaxnECALGapClusters)
-  << " ECAL GAP Clusters!!";
-  break;
-  }
-  }
-  // EE
-  for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EE.size(); ++i) {
-  BoundaryInformation bInfo = anomalousECALvars.v_enNeighboursGap_EE[i];
-  fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
-  fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
-  fTnECALGapClusters++;
-  if(fTnECALGapClusters >= gMaxnECALGapClusters){
-  edm::LogWarning("NTP") << "@SUB=analyze()"
-  << "More than " << static_cast<int>(gMaxnECALGapClusters)
-  << " ECAL GAP Clusters!!";
-  break;
-  }
-  }
-  */
-
-  // Retrieve HB/HE noise flag	
-  if(!fIsModelScan) {
-    edm::Handle<bool> hbHeNoiseFlag;
-    iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
-    *fTHBHENoiseFlag    = static_cast<int>(*hbHeNoiseFlag);
-	   
-    edm::Handle<bool> hbHeNoiseFlagIso;
-    iEvent.getByLabel(fHBHENoiseResultTagIso,hbHeNoiseFlagIso);
-    *fTHBHENoiseFlagIso = static_cast<int>(*hbHeNoiseFlagIso);
-  }
 
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
@@ -3490,12 +3398,7 @@ void NTupleProducer::declareProducts(void) {
   produces<int>("MaxGenPhoExceed");
   produces<int>("MaxGenJetExceed");
   produces<int>("MaxVerticesExceed");
-  produces<int>("HBHENoiseFlag");
-  produces<int>("HBHENoiseFlagIso");
   produces<int>("CSCTightHaloID");
-  produces<int>("EcalDeadTPFilterFlag");
-  produces<int>("RecovRecHitFilterFlag");
-  produces<int>("RA2TrackingFailureFilterFlag");
   produces<float>("PFType1MET");
   produces<float>("PFType1METpx");
   produces<float>("PFType1METpy");
@@ -4140,12 +4043,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMaxGenPhoExceed.reset(new int(0));
   fTMaxGenJetExceed.reset(new int(0));
   fTMaxVerticesExceed.reset(new int(0));
-  fTHBHENoiseFlag.reset(new int(-999));
-  fTHBHENoiseFlagIso.reset(new int(-999));
   fTCSCTightHaloID.reset(new int(-999));
-  fTEcalDeadTPFilterFlag.reset(new int(-999));
-  fTRecovRecHitFilterFlag.reset(new int(-999));
-  fTRA2TrackingFailureFilterFlag.reset(new int(-999));
   fTPFType1MET.reset(new float(-999.99));
   fTPFType1METpx.reset(new float(-999.99));
   fTPFType1METpy.reset(new float(-999.99));
@@ -4854,12 +4752,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMaxGenPhoExceed, "MaxGenPhoExceed");
   event.put(fTMaxGenJetExceed, "MaxGenJetExceed");
   event.put(fTMaxVerticesExceed, "MaxVerticesExceed");
-  event.put(fTHBHENoiseFlag, "HBHENoiseFlag");
-  event.put(fTHBHENoiseFlagIso, "HBHENoiseFlagIso");
   event.put(fTCSCTightHaloID, "CSCTightHaloID");
-  event.put(fTEcalDeadTPFilterFlag, "EcalDeadTPFilterFlag");
-  event.put(fTRecovRecHitFilterFlag, "RecovRecHitFilterFlag");
-  event.put(fTRA2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag");
   event.put(fTPFType1MET, "PFType1MET");
   event.put(fTPFType1METpx, "PFType1METpx");
   event.put(fTPFType1METpy, "PFType1METpy");

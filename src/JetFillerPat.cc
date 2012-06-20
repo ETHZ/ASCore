@@ -123,6 +123,7 @@ void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup
         fTChEmfrac   ->push_back(jetuncorr.chargedEmEnergyFraction());
         fTNeuEmfrac  ->push_back(jetuncorr.neutralEmEnergyFraction());
         fTChMufrac   ->push_back(jetuncorr.chargedMuEnergyFraction());    
+	// Note: fTChHadfrac+fTNeuHadfrac+fTChEmfrac+fTNeuEmfrac+fTChMufrac==1
 
 	fTPhofrac    ->push_back(jetuncorr.photonEnergyFraction()); // photons also count for neutralEmEnergy
         fTHFHadfrac  ->push_back(jetuncorr.HFHadronEnergyFraction());

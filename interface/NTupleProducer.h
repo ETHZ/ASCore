@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.22 2012/05/30 14:38:14 mdunser Exp $
+// $Id: NTupleProducer.h,v 1.114.2.23 2012/06/15 15:51:00 fronga Exp $
 //
 //
 
@@ -210,8 +210,6 @@ private:
   edm::InputTag fGenJetTag;
   edm::InputTag fL1TriggerTag;
   edm::InputTag fHLTTrigEventTag;
-  edm::InputTag fHBHENoiseResultTag;
-  edm::InputTag fHBHENoiseResultTagIso;
   edm::InputTag fSrcRho;
   edm::InputTag fSrcRhoForIso;
   edm::InputTag fpdfWeightTag;
@@ -387,11 +385,6 @@ private:
   std::auto_ptr<float>  fTPUWeightTotal;
   std::auto_ptr<float>  fTPUWeightInTime;
 
-  // ECAL & HCAL Noise
-  std::auto_ptr<int> fTHBHENoiseFlag;
-  std::auto_ptr<int> fTHBHENoiseFlagIso;
-  std::auto_ptr<int> fTRecovRecHitFilterFlag;
-  std::auto_ptr<int> fTRA2TrackingFailureFilterFlag;
   //FR std::auto_ptr<int> fPBNRFlag;
   std::auto_ptr<float> fTPFType1MET;
   std::auto_ptr<float> fTPFType1METpx;
@@ -410,13 +403,6 @@ private:
   std::auto_ptr<std::vector<float> >  fTEBrechitE4oE1;
   std::auto_ptr<std::vector<float> >  fTEBrechitE2oE9;
 
-  std::auto_ptr<int>  fTEcalDeadTPFilterFlag;
-  // int fTEcalDeadCellBEFlag;
-  // static const unsigned int gMaxnECALGapClusters = 50;
-  // unsigned int fTnECALGapClusters;
-  // float fTEcalGapBE[gMaxnECALGapClusters];
-  // int fTEcalGapClusterSize[gMaxnECALGapClusters];
-	
   // CSCBeamHalo 
   std::auto_ptr<int>  fTCSCTightHaloID;
 
