@@ -51,8 +51,8 @@ options.register ('perEvtMvaWeights',
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
-#options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
+#options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
@@ -73,12 +73,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
     # CMSSW_5_2
-    process.GlobalTag.globaltag = "GR_R_52_V7::All"
-    #process.GlobalTag.globaltag = "GR_R_50_V9::All"
+    process.GlobalTag.globaltag = "GR_R_52_V9::All"
 else:
     # CMSSW_5_2_X:
-    process.GlobalTag.globaltag = "START52_V9::All"
-    #process.GlobalTag.globaltag = "START42_V13::All"
+    process.GlobalTag.globaltag = "START52_V9B::All"
 
 
 ### Input/Output ###############################################################
@@ -110,16 +108,31 @@ process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
 ### Jet/MET Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
-# note: this runs the L1Fast-Jet corrections for PF jets. not applied on Calo
+# Charged hadron subtraction (put that first, it loads many other things)
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.tools.pfTools import *
+pfPostfix= 'PFCHS'
+# ---  CHS enabled ---
+usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon!='data'), postfix=pfPostfix,
+          jetCorrections=('AK5PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute']),  # residual set for data later on
+          pvCollection=cms.InputTag('goodVertices'))
+process.pfPileUpPFCHS.checkClosestZVertex = False
+process.pfNoPileUpPFCHS.enable = True ## pfNoPU enabled
+# ---  CHS diabled ---
+# usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon!='data'), postfix=pfPostfix,
+#           jetCorrections=('AK5PF', ['L1FastJet', 'L2Relative', 'L3Absolute']),  # residual set for data later on
+#           pvCollection=cms.InputTag('goodVertices'))
+# process.pfPileUpPFCHS.checkClosestZVertex = False
+# process.pfNoPileUpPFCHS.enable = False ## pfNoPU enabled
+# --------- disable top-projections: do old style cleaning --------------------
+process.pfNoElectronPFCHS.enable = False 
+process.pfNoMuonPFCHS.enable = False
+process.pfNoTauPFCHS.enable = False
+process.patJetCorrFactorsPFCHS.rho = "kt6PFJets:rho" # fix rho to be taken from reco: temporary fix... to be confirmed
+
+# L1 Fast-jet corrections (only PF jets)
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
-# Turn-on the FastJet density calculation -----------------------
-process.kt6PFJets.doRhoFastjet = True
-# process.kt6PFJets.Rho_EtaMax   = cms.double(4.4) # this is the default value in 4_2
-# process.kt6PFJets.Ghost_EtaMax = cms.double(5.0) # this is the default value in 4_2
-# Turn-on the FastJet jet area calculation 
-process.ak5PFJets.doAreaFastjet = True
-process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
 
 process.kt6PFJetsForIso = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
 process.kt6PFJetsForIso.Rho_EtaMax = cms.double(2.5)
@@ -203,6 +216,7 @@ glist_btags = cms.vstring('trackCountingHighEffBJetTags','trackCountingHighPurBJ
 		          'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags',
 			  'combinedSecondaryVertexBJetTags', 'combinedSecondaryVertexMVABJetTags',
 			  'jetBProbabilityBJetTags','jetProbabilityBJetTags')
+
 process.analyze.jets = (
    # Calo jets
      cms.PSet( prefix = cms.string('CA'),
@@ -213,7 +227,16 @@ process.analyze.jets = (
                sel_minpt  = process.analyze.sel_mincorjpt,
                sel_maxeta = process.analyze.sel_maxjeta,
                corrections = cms.string('ak5CaloL2L3'),
-               ), )
+               ), 
+     # pf jets with CHS
+     cms.PSet( prefix = cms.string('PFCHS'),
+               tag = cms.InputTag('patJetsPFCHS'),
+               isPat = cms.bool(True),
+               sel_minpt  = process.analyze.sel_mincorjpt,
+               sel_maxeta = process.analyze.sel_maxjeta,
+	       list_btags = glist_btags,
+               ), 
+     )
 # Add PF candidates
 process.analyze.pfCandidates = (
      cms.PSet( prefix = cms.string('PFC'),
@@ -238,7 +261,9 @@ process.analyze.leptons = (
 if options.runon == 'data':
     process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
     for extJet in process.analyze.jets:
-        extJet.corrections = extJet.corrections.value() + 'Residual'
+        if hasattr(extJet,'corrections'): extJet.corrections = extJet.corrections.value() + 'Residual'
+    process.patJetCorrFactorsPFCHS.levels.extend( ['L2L3Residual'] )
+	
               
 ## Colins Bernet's Particle Based Noise Rejection Filter
 #process.load('SandBox.Skims.jetIDFailureFilter_cfi')
@@ -443,7 +468,8 @@ process.analyze.tag_elepfisosCustom  = ['electronPFIsoChHad03'    , 'electronPFI
                                         'electronRadPFIsoNHad03'  , 'electronRadPFIsoNHad04'   ,
                                         'electronRadPFIsoPhoton03', 'electronRadPFIsoPhoton04' ]
 
-#To add the tauID's
+####################################################################################
+### Tau ID
 from PhysicsTools.PatAlgos.patSequences_cff import tauIsoDepositPFCandidates,tauIsoDepositPFChargedHadrons,tauIsoDepositPFNeutralHadrons,tauIsoDepositPFGammas,patTaus
 process.tauIsoDepositPFCandidates = tauIsoDepositPFCandidates.clone()
 process.tauIsoDepositPFChargedHadrons = tauIsoDepositPFChargedHadrons.clone()
@@ -482,12 +508,12 @@ process.patTaus.tauIDSources = cms.PSet(
     byMediumIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationMVA"),
     byTightIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByTightIsolationMVA"),
     )
-process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus)
 #Only an obvious and loose selection
 process.selectedNewTaus = cms.EDFilter("PATTauSelector",
                                        src = cms.InputTag("patTaus"),
                                        cut = cms.string("tauID('decayModeFinding')")
                                        )
+process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus*process.selectedNewTaus)
 
 
 #### Path ######################################################################
@@ -504,8 +530,6 @@ process.p = cms.Path(
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
 	+ process.pfIsolationAllSequence
-# 	+ process.kt6PFJets
-# 	+ process.ak5PFJets
 	+ process.kt6PFJetsForIso
 	+ process.newBtaggingSequence
 	+ process.newPFBtaggingSequence
@@ -516,12 +540,11 @@ process.p = cms.Path(
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
         + process.PFTau
-        + process.newTaus  
-        + process.selectedNewTaus 
+	+ process.newTaus
+        + process.patPF2PATSequencePFCHS
 #	+ process.jetIDFailure
 #	+ process.dump  
 	+ process.analyze
-
        	)
    )
 
