@@ -10322,6 +10322,7 @@ void SSDLPlotter::storeWeightedPred(){
 	float puweight, slumi, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
 	int event, run;
+	signed int charge;
 
 	sigtree->SetBranchAddress("SystFlag", &flag);
 	sigtree->SetBranchAddress("Event",    &event);
@@ -10342,6 +10343,7 @@ void SSDLPlotter::storeWeightedPred(){
 	sigtree->SetBranchAddress("NJ",       &njets);
 	sigtree->SetBranchAddress("NbJ",      &nbjets);
 	sigtree->SetBranchAddress("NbJmed",   &nbjetsmed);
+	sigtree->SetBranchAddress("Charge",   &charge);
 	
 	FakeRatios *FR = new FakeRatios();
 
@@ -10420,6 +10422,7 @@ void SSDLPlotter::storeWeightedPred(){
 			if(njets  < Region::minNjets [r]) continue;
 			if(nbjets < Region::minNbjets[r]) continue;
 			if(nbjetsmed < Region::minNbjmed[r]) continue;
+			if(Region::chargeVeto[r] != 0 && (charge == Region::chargeVeto[r]) ) continue;
 
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
 
