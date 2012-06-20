@@ -5159,14 +5159,14 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	                    1.0+(ttwzpreds[ijs].wz  -ttwzpreds[inm].wz  )/ttwzpreds[inm].wz,
 	                    1.0+(ttwzpreds[ijs].rare-ttwzpreds[inm].rare)/ttwzpreds[inm].rare) << endl;
 	const float pu_syst = 1.03;
-	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
-	              pu_syst, pu_syst, pu_syst) << endl;
 	const float match_syst_up = 1.01485;
 	const float match_syst_dn = 0.997558;
-	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
-	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
 	const float scale_syst_up = 1.02302;
 	const float scale_syst_dn = 0.965962;
+	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              pu_syst, pu_syst, pu_syst) << endl;
+	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
@@ -5290,6 +5290,145 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, 
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
+	fOUTSTREAM << endl;
+	fOUTSTREAM.close();
+	
+	
+	datacard = outputdir + "datacard_TTWZ_sep.txt";
+	fOUTSTREAM.open(datacard.Data(), ios::trunc);
+	fOUTSTREAM <<      "#=========================================================================================" << endl;
+	fOUTSTREAM <<      "# Systematics table for ttW/Z analysis, same-sign channel, subchannels" << endl;
+	fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
+	fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM <<      "imax 3" << endl;
+	fOUTSTREAM <<      "jmax 5" << endl;
+	fOUTSTREAM <<      "kmax *" << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "bin\t\t1\t2\t3" << endl;
+	fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds[inm].obs_mm, ttwzpreds[inm].obs_em, ttwzpreds[inm].obs_ee) << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t1\t\t2\t\t2\t\t2\t\t2\t\t2\t\t2\t\t3\t\t3\t\t3\t\t3\t\t3\t\t3" << endl;
+	fOUTSTREAM <<      "process\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
+	fOUTSTREAM <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5" << endl;
+	fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+	              ttwzpreds[inm].ttw_mm, ttwzpreds[inm].ttz_mm, ttwzpreds[inm].fake_mm, 0.0                   , ttwzpreds[inm].wz_mm, ttwzpreds[inm].rare_mm,
+	              ttwzpreds[inm].ttw_em, ttwzpreds[inm].ttz_em, ttwzpreds[inm].fake_em, ttwzpreds[inm].cmid_em, ttwzpreds[inm].wz_em, ttwzpreds[inm].rare_em,
+	              ttwzpreds[inm].ttw_ee, ttwzpreds[inm].ttz_ee, ttwzpreds[inm].fake_ee, ttwzpreds[inm].cmid_ee, ttwzpreds[inm].wz_ee, ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << endl << endl;
+	fOUTSTREAM <<      "#syst" << endl;
+	fOUTSTREAM <<      "lumi     lnN\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022\t\t1.022" << endl;
+	fOUTSTREAM << Form("bgUncfak lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-",
+	              1.0+ttwzpreds[inm].fake_err_mm/ttwzpreds[inm].fake_mm,
+	              1.0+ttwzpreds[inm].fake_err_em/ttwzpreds[inm].fake_em,
+	              1.0+ttwzpreds[inm].fake_err_ee/ttwzpreds[inm].fake_ee) << endl;
+	fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-",
+	              1.0+ttwzpreds[inm].cmid_err_em/ttwzpreds[inm].cmid_em,
+	              1.0+ttwzpreds[inm].cmid_err_ee/ttwzpreds[inm].cmid_ee) << endl;
+	fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-",
+	              1.0+ttwzpreds[inm].wz_err_mm  /ttwzpreds[inm].wz_mm,
+	              1.0+ttwzpreds[inm].wz_err_em  /ttwzpreds[inm].wz_em,
+	              1.0+ttwzpreds[inm].wz_err_ee  /ttwzpreds[inm].wz_ee)   << endl;
+	fOUTSTREAM << Form("bgUncrar lnN\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f",
+	              1.0+ttwzpreds[inm].rare_err_mm/ttwzpreds[inm].rare_mm,
+	              1.0+ttwzpreds[inm].rare_err_em/ttwzpreds[inm].rare_em,
+	              1.0+ttwzpreds[inm].rare_err_ee/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("lept     lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              1.0+(ttwzpreds[ild].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ilu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ild].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ilu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ild].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ilu].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ild].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ilu].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ild].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ilu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ild].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ilu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ild].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ilu].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ild].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ilu].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ild].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ilu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ild].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ilu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ild].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ilu].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ild].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+	              1.0+(ttwzpreds[ilu].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("btag     lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+                  1.0+(ttwzpreds[ibd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibu].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ibd].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ibu].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ibd].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ibu].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ibd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibu].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ibd].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ibu].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ibd].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ibu].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ibd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibu].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ibd].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ibu].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ibd].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+                  1.0+(ttwzpreds[ibu].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("jes      lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+                  1.0+(ttwzpreds[ijd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[iju].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ijd].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[iju].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+                  1.0+(ttwzpreds[ijd].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[iju].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+                  1.0+(ttwzpreds[ijd].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[iju].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+                  1.0+(ttwzpreds[ijd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[iju].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ijd].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[iju].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+                  1.0+(ttwzpreds[ijd].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[iju].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+                  1.0+(ttwzpreds[ijd].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[iju].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+                  1.0+(ttwzpreds[ijd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[iju].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ijd].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[iju].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+                  1.0+(ttwzpreds[ijd].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[iju].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+                  1.0+(ttwzpreds[ijd].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee,
+                  1.0+(ttwzpreds[iju].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("jer      lnN\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              1.0+(ttwzpreds[ijs].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ijs].ttwz_mm-ttwzpreds[inm].ttwz_mm)/ttwzpreds[inm].ttwz_mm,
+	              1.0+(ttwzpreds[ijs].wz_mm  -ttwzpreds[inm].wz_mm  )/ttwzpreds[inm].wz_mm,
+	              1.0+(ttwzpreds[ijs].rare_mm-ttwzpreds[inm].rare_mm)/ttwzpreds[inm].rare_mm,
+	              1.0+(ttwzpreds[ijs].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ijs].ttwz_em-ttwzpreds[inm].ttwz_em)/ttwzpreds[inm].ttwz_em,
+	              1.0+(ttwzpreds[ijs].wz_em  -ttwzpreds[inm].wz_em  )/ttwzpreds[inm].wz_em,
+	              1.0+(ttwzpreds[ijs].rare_em-ttwzpreds[inm].rare_em)/ttwzpreds[inm].rare_em,
+	              1.0+(ttwzpreds[ijs].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ijs].ttwz_ee-ttwzpreds[inm].ttwz_ee)/ttwzpreds[inm].ttwz_ee,
+	              1.0+(ttwzpreds[ijs].wz_ee  -ttwzpreds[inm].wz_ee  )/ttwzpreds[inm].wz_ee,
+	              1.0+(ttwzpreds[ijs].rare_ee-ttwzpreds[inm].rare_ee)/ttwzpreds[inm].rare_ee) << endl;
+	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
+	              pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst) << endl;
+	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, 
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
+	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, 
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
