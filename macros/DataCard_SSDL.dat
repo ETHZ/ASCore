@@ -8,10 +8,10 @@
 # Data
 DoubleMu1	mdunser/SSDLTrees/2012/Jun15/DoubleMu-Run2012A-PromptReco-v1-AOD.root			0	0
 DoubleMu2	mdunser/SSDLTrees/2012/Jun15/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
-DoubleMu3	folguera/SSDLTrees/2012/Jun19/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
+DoubleMu3	mdunser/SSDLTrees/2012/Jun21/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
 DoubleEle1	mdunser/SSDLTrees/2012/Jun15/DoubleElectron-Run2012A-PromptReco-v1-AOD.root		0	1
 DoubleEle2	mdunser/SSDLTrees/2012/Jun15/DoubleElectron-Run2012B-PromptReco-v1-AOD/			0	1
-DoubleEle3	folguera/SSDLTrees/2012/Jun19/DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
+DoubleEle3	folguera/SSDLTrees/2012/Jun21/DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
 MuEG1		mdunser/SSDLTrees/2012/Jun15/MuEG-Run2012A-PromptReco-v1-AOD.root			0	2
 MuEG2		mdunser/SSDLTrees/2012/Jun15/MuEG-Run2012B-PromptReco-v1-AOD/				0	2
 MuEG3		folguera/SSDLTrees/2012/Jun19/MuEG-Run2012B-PromptReco-v1-AOD/				0	2
