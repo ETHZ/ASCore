@@ -70,7 +70,8 @@ rules = { # Reco
           'NEBhits' : 20,
           'PUnumInteractions': 50,
           'PUnumFilled'      : 50,
-	  'nGenParticles'    : MAXGENINFO # generator information: max number of stored particles
+	  'nGenParticles'    : MAXGENINFO, # generator information: max number of stored particles
+          'NPfCand' : 2000
           }
 
 #______________________________________________________________
