@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.6 2012/06/23 08:49:25 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.7 2012/06/23 09:10:21 peruzzi Exp $
 //
 //
 
@@ -1846,7 +1846,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
 // 	fTPhotSCSigmaPhiPhi[phoqi]  = lazyTools->covariances(*(photon.superCluster()->seed())).at(2);
 	fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
-	fTPhotPassConvSafeElectronVeto = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, convH, beamspot.position());
+	fTPhotPassConvSafeElectronVeto[phoqi] = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, convH, beamspot.position());
 	fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0;
 
 	// fTPhotIsInJet[phoqi]      = -1;
