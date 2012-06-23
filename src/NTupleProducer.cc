@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.5 2012/06/23 08:15:39 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.6 2012/06/23 08:49:25 peruzzi Exp $
 //
 //
 
@@ -105,6 +105,8 @@ Implementation:
 #include "Geometry/Records/interface/CaloTopologyRecord.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
 #include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
+
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
@@ -393,7 +395,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	//PFcandidates
 	edm::Handle<reco::PFCandidateCollection> pfCandidates;
 	iEvent.getByLabel(pfProducerTag, pfCandidates);
-	
+
+	// All conversions
+	edm::Handle<reco::ConversionCollection> convH;
+	iEvent.getByLabel(fallConversionsCollForVertexing, convH);
+
 	//Electron collection
 	edm::Handle<reco::GsfElectronCollection> electronHandle;
 	iEvent.getByLabel(fElectronTag, electronHandle);
@@ -427,6 +433,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<BeamSpot> beamSpotHandle;
 	iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
 	beamSpot = *beamSpotHandle;
+	const reco::BeamSpot &beamspot = *beamSpotHandle.product();
 
 	// Primary vertex
 	edm::Handle<VertexCollection> vertices;
@@ -1839,6 +1846,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
 // 	fTPhotSCSigmaPhiPhi[phoqi]  = lazyTools->covariances(*(photon.superCluster()->seed())).at(2);
 	fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
+	fTPhotPassConvSafeElectronVeto = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, convH, beamspot.position());
 	fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0;
 
 	// fTPhotIsInJet[phoqi]      = -1;
@@ -2365,9 +2373,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 iEvent.getByLabel(fTrackCollForVertexing, tkH);
 
 	 edm::Handle<VertexCollection> vtxH = vertices;
-
-	 edm::Handle<reco::ConversionCollection> convH;
-	 iEvent.getByLabel(fallConversionsCollForVertexing, convH);
 
 	 int tk_n = 0; 
 
@@ -3797,6 +3802,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoSCEtaWidth"    ,&fTPhotSCEtaWidth    ,"PhoSCEtaWidth[NPhotons]/F");
 	fEventTree->Branch("PhoSCSigmaPhiPhi" ,&fTPhotSCSigmaPhiPhi ,"PhoSCSigmaPhiPhi[NPhotons]/F");
 	fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
+	fEventTree->Branch("PhoPassConvSafeElectronVeto"    ,&fTPhotPassConvSafeElectronVeto    ,"PhoPassConvSafeElectronVeto[NPhotons]/I");
 	fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
 	fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
 	fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/F");
@@ -4676,6 +4682,7 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPhotSCEtaWidth,gMaxnphos);
 	resetFloat(fTPhotSCSigmaPhiPhi,gMaxnphos);
 	resetInt(fTPhotHasPixSeed,gMaxnphos);
+	resetInt(fTPhotPassConvSafeElectronVeto,gMaxnphos);
 	resetInt(fTPhotHasConvTrks,gMaxnphos);
 	resetInt(fTgoodphoton,gMaxnphos);
 	resetInt(fTPhotIsIso,gMaxnphos);

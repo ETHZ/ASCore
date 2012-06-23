@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.4 2012/06/15 13:55:00 chanon Exp $
+// $Id: NTupleProducer.h,v 1.131.2.5 2012/06/23 08:15:38 peruzzi Exp $
 //
 //
 
@@ -791,6 +791,7 @@ private:
 	float fTPhotSCEtaWidth[gMaxnphos];
 	float fTPhotSCSigmaPhiPhi[gMaxnphos];
 	int   fTPhotHasPixSeed[gMaxnphos];
+	int   fTPhotPassConvSafeElectronVeto[gMaxnphos];
 	int   fTPhotHasConvTrks[gMaxnphos];
 	// int   fTPhotIsInJet[gMaxnphos];
 	// int   fTPhotDupEl[gMaxnphos];
