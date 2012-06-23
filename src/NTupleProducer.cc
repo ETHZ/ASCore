@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.4 2012/06/15 13:55:01 chanon Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.5 2012/06/23 08:15:39 peruzzi Exp $
 //
 //
 
@@ -2252,7 +2252,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		   else pho_Cone06PfCandIsFromPU[ipf] = 1;
 		   //cout << "C"<<endl;
 		 }
-	       ipf++;
+
 	       
 	       //if (dR<0.4 && isOverlapping==false) {
 	       //FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pho_Cone06PfCandIsFromPU[ipf], pfCandidates, i, phoqi);
@@ -2305,6 +2305,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       
 	       
 	   }
+
+	       ipf++;
+
 	 }
 	     
 	 pho_Cone06NbPfCand = ipf;
