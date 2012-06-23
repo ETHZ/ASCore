@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.3 2012/06/12 13:09:33 chanon Exp $
+// $Id: NTupleProducer.h,v 1.131.2.4 2012/06/15 13:55:00 chanon Exp $
 //
 //
 
@@ -744,6 +744,7 @@ private:
 	float fTGenElGME[gMaxneles];
 
   //PfCand
+  int fTNPfCand;
   float  fTPfCandPdgId[gMaxnpfcand];
   float  fTPfCandEta[gMaxnpfcand];
   float  fTPfCandPhi[gMaxnpfcand];
@@ -848,6 +849,9 @@ private:
   float fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];
   float fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];  
   float fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];
+
+  float fT_pho_Cone03PFCombinedIso[gMaxnphos];
+  float fT_pho_Cone04PFCombinedIso[gMaxnphos];
 
   /*
 float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];

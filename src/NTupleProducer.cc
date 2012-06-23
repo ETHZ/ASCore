@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.3 2012/06/12 13:09:33 chanon Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.4 2012/06/15 13:55:01 chanon Exp $
 //
 //
 
@@ -1718,9 +1718,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// PfCandidates Variables:
 
 
+
 	int pfcandIndex(0);
 	for( reco::PFCandidateCollection::const_iterator ip = pfCandidates->begin();
 	     ip != pfCandidates->end(); ++ip, ++pfcandIndex ){
+	  
+		if (pfcandIndex >= gMaxnpfcand){
+		  edm::LogWarning("NTP") << "@SUB=analyze"
+					 << "Maximum number of pf candidates exceeded";
+		  fTgoodevent = 1;
+		  break;
+		}
 	  
 	  fTPfCandPdgId[pfcandIndex] = ip->pdgId();
 	  fTPfCandEta[pfcandIndex] = ip->eta();
@@ -1735,7 +1743,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  fTPfCandVz[pfcandIndex] = ip->vz();
 
 	}
-
+	fTNPfCand=pfcandIndex;
 
 
 
@@ -2300,6 +2308,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 }
 	     
 	 pho_Cone06NbPfCand = ipf;
+	 
+	 fT_pho_Cone03PFCombinedIso[phoqi] = (fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi]+fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi]+fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi]) / fTPhotPt[phoqi];
+	 fT_pho_Cone04PFCombinedIso[phoqi] = (fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi]+fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi]+fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi]) / fTPhotPt[phoqi];
+
 
        }     // end PF stuff from Nicholas
 
@@ -2320,7 +2332,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // 		fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
 //      } else
 // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
- 	} // end photons
+ 	} // end photon loop
 
 
 	
@@ -3733,17 +3745,19 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElGenGME"                    ,&fTGenElGME        ,"ElGenGME[NEles]/F");
 
 	//PfCandidates:
-	fEventTree->Branch("fTPfCandPdgId"                 ,&fTPfCandPdgId     ,"fTPfCandPdgId[NPfCand]/F");
-	fEventTree->Branch("fTPfCandEta"                   ,&fTPfCandEta       ,"fTPfCandEta[NPfCand]/F");
-	fEventTree->Branch("fTPfCandPhi"                   ,&fTPfCandPhi       ,"fTPfCandPhi[NPfCand]/F");
-	fEventTree->Branch("fTPfCandPx"                    ,&fTPfCandPx        ,"fTPfCandPx[NPfCand]/F");
-	fEventTree->Branch("fTPfCandPy"                    ,&fTPfCandPy        ,"fTPfCandPy[NPfCand]/F");
-	fEventTree->Branch("fTPfCandPz"                    ,&fTPfCandPz        ,"fTPfCandPz[NPfCand]/F");
-	fEventTree->Branch("fTPfCandEnergy"                ,&fTPfCandEnergy    ,"fTPfCandEnergy[NPfCand]/F");
-	fEventTree->Branch("fTPfCandPt"                    ,&fTPfCandPt        ,"fTPfCandPt[NPfCand]/F");
-	fEventTree->Branch("fTPfCandVx"                    ,&fTPfCandVx        ,"fTPfCandVx[NPfCand]/F");
-	fEventTree->Branch("fTPfCandVy"                    ,&fTPfCandVy        ,"fTPfCandVy[NPfCand]/F");
-	fEventTree->Branch("fTPfCandVz"                    ,&fTPfCandVz        ,"fTPfCandVz[NPfCand]/F");
+	
+	fEventTree->Branch("NPfCand"                     ,&fTNPfCand         ,"NPfCand/I");
+	fEventTree->Branch("PfCandPdgId"                 ,&fTPfCandPdgId     ,"PfCandPdgId[NPfCand]/F");
+	fEventTree->Branch("PfCandEta"                   ,&fTPfCandEta       ,"PfCandEta[NPfCand]/F");
+	fEventTree->Branch("PfCandPhi"                   ,&fTPfCandPhi       ,"PfCandPhi[NPfCand]/F");
+	fEventTree->Branch("PfCandPx"                    ,&fTPfCandPx        ,"PfCandPx[NPfCand]/F");
+	fEventTree->Branch("PfCandPy"                    ,&fTPfCandPy        ,"PfCandPy[NPfCand]/F");
+	fEventTree->Branch("PfCandPz"                    ,&fTPfCandPz        ,"PfCandPz[NPfCand]/F");
+	fEventTree->Branch("PfCandEnergy"                ,&fTPfCandEnergy    ,"PfCandEnergy[NPfCand]/F");
+	fEventTree->Branch("PfCandPt"                    ,&fTPfCandPt        ,"PfCandPt[NPfCand]/F");
+	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
+	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
+	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");
 
 
 	// Photons:
@@ -3817,20 +3831,24 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
 
 
-       fEventTree->Branch("fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+       fEventTree->Branch("pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
 
-       fEventTree->Branch("fT_pho_Cone01NeutralHadronIso_mvVtx",&fT_pho_Cone01NeutralHadronIso_mvVtx,"fT_pho_Cone01NeutralHadronIso_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone02NeutralHadronIso_mvVtx",&fT_pho_Cone02NeutralHadronIso_mvVtx,"fT_pho_Cone02NeutralHadronIso_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone03NeutralHadronIso_mvVtx",&fT_pho_Cone03NeutralHadronIso_mvVtx,"fT_pho_Cone03NeutralHadronIso_mvVtx/F");
-       fEventTree->Branch("fT_pho_Cone04NeutralHadronIso_mvVtx",&fT_pho_Cone04NeutralHadronIso_mvVtx,"fT_pho_Cone04NeutralHadronIso_mvVtx/F");
+       fEventTree->Branch("pho_Cone01NeutralHadronIso_mvVtx",&fT_pho_Cone01NeutralHadronIso_mvVtx,"pho_Cone01NeutralHadronIso_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone02NeutralHadronIso_mvVtx",&fT_pho_Cone02NeutralHadronIso_mvVtx,"pho_Cone02NeutralHadronIso_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone03NeutralHadronIso_mvVtx",&fT_pho_Cone03NeutralHadronIso_mvVtx,"pho_Cone03NeutralHadronIso_mvVtx[NPhotons]/F");
+       fEventTree->Branch("pho_Cone04NeutralHadronIso_mvVtx",&fT_pho_Cone04NeutralHadronIso_mvVtx,"pho_Cone04NeutralHadronIso_mvVtx[NPhotons]/F");
 
-       fEventTree->Branch("fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01/F");
-       fEventTree->Branch("fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01/F");
-       fEventTree->Branch("fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01/F");
-       fEventTree->Branch("fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01/F");
+       fEventTree->Branch("pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+       fEventTree->Branch("pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+       fEventTree->Branch("pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+       fEventTree->Branch("pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+
+       fEventTree->Branch("pho_Cone03PFCombinedIso",&fT_pho_Cone03PFCombinedIso,"pho_Cone03CombinedIso[NPhotons]/F");
+       fEventTree->Branch("pho_Cone04PFCombinedIso",&fT_pho_Cone04PFCombinedIso,"pho_Cone04CombinedIso[NPhotons]/F");
+
 
        /*
 fEventTree->Branch("Pho_Cone04PhotonIso_dR0_dEta0_pt0",&fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,"Pho_Cone04PhotonIso_dR0_dEta0_pt0[NPhotons]/F");
@@ -4160,6 +4178,16 @@ void NTupleProducer::endJob(){
 	edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
 	edm::LogVerbatim("NTP") << "  Number of times Tree was filled:  " << fNFillTree;
 	edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+
+	if (fNTotEvents!=fNFillTree) {
+	  edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+	  edm::LogVerbatim("NTP") << " ==> WARNING!";
+	  edm::LogVerbatim("NTP") << "  Total number of processed Events is not the same as Number of times Tree was filled ";
+	  edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+	  
+	}
+
+
 }
 
 // Method to reset the TTree variables for each event
@@ -4302,6 +4330,7 @@ void NTupleProducer::resetTree(){
 	fTnjetstot    = 0;
 	fTntracks     = 0;
 	fTntrackstot  = 0;
+	fTNPfCand     = 0;
 	fTnphotons    = 0;
 	fTnphotonstot = 0;
 	fTngenleptons = 0;
@@ -4601,6 +4630,20 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTtrkVtxDxy, gMaxntrks);
 	resetFloat(fTtrkVtxDz, gMaxntrks);
 
+
+	
+	resetFloat(fTPfCandPdgId     ,gMaxnpfcand);
+	resetFloat(fTPfCandEta       ,gMaxnpfcand);
+	resetFloat(fTPfCandPhi       ,gMaxnpfcand);
+	resetFloat(fTPfCandPx        ,gMaxnpfcand);
+	resetFloat(fTPfCandPy        ,gMaxnpfcand);
+	resetFloat(fTPfCandPz        ,gMaxnpfcand);
+	resetFloat(fTPfCandEnergy    ,gMaxnpfcand);
+	resetFloat(fTPfCandPt        ,gMaxnpfcand);
+	resetFloat(fTPfCandVx        ,gMaxnpfcand);
+	resetFloat(fTPfCandVy        ,gMaxnpfcand);
+	resetFloat(fTPfCandVz        ,gMaxnpfcand);
+
 	resetFloat(fTPhotPt,gMaxnphos);
 	resetFloat(fTPhotPx,gMaxnphos);
 	resetFloat(fTPhotPy,gMaxnphos);
@@ -4719,7 +4762,8 @@ void NTupleProducer::resetTree(){
        resetFloat(fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
 
-       
+       resetFloat(fT_pho_Cone03PFCombinedIso, gMaxnphos);
+       resetFloat(fT_pho_Cone04PFCombinedIso, gMaxnphos);
 
        /*
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
