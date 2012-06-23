@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.7 2012/06/23 09:10:21 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.8 2012/06/23 09:18:40 peruzzi Exp $
 //
 //
 
@@ -3147,7 +3147,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	
 
 	bool blabalot=false;
-	bool BloatWithGenInfo=true;
+	bool BloatWithGenInfo=false;
 
 	
 	if(BloatWithGenInfo && !fIsRealData) {
@@ -3429,28 +3429,28 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 //        fEventTree->Branch("nStoredGeneratorParticles",(int *) &nStoredGenParticles,"nStoredGeneratorParticles/I");
 
 
-        fEventTree->Branch("FlagMaxGenPartExceeded",&fTflagmaxgenpartexc,"FlagMaxGenPartExceeded/I");
-        fEventTree->Branch("nGenParticles",&fTnGenParticles,"nGenParticles/I");
-        fEventTree->Branch("genInfoId"        ,&fTgenInfoId         ,"genInfoId[nGenParticles]/I");
-        fEventTree->Branch("genInfoStatus"    ,&fTgenInfoStatus     ,"genInfoStatus[nGenParticles]/I");
-        fEventTree->Branch("genInfoMass"      ,&fTgenInfoMass       ,"genInfoMass[nGenParticles]/F");
-        fEventTree->Branch("genInfoNMo"       ,&fTgenInfoNMo        ,"genInfoNMo[nGenParticles]/I");
-        fEventTree->Branch("genInfoMo1Pt"     ,&fTgenInfoMo1Pt      ,"genInfoMo1Pt[nGenParticles]/F");
-        fEventTree->Branch("genInfoMo2Pt"     ,&fTgenInfoMo2Pt      ,"genInfoMo2Pt[nGenParticles]/F");
-        fEventTree->Branch("genInfoNDa"       ,&fTgenInfoNDa        ,"genInfoNDa[nGenParticles]/I");
-        fEventTree->Branch("genInfoMo1"       ,&fTgenInfoMo1        ,"genInfoMo1[nGenParticles]/I");
-        fEventTree->Branch("genInfoMo2"       ,&fTgenInfoMo2        ,"genInfoMo2[nGenParticles]/I");
-        fEventTree->Branch("genInfoDa1"       ,&fTgenInfoDa1        ,"genInfoDa1[nGenParticles]/I");
-        fEventTree->Branch("genInfoDa2"       ,&fTgenInfoDa2        ,"genInfoDa2[nGenParticles]/I");
-        fEventTree->Branch("genInfoPt"        ,&fTgenInfoPt         ,"genInfoPt[nGenParticles]/F");
-        fEventTree->Branch("genInfoEta"       ,&fTgenInfoEta        ,"genInfoEta[nGenParticles]/F");
-        fEventTree->Branch("genInfoPhi"       ,&fTgenInfoPhi        ,"genInfoPhi[nGenParticles]/F");
-        fEventTree->Branch("genInfoPx"        ,&fTgenInfoPx         ,"genInfoPx[nGenParticles]/F");
-        fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
-        fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
-        fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
-	fEventTree->Branch("genInfoMoIndex"   ,&fTgenInfoMoIndex    ,"genInfoMoIndex[nGenParticles]/I");
-	fEventTree->Branch("PromptnessLevel"  ,&fTPromptnessLevel   ,"PromptnessLevel[nGenParticles]/I");
+//        fEventTree->Branch("FlagMaxGenPartExceeded",&fTflagmaxgenpartexc,"FlagMaxGenPartExceeded/I");
+//        fEventTree->Branch("nGenParticles",&fTnGenParticles,"nGenParticles/I");
+//        fEventTree->Branch("genInfoId"        ,&fTgenInfoId         ,"genInfoId[nGenParticles]/I");
+//        fEventTree->Branch("genInfoStatus"    ,&fTgenInfoStatus     ,"genInfoStatus[nGenParticles]/I");
+//        fEventTree->Branch("genInfoMass"      ,&fTgenInfoMass       ,"genInfoMass[nGenParticles]/F");
+//        fEventTree->Branch("genInfoNMo"       ,&fTgenInfoNMo        ,"genInfoNMo[nGenParticles]/I");
+//        fEventTree->Branch("genInfoMo1Pt"     ,&fTgenInfoMo1Pt      ,"genInfoMo1Pt[nGenParticles]/F");
+//        fEventTree->Branch("genInfoMo2Pt"     ,&fTgenInfoMo2Pt      ,"genInfoMo2Pt[nGenParticles]/F");
+//        fEventTree->Branch("genInfoNDa"       ,&fTgenInfoNDa        ,"genInfoNDa[nGenParticles]/I");
+//        fEventTree->Branch("genInfoMo1"       ,&fTgenInfoMo1        ,"genInfoMo1[nGenParticles]/I");
+//        fEventTree->Branch("genInfoMo2"       ,&fTgenInfoMo2        ,"genInfoMo2[nGenParticles]/I");
+//        fEventTree->Branch("genInfoDa1"       ,&fTgenInfoDa1        ,"genInfoDa1[nGenParticles]/I");
+//        fEventTree->Branch("genInfoDa2"       ,&fTgenInfoDa2        ,"genInfoDa2[nGenParticles]/I");
+//        fEventTree->Branch("genInfoPt"        ,&fTgenInfoPt         ,"genInfoPt[nGenParticles]/F");
+//        fEventTree->Branch("genInfoEta"       ,&fTgenInfoEta        ,"genInfoEta[nGenParticles]/F");
+//        fEventTree->Branch("genInfoPhi"       ,&fTgenInfoPhi        ,"genInfoPhi[nGenParticles]/F");
+//        fEventTree->Branch("genInfoPx"        ,&fTgenInfoPx         ,"genInfoPx[nGenParticles]/F");
+//        fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
+//        fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
+//        fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
+//	fEventTree->Branch("genInfoMoIndex"   ,&fTgenInfoMoIndex    ,"genInfoMoIndex[nGenParticles]/I");
+//	fEventTree->Branch("PromptnessLevel"  ,&fTPromptnessLevel   ,"PromptnessLevel[nGenParticles]/I");
 
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
