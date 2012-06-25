@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.9 2012/06/23 15:59:55 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.10 2012/06/25 15:38:24 peruzzi Exp $
 //
 //
 
@@ -2650,8 +2650,6 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	  
 	  if (!store) continue;
 
-	  pfcandIndex++;
-
 		if (pfcandIndex >= gMaxnpfcand){
 		  edm::LogWarning("NTP") << "@SUB=analyze"
 					 << "Maximum number of pf candidates exceeded";
@@ -2670,6 +2668,8 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	  fTPfCandVx[pfcandIndex] = ip->vx();
 	  fTPfCandVy[pfcandIndex] = ip->vy();
 	  fTPfCandVz[pfcandIndex] = ip->vz();
+
+	  pfcandIndex++;
 
 	}
 	fTNPfCand=pfcandIndex;
