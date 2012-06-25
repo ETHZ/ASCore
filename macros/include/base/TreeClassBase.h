@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Jun 23 11:23:13 2012 by ROOT version 5.27/06b
+// Mon Jun 25 19:13:54 2012 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/crab/mc_T2/NTupleProducer_42X_MC_numEvent20.root
 //////////////////////////////////////////////////////////
@@ -71,28 +71,6 @@ public :
    Float_t         signMu;
    Float_t         A0;
    Int_t           process;
-   Int_t           FlagMaxGenPartExceeded;
-   Int_t           nGenParticles;
-   Int_t           genInfoId[2000];   //[nGenParticles]
-   Int_t           genInfoStatus[2000];   //[nGenParticles]
-   Float_t         genInfoMass[2000];   //[nGenParticles]
-   Int_t           genInfoNMo[2000];   //[nGenParticles]
-   Float_t         genInfoMo1Pt[2000];   //[nGenParticles]
-   Float_t         genInfoMo2Pt[2000];   //[nGenParticles]
-   Int_t           genInfoNDa[2000];   //[nGenParticles]
-   Int_t           genInfoMo1[2000];   //[nGenParticles]
-   Int_t           genInfoMo2[2000];   //[nGenParticles]
-   Int_t           genInfoDa1[2000];   //[nGenParticles]
-   Int_t           genInfoDa2[2000];   //[nGenParticles]
-   Float_t         genInfoPt[2000];   //[nGenParticles]
-   Float_t         genInfoEta[2000];   //[nGenParticles]
-   Float_t         genInfoPhi[2000];   //[nGenParticles]
-   Float_t         genInfoPx[2000];   //[nGenParticles]
-   Float_t         genInfoPy[2000];   //[nGenParticles]
-   Float_t         genInfoPz[2000];   //[nGenParticles]
-   Float_t         genInfoM[2000];   //[nGenParticles]
-   Int_t           genInfoMoIndex[2000];   //[nGenParticles]
-   Int_t           PromptnessLevel[2000];   //[nGenParticles]
    Int_t           PrimVtxGood;
    Float_t         PrimVtxx;
    Float_t         PrimVtxy;
@@ -148,6 +126,8 @@ public :
    Float_t         GenPhotonPartonMindR[100];   //[NGenPhotons]
    Int_t           GenPhotonMotherID[100];   //[NGenPhotons]
    Int_t           GenPhotonMotherStatus[100];   //[NGenPhotons]
+   Float_t         GenPhotonIsoDR03[100];   //[NGenPhotons]
+   Float_t         GenPhotonIsoDR04[100];   //[NGenPhotons]
    Int_t           NGenJets;
    Float_t         GenJetPt[100];   //[NGenJets]
    Float_t         GenJetEta[100];   //[NGenJets]
@@ -1035,28 +1015,6 @@ public :
    TBranch        *b_signMu;   //!
    TBranch        *b_A0;   //!
    TBranch        *b_process;   //!
-   TBranch        *b_FlagMaxGenPartExceeded;   //!
-   TBranch        *b_nGenParticles;   //!
-   TBranch        *b_genInfoId;   //!
-   TBranch        *b_genInfoStatus;   //!
-   TBranch        *b_genInfoMass;   //!
-   TBranch        *b_genInfoNMo;   //!
-   TBranch        *b_genInfoMo1Pt;   //!
-   TBranch        *b_genInfoMo2Pt;   //!
-   TBranch        *b_genInfoNDa;   //!
-   TBranch        *b_genInfoMo1;   //!
-   TBranch        *b_genInfoMo2;   //!
-   TBranch        *b_genInfoDa1;   //!
-   TBranch        *b_genInfoDa2;   //!
-   TBranch        *b_genInfoPt;   //!
-   TBranch        *b_genInfoEta;   //!
-   TBranch        *b_genInfoPhi;   //!
-   TBranch        *b_genInfoPx;   //!
-   TBranch        *b_genInfoPy;   //!
-   TBranch        *b_genInfoPz;   //!
-   TBranch        *b_genInfoM;   //!
-   TBranch        *b_genInfoMoIndex;   //!
-   TBranch        *b_PromptnessLevel;   //!
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -1112,6 +1070,8 @@ public :
    TBranch        *b_GenPhotonPartonMindR;   //!
    TBranch        *b_GenPhotonMotherID;   //!
    TBranch        *b_GenPhotonMotherStatus;   //!
+   TBranch        *b_GenPhotonIsoDR03;   //!
+   TBranch        *b_GenPhotonIsoDR04;   //!
    TBranch        *b_NGenJets;   //!
    TBranch        *b_GenJetPt;   //!
    TBranch        *b_GenJetEta;   //!
@@ -2070,28 +2030,6 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("signMu", &signMu, &b_signMu);
    fChain->SetBranchAddress("A0", &A0, &b_A0);
    fChain->SetBranchAddress("process", &process, &b_process);
-   fChain->SetBranchAddress("FlagMaxGenPartExceeded", &FlagMaxGenPartExceeded, &b_FlagMaxGenPartExceeded);
-   fChain->SetBranchAddress("nGenParticles", &nGenParticles, &b_nGenParticles);
-   fChain->SetBranchAddress("genInfoId", genInfoId, &b_genInfoId);
-   fChain->SetBranchAddress("genInfoStatus", genInfoStatus, &b_genInfoStatus);
-   fChain->SetBranchAddress("genInfoMass", genInfoMass, &b_genInfoMass);
-   fChain->SetBranchAddress("genInfoNMo", genInfoNMo, &b_genInfoNMo);
-   fChain->SetBranchAddress("genInfoMo1Pt", genInfoMo1Pt, &b_genInfoMo1Pt);
-   fChain->SetBranchAddress("genInfoMo2Pt", genInfoMo2Pt, &b_genInfoMo2Pt);
-   fChain->SetBranchAddress("genInfoNDa", genInfoNDa, &b_genInfoNDa);
-   fChain->SetBranchAddress("genInfoMo1", genInfoMo1, &b_genInfoMo1);
-   fChain->SetBranchAddress("genInfoMo2", genInfoMo2, &b_genInfoMo2);
-   fChain->SetBranchAddress("genInfoDa1", genInfoDa1, &b_genInfoDa1);
-   fChain->SetBranchAddress("genInfoDa2", genInfoDa2, &b_genInfoDa2);
-   fChain->SetBranchAddress("genInfoPt", genInfoPt, &b_genInfoPt);
-   fChain->SetBranchAddress("genInfoEta", genInfoEta, &b_genInfoEta);
-   fChain->SetBranchAddress("genInfoPhi", genInfoPhi, &b_genInfoPhi);
-   fChain->SetBranchAddress("genInfoPx", genInfoPx, &b_genInfoPx);
-   fChain->SetBranchAddress("genInfoPy", genInfoPy, &b_genInfoPy);
-   fChain->SetBranchAddress("genInfoPz", genInfoPz, &b_genInfoPz);
-   fChain->SetBranchAddress("genInfoM", genInfoM, &b_genInfoM);
-   fChain->SetBranchAddress("genInfoMoIndex", genInfoMoIndex, &b_genInfoMoIndex);
-   fChain->SetBranchAddress("PromptnessLevel", PromptnessLevel, &b_PromptnessLevel);
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
@@ -2147,6 +2085,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("GenPhotonPartonMindR", GenPhotonPartonMindR, &b_GenPhotonPartonMindR);
    fChain->SetBranchAddress("GenPhotonMotherID", GenPhotonMotherID, &b_GenPhotonMotherID);
    fChain->SetBranchAddress("GenPhotonMotherStatus", GenPhotonMotherStatus, &b_GenPhotonMotherStatus);
+   fChain->SetBranchAddress("GenPhotonIsoDR03", GenPhotonIsoDR03, &b_GenPhotonIsoDR03);
+   fChain->SetBranchAddress("GenPhotonIsoDR04", GenPhotonIsoDR04, &b_GenPhotonIsoDR04);
    fChain->SetBranchAddress("NGenJets", &NGenJets, &b_NGenJets);
    fChain->SetBranchAddress("GenJetPt", GenJetPt, &b_GenJetPt);
    fChain->SetBranchAddress("GenJetEta", GenJetEta, &b_GenJetEta);
