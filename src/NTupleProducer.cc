@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.8 2012/06/23 09:18:40 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.9 2012/06/23 15:59:55 peruzzi Exp $
 //
 //
 
@@ -1144,7 +1144,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(dR < minDR) minDR=dR;
 	   }
 	   fTGenPhotonPartonMindR[i] = minDR;
+
+	   fTGenPhotonIsoDR03[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.3);
+	   fTGenPhotonIsoDR04[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.4);
+	 
          }
+	 
        }
 
 
@@ -1719,38 +1724,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-
-
-	////////////////////////////////////////////////////////
-	// PfCandidates Variables:
-
-
-
-	int pfcandIndex(0);
-	for( reco::PFCandidateCollection::const_iterator ip = pfCandidates->begin();
-	     ip != pfCandidates->end(); ++ip, ++pfcandIndex ){
-	  
-		if (pfcandIndex >= gMaxnpfcand){
-		  edm::LogWarning("NTP") << "@SUB=analyze"
-					 << "Maximum number of pf candidates exceeded";
-		  fTgoodevent = 1;
-		  break;
-		}
-	  
-	  fTPfCandPdgId[pfcandIndex] = ip->pdgId();
-	  fTPfCandEta[pfcandIndex] = ip->eta();
-	  fTPfCandPhi[pfcandIndex] = ip->phi();
-	  fTPfCandPx[pfcandIndex] = ip->px();
-	  fTPfCandPy[pfcandIndex] = ip->py();
-	  fTPfCandPz[pfcandIndex] = ip->pz();	  
-	  fTPfCandEnergy[pfcandIndex] = ip->energy();
-	  fTPfCandPt[pfcandIndex] = ip->pt();
-	  fTPfCandVx[pfcandIndex] = ip->vx();
-	  fTPfCandVy[pfcandIndex] = ip->vy();
-	  fTPfCandVz[pfcandIndex] = ip->vz();
-
-	}
-	fTNPfCand=pfcandIndex;
 
 
 
@@ -2657,6 +2630,51 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
 
 
+
+	////////////////////////////////////////////////////////
+	// PfCandidates Variables:
+
+	int pfcandIndex(0);
+	for( reco::PFCandidateCollection::const_iterator ip = pfCandidates->begin();
+	     ip != pfCandidates->end(); ++ip){
+	  
+	  bool store=false;
+	  bool isclosetophoton=false;
+	  int type=FindPFCandType(ip->pdgId());
+	  
+	  if (type==2) store=true;
+	  if (type==1) 
+	    for (int i=0; i<fTnphotons; i++)
+	      if (DeltaR(ip->phi(),fTPhotPhi[i],ip->eta(),fTPhotEta[i])<0.4)
+		store=true;
+	  
+	  if (!store) continue;
+
+	  pfcandIndex++;
+
+		if (pfcandIndex >= gMaxnpfcand){
+		  edm::LogWarning("NTP") << "@SUB=analyze"
+					 << "Maximum number of pf candidates exceeded";
+		  fTgoodevent = 1;
+		  break;
+		}
+	  
+	  fTPfCandPdgId[pfcandIndex] = ip->pdgId();
+	  fTPfCandEta[pfcandIndex] = ip->eta();
+	  fTPfCandPhi[pfcandIndex] = ip->phi();
+	  fTPfCandPx[pfcandIndex] = ip->px();
+	  fTPfCandPy[pfcandIndex] = ip->py();
+	  fTPfCandPz[pfcandIndex] = ip->pz();	  
+	  fTPfCandEnergy[pfcandIndex] = ip->energy();
+	  fTPfCandPt[pfcandIndex] = ip->pt();
+	  fTPfCandVx[pfcandIndex] = ip->vx();
+	  fTPfCandVy[pfcandIndex] = ip->vy();
+	  fTPfCandVz[pfcandIndex] = ip->vz();
+
+	}
+	fTNPfCand=pfcandIndex;
+
+
 	////////////////////////////////////////////////////////
 	// Jet Variables:
 	const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs, iSetup);
@@ -3517,6 +3535,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("GenPhotonPartonMindR",&fTGenPhotonPartonMindR ,"GenPhotonPartonMindR[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonMotherID"     ,&fTGenPhotonMotherID        ,"GenPhotonMotherID[NGenPhotons]/I");
 	fEventTree->Branch("GenPhotonMotherStatus"     ,&fTGenPhotonMotherStatus        ,"GenPhotonMotherStatus[NGenPhotons]/I");
+	fEventTree->Branch("GenPhotonIsoDR03"     ,&fTGenPhotonIsoDR03        ,"GenPhotonIsoDR03[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonIsoDR04"     ,&fTGenPhotonIsoDR04        ,"GenPhotonIsoDR04[NGenPhotons]/F");
 
 	// Gen-Jets
 	fEventTree->Branch("NGenJets"    ,&fTNGenJets   ,"NGenJets/I");
@@ -4372,6 +4392,8 @@ void NTupleProducer::resetTree(){
        resetFloat(fTGenPhotonPartonMindR   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherID   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherStatus ,gMaxngenphot);
+       resetFloat(fTGenPhotonIsoDR03 ,gMaxngenphot);
+       resetFloat(fTGenPhotonIsoDR04 ,gMaxngenphot);
 
 	resetFloat(fTGenJetPt   ,gMaxngenjets);
 	resetFloat(fTGenJetEta  ,gMaxngenjets);
@@ -5887,6 +5909,42 @@ double NTupleProducer::etaTransformation(  float EtaParticle , float Zvertex)  {
   return ETA;
   //---end
 }
+
+
+double NTupleProducer::GenPartonicIso_allpart(const reco::GenParticle & photon,    edm::Handle <reco::GenParticleCollection> & genparticles, double dRcone){
+
+  double etsum=0;
+  double dR=0;
+
+  for (unsigned int ipart=0; ipart< genparticles->size(); ipart++){
+    const reco::GenParticle & mygenpart = (*genparticles)[ ipart ];
+
+    if (mygenpart.status()==1){
+
+//      bool isDoubleCounted = false;
+//      for (uint i=0; i<genparticleToVeto.size(); i++) {
+//        if (genparticleToVeto[i]->pt()==(*genparticles)[ ipart ].pt()) isDoubleCounted=true;
+//      }
+//
+//      if (isDoubleCounted==true) continue;
+
+      if (mygenpart.pdgId()!=22 || (fabs(mygenpart.pt()-photon.pt())>0.01 && mygenpart.pdgId()==22)){
+        dR = DeltaR(photon.phi(), mygenpart.phi(), photon.eta(), mygenpart.eta());
+        if (dR<dRcone && dR>1e-05){
+          etsum += mygenpart.et();
+        }
+      }
+    }
+  }
+
+  //if (etsum>0) cout << "GenPartonicIso etsum="<<etsum<<endl;
+
+  return etsum;
+
+}
+
+
+
 
 ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz, 
 				 int ntracks, float * tkpx, float * tkpy, float * tkpz,
