@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.38 $";
+string sjzbversion="$Revision: 1.70.2.39 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.38 2012/06/13 16:00:25 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.39 2012/06/18 15:12:24 buchmann Exp $
 */
 
 
@@ -139,6 +139,7 @@ public:
   float pfJetScaleUnc[jMax];
   float pfJetDphiMet[jMax];
   float pfJetDphiZ[jMax];
+  float pfBJetDphiZ[jMax];
   float CorrectionRatio[jMax];
   float pfHT;
   float pfGoodHT;
@@ -388,6 +389,7 @@ void nanoEvent::reset()
     pfJetScaleUnc[jCounter]=0;
     pfJetDphiMet[jCounter]=0;
     pfJetDphiZ[jCounter]=0;
+    pfBJetDphiZ[jCounter]=0;
     CorrectionRatio[jMax]=0;
   }
   pfJetNum=0;
@@ -722,6 +724,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetScaleUnc",nEvent.pfJetScaleUnc,"pfJetScaleUnc[pfJetNum]/F");
   myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
   myTree->Branch("pfJetDphiZ",nEvent.pfJetDphiZ,"pfJetDphiZ[pfJetNum]/F");
+  myTree->Branch("pfBJetDphiZ",nEvent.pfBJetDphiZ,"pfBJetDphiZ[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
@@ -1441,6 +1444,8 @@ void JZBAnalysis::Analyze() {
              nEvent.pfJetGoodPhiBtag[nEvent.pfJetGoodNumBtag] = jphi;
              nEvent.pfJetGoodEBtag[nEvent.pfJetGoodNumBtag] = jenergy;
              nEvent.pfJetGoodIDBtag[nEvent.pfJetGoodNumBtag]  = isJetID;
+	     nEvent.pfBJetDphiZ[nEvent.pfJetGoodNumBtag]  = aJet.DeltaPhi(zVector);
+	     
 	     nEvent.pfJetGoodNumBtag++;
         }
         nEvent.pfJetGoodNum++;
