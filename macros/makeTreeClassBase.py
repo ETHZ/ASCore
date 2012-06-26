@@ -133,12 +133,13 @@ def getBranches(file,tree):
     cmd = ['edmFileUtil','-P','-t',tree,file]
     run = subprocess.Popen(cmd,stdout=subprocess.PIPE)
     output = run.communicate()[0]
+    print output
     if run.returncode:
         print >>sys.stderr,"*** Error while parsing file:",output
         return []
     branches = dict()
     pattern  = re.compile(r".*?(\w+)_analyze_(\S+)_NTupleProducer.*")
-    pattern2 = re.compile(r".*?(\w+)_(\S+)__NTupleProducer.*")
+    pattern2 = re.compile(r".*?(\w+)_(\S+)_(\S*)_NTupleProducer.*")
     for line in output.split('\n'):
         m  = re.match(pattern,line)
         m2 = re.match(pattern2,line)
