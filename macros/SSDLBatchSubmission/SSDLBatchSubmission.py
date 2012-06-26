@@ -26,13 +26,13 @@ def usage():
 	print '        OutputLocation     <the desired output location. make sure the folder exists and that there is NO allYields.root in it!>'
 	print '        OutdirNode         <temporary folder on the workernodes /scratch/ directory'
 	print '                           this dir will be created and stuff will be moved out of it, so it doesn\'t really matter what it\'s called>'
-	print '        DataCard           <datacard as usual, but you must include the entire path after stiegerb/ (i.e. don\'t forget the 2011(B)-part'
+	print '        DataCard           <datacard as usual, but you must include the entire path after <username>/ (i.e. don\'t forget the 2011(B)-part'
 	print '                           omit the \'.root\' in the filename if you want to split up the job, the resulting directory MUST exist on the SE'
 	print '                           it is crucial that this datacard has only existing paths!>'
 	print '        BatchScript        <There are a few things you must consider:'
 	print '                                   replace \'HN_NAME=your-hn-name\' with \'USERNAMELINE\''
 	print '                                   The \'YOUR FUNCTIONALITY CODE GOES HERE\' section MUST look as follows:'
-	print '                                   export SCRAM_ARCH=slc5_amd64_gcc434'
+	print '                                   export SCRAM_ARCH=slc5_amd64_gcc462'
 	print '                                   source $VO_CMS_SW_DIR/cmsset_default.sh'
 	print '                                   RELEASEDIRLINE'
 	print '                                   eval `scramv1 runtime -sh`'
@@ -131,10 +131,6 @@ def read_config(config_name):
 	cfg.close()
 	return info
 
-def print_status(t):
-	n_min = t/60
-	print '[status] '+str(int(commands.getoutput('qstat | wc -l'))-2),' jobs still running after', n_min, 'minutes...'
-
 def check_commands():
 	print '[status] checking if `root\' and `hadd\' commands exist...'
 	if not commands.getstatusoutput('which root')[0]:
@@ -201,6 +197,22 @@ def merge_and_clean():
 		if os.path.isdir(output_location+ls) and 'output' in ls:
 			os.system('rm -rf '+output_location+ls)
 		
+
+def check_on_jobs(jobnames, time_elapsed):
+	tmp = commands.getoutput('qstat')
+	jobs = tmp.split('\n')[2:]
+	running_jobs = []
+	for job in jobs:
+		running_jobs.append(job.split()[2])
+	cnt=0
+	for job in jobnames:
+		if job[:10] in running_jobs:
+			cnt+=1
+	if not time_elapsed%60:
+		n_min = time_elapsed/60
+		## print '[status] '+str(int(commands.getoutput('qstat | wc -l'))-2),' jobs still running after', n_min, 'minutes...'
+		print '[status]', cnt, ' jobs still running after', n_min, 'minutes...'
+	return cnt
 
 def do_stuff(config_name):
 	print '[status] starting script...'
@@ -277,6 +289,8 @@ def do_stuff(config_name):
 		commit_strings.append(dumper_location + ' -v 1 -l ' + os.path.abspath('.')+'/tmp/'+card+' -o '+output_node)
 	
 	print '[status] starting to submit jobs...'
+	global jobnames
+	jobnames = []
 
 	for commit in commit_strings:
 		ind = commit_strings.index(commit)
@@ -310,19 +324,28 @@ def do_stuff(config_name):
 				tmpScript.writelines(line)
 		tmpScript.close()
 		#os.system('qsub -q all.q  -N job_'+str(ind)+' '+tmpScript_name)
+		print commit
 		if not dryrun:
-			os.system('qsub -q short.q  -N job_'+str(ind)+' '+tmpScript_name)
+			os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
+			jobnames.append('ssdl_'+str(ind))
 	print '[status] submitted', len(commit_strings), 'jobs'
 
 	print '[status] done submitting jobs...'
 
 	time_elapsed = 0
-	while (int(commands.getoutput('qstat | wc -l'))-2)>0:
+	while (check_on_jobs(jobnames, time_elapsed) > 0):
 		os.system('sleep 1')
 		time_elapsed+=1
-		if not time_elapsed%60:
-			print_status(time_elapsed)
+		## if not time_elapsed%60:
+		## 	print_status(time_elapsed, jobnames)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
+
+	## while (int(commands.getoutput('qstat | wc -l'))-2)>0:
+	## 	os.system('sleep 1')
+	## 	time_elapsed+=1
+	## 	if not time_elapsed%60:
+	## 		print_status(time_elapsed)
+	## print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
 	
 	if not dryrun:
 		if check_commands():
