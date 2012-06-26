@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.28 2012/06/15 15:51:00 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.29 2012/06/20 21:29:45 pnef Exp $
 //
 //
 
@@ -400,8 +400,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   //Get SC collections
   Handle<SuperClusterCollection> BarrelSuperClusters;
   Handle<SuperClusterCollection> EndcapSuperClusters;
+  Handle<edm::View<reco::Candidate> > GoodSuperClusters;
+
   iEvent.getByLabel(fSCTagBarrel,BarrelSuperClusters);
   iEvent.getByLabel(fSCTagEndcap,EndcapSuperClusters);
+  iEvent.getByLabel("goodSuperClustersClean", GoodSuperClusters);
+
 	
   // PFcandidates
   edm::Handle<reco::PFCandidateCollection> pfCandidates;
@@ -1256,6 +1260,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIsIso->push_back( 1 );
   }
 
+
+  (*fTNGoodSuperClusters)=0;
+  for (edm::View<reco::Candidate>::const_iterator sc = GoodSuperClusters->begin(); sc!=GoodSuperClusters->end(); ++sc){
+
+    if (*fTNGoodSuperClusters>gMaxNSC) {
+      edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded";
+      *fTGoodEvent = 1;
+      break;
+    }
+
+    fTGoodSCEnergy->push_back(sc->energy());
+    fTGoodSCEta->push_back(sc->eta());
+    fTGoodSCPhi->push_back(sc->phi());
+    (*fTNGoodSuperClusters)++;
+  }
 
 
 
@@ -3807,6 +3826,10 @@ void NTupleProducer::declareProducts(void) {
   //     produces<std::vector<float> >("gvSumPtLo");
   //     produces<std::vector<int> >("gvNTkHi");
   //     produces<std::vector<int> >("gvNTkLo");
+  produces<int>("NGoodSuperClusters");
+  produces<std::vector<float> >("GoodSCEnergy");
+  produces<std::vector<float> >("GoodSCEta");
+  produces<std::vector<float> >("GoodSCPhi");
   produces<int>("NSuperClusters");
   produces<std::vector<float> >("SCRaw");
   produces<std::vector<float> >("SCPre");
@@ -4465,6 +4488,10 @@ void NTupleProducer::resetProducts( void ) {
     gv_pos[i]=TVector3();
     gv_p3[i]=TVector3();
   }
+  fTNGoodSuperClusters.reset(new int(0));
+  fTGoodSCEnergy.reset(new std::vector<float> );
+  fTGoodSCEta.reset(new std::vector<float> );
+  fTGoodSCPhi.reset(new std::vector<float> );
   fTNSuperClusters.reset(new int(0));
   fTSCRaw.reset(new std::vector<float> );
   fTSCPre.reset(new std::vector<float> );
@@ -5164,6 +5191,10 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   //     event.put(fTgvSumPtLo, "gvSumPtLo");
   //     event.put(fTgvNTkHi, "gvNTkHi");
   //     event.put(fTgvNTkLo, "gvNTkLo");
+  event.put(fTNGoodSuperClusters, "NGoodSuperClusters");
+  event.put(fTGoodSCEnergy, "GoodSCEnergy");
+  event.put(fTGoodSCEta, "GoodSCEta");
+  event.put(fTGoodSCPhi, "GoodSCPhi");
   event.put(fTNSuperClusters, "NSuperClusters");
   event.put(fTSCRaw, "SCRaw");
   event.put(fTSCPre, "SCPre");

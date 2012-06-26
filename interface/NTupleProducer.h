@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.23 2012/06/15 15:51:00 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.24 2012/06/20 21:29:45 pnef Exp $
 //
 //
 
@@ -881,6 +881,11 @@ private:
 
 
   //- Superclusters:
+  std::auto_ptr<int> fTNGoodSuperClusters;
+  std::auto_ptr<std::vector<float> >  fTGoodSCEnergy;
+  std::auto_ptr<std::vector<float> >  fTGoodSCEta;
+  std::auto_ptr<std::vector<float> >  fTGoodSCPhi;
+
   std::auto_ptr<int>  fTNSuperClusters;
   std::auto_ptr<std::vector<float> >  fTSCRaw;
   std::auto_ptr<std::vector<float> >  fTSCPre;

@@ -51,7 +51,7 @@ options.register ('perEvtMvaWeights',
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
 # options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
@@ -490,6 +490,47 @@ process.selectedNewTaus = cms.EDFilter("PATTauSelector",
 process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus*process.selectedNewTaus)
 
 
+###############################################################################################################
+########################################Special for Tag&Probe##################################################
+###############################################################################################################
+
+process.superClusters = cms.EDProducer("SuperClusterMerger",
+   src = cms.VInputTag(cms.InputTag("correctedHybridSuperClusters","", "RECO"),
+                       cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "RECO") )
+)
+
+process.superClusterCands = cms.EDProducer("ConcreteEcalCandidateProducer",
+   src = cms.InputTag("superClusters"),
+   particleType = cms.int32(11),
+)
+
+process.goodSuperClusters = cms.EDFilter("CandViewSelector",
+      src = cms.InputTag("superClusterCands"),
+      cut = cms.string("abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et> 10"),
+      filter = cms.bool(True)
+)
+
+process.JetsToRemoveFromSuperCluster = cms.EDFilter("CaloJetSelector",
+    src = cms.InputTag("ak5CaloJets"),
+    cut = cms.string('pt>5 && energyFractionHadronic > 0.15')
+)
+
+process.goodSuperClustersClean = cms.EDProducer("CandViewCleaner",
+    srcObject = cms.InputTag("goodSuperClusters"),
+    module_label = cms.string(""),
+    srcObjectsToRemove = cms.VInputTag(cms.InputTag("JetsToRemoveFromSuperCluster")),
+    deltaRMin = cms.double(0.1)
+)
+
+process.sc_sequence = cms.Sequence(
+    process.superClusters +
+    process.superClusterCands +
+    process.goodSuperClusters +
+    process.JetsToRemoveFromSuperCluster +
+    process.goodSuperClustersClean
+)
+
+
 #### Path ######################################################################
 
 process.p = cms.Path(
@@ -518,7 +559,8 @@ process.p = cms.Path(
         + process.PFTau
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
-	+ process.analyze
+        + process.sc_sequence
+ 	+ process.analyze
        	)
    )
 
