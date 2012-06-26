@@ -164,7 +164,7 @@ def clean():
 		elif os.path.isdir(output_location+obj):
 			os.system('cd '+output_location+' ; mv '+output_location+obj+'/* '+obj+'.root' )
 			os.system('rm -r '+output_location+obj+'/' )
-	os.system('rm -r tmp/ ; rm job_* ; rm -r sgejob*')
+	os.system('rm -r tmp/ ; rm ssdl_* ; rm -r sgejob*')
 	
 		
 def merge_and_clean():
@@ -192,7 +192,7 @@ def merge_and_clean():
 	# 		hadd_string+=' '+output_location+ls
 	# os.system(hadd_string)
 
-	os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
+	os.system('rm -r tmp/ ; rm ssdl_* ; rm sgejob-* -rf')
 	for ls in os.listdir(output_location):
 		if os.path.isdir(output_location+ls) and 'output' in ls:
 			os.system('rm -rf '+output_location+ls)
