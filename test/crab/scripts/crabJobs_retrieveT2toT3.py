@@ -31,7 +31,7 @@ if ( not len(oDatasetPath)>0 ):
 # Remove leading white spaces
 oDatasetPath = oDatasetPath.lstrip()
 
-command = '/swshare/psit3/bin/dbs_transferRegister.py --dbs=ph02 --to-site=T3_CH_PSI '+oDatasetPath
+command = '/swshare/psit3/bin/dbs_transferRegister.py --dbs=ph02 --to-site=T3_CH_PSI --retransfer '+oDatasetPath
 
 print 'Running',command
 return_value = os.system(command)
