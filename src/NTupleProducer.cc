@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.10 2012/06/25 15:38:24 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.11 2012/06/25 16:33:53 peruzzi Exp $
 //
 //
 
@@ -2456,29 +2456,38 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
 	 { // all conversions
 
-	  
+	     
 	   for( reco::ConversionCollection::const_iterator  iConv = convH->begin(); iConv != convH->end(); iConv++) {
-
+	          
 	     reco::Conversion localConv = reco::Conversion(*iConv);
   
 	     if(ConversionsCut(localConv)) continue;
-  
+
+	     if (conv_n >= gMaxnconv){
+	       edm::LogWarning("NTP") << "@SUB=analyze"
+				      << "Maximum number of conversions exceeded";
+	       fTgoodevent = 1;
+	       break;
+	     }
+
 	     conv_validvtx[conv_n]=localConv.conversionVertex().isValid();
   
-	     if ( !localConv.conversionVertex().isValid() ) continue;
-  
-	     reco::Vertex vtx=localConv.conversionVertex();
-	     conv_vtx[conv_n].SetXYZ(vtx.x(), vtx.y(), vtx.z());
-	     conv_ntracks[conv_n]=localConv.nTracks();
-	     conv_chi2_probability[conv_n]=ChiSquaredProbability(vtx.chi2(), vtx.ndof());
-	     conv_eoverp[conv_n]=localConv.EoverPrefittedTracks();
-	     conv_zofprimvtxfromtrks[conv_n]=localConv.zOfPrimaryVertexFromTracks();
-	     conv_refitted_momentum[conv_n].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
+	     if ( localConv.conversionVertex().isValid() ){
+	       reco::Vertex vtx=localConv.conversionVertex();
+	       conv_vtx[conv_n].SetXYZ(vtx.x(), vtx.y(), vtx.z());
+	       conv_ntracks[conv_n]=localConv.nTracks();
+	       conv_chi2_probability[conv_n]=ChiSquaredProbability(vtx.chi2(), vtx.ndof());
+	       conv_eoverp[conv_n]=localConv.EoverPrefittedTracks();
+	       conv_zofprimvtxfromtrks[conv_n]=localConv.zOfPrimaryVertexFromTracks();
+	       conv_refitted_momentum[conv_n].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
+	     }
+
 	     conv_n++;
 
 	   }
 
 	 }
+
 
 	 if (VTX_MVA_DEBUG)	  cout << "done convs" << endl;
 
@@ -2600,26 +2609,27 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
            // [diphoton_pair][ranking_of_vertices]
 
-           i1=0; i2=0;
-           for (std::vector<int>::const_iterator it=diphotons_first.begin(); it!=diphotons_first.end(); it++) {f_diphotons_first[i1]=*it; i1++;}
-           for (std::vector<int>::const_iterator it=diphotons_second.begin(); it!=diphotons_second.end(); it++) {f_diphotons_second[i2]=*it; i2++;}
+           i1=0;
+           for (std::vector<int>::const_iterator it=diphotons_first.begin(); it!=diphotons_first.end() && i1<gMax_vertexing_diphoton_pairs; it++) {f_diphotons_first[i1]=*it; i1++;}
+           i1=0;
+           for (std::vector<int>::const_iterator it=diphotons_second.begin(); it!=diphotons_second.end() && i1<gMax_vertexing_diphoton_pairs; it++) {f_diphotons_second[i1]=*it; i1++;}
 
-           for (i1=0; i1<(int)vtx_dipho_h2gglobe.size(); i1++)
-             for (i2=0; i2<(int)vtx_dipho_h2gglobe.at(i1).size(); i2++)
-               f_vtx_dipho_h2gglobe[i1][i2]=vtx_dipho_h2gglobe.at(i1).at(i2);
+           for (i1=0; i1<(int)vtx_dipho_h2gglobe.size() && i1<gMax_vertexing_diphoton_pairs; i1++)
+             for (i2=0; i2<(int)vtx_dipho_h2gglobe.at(i1).size() && i2<gMax_vertexing_vtxes; i2++) {
+       if (!(i1<gMax_vertexing_diphoton_pairs && i2<gMax_vertexing_vtxes)) cout<<"wrong!!!"<<endl;
+               f_vtx_dipho_h2gglobe[i1][i2]=vtx_dipho_h2gglobe.at(i1).at(i2); }
 
-           for (i1=0; i1<(int)vtx_dipho_mva.size(); i1++)
-             for (i2=0; i2<(int)vtx_dipho_mva.at(i1).size(); i2++)
-               f_vtx_dipho_mva[i1][i2]=vtx_dipho_mva.at(i1).at(i2);
+           for (i1=0; i1<(int)vtx_dipho_mva.size() && i1<gMax_vertexing_diphoton_pairs; i1++)
+             for (i2=0; i2<(int)vtx_dipho_mva.at(i1).size() && i2<gMax_vertexing_vtxes; i2++) {
+       if (!(i1<gMax_vertexing_diphoton_pairs && i2<gMax_vertexing_vtxes)) cout<<"wrong!!!"<<endl;
+               f_vtx_dipho_mva[i1][i2]=vtx_dipho_mva.at(i1).at(i2); }
 
-           for (i1=0; i1<(int)vtx_dipho_productrank.size(); i1++)
-             for (i2=0; i2<(int)vtx_dipho_productrank.at(i1).size(); i2++)
-               f_vtx_dipho_productrank[i1][i2]=vtx_dipho_productrank.at(i1).at(i2);
+           for (i1=0; i1<(int)vtx_dipho_productrank.size() && i1<gMax_vertexing_diphoton_pairs; i1++)
+             for (i2=0; i2<(int)vtx_dipho_productrank.at(i1).size() && i2<gMax_vertexing_vtxes; i2++) {
+       if (!(i1<gMax_vertexing_diphoton_pairs && i2<gMax_vertexing_vtxes)) cout<<"wrong!!!"<<endl;
+               f_vtx_dipho_productrank[i1][i2]=vtx_dipho_productrank.at(i1).at(i2); }
 
          }
-
-
-
 
 
        } // end vertex selection for diphoton events
@@ -3934,11 +3944,11 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
  fEventTree->Branch("Pho_conv_eoverp",&pho_conv_eoverp,"Pho_conv_eoverp[NPhotons]/F");
 
  fEventTree->Branch("Conv_n",&conv_n,"Conv_n/I");
- fEventTree->Branch("Conv_validvtx",&conv_validvtx,"Conv_validvtx[NPhotons]/O");
- fEventTree->Branch("Conv_ntracks",&conv_ntracks,"Conv_ntracks[NPhotons]/I");
- fEventTree->Branch("Conv_chi2_probability",&conv_chi2_probability,"Conv_chi2_probability[NPhotons]/F");
- fEventTree->Branch("Conv_eoverp",&conv_eoverp,"Conv_eoverp[NPhotons]/F");
- fEventTree->Branch("Conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"Conv_zofprimvtxfromtrks[NPhotons]/F");
+ fEventTree->Branch("Conv_validvtx",&conv_validvtx,"Conv_validvtx[Conv_n]/O");
+ fEventTree->Branch("Conv_ntracks",&conv_ntracks,"Conv_ntracks[Conv_n]/I");
+ fEventTree->Branch("Conv_chi2_probability",&conv_chi2_probability,"Conv_chi2_probability[Conv_n]/F");
+ fEventTree->Branch("Conv_eoverp",&conv_eoverp,"Conv_eoverp[Conv_n]/F");
+ fEventTree->Branch("Conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"Conv_zofprimvtxfromtrks[Conv_n]/F");
 
 // fEventTree->Branch("Gvn",&gv_n,"Gvn/I");
 // fEventTree->Branch("Gv_sumPtHi",&gv_sumPtHi,"Gv_sumPtHi[Gvn]/F");
@@ -4849,6 +4859,9 @@ void NTupleProducer::resetTree(){
        for (int i=0; i<gMaxnphos; i++) {
 	 pho_conv_vtx[i]=TVector3();
 	 pho_conv_refitted_momentum[i]=TVector3();
+       }
+
+       for (int i=0; i<gMaxnconv; i++) {
 	 conv_vtx[i]=TVector3();
 	 conv_refitted_momentum[i]=TVector3();
        }
