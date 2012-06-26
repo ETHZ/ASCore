@@ -20,9 +20,9 @@ public:
 	virtual ~UserAnalysisBase();
   
 	virtual void Begin() {}
-    	virtual void BeginRun(Int_t& run);
-    	virtual void Analyze() {}
-    	virtual void End() {}
+	virtual void BeginRun(Int_t& run);
+	virtual void Analyze() {}
+	virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 	inline virtual void SetData(bool isdata){fIsData = isdata;};
@@ -39,11 +39,11 @@ public:
 
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string = "");
-  	virtual void  SetPileUp3DSrc(string, string);
+	virtual void  SetPileUp3DSrc(string, string);
 
 	virtual float GetPUWeight(int);
 	virtual float GetPUWeight(int, int);
-  virtual float GetPUWeight3D( int , int , int );
+	virtual float GetPUWeight3D( int , int , int );
 
 
 	TreeReader *fTR;
@@ -113,11 +113,12 @@ public:
 	virtual void EventPrint();
 	virtual void GetEvtEmChFrac(double & fracEm, double & fracCh);
 
-        // Put all JES-related stuff between precompiler flags
+	// Put all JES-related stuff between precompiler flags
 #ifdef DOJES 
-        FactorizedJetCorrector *fJetCorrector;
-        JetCorrectionUncertainty *jecUnc;
+	FactorizedJetCorrector *fJetCorrector;
+	JetCorrectionUncertainty *fJECUnc;
 	virtual float GetJetPtNoResidual(int);
+	virtual float GetJECUncert(float pt, float eta);
 #endif
 
 private:

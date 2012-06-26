@@ -2,6 +2,8 @@
 #include "helper/Monitor.hh"
 #include "helper/PUWeight.h"
 
+#include "JetCorrectionUncertainty.h"
+
 
 using namespace std;
 
@@ -9,8 +11,7 @@ const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 
-TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
-// TString SSDLAnalysis::gBaseDir = "/home/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
+TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
@@ -32,22 +33,19 @@ SSDLAnalysis::~SSDLAnalysis(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Begin(const char* filename){
-	// string pileupsrc = string(gBaseDir + "data_pileup.root");
-	// SetPileUpSrc(pileupsrc);
-	// ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
-	// ReadPDGTable(gBaseDir + "pdgtable.txt");
+	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
+	ReadPDGTable(gBaseDir + "pdgtable.txt");
+
 	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
-	if ( !fIsData) {
+	if(!fIsData){
 		fMsugraCount = new TH2D("msugra_count", "msugra_count", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		for (int i=0; i<10; i++) {
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
 		fSMSCount = new TH2D("sms_count", "sms_count", 51, -5, 505, 51, -5, 505);
 	}
-	//SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
-	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
-	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
 	BookTree();
+	fHEvCount = new TH1F("EventCount", "Event Counter", 1, 0., 1.); // count number of generated events
 	if(!fIsData && fDoFillEffTree) BookEffTree();
 }
 
@@ -61,6 +59,7 @@ void SSDLAnalysis::End(){
 		fSMSCount->Write();
 	}
 	fOutputFile->cd();
+	fHEvCount->Write();
 	fAnalysisTree->Write();
 	if(fDoFillEffTree && !fIsData) fLepEffTree->Write();
 	fOutputFile->Close();
@@ -194,6 +193,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuIso"         ,&fTmuiso,          "MuIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
+	fAnalysisTree->Branch("MuEMVetoEt"    ,&fTmuEMVetoEt,     "MuEMVetoEt[NMus]/F");
+	fAnalysisTree->Branch("MuHadVetoEt"   ,&fTmuHadVetoEt,    "MuHadVetoEt[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
 	fAnalysisTree->Branch("MuGenID"       ,&fTmuid,           "MuGenID[NMus]/I");
 	fAnalysisTree->Branch("MuGenMID"      ,&fTmumoid,         "MuGenMID[NMus]/I");
@@ -234,19 +235,23 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
 	// jet-MET properties
-	fAnalysisTree->Branch("tcMET",         &fTtcMET,    "tcMET/F");
-	fAnalysisTree->Branch("tcMETPhi",      &fTtcMETphi, "tcMETPhi/F");
-	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
-	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi, "pfMETPhi/F");
-	fAnalysisTree->Branch("NJets",         &fTnqjets,   "NJets/I");
-	fAnalysisTree->Branch("JetPt",         &fTJetpt,    "JetPt[NJets]/F");
-	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
-	fAnalysisTree->Branch("JetPhi",        &fTJetphi,   "JetPhi[NJets]/F");
-	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1, "JetSSVHPBTag[NJets]/F");
-	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2, "JetSSVHEBTag[NJets]/F");
-	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3, "JetTCHPBTag[NJets]/F");
-	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4, "JetTCHEBTag[NJets]/F");
-	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
+	fAnalysisTree->Branch("pfMET",         &fTpfMET,       "pfMET/F");
+	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi,    "pfMETPhi/F");
+	fAnalysisTree->Branch("NJets",         &fTnqjets,      "NJets/I");
+	fAnalysisTree->Branch("JetPt",         &fTJetpt,       "JetPt[NJets]/F");
+	fAnalysisTree->Branch("JetEta",        &fTJeteta,      "JetEta[NJets]/F");
+	fAnalysisTree->Branch("JetPhi",        &fTJetphi,      "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,   "JetEnergy[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1,    "JetSSVHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2,    "JetSSVHEBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
+	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
+	fAnalysisTree->Branch("JetJECUncert",  &fTJetJECUncert,"JetJECUncert[NJets]/F");
+	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
+	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,   "JetGenPt[NJets]/F");
+	fAnalysisTree->Branch("JetGenEta",     &fTJetGeneta,   "JetGenEta[NJets]/F");
+	fAnalysisTree->Branch("JetGenPhi",     &fTJetGenphi,   "JetGenPhi[NJets]/F");
 }
 
 void SSDLAnalysis::BookEffTree(){
@@ -273,6 +278,7 @@ void SSDLAnalysis::BookEffTree(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Analyze(){
+	fHEvCount->Fill(0.);
 	FillAnalysisTree();
 	if(fDoFillEffTree && !fIsData) FillEffTree();
 }
@@ -296,7 +302,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Do object selections
 	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsLooseMu);
 	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsLooseEl);
-	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
+	vector<int> selectedJetInd = PFJetSelection(15., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
 	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
 	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets);
@@ -325,22 +331,36 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmLSP    = -1;
 
 	}
+		
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt   [ind] = GetJetPtNoResidual(jetindex);
-		fTJeteta  [ind] = fTR->JEta[jetindex];
-		fTJetphi  [ind] = fTR->JPhi[jetindex];
-		fTJetbtag1[ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
-		fTJetbtag2[ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
-		fTJetbtag3[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
-		fTJetbtag4[ind] = fTR->JbTagProbTkCntHighEff[jetindex];
-		fTJetArea [ind] = fTR->JArea[jetindex];
+		fTJetpt      [ind] = fTR->JPt[jetindex];
+		fTJeteta     [ind] = fTR->JEta[jetindex];
+		fTJetphi     [ind] = fTR->JPhi[jetindex];
+		fTJetenergy  [ind] = fTR->JE[jetindex];
+		fTJetbtag1   [ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
+		fTJetbtag2   [ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
+		fTJetbtag3   [ind] = fTR->JbTagProbTkCntHighPur[jetindex];
+		fTJetbtag4   [ind] = fTR->JbTagProbTkCntHighEff[jetindex];
+		fTJetArea    [ind] = fTR->JArea[jetindex];
+		fTJetJECUncert[ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex]);
+		fTJetPartonID[ind] = JetPartonMatch(jetindex);
+		int genjetind = GenJetMatch(jetindex);
+		if(genjetind > -1){
+			fTJetGenpt [ind] = fTR->GenJetPt [genjetind];
+			fTJetGeneta[ind] = fTR->GenJetEta[genjetind];
+			fTJetGenphi[ind] = fTR->GenJetPhi[genjetind];
+		}
+		else{
+			fTJetGenpt [ind] = -888.88;
+			fTJetGeneta[ind] = -888.88;
+			fTJetGenphi[ind] = -888.88;
+		}
+		
 	}
 
 	// Get METs
-	fTtcMET     = fTR->TCMET;
-	fTtcMETphi  = fTR->TCMETphi;
 	fTpfMET     = fTR->PFMET;
 	fTpfMETphi  = fTR->PFMETphi;
 
@@ -361,6 +381,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
 		fTmuptE   [i] = fTR->MuPtE     [index];
+		fTmuEMVetoEt [i] = fTR->MuIso03EMVetoEt [index];
+		fTmuHadVetoEt[i] = fTR->MuIso03HadVetoEt[index];
 		
 		if(fIsData == false){ // mc truth information
 			fTmuid     [i] = fTR->MuGenID  [index];
@@ -536,6 +558,8 @@ void SSDLAnalysis::ResetTree(){
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
 		fTmuptE         [i] = -999.99;
+		fTmuEMVetoEt    [i] = -999.99;
+		fTmuHadVetoEt   [i] = -999.99;
 		fTmuid          [i] = -999;
 		fTmumoid        [i] = -999;
 		fTmugmoid       [i] = -999;
@@ -580,17 +604,21 @@ void SSDLAnalysis::ResetTree(){
 	// jet-MET properties
 	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt [i]   = -999.99;
-		fTJeteta[i]   = -999.99;
-		fTJetphi[i]   = -999.99;
-		fTJetbtag1[i] = -999.99;
-		fTJetbtag2[i] = -999.99;
-		fTJetbtag3[i] = -999.99;
-		fTJetbtag4[i] = -999.99;
-		fTJetArea[i]  = -999.99;
+		fTJetpt [i]       = -999.99;
+		fTJeteta[i]       = -999.99;
+		fTJetphi[i]       = -999.99;
+		fTJetenergy[i]    = -999.99;
+		fTJetbtag1[i]     = -999.99;
+		fTJetbtag2[i]     = -999.99;
+		fTJetbtag3[i]     = -999.99;
+		fTJetbtag4[i]     = -999.99;
+		fTJetArea[i]      = -999.99;
+		fTJetJECUncert[i] = -999.99;
+		fTJetPartonID[i]  = -999;
+		fTJetGenpt [i]    = -999.99;
+		fTJetGeneta[i]    = -999.99;
+		fTJetGenphi[i]    = -999.99;
 	}
-	fTtcMET      = -999.99;
-	fTtcMETphi   = -999.99;
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
 }
@@ -731,6 +759,66 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 	}
 	cout << "Choose your toggle!" << endl;
 	return false;
+}
+
+//____________________________________________________________________________
+int SSDLAnalysis::JetPartonMatch(int index){
+	if(fIsData) return -1;
+	// Returns PDG id of matched parton, any of (1,2,3,4,5,21)
+	// Unmatched returns 0
+	float jpt  = fTR->JPt[index];
+	float jeta = fTR->JEta[index];
+	float jphi = fTR->JPhi[index];
+	int match = 0;
+	float mindr = 100;
+
+	////////////////////////////
+	////////////////////////////
+	// return -2;
+	////////////////////////////
+	////////////////////////////
+
+	if(fTR->nGenParticles > 1000) return -2;
+	for(size_t i = 0; i < fTR->nGenParticles; ++i){
+		// Only status 3 particles
+		if(fTR->genInfoStatus[i] != 3) continue;
+		
+		// Restrict to non-top quarks and gluons
+		if(abs(fTR->genInfoId[i]) > 5 && fTR->genInfoId[i] != 21) continue;
+
+		// Cutoff for low pt genparticles
+		if(fTR->genInfoPt[i]/jpt < 0.1) continue;
+
+		// Minimize DeltaR
+		float DR = Util::GetDeltaR(jeta, fTR->genInfoEta[i], jphi, fTR->genInfoPhi[i]);
+		if(DR > 0.5) continue;
+		if(DR > mindr) continue;
+		mindr = DR;
+		match = abs(fTR->genInfoId[i]);
+	}
+	return match;
+}
+int SSDLAnalysis::GenJetMatch(int index){
+	if(fIsData) return -1;
+	// Returns index of matched genjet
+	// Unmatched returns -1
+	float jpt  = fTR->JPt[index];
+	float jeta = fTR->JEta[index];
+	float jphi = fTR->JPhi[index];
+
+	int match = -1;
+	float mindr = 100;
+
+	for(size_t i = 0; i < fTR->NGenJets; ++i){
+		// Gen jets are stored with pt > 10
+		// Minimize DeltaR
+		float DR = Util::GetDeltaR(jeta, fTR->GenJetEta[i], jphi, fTR->GenJetPhi[i]);
+		if(DR > 0.5) continue;
+		if(DR > mindr) continue;
+		mindr = DR;
+		match = i;
+	}
+	return match;
 }
 
 //____________________________________________________________________________

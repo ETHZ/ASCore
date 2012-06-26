@@ -16,31 +16,30 @@ using namespace std;
 //_____________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-s lumi]" << endl;
+	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-x cross-section]" << endl;
 	cout << "  where:" << endl;
-	cout << "     verbose    sets the verbose level                  " << endl;
-	cout << "                   default is 0 (quiet mode)            " << endl;
-	cout << "     input      is the file containing an SSDLTree      " << endl;
-	cout << "     name       is the short tag included in the histos " << endl;
-	cout << "     datamc     switches between                        " << endl;
-	cout << "                   (0) data, i.e. no pileup weights     " << endl;
-	cout << "                   (1) SM MC                            " << endl;
-	cout << "                   (2) Signal MC                        " << endl;
-	cout << "                   (3) Rare SM MC                       " << endl;
-	cout << "                   (4) Rare SM MC with no pile up       " << endl;
-	cout << "     channel    Determines which type (mumu/elel/elmu)  " << endl;
-	cout << "                of events are considered from this      " << endl;
-	cout << "                sample. Used to avoid double counting   " << endl;
-	cout << "                of events between different channels.   " << endl;
-	cout << "                  (-1) Ignore (use for MC)              " << endl;
-	cout << "                   (0) MuMu                             " << endl;
-	cout << "                   (1) ElEl                             " << endl;
-	cout << "                   (2) ElMu                             " << endl;
-	cout << "     lumi       Is the integrated luminosity of the     " << endl;
-	cout << "                sample, only relevant for MC            " << endl;
-	cout << "     datacard   switches to input of a datacard         " << endl;
-	cout << "                containing several input files          " << endl;
-	cout << "     output     is the output directory                 " << endl;
+	cout << "     verbose         sets the verbose level                  " << endl;
+	cout << "                        default is 0 (quiet mode)            " << endl;
+	cout << "     input           is the file containing an SSDLTree      " << endl;
+	cout << "     name            is the short tag included in the histos " << endl;
+	cout << "     datamc          switches between                        " << endl;
+	cout << "                        (0) data, i.e. no pileup weights     " << endl;
+	cout << "                        (1) SM MC                            " << endl;
+	cout << "                        (2) Signal MC                        " << endl;
+	cout << "                        (3) Rare SM MC                       " << endl;
+	cout << "                        (4) Rare SM MC with no pile up       " << endl;
+	cout << "     channel         Determines which type (mumu/elel/elmu)  " << endl;
+	cout << "                     of events are considered from this      " << endl;
+	cout << "                     sample. Used to avoid double counting   " << endl;
+	cout << "                     of events between different channels.   " << endl;
+	cout << "                       (-1) Ignore (use for MC)              " << endl;
+	cout << "                        (0) MuMu                             " << endl;
+	cout << "                        (1) ElEl                             " << endl;
+	cout << "                        (2) ElMu                             " << endl;
+	cout << "     cross-section   Is the cross-section for each MC sample " << endl;
+	cout << "     datacard        switches to input of a datacard         " << endl;
+	cout << "                     containing several input files          " << endl;
+	cout << "     output          is the output directory                 " << endl;
 	cout << endl;
 	exit(status);
 }
@@ -55,18 +54,18 @@ int main(int argc, char* argv[]) {
 	int channel = -1; // ignore(-1), mumu(0), elel(1), elmu(2)
 	int verbose = 0;
 	int datamc = 0;
-	double lumi = 1.;
+	double xsec = 1.;
 	
 	bool card = false; // toggle between running on single file or datacard
 
 	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "v:l:i:n:m:o:c:s:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "v:l:i:n:m:o:c:g:x:h?")) != -1 ) {
 		switch (ch) {
 			case 'v': verbose    = atoi(optarg);         break;
 			case 'm': datamc     = atoi(optarg);         break;
 			case 'c': channel    = atoi(optarg);         break;
-			case 's': lumi       = strtod(optarg, NULL); break;
+			case 'x': xsec       = strtod(optarg, NULL); break;
 			case 'l': datacard   = TString(optarg);      break;
 			case 'i': inputfile  = TString(optarg);      break;
 			case 'n': name       = TString(optarg);      break;
@@ -111,14 +110,14 @@ int main(int argc, char* argv[]) {
 	if(verbose > 0 && !card) cout << " Name is:           " << name << endl;
 	if(verbose > 0 && !card) cout << " Type is:           " << type << endl;
 	if(verbose > 0 && !card) cout << " Channel is:        " << chan << endl;
-	if(verbose > 0 && !card) cout << " Lumi is:           " << lumi << endl;
+	if(verbose > 0 && !card) cout << " Cross-section is:  " << xsec << endl;
 	if(verbose > 0 &&  card) cout << " Datacard is:       " << datacard << endl;
 	if(verbose > 0)          cout << " Outputdir is:      " << outputdir << endl;
 
 	SSDLDumper *tA = new SSDLDumper();
 	tA->setVerbose(verbose);
 	tA->setOutputDir(outputdir);
-	if(!card) tA->init(inputfile, name, datamc, channel, lumi);
+	if(!card) tA->init(inputfile, name, datamc, xsec, channel);
 	if( card) tA->init(datacard);
 	tA->loop();
 	delete tA;

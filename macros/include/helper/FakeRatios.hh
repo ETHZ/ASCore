@@ -8,6 +8,10 @@
 
 using namespace std;
 
+class TGraphAsymmErrors;
+class TH1D;
+
+
 class FakeRatios {
 	
 public:
@@ -140,6 +144,7 @@ public:
 
 	// Central place to fix how to handle statistical errors
 	float getEStat2(float);
+	TGraphAsymmErrors* getGraphPoissonErrors( TH1D* histo, float nSigma=1., const std::string& xErrType="0" );
 	inline float getEStat(float N){return sqrt(getEStat2(N));};
 
 private:

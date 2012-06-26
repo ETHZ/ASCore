@@ -53,6 +53,9 @@ public:
 	bool IsTightMuon(int, int);
 	bool IsTightEle(int, int);
 	
+	int JetPartonMatch(int);
+	int GenJetMatch(int);
+	
 	double corrMuIso(int);
 	double corrElIso(int);
 	
@@ -64,6 +67,8 @@ public:
 	};
 
 private:
+	TH1F *fHEvCount;
+	
 	bool fDoFillEffTree;
 	
 	Monitor fCounter;
@@ -74,6 +79,8 @@ private:
 	static const int fMaxNeles = 5;
 	
 	static TString gBaseDir;
+	
+	JetCorrectionUncertainty *fJetCorrUnc;
 	
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
@@ -108,14 +115,18 @@ private:
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
+	float fTJetenergy[fMaxNjets];
 	float fTJetbtag1[fMaxNjets]; // SSVHP tight WP: > 2.
 	float fTJetbtag2[fMaxNjets]; // SSVHE
 	float fTJetbtag3[fMaxNjets]; // TCHP
 	float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
+	float fTJetJECUncert[fMaxNjets];
+	int   fTJetPartonID[fMaxNjets];
+	float fTJetGenpt [fMaxNjets];
+	float fTJetGeneta[fMaxNjets];
+	float fTJetGenphi[fMaxNjets];
 
-	float fTtcMET;
-	float fTtcMETphi;
 	float fTpfMET;
 	float fTpfMETphi;
 	
@@ -130,6 +141,8 @@ private:
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
 	float fTmuptE         [fMaxNmus];
+	float fTmuEMVetoEt    [fMaxNmus];
+	float fTmuHadVetoEt   [fMaxNmus];
 	int   fTmuid          [fMaxNmus];
 	int   fTmumoid        [fMaxNmus];
 	int   fTmugmoid       [fMaxNmus];

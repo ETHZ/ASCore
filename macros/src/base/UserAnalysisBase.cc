@@ -35,8 +35,8 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	JetCorPar.push_back(*ResJetPar);
 
 	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-        jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
-	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
+	fJECUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
+	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, fJECUnc;
 #endif
 
 }
@@ -48,7 +48,7 @@ UserAnalysisBase::~UserAnalysisBase(){
 
 #ifdef DOJES       
 	delete fJetCorrector;
-        delete jecUnc;
+	delete fJECUnc;
 #endif
 
 }
@@ -337,7 +337,25 @@ bool UserAnalysisBase::IsTightMu(int index){
 }
 
 bool UserAnalysisBase::IsLooseMu(int index){
-	if(!IsGoodBasicMu(index)) return false;
+	// Basic muon cleaning and ID
+	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
+	if(fTR->MuIsTrackerMuon[index] == 0) return false;
+
+	if(fTR->MuPt[index] < 5)          return false;
+	if(fabs(fTR->MuEta[index]) > 2.4) return false;
+
+	if(fTR->MuNChi2[index] > 10)   return false;
+	if(fTR->MuNTkHits[index] < 11) return false;
+	if(fTR->MuNMuHits[index] < 1)  return false;
+
+	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
+	if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
+
+	// if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
+	// if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
+
+	// if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+
 	if(fTR->MuRelIso03[index] > 1.0) return false;
 	return true;
 }
@@ -883,6 +901,15 @@ float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 
 	double l1l2l3scale = factors[2];
 	return rawpt*l1l2l3scale;
+}
+float UserAnalysisBase::GetJECUncert(float pt, float eta){
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
+
+	fJECUnc->setJetPt(pt);   
+	fJECUnc->setJetEta(eta); 
+	float uncert= fJECUnc->getUncertainty(true);
+	return uncert;
 }
 #endif
 

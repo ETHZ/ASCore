@@ -57,7 +57,7 @@ void DiPhotonPurity::Analyze(){
   if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
   fHNumVtx->Fill(fTR->NVrtx,weight);
 
-   if (isdata && !TriggerSelection()) return;
+   if (!TriggerSelection()) return;
 
   std::vector<int> passing = PhotonSelection(fTR);
 

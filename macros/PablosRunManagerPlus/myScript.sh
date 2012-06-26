@@ -135,7 +135,7 @@ EOF
 ## YOUR FUNCTIONALITY CODE GOES HERE
 # set up CMS environment
 
-export SCRAM_ARCH=slc5_amd64_gcc434
+export SCRAM_ARCH=slc5_amd64_gcc462
 
 source $VO_CMS_SW_DIR/cmsset_default.sh
 

@@ -10,7 +10,7 @@
 
 class QuickAnalyzer : public TreeAnalyzerBase {
 public:
-	QuickAnalyzer(TTree *tree = 0);
+	QuickAnalyzer(std::vector<std::string>& fileList);
 	virtual ~QuickAnalyzer();
 	void BeginJob(TString filename="QuickHistos.root");
 	void EndJob();

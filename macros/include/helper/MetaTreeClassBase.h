@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Feb 16 08:15:36 2012 by ROOT version 5.27/06b
+// Tue Jun 19 14:59:39 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: SMS.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -76,6 +76,8 @@ public :
    Float_t         MuIso[5];   //[NMus]
    Float_t         MuD0[5];   //[NMus]
    Float_t         MuDz[5];   //[NMus]
+   Float_t         MuEMVetoEt[5];   //[NMus]
+   Float_t         MuHadVetoEt[5];   //[NMus]
    Float_t         MuPtE[5];   //[NMus]
    Int_t           MuGenID[5];   //[NMus]
    Int_t           MuGenMID[5];   //[NMus]
@@ -112,19 +114,23 @@ public :
    Int_t           ElGenMType[5];   //[NEls]
    Int_t           ElGenGMType[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
-   Float_t         tcMET;
-   Float_t         tcMETPhi;
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[10];   //[NJets]
-   Float_t         JetEta[10];   //[NJets]
-   Float_t         JetPhi[10];   //[NJets]
-   Float_t         JetSSVHPBTag[10];   //[NJets]
-   Float_t         JetSSVHEBTag[10];   //[NJets]
-   Float_t         JetTCHPBTag[10];   //[NJets]
-   Float_t         JetTCHEBTag[10];   //[NJets]
-   Float_t         JetArea[10];   //[NJets]
+   Float_t         JetPt[40];   //[NJets]
+   Float_t         JetEta[40];   //[NJets]
+   Float_t         JetPhi[40];   //[NJets]
+   Float_t         JetEnergy[40];   //[NJets]
+   Float_t         JetSSVHPBTag[40];   //[NJets]
+   Float_t         JetSSVHEBTag[40];   //[NJets]
+   Float_t         JetTCHPBTag[40];   //[NJets]
+   Float_t         JetTCHEBTag[40];   //[NJets]
+   Float_t         JetArea[40];   //[NJets]
+   Float_t         JetJECUncert[40];   //[NJets]
+   Int_t           JetPartonID[40];   //[NJets]
+   Float_t         JetGenPt[40];   //[NJets]
+   Float_t         JetGenEta[40];   //[NJets]
+   Float_t         JetGenPhi[40];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -185,6 +191,8 @@ public :
    TBranch        *b_MuIso;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
+   TBranch        *b_MuEMVetoEt;   //!
+   TBranch        *b_MuHadVetoEt;   //!
    TBranch        *b_MuPtE;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenMID;   //!
@@ -221,19 +229,23 @@ public :
    TBranch        *b_ElGenMType;   //!
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElMT;   //!
-   TBranch        *b_tcMET;   //!
-   TBranch        *b_tcMETPhi;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_pfMETPhi;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
+   TBranch        *b_JetEnergy;   //!
    TBranch        *b_JetSSVHPBTag;   //!
    TBranch        *b_JetSSVHEBTag;   //!
    TBranch        *b_JetTCHPBTag;   //!
    TBranch        *b_JetTCHEBTag;   //!
    TBranch        *b_JetArea;   //!
+   TBranch        *b_JetJECUncert;   //!
+   TBranch        *b_JetPartonID;   //!
+   TBranch        *b_JetGenPt;   //!
+   TBranch        *b_JetGenEta;   //!
+   TBranch        *b_JetGenPhi;   //!
 
    MetaTreeClassBase(TTree *tree=0);
    virtual ~MetaTreeClassBase();
@@ -254,9 +266,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SMS.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root");
       if (!f) {
-         f = new TFile("SMS.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jun18/MC/WplusWplus.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -365,6 +377,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+   fChain->SetBranchAddress("MuEMVetoEt", MuEMVetoEt, &b_MuEMVetoEt);
+   fChain->SetBranchAddress("MuHadVetoEt", MuHadVetoEt, &b_MuHadVetoEt);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
@@ -401,19 +415,23 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+   fChain->SetBranchAddress("JetEnergy", JetEnergy, &b_JetEnergy);
    fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
    fChain->SetBranchAddress("JetSSVHEBTag", JetSSVHEBTag, &b_JetSSVHEBTag);
    fChain->SetBranchAddress("JetTCHPBTag", JetTCHPBTag, &b_JetTCHPBTag);
    fChain->SetBranchAddress("JetTCHEBTag", JetTCHEBTag, &b_JetTCHEBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
+   fChain->SetBranchAddress("JetJECUncert", JetJECUncert, &b_JetJECUncert);
+   fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
+   fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
+   fChain->SetBranchAddress("JetGenEta", JetGenEta, &b_JetGenEta);
+   fChain->SetBranchAddress("JetGenPhi", JetGenPhi, &b_JetGenPhi);
    Notify();
 }
 
