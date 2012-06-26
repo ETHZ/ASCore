@@ -137,11 +137,17 @@ def getBranches(file,tree):
         print >>sys.stderr,"*** Error while parsing file:",output
         return []
     branches = dict()
-    pattern = re.compile(r".*?(\w+)_analyze_(\S+)_NTupleProducer.*")
+    pattern  = re.compile(r".*?(\w+)_analyze_(\S+)_NTupleProducer.*")
+    pattern2 = re.compile(r".*?(\w+)_(\S+)__NTupleProducer.*")
     for line in output.split('\n'):
-        m = re.match(pattern,line)
+        m  = re.match(pattern,line)
+        m2 = re.match(pattern2,line)
         if m:
             branches[m.group(2)] = m.group(1)
+    	elif m2:
+            branches[m2.group(2)] = m2.group(1)
+	
+
 
     return branches
 
