@@ -29,6 +29,22 @@ if (isdata){
     nametriggers.push_back("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v");
     nametriggers.push_back("HLT_Photon36_R9Id_Photon22_R9Id_v");
   }
+  else if (run>=173236 && run<=178380){
+    nametriggers.push_back("HLT_Photon26_CaloIdXL_IsoXL_Photon18_CaloIdXL_IsoXL_v");
+    nametriggers.push_back("HLT_Photon26_CaloIdXL_IsoXL_Photon18_R9Id_v");
+    nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdXL_IsoXL_v");
+    nametriggers.push_back("HLT_Photon26_R9Id_Photon18_R9Id_v");
+    nametriggers.push_back("HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_R9Id_v");
+  }
+  else if (run>=178420 && run<=180252){
+    nametriggers.push_back("HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_R9Id_v");
+  }
 
  }
 
@@ -46,7 +62,6 @@ nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
 nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
 nametriggers.push_back("HLT_Photon32_CaloIdL_Photon26_CaloIdL_v");
 nametriggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v");
-nametriggers.push_back("HLT_DoublePhoton33_v");
 
  }
 
