@@ -42,25 +42,27 @@ def declareVars(names,file):
     indent = 35 # Formatting attempt
     for k,v in sorted(names.iteritems()):
         type = typename(v)
+	name = k[0] if k[0] is not "" else k[1]
         # Variable
         spaces = (indent-len(type))*' '+' '
-        file.write(4*' '+type+spaces+' '+k+';\n')
+        file.write(4*' '+type+spaces+' '+name+';\n')
         # edm::Handle
         spaces = (indent-14-len(type))*' '+' '
         file.write(4*' '+'edm::Handle<'+type)
-        if isVector(v): file.write(' >'+spaces+'h'+k+';\n')
-        else: file.write('> '+spaces+'h'+k+';\n')
+        if isVector(v): file.write(' >'+spaces+'h'+name+';\n')
+        else: file.write('> '+spaces+'h'+name+';\n')
         # edm::InputTag
         spaces = (indent-13)*' '+' '
-        file.write(4*' '+'edm::InputTag'+spaces+'t'+k+';\n')
+        file.write(4*' '+'edm::InputTag'+spaces+'t'+name+';\n')
 
 #______________________________________________________________
 def getVars(names,file,spaces,treename):
     indent = spaces*' '
     for k,v in sorted(names.iteritems()):
-        line = 'result &= '+treename+'getByLabel( t'+k+', h'+k+' );\n'
+	name = k[0] if k[0] is not "" else k[1]
+        line = 'result &= '+treename+'getByLabel( t'+name+', h'+name+' );\n'
         file.write(indent+line)
-        line = 'if ( h'+k+'.isValid() ) '+k+' = *h'+k+';\n'
+        line = 'if ( h'+name+'.isValid() ) '+name+' = *h'+name+';\n'
         file.write(indent+line)
         
 
@@ -68,8 +70,9 @@ def getVars(names,file,spaces,treename):
 def defineLabels(names,file):
     indent = 25
     for k,v in sorted(names.iteritems()):
-        spaces = (indent-len(k))*' '
-        file.write(4*' '+'t'+k+spaces+' = edm::InputTag("analyze","'+k+'");\n')
+	name = k[0] if k[0] is not "" else k[1]
+        spaces = (indent-len(name))*' '
+        file.write(4*' '+'t'+name+spaces+' = edm::InputTag("'+k[1]+'","'+k[0]+'");\n')
 
 #______________________________________________________________
 def processImpl(rBranches,eBranches):
@@ -137,12 +140,12 @@ def getBranches(file,tree):
         print >>sys.stderr,"*** Error while parsing file:",output
         return []
     branches = dict()
-    pattern = re.compile(r".*?(\w+)_analyze_(\S+)_NTupleProducer.*")
+    pattern  = re.compile(r".*?(\w+)_(\S+)_(\S*)_NTupleProducer.*")
     for line in output.split('\n'):
-        m = re.match(pattern,line)
+        m  = re.match(pattern,line)
         if m:
-            branches[m.group(2)] = m.group(1)
-
+            branches[(m.group(3),m.group(2))] = m.group(1)
+	
     return branches
 
 #______________________________________________________________
