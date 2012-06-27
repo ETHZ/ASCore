@@ -1053,6 +1053,8 @@ const bool TreeClassBase::GetAllByLabel(void) {
     if ( hNPhotons.isValid() ) NPhotons = *hNPhotons;
     result &= event->getByLabel( tNPhotonsTot, hNPhotonsTot );
     if ( hNPhotonsTot.isValid() ) NPhotonsTot = *hNPhotonsTot;
+    result &= event->getByLabel( tNGoodSuperClusters, hNGoodSuperClusters );
+    if ( hNGoodSuperClusters.isValid() ) NGoodSuperClusters = *hNGoodSuperClusters;
     result &= event->getByLabel( tNSuperClusters, hNSuperClusters );
     if ( hNSuperClusters.isValid() ) NSuperClusters = *hNSuperClusters;
     result &= event->getByLabel( tNTMus, hNTMus );
@@ -1427,6 +1429,12 @@ const bool TreeClassBase::GetAllByLabel(void) {
     if ( hRun.isValid() ) Run = *hRun;
     result &= event->getByLabel( tSCBrem, hSCBrem );
     if ( hSCBrem.isValid() ) SCBrem = *hSCBrem;
+    result &= event->getByLabel( tGoodSCEnergy, hGoodSCEnergy );
+    if ( hGoodSCEnergy.isValid() ) GoodSCEnergy = *hGoodSCEnergy;
+    result &= event->getByLabel( tGoodSCEta, hGoodSCEta );
+    if ( hGoodSCEta.isValid() ) GoodSCEta = *hGoodSCEta;
+    result &= event->getByLabel( tGoodSCPhi, hGoodSCPhi );
+    if ( hGoodSCPhi.isValid() ) GoodSCPhi = *hGoodSCPhi;
     result &= event->getByLabel( tSCEnergy, hSCEnergy );
     if ( hSCEnergy.isValid() ) SCEnergy = *hSCEnergy;
     result &= event->getByLabel( tSCEta, hSCEta );
@@ -2074,6 +2082,7 @@ void TreeClassBase::Init(void)
     tNPdfs                     = edm::InputTag("analyze","NPdfs");
     tNPhotons                  = edm::InputTag("analyze","NPhotons");
     tNPhotonsTot               = edm::InputTag("analyze","NPhotonsTot");
+    tNGoodSuperClusters        = edm::InputTag("analyze","NGoodSuperClusters");
     tNSuperClusters            = edm::InputTag("analyze","NSuperClusters");
     tNTMus                     = edm::InputTag("analyze","NTMus");
     tNTracks                   = edm::InputTag("analyze","NTracks");
@@ -2261,6 +2270,9 @@ void TreeClassBase::Init(void)
     tRhoForIso                 = edm::InputTag("analyze","RhoForIso");
     tRun                       = edm::InputTag("analyze","Run");
     tSCBrem                    = edm::InputTag("analyze","SCBrem");
+    tGoodSCEnergy              = edm::InputTag("analyze","GoodSCEnergy");
+    tGoodSCEta                 = edm::InputTag("analyze","GoodSCEta");
+    tGoodSCPhi                 = edm::InputTag("analyze","GoodSCPhi");
     tSCEnergy                  = edm::InputTag("analyze","SCEnergy");
     tSCEta                     = edm::InputTag("analyze","SCEta");
     tSCEtaWidth                = edm::InputTag("analyze","SCEtaWidth");

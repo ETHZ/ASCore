@@ -1541,6 +1541,9 @@ public:
     int                                  NSuperClusters;
     edm::Handle<int>                    hNSuperClusters;
     edm::InputTag                       tNSuperClusters;
+    int                                  NGoodSuperClusters;
+    edm::Handle<int>                    hNGoodSuperClusters;
+    edm::InputTag                       tNGoodSuperClusters;
     int                                  NTMus;
     edm::Handle<int>                    hNTMus;
     edm::InputTag                       tNTMus;
@@ -2099,6 +2102,15 @@ public:
     std::vector<float>                   SCBrem;
     edm::Handle<std::vector<float> >    hSCBrem;
     edm::InputTag                       tSCBrem;
+    std::vector<float>                   GoodSCEnergy;
+    edm::Handle<std::vector<float> >    hGoodSCEnergy;
+    edm::InputTag                       tGoodSCEnergy;
+    std::vector<float>                   GoodSCEta;
+    edm::Handle<std::vector<float> >    hGoodSCEta;
+    edm::InputTag                       tGoodSCEta;
+    std::vector<float>                   GoodSCPhi;
+    edm::Handle<std::vector<float> >    hGoodSCPhi;
+    edm::InputTag                       tGoodSCPhi;
     std::vector<float>                   SCEnergy;
     edm::Handle<std::vector<float> >    hSCEnergy;
     edm::InputTag                       tSCEnergy;
