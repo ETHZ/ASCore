@@ -85,7 +85,9 @@ def findDuplicates():
     parser.add_option('--dcap', dest='dcap', help='Print the list of files in dcap format', action='store_true')
     parser.add_option('--auto', dest='auto', help='Automatically guess remote location (argument should be crab task directory)', action='store_true', default=False)
     parser.add_option('--debug', dest='debug', help='Turn on debugging information', action='store_true', default=False)
+    parser.add_option('--dbs', dest='DBS', help='Check also DBS information', action='store_true', default=False)
 #     parser.add_option('--tag', dest='tag', default='MC', help='tag to match the files [MC,data]')
+
 
     (opt, args) = parser.parse_args()
 
@@ -93,15 +95,20 @@ def findDuplicates():
         parser.error('No site selected')
     if opt.site == 't3psi' or opt.site == 'T3_CH_PSI':
         srmSite = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN="
-        rootpath = srmSite+'/pnfs/psi.ch/cms/trivcat'
+        pfnPrefix = "/pnfs/psi.ch/cms/trivcat"
+        rootpath = srmSite+pfnPrefix
         dcapPrefix= 'dcap://t3se01.psi.ch:22125'
+        pfnPrefix = "/pnfs/psi.ch/cms/trivcat"
     elif opt.site == 't2cscs' or opt.site == 'T2_CH_CSCS':
         srmSite = "srm://storage01.lcg.cscs.ch:8443/srm/managerv2?SFN="
-        rootpath = srmSite+"/pnfs/lcg.cscs.ch/cms/trivcat"
+        pfnPrefix = "/pnfs/lcg.cscs.ch/cms/trivcat"
+        rootpath = srmSite+pfnPrefix
         dcapPrefix= ''
+        pfnPrefix = "/pnfs/lcg.cscs.ch/cms/trivcat"
     elif opt.site == 't2rwth' or opt.site == 'T2_DE_RWTH':
         srmSite = "srm://grid-srm.physik.rwth-aachen.de:8443/srm/managerv2?SFN="
-        rootpath = srmSite+"/pnfs/physik.rwth-aachen.de/cms"
+        pfnPrefix = "/pnfs/physik.rwth-aachen.de/cms"
+        rootpath = srmSite+pfnPrefix
         dcapPrefix= ''
     else:
         parser.error('site can be t3psi, t2cscs, or t2rwth')
@@ -112,6 +119,16 @@ def findDuplicates():
     path = args[0]
     if path[0] is not '/' and not opt.auto:
         parser.error('Requires an absolute path: It must start with \'/\'')
+
+    PWD=os.getenv("PWD")
+    dbsFileList=os.path.basename(path)+'.'+opt.site+'.dbs.list'
+    SiteTranslate = {"t2cscs":"T2_CH_CSCS", "t3psi":"T3_CH_PSI","t2rwth":"T2_DE_RWTH"}
+    if opt.DBS:
+        ###TODO: check for DBSSQL
+        datasetName = os.popen("grep '<User Dataset Name>' "+path+"/log/crab.log | cut -d= -f2 | uniq").readline().strip(" ").strip("\n")
+        print "Considering dataset: "+datasetName+", getting files"
+        os.system("dbssql --limit=10000 --dbsInst=cms_dbs_ph_analysis_02 --input='find file,site where dataset="+datasetName+" and site="+SiteTranslate[opt.site]+"' | grep -v '#' | awk '{print $1}'>"+dbsFileList)
+        
 
 #     fileTag=opt.tag
 
@@ -189,9 +206,10 @@ def findDuplicates():
         id = int(res.group(1))
         retry = int(res.group(2))
         size = int(tokens[0])
+        lfn= path[len(pfnPrefix):].replace("//","/")
 
         # make a tuple, path, size, id, retry
-        fileTuple=(path,size,id,retry)
+        fileTuple=(path,size,id,retry,lfn)
         # count the total size
         sizeOnDisk += size
         # fill the map, where the key is the job id
@@ -225,15 +243,23 @@ def findDuplicates():
     print 'Files found:',nFiles,'Duplicates:',nDuplicates
     print 'Total file size: %.2fGb' % sizeGb
 
+    dbsDuplicates = {}
     if len(duplicatesMap) is not 0:
         print 'Id \t Retry \t Size \t Path #'
         for id in sorted(duplicatesMap.iterkeys()):
+            
             fileArray = duplicatesMap[id]
             print '---',id,'-',len(fileArray),'duplicates'
+            nInDbs=0
+
             for fileTuple in fileArray:
-                # size, path, retry
-                print fileTuple[2],'\t',fileTuple[3],'\t',fileTuple[1],'\t',fileTuple[0]
-    
+                res = os.popen("grep "+fileTuple[4].split("/")[-1]+" "+dbsFileList).readlines()
+                dbsString = ""
+                if res!=[]:
+                    dbsString="DBS"
+                    nInDbs+=1
+                print fileTuple[2],'\t',fileTuple[3],'\t',fileTuple[1],'\t',fileTuple[0],'\t',dbsString
+                dbsDuplicates[str(fileTuple[2])] = nInDbs
 
     if len(missingFiles) == 0:
         missStr = 'None'
@@ -245,7 +271,16 @@ def findDuplicates():
 
     print 'Missing files','('+str(len(missingFiles))+'):',missStr
     print hline
-        
+
+    nPub=0
+    if len(dbsDuplicates)!=0:
+        dRange = ""
+        for d in dbsDuplicates.keys():
+            if dbsDuplicates[d]>1: dRange+=d +" ("+str(dbsDuplicates[d])+"),"
+            if dbsDuplicates[d]>0: nPub+=1
+        print "Duplicate files in DBS (legend: [ID (nCopies)]):  "+"["+dRange[:-1]+"]"
+    print "Published files (unique): ", nPub
+
     if opt.tryDelete:
         filesToDelete = []
         nUnsafeDuplicates = 0
