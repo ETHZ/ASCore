@@ -84,13 +84,6 @@ class SSDLPlotter : public SSDLDumper{
 public:
 	static TString gHiLoLabel[3];
 
-	static double gEChMisIDBB;
-	static double gEChMisIDBB_E;
-	static double gEChMisIDEE;
-	static double gEChMisIDEE_E;
-	static double gEChMisIDEB;
-	static double gEChMisIDEB_E;
-
 	static double gEChMisIDE;
 	static double gEChMisIDE_E;
 	static double gEChMisIDB;
@@ -115,6 +108,7 @@ public:
 	virtual void msugraLOxsecs(TFile *);
 	virtual void msugraNLOxsecs(TFile *);
 	virtual void scanMSUGRA(const char * filestring);
+	// virtual void scanSMS(const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2i, bool pass3rdVeto);
 	virtual void scanSMS(const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2);
 	virtual void plotWeightedHT();
 
@@ -153,7 +147,7 @@ public:
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
 
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
-        void makeDiffPrediction();
+	void makeDiffPrediction();
 	// MARC void makeTTWDiffPredictions();
 	void makeDiffPredictionTTW(int);
 
@@ -182,7 +176,7 @@ public:
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
         
-        void calculateChMisIdProb(vector<int>, gChMisIdReg, float&, float&);
+	void calculateChMisIdProb(vector<int>, gChMisIdReg, float&, float&);
 
         TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);

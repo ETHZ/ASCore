@@ -78,17 +78,18 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, //DoubleMu4, DoubleMu5,
-		DoubleEle1, DoubleEle2, DoubleEle3, //DoubleEle4, DoubleEle5,
-		MuEG1, MuEG2, MuEG3, //MuEG4, MuEG5,
-		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
+		DoubleMu1 = sample_begin, DoubleMu2, // DoubleMu3, //DoubleMu4, DoubleMu5,
+		DoubleEle1, DoubleEle2, // DoubleEle3, //DoubleEle4, DoubleEle5,
+		MuEG1, MuEG2, // MuEG3, //MuEG4, MuEG5,
+		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
 		// GJets40, GJets100, GJets200,
 		WZ,ZZ, 
 		// GVJets,
 		TTbarW, TTbarZ, TTbarG, //DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
-		WZZ, WWG, ZZZ, WWW,
+		WWZ, WZZ, 
+		WWG, ZZZ, WWW,
 		TTbarWW,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
@@ -140,6 +141,13 @@ public:
 		HT200MET503b,
 		HT320MET0,
 		HT320MET0b,
+		MET0_80HT200b,
+		MET0_200HT320b,
+		MET0_320HT600b,
+		HT80_0MET30b,
+		HT80_30MET50b,
+		HT80_50MET120b,
+		HT80_120MET200b,
 		gNREGIONS
 	};
 	//enum gRegion {
@@ -835,6 +843,8 @@ public:
 	float       fSETree_pT2;
 	float       fSETree_eta1;
 	float       fSETree_eta2;
+	float		fSETree_PFIso1;
+	float		fSETree_PFIso2;
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
