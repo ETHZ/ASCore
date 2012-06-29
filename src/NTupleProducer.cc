@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.11 2012/06/25 16:33:53 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.12 2012/06/26 11:51:45 peruzzi Exp $
 //
 //
 
@@ -1762,6 +1762,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnphotons = phoOrdered.size();
 	phoqi = 0;
 
+	std::vector<int> storethispfcand(pfCandidates->size(),0);
+
 	for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
 	it != phoOrdered.end(); ++it, ++phoqi ) {
 
@@ -2180,15 +2182,26 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 int type = -1;
 
 	 for( int i=0; i<ncand; ++i ) {
-
-	   if (FoundPFPhoton && i==iphot) continue;
-	   if (FoundPFElectron && i==iel) continue;
 	   
 	   dR = DeltaR(photonPhi, (*pfCandidates)[i].phi(), photonEta, (*pfCandidates)[i].eta());
 	   //if (dR<0.6 && dR>1e-05){
 	   
 	   type = FindPFCandType((*pfCandidates)[i].pdgId());
 	   //cout << "type=" << type<<endl;
+
+	   { // decide which pf candidates will be stored
+	     math::XYZVector vCand = math::XYZVector(gamIter->superCluster()->x(), gamIter->superCluster()->y(), gamIter->superCluster()->z());
+	     float r = vCand.R();
+	     math::XYZVector pfvtx((*pfCandidates)[i].vx(), (*pfCandidates)[i].vy(), (*pfCandidates)[i].vz());
+	     math::XYZVector pvm(((*pfCandidates)[i].momentum()*r/(*pfCandidates)[i].momentum().R()) + pfvtx);
+	     
+	     if (type==2) storethispfcand[i]=1;
+	     if (type==1 && dR<0.4) storethispfcand[i]=1;
+	     if (type==1 && DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta())<0.4) storethispfcand[i]=1;
+	   }
+
+	   if (FoundPFPhoton && i==iphot) continue;
+	   if (FoundPFElectron && i==iel) continue;
 	   
 	   if (type==0 || type==1 || type==2){
 	   
@@ -2222,7 +2235,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       pho_Cone06PfCandDeltaEtarecomputed[ipf] = pvm.Eta() - vCand.Eta();
 	       pho_Cone06PfCandDeltaPhirecomputed[ipf] = DeltaPhi(vCand.Phi(),pvm.Phi());
 	       //pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();
-
 
 	       pho_Cone06PfCandIsFromPU[ipf] = -1;
 		 if (type==1){
@@ -2645,44 +2657,37 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	// PfCandidates Variables:
 
 	int pfcandIndex(0);
-	for( reco::PFCandidateCollection::const_iterator ip = pfCandidates->begin();
-	     ip != pfCandidates->end(); ++ip){
-	  
-	  bool store=false;
-	  bool isclosetophoton=false;
-	  int type=FindPFCandType(ip->pdgId());
-	  
-	  if (type==2) store=true;
-	  if (type==1) 
-	    for (int i=0; i<fTnphotons; i++)
-	      if (DeltaR(ip->phi(),fTPhotPhi[i],ip->eta(),fTPhotEta[i])<0.4)
-		store=true;
-	  
-	  if (!store) continue;
+	for (unsigned int i=0; i<pfCandidates->size(); i++){
 
-		if (pfcandIndex >= gMaxnpfcand){
-		  edm::LogWarning("NTP") << "@SUB=analyze"
-					 << "Maximum number of pf candidates exceeded";
-		  fTgoodevent = 1;
-		  break;
-		}
-	  
-	  fTPfCandPdgId[pfcandIndex] = ip->pdgId();
-	  fTPfCandEta[pfcandIndex] = ip->eta();
-	  fTPfCandPhi[pfcandIndex] = ip->phi();
-	  fTPfCandPx[pfcandIndex] = ip->px();
-	  fTPfCandPy[pfcandIndex] = ip->py();
-	  fTPfCandPz[pfcandIndex] = ip->pz();	  
-	  fTPfCandEnergy[pfcandIndex] = ip->energy();
-	  fTPfCandPt[pfcandIndex] = ip->pt();
-	  fTPfCandVx[pfcandIndex] = ip->vx();
-	  fTPfCandVy[pfcandIndex] = ip->vy();
-	  fTPfCandVz[pfcandIndex] = ip->vz();
+	  if (storethispfcand[i]==0) continue;
+
+	  if (pfcandIndex >= gMaxnpfcand){
+	    edm::LogWarning("NTP") << "@SUB=analyze"
+				   << "Maximum number of pf candidates exceeded";
+	    fTgoodevent = 1;
+	    break;
+	  }
+
+	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
+	  fTPfCandEta[pfcandIndex] = (*pfCandidates)[i].eta();
+	  fTPfCandPhi[pfcandIndex] = (*pfCandidates)[i].phi();
+	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
+	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
+	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
+	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
+	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
+	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
+	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
+	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
 
 	  pfcandIndex++;
 
 	}
 	fTNPfCand=pfcandIndex;
+
+
+
+	  
 
 
 	////////////////////////////////////////////////////////
