@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.24 2012/06/20 21:29:45 pnef Exp $
+// $Id: NTupleProducer.h,v 1.114.2.25 2012/06/26 17:08:17 pablom Exp $
 //
 //
 
@@ -450,7 +450,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTL1TechResults;
 
   static const unsigned int gMaxHltNObjs  = 10;
-  std::auto_ptr<int>  fTNHLTObjs;
+  std::auto_ptr<std::vector<int> >  fTNHLTObjs;
   std::auto_ptr<std::vector<int> >  fTHLTObjectID[10];
   std::auto_ptr<std::vector<float> >  fTHLTObjectPt[10];
   std::auto_ptr<std::vector<float> >  fTHLTObjectEta[10];

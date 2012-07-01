@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.29 2012/06/20 21:29:45 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.30 2012/06/26 17:08:16 pablom Exp $
 //
 //
 
@@ -679,32 +679,41 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<trigger::TriggerEvent> trgEvent;
   iEvent.getByLabel(fHLTTrigEventTag, trgEvent);
 
+
   InputTag collectionTag;
   // Loop over path names and get related objects
+  const std::vector<std::string> allTrigNames = fHltConfig.triggerNames();
   for (size_t i=0; i<fTNpaths; ++i) {
-    collectionTag = edm::InputTag(fHLTLabels[i],"",fHltConfig.processName());
+    size_t j = 0;
+    for(; j <allTrigNames.size();++j) {
+      if(allTrigNames[j].find(fHLTLabels[i])!=string::npos) break;
+    }
+    const std::vector<std::string> filtertags = fHltConfig.moduleLabels(allTrigNames[j]);
+    if(filtertags.size() < 2) continue;
+    collectionTag = edm::InputTag(filtertags[filtertags.size()-2],"",fHltConfig.processName());
     size_t  filterIndex_ = trgEvent->filterIndex(collectionTag);
     if (filterIndex_<trgEvent->sizeFilters()) {
       const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
       const trigger::Keys& keys = trgEvent->filterKeys(filterIndex_);
       // Loop over objects
-      for ( size_t hlto = 0; hlto<keys.size(); ++hlto ) {
-        if (hlto>=gMaxHltNObjs) {
+      int hlto;
+      for (hlto = 0; hlto< (int) keys.size(); ++hlto ) {
+        if (hlto>=(int)gMaxHltNObjs) {
           edm::LogWarning("NTP") << "@SUB=analyze()"
                                  << "Maximum number of triggering objects exceeded"
                                  << " for filter " << fHLTLabels[i];
           break;
         }
-        // Update number of objects stored
-        if ( *fTNHLTObjs<=(int)hlto ) *fTNHLTObjs = hlto+1; // Not an index...
         const trigger::TriggerObject& TO(TOC[keys[hlto]]);
         fTHLTObjectID[i]->push_back( TO.id() );
         fTHLTObjectPt[i]->push_back( TO.pt() );
         fTHLTObjectEta[i]->push_back( TO.eta() );
         fTHLTObjectPhi[i]->push_back( TO.phi() );
       }
+      fTNHLTObjs->push_back(hlto);
     }
   }
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // Dump tree variables /////////////////////////////////////////////////////////
@@ -3351,7 +3360,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("HLTPrescale");
   produces<std::vector<int> >("L1PhysResults");
   produces<std::vector<int> >("L1TechResults");
-  produces<int>("NHLTObjs");
+  produces<std::vector<int> >("NHLTObjs");
   for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
     std::ostringstream s;
     s << i;
@@ -4005,7 +4014,7 @@ void NTupleProducer::resetProducts( void ) {
   fTHLTPrescale.reset(new std::vector<int> );
   fTL1PhysResults.reset(new std::vector<int> );
   fTL1TechResults.reset(new std::vector<int> );
-  fTNHLTObjs.reset(new int(0));
+  fTNHLTObjs.reset(new std::vector<int> );
   for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
     fTHLTObjectID[i].reset(new std::vector<int> );
     fTHLTObjectPt[i].reset(new std::vector<float> );
