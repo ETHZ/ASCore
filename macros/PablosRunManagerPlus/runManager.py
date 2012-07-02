@@ -450,7 +450,6 @@ if __name__ == '__main__' :
             os.system("voms-proxy-init -voms cms");
         else:
 		    print "Proxy lifetime is acceptable (more than "+str(timeleft)+" hours)"
-        sys.exit(-1)
         result = parseInputFile(args[0])
         if(result == "Error"):
                 showMessage("Error parsing input file")
