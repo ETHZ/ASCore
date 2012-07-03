@@ -317,14 +317,6 @@ void DiPhotonMiniTree::Analyze(){
       continue;
     }
 
-    if (sel_cat==0 || sel_cat==4) {
-      float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
-      float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
-      float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
-      dipho_mgg_photon = invmass0;
-      dipho_mgg_newCorr = invmass5;
-      dipho_mgg_newCorrLocal = invmass6;
-    }
   
   
   pholead_eta = fTR->PhoEta[passing.at(0)];
@@ -468,6 +460,16 @@ void DiPhotonMiniTree::Analyze(){
   photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[passing.at(1)];
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(1)];
   }
+
+  if (sel_cat==0 || sel_cat==4) {
+    float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
+    float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
+    float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
+    dipho_mgg_photon = invmass0;
+    dipho_mgg_newCorr = invmass5;
+    dipho_mgg_newCorrLocal = invmass6;
+  }
+  
 
 
   OutputTree[sel_cat]->Fill();
