@@ -10,7 +10,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, std::string _tchoice, Float_t aw, Float_t* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), templateChoice(_tchoice), AddWeight(aw), kfactors(_kfac){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t aw, Float_t* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac){
   Util::SetStyle();	
   if (fDataType_ == "mc") isdata=false;
   else if (fDataType_ == "data") isdata=true; 
@@ -42,10 +42,8 @@ void DiPhotonMiniTree::Begin(){
 
   for (int i=0; i<4; i++){
 
-
- OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
- OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
-
+  OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
+  OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
 
   OutputTree[i]->Branch("event_weight",&event_weight,"event_weight/F");
   OutputTree[i]->Branch("event_rho",&event_rho,"event_rho/F");
@@ -101,99 +99,40 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("pholead_sigmaEta",&pholead_sigmaEta,"pholead_sigmaEta/F");
   OutputTree[i]->Branch("photrail_sigmaEta",&photrail_sigmaEta,"photrail_sigmaEta/F");
 
+  OutputTree[i]->Branch("pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone01NeutralHadronIso_mvVtx",&pholead_pho_Cone01NeutralHadronIso_mvVtx,"pholead_pho_Cone01NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone01NeutralHadronIso_mvVtx",&photrail_pho_Cone01NeutralHadronIso_mvVtx,"photrail_pho_Cone01NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone02NeutralHadronIso_mvVtx",&pholead_pho_Cone02NeutralHadronIso_mvVtx,"pholead_pho_Cone02NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone02NeutralHadronIso_mvVtx",&photrail_pho_Cone02NeutralHadronIso_mvVtx,"photrail_pho_Cone02NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone03NeutralHadronIso_mvVtx",&pholead_pho_Cone03NeutralHadronIso_mvVtx,"pholead_pho_Cone03NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone03NeutralHadronIso_mvVtx",&photrail_pho_Cone03NeutralHadronIso_mvVtx,"photrail_pho_Cone03NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone04NeutralHadronIso_mvVtx",&pholead_pho_Cone04NeutralHadronIso_mvVtx,"pholead_pho_Cone04NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("photrail_pho_Cone04NeutralHadronIso_mvVtx",&photrail_pho_Cone04NeutralHadronIso_mvVtx,"photrail_pho_Cone04NeutralHadronIso_mvVtx/F");
+  OutputTree[i]->Branch("pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01/F");
+  OutputTree[i]->Branch("pholead_pho_Cone03PFCombinedIso",&pholead_pho_Cone03PFCombinedIso,"pholead_pho_Cone03PFCombinedIso/F");
+  OutputTree[i]->Branch("photrail_pho_Cone03PFCombinedIso",&photrail_pho_Cone03PFCombinedIso,"photrail_pho_Cone03PFCombinedIso/F");
+  OutputTree[i]->Branch("pholead_pho_Cone04PFCombinedIso",&pholead_pho_Cone04PFCombinedIso,"pholead_pho_Cone04PFCombinedIso/F");
+  OutputTree[i]->Branch("photrail_pho_Cone04PFCombinedIso",&photrail_pho_Cone04PFCombinedIso,"photrail_pho_Cone04PFCombinedIso/F");
 
-  OutputTree[i]->Branch("pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt5",&pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt5,"pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt5/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt0",&pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt0,"pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt5",&pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt5,"pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt5/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&pholead_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"pholead_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&pholead_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"pholead_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&pholead_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"pholead_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&pholead_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"pholead_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0",&pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0,"pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5",&pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5,"pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks",&pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks,"pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks",&pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks,"pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0",&pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0,"pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5",&pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5,"pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&pholead_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"pholead_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&pholead_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"pholead_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&pholead_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"pholead_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old",&pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old,"pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old",&pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old,"pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old",&pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old,"pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old",&pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old,"pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0",&pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0,"pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0",&pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0,"pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0",&pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0,"pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0",&pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0,"pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0",&pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0,"pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0",&pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0,"pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0",&pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0,"pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0,"pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
+  OutputTree[i]->Branch("pholead_PhoPassConvSafeElectronVeto",&pholead_PhoPassConvSafeElectronVeto,"pholead_PhoPassConvSafeElectronVeto/I");
+  OutputTree[i]->Branch("photrail_PhoPassConvSafeElectronVeto",&photrail_PhoPassConvSafeElectronVeto,"photrail_PhoPassConvSafeElectronVeto/I");
 
-
-  OutputTree[i]->Branch("photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt5",&photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt5,"photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt5/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt0",&photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt0,"photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt5",&photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt5,"photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt5/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&photrail_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"photrail_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&photrail_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"photrail_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&photrail_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"photrail_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx",&photrail_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,"photrail_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0",&photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0,"photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5",&photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5,"photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks",&photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks,"photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks",&photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks,"photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0",&photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0,"photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5",&photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5,"photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&photrail_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"photrail_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&photrail_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"photrail_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&photrail_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"photrail_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx",&photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx,"photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old",&photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old,"photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old",&photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old,"photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old",&photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old,"photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old",&photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old,"photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0",&photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0,"photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0",&photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0,"photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0",&photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0,"photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0",&photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0,"photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0",&photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0,"photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0",&photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0,"photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0",&photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0,"photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,"photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0,"photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01/F");
-  OutputTree[i]->Branch("photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU/F");
+  OutputTree[i]->Branch("pholead_GenPhotonIsoDR04",&pholead_GenPhotonIsoDR04,"pholead_GenPhotonIsoDR04/F");
+  OutputTree[i]->Branch("photrail_GenPhotonIsoDR04",&photrail_GenPhotonIsoDR04,"photrail_GenPhotonIsoDR04/F");
 
   OutputTree[i]->Branch("pholead_PhoIso03Ecal",&pholead_PhoIso03Ecal,"pholead_PhoIso03Ecal/F");
   OutputTree[i]->Branch("pholead_PhoIso03Hcal",&pholead_PhoIso03Hcal,"pholead_PhoIso03Hcal/F");
@@ -261,7 +200,6 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("photrail_Pho_isPFPhoton",&photrail_Pho_isPFPhoton,"photrail_Pho_isPFPhoton/I");
   OutputTree[i]->Branch("photrail_Pho_isPFElectron",&photrail_Pho_isPFElectron,"photrail_Pho_isPFElectron/I");
 
-
   OutputTree[i]->Branch("pholead_PhoMCmatchindex",&pholead_PhoMCmatchindex,"pholead_PhoMCmatchindex/I");
   OutputTree[i]->Branch("pholead_PhoMCmatchexitcode",&pholead_PhoMCmatchexitcode,"pholead_PhoMCmatchexitcode/I");
 
@@ -302,189 +240,122 @@ void DiPhotonMiniTree::Analyze(){
   if (!isdata) event_nPU = fTR->PUnumInteractions;
   event_nRecVtx = fTR->NVrtx;
 
+  int nmatched_part_isrfsr_gamma=0;
+  {
+    std::vector<int> temp;
+    for (int i=0; i<fTR->NPhotons; i++){
+      temp.push_back(i);
+    }
+    temp = PhotonPreSelection(fTR,temp);
+    temp = ApplyPixelVeto(fTR,temp,0);
+    nmatched_part_isrfsr_gamma = Count_part_isrfsr_gamma(fTR,temp);
+  }
+  if (!isdata) event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
+  else event_Kfactor=1;
 
 
-  // 0=standard selection, 1=sideband, 2=inclusive, 3=DY pixel veto reversed
-  std::vector<int> passing_sel[4];
+  // 0 = standard selection for data and MC
+  // 1 = signal template generation from MC
+  // 2 = background template generation from MC
+  // 3 = DY selection (standard with reversed pixel veto)
+
+  if (!TriggerSelection()) return;
+
+  std::vector<int> passing_selection[4];
+
+  bool pass[4];
 
   for (int sel_cat=0; sel_cat<4; sel_cat++){
 
-    if (!TriggerSelection()) continue;
+    pass[sel_cat]=false;
 
-    //    cout << "trigger passed" << endl;
+    std::vector<int> passing;
 
-    passing_sel[sel_cat] = PhotonSelection(fTR,sel_cat);
-    if (passing_sel[sel_cat].size()<2) continue;
-
-    //    cout << "phot selection passed" << endl;
-
-    if (!EventSelection(passing_sel[sel_cat])) continue;
-
-    //    cout << "evt selection passed" << endl;
-
-    std::vector<int> passing = passing_sel[sel_cat];
-
-    //  cout << "B" << endl;
-
-  float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
-  float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
-  float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
-  
-  if (!isdata) {
-    int nmatched_part_isrfsr_gamma=0;
-    for (int i=0; i<2; i++){
-      int code = fTR->PhoMCmatchexitcode[passing.at(i)];
-      if (code==1 || code==2) nmatched_part_isrfsr_gamma++;
+    for (int i=0; i<fTR->NPhotons; i++){
+      passing.push_back(i);
     }
-    event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
+
+    passing = PhotonPreSelection(fTR,passing);
+
+    if (sel_cat!=3) passing = ApplyPixelVeto(fTR,passing,0);
+    if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1);
+
+    passing = PhotonSelection(fTR,passing);
+
+    if (sel_cat==0 || sel_cat==3){
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    if (sel_cat==1 || sel_cat==2){
+      if (sel_cat==1) passing = SignalSelection(fTR,passing);
+      if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+
+    passing_selection[sel_cat] = passing;
+
   }
-  else event_Kfactor=1;
 
-  dipho_mgg_photon = invmass0;
-  dipho_mgg_newCorr = invmass5;
-  dipho_mgg_newCorrLocal = invmass6;
+  for (int sel_cat=0; sel_cat<4; sel_cat++){
 
-  pholead_eta = fTR->PhoEta[passing.at(0)];
-  photrail_eta = fTR->PhoEta[passing.at(1)];
+    if (!pass[sel_cat]) continue;
+
+    std::vector<int> passing = passing_selection[sel_cat];
+
+    int minsize=999;
+    if (sel_cat==0 || sel_cat==4) minsize=2;
+    if (sel_cat==1 || sel_cat==2) minsize=1;
+
+    if (!(passing_selection[sel_cat].size()>=minsize)){
+      std::cout << "Error!!!" << std::endl;
+      continue;
+    }
+
+    if (sel_cat==0 || sel_cat==4) {
+      float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
+      float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
+      float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
+      dipho_mgg_photon = invmass0;
+      dipho_mgg_newCorr = invmass5;
+      dipho_mgg_newCorrLocal = invmass6;
+    }
   
+  
+  pholead_eta = fTR->PhoEta[passing.at(0)];
   pholead_px = fTR->PhoPx[passing.at(0)];
-  photrail_px = fTR->PhoPx[passing.at(1)];
   pholead_py = fTR->PhoPy[passing.at(0)];
-  photrail_py = fTR->PhoPy[passing.at(1)];
   pholead_pt = fTR->PhoPt[passing.at(0)];
-  photrail_pt = fTR->PhoPt[passing.at(1)];
   pholead_pz = fTR->PhoPz[passing.at(0)];
-  photrail_pz = fTR->PhoPz[passing.at(1)];
   pholead_energy = fTR->PhoEnergy[passing.at(0)];
-  photrail_energy = fTR->PhoEnergy[passing.at(1)];
-
   pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
-  photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
   pholead_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(0)]];
-  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(1)]];
- 
   pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(0)];
   pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(0)];
   pholead_PhoScSeedSeverity=fTR->PhoScSeedSeverity[passing.at(0)];
-  
-  photrail_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(1)];
-  photrail_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(1)];
-  photrail_PhoScSeedSeverity=fTR->PhoScSeedSeverity[passing.at(1)];
-
   pholead_energySCdefault = CorrPhoton(fTR,passing.at(0),0).E();
-  photrail_energySCdefault = CorrPhoton(fTR,passing.at(1),0).E();
   pholead_energyNewCorr = CorrPhoton(fTR,passing.at(0),5).E();
-  photrail_energyNewCorr = CorrPhoton(fTR,passing.at(1),5).E();
   pholead_energyNewCorrLocal = CorrPhoton(fTR,passing.at(0),6).E();
-  photrail_energyNewCorrLocal = CorrPhoton(fTR,passing.at(1),6).E();
-
   pholead_r9 = fTR->SCR9[fTR->PhotSCindex[passing.at(0)]];
-  photrail_r9 = fTR->SCR9[fTR->PhotSCindex[passing.at(1)]];
   pholead_sieie = fTR->PhoSigmaIetaIeta[passing.at(0)];
-  photrail_sieie = fTR->PhoSigmaIetaIeta[passing.at(1)];
   pholead_hoe = fTR->PhoHoverE[passing.at(0)];
-  photrail_hoe = fTR->PhoHoverE[passing.at(1)];
-  pholead_brem =  fTR->SCBrem[fTR->PhotSCindex[passing.at(0)]];
-  photrail_brem = fTR->SCBrem[fTR->PhotSCindex[passing.at(1)]];
+  pholead_brem = fTR->SCBrem[fTR->PhotSCindex[passing.at(0)]];
   pholead_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[passing.at(0)]];
-  photrail_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[passing.at(1)]];
   pholead_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[passing.at(0)]];
-  photrail_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[passing.at(1)]];
-
-  pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt0=fTR->Pho_Cone04PhotonIso_dR0_dEta0_pt0[passing.at(0)];
-  pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt5=fTR->Pho_Cone04PhotonIso_dR0_dEta0_pt5[passing.at(0)];
-  pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt0=fTR->Pho_Cone04PhotonIso_dR8_dEta0_pt0[passing.at(0)];
-  pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt5=fTR->Pho_Cone04PhotonIso_dR8_dEta0_pt5[passing.at(0)];
-  pholead_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(0)];
-  pholead_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(0)];
-  pholead_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(0)];
-  pholead_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0=fTR->Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5=fTR->Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[passing.at(0)];
-  pholead_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(0)];
-  pholead_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(0)];
-  pholead_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(0)];
-  pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(0)];
-  pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(0)];
-
-  photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt0=fTR->Pho_Cone04PhotonIso_dR0_dEta0_pt0[passing.at(1)];
-  photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt5=fTR->Pho_Cone04PhotonIso_dR0_dEta0_pt5[passing.at(1)];
-  photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt0=fTR->Pho_Cone04PhotonIso_dR8_dEta0_pt0[passing.at(1)];
-  photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt5=fTR->Pho_Cone04PhotonIso_dR8_dEta0_pt5[passing.at(1)];
-  photrail_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(1)];
-  photrail_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(1)];
-  photrail_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(1)];
-  photrail_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx=fTR->Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0=fTR->Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5=fTR->Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[passing.at(1)];
-  photrail_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(1)];
-  photrail_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(1)];
-  photrail_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(1)];
-  photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx=fTR->Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU=fTR->Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[passing.at(1)];
-  photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU=fTR->Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[passing.at(1)];
-
+  pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(0)];
+  pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(0)];
+  pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(0)];
+  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(0)];
+  pholead_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[passing.at(0)];
+  pholead_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[passing.at(0)];
+  pholead_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[passing.at(0)];
+  pholead_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[passing.at(0)];
+  pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[passing.at(0)];
+  pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[passing.at(0)];
+  pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[passing.at(0)];
+  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[passing.at(0)];
+  pholead_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[passing.at(0)];
+  pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[passing.at(0)];
+  pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[passing.at(0)];
+  pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(0)]];
   pholead_PhoIso03Ecal=fTR->PhoIso03Ecal[passing.at(0)];
   pholead_PhoIso03Hcal=fTR->PhoIso03Hcal[passing.at(0)];
   pholead_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[passing.at(0)];
@@ -495,20 +366,6 @@ void DiPhotonMiniTree::Analyze(){
   pholead_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[passing.at(0)];
   pholead_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[passing.at(0)];
   pholead_PhoIso04=fTR->PhoIso04[passing.at(0)];
-
-  photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[passing.at(1)];
-  photrail_PhoIso03Hcal=fTR->PhoIso03Hcal[passing.at(1)];
-  photrail_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[passing.at(1)];
-  photrail_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[passing.at(1)];
-  photrail_PhoIso03=fTR->PhoIso03[passing.at(1)];
-  photrail_PhoIso04Ecal=fTR->PhoIso04Ecal[passing.at(1)];
-  photrail_PhoIso04Hcal=fTR->PhoIso04Hcal[passing.at(1)];
-  photrail_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[passing.at(1)];
-  photrail_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[passing.at(1)];
-  photrail_PhoIso04=fTR->PhoIso04[passing.at(1)];
-
-
-
   pholead_PhoE1OverE9=fTR->PhoE1OverE9[passing.at(0)];
   pholead_PhoS4OverS1=fTR->PhoS4OverS1[passing.at(0)];
   pholead_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[passing.at(0)];
@@ -530,7 +387,56 @@ void DiPhotonMiniTree::Analyze(){
   pholead_Pho_PhotonIso=fTR->Pho_PhotonIso[passing.at(0)];
   pholead_Pho_isPFPhoton=fTR->Pho_isPFPhoton[passing.at(0)];
   pholead_Pho_isPFElectron=fTR->Pho_isPFElectron[passing.at(0)];
+  pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[passing.at(0)];
+  pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(0)];
 
+  if (sel_cat==0 || sel_cat==3){
+  photrail_eta = fTR->PhoEta[passing.at(1)];
+  photrail_px = fTR->PhoPx[passing.at(1)];
+  photrail_py = fTR->PhoPy[passing.at(1)];
+  photrail_pt = fTR->PhoPt[passing.at(1)];
+  photrail_pz = fTR->PhoPz[passing.at(1)];
+  photrail_energy = fTR->PhoEnergy[passing.at(1)];
+  photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
+  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(1)]];
+  photrail_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(1)];
+  photrail_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(1)];
+  photrail_PhoScSeedSeverity=fTR->PhoScSeedSeverity[passing.at(1)];
+  photrail_energySCdefault = CorrPhoton(fTR,passing.at(1),0).E();
+  photrail_energyNewCorr = CorrPhoton(fTR,passing.at(1),5).E();
+  photrail_energyNewCorrLocal = CorrPhoton(fTR,passing.at(1),6).E();
+  photrail_r9 = fTR->SCR9[fTR->PhotSCindex[passing.at(1)]];
+  photrail_sieie = fTR->PhoSigmaIetaIeta[passing.at(1)];
+  photrail_hoe = fTR->PhoHoverE[passing.at(1)];
+  photrail_brem = fTR->SCBrem[fTR->PhotSCindex[passing.at(1)]];
+  photrail_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[passing.at(1)]];
+  photrail_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[passing.at(1)]];
+  photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(1)];
+  photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(1)];
+  photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(1)];
+  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[passing.at(1)];
+  photrail_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[passing.at(1)];
+  photrail_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[passing.at(1)];
+  photrail_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[passing.at(1)];
+  photrail_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[passing.at(1)];
+  photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[passing.at(1)];
+  photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[passing.at(1)];
+  photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[passing.at(1)];
+  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[passing.at(1)];
+  photrail_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[passing.at(1)];
+  photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[passing.at(1)];
+  photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[passing.at(1)];
+  photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(1)]];
+  photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[passing.at(1)];
+  photrail_PhoIso03Hcal=fTR->PhoIso03Hcal[passing.at(1)];
+  photrail_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[passing.at(1)];
+  photrail_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[passing.at(1)];
+  photrail_PhoIso03=fTR->PhoIso03[passing.at(1)];
+  photrail_PhoIso04Ecal=fTR->PhoIso04Ecal[passing.at(1)];
+  photrail_PhoIso04Hcal=fTR->PhoIso04Hcal[passing.at(1)];
+  photrail_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[passing.at(1)];
+  photrail_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[passing.at(1)];
+  photrail_PhoIso04=fTR->PhoIso04[passing.at(1)];
   photrail_PhoE1OverE9=fTR->PhoE1OverE9[passing.at(1)];
   photrail_PhoS4OverS1=fTR->PhoS4OverS1[passing.at(1)];
   photrail_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[passing.at(1)];
@@ -552,14 +458,9 @@ void DiPhotonMiniTree::Analyze(){
   photrail_Pho_PhotonIso=fTR->Pho_PhotonIso[passing.at(1)];
   photrail_Pho_isPFPhoton=fTR->Pho_isPFPhoton[passing.at(1)];
   photrail_Pho_isPFElectron=fTR->Pho_isPFElectron[passing.at(1)];
-
-
-
-  pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[passing.at(0)];
-  pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(0)];
-
   photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[passing.at(1)];
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(1)];
+  }
 
   //  cout << "C" << endl;
 
@@ -567,7 +468,7 @@ void DiPhotonMiniTree::Analyze(){
  
   //  cout << "D" << endl;
 
-  } 
+  }
  
 
 }
@@ -591,104 +492,179 @@ TLorentzVector DiPhotonMiniTree::CorrPhoton(TreeReader *fTR, int i, int mode){
   return corr;
 };
 
-std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, int mode){
+std::vector<int> DiPhotonMiniTree::ApplyPixelVeto(TreeReader *fTR, vector<int> passing, bool forelectron){
 
-  vector<int> passing;
-  for (int i=0; i<fTR->NPhotons; i++){
-    passing.push_back(i);
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // Pixel veto (conversion safe)
+    int wantpixelseed;
+    if (forelectron) wantpixelseed=1; else wantpixelseed=0; 
+    if (fTR->PhoPassConvSafeElectronVeto[*it]==wantpixelseed) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+};
+
+std::vector<int> DiPhotonMiniTree::PhotonPreSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // SC matching
     if (fTR->PhotSCindex[*it]==-1) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // fiducial region
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    if (fabs(eta)>1.4442 && fabs(eta)<1.56) it=passing.erase(it); else it++;
+    if ((fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5)) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-    int wantpixelseed;
-    if (mode==3) wantpixelseed=1; else wantpixelseed=0; // mode=3 is DY with reversed pixel seed
-    if (fTR->PhoHasPixSeed[*it]!=wantpixelseed) it=passing.erase(it); else it++;
-  }
-
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // Pt cut on RawEnCetaCorr
     float energy=fTR->SCRaw[fTR->PhotSCindex[*it]];
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
     if (fabs(eta)<1.4442) energy*=phocorr->getEtaCorrectionBarrel(eta);
     if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->PhotSCindex[*it]];
-    if (energy/cosh(eta)<20 || fabs(eta)>2.5) it=passing.erase(it); else it++;
+    if (energy/cosh(eta)<20) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+//  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // Remove eta/phi cracks
+//    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+//    float phi=fTR->SCPhi[fTR->PhotSCindex[*it]];
+//    if ((phocorr->isInPhiCracks(phi,eta)) || (phocorr->isInEBEtaCracks(eta))) it=passing.erase(it); else it++;
+//  }
+
+  // MVA presel from Hgg
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // HoverE cut
+    float r9=fTR->SCR9[fTR->PhotSCindex[*it]];
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    float phi=fTR->SCPhi[fTR->PhotSCindex[*it]];
-    if ((phocorr->isInPhiCracks(phi,eta)) || (phocorr->isInEBEtaCracks(eta))) it=passing.erase(it); else it++;
+    float hoe=fTR->PhoHoverE[*it];
+    bool pass=0;
+    if (fabs(eta)<1.4442 && r9<0.9 && hoe<0.075) pass=1;
+    if (fabs(eta)<1.4442 && r9>0.9 && hoe<0.082) pass=1;
+    if (fabs(eta)>1.56 && r9<0.9 && hoe<0.075) pass=1;
+    if (fabs(eta)>1.56 && r9>0.9 && hoe<0.075) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+	
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // sieie cut
+    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+    float sieie=fTR->PhoSigmaIetaIeta[*it];
+    bool pass=0;
+    if (fabs(eta)<1.4442 && sieie<0.014 && sieie>0.001) pass=1; // to add sigmaiphiphi>0.001 in the future
+    if (fabs(eta)>1.56 && sieie<0.034) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+	
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // isolation cuts (trigger)
+    float r9=fTR->SCR9[fTR->PhotSCindex[*it]];
+    bool pass=0;
+    float etcorrecaliso=fTR->PhoIso03Ecal[*it]-0.012*fTR->PhoPt[*it];
+    float etcorrhcaliso=fTR->PhoIso03Hcal[*it]-0.005*fTR->PhoPt[*it];
+    float etcorrtrkiso=fTR->PhoIso03TrkHollow[*it]-0.002*fTR->PhoPt[*it];
+    if (r9<0.9 && etcorrecaliso<4 && etcorrhcaliso<4 && etcorrtrkiso<4) pass=1;
+    if (r9>0.9 && etcorrecaliso<50 && etcorrhcaliso<50 && etcorrtrkiso<50) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
   }
 
-  if (templateChoice=="sieie"){
-
-    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-      bool ok=true;
-      if (fTR->PhoIso04Ecal[*it]>4.2) ok=false;
-      if (fTR->PhoIso04Hcal[*it]>2.2) ok=false;
-      if (fTR->PhoHoverE[*it]>0.05) ok=false;  
-      if (mode==0||mode==3) { // standard or DY pixel veto reversed
-	if (fTR->PhoIso04TrkHollow[*it]>2.0) ok=false;
-      }
-      else if (mode==1){ // trk iso sideband
-	if (fTR->PhoIso04TrkHollow[*it]<2.0) ok=false;
-	if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
-      }
-      else if (mode==2){ // inclusive=standard or sideband
-	if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
-      }
-    
-      if (!ok) it=passing.erase(it); else it++;
-    }
-  
-  } // end special selection for sieie templates 
-
-  if (templateChoice=="combiso"){
-    
-    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-      bool ok=true;
-      float cutUP, cutLOW, sidecutUP, sidecutLOW;
-
-      if (fTR->PhoHoverE[*it]>0.05) ok=false;  
-
-      if (fabs(fTR->PhoEta[*it])<1.4442) {cutLOW=0; cutUP=0.011;} // EB
-      else {cutLOW=0; cutUP=0.028;} // EE
-
-      if (fabs(fTR->PhoEta[*it])<1.4442) {sidecutLOW=0.011; sidecutUP=0.014;} // EB
-      else{sidecutLOW=0.028; sidecutUP=0.045;} // EE
-      
-      bool ok_std=!(fTR->PhoSigmaIetaIeta[*it]>cutUP || fTR->PhoSigmaIetaIeta[*it]<cutLOW);
-      bool ok_side=!(fTR->PhoSigmaIetaIeta[*it]>sidecutUP || fTR->PhoSigmaIetaIeta[*it]<sidecutLOW);
-
-      if (mode==0||mode==3) { // standard or DY pixel veto reversed
-	if (!ok_std) ok=false;
-      }
-      else if (mode==1){ // sieie sideband
-	if (!ok_side) ok=false;
-      }
-      else if (mode==2){ // inclusive=standard or sideband
-	if (!(ok_std || ok_side)) ok=false;
-      }
-    
-      if (!ok) it=passing.erase(it); else it++;
-    }
-
-    
-  } // end special selection for combiso templates
-
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // isolation cuts (filter)
+    float r9=fTR->SCR9[fTR->PhotSCindex[*it]];
+    bool pass=0;
+    if(fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[*it]<4) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
 
   return passing;
 
 };
 
-bool DiPhotonMiniTree::EventSelection(std::vector<int> passing){
+std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::vector<int> passing){
+
+  // Genlevel isolation cut for MC
+  // selects only photons matched to gen level, with gen-level iso < 5 GeV
+
+  if (isdata) {
+    std::cout << "Calling gen level isolation cut on data!!!" << std::endl;
+    return passing;
+  }
+  
+  for (std::vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+      bool pass=0;
+      if (fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)
+	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<5)
+	  pass=1;
+      if (!pass) it=passing.erase(it); else it++;
+    }
+
+  return passing;
+
+};
+
+std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // HoverE cut
+    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+    float hoe=fTR->PhoHoverE[*it];
+    bool pass=0;
+    if (fabs(eta)<1.4442 && hoe<0.05) pass=1;
+    if (fabs(eta)>1.56 && hoe<0.05) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+	
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // sieie cut
+    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+    float sieie=fTR->PhoSigmaIetaIeta[*it];
+    bool pass=0;
+    if (fabs(eta)<1.4442 && sieie<0.011) pass=1;
+    if (fabs(eta)>1.56 && sieie<0.030) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    if (fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]<5) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  return passing;
+
+};
+
+std::vector<int> DiPhotonMiniTree::SignalSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    if (fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  std::vector<int> passing2 = GenLevelIsolationCut(fTR,passing);
+
+  return passing2;
+
+};
+
+std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    if (!(fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  return passing;
+
+};
+
+
+bool DiPhotonMiniTree::SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing){
+
+  if (passing.size()<1) return false;
+
+  if (fTR->PhoPt[passing.at(0)]<40) return false;
+
+  return true;
+
+};
+
+bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> passing){
+
+  if (passing.size()<2) return false;
+
   float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
   float deta=fTR->PhoEta[passing.at(0)]-fTR->PhoEta[passing.at(1)];
   float dphi=fTR->PhoPhi[passing.at(0)]-fTR->PhoPhi[passing.at(1)];
@@ -706,4 +682,162 @@ bool DiPhotonMiniTree::EventSelection(std::vector<int> passing){
 
 bool DiPhotonMiniTree::TriggerSelection(){
 #include "DiPhotonTriggerSelection.cc"
+};
+
+int DiPhotonMiniTree::Count_part_isrfsr_gamma(TreeReader *fTR, std::vector<int> passing){
+
+  if (isdata){
+    std::cout << "calling count of gammas for k-factor on data!!!" << std::endl;
+    return 0;
+  }
+
+  int res=0;
+  for (int i=0; i<2 && i<passing.size(); i++){
+    int code = fTR->PhoMCmatchexitcode[passing.at(i)];
+    if (code==1 || code==2) res++;
+  }
+  return res;
+
+};
+
+void DiPhotonMiniTree::ResetVars(){
+  dipho_mgg_photon = -999;
+  dipho_mgg_newCorr = -999;
+  dipho_mgg_newCorrLocal = -999;
+  pholead_eta = -999;
+  photrail_eta = -999;
+  pholead_px = -999;
+  photrail_px = -999;
+  pholead_py = -999;
+  photrail_py = -999;
+  pholead_pt = -999;
+  photrail_pt = -999;
+  pholead_pz = -999;
+  photrail_pz = -999;
+  pholead_energy = -999;
+  photrail_energy = -999;
+  pholead_energySCdefault = -999;
+  photrail_energySCdefault = -999;
+  pholead_energyNewCorr = -999;
+  photrail_energyNewCorr = -999;
+  pholead_energyNewCorrLocal = -999;
+  photrail_energyNewCorrLocal = -999;
+  pholead_SCeta = -999;
+  photrail_SCeta = -999;
+  pholead_SCphi = -999;
+  photrail_SCphi = -999;
+  pholead_PhoHasPixSeed = -999;
+  pholead_PhoHasConvTrks = -999;
+  pholead_PhoScSeedSeverity = -999;
+  photrail_PhoHasPixSeed = -999;
+  photrail_PhoHasConvTrks = -999;
+  photrail_PhoScSeedSeverity = -999;
+  pholead_r9 = -999;
+  photrail_r9 = -999;
+  pholead_sieie = -999;
+  photrail_sieie = -999;
+  pholead_hoe = -999;
+  photrail_hoe = -999;
+  pholead_brem = -999;
+  photrail_brem = -999;
+  pholead_sigmaPhi = -999;
+  photrail_sigmaPhi = -999;
+  pholead_sigmaEta = -999;
+  photrail_sigmaEta = -999;
+  pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = -999;
+  pholead_pho_Cone01NeutralHadronIso_mvVtx = -999;
+  photrail_pho_Cone01NeutralHadronIso_mvVtx = -999;
+  pholead_pho_Cone02NeutralHadronIso_mvVtx = -999;
+  photrail_pho_Cone02NeutralHadronIso_mvVtx = -999;
+  pholead_pho_Cone03NeutralHadronIso_mvVtx = -999;
+  photrail_pho_Cone03NeutralHadronIso_mvVtx = -999;
+  pholead_pho_Cone04NeutralHadronIso_mvVtx = -999;
+  photrail_pho_Cone04NeutralHadronIso_mvVtx = -999;
+  pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = -999;
+  pholead_pho_Cone03PFCombinedIso = -999;
+  photrail_pho_Cone03PFCombinedIso = -999;
+  pholead_pho_Cone04PFCombinedIso = -999;
+  photrail_pho_Cone04PFCombinedIso = -999;
+  pholead_PhoPassConvSafeElectronVeto = -999;
+  photrail_PhoPassConvSafeElectronVeto = -999;
+  pholead_GenPhotonIsoDR04 = -999;
+  photrail_GenPhotonIsoDR04 = -999;
+  pholead_PhoIso03Ecal = -999;
+  pholead_PhoIso03Hcal = -999;
+  pholead_PhoIso03TrkSolid = -999;
+  pholead_PhoIso03TrkHollow = -999;
+  pholead_PhoIso03 = -999;
+  pholead_PhoIso04Ecal = -999;
+  pholead_PhoIso04Hcal = -999;
+  pholead_PhoIso04TrkSolid = -999;
+  pholead_PhoIso04TrkHollow = -999;
+  pholead_PhoIso04 = -999;
+  photrail_PhoIso03Ecal = -999;
+  photrail_PhoIso03Hcal = -999;
+  photrail_PhoIso03TrkSolid = -999;
+  photrail_PhoIso03TrkHollow = -999;
+  photrail_PhoIso03 = -999;
+  photrail_PhoIso04Ecal = -999;
+  photrail_PhoIso04Hcal = -999;
+  photrail_PhoIso04TrkSolid = -999;
+  photrail_PhoIso04TrkHollow = -999;
+  photrail_PhoIso04 = -999;
+  pholead_PhoS4OverS1 = -999;
+  pholead_PhoSigmaEtaEta = -999;
+  pholead_PhoE1x5 = -999;
+  pholead_PhoE2x5 = -999;
+  pholead_PhoE3x3 = -999;
+  pholead_PhoE5x5 = -999;
+  pholead_PhomaxEnergyXtal = -999;
+  pholead_PhoIso03HcalDepth1 = -999;
+  pholead_PhoIso03HcalDepth2 = -999;
+  pholead_PhoIso04HcalDepth1 = -999;
+  pholead_PhoIso04HcalDepth2 = -999;
+  pholead_PhoIso03nTrksSolid = -999;
+  pholead_PhoIso03nTrksHollow = -999;
+  pholead_PhoIso04nTrksSolid = -999;
+  pholead_PhoIso04nTrksHollow = -999;
+  pholead_Pho_ChargedHadronIso = -999;
+  pholead_Pho_NeutralHadronIso = -999;
+  pholead_Pho_PhotonIso = -999;
+  pholead_Pho_isPFPhoton = -999;
+  pholead_Pho_isPFElectron = -999;
+  photrail_PhoS4OverS1 = -999;
+  photrail_PhoSigmaEtaEta = -999;
+  photrail_PhoE1x5 = -999;
+  photrail_PhoE2x5 = -999;
+  photrail_PhoE3x3 = -999;
+  photrail_PhoE5x5 = -999;
+  photrail_PhomaxEnergyXtal = -999;
+  photrail_PhoIso03HcalDepth1 = -999;
+  photrail_PhoIso03HcalDepth2 = -999;
+  photrail_PhoIso04HcalDepth1 = -999;
+  photrail_PhoIso04HcalDepth2 = -999;
+  photrail_PhoIso03nTrksSolid = -999;
+  photrail_PhoIso03nTrksHollow = -999;
+  photrail_PhoIso04nTrksSolid = -999;
+  photrail_PhoIso04nTrksHollow = -999;
+  photrail_Pho_ChargedHadronIso = -999;
+  photrail_Pho_NeutralHadronIso = -999;
+  photrail_Pho_PhotonIso = -999;
+  photrail_Pho_isPFPhoton = -999;
+  photrail_Pho_isPFElectron = -999;
+  pholead_PhoMCmatchindex = -999;
+  pholead_PhoMCmatchexitcode = -999;
+  photrail_PhoMCmatchindex = -999;
+  photrail_PhoMCmatchexitcode = -999;
 };

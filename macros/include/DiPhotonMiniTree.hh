@@ -16,9 +16,11 @@
 
 #include "EnergyCorrection.hh"
 
+#include <vector>
+
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", std::string tchoice="", Float_t aw=-999, Float_t* _kfac=NULL);
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
   virtual ~DiPhotonMiniTree();
 
   void Begin();
@@ -27,17 +29,24 @@ public:
 
 private:
 
-  std::string templateChoice;
-
-  Float_t* kfactors;
-
-  std::vector<int> PhotonSelection(TreeReader *fTR, int mode);
-  bool TriggerSelection();
-  bool EventSelection(std::vector<int> passing);
+   Float_t* kfactors;
 
   EnergyCorrection *phocorr;
   TLorentzVector CorrPhoton(TreeReader *fTR, int i, int mode);
 	
+  std::vector<int> ApplyPixelVeto(TreeReader *fTR, vector<int> passing, bool forelectron=0);
+  std::vector<int> PhotonPreSelection(TreeReader *fTR, vector<int> passing);
+  std::vector<int> GenLevelIsolationCut(TreeReader *fTR, vector<int> passing);
+  std::vector<int> PhotonSelection(TreeReader *fTR, vector<int> passing);
+  std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
+  std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
+  bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing);
+  bool StandardEventSelection(TreeReader *fTR, std::vector<int> passing);
+  bool TriggerSelection();
+  int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
+  void ResetVars();
+  
+  
   std::string fDataType_;
   bool isdata;
 
@@ -85,56 +94,39 @@ private:
   Float_t pholead_sigmaEta, photrail_sigmaEta;
   
 
-
-  Float_t photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt0,    pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt0;
-  Float_t photrail_Pho_Cone04PhotonIso_dR0_dEta0_pt5,    pholead_Pho_Cone04PhotonIso_dR0_dEta0_pt5;
-  Float_t photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt0,    pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt0;
-  Float_t photrail_Pho_Cone04PhotonIso_dR8_dEta0_pt5,    pholead_Pho_Cone04PhotonIso_dR8_dEta0_pt5;
-  Float_t photrail_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,    pholead_Pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx;
-  Float_t photrail_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,    pholead_Pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx;
-  Float_t photrail_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,    pholead_Pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx;
-  Float_t photrail_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx,    pholead_Pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0,    pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5,    pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks,    pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks,    pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0,    pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5,    pholead_Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5;
-  Float_t photrail_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx,    pholead_Pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx;
-  Float_t photrail_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx,    pholead_Pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx;
-  Float_t photrail_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx,    pholead_Pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx;
-  Float_t photrail_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx,    pholead_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old,    pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old,    pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old,    pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old,    pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0,    pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,    pholead_Pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0,    pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,    pholead_Pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0,    pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,    pholead_Pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0,    pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,    pholead_Pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0,    pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,    pholead_Pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0,    pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,    pholead_Pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0,    pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU,    pholead_Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0,    pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,    pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01;
-  Float_t photrail_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,    pholead_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU;
-
+  Float_t pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx;
+  Float_t pholead_pho_Cone01NeutralHadronIso_mvVtx;
+  Float_t photrail_pho_Cone01NeutralHadronIso_mvVtx;
+  Float_t pholead_pho_Cone02NeutralHadronIso_mvVtx;
+  Float_t photrail_pho_Cone02NeutralHadronIso_mvVtx;
+  Float_t pholead_pho_Cone03NeutralHadronIso_mvVtx;
+  Float_t photrail_pho_Cone03NeutralHadronIso_mvVtx;
+  Float_t pholead_pho_Cone04NeutralHadronIso_mvVtx;
+  Float_t photrail_pho_Cone04NeutralHadronIso_mvVtx;
+  Float_t pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01;
+  Float_t pholead_pho_Cone03PFCombinedIso;
+  Float_t photrail_pho_Cone03PFCombinedIso;
+  Float_t pholead_pho_Cone04PFCombinedIso;
+  Float_t photrail_pho_Cone04PFCombinedIso;
+  Int_t pholead_PhoPassConvSafeElectronVeto;
+  Int_t photrail_PhoPassConvSafeElectronVeto;
+  Float_t pholead_GenPhotonIsoDR04;
+  Float_t photrail_GenPhotonIsoDR04;
  
-
   Float_t  pholead_PhoIso03Ecal, photrail_PhoIso03Ecal;
   Float_t  pholead_PhoIso03Hcal, photrail_PhoIso03Hcal;
   Float_t  pholead_PhoIso03TrkSolid, photrail_PhoIso03TrkSolid;
