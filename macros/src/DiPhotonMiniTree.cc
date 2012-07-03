@@ -29,15 +29,11 @@ void DiPhotonMiniTree::Begin(){
 
   cout << "Begin" << endl;
 
-  // Define the output file of histograms
-  //  const char* filename = "MiniTree_Diphoton.root";
-
-
   fOutputFile->cd();
 
   OutputTree[0] = new TTree("Tree_standard_sel","Tree_standard_sel");
-  OutputTree[1] = new TTree("Tree_sideband_sel","Tree_sideband_sel");
-  OutputTree[2] = new TTree("Tree_inclusive_sel","Tree_inclusive_sel");
+  OutputTree[1] = new TTree("Tree_signal_template","Tree_signal_template");
+  OutputTree[2] = new TTree("Tree_background_template","Tree_background_template");
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
 
   for (int i=0; i<4; i++){
@@ -222,9 +218,11 @@ void DiPhotonMiniTree::Begin(){
 
 void DiPhotonMiniTree::Analyze(){
 
-  //  cout << "Analyze this event" << endl;
+  //    cout << "Analyze this event" << endl;
 
-  //  cout << "A" << endl;
+    ResetVars();
+
+    //    cout << "A" << endl;
 
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
@@ -240,19 +238,26 @@ void DiPhotonMiniTree::Analyze(){
   if (!isdata) event_nPU = fTR->PUnumInteractions;
   event_nRecVtx = fTR->NVrtx;
 
+  //  cout << "B" << endl;
+
   int nmatched_part_isrfsr_gamma=0;
   {
     std::vector<int> temp;
     for (int i=0; i<fTR->NPhotons; i++){
       temp.push_back(i);
     }
+    //    cout << "B1" << endl;
     temp = PhotonPreSelection(fTR,temp);
+    //    cout << "B2" << endl;
     temp = ApplyPixelVeto(fTR,temp,0);
+    //    cout << "B3" << endl;
     nmatched_part_isrfsr_gamma = Count_part_isrfsr_gamma(fTR,temp);
+    //    cout << "B4" << endl;
   }
   if (!isdata) event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
   else event_Kfactor=1;
 
+  //  cout << "C" << endl;
 
   // 0 = standard selection for data and MC
   // 1 = signal template generation from MC
@@ -294,6 +299,8 @@ void DiPhotonMiniTree::Analyze(){
     passing_selection[sel_cat] = passing;
 
   }
+
+  //  cout << "D" << endl;
 
   for (int sel_cat=0; sel_cat<4; sel_cat++){
 
@@ -462,14 +469,12 @@ void DiPhotonMiniTree::Analyze(){
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(1)];
   }
 
-  //  cout << "C" << endl;
 
   OutputTree[sel_cat]->Fill();
  
-  //  cout << "D" << endl;
-
   }
  
+  //  cout << "E" << endl;
 
 }
 
@@ -499,6 +504,8 @@ std::vector<int> DiPhotonMiniTree::ApplyPixelVeto(TreeReader *fTR, vector<int> p
     if (forelectron) wantpixelseed=1; else wantpixelseed=0; 
     if (fTR->PhoPassConvSafeElectronVeto[*it]==wantpixelseed) it=passing.erase(it); else it++;
   }
+
+  return passing;
 
 };
 
