@@ -193,6 +193,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
 	fAnalysisTree->Branch("MuPFIso"       ,&fTmupfiso,        "MuPFIso[NMus]/F");
+	fAnalysisTree->Branch("MuPFChIso"     ,&fTmupfchiso,      "MuPFChIso[NMus]/F");
+	fAnalysisTree->Branch("MuPFNeIso"     ,&fTmupfneiso,      "MuPFNeIso[NMus]/F");
 	fAnalysisTree->Branch("MuRadIso"      ,&fTmuradiso,       "MuRadIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
@@ -221,6 +223,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElDz",                   &fTEldz,                "ElDz[NEls]/F");
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
 	fAnalysisTree->Branch("ElPFIso",                &fTElPFIso,             "ElPFIso[NEls]/F");
+	fAnalysisTree->Branch("ElPFChIso",              &fTElPFchiso,           "ElPFChIso[NEls]/F");
+	fAnalysisTree->Branch("ElPFNeIso",              &fTElPFneiso,           "ElPFNeIso[NEls]/F");
 	fAnalysisTree->Branch("ElRadIso",               &fTElRadIso,            "ElRadIso[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElHcalTowerSumEt",       &fTElHcalTowerSumEt,    "ElHcalTowerSumEt[NEls]/F");
@@ -252,6 +256,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetPt",         &fTJetpt,       "JetPt[NJets]/F");
 	fAnalysisTree->Branch("JetEta",        &fTJeteta,      "JetEta[NJets]/F");
 	fAnalysisTree->Branch("JetPhi",        &fTJetphi,      "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,   "JetEnergy[NJets]/F");
 	fAnalysisTree->Branch("JetCSVBTag",    &fTJetbtag1,    "JetCSVBTag[NJets]/F");
 	fAnalysisTree->Branch("JetProbBTag",   &fTJetbtag2,    "JetProbBTag[NJets]/F");
 	// MARC fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
@@ -350,6 +355,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetpt      [ind] = fTR->JPt[jetindex];
 		fTJeteta     [ind] = fTR->JEta[jetindex];
 		fTJetphi     [ind] = fTR->JPhi[jetindex];
+		fTJetenergy  [ind] = fTR->JE[jetindex];
 		fTJetbtag1   [ind] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[jetindex];
 		fTJetbtag2   [ind] = fTR->JnewPFJetProbabilityBPFJetTags[jetindex];
 		// MARC fTJetbtag3   [ind] = fTR->JnewPFJetProbabilityBPFJetTags[jetindex];
@@ -395,6 +401,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuphi   [i] = fTR->MuPhi     [index];
 		fTmucharge[i] = fTR->MuCharge  [index];
 		fTmupfiso [i] = MuPFIso(index);
+		fTmupfchiso[i] = fTR->MuPfIsoR03ChHad[index] / fTR->MuPt[index];
+		fTmupfneiso[i] = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] ) / fTR->MuPt[index];
 		fTmuradiso[i] = MuRadIso(index);
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
@@ -447,6 +455,10 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTEldz              [ind] = fTR->ElDzPV                  [elindex];
 		fTElDzErr           [ind] = fTR->ElDzE                   [elindex];
 		fTElPFIso           [ind] = ElPFIso(elindex);
+		fTElPFchiso         [ind] = fTR->ElEventelPFIsoValueCharged03PFIdStandard[elindex] / fTR->ElPt[elindex];
+		double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[elindex] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[elindex];
+		double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[elindex]);
+		fTElPFneiso         [ind] = TMath::Max(0., neutral - rhocorr) / fTR->ElPt[elindex];
 		fTElRadIso          [ind] = ElRadIso(elindex);
 		
 		if(fIsData == false){ // mc truth information		
@@ -579,6 +591,8 @@ void SSDLAnalysis::ResetTree(){
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
 		fTmupfiso       [i] = -999.99;
+		fTmupfchiso     [i] = -999.99;
+		fTmupfneiso     [i] = -999.99;
 		fTmuradiso      [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
@@ -609,6 +623,8 @@ void SSDLAnalysis::ResetTree(){
 		fTEldz              [i] = -999.99;
 		fTElDzErr           [i] = -999.99;
 		fTElPFIso           [i] = -999.99;
+		fTElPFchiso         [i] = -999.99;
+		fTElPFneiso         [i] = -999.99;
 		fTElRadIso          [i] = -999.99;
 		fTElEcalRecHitSumEt [i] = -999.99;
 		fTElHcalTowerSumEt  [i] = -999.99;
@@ -636,6 +652,7 @@ void SSDLAnalysis::ResetTree(){
 		fTJetpt [i]       = -999.99;
 		fTJeteta[i]       = -999.99;
 		fTJetphi[i]       = -999.99;
+		fTJetenergy[i]    = -999.99;
 		fTJetbtag1[i]     = -999.99;
 		fTJetbtag2[i]     = -999.99;
 		// MARC fTJetbtag3[i]     = -999.99;

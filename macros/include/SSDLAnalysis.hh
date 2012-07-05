@@ -115,6 +115,7 @@ private:
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
+	float fTJetenergy[fMaxNjets];
 	float fTJetbtag1[fMaxNjets]; // CSV
 	float fTJetbtag2[fMaxNjets]; // JetProb
 	// MARC float fTJetbtag3[fMaxNjets]; // TCHP
@@ -138,6 +139,8 @@ private:
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
 	float fTmupfiso       [fMaxNmus];
+	float fTmupfchiso     [fMaxNmus];
+	float fTmupfneiso     [fMaxNmus];
 	float fTmuradiso      [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
 	float fTmud0          [fMaxNmus];
@@ -167,6 +170,8 @@ private:
 	float fTEldz             [fMaxNeles];
 	float fTElDzErr          [fMaxNeles];
 	float fTElPFIso          [fMaxNeles];
+	float fTElPFchiso        [fMaxNeles];
+	float fTElPFneiso        [fMaxNeles];
 	float fTElRadIso         [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
 	float fTElHcalTowerSumEt [fMaxNeles];
