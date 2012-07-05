@@ -220,7 +220,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //    cout << "Analyze this event" << endl;
 
-    ResetVars();
+
 
     //    cout << "A" << endl;
 
@@ -309,7 +309,7 @@ void DiPhotonMiniTree::Analyze(){
     std::vector<int> passing = passing_selection[sel_cat];
 
     int minsize=999;
-    if (sel_cat==0 || sel_cat==4) minsize=2;
+    if (sel_cat==0 || sel_cat==3) minsize=2;
     if (sel_cat==1 || sel_cat==2) minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
@@ -317,7 +317,7 @@ void DiPhotonMiniTree::Analyze(){
       continue;
     }
 
-  
+    ResetVars();  
   
   pholead_eta = fTR->PhoEta[passing.at(0)];
   pholead_px = fTR->PhoPx[passing.at(0)];
@@ -461,7 +461,7 @@ void DiPhotonMiniTree::Analyze(){
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[passing.at(1)];
   }
 
-  if (sel_cat==0 || sel_cat==4) {
+  if (sel_cat==0 || sel_cat==3) {
     float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
     float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
     float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
