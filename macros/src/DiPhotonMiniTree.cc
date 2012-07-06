@@ -354,7 +354,7 @@ void DiPhotonMiniTree::Analyze(){
   pholead_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[passing.at(0)];
   pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[passing.at(0)];
   pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[passing.at(0)];
-  pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(0)]];
+  if (fTR->PhoMCmatchindex[passing.at(0)]>=0) pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(0)]];
   pholead_PhoIso03Ecal=fTR->PhoIso03Ecal[passing.at(0)];
   pholead_PhoIso03Hcal=fTR->PhoIso03Hcal[passing.at(0)];
   pholead_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[passing.at(0)];
@@ -425,7 +425,7 @@ void DiPhotonMiniTree::Analyze(){
   photrail_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[passing.at(1)];
   photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[passing.at(1)];
   photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[passing.at(1)];
-  photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(1)]];
+  if (fTR->PhoMCmatchindex[passing.at(1)]>=0) photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[passing.at(1)]];
   photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[passing.at(1)];
   photrail_PhoIso03Hcal=fTR->PhoIso03Hcal[passing.at(1)];
   photrail_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[passing.at(1)];
