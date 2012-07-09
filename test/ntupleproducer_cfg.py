@@ -33,6 +33,11 @@ options.register ('ModelScan', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
+options.register ('FastSim', # register 'runon' option
+                                    False,  # the default value
+                                    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                                    VarParsing.VarParsing.varType.bool,         # string, int, or float
+                                    "If you are dealing with a FastSim (but not a model scan!), set this to True, otherwise to False (default)")
 options.register ('doVertexing',
                   False,
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -88,6 +93,8 @@ process.source = cms.Source("PoolSource",
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.ModelScan = cms.untracked.PSet( input = cms.untracked.bool(options.ModelScan) )
+process.FastSim = cms.untracked.PSet( input = cms.untracked.bool(options.FastSim) )
+
 # Output
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
@@ -196,6 +203,7 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData      = (options.runon=='data')
 process.analyze.isModelScan     = options.ModelScan
+process.analyze.isFastSim     = options.FastSim
 process.analyze.tag_doVertexing = options.doVertexing
 process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
 process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights
@@ -583,3 +591,7 @@ if options.runon=='data':
     process.p.remove(process.photonPartonMatch)
 if options.ModelScan==True:
     process.p.remove(process.hcalLaserEventFilter)
+if options.FastSim==True:
+    process.p.remove(process.hcalLaserEventFilter)
+    process.p.remove(process.HBHENoiseFilterResultProducer)
+        

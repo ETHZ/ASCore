@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.25 2012/06/26 17:08:17 pablom Exp $
+// $Id: NTupleProducer.h,v 1.114.2.26 2012/07/01 15:56:24 pablom Exp $
 //
 //
 
@@ -154,6 +154,7 @@ private:
 
   bool fIsRealData;
   bool fIsModelScan;
+  bool fIsFastSim;
   int fNTotEvents;
   int fNFillTree;
 

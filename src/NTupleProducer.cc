@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.30 2012/06/26 17:08:16 pablom Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.31 2012/07/01 15:56:23 pablom Exp $
 //
 //
 
@@ -140,6 +140,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Main settings
   fIsRealData = iConfig.getParameter<bool>("isRealData");
   fIsModelScan = iConfig.getParameter<bool>("isModelScan");
+  fIsFastSim = iConfig.getParameter<bool>("isFastSim");
+
   if(fIsRealData&&fIsModelScan) fIsModelScan=false; // avoiding possible mistakes
 
   // InputTags
@@ -213,11 +215,14 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMinGenJetPt    = iConfig.getParameter<double>("sel_mingenjetpt");
   fMaxGenJetEta   = iConfig.getParameter<double>("sel_maxgenjeteta");
 
+  ///commenting out, chrashes for unknow reasons
+  /*
   if(fIsModelScan) {
     LHAPDF::initPDFSet("cteq66.LHgrid",1);
-    *fTNPdfs = LHAPDF::numberPDF();
+    std::cout << LHAPDF::numberPDF() << std::endl;
+    *fTNPdfs.get() = 44;//(int)LHAPDF::numberPDF();
   }
-
+  */
   CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
   LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
@@ -378,11 +383,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTRhoForIso = *rhoForIso;
 
   // beam halo
+  if(!fIsFastSim){
   edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
   iEvent.getByLabel("BeamHaloSummary",TheBeamHaloSummary);
   const BeamHaloSummary TheSummary = (*TheBeamHaloSummary.product());
   *fTCSCTightHaloID = (TheSummary.CSCTightHaloId()) ? 0:1;
-
+  }
   // collect information for b-tagging (4 tags)
   Handle<JetTagCollection> jetsBtag[gMaxNBtags];
   size_t ibtag = 0;
@@ -521,7 +527,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   double MyWeightInTime  =-999;
   // If need to run on MC prior to Spring11 (CMSSW_3_9_X series) change code accordingly here:
   // edm::Handle<PileupSummaryInfo> pileupInfo; 
-  if(!fIsRealData){
+
+  if(!fIsRealData && !fIsFastSim){
     // Get LHEEventProduct with partonic momenta. 	
     Handle<LHEEventProduct> evt;
     bool LHEEventProduct_found= iEvent.getByType( evt );
@@ -537,8 +544,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         partonicHT +=ptPart; // sum QCD partonic HT
       }
       *fTQCDPartonicHT = partonicHT;
-    }
 
+      }
+    
     iEvent.getByLabel("generator", genEvtInfo);
     *fTPtHat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
     *fTSigProcID   = genEvtInfo->signalProcessID();
@@ -604,8 +612,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       //       double pdf2 = pdfstuff->pdf()->xPDF.second;
 
       fTpdfW->push_back(1);
-      LHAPDF::initPDF(0);
-
+      //LHAPDF::initPDF(0);
+      /*
       double newpdf1_0 = LHAPDF::xfx(x1, Q, id1)/x1;
       double newpdf2_0 = LHAPDF::xfx(x2, Q, id2)/x2;
 			
@@ -618,7 +626,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         pdfWsum += fTpdfW->back();
       }
       *fTpdfWsum = pdfWsum;
-
+      */
       int process = 0;
       if (*fTSigProcID>=237 && *fTSigProcID<=242) process=1;//"ng";
       else if(*fTSigProcID>=246 && *fTSigProcID<=256) process=2;//"ns";
@@ -634,7 +642,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       *fTprocess = process;
     }
   }
-  *fTPUWeightTotal  = MyWeightTotal;
+*fTPUWeightTotal  = MyWeightTotal;
   *fTPUWeightInTime = MyWeightInTime;
 	
 	
@@ -2975,7 +2983,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTxSMS=-1;
   *fTxbarSMS=-1;
 
-  if(!fIsRealData&&fIsModelScan) {
+  if(!fIsRealData&&fIsModelScan && !fIsFastSim) {
+    
     Handle<LHEEventProduct> product;
     bool LHEEventProduct_found = iEvent.getByLabel("source", product);
     LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
@@ -3996,7 +4005,7 @@ void NTupleProducer::resetProducts( void ) {
   fTGenWeight.reset(new float(-999.99));
   fTpdfW.reset(new std::vector<float> );
   fTpdfWsum.reset(new float(0.0));
-  fTNPdfs.reset(new int(0));
+  fTNPdfs.reset(new int(1));
   fTPUnumInteractions.reset(new int(-999));
   fTPUnumTrueInteractions.reset(new int(-999));
   fTPUnumFilled.reset(new int(-999));
