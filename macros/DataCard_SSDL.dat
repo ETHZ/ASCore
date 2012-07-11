@@ -6,12 +6,12 @@
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Data
-DoubleMu1	folguera/SSDLTrees/2012/Jun24//DoubleMu-Run2012A-PromptReco-v1-AOD			0	0
-DoubleMu2	folguera/SSDLTrees/2012/Jun24//DoubleMu-Run2012B-PromptReco-v1-AOD			0	0
-DoubleEle1	folguera/SSDLTrees/2012/Jun24//DoubleElectron-Run2012A-PromptReco-v1-AOD		0	1
-DoubleEle2	folguera/SSDLTrees/2012/Jun24//DoubleElectron-Run2012B-PromptReco-v1-AOD		0	1
-MuEG1		folguera/SSDLTrees/2012/Jun24//MuEG-Run2012A-PromptReco-v1-AOD				0	2
-MuEG2		folguera/SSDLTrees/2012/Jun24//MuEG-Run2012B-PromptReco-v1-AOD				0	2
+DoubleMu1	mdunser/SSDLTrees/2012/Jul9//DoubleMu-Run2012A-PromptReco-v1-AOD		0	0
+DoubleMu2	mdunser/SSDLTrees/2012/Jul9//DoubleMu-Run2012B-PromptReco-v1-AOD		0	0
+DoubleEle1	mdunser/SSDLTrees/2012/Jul9//DoubleElectron-Run2012A-PromptReco-v1-AOD		0	1
+DoubleEle2	mdunser/SSDLTrees/2012/Jul9//DoubleElectron-Run2012B-PromptReco-v1-AOD-2	0	1
+MuEG1		mdunser/SSDLTrees/2012/Jul9//MuEG-Run2012A-PromptReco-v1-AOD			0	2
+MuEG2		mdunser/SSDLTrees/2012/Jul9//MuEG-Run2012B-PromptReco-v1-AOD			0	2
 ####################################################################################################################
 # Top and EWK
 TTJets		folguera/SSDLTrees/2012/Jun16/TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/			1	-1	225.197
