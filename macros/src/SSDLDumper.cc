@@ -95,9 +95,9 @@ TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "N
 int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 ,         20 };
 float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.,          0.};
 float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 200.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.,         20.};
-TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
-                                                                   "Particle Flow ME_{T} [GeV]",
-                                                                   // "E_{T}^{miss} (GeV)",
+TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} (GeV)",
+                                                                   // "Particle Flow ME_{T} [GeV]",
+                                                                   "E_{T}^{miss} (GeV)",
                                                                    "Jet Multiplicity",
                                                                    "Leading Lepton p_{T} [GeV]",
                                                                    "Subleading Lepton p_{T} [GeV]",
