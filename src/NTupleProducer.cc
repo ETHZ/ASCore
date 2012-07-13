@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.12 2012/06/26 11:51:45 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.13 2012/06/29 14:23:31 peruzzi Exp $
 //
 //
 
@@ -1851,11 +1851,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 if (conversions.size()<1) { std::cout << "something wrong here" << std::endl; }
 	 reco::ConversionRef conv = conversions[0];
 	 pho_conv_validvtx[phoqi]=conv->conversionVertex().isValid();
-	 if (!pho_conv_validvtx[phoqi]) continue;
 
-	 for (unsigned int i=0; i<conversions.size(); i++) {
-	   conv=conversions[i];
-	   if(ConversionsCut(*conv)) continue;
+	 if(pho_conv_validvtx[phoqi] && ConversionsCut(*conv)) {
 	   reco::Vertex vtx=conv->conversionVertex();
 	   pho_conv_vtx[phoqi].SetXYZ(vtx.x(), vtx.y(), vtx.z());
 	   pho_conv_chi2_probability[phoqi]=ChiSquaredProbability(vtx.chi2(), vtx.ndof());
