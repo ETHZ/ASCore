@@ -282,10 +282,12 @@ void DiPhotonMiniTree::Analyze(){
 
     passing = PhotonPreSelection(fTR,passing);
 
-    if (sel_cat!=3) passing = ApplyPixelVeto(fTR,passing,0);
-    if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1);
-
-    passing = PhotonSelection(fTR,passing);
+    // comment this block for the noselection running
+    {
+      if (sel_cat!=3) passing = ApplyPixelVeto(fTR,passing,0);
+      if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1);
+      passing = PhotonSelection(fTR,passing);
+    }
 
     if (sel_cat==0 || sel_cat==3){
       pass[sel_cat] = StandardEventSelection(fTR,passing);
@@ -514,7 +516,7 @@ std::vector<int> DiPhotonMiniTree::ApplyPixelVeto(TreeReader *fTR, vector<int> p
 std::vector<int> DiPhotonMiniTree::PhotonPreSelection(TreeReader *fTR, std::vector<int> passing){
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // SC matching
-    if (fTR->PhotSCindex[*it]==-1) it=passing.erase(it); else it++;
+    if (fTR->PhotSCindex[*it]<0) it=passing.erase(it); else it++;
   }
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // fiducial region
@@ -625,7 +627,11 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
-    if (fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]<5) pass=1;
+    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+    const float eff_area = (fabs(eta)<1.4442) ? 0.406 : 0.528;
+    const float dR=0.4;
+    float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
+    if (fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]-puenergy<5) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
 
