@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.31 2012/07/01 15:56:23 pablom Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.32 2012/07/09 09:46:10 leo Exp $
 //
 //
 
@@ -84,6 +84,7 @@
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
@@ -1771,6 +1772,23 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoH2overE         ->push_back(photon.hadronicDepth2OverEm());
     fTPhoSigmaIetaIeta   ->push_back(photon.sigmaIetaIeta());
     fTPhoSigmaEtaEta     ->push_back(photon.sigmaEtaEta());
+    
+  /*  
+  the following lines are from:
+  https://twiki.cern.ch/twiki/bin/view/CMS/HoverE2012
+*/
+    edm::Handle<reco::BeamSpot> beamspotHandle;
+    iEvent.getByLabel("offlineBeamSpot", beamspotHandle);
+    const reco::BeamSpot &beamspot = *beamspotHandle.product();
+
+    edm::Handle<reco::ConversionCollection> hConversions;
+    iEvent.getByLabel("allConversions", hConversions);
+
+    bool passed_PhotonVeto = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, hConversions, beamspot.position());
+    fTPhoPassConversionVeto->push_back(passed_PhotonVeto);
+      
+    float PhoHCalIsoConeDR03 = photon.hcalTowerSumEtConeDR03() + (photon.hadronicOverEm() - photon.hadTowOverEm())*photon.superCluster()->energy()/cosh(photon.superCluster()->eta());
+    fTPhoHCalIsoConeDR03->push_back(PhoHCalIsoConeDR03);
 
     fTPhoE1x5 ->push_back(photon.e1x5());
     fTPhoE2x5 ->push_back(photon.e2x5());
@@ -3830,6 +3848,9 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
   produces<std::vector<bool> > ("PhoConvValidVtx");
   produces<std::vector<bool> > ("ElPassConversionVeto");
+  produces<std::vector<bool> > ("PhoPassConversionVeto");
+  produces<std::vector<float> >("PhoHCalIsoConeDR03");
+    
   produces<std::vector<int> >  ("PhoConvNtracks");
   produces<std::vector<float> >("PhoConvChi2Probability");
   produces<std::vector<float> >("PhoConvEoverP");
@@ -4367,6 +4388,7 @@ void NTupleProducer::resetProducts( void ) {
   fTElGenGMEta.reset(new std::vector<float> );
   fTElGenGMPhi.reset(new std::vector<float> );
   fTElGenGME.reset(new std::vector<float> );
+  fTPhoPassConversionVeto.reset(new std::vector<bool>);
   fTNPhotons.reset(new int(0));
   fTNPhotonsTot.reset(new int(0));
   fTPhoGood.reset(new std::vector<int> );
@@ -4405,6 +4427,7 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoE1OverE9.reset(new std::vector<float> );
   fTPhoS4OverS1.reset(new std::vector<float> );
   fTPhoSigmaEtaEta.reset(new std::vector<float> );
+  fTPhoHCalIsoConeDR03.reset(new std::vector<float> );
   fTPhoE1x5.reset(new std::vector<float> );
   fTPhoE2x5.reset(new std::vector<float> );
   fTPhoE3x3.reset(new std::vector<float> );
@@ -5080,6 +5103,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElGenGMEta, "ElGenGMEta");
   event.put(fTElGenGMPhi, "ElGenGMPhi");
   event.put(fTElGenGME, "ElGenGME");
+  event.put(fTPhoPassConversionVeto,"PhoPassConversionVeto");
   event.put(fTNPhotons, "NPhotons");
   event.put(fTNPhotonsTot, "NPhotonsTot");
   event.put(fTPhoGood, "PhoGood");
@@ -5118,6 +5142,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoE1OverE9, "PhoE1OverE9");
   event.put(fTPhoS4OverS1, "PhoS4OverS1");
   event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
+  event.put(fTPhoHCalIsoConeDR03, "PhoHCalIsoConeDR03");
   event.put(fTPhoE1x5, "PhoE1x5");
   event.put(fTPhoE2x5, "PhoE2x5");
   event.put(fTPhoE3x3, "PhoE3x3");

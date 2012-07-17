@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.26 2012/07/01 15:56:24 pablom Exp $
+// $Id: NTupleProducer.h,v 1.114.2.27 2012/07/09 09:46:00 leo Exp $
 //
 //
 
@@ -740,6 +740,7 @@ private:
   //- Photons:
   std::auto_ptr<int>  fTNPhotons;
   std::auto_ptr<int>  fTNPhotonsTot;
+  std::auto_ptr<std::vector<bool> >  fTPhoPassConversionVeto;
   std::auto_ptr<std::vector<int> >  fTPhoGood;
   std::auto_ptr<std::vector<int> >  fTPhoIsIso;
   std::auto_ptr<std::vector<float> >  fTPhoPt;
@@ -778,6 +779,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoS4OverS1;
   // ID
   std::auto_ptr<std::vector<float> >  fTPhoSigmaEtaEta;
+  std::auto_ptr<std::vector<float> >  fTPhoHCalIsoConeDR03;
   std::auto_ptr<std::vector<float> >  fTPhoE1x5;
   std::auto_ptr<std::vector<float> >  fTPhoE2x5;
   std::auto_ptr<std::vector<float> >  fTPhoE3x3;
