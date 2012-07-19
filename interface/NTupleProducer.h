@@ -220,6 +220,8 @@ private:
   edm::InputTag fSCTagEndcap;
   edm::InputTag fTrackCollForVertexing;
   edm::InputTag fAllConversionsCollForVertexing;
+    
+  PFIsolationEstimator isolator;
 
   // Selection cuts
   float fMinMuPt;
@@ -780,6 +782,9 @@ private:
   // ID
   std::auto_ptr<std::vector<float> >  fTPhoSigmaEtaEta;
   std::auto_ptr<std::vector<float> >  fTPhoHCalIsoConeDR03;
+  std::auto_ptr<std::vector<float> >  fTPhoNewIsoPFCharged;
+  std::auto_ptr<std::vector<float> >  fTPhoNewIsoPFPhoton;
+  std::auto_ptr<std::vector<float> >  fTPhoNewIsoPFNeutral;
   std::auto_ptr<std::vector<float> >  fTPhoE1x5;
   std::auto_ptr<std::vector<float> >  fTPhoE2x5;
   std::auto_ptr<std::vector<float> >  fTPhoE3x3;

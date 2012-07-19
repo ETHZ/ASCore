@@ -429,11 +429,13 @@ process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
                              'newPFJetBProbabilityBPFJetTags']
 ##########################################################################
 ### PF isolation settings ################################################
-from CommonTools.ParticleFlow.Tools.pfIsolation import setupPFElectronIso
+from CommonTools.ParticleFlow.Tools.pfIsolation import setupPFElectronIso, setupPFPhotonIso
 process.eleIsoSequence = setupPFElectronIso(process, 'gsfElectrons', postfix='Standard')
 process.analyze.tag_elepfisosEvent = ['elPFIsoValueCharged03PFIdStandard' , 'elPFIsoValueCharged04PFIdStandard'  ,
                                       'elPFIsoValueNeutral03PFIdStandard' , 'elPFIsoValueNeutral04PFIdStandard'  ,
                                       'elPFIsoValueGamma03PFIdStandard'   , 'elPFIsoValueGamma04PFIdStandard'  ]
+
+process.phoIsoSequence = setupPFPhotonIso(process, 'photons')
 
 process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
 process.pfPileUp.Vertices = 'goodVertices'
@@ -564,6 +566,7 @@ process.p = cms.Path(
        	+ process.metCorSequence
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
+    + process.phoIsoSequence
         + process.PFTau
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS

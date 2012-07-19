@@ -73,7 +73,6 @@
 
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
-#include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -98,6 +97,7 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc"
 
 /*
   #include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
@@ -317,6 +317,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
       produces<edm::InEvent>( ip->first, ip->second );
   }
 
+  isolator.initializePhotonIsolation(kTRUE);
+  isolator. setConeSize(0.3);
 }
 
 //________________________________________________________________________________________
@@ -417,6 +419,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // PFcandidates
   edm::Handle<reco::PFCandidateCollection> pfCandidates;
   iEvent.getByLabel(pfProducerTag, pfCandidates);
+  const  PFCandidateCollection thePfColl = *(pfCandidates.product());
 
   // PF candidate isolation
   Handle< edm::ValueMap<float> > muonPfIsoTagsCustom[gMaxNPfIsoTags];
@@ -470,6 +473,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(fVertexTag, vertices);
   const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
 
+  unsigned int ivtx = 0;
+  VertexRef myVtxRef(vertices, ivtx);
+    
   // Get Muon IsoDeposits
   // ECAL:
   edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepECValueMap;
@@ -1640,7 +1646,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       
       bool passconversionveto = !ConversionTools::hasMatchedConversion(electron,hConversions, beamspot.position());
       fTElPassConversionVeto->push_back(passconversionveto);
-
+        
       reco::GsfElectron::ConversionRejection ConvRejVars = electron.conversionRejectionVariables();
       reco::TrackBaseRef ConvPartnerTrack = ConvRejVars.partner;
       if( ConvPartnerTrack.isNonnull() ){
@@ -1786,6 +1792,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     bool passed_PhotonVeto = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, hConversions, beamspot.position());
     fTPhoPassConversionVeto->push_back(passed_PhotonVeto);
+      
+    isolator.fGetIsolation(&photon,&thePfColl, myVtxRef, vertices);
+    //cout<<"PF  :  "<<isolator.getIsolationCharged()<<" : "<<isolator.getIsolationPhoton()<<" : "<<isolator.getIsolationNeutral()<<endl;
+    fTPhoNewIsoPFCharged->push_back(isolator.getIsolationCharged());
+    fTPhoNewIsoPFPhoton->push_back(isolator.getIsolationPhoton());
+    fTPhoNewIsoPFNeutral->push_back(isolator.getIsolationNeutral());
       
     float PhoHCalIsoConeDR03 = photon.hcalTowerSumEtConeDR03() + (photon.hadronicOverEm() - photon.hadTowOverEm())*photon.superCluster()->energy()/cosh(photon.superCluster()->eta());
     fTPhoHCalIsoConeDR03->push_back(PhoHCalIsoConeDR03);
@@ -3770,6 +3782,9 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PhoE1OverE9");
   produces<std::vector<float> >("PhoS4OverS1");
   produces<std::vector<float> >("PhoSigmaEtaEta");
+  produces<std::vector<float> >("PhoNewIsoPFCharged");
+  produces<std::vector<float> >("PhoNewIsoPFPhoton");
+  produces<std::vector<float> >("PhoNewIsoPFNeutral");
   produces<std::vector<float> >("PhoE1x5");
   produces<std::vector<float> >("PhoE2x5");
   produces<std::vector<float> >("PhoE3x3");
@@ -4428,6 +4443,9 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoS4OverS1.reset(new std::vector<float> );
   fTPhoSigmaEtaEta.reset(new std::vector<float> );
   fTPhoHCalIsoConeDR03.reset(new std::vector<float> );
+  fTPhoNewIsoPFCharged.reset(new std::vector<float> );
+  fTPhoNewIsoPFPhoton.reset(new std::vector<float> );
+  fTPhoNewIsoPFNeutral.reset(new std::vector<float> );
   fTPhoE1x5.reset(new std::vector<float> );
   fTPhoE2x5.reset(new std::vector<float> );
   fTPhoE3x3.reset(new std::vector<float> );
@@ -5143,6 +5161,9 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoS4OverS1, "PhoS4OverS1");
   event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
   event.put(fTPhoHCalIsoConeDR03, "PhoHCalIsoConeDR03");
+  event.put(fTPhoNewIsoPFCharged, "PhoNewIsoPFCharged");
+  event.put(fTPhoNewIsoPFPhoton, "PhoNewIsoPFPhoton");
+  event.put(fTPhoNewIsoPFNeutral, "PhoNewIsoPFNeutral");
   event.put(fTPhoE1x5, "PhoE1x5");
   event.put(fTPhoE2x5, "PhoE2x5");
   event.put(fTPhoE3x3, "PhoE3x3");
