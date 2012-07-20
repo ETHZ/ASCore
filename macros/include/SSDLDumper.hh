@@ -141,13 +141,9 @@ public:
 		HT200MET503b,
 		HT320MET0,
 		HT320MET0b,
-		MET0_80HT200b,
-		MET0_200HT320b,
-		MET0_320HT600b,
-		HT80_0MET30b,
-		HT80_30MET50b,
-		HT80_50MET120b,
-		HT80_120MET200b,
+		MET0_80HT200b, MET0_200HT320b, MET0_320HT600b,
+		HT80_0MET30b, HT80_30MET50b, HT80_50MET120b,HT80_120MET200b,
+		HT0MET200,HT0MET120V, HT0MET120bV,HT0MET80V,HT0MET80bV,	 //EWKino regions
 		gNREGIONS
 	};
 	//enum gRegion {
@@ -315,6 +311,7 @@ public:
 		static float minJetPt  [gNREGIONS];
 		static int   minNjets  [gNREGIONS];
 		static int   minNbjets [gNREGIONS];
+		static int   maxNbjets [gNREGIONS];
 		static int   minNbjmed [gNREGIONS];
 		static int   app3rdVet [gNREGIONS];
 		static int   vetoTTZSel[gNREGIONS];
@@ -763,6 +760,7 @@ public:
 	float fC_minJetPt;
 	int   fC_minNjets;
 	int   fC_minNbjets;
+	int   fC_maxNbjets;
 	int   fC_minNbjmed;
 	float fC_minMu1pt;
 	float fC_minMu2pt;
