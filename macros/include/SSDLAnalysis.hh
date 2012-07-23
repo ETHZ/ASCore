@@ -85,7 +85,26 @@ private:
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
 	TH2D* fProcessCount[10];
-	TH2D* fSMSCount;
+	TH2D* fRightHandedSlepCount;
+	TH2D* fRightHandedSlepCountp25;
+	TH2D* fRightHandedSlepCountp50;
+	TH2D* fRightHandedSlepCountp75;
+	TH2D* fRightHandedCount;
+	TH2D* fRightHandedCountp25;
+	TH2D* fRightHandedCountp50;
+	TH2D* fRightHandedCountp75;
+	TH2D* fTChiSlepSlepCount;
+	TH2D* fTChiSlepSlepCountp25;
+	TH2D* fTChiSlepSlepCountp50;
+	TH2D* fTChiSlepSlepCountp75;
+	TH2D* fTChiSlepSnuCount;
+	TH2D* fTChiSlepSnuCountp25;
+	TH2D* fTChiSlepSnuCountp50;
+	TH2D* fTChiSlepSnuCountp75;
+	TH2D* fTChiStauStauCount;
+	TH2D* fTChiStauStauCountp25;
+	TH2D* fTChiStauStauCountp50;
+	TH2D* fTChiStauStauCountp75;
 	
 	/////////////////////////////////////
 	// Tree branches
@@ -98,6 +117,8 @@ private:
 	int    fTprocess;
 	float  fTmGlu;
 	float  fTmLSP;
+	int    fTisTChiSlepSnu;
+	int    fTisRightHanded;
 
 	// PileUP info
 	float fTrho;

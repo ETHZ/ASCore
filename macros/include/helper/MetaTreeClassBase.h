@@ -30,6 +30,8 @@ public :
    Int_t           process;
    Float_t         mGlu;
    Float_t         mLSP;
+   Int_t           isTChiSlepSnu;
+   Int_t           isRightHanded;
    Int_t           HLT_MU8;
    Int_t           HLT_MU8_PS;
    Int_t           HLT_MU17;
@@ -56,72 +58,77 @@ public :
    Int_t           NVrtx;
    Float_t         PUWeight;
    Int_t           NMus;
-   Int_t           IsSignalMuon[10];   //[NMus]
-   Float_t         MuPt[10];   //[NMus]
-   Float_t         MuEta[10];   //[NMus]
-   Float_t         MuPhi[10];   //[NMus]
-   Int_t           MuCharge[10];   //[NMus]
-   Float_t         MuPFIso[10];   //[NMus]
-   Float_t         MuRadIso[10];   //[NMus]
-   Float_t         MuD0[10];   //[NMus]
-   Float_t         MuDz[10];   //[NMus]
-   Float_t         MuEMVetoEt[10];   //[NMus]
-   Float_t         MuHadVetoEt[10];   //[NMus]
-   Int_t           MuPassesTightID[10];   //[NMus]
-   Float_t         MuPtE[10];   //[NMus]
-   Int_t           MuGenID[10];   //[NMus]
-   Int_t           MuGenMID[10];   //[NMus]
-   Int_t           MuGenGMID[10];   //[NMus]
-   Int_t           MuGenType[10];   //[NMus]
-   Int_t           MuGenMType[10];   //[NMus]
-   Int_t           MuGenGMType[10];   //[NMus]
-   Float_t         MuMT[10];   //[NMus]
+   Int_t           IsSignalMuon[5];   //[NMus]
+   Float_t         MuPt[5];   //[NMus]
+   Float_t         MuEta[5];   //[NMus]
+   Float_t         MuPhi[5];   //[NMus]
+   Int_t           MuCharge[5];   //[NMus]
+   Float_t         MuPFIso[5];   //[NMus]
+   Float_t         MuPFChIso[5];   //[NMus]
+   Float_t         MuPFNeIso[5];   //[NMus]
+   Float_t         MuRadIso[5];   //[NMus]
+   Float_t         MuD0[5];   //[NMus]
+   Float_t         MuDz[5];   //[NMus]
+   Float_t         MuEMVetoEt[5];   //[NMus]
+   Float_t         MuHadVetoEt[5];   //[NMus]
+   Int_t           MuPassesTightID[5];   //[NMus]
+   Float_t         MuPtE[5];   //[NMus]
+   Int_t           MuGenID[5];   //[NMus]
+   Int_t           MuGenMID[5];   //[NMus]
+   Int_t           MuGenGMID[5];   //[NMus]
+   Int_t           MuGenType[5];   //[NMus]
+   Int_t           MuGenMType[5];   //[NMus]
+   Int_t           MuGenGMType[5];   //[NMus]
+   Float_t         MuMT[5];   //[NMus]
    Int_t           NEls;
-   Int_t           IsSignalElectron[10];   //[NEls]
-   Int_t           ElCharge[10];   //[NEls]
-   Int_t           ElChIsCons[10];   //[NEls]
-   Float_t         ElPt[10];   //[NEls]
-   Float_t         ElEta[10];   //[NEls]
-   Float_t         ElPhi[10];   //[NEls]
-   Float_t         ElD0[10];   //[NEls]
-   Float_t         ElD0Err[10];   //[NEls]
-   Float_t         ElDz[10];   //[NEls]
-   Float_t         ElDzErr[10];   //[NEls]
-   Float_t         ElPFIso[10];   //[NEls]
-   Float_t         ElRadIso[10];   //[NEls]
-   Float_t         ElEcalRecHitSumEt[10];   //[NEls]
-   Float_t         ElHcalTowerSumEt[10];   //[NEls]
-   Float_t         ElTkSumPt[10];   //[NEls]
-   Float_t         ElDPhi[10];   //[NEls]
-   Float_t         ElDEta[10];   //[NEls]
-   Float_t         ElSigmaIetaIeta[10];   //[NEls]
-   Float_t         ElHoverE[10];   //[NEls]
-   Float_t         ElEPthing[10];   //[NEls]
-   Int_t           ElIsGoodElId_LooseWP[10];   //[NEls]
-   Int_t           ElIsGoodElId_MediumWP[10];   //[NEls]
-   Int_t           ElGenID[10];   //[NEls]
-   Int_t           ElGenMID[10];   //[NEls]
-   Int_t           ElGenGMID[10];   //[NEls]
-   Int_t           ElGenType[10];   //[NEls]
-   Int_t           ElGenMType[10];   //[NEls]
-   Int_t           ElGenGMType[10];   //[NEls]
-   Float_t         ElMT[10];   //[NEls]
+   Int_t           IsSignalElectron[5];   //[NEls]
+   Int_t           ElCharge[5];   //[NEls]
+   Int_t           ElChIsCons[5];   //[NEls]
+   Float_t         ElPt[5];   //[NEls]
+   Float_t         ElEta[5];   //[NEls]
+   Float_t         ElPhi[5];   //[NEls]
+   Float_t         ElD0[5];   //[NEls]
+   Float_t         ElD0Err[5];   //[NEls]
+   Float_t         ElDz[5];   //[NEls]
+   Float_t         ElDzErr[5];   //[NEls]
+   Float_t         ElPFIso[5];   //[NEls]
+   Float_t         ElPFChIso[5];   //[NEls]
+   Float_t         ElPFNeIso[5];   //[NEls]
+   Float_t         ElRadIso[5];   //[NEls]
+   Float_t         ElEcalRecHitSumEt[5];   //[NEls]
+   Float_t         ElHcalTowerSumEt[5];   //[NEls]
+   Float_t         ElTkSumPt[5];   //[NEls]
+   Float_t         ElDPhi[5];   //[NEls]
+   Float_t         ElDEta[5];   //[NEls]
+   Float_t         ElSigmaIetaIeta[5];   //[NEls]
+   Float_t         ElHoverE[5];   //[NEls]
+   Float_t         ElEPthing[5];   //[NEls]
+   Int_t           ElIsGoodElId_LooseWP[5];   //[NEls]
+   Int_t           ElIsGoodElId_MediumWP[5];   //[NEls]
+   Int_t           ElIsGoodTriggerEl[5];   //[NEls]
+   Int_t           ElGenID[5];   //[NEls]
+   Int_t           ElGenMID[5];   //[NEls]
+   Int_t           ElGenGMID[5];   //[NEls]
+   Int_t           ElGenType[5];   //[NEls]
+   Int_t           ElGenMType[5];   //[NEls]
+   Int_t           ElGenGMType[5];   //[NEls]
+   Float_t         ElMT[5];   //[NEls]
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Float_t         pfMETType1;
    Float_t         pfMETType1Phi;
    Int_t           NJets;
-   Float_t         JetPt[40];   //[NJets]
-   Float_t         JetEta[40];   //[NJets]
-   Float_t         JetPhi[40];   //[NJets]
-   Float_t         JetCSVBTag[40];   //[NJets]
-   Float_t         JetProbBTag[40];   //[NJets]
-   Float_t         JetArea[40];   //[NJets]
-   Float_t         JetJECUncert[40];   //[NJets]
-   Int_t           JetPartonID[40];   //[NJets]
-   Float_t         JetGenPt[40];   //[NJets]
-   Float_t         JetGenEta[40];   //[NJets]
-   Float_t         JetGenPhi[40];   //[NJets]
+   Float_t         JetPt[20];   //[NJets]
+   Float_t         JetEta[20];   //[NJets]
+   Float_t         JetPhi[20];   //[NJets]
+   Float_t         JetCSVBTag[20];   //[NJets]
+   Float_t         JetProbBTag[20];   //[NJets]
+   Float_t         JetArea[20];   //[NJets]
+   Float_t         JetJECUncert[20];   //[NJets]
+   Int_t           JetPartonID[20];   //[NJets]
+   Float_t         JetGenPt[20];   //[NJets]
+   Float_t         JetGenEta[20];   //[NJets]
+   Float_t         JetGenPhi[20];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -132,6 +139,8 @@ public :
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
    TBranch        *b_mLSP;   //!
+   TBranch        *b_isTChiSlepSnu;   //!
+   TBranch        *b_isRightHanded;   //!
    TBranch        *b_HLT_MU8;   //!
    TBranch        *b_HLT_MU8_PS;   //!
    TBranch        *b_HLT_MU17;   //!
@@ -164,6 +173,8 @@ public :
    TBranch        *b_MuPhi;   //!
    TBranch        *b_MuCharge;   //!
    TBranch        *b_MuPFIso;   //!
+   TBranch        *b_MuPFChIso;   //!
+   TBranch        *b_MuPFNeIso;   //!
    TBranch        *b_MuRadIso;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
@@ -190,6 +201,8 @@ public :
    TBranch        *b_ElDz;   //!
    TBranch        *b_ElDzErr;   //!
    TBranch        *b_ElPFIso;   //!
+   TBranch        *b_ElPFChIso;   //!
+   TBranch        *b_ElPFNeIso;   //!
    TBranch        *b_ElRadIso;   //!
    TBranch        *b_ElEcalRecHitSumEt;   //!
    TBranch        *b_ElHcalTowerSumEt;   //!
@@ -304,6 +317,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
+   fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
+   fChain->SetBranchAddress("isRightHanded", &isRightHanded, &b_isRightHanded);
    fChain->SetBranchAddress("HLT_MU8", &HLT_MU8, &b_HLT_MU8);
    fChain->SetBranchAddress("HLT_MU8_PS", &HLT_MU8_PS, &b_HLT_MU8_PS);
    fChain->SetBranchAddress("HLT_MU17", &HLT_MU17, &b_HLT_MU17);
@@ -336,6 +351,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
    fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
    fChain->SetBranchAddress("MuPFIso", MuPFIso, &b_MuPFIso);
+   fChain->SetBranchAddress("MuPFChIso", MuPFChIso, &b_MuPFChIso);
+   fChain->SetBranchAddress("MuPFNeIso", MuPFNeIso, &b_MuPFNeIso);
    fChain->SetBranchAddress("MuRadIso", MuRadIso, &b_MuRadIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
@@ -362,6 +379,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElPFIso", ElPFIso, &b_ElPFIso);
+   fChain->SetBranchAddress("ElPFChIso", ElPFChIso, &b_ElPFChIso);
+   fChain->SetBranchAddress("ElPFNeIso", ElPFNeIso, &b_ElPFNeIso);
    fChain->SetBranchAddress("ElRadIso", ElRadIso, &b_ElRadIso);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
    fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
