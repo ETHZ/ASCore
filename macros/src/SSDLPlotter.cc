@@ -371,6 +371,9 @@ void SSDLPlotter::doAnalysis(){
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
 	// makeRelIsoTTSigPlots();
+	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
+	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
+	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0., 7000., 200., 7000., 20., 10.); // MET 200 region , no HT cut
 }
 
 //____________________________________________________________________________
@@ -11948,7 +11951,7 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	eff_->Write();
 
 }
-void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2, bool pass3rdVeto){
+void SSDLPlotter::scanSMS( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2){
 
 	float myMinMet = minMET;
 	float myLep1Pt = pt1;
@@ -11980,25 +11983,24 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 		htTitleString = Form("H_{T} > %3.0f GeV", fC_maxHT);
 	}
 
-	int nx(3);
-	TString bar[nx];
-	bar[0] = "p25";
-	bar[1] = "p50";
-	bar[2] = "p75";
-
-	TH2D * TChi_yield_      [nx];
-	TH2D * TChiRight_yield_ [nx];
-
 	bool verbose = false;
 	if (verbose) fOUTSTREAM.open(Form("SMSoutput_"+htString+"_MET%3.0f.txt", fC_minMet), ios::trunc);
-	for (int i = 0; i<nx; i++) {
-		TChi_yield_              [i] = new TH2D("TChi_yield"+bar[i]      , "TChi_yield"+bar[i]      , 101, -5, 1005    , 101 , -5 , 1005);
-		TChiRight_yield_         [i] = new TH2D("TChiRight_yield"+bar[i] , "TChiRight_yield"+bar[i] , 101, -5, 1005    , 101 , -5 , 1005);
 
-	}
+	// TH2D  * TChiSlepSnu_nPass_  = new TH2D("TChiSlepSnu_nPass"   , "TChiSlepSnu_nPass"  , 51 , -5 , 505    , 51 , -5 , 505);
+	// TH2D  * TChiSlepSnu_yield_  = new TH2D("TChiSlepSnu_yield"   , "TChiSlepSnu_yield"  , 51 , -5 , 505    , 51 , -5 , 505);
+	// TH1D  * TChiSlepSnu_nJets_  = new TH1D("TChiSlepSnu_nJets"   , "TChiSlepSnu_nJets"  , 10 , 0  , 10);
+	// TH1D  * TChiSlepSnu_pt1_    = new TH1D("TChiSlepSnu_pt1"     , "TChiSlepSnu_pt1"    , 50 , 0. , 400.);
+	// TH1D  * TChiSlepSnu_pt2_    = new TH1D("TChiSlepSnu_pt2"     , "TChiSlepSnu_pt2"    , 50 , 0. , 400.);
 
-	TH2D  * TChi_nPass_[nx] [5];
-	TH2D  * TChiRight_nPass_[nx] [5];
+	TH2D  * TChiSlepSlep_yield_       = new TH2D("TChiSlepSlep_yield"      , "TChiSlepSlep_yield"      , 51, -5, 505    , 51 , -5 , 505);
+	TH1D  * TChiSlepSlep_nJets_       = new TH1D("TChiSlepSlep_nJets"      , "TChiSlepSlep_nJets"      , 10, 0 , 10);
+	TH1D  * TChiSlepSlep_pt1_         = new TH1D("TChiSlepSlep_pt1"        , "TChiSlepSlep_pt1"        , 50, 0., 400.);
+	TH1D  * TChiSlepSlep_pt2_         = new TH1D("TChiSlepSlep_pt2"        , "TChiSlepSlep_pt2"        , 50, 0., 400.);
+	TH1D  * TChiSlepSlep_Met450_50_   = new TH1D("TChiSlepSlep_Met450_50_" , "TChiSlepSlep_Met450_50_" , 50, 0 , 350);
+	TH1D  * TChiSlepSlep_Met200_150_  = new TH1D("TChiSlepSlep_Met200_150_", "TChiSlepSlep_Met200_150_", 50, 0 , 350);
+	TH1D  * TChiSlepSlep_Met450_400_  = new TH1D("TChiSlepSlep_Met450_400_", "TChiSlepSlep_Met450_400_", 50, 0 , 350);
+
+	TH2D  * TChiSlepSlep_nPass_ [5];
 	int nSyst(5);
 	TString foo[nSyst];
 	foo[0] = "norm";
@@ -12006,11 +12008,8 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 	foo[2] = "metup";
 	foo[3] = "lepdown";
 	foo[4] = "lepup";
-	for (int i = 0; i<nx; i++) {
-		for (int j = 0; j<nSyst; j++) {
-		TChi_nPass_ [i][j]      = new TH2D("TChi_nPass_x"+bar[i]+"_"+foo[j]      , "TChi_nPass_x"+bar[i]+"_"+foo[i]      , 101 , -5 , 1005 , 101 , -5 , 1005);
-		TChiRight_nPass_ [i][j] = new TH2D("TChiRight_nPass_x"+bar[i]+"_"+foo[j] , "TChiRight_nPass_x"+bar[i]+"_"+foo[i] , 101 , -5 , 1005 , 101 , -5 , 1005);
-		}
+	for (int i = 0; i<nSyst; i++) {
+		TChiSlepSlep_nPass_ [i] = new TH2D("TChiSlepSlep_nPass_"+foo[i] , "TChiSlepSlep_nPass_"+foo[i] , 51 , -5 , 505    , 51 , -5 , 505);
 	}
 
 	// get the histo with the x-secs
@@ -12019,12 +12018,8 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 
 	// get the histo with the count for each point
 	TFile * file_ = new TFile(filestring, "READ", "file_");
-	TH2D  * TChi_nTot_ [nSyst];
-	TH2D  * TChiRight_nTot_[nSyst];
-	for (int i = 0; i<nx; i++) {
-		TChi_nTot_[i]      = (TH2D  *) file_->Get("TChiStauStauCount"+bar[i]);
-		TChiRight_nTot_[i] = (TH2D  *) file_->Get("RightHandedSlepCount"+bar[i]);
-	}
+	// TH2D  * TChiSlepSnu_nTot_  = (TH2D  *) file_->Get("TChiSlepSnuCount");
+	TH2D  * TChiSlepSlep_nTot_ = (TH2D  *) file_->Get("TChiSlepSlepCount");
 	TTree * tree_ = (TTree *) file_->Get("Analysis");
 	tree_->ResetBranchAddresses();
 
@@ -12042,10 +12037,6 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		tree_->GetEntry(jentry);
 		printProgress(jentry, tot_events, "SMS Scan");
-		int x;
-		if (m0 == 0.25) x = 0;
-		if (m0 == 0.50) x = 1;
-		if (m0 == 0.75) x = 2;
 		for (int i = 0; i<nSyst; i++) {
 			if (!doSystematic) { if (i!=0) continue; }
 			fC_minMet   = myMinMet;                 // normal selection
@@ -12070,8 +12061,6 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 
 			int mu1(-1), mu2(-1);
 			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
 					tightTot++;
 					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
@@ -12080,24 +12069,32 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 					n_tot++;
 					int xsecBin   = xsecs->FindBin(mGlu);
 					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
-					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
-					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
-					}
-					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
-						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
+					// if (isTChiSlepSnu == 1) {
+					// 	nSlepSnu++;
+					// 	int nGenBin   = TChiSlepSnu_nTot_->FindBin(mGlu, mLSP);
+					// 	float nGen    = TChiSlepSnu_nTot_->GetBinContent(nGenBin);
+					// 	float weight  = fLumiNorm * nloXsec / nGen;
+					// 	TChiSlepSnu_yield_ -> Fill(mGlu, mLSP, weight);
+					// 	TChiSlepSnu_nPass_ -> Fill(mGlu, mLSP);
+					// 	TChiSlepSnu_nJets_ -> Fill(getNJets());
+					// 	TChiSlepSnu_pt1_   -> Fill(MuPt[mu1]);
+					// 	TChiSlepSnu_pt2_   -> Fill(MuPt[mu2]);
+					// }
+					if (isTChiSlepSnu == 0){
+						nSlepSlep++;
+						int nGenBin   = TChiSlepSlep_nTot_->FindBin(mGlu, mLSP);
+						float nGen    = TChiSlepSlep_nTot_->GetBinContent(nGenBin);
+						float weight  = fLumiNorm * nloXsec / nGen;
+						TChiSlepSlep_nPass_[i] -> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_yield_ -> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_nJets_ -> Fill(getNJets());
+							TChiSlepSlep_pt1_   -> Fill(MuPt[mu1]);
+							TChiSlepSlep_pt2_   -> Fill(MuPt[mu2]);
+							if (mGlu == 450 && mLSP ==  50) TChiSlepSlep_Met450_50_  -> Fill(pfMET);
+							if (mGlu == 200 && mLSP == 150) TChiSlepSlep_Met200_150_ -> Fill(pfMET);
+							if (mGlu == 450 && mLSP == 400) TChiSlepSlep_Met450_400_ -> Fill(pfMET);
 						}
-						
 					}
 					nMM++;
 					continue;
@@ -12106,8 +12103,6 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 			}
 			int mu(-1), el(-1);
 			if( isSSLLElMuEvent(mu, el) ){
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 					tightTot++;
 					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
@@ -12116,24 +12111,32 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 					n_tot++;
 					int xsecBin   = xsecs->FindBin(mGlu);
 					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
-					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
-					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
-					}
-					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
-						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
+					// if (isTChiSlepSnu == 1) {
+					// 	nSlepSnu++;
+					// 	int nGenBin   = TChiSlepSnu_nTot_->FindBin(mGlu, mLSP);
+					// 	float nGen    = TChiSlepSnu_nTot_->GetBinContent(nGenBin);
+					// 	float weight  = fLumiNorm * nloXsec / nGen;
+					// 	TChiSlepSnu_yield_ -> Fill(mGlu, mLSP, weight);
+					// 	TChiSlepSnu_nPass_ -> Fill(mGlu, mLSP);
+					// 	TChiSlepSnu_nJets_ -> Fill(getNJets());
+					// 	TChiSlepSnu_pt1_   -> Fill(MuPt[mu1]);
+					// 	TChiSlepSnu_pt2_   -> Fill(MuPt[mu2]);
+					// }
+					if (isTChiSlepSnu == 0){
+						nSlepSlep++;
+						int nGenBin   = TChiSlepSlep_nTot_->FindBin(mGlu, mLSP);
+						float nGen    = TChiSlepSlep_nTot_->GetBinContent(nGenBin);
+						float weight  = fLumiNorm * nloXsec / nGen;
+						TChiSlepSlep_nPass_[i] -> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_yield_ -> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_nJets_ -> Fill(getNJets());
+							TChiSlepSlep_pt1_   -> Fill(MuPt[mu1]);
+							TChiSlepSlep_pt2_   -> Fill(MuPt[mu2]);
+							if (mGlu == 450 && mLSP ==  50) TChiSlepSlep_Met450_50_  -> Fill(pfMET);
+							if (mGlu == 200 && mLSP == 150) TChiSlepSlep_Met200_150_ -> Fill(pfMET);
+							if (mGlu == 450 && mLSP == 400) TChiSlepSlep_Met450_400_ -> Fill(pfMET);
 						}
-						
 					}
 					nEM++;
 					continue;
@@ -12142,8 +12145,6 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 			}
 			int el1(-1), el2(-1);
 			if( isSSLLElEvent(el1, el2) ){
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 					tightTot++;
 					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
@@ -12152,24 +12153,32 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 					n_tot++;
 					int xsecBin   = xsecs->FindBin(mGlu);
 					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
-					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
-					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
-					}
-					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
-						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
+					// if (isTChiSlepSnu == 1) {
+					// 	nSlepSnu++;
+					// 	int nGenBin   = TChiSlepSnu_nTot_->FindBin(mGlu, mLSP);
+					// 	float nGen    = TChiSlepSnu_nTot_->GetBinContent(nGenBin);
+					// 	float weight  = fLumiNorm * nloXsec / nGen;
+					// 	TChiSlepSnu_yield_ -> Fill(mGlu, mLSP, weight);
+					// 	TChiSlepSnu_nPass_ -> Fill(mGlu, mLSP);
+					// 	TChiSlepSnu_nJets_ -> Fill(getNJets());
+					// 	TChiSlepSnu_pt1_   -> Fill(MuPt[mu1]);
+					// 	TChiSlepSnu_pt2_   -> Fill(MuPt[mu2]);
+					// }
+					if (isTChiSlepSnu == 0){
+						nSlepSlep++;
+						int nGenBin   = TChiSlepSlep_nTot_->FindBin(mGlu, mLSP);
+						float nGen    = TChiSlepSlep_nTot_->GetBinContent(nGenBin);
+						float weight  = fLumiNorm * nloXsec / nGen;
+						TChiSlepSlep_nPass_[i] -> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_yield_ -> Fill(mGlu, mLSP, weight);
+							TChiSlepSlep_nJets_ -> Fill(getNJets());
+							TChiSlepSlep_pt1_   -> Fill(MuPt[mu1]);
+							TChiSlepSlep_pt2_   -> Fill(MuPt[mu2]);
+							if (mGlu == 450 && mLSP ==  50) TChiSlepSlep_Met450_50_  -> Fill(pfMET);
+							if (mGlu == 200 && mLSP == 150) TChiSlepSlep_Met200_150_ -> Fill(pfMET);
+							if (mGlu == 450 && mLSP == 400) TChiSlepSlep_Met450_400_ -> Fill(pfMET);
 						}
-						
 					}
 					nEE++;
 				}
@@ -12183,34 +12192,59 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 	if (verbose) fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
 	if (verbose) fOUTSTREAM << "nSlepSnu: " << nSlepSnu << " nSlepSlep: " << nSlepSlep << endl;
 
-	TH2D * TChi_eff_[nx] [nSyst];
-	TH2D * TChiRight_eff_ [nx] [nSyst];
-	for (int x=0; x<nx;x++) {
-		for (int i=0; i<nSyst;i++) {
-			TChi_eff_ [x][i] = new TH2D("TChi_eff_x"+bar[x]+"_"+foo[i] , "TChi_eff_x"+bar[x]+"_"+foo[i] , 101, -5, 1005    , 101 , -5 , 1005);
-			TChi_eff_ [x][i]->Divide(TChi_nPass_[x][i] , TChi_nTot_[x] , 1. , 1.);
-			TChiRight_eff_ [x][i] = new TH2D("TChiRight_eff_x"+bar[x]+"_"+foo[i] , "TChiRight_eff_x"+bar[x]+"_"+foo[i] , 101, -5, 1005    , 101 , -5 , 1005);
-			TChiRight_eff_ [x][i]->Divide(TChiRight_nPass_[x][i] , TChiRight_nTot_[x] , 1. , 1.);
-		}
+	// TH2D * TChiSlepSnu_eff_   = new TH2D("TChiSlepSnu_eff"  , "TChiSlepSnu_eff"  , 51 , -5 , 505 , 51 , -5 , 505);
+	// TChiSlepSnu_eff_ ->Divide(TChiSlepSnu_nPass_  , TChiSlepSnu_nTot_  , 1. , 1.);
+	TH2D * TChiSlepSlep_eff_ [nSyst];
+	for (int i=0; i<nSyst;i++) {
+		TChiSlepSlep_eff_ [i] = new TH2D("TChiSlepSlep_eff_"+foo[i] , "TChiSlepSlep_eff_"+foo[i] , 51 , -5 , 505 , 51 , -5 , 505);
+		TChiSlepSlep_eff_ [i]->Divide(TChiSlepSlep_nPass_[i] , TChiSlepSlep_nTot_ , 1. , 1.);
 	}
 
-	TFile * res_;
-	if (pass3rdVeto) res_ = new TFile(Form("newSMSresults_"+htString+"_MET%d_PT%2.0f_%2.0f_with3rdLeptonVeto.root", (int) myMinMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
-	else res_ = new TFile(Form("newSMSresults_"+htString+"_MET%d_PT%2.0f_%2.0f.root", (int) myMinMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
+	TFile * res_ = new TFile(Form("SMSresults_"+htString+"_MET%3.0f_PT%2.0f_%2.0f.root", myMinMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
 	res_   -> cd();
+	// TChiSlepSnu_yield_ -> Write();
+	// TChiSlepSnu_nJets_ -> Write();
+	// TChiSlepSnu_pt1_   -> Write();
+	// TChiSlepSnu_pt2_   -> Write();
+	// TChiSlepSnu_nPass_ -> Write();
+	// TChiSlepSnu_nTot_  -> Write();
+	// TChiSlepSnu_eff_   -> Write();
 
-	for (int x=0; x<nx;x++) {
-		TChi_yield_     [x]->Write();
-		TChi_nTot_      [x]->Write();
-		TChiRight_yield_     [x]->Write();
-		TChiRight_nTot_      [x]->Write();
+	TChiSlepSlep_yield_     ->Write();
+	TChiSlepSlep_nJets_     ->Write();
+	TChiSlepSlep_pt1_       ->Write();
+	TChiSlepSlep_pt2_       ->Write();
+	TChiSlepSlep_Met450_50_ ->Write();
+	TChiSlepSlep_Met200_150_->Write();
+	TChiSlepSlep_Met450_400_->Write();
+	TChiSlepSlep_nTot_      ->Write();
 
-		for (int i=0; i<nSyst; i++) {
-			TChi_eff_  [x][i]-> Write();
-			TChi_nPass_[x][i]->Write();
-			TChiRight_eff_  [x][i]-> Write();
-			TChiRight_nPass_[x][i]->Write();
-		}
+	for (int i=0; i<nSyst; i++) {
+		TChiSlepSlep_eff_[i]-> Write();
+		TChiSlepSlep_nPass_[i]  ->Write();
 	}
 
+	// plotting of the efficiency histogram
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	for (int i=0; i<nSyst; i++){
+		float maxValue = TChiSlepSlep_eff_[1]->GetMaximum();
+		TCanvas * canv = new TCanvas();
+		useNiceColorPalette();
+		canv->cd();
+		canv->SetRightMargin(0.15);
+
+		TChiSlepSlep_eff_[i]->Draw("colz");
+		TChiSlepSlep_eff_[i]->GetXaxis()->SetTitle("m_{#chi^{2}}");
+		TChiSlepSlep_eff_[i]->GetYaxis()->SetTitle("m_{LSP}");
+		TChiSlepSlep_eff_[i]->GetZaxis()->SetRangeUser(0.,maxValue);
+		gPad->Update();
+		//canv->SetLogz(1);
+		TChiSlepSlep_eff_[i]->Draw("colz");
+		lat->DrawLatex(0.10,0.94, Form(foo[i]+"_"+"Efficiency for TChiSlepSlep, "+htTitleString+", E_{T}^{miss} > %3.0f, p_{T}^{leptons} %2.0f/%2.0f", myMinMet, fC_minMu1pt, fC_minMu2pt));
+		canv->SaveAs(Form(foo[i]+"_"+"TChiSlepSlep_efficiency_"+htString+"_MET%3.0f.pdf", myMinMet));
+	}
 }
+
