@@ -270,7 +270,7 @@ void DiPhotonMiniTree::Analyze(){
 
   if (!TriggerSelection()) return;
 
-  std::vector<int> passing_selection[5];
+  std::vector<int> passing_selection[6];
 
   bool pass[6];
 
