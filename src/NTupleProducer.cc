@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.13 2012/06/29 14:23:31 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.14 2012/07/13 09:07:00 peruzzi Exp $
 //
 //
 
@@ -1613,7 +1613,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			  if (fTElSCindex[eqi]!=-1)
 			  if (fabs(fTSCeta[fTElSCindex[eqi]]-electron.superCluster()->eta())>0.1 || \
-			      DeltaPhi(fTSCphi[fTElSCindex[eqi]],electron.superCluster()->phi())>0.1){
+			      reco::deltaPhi(fTSCphi[fTElSCindex[eqi]],electron.superCluster()->phi())>0.1){
 			    // 			    std::cout << fTSCraw[fTElSCindex[eqi]] << " " << electron.superCluster()->rawEnergy() << std::endl;
 // 			    			    std::cout << fTSCeta[fTElSCindex[eqi]] << " " << electron.superCluster()->eta() << std::endl;
 // 			    			    std::cout << fTSCphi[fTElSCindex[eqi]] << " " << electron.superCluster()->phi() << std::endl;
@@ -1888,7 +1888,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
            for(int i=0; i<fTngenphotons; ++i){
              if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.01*matched[0]->pt()) \
                   && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.01) \
-                  && ( DeltaPhi(fTGenPhotonPhi[i],matched[0]->phi())<0.01 ) ) {
+                  && ( reco::deltaPhi(fTGenPhotonPhi[i],matched[0]->phi())<0.01 ) ) {
                fTPhotMCmatchindex[phoqi]=i;
              }
            }
@@ -1917,7 +1917,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 if (fTPhotSCindex[phoqi]!=-1)
 	   if (fabs(fTSCeta[fTPhotSCindex[phoqi]]-photon.superCluster()->eta())>0.1 || \
-	       DeltaPhi(fTSCphi[fTPhotSCindex[phoqi]],photon.superCluster()->phi())>0.1){
+	       reco::deltaPhi(fTSCphi[fTPhotSCindex[phoqi]],photon.superCluster()->phi())>0.1){
 	     //			    std::cout << fTSCraw[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->rawEnergy() << std::endl;
 	     //			    std::cout << fTSCeta[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->eta() << std::endl;
 	     //			    std::cout << fTSCphi[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->phi() << std::endl;
@@ -2230,7 +2230,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	       pho_Cone06PfCandDeltaRrecomputed[ipf] = DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta());
 	       pho_Cone06PfCandDeltaEtarecomputed[ipf] = pvm.Eta() - vCand.Eta();
-	       pho_Cone06PfCandDeltaPhirecomputed[ipf] = DeltaPhi(vCand.Phi(),pvm.Phi());
+	       pho_Cone06PfCandDeltaPhirecomputed[ipf] = reco::deltaPhi(vCand.Phi(),pvm.Phi());
 	       //pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();
 
 	       pho_Cone06PfCandIsFromPU[ipf] = -1;
@@ -5417,9 +5417,7 @@ void NTupleProducer::resetInt(int *v, unsigned int size){
 
 double NTupleProducer::DeltaR(double phi1, double phi2, double eta1, double eta2){
 
-  double dphi=phi2-phi1;
-  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
-  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+  double dphi = reco::deltaPhi(phi1,phi2);
   double dR=sqrt(dphi*dphi+(eta2-eta1)*(eta2-eta1));
 
   return dR;
@@ -5663,15 +5661,6 @@ bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::
 
   return isOverlapping;
 	
-}
-
-double NTupleProducer::DeltaPhi(double phi1, double phi2){
-
-  double dphi=phi1-phi2;
-  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
-  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
-
-  return dphi;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------

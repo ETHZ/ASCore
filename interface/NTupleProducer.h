@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.6 2012/06/23 09:10:21 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.7 2012/06/25 15:38:25 peruzzi Exp $
 //
 //
 
@@ -132,7 +132,6 @@ private:
   bool isInPhiCracks(double phi, double eta);
   bool isInEtaCracks(double eta);
   bool CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i);
-  double DeltaPhi(double phi1, double phi2);
   double phiNorm(float &phi);
   double etaTransformation(float EtaParticle , float Zvertex);
   double GenPartonicIso_allpart(const reco::GenParticle & photon,    edm::Handle <reco::GenParticleCollection> & genparticles, double dRcone);
