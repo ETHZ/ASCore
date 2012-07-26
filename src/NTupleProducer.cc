@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.15 2012/07/26 12:31:44 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.16 2012/07/26 12:34:47 peruzzi Exp $
 //
 //
 
@@ -1357,7 +1357,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    fTgoodevent = 1; 
 	    break;
           }
-
+	  
+	  fTSCx[fTnSC] = sc->x();
+	  fTSCy[fTnSC] = sc->y();
+	  fTSCz[fTnSC] = sc->z();
 	  fTSCraw[fTnSC] = sc->rawEnergy();
 	  fTSCpre[fTnSC] = sc->preshowerEnergy();
 	  fTSCenergy[fTnSC] = sc->energy();
@@ -1403,6 +1406,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    break;
           }
 
+	  fTSCx[fTnSC] = sc->x();
+	  fTSCy[fTnSC] = sc->y();
+	  fTSCz[fTnSC] = sc->z();
 	  fTSCraw[fTnSC] = sc->rawEnergy();
 	  fTSCpre[fTnSC] = sc->preshowerEnergy();
 	  fTSCenergy[fTnSC] = sc->energy();
@@ -1763,6 +1769,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	phoqi = 0;
 
 	std::vector<int> storethispfcand(pfCandidates->size(),0);
+	std::vector<int> PhotonToPFPhotonMatchingArray(gMaxnphos,-999);
+	std::vector<int> PhotonToPFElectronMatchingArray(gMaxnphos,-999);
 
 	for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
 	it != phoOrdered.end(); ++it, ++phoqi ) {
@@ -1798,6 +1806,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotH1overE[phoqi]        = photon.hadronicDepth1OverEm();
 	fTPhotH2overE[phoqi]        = photon.hadronicDepth2OverEm();
 	fTPhotSigmaIetaIeta[phoqi]  = photon.sigmaIetaIeta();
+
+	fTPhotVx[phoqi] = photon.vx();
+	fTPhotVy[phoqi] = photon.vy();
+	fTPhotVz[phoqi] = photon.vz();
 
        fTPhotSigmaEtaEta[phoqi] = photon.sigmaEtaEta();
        fTPhote1x5[phoqi]= photon.e1x5();
@@ -2041,6 +2053,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 if (iphot!=-1) {
 	   FoundPFPhoton=true;
 	   fT_pho_isPFPhoton[phoqi] = 1;
+	   PhotonToPFPhotonMatchingArray[phoqi] = iphot;
 	 }
 
 	 //Find PFElectron
@@ -2070,6 +2083,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 if (iel!=-1) {
 	   FoundPFElectron=true;
 	   fT_pho_isPFElectron[phoqi] = 1;
+	   PhotonToPFElectronMatchingArray[phoqi] = iel;
 	 }
 
 	 /*
@@ -2676,7 +2690,15 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
 	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
 	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
+	  fTPfCandMomX[pfcandIndex] = (*pfCandidates)[i].momentum().x();
+	  fTPfCandMomY[pfcandIndex] = (*pfCandidates)[i].momentum().y();
+	  fTPfCandMomZ[pfcandIndex] = (*pfCandidates)[i].momentum().z();
 
+	  for (int j=0; j<fTnphotons; j++){
+	    if (PhotonToPFPhotonMatchingArray[j]==(int)i) fT_pho_matchedPFPhotonCand[j]=pfcandIndex;
+	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
+	  }
+	  
 	  pfcandIndex++;
 
 	}
@@ -3798,7 +3820,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
 	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
 	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");
-
+	fEventTree->Branch("PfCandMomX"                  ,&fTPfCandMomX      ,"PfCandMomX[NPfCand]/F");
+	fEventTree->Branch("PfCandMomY"                  ,&fTPfCandMomY      ,"PfCandMomY[NPfCand]/F");
+	fEventTree->Branch("PfCandMomZ"                  ,&fTPfCandMomZ      ,"PfCandMomZ[NPfCand]/F");
 
 	// Photons:
 	fEventTree->Branch("NPhotons"         ,&fTnphotons          ,"NPhotons/I");
@@ -3870,7 +3894,11 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
-
+       fEventTree->Branch("pho_matchedPFPhotonCand",&fT_pho_matchedPFPhotonCand,"pho_matchedPFPhotonCand[NPhotons]/I");
+       fEventTree->Branch("pho_matchedPFElectronCand",&fT_pho_matchedPFElectronCand,"pho_matchedPFElectronCand[NPhotons]/I");
+       fEventTree->Branch("PhoVx",&fTPhotVx,"PhoVx[NPhotons]/F");
+       fEventTree->Branch("PhoVy",&fTPhotVy,"PhoVy[NPhotons]/F");
+       fEventTree->Branch("PhoVz",&fTPhotVz,"PhoVz[NPhotons]/F");
 
        fEventTree->Branch("pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
        fEventTree->Branch("pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
@@ -3981,6 +4009,9 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("SClocalcorr",&fTSClocalcorr ,"SClocalcorr[NSuperClusters]/F");
 	fEventTree->Branch("SCcrackcorrseedfactor",&fTSCcrackcorrseedfactor ,"SCcrackcorrseedfactor[NSuperClusters]/F");
 	fEventTree->Branch("SClocalcorrseedfactor",&fTSClocalcorrseedfactor ,"SClocalcorrseedfactor[NSuperClusters]/F");
+	fEventTree->Branch("SCx",&fTSCx,"SCx[NSuperClusters]/F");
+	fEventTree->Branch("SCy",&fTSCy,"SCy[NSuperClusters]/F");
+	fEventTree->Branch("SCz",&fTSCz,"SCz[NSuperClusters]/F");
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -4686,7 +4717,13 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPfCandVx        ,gMaxnpfcand);
 	resetFloat(fTPfCandVy        ,gMaxnpfcand);
 	resetFloat(fTPfCandVz        ,gMaxnpfcand);
+	resetFloat(fTPfCandMomX      ,gMaxnpfcand);
+	resetFloat(fTPfCandMomY      ,gMaxnpfcand);
+	resetFloat(fTPfCandMomZ      ,gMaxnpfcand);
 
+	resetFloat(fTPhotVx,gMaxnphos);
+	resetFloat(fTPhotVy,gMaxnphos);
+	resetFloat(fTPhotVz,gMaxnphos);
 	resetFloat(fTPhotPt,gMaxnphos);
 	resetFloat(fTPhotPx,gMaxnphos);
 	resetFloat(fTPhotPy,gMaxnphos);
@@ -4762,7 +4799,9 @@ void NTupleProducer::resetTree(){
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
-       
+       resetInt(fT_pho_matchedPFPhotonCand, gMaxnphos);
+       resetInt(fT_pho_matchedPFElectronCand, gMaxnphos);
+
        for (int i=0; i<gMaxnphos; i++) pho_conv_validvtx[i]=false;
        resetFloat(pho_conv_chi2_probability,gMaxnphos);
        resetFloat(pho_conv_eoverp,gMaxnphos);
@@ -4890,6 +4929,9 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTSClocalcorr,gMaxnSC);
 	resetFloat(fTSCcrackcorrseedfactor,gMaxnSC);
 	resetFloat(fTSClocalcorrseedfactor,gMaxnSC);
+	resetFloat(fTSCx,gMaxnSC);
+	resetFloat(fTSCy,gMaxnSC);
+	resetFloat(fTSCz,gMaxnSC);
 
 	fTTrkPtSumx          = -999.99;
 	fTTrkPtSumy          = -999.99;

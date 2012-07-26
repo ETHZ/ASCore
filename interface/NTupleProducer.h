@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.7 2012/06/25 15:38:25 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.8 2012/07/26 12:31:45 peruzzi Exp $
 //
 //
 
@@ -758,6 +758,10 @@ private:
   float  fTPfCandVx[gMaxnpfcand];
   float  fTPfCandVy[gMaxnpfcand];
   float  fTPfCandVz[gMaxnpfcand];
+  float  fTPfCandMomX[gMaxnpfcand];
+  float  fTPfCandMomY[gMaxnpfcand];
+  float  fTPfCandMomZ[gMaxnpfcand];
+
 
 // Photons:
 	int fTnphotons;
@@ -831,11 +835,17 @@ private:
   int fTPhotMCmatchindex[gMaxnphos];
   int fTPhotMCmatchexitcode[gMaxnphos];
  
+  float fTPhotVx[gMaxnphos];
+  float fTPhotVy[gMaxnphos];
+  float fTPhotVz[gMaxnphos];
+
   float fT_pho_ChargedHadronIso[gMaxnphos];
   float fT_pho_NeutralHadronIso[gMaxnphos];
   float fT_pho_PhotonIso[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
+  int fT_pho_matchedPFPhotonCand[gMaxnphos];
+  int fT_pho_matchedPFElectronCand[gMaxnphos];
   int fTPhotSCindex[gMaxnphos];
 
   float fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[gMaxnphos];
@@ -953,7 +963,9 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   float fTSClocalcorr[gMaxnSC];
   float fTSCcrackcorrseedfactor[gMaxnSC];
   float fTSClocalcorrseedfactor[gMaxnSC];
-
+  float fTSCx[gMaxnSC];
+  float fTSCy[gMaxnSC];
+  float fTSCz[gMaxnSC];
 
 // Jets:
 	int fTnjets;
