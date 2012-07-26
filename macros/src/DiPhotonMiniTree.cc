@@ -20,6 +20,9 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   }
   phocorr = new EnergyCorrection("photons");
   randomgen = new TRandom3(0);
+
+  eff_area_EB = 0.406;
+  eff_area_EE = 0.528;
 }
 
 DiPhotonMiniTree::~DiPhotonMiniTree(){
@@ -658,7 +661,7 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    const float eff_area = (fabs(eta)<1.4442) ? 0.406 : 0.528;
+    const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
     const float dR=0.4;
     float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
     if (fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]-puenergy<5) pass=1;
@@ -933,30 +936,35 @@ double DiPhotonMiniTree::phiNorm(float phi) {
   return phi;
 }
 
-bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi){
+bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi, int phoqi){
 
   const bool debug=false;
   if (debug) std::cout << "calling FindCloseJetsAndPhotons eta=" << eta << " phi=" << phi << std::endl;
 
   const float mindR = 0.4;
-  bool good=false;
+  bool found=false;
 
   for (int i=0; i<fTR->NJets; i++){
     if (fTR->JPt[i]<10) continue;
     float dR = Util::GetDeltaR(eta,fTR->JEta[i],phi,fTR->JPhi[i]);
-    if (dR<mindR) good=true;
+    if (dR<mindR) found=true;
     if (debug) if (dR<mindR) std::cout << "Found jet eta=" << fTR->JEta[i] << " phi=" << fTR->JPhi[i] << std::endl;
   }
 
   for (int i=0; i<fTR->NPhotons; i++){
     if (fTR->PhoPt[i]<10) continue;
     float dR = Util::GetDeltaR(eta,fTR->PhoEta[i],phi,fTR->PhoPhi[i]);
-    if (dR<mindR) good=true;
+    if (dR<mindR) found=true;
     if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
   }
 
-  if (debug) std::cout << "returning " << good << std::endl;
-  return good;
+
+  const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
+  float puenergy =3.14*0.4*0.4*eff_area*fTR->Rho;
+  if (CombinedPFIsolation(eta,phi,phoqi)-puenergy>5) found=true;
+
+  if (debug) std::cout << "returning " << found << std::endl;
+  return found;
 
 };
 
@@ -975,16 +983,16 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
   
   double rotated_scphi = phiNorm(scphi+0.5*TMath::Pi());
 
-  bool isok = !(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+  bool isok = !(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi,phoqi));
   if (!isok) {
     rotated_scphi=phiNorm(scphi-0.5*TMath::Pi());
-    isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+    isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi,phoqi));
   }
   
     int count=0;
     while (!isok && count<10) {
       rotated_scphi = phiNorm(scphi+randomgen->Uniform(0.8,6.28-0.8));
-      isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+      isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi,phoqi));
       count++;
     }
 
@@ -1064,7 +1072,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
       if (pt<3) continue;
       if (dR>0.4) continue;
       if (dz>0.2) continue;
-      if (dxy<0.1) continue;
+      if (dxy>0.1) continue;
       if (dR<0.02) continue;
 
       pass=1;
@@ -1144,3 +1152,66 @@ void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, i
 
 
 };
+
+float DiPhotonMiniTree::CombinedPFIsolation(float eta, float phi, int phoqi){
+
+  float result=0;
+  
+  ROOT::Math::XYZVector vCand = ROOT::Math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  float r = vCand.R();
+  
+  for (int i=0; i<fTR->NPfCand; i++){
+
+    if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
+    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
+
+    int type = FindPFCandType(fTR->PfCandPdgId[i]);
+
+    if (!(type==0 || type==1 || type==2)) continue;
+
+    ROOT::Math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+    ROOT::Math::XYZVector momentum(fTR->PfCandMomX[i],fTR->PfCandMomY[i],fTR->PfCandMomZ[i]);
+    ROOT::Math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
+
+    double dEta = pvm.Eta() - eta;
+    double dPhi = Util::DeltaPhi(pvm.Phi(),phi);
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+    double pt = fTR->PfCandPt[i];
+
+    double dz = fabs(fTR->PfCandVz[i]-fTR->PhoVz[phoqi]);
+    double dxy = fabs( ( -(fTR->PfCandVx[i]-fTR->PhoVx[phoqi])*fTR->PfCandPy[i] + (fTR->PfCandVy[i]-fTR->PhoVy[phoqi])*fTR->PfCandPx[i] )/pt );
+
+    if (dR>0.4) continue;
+
+    if (type==2){
+      if (fabs(eta)<1.479 && fabs(dEta)<0.015) continue;
+      if (fabs(eta)>1.479 && dR<0.07) continue;
+    }
+    if (type==1){	
+      if (dz>0.2) continue;
+      if (dxy>0.1) continue;
+      if (dR<0.02) continue;      
+    }
+
+    result+=pt;
+
+  } // end pf cand loop
+
+  return result;
+
+};
+
+
+int DiPhotonMiniTree::FindPFCandType(int id){
+
+  int type = -1;
+
+  if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
+  if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
+  if (id==22) type=2; //photons
+  if (fabs(id)==11) type=3; //electrons
+  if (fabs(id)==13) type=4; //muons
+
+  return type;
+}

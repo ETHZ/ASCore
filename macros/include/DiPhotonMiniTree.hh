@@ -34,9 +34,10 @@ public:
 
 private:
 
+  float eff_area_EB;
+  float eff_area_EE;
 
-
-   Float_t* kfactors;
+  Float_t* kfactors;
 
   EnergyCorrection *phocorr;
   TLorentzVector CorrPhoton(TreeReader *fTR, int i, int mode);
@@ -57,8 +58,11 @@ private:
 
   double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
-  bool FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi);
+  bool FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
+  float CombinedPFIsolation(float eta, float phi, int phoqi);
+
+  int FindPFCandType(int id);
 
   TRandom3 *randomgen;
   
