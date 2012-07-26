@@ -40,7 +40,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
 
-  histo_PFPhotonDepositAroungImpingingTrack = new TH1F("PFPhotonDepositAroungImpingingTrack","PFPhotonDepositAroungImpingingTrack",50,0,0.2);
+  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
   for (int i=0; i<6; i++){
 
@@ -499,7 +499,7 @@ void DiPhotonMiniTree::Analyze(){
     //    std::cout << impinging_track_pfcand[passing.at(0)] << " " ;
     //    std::cout  << fTR->PfCandPt[impinging_track_pfcand[passing.at(0)]] << std::endl;
     for (int i=0; i<passing.size(); i++){
-      Fillhist_PFPhotonDepositAroungImpingingTrack(passing.at(i),impinging_track_pfcand[passing.at(i)]);
+      Fillhist_PFPhotonDepositAroundImpingingTrack(passing.at(i),impinging_track_pfcand[passing.at(i)]);
     }
   }
 
@@ -516,7 +516,7 @@ void DiPhotonMiniTree::End(){
   for (int i=0; i<6; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
-  histo_PFPhotonDepositAroungImpingingTrack->Write();
+  histo_PFPhotonDepositAroundImpingingTrack->Write();
 	
   fOutputFile->Close();
 
@@ -995,6 +995,9 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
 
   for (int i=0; i<fTR->NPfCand; i++){
 
+    if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
+    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
+
     if (fTR->PfCandPdgId[i]!=22) continue;
 
     ROOT::Math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
@@ -1039,6 +1042,9 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
     
     for (int i=0; i<fTR->NPfCand; i++){
 
+      if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
+      if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
+
       float id = fTR->PfCandPdgId[i];
       if (!(fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212)) continue;
 
@@ -1076,7 +1082,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
 };
 
 
-void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroungImpingingTrack(int phoqi, int trkindex){
+void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex){
 
     ROOT::Math::XYZVector vCand = ROOT::Math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
     float r = vCand.R();
@@ -1099,6 +1105,9 @@ void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroungImpingingTrack(int phoqi, i
 
     
     for (int i=0; i<fTR->NPfCand; i++){
+
+      if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
+      if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
 
       if (fTR->PfCandPdgId[i]!=22) continue;
 
@@ -1128,7 +1137,7 @@ void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroungImpingingTrack(int phoqi, i
 	assert(1==0);
       }
 
-      histo_PFPhotonDepositAroungImpingingTrack->Fill(dR_trk,pt);
+      histo_PFPhotonDepositAroundImpingingTrack->Fill(dR_trk,pt);
       
       
     } // end pf cand loop
