@@ -40,6 +40,8 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
 
+  histo_PFPhotonDepositAroungImpingingTrack = new TH1F("PFPhotonDepositAroungImpingingTrack","PFPhotonDepositAroungImpingingTrack",50,0,0.2);
+
   for (int i=0; i<6; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
@@ -494,8 +496,11 @@ void DiPhotonMiniTree::Analyze(){
   }  
 
   if (sel_cat==5){
-    std::cout << impinging_track_pfcand[passing.at(0)] << " " ;
-    std::cout  << fTR->PfCandPt[impinging_track_pfcand[passing.at(0)]] << std::endl;
+    //    std::cout << impinging_track_pfcand[passing.at(0)] << " " ;
+    //    std::cout  << fTR->PfCandPt[impinging_track_pfcand[passing.at(0)]] << std::endl;
+    for (int i=0; i<passing.size(); i++){
+      Fillhist_PFPhotonDepositAroungImpingingTrack(passing.at(i),impinging_track_pfcand[passing.at(i)]);
+    }
   }
 
   OutputTree[sel_cat]->Fill();
@@ -511,6 +516,7 @@ void DiPhotonMiniTree::End(){
   for (int i=0; i<6; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
+  histo_PFPhotonDepositAroungImpingingTrack->Write();
 	
   fOutputFile->Close();
 
@@ -740,8 +746,6 @@ int DiPhotonMiniTree::Count_part_isrfsr_gamma(TreeReader *fTR, std::vector<int> 
 };
 
 void DiPhotonMiniTree::ResetVars(){
-
-  for (int i=0; i<100; i++) impinging_track_pfcand[i]=-999;
 
   dipho_mgg_photon = -999;
   dipho_mgg_newCorr = -999;
@@ -1020,6 +1024,8 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
 
 std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing){
 
+  for (int i=0; i<100; i++) impinging_track_pfcand[i]=-999;
+
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
 
     bool pass=0;
@@ -1049,6 +1055,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
       double dz = fabs(fTR->PfCandVz[i]-fTR->PhoVz[phoqi]);
       double dxy = fabs( ( -(fTR->PfCandVx[i]-fTR->PhoVx[phoqi])*fTR->PfCandPy[i] + (fTR->PfCandVy[i]-fTR->PhoVy[phoqi])*fTR->PfCandPx[i] )/pt );
 
+      if (pt<3) continue;
       if (dR>0.4) continue;
       if (dz>0.2) continue;
       if (dxy<0.1) continue;
@@ -1068,3 +1075,63 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
 
 };
 
+
+void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroungImpingingTrack(int phoqi, int trkindex){
+
+    ROOT::Math::XYZVector vCand = ROOT::Math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+    float r = vCand.R();
+    double sceta = vCand.Eta();
+    double scphi = vCand.Phi();
+        
+    ROOT::Math::XYZVector pfvtx_trk(fTR->PfCandVx[trkindex],fTR->PfCandVy[trkindex],fTR->PfCandVz[trkindex]);
+    ROOT::Math::XYZVector momentum_trk(fTR->PfCandMomX[trkindex],fTR->PfCandMomY[trkindex],fTR->PfCandMomZ[trkindex]);
+    ROOT::Math::XYZVector pvm_trk(momentum_trk*r/momentum_trk.R()+pfvtx_trk);
+
+    double trketa = pvm_trk.Eta();
+    double trkphi = pvm_trk.Phi();
+
+    double dR_trkpho = Util::GetDeltaR(sceta,trketa,scphi,trkphi);
+    double dEta_trkpho = trketa-sceta;
+    
+    if (dR_trkpho>0.4) return;
+    if (fabs(sceta)<1.479 && fabs(dEta_trkpho)<0.215) return;
+    if (fabs(sceta)>1.479 && dR_trkpho<0.27) return;
+
+    
+    for (int i=0; i<fTR->NPfCand; i++){
+
+      if (fTR->PfCandPdgId[i]!=22) continue;
+
+      ROOT::Math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+      ROOT::Math::XYZVector momentum(fTR->PfCandMomX[i],fTR->PfCandMomY[i],fTR->PfCandMomZ[i]);
+      ROOT::Math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
+
+      double dEta_trk = pvm.Eta() - trketa;
+      double dPhi_trk = Util::DeltaPhi(pvm.Phi(),trkphi);
+      double dR_trk = sqrt(dEta_trk*dEta_trk+dPhi_trk*dPhi_trk);
+
+      double dEta_pho = pvm.Eta() - sceta;
+      double dPhi_pho = Util::DeltaPhi(pvm.Phi(),scphi);
+      double dR_pho = sqrt(dEta_pho*dEta_pho+dPhi_pho*dPhi_pho);
+
+      double pt = fTR->PfCandPt[i];
+
+
+      if (dR_trk>0.2) continue;
+
+      bool error=0;
+      if (fabs(sceta)<1.479 && fabs(dEta_pho)<0.015) error=1;
+      if (fabs(sceta)>1.479 && dR_pho<0.07) error=1;
+
+      if (error) {
+	std::cout << "Error in impinging track histo filler!!!" << std::endl;
+	assert(1==0);
+      }
+
+      histo_PFPhotonDepositAroungImpingingTrack->Fill(dR_trk,pt);
+      
+      
+    } // end pf cand loop
+
+
+};

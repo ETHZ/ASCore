@@ -53,7 +53,7 @@ private:
   bool TriggerSelection();
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
-  
+  void Fillhist_PFPhotonDepositAroungImpingingTrack(int phoqi, int trkindex);  
 
   double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
@@ -64,6 +64,8 @@ private:
   
   std::string fDataType_;
   bool isdata;
+
+  TH1F *histo_PFPhotonDepositAroungImpingingTrack;
 
   Float_t AddWeight;
 
