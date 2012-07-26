@@ -1046,8 +1046,8 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
       double pt = fTR->PfCandPt[i];
       double dR = sqrt(dEta*dEta+dPhi*dPhi);
 
-      double dz = fabs(fTR->PfCandVz[i]-fTR->PhotVz[phoqi]);
-      double dxy = fabs( ( -(fTR->PfCandVx[i]-fTR->PhotVx[phoqi])*fTR->PfCandPy[i] + (fTR->PfCandVy[i]-fTR->PhotVy[phoqi])*fTR->PfCandPx[i] )/pt );
+      double dz = fabs(fTR->PfCandVz[i]-fTR->PhoVz[phoqi]);
+      double dxy = fabs( ( -(fTR->PfCandVx[i]-fTR->PhoVx[phoqi])*fTR->PfCandPy[i] + (fTR->PfCandVy[i]-fTR->PhoVy[phoqi])*fTR->PfCandPx[i] )/pt );
 
       if (dR>0.4) continue;
       if (dz>0.2) continue;
