@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.16 2012/07/26 12:34:47 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.17 2012/07/26 13:15:35 peruzzi Exp $
 //
 //
 
@@ -2207,6 +2207,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     math::XYZVector pvm(((*pfCandidates)[i].momentum()*r/(*pfCandidates)[i].momentum().R()) + pfvtx);
 	     
 	     if (type==2) storethispfcand[i]=1;
+	     if (fabs(photonEta-(*pfCandidates)[i].eta())<0.4) storethispfcand[i]=1;
+	     if (fabs(vCand.Eta()-pvm.Eta())<0.4) storethispfcand[i]=1;
 	     if (type==1 && dR<0.4) storethispfcand[i]=1;
 	     if (type==1 && DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta())<0.4) storethispfcand[i]=1;
 	   }
