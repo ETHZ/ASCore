@@ -38,8 +38,9 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[2] = new TTree("Tree_background_template","Tree_background_template");
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
+  OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
 
-  for (int i=0; i<5; i++){
+  for (int i=0; i<6; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -271,9 +272,9 @@ void DiPhotonMiniTree::Analyze(){
 
   std::vector<int> passing_selection[5];
 
-  bool pass[5];
+  bool pass[6];
 
-  for (int sel_cat=0; sel_cat<5; sel_cat++){
+  for (int sel_cat=0; sel_cat<6; sel_cat++){
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -309,6 +310,10 @@ void DiPhotonMiniTree::Analyze(){
       //      passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!)
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
+    if (sel_cat==5){ // impinging track
+      passing = ImpingingTrackSelection(fTR,passing);
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
 
     passing_selection[sel_cat] = passing;
 
@@ -316,7 +321,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<5; sel_cat++){
+  for (int sel_cat=0; sel_cat<6; sel_cat++){
 
     if (!pass[sel_cat]) continue;
 
@@ -324,7 +329,7 @@ void DiPhotonMiniTree::Analyze(){
 
     int minsize=999;
     if (sel_cat==0 || sel_cat==3) minsize=2;
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4) minsize=1;
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5) minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
       std::cout << "Error!!!" << std::endl;
@@ -488,6 +493,10 @@ void DiPhotonMiniTree::Analyze(){
     pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = RandomConePhotonIsolation(fTR,passing.at(0));
   }  
 
+  if (sel_cat==5){
+    std::cout << impinging_track_pfcand[passing.at(0)] << " " ;
+    std::cout  << fTR->PfCandPt[impinging_track_pfcand[passing.at(0)]] << std::endl;
+  }
 
   OutputTree[sel_cat]->Fill();
  
@@ -499,7 +508,7 @@ void DiPhotonMiniTree::Analyze(){
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<5; i++) OutputTree[i]->Write();	
+  for (int i=0; i<6; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
 	
@@ -731,6 +740,9 @@ int DiPhotonMiniTree::Count_part_isrfsr_gamma(TreeReader *fTR, std::vector<int> 
 };
 
 void DiPhotonMiniTree::ResetVars(){
+
+  for (int i=0; i<100; i++) impinging_track_pfcand[i]=-999;
+
   dipho_mgg_photon = -999;
   dipho_mgg_newCorr = -999;
   dipho_mgg_newCorrLocal = -999;
@@ -947,18 +959,24 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float
 float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
 
   float result=0;
+  
+  //  double sceta = fTR->SCEta[fTR->PhotSCindex[phoqi]];
+  //  double scphi = fTR->SCPhi[fTR->PhotSCindex[phoqi]];
+  
+  ROOT::Math::XYZVector vCand = ROOT::Math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  float r = vCand.R();
+  
+  double sceta = vCand.Eta();
+  double scphi = vCand.Phi();
+  
+  double rotated_scphi = phiNorm(scphi+0.5*TMath::Pi());
 
-    double sceta = fTR->SCEta[fTR->PhotSCindex[phoqi]];
-    double scphi = fTR->SCPhi[fTR->PhotSCindex[phoqi]];
-    
-    double rotated_scphi = phiNorm(scphi+0.5*TMath::Pi());
-
-    bool isok = !(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
-    if (!isok) {
-      rotated_scphi=phiNorm(scphi-0.5*TMath::Pi());
-      isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
-    }
-
+  bool isok = !(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+  if (!isok) {
+    rotated_scphi=phiNorm(scphi-0.5*TMath::Pi());
+    isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+  }
+  
     int count=0;
     while (!isok && count<10) {
       rotated_scphi = phiNorm(scphi+randomgen->Uniform(0.8,6.28-0.8));
@@ -970,26 +988,20 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
       std::cout << "Error in random cone generation!!!" << std::endl;
       return -999;
     };
-    
-
-    //    double rotated_scphi = scphi; //testing
 
   for (int i=0; i<fTR->NPfCand; i++){
 
     if (fTR->PfCandPdgId[i]!=22) continue;
 
-//    math::XYZVector vCand = math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-//    float r = vCand.R();
-//    math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
-//    math::XYZVector momentum(fTR->PfCandMomentumX[i],fTR->PfCandMomentumY[i],fTR->PfCandMomentumZ[i]);
-//    math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
-//    cambiare_definizione_phi_fotone;
-//    double pt = fTR->PfCandPt[i];
-//    double dEta = pvm.Eta() - vCand.Eta();
-//    double dPhi = DeltaPhi(vCand.Phi(),pvm.Phi());
+    ROOT::Math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+    ROOT::Math::XYZVector momentum(fTR->PfCandMomX[i],fTR->PfCandMomY[i],fTR->PfCandMomZ[i]);
+    ROOT::Math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
 
-    double dEta = etaTransformation(fTR->PfCandEta[i],fTR->PfCandVz[i]) - sceta;
-    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],rotated_scphi);
+    double dEta = pvm.Eta() - sceta;
+    double dPhi = Util::DeltaPhi(pvm.Phi(),scphi);
+
+    //    double dEta = etaTransformation(fTR->PfCandEta[i],fTR->PfCandVz[i]) - sceta;
+    //    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],rotated_scphi);
 
     double pt = fTR->PfCandPt[i];
     double dR = sqrt(dEta*dEta+dPhi*dPhi);
@@ -1005,3 +1017,54 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
   return result;
 
 };
+
+std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+
+    bool pass=0;
+    int phoqi=*it;
+    
+    ROOT::Math::XYZVector vCand = ROOT::Math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+    float r = vCand.R();
+    
+    double sceta = vCand.Eta();
+    double scphi = vCand.Phi();
+    
+    for (int i=0; i<fTR->NPfCand; i++){
+
+      float id = fTR->PfCandPdgId[i];
+      if (!(fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212)) continue;
+
+      ROOT::Math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+      ROOT::Math::XYZVector momentum(fTR->PfCandMomX[i],fTR->PfCandMomY[i],fTR->PfCandMomZ[i]);
+      ROOT::Math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
+
+      double dEta = pvm.Eta() - sceta;
+      double dPhi = Util::DeltaPhi(pvm.Phi(),scphi);
+
+      double pt = fTR->PfCandPt[i];
+      double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+      double dz = fabs(fTR->PfCandVz[i]-fTR->PhotVz[phoqi]);
+      double dxy = fabs( ( -(fTR->PfCandVx[i]-fTR->PhotVx[phoqi])*fTR->PfCandPy[i] + (fTR->PfCandVy[i]-fTR->PhotVy[phoqi])*fTR->PfCandPx[i] )/pt );
+
+      if (dR>0.4) continue;
+      if (dz>0.2) continue;
+      if (dxy<0.1) continue;
+      if (dR<0.02) continue;
+
+      pass=1;
+      impinging_track_pfcand[phoqi]=i;
+      break;
+
+  } // end pf cand loop
+
+  if (!pass) it=passing.erase(it); else it++;
+  
+  }
+
+  return passing;
+
+};
+

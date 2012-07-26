@@ -21,6 +21,8 @@
 #include "TRandom3.h"
 #include "helper/Utilities.hh"
 
+#include "Math/Vector3D.h"
+
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
   DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
@@ -31,6 +33,8 @@ public:
   void End();
 
 private:
+
+
 
    Float_t* kfactors;
 
@@ -43,6 +47,7 @@ private:
   std::vector<int> PhotonSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
+  std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing);
   bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool StandardEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool TriggerSelection();
@@ -62,7 +67,9 @@ private:
 
   Float_t AddWeight;
 
-  TTree* OutputTree[5];
+  int impinging_track_pfcand[100];
+
+  TTree* OutputTree[6];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
