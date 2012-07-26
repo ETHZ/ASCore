@@ -18,6 +18,9 @@
 
 #include <vector>
 
+#include "TRandom3.h"
+#include "helper/Utilities.hh"
+
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
   DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
@@ -46,13 +49,20 @@ private:
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
   
+
+  double etaTransformation(float EtaParticle, float Zvertex);
+  double phiNorm(float phi);
+  bool FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi);
+  float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
+
+  TRandom3 *randomgen;
   
   std::string fDataType_;
   bool isdata;
 
   Float_t AddWeight;
 
-  TTree* OutputTree[4];
+  TTree* OutputTree[5];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;

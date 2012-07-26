@@ -19,10 +19,12 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
     assert(1==0);
   }
   phocorr = new EnergyCorrection("photons");
+  randomgen = new TRandom3(0);
 }
 
 DiPhotonMiniTree::~DiPhotonMiniTree(){
   delete phocorr;
+  delete randomgen;
 }
 
 void DiPhotonMiniTree::Begin(){
@@ -35,8 +37,9 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[1] = new TTree("Tree_signal_template","Tree_signal_template");
   OutputTree[2] = new TTree("Tree_background_template","Tree_background_template");
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
+  OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
 
-  for (int i=0; i<4; i++){
+  for (int i=0; i<5; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -241,7 +244,7 @@ void DiPhotonMiniTree::Analyze(){
   //  cout << "B" << endl;
 
   int nmatched_part_isrfsr_gamma=0;
-  {
+  if (!isdata) {
     std::vector<int> temp;
     for (int i=0; i<fTR->NPhotons; i++){
       temp.push_back(i);
@@ -253,8 +256,8 @@ void DiPhotonMiniTree::Analyze(){
     //    cout << "B3" << endl;
     nmatched_part_isrfsr_gamma = Count_part_isrfsr_gamma(fTR,temp);
     //    cout << "B4" << endl;
+    event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
   }
-  if (!isdata) event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
   else event_Kfactor=1;
 
   //  cout << "C" << endl;
@@ -266,11 +269,16 @@ void DiPhotonMiniTree::Analyze(){
 
   if (!TriggerSelection()) return;
 
-  std::vector<int> passing_selection[4];
+  std::vector<int> passing_selection[5];
 
-  bool pass[4];
+  bool pass[5];
 
-  for (int sel_cat=0; sel_cat<4; sel_cat++){
+  for (int sel_cat=0; sel_cat<5; sel_cat++){
+
+    if (isdata){ // do not run these cats on data
+      if (sel_cat==1) continue;
+      if (sel_cat==2) continue;
+    }
 
     pass[sel_cat]=false;
 
@@ -297,6 +305,10 @@ void DiPhotonMiniTree::Analyze(){
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
+    if (sel_cat==4){ // random cone
+      //      passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!)
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
 
     passing_selection[sel_cat] = passing;
 
@@ -304,7 +316,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<4; sel_cat++){
+  for (int sel_cat=0; sel_cat<5; sel_cat++){
 
     if (!pass[sel_cat]) continue;
 
@@ -312,7 +324,7 @@ void DiPhotonMiniTree::Analyze(){
 
     int minsize=999;
     if (sel_cat==0 || sel_cat==3) minsize=2;
-    if (sel_cat==1 || sel_cat==2) minsize=1;
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4) minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
       std::cout << "Error!!!" << std::endl;
@@ -471,7 +483,10 @@ void DiPhotonMiniTree::Analyze(){
     dipho_mgg_newCorr = invmass5;
     dipho_mgg_newCorrLocal = invmass6;
   }
-  
+
+  if (sel_cat==4){
+    pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = RandomConePhotonIsolation(fTR,passing.at(0));
+  }  
 
 
   OutputTree[sel_cat]->Fill();
@@ -484,7 +499,7 @@ void DiPhotonMiniTree::Analyze(){
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<4; i++) OutputTree[i]->Write();	
+  for (int i=0; i<5; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
 	
@@ -855,4 +870,138 @@ void DiPhotonMiniTree::ResetVars(){
   pholead_PhoMCmatchexitcode = -999;
   photrail_PhoMCmatchindex = -999;
   photrail_PhoMCmatchexitcode = -999;
+};
+
+double DiPhotonMiniTree::etaTransformation(  float EtaParticle , float Zvertex)  {
+
+  //---Definitions
+  const float pi = 3.1415927;
+
+  //---Definitions for ECAL
+  const float R_ECAL           = 136.5;
+  const float Z_Endcap         = 328.0;
+  const float etaBarrelEndcap  = 1.479; 
+   
+  //---ETA correction
+
+  float Theta = 0.0  ; 
+  float ZEcal = R_ECAL*sinh(EtaParticle)+Zvertex;
+
+  if(ZEcal != 0.0) Theta = atan(R_ECAL/ZEcal);
+  if(Theta<0.0) Theta = Theta+pi ;
+  double ETA = - log(tan(0.5*Theta));
+         
+  if( fabs(ETA) > etaBarrelEndcap )
+    {
+      float Zend = Z_Endcap ;
+      if(EtaParticle<0.0 )  Zend = -Zend ;
+      float Zlen = Zend - Zvertex ;
+      float RR = Zlen/sinh(EtaParticle); 
+      Theta = atan(RR/Zend);
+      if(Theta<0.0) Theta = Theta+pi ;
+      ETA = - log(tan(0.5*Theta));		      
+    } 
+  //---Return the result
+  return ETA;
+  //---end
+}
+
+double DiPhotonMiniTree::phiNorm(float phi) {
+
+  const float pi = 3.1415927;
+  const float twopi = 2.0*pi;
+
+  if(phi >  pi) {phi = phi - twopi;}
+  if(phi < -pi) {phi = phi + twopi;}
+
+  return phi;
+}
+
+bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi){
+
+  const bool debug=false;
+  if (debug) std::cout << "calling FindCloseJetsAndPhotons eta=" << eta << " phi=" << phi << std::endl;
+
+  const float mindR = 0.4;
+  bool good=false;
+
+  for (int i=0; i<fTR->NJets; i++){
+    if (fTR->JPt[i]<10) continue;
+    float dR = Util::GetDeltaR(eta,fTR->JEta[i],phi,fTR->JPhi[i]);
+    if (dR<mindR) good=true;
+    if (debug) if (dR<mindR) std::cout << "Found jet eta=" << fTR->JEta[i] << " phi=" << fTR->JPhi[i] << std::endl;
+  }
+
+  for (int i=0; i<fTR->NPhotons; i++){
+    if (fTR->PhoPt[i]<10) continue;
+    float dR = Util::GetDeltaR(eta,fTR->PhoEta[i],phi,fTR->PhoPhi[i]);
+    if (dR<mindR) good=true;
+    if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
+  }
+
+  if (debug) std::cout << "returning " << good << std::endl;
+  return good;
+
+};
+
+float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
+
+  float result=0;
+
+    double sceta = fTR->SCEta[fTR->PhotSCindex[phoqi]];
+    double scphi = fTR->SCPhi[fTR->PhotSCindex[phoqi]];
+    
+    double rotated_scphi = phiNorm(scphi+0.5*TMath::Pi());
+
+    bool isok = !(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+    if (!isok) {
+      rotated_scphi=phiNorm(scphi-0.5*TMath::Pi());
+      isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+    }
+
+    int count=0;
+    while (!isok && count<10) {
+      rotated_scphi = phiNorm(scphi+randomgen->Uniform(0.8,6.28-0.8));
+      isok=!(FindCloseJetsAndPhotons(fTR,sceta,rotated_scphi));
+      count++;
+    }
+
+    if (count==10){
+      std::cout << "Error in random cone generation!!!" << std::endl;
+      return -999;
+    };
+    
+
+    //    double rotated_scphi = scphi; //testing
+
+  for (int i=0; i<fTR->NPfCand; i++){
+
+    if (fTR->PfCandPdgId[i]!=22) continue;
+
+//    math::XYZVector vCand = math::XYZVector(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+//    float r = vCand.R();
+//    math::XYZVector pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+//    math::XYZVector momentum(fTR->PfCandMomentumX[i],fTR->PfCandMomentumY[i],fTR->PfCandMomentumZ[i]);
+//    math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
+//    cambiare_definizione_phi_fotone;
+//    double pt = fTR->PfCandPt[i];
+//    double dEta = pvm.Eta() - vCand.Eta();
+//    double dPhi = DeltaPhi(vCand.Phi(),pvm.Phi());
+
+    double dEta = etaTransformation(fTR->PfCandEta[i],fTR->PfCandVz[i]) - sceta;
+    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],rotated_scphi);
+
+    double pt = fTR->PfCandPt[i];
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+    if (fabs(sceta)<1.479 && fabs(dEta)<0.015) continue;
+    if (fabs(sceta)>1.479 && dR<0.07) continue;
+    if (dR>0.4) continue;
+
+    result+=pt;
+
+  } // end pf cand loop
+
+  return result;
+
 };
