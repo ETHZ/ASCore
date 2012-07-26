@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.14 2012/07/13 09:07:00 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.15 2012/07/26 12:31:44 peruzzi Exp $
 //
 //
 
@@ -2217,7 +2217,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       //pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
 	       pho_Cone06PfCandPt[ipf] = (*pfCandidates)[i].pt();
 	       pho_Cone06PfCandDz[ipf] = fabs((*pfCandidates)[i].vz()-photonVz);
-	       pho_Cone06PfCandDxy[ipf] = ( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt();
+	       pho_Cone06PfCandDxy[ipf] = fabs(( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt());
 
 	       math::XYZVector vCand = math::XYZVector(gamIter->superCluster()->x(), gamIter->superCluster()->y(), gamIter->superCluster()->z());
 	       float r = vCand.R();
