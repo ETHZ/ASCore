@@ -1013,7 +1013,7 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
     ROOT::Math::XYZVector pvm(momentum*r/momentum.R()+pfvtx);
 
     double dEta = pvm.Eta() - sceta;
-    double dPhi = Util::DeltaPhi(pvm.Phi(),scphi);
+    double dPhi = Util::DeltaPhi(pvm.Phi(),rotated_scphi);
 
     //    double dEta = etaTransformation(fTR->PfCandEta[i],fTR->PfCandVz[i]) - sceta;
     //    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],rotated_scphi);
