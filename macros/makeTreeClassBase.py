@@ -66,7 +66,7 @@ rules = { # Reco
           # Others
           'NTracks' : 500,
           'NPaths'  : 10,
-          'NVrtx'   : 25,
+          'NVrtx'   : 50,
           'NEBhits' : 20,
           'PUnumInteractions': 50,
           'PUnumFilled'      : 50,

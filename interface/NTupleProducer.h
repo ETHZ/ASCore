@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.8 2012/07/26 12:31:45 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.9 2012/07/26 13:15:34 peruzzi Exp $
 //
 //
 
@@ -190,7 +190,7 @@ private:
 	static const int gMaxngenlept = 100;
 	static const int gMaxngenphot = 100;
 	static const int gMaxngenjets = 100;
-	static const int gMaxnvrtx    = 25;
+	static const int gMaxnvrtx    = 50;
 	static const int gMaxnpileup  = 50;
 	static const int gMaxnEBhits  = 20;
         static const int gMaxngenvtx = 60;

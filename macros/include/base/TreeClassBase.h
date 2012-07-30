@@ -137,17 +137,17 @@ public :
    Float_t         GenJetHadE[100];   //[NGenJets]
    Float_t         GenJetInvE[100];   //[NGenJets]
    Int_t           NVrtx;
-   Float_t         VrtxX[25];   //[NVrtx]
-   Float_t         VrtxY[25];   //[NVrtx]
-   Float_t         VrtxZ[25];   //[NVrtx]
-   Float_t         VrtxXE[25];   //[NVrtx]
-   Float_t         VrtxYE[25];   //[NVrtx]
-   Float_t         VrtxZE[25];   //[NVrtx]
-   Float_t         VrtxNdof[25];   //[NVrtx]
-   Float_t         VrtxChi2[25];   //[NVrtx]
-   Float_t         VrtxNtrks[25];   //[NVrtx]
-   Float_t         VrtxSumPt[25];   //[NVrtx]
-   Int_t           VrtxIsFake[25];   //[NVrtx]
+   Float_t         VrtxX[50];   //[NVrtx]
+   Float_t         VrtxY[50];   //[NVrtx]
+   Float_t         VrtxZ[50];   //[NVrtx]
+   Float_t         VrtxXE[50];   //[NVrtx]
+   Float_t         VrtxYE[50];   //[NVrtx]
+   Float_t         VrtxZE[50];   //[NVrtx]
+   Float_t         VrtxNdof[50];   //[NVrtx]
+   Float_t         VrtxChi2[50];   //[NVrtx]
+   Float_t         VrtxNtrks[50];   //[NVrtx]
+   Float_t         VrtxSumPt[50];   //[NVrtx]
+   Int_t           VrtxIsFake[50];   //[NVrtx]
    Int_t           NMus;
    Int_t           NMusTot;
    Int_t           NGMus;
