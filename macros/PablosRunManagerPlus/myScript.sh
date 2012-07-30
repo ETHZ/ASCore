@@ -192,13 +192,13 @@ fi
 
 if test -e $SEOUTFILES; then
    if test 0"$DBG" -ge 2; then
-      srmdebug="-debug"
+      srmdebug="-v"
    fi
    for n in $SEOUTFILES; do
        if test ! -e $WORKDIR/$n; then
           echo "WARNING: Cannot find output file $WORKDIR/$n. Ignoring it" >&2
        else
-          srmcp $srmdebug -2 file:///$WORKDIR/$n $SERESULTDIR/$n
+          lcg-cp -b -D srmv2 $srmdebug /$WORKDIR/$n $SERESULTDIR/$n
           if test $? -ne 0; then
              echo "ERROR: Failed to copy $WORKDIR/$n to $SERESULTDIR/$n" >&2
           fi

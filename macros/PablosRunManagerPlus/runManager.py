@@ -313,18 +313,18 @@ def process(task, conf):
   else:
       # If not: rebuild the list
       showMessage("Going to fetch list of files pertaining to "+str(task[0]))
+      print "I do not know what happens if there are more than 1000 files in this dir"
       doloop=True
       offset=0
       while(doloop) :
-	      command = 'srmls --offset '+str(offset)+ ' --count 1000 ' + folderToList + " 2>&1 | grep root | awk '{print $2}'"
+	      command = 'lcg-ls ' + folderToList + ' 2>&1 | grep root'
 	      theList = os.popen(command)
 	      list = theList.readlines()
 	      for li in list:
 		      allmyfiles.append(li)
-	      if(len(list)==1000):
-		      doloop=True;
-		      offset=offset+1000
-		      print "Need to fetch more files ... hold on (currently have a list of "+str(len(allmyfiles))+" files)"
+	      if(len(list)>=1000):
+		      doloop=False;
+		      print "1000 files found, possible problems here"
 	      else:
 		      doloop=False;
       f = open(cacheFile,'w')
