@@ -65,7 +65,7 @@ def process(dir,opt):
    # 1. Remove remote files
    answ = 'y'
    if len(list)>0:
-      cmd = ['srmrm']+list
+      cmd = ['lcg-del -b -D srmv2 -l ']+list
       if opt.verb>1: print "CMD =",' '.join(cmd)
       if not opt.force: 
          answ = raw_input('Remove files? [y/n] ')
@@ -81,7 +81,7 @@ def process(dir,opt):
    # 2. Remove remote directory
    if len(list)>0:
       answ = 'y'
-      cmd = ['srmrmdir',sedir]
+      cmd = ['lcg-del -b -D srmv2 -l -d ',sedir]
       if opt.verb>1: print "CMD =",' '.join(cmd)
       if not opt.force: 
          answ = raw_input('Remove remote directory? [y/n] ')
