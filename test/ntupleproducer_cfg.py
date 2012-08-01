@@ -63,7 +63,7 @@ options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLept
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
-options.output='NTupleProducer_52X_'+options.runon+'.root'
+options.output='NTupleProducer_53X_'+options.runon+'.root'
 
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
@@ -430,7 +430,7 @@ process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
 ##########################################################################
 ### PF isolation settings ################################################
 from CommonTools.ParticleFlow.Tools.pfIsolation import setupPFElectronIso, setupPFPhotonIso
-process.eleIsoSequence = setupPFElectronIso(process, 'gsfElectrons', postfix='Standard')
+process.eleIsoSequence = setupPFElectronIso(process, 'gsfElectrons', newpostfix='Standard')
 process.analyze.tag_elepfisosEvent = ['elPFIsoValueCharged03PFIdStandard' , 'elPFIsoValueCharged04PFIdStandard'  ,
                                       'elPFIsoValueNeutral03PFIdStandard' , 'elPFIsoValueNeutral04PFIdStandard'  ,
                                       'elPFIsoValueGamma03PFIdStandard'   , 'elPFIsoValueGamma04PFIdStandard'  ]
@@ -517,7 +517,7 @@ process.superClusterCands = cms.EDProducer("ConcreteEcalCandidateProducer",
 process.goodSuperClusters = cms.EDFilter("CandViewSelector",
       src = cms.InputTag("superClusterCands"),
       cut = cms.string("abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et> 10"),
-      filter = cms.bool(True)
+      filter = cms.bool(False)
 )
 
 process.JetsToRemoveFromSuperCluster = cms.EDFilter("CaloJetSelector",
