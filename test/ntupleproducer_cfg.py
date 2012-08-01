@@ -77,8 +77,11 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
+    # CMSSW_5_3
+    process.GlobalTag.globaltag = "GR_P_V40_AN1" ### GLOBAL TAG FOR 2012C v1 and v2
+    #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
     # CMSSW_5_2
-    process.GlobalTag.globaltag = "GR_R_52_V9::All"
+    #process.GlobalTag.globaltag = "GR_P_V39_AN1"
 else:
     # CMSSW_5_2_X:
     process.GlobalTag.globaltag = "START52_V9B::All"
