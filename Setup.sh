@@ -26,7 +26,7 @@ addpkg PhysicsTools/PatAlgos       V08-09-21
 addpkg CommonTools/ParticleFlow    V00-03-15
 
 # for picking up the right neutral thresholds for electron pf-isolation, recommended by the e/gamma POG
-addpkg RecoParticleFlow/PFProducer V15-01-11 
+addpkg RecoParticleFlow/PFProducer CMSSW_5_3_2_patch4
 
 # Type1MET
 addpkg JetMETCorrections/Type1MET  V04-06-09
