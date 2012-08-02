@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.32 2012/07/09 09:46:10 leo Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.34 2012/07/19 02:00:51 buchmann Exp $
 //
 //
 
@@ -1799,8 +1799,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoNewIsoPFPhoton->push_back(isolator.getIsolationPhoton());
     fTPhoNewIsoPFNeutral->push_back(isolator.getIsolationNeutral());
       
-    float PhoHCalIsoConeDR03 = photon.hcalTowerSumEtConeDR03() + (photon.hadronicOverEm() - photon.hadTowOverEm())*photon.superCluster()->energy()/cosh(photon.superCluster()->eta());
-    fTPhoHCalIsoConeDR03->push_back(PhoHCalIsoConeDR03);
+    float PhoHCalIso2012ConeDR03 = photon.hcalTowerSumEtConeDR03() + (photon.hadronicOverEm() - photon.hadTowOverEm())*photon.superCluster()->energy()/cosh(photon.superCluster()->eta());
+    fTPhoHCalIso2012ConeDR03->push_back(PhoHCalIso2012ConeDR03);
 
     fTPhoE1x5 ->push_back(photon.e1x5());
     fTPhoE2x5 ->push_back(photon.e2x5());
@@ -3864,7 +3864,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<bool> > ("PhoConvValidVtx");
   produces<std::vector<bool> > ("ElPassConversionVeto");
   produces<std::vector<bool> > ("PhoPassConversionVeto");
-  produces<std::vector<float> >("PhoHCalIsoConeDR03");
+  produces<std::vector<float> >("PhoHCalIso2012ConeDR03");
     
   produces<std::vector<int> >  ("PhoConvNtracks");
   produces<std::vector<float> >("PhoConvChi2Probability");
@@ -4442,7 +4442,7 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoE1OverE9.reset(new std::vector<float> );
   fTPhoS4OverS1.reset(new std::vector<float> );
   fTPhoSigmaEtaEta.reset(new std::vector<float> );
-  fTPhoHCalIsoConeDR03.reset(new std::vector<float> );
+  fTPhoHCalIso2012ConeDR03.reset(new std::vector<float> );
   fTPhoNewIsoPFCharged.reset(new std::vector<float> );
   fTPhoNewIsoPFPhoton.reset(new std::vector<float> );
   fTPhoNewIsoPFNeutral.reset(new std::vector<float> );
@@ -5160,7 +5160,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoE1OverE9, "PhoE1OverE9");
   event.put(fTPhoS4OverS1, "PhoS4OverS1");
   event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
-  event.put(fTPhoHCalIsoConeDR03, "PhoHCalIsoConeDR03");
+  event.put(fTPhoHCalIso2012ConeDR03, "PhoHCalIso2012ConeDR03");
   event.put(fTPhoNewIsoPFCharged, "PhoNewIsoPFCharged");
   event.put(fTPhoNewIsoPFPhoton, "PhoNewIsoPFPhoton");
   event.put(fTPhoNewIsoPFNeutral, "PhoNewIsoPFNeutral");
