@@ -1,11 +1,5 @@
 #! /bin/bash
 
-rootbkp=$CVSROOT
-
-newroot=`echo $CVSROOT | sed 's/:ext:/:gserver:/'`
-export CVSROOT=$newroot
-echo "Temporarily setting CVSROOT to $CVSROOT"
-
 export SCRAM_ARCH=slc5_amd64_gcc462
 eval `scramv1 ru -sh`
 
@@ -66,6 +60,5 @@ cvs update -rHEAD ../../EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc .
 #####################################################################################################################################
 
 echo "Everything has been set up. You can compile now (scramv1 b -j2) or modify the recipe to your likings"
-export CVSROOT=$rootbkp
 
 exit 0
