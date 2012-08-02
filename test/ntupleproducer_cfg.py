@@ -85,7 +85,7 @@ if options.runon=='data':
     #process.GlobalTag.globaltag = "GR_P_V39_AN1"
 else:
     # CMSSW_5_2_X:
-    process.GlobalTag.globaltag = "START53_V10::All"
+    process.GlobalTag.globaltag = "START53_V7A::All"
 
 
 ### Input/Output ###############################################################
