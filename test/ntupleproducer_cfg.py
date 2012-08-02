@@ -56,8 +56,8 @@ options.register ('perEvtMvaWeights',
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
-# options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
+#options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
+options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
@@ -296,9 +296,6 @@ process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
 #process.Tracer = cms.Service("Tracer")
-process.options = cms.untracked.PSet(
- 	wantSummary = cms.untracked.bool(True)
-)
 
 
 ###############################################################################
