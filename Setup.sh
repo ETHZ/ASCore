@@ -50,7 +50,7 @@ cvs co -r V04-00-01 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/Is
 # alternate code for photon isolation
 cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 # updating alternate code (only the two files we need) to get the latest bugfixes
-cvs update -rHEAD ../../EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc ../../EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h 
+cvs update -rHEAD EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h 
 
 
 #####################################################################################################################################
