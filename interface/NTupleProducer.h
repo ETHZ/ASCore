@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.9 2012/07/26 13:15:34 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.10 2012/07/30 08:08:12 peruzzi Exp $
 //
 //
 
@@ -761,6 +761,13 @@ private:
   float  fTPfCandMomX[gMaxnpfcand];
   float  fTPfCandMomY[gMaxnpfcand];
   float  fTPfCandMomZ[gMaxnpfcand];
+  int    fTPfCandHasHitInFirstPixelLayer[gMaxnpfcand];
+  float  fTPfCandTrackRefPx[gMaxnpfcand];
+  float  fTPfCandTrackRefPy[gMaxnpfcand];
+  float  fTPfCandTrackRefPz[gMaxnpfcand];
+  float  fTPfCandTrackRefVx[gMaxnpfcand];
+  float  fTPfCandTrackRefVy[gMaxnpfcand];
+  float  fTPfCandTrackRefVz[gMaxnpfcand];
 
 
 // Photons:

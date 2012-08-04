@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.17 2012/07/26 13:15:35 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.18 2012/07/26 13:46:30 peruzzi Exp $
 //
 //
 
@@ -1133,6 +1133,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
            fTGenPhotonMotherID[i] =   gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->pdgId() : -999;
            fTGenPhotonMotherStatus[i] = gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->status() : -999;
 
+	   fTGenPhotonIsoDR03[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.3);
+	   fTGenPhotonIsoDR04[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.4);
+
+
 	   // use Steve Mrenna's status 2 parton jets to compute dR to closest jet of prompt photon
 	   if(fTGenPhotonMotherStatus[i]!=3) continue;
 	   TLorentzVector photon(0,0,0,0);
@@ -1145,8 +1149,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   }
 	   fTGenPhotonPartonMindR[i] = minDR;
 
-	   fTGenPhotonIsoDR03[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.3);
-	   fTGenPhotonIsoDR04[i] = GenPartonicIso_allpart(*(gen_photons[i]),gen,0.4);
 	 
          }
 	 
@@ -2700,7 +2702,19 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    if (PhotonToPFPhotonMatchingArray[j]==(int)i) fT_pho_matchedPFPhotonCand[j]=pfcandIndex;
 	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
 	  }
-	  
+
+	  int type = FindPFCandType((*pfCandidates)[i].pdgId());
+	  if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
+	  reco::HitPattern pattern; 
+	  if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
+	  fTPfCandHasHitInFirstPixelLayer[pfcandIndex] = (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999;
+	  fTPfCandTrackRefPx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999;
+	  fTPfCandTrackRefPy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999;
+	  fTPfCandTrackRefPz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999;
+	  fTPfCandTrackRefVx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vx() : -999;
+	  fTPfCandTrackRefVy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vy() : -999;
+	  fTPfCandTrackRefVz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vz() : -999;
+
 	  pfcandIndex++;
 
 	}
@@ -3822,9 +3836,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
 	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
 	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");
-	fEventTree->Branch("PfCandMomX"                  ,&fTPfCandMomX      ,"PfCandMomX[NPfCand]/F");
-	fEventTree->Branch("PfCandMomY"                  ,&fTPfCandMomY      ,"PfCandMomY[NPfCand]/F");
-	fEventTree->Branch("PfCandMomZ"                  ,&fTPfCandMomZ      ,"PfCandMomZ[NPfCand]/F");
+//	fEventTree->Branch("PfCandMomX"                  ,&fTPfCandMomX      ,"PfCandMomX[NPfCand]/F");
+//	fEventTree->Branch("PfCandMomY"                  ,&fTPfCandMomY      ,"PfCandMomY[NPfCand]/F");
+//	fEventTree->Branch("PfCandMomZ"                  ,&fTPfCandMomZ      ,"PfCandMomZ[NPfCand]/F");
+	fEventTree->Branch("PfCandHasHitInFirstPixelLayer", &fTPfCandHasHitInFirstPixelLayer, "PfCandHasHitInFirstPixelLayer[NPfCand]/I");
+	fEventTree->Branch("PfCandTrackRefPx", &fTPfCandTrackRefPx, "PfCandTrackRefPx[NPfCand]/F");
+	fEventTree->Branch("PfCandTrackRefPy", &fTPfCandTrackRefPy, "PfCandTrackRefPy[NPfCand]/F");
+	fEventTree->Branch("PfCandTrackRefPz", &fTPfCandTrackRefPz, "PfCandTrackRefPz[NPfCand]/F");
+	fEventTree->Branch("PfCandTrackRefVx", &fTPfCandTrackRefVx, "PfCandTrackRefVx[NPfCand]/F");
+	fEventTree->Branch("PfCandTrackRefVy", &fTPfCandTrackRefVy, "PfCandTrackRefVy[NPfCand]/F");
+	fEventTree->Branch("PfCandTrackRefVz", &fTPfCandTrackRefVz, "PfCandTrackRefVz[NPfCand]/F");
 
 	// Photons:
 	fEventTree->Branch("NPhotons"         ,&fTnphotons          ,"NPhotons/I");
@@ -4722,6 +4743,14 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPfCandMomX      ,gMaxnpfcand);
 	resetFloat(fTPfCandMomY      ,gMaxnpfcand);
 	resetFloat(fTPfCandMomZ      ,gMaxnpfcand);
+	resetInt(fTPfCandHasHitInFirstPixelLayer, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefPx, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefPy, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefPz, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefVx, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefVy, gMaxnpfcand);
+	resetFloat(fTPfCandTrackRefVz, gMaxnpfcand);
+
 
 	resetFloat(fTPhotVx,gMaxnphos);
 	resetFloat(fTPhotVy,gMaxnphos);
