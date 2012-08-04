@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.19 2012/08/04 09:49:08 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.20 2012/08/04 11:24:23 peruzzi Exp $
 //
 //
 
@@ -2151,10 +2151,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       if (fabs(dEta)<0.015 && gamIter->isEB()) vetoed=true;
 	       else if (gamIter->isEE()){
 		 float sceta = gamIter->superCluster()->eta();
-		 float rescaled_dEta = dEta/tanh(sceta); // ignoring the sign, we square after
-		 float rescaled_dR = sqrt(dPhi*dPhi+rescaled_dEta*rescaled_dEta);
 		 float limit_dR = 0.00864*fabs(sinh(sceta))*4;
-		 if (rescaled_dR<limit_dR) vetoed=true;
+		 if (dR<limit_dR) vetoed=true;
 	       }
 	       if (!vetoed){
 		 if (dR<0.1) fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
