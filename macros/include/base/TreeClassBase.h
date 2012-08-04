@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Jul 26 17:21:58 2012 by ROOT version 5.27/06b
+// Sat Aug  4 13:23:11 2012 by ROOT version 5.32/01
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: ../test/NTupleProducer_42X_MC_numEvent300.root
+// found on file: NTupleProducer_42X_MC.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -11,6 +11,10 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+
+// Header file for the classes stored in the TTree if any.
+
+// Fixed size dimensions of array or collections stored in the TTree if any.
 
 class TreeClassBase {
 public :
@@ -355,9 +359,10 @@ public :
    Float_t         PfCandVx[2000];   //[NPfCand]
    Float_t         PfCandVy[2000];   //[NPfCand]
    Float_t         PfCandVz[2000];   //[NPfCand]
-   Float_t         PfCandMomX[2000];   //[NPfCand]
-   Float_t         PfCandMomY[2000];   //[NPfCand]
-   Float_t         PfCandMomZ[2000];   //[NPfCand]
+   Int_t           PfCandHasHitInFirstPixelLayer[2000];   //[NPfCand]
+   Float_t         PfCandTrackRefPx[2000];   //[NPfCand]
+   Float_t         PfCandTrackRefPy[2000];   //[NPfCand]
+   Float_t         PfCandTrackRefPz[2000];   //[NPfCand]
    Int_t           NPhotons;
    Int_t           NPhotonsTot;
    Int_t           PhoGood[50];   //[NPhotons]
@@ -1310,9 +1315,10 @@ public :
    TBranch        *b_PfCandVx;   //!
    TBranch        *b_PfCandVy;   //!
    TBranch        *b_PfCandVz;   //!
-   TBranch        *b_PfCandMomX;   //!
-   TBranch        *b_PfCandMomY;   //!
-   TBranch        *b_PfCandMomZ;   //!
+   TBranch        *b_PfCandHasHitInFirstPixelLayer;   //!
+   TBranch        *b_PfCandTrackRefPx;   //!
+   TBranch        *b_PfCandTrackRefPy;   //!
+   TBranch        *b_PfCandTrackRefPz;   //!
    TBranch        *b_NPhotons;   //!
    TBranch        *b_NPhotonsTot;   //!
    TBranch        *b_PhoGood;   //!
@@ -1941,16 +1947,17 @@ public :
 #endif
 
 #ifdef TreeClassBase_cxx
-TreeClassBase::TreeClassBase(TTree *tree)
+TreeClassBase::TreeClassBase(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC_numEvent300.root");
-      if (!f) {
-         f = new TFile("../test/NTupleProducer_42X_MC_numEvent300.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_42X_MC.root");
+      if (!f || !f->IsOpen()) {
+         f = new TFile("NTupleProducer_42X_MC.root");
       }
-      tree = (TTree*)gDirectory->Get("Analysis");
+      TDirectory * dir = (TDirectory*)f->Get("NTupleProducer_42X_MC.root:/analyze");
+      dir->GetObject("Analysis",tree);
 
    }
    Init(tree);
@@ -1974,10 +1981,8 @@ Long64_t TreeClassBase::LoadTree(Long64_t entry)
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
-   if (!fChain->InheritsFrom(TChain::Class()))  return centry;
-   TChain *chain = (TChain*)fChain;
-   if (chain->GetTreeNumber() != fCurrent) {
-      fCurrent = chain->GetTreeNumber();
+   if (fChain->GetTreeNumber() != fCurrent) {
+      fCurrent = fChain->GetTreeNumber();
       Notify();
    }
    return centry;
@@ -2336,9 +2341,10 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PfCandVx", PfCandVx, &b_PfCandVx);
    fChain->SetBranchAddress("PfCandVy", PfCandVy, &b_PfCandVy);
    fChain->SetBranchAddress("PfCandVz", PfCandVz, &b_PfCandVz);
-   fChain->SetBranchAddress("PfCandMomX", PfCandMomX, &b_PfCandMomX);
-   fChain->SetBranchAddress("PfCandMomY", PfCandMomY, &b_PfCandMomY);
-   fChain->SetBranchAddress("PfCandMomZ", PfCandMomZ, &b_PfCandMomZ);
+   fChain->SetBranchAddress("PfCandHasHitInFirstPixelLayer", PfCandHasHitInFirstPixelLayer, &b_PfCandHasHitInFirstPixelLayer);
+   fChain->SetBranchAddress("PfCandTrackRefPx", PfCandTrackRefPx, &b_PfCandTrackRefPx);
+   fChain->SetBranchAddress("PfCandTrackRefPy", PfCandTrackRefPy, &b_PfCandTrackRefPy);
+   fChain->SetBranchAddress("PfCandTrackRefPz", PfCandTrackRefPz, &b_PfCandTrackRefPz);
    fChain->SetBranchAddress("NPhotons", &NPhotons, &b_NPhotons);
    fChain->SetBranchAddress("NPhotonsTot", &NPhotonsTot, &b_NPhotonsTot);
    fChain->SetBranchAddress("PhoGood", PhoGood, &b_PhoGood);
@@ -2632,21 +2638,21 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PfMuAntiIsoMaxLepExc", &PfMuAntiIsoMaxLepExc, &b_PfMuAntiIsoMaxLepExc);
    fChain->SetBranchAddress("PfMuAntiIsoNObjsTot", &PfMuAntiIsoNObjsTot, &b_PfMuAntiIsoNObjsTot);
    fChain->SetBranchAddress("PfMuAntiIsoNObjs", &PfMuAntiIsoNObjs, &b_PfMuAntiIsoNObjs);
-   fChain->SetBranchAddress("PfMuAntiIsoPx", &PfMuAntiIsoPx, &b_PfMuAntiIsoPx);
-   fChain->SetBranchAddress("PfMuAntiIsoPy", &PfMuAntiIsoPy, &b_PfMuAntiIsoPy);
-   fChain->SetBranchAddress("PfMuAntiIsoPz", &PfMuAntiIsoPz, &b_PfMuAntiIsoPz);
-   fChain->SetBranchAddress("PfMuAntiIsoPt", &PfMuAntiIsoPt, &b_PfMuAntiIsoPt);
-   fChain->SetBranchAddress("PfMuAntiIsoE", &PfMuAntiIsoE, &b_PfMuAntiIsoE);
-   fChain->SetBranchAddress("PfMuAntiIsoEt", &PfMuAntiIsoEt, &b_PfMuAntiIsoEt);
-   fChain->SetBranchAddress("PfMuAntiIsoEta", &PfMuAntiIsoEta, &b_PfMuAntiIsoEta);
-   fChain->SetBranchAddress("PfMuAntiIsoPhi", &PfMuAntiIsoPhi, &b_PfMuAntiIsoPhi);
-   fChain->SetBranchAddress("PfMuAntiIsoCharge", &PfMuAntiIsoCharge, &b_PfMuAntiIsoCharge);
-   fChain->SetBranchAddress("PfMuAntiIsoParticleIso", &PfMuAntiIsoParticleIso, &b_PfMuAntiIsoParticleIso);
-   fChain->SetBranchAddress("PfMuAntiIsoChargedHadronIso", &PfMuAntiIsoChargedHadronIso, &b_PfMuAntiIsoChargedHadronIso);
-   fChain->SetBranchAddress("PfMuAntiIsoNeutralHadronIso", &PfMuAntiIsoNeutralHadronIso, &b_PfMuAntiIsoNeutralHadronIso);
-   fChain->SetBranchAddress("PfMuAntiIsoPhotonIso", &PfMuAntiIsoPhotonIso, &b_PfMuAntiIsoPhotonIso);
-   fChain->SetBranchAddress("PfMuAntiIsoPtErr", &PfMuAntiIsoPtErr, &b_PfMuAntiIsoPtErr);
-   fChain->SetBranchAddress("PfMuAntiIsoNMatches", &PfMuAntiIsoNMatches, &b_PfMuAntiIsoNMatches);
+   fChain->SetBranchAddress("PfMuAntiIsoPx", PfMuAntiIsoPx, &b_PfMuAntiIsoPx);
+   fChain->SetBranchAddress("PfMuAntiIsoPy", PfMuAntiIsoPy, &b_PfMuAntiIsoPy);
+   fChain->SetBranchAddress("PfMuAntiIsoPz", PfMuAntiIsoPz, &b_PfMuAntiIsoPz);
+   fChain->SetBranchAddress("PfMuAntiIsoPt", PfMuAntiIsoPt, &b_PfMuAntiIsoPt);
+   fChain->SetBranchAddress("PfMuAntiIsoE", PfMuAntiIsoE, &b_PfMuAntiIsoE);
+   fChain->SetBranchAddress("PfMuAntiIsoEt", PfMuAntiIsoEt, &b_PfMuAntiIsoEt);
+   fChain->SetBranchAddress("PfMuAntiIsoEta", PfMuAntiIsoEta, &b_PfMuAntiIsoEta);
+   fChain->SetBranchAddress("PfMuAntiIsoPhi", PfMuAntiIsoPhi, &b_PfMuAntiIsoPhi);
+   fChain->SetBranchAddress("PfMuAntiIsoCharge", PfMuAntiIsoCharge, &b_PfMuAntiIsoCharge);
+   fChain->SetBranchAddress("PfMuAntiIsoParticleIso", PfMuAntiIsoParticleIso, &b_PfMuAntiIsoParticleIso);
+   fChain->SetBranchAddress("PfMuAntiIsoChargedHadronIso", PfMuAntiIsoChargedHadronIso, &b_PfMuAntiIsoChargedHadronIso);
+   fChain->SetBranchAddress("PfMuAntiIsoNeutralHadronIso", PfMuAntiIsoNeutralHadronIso, &b_PfMuAntiIsoNeutralHadronIso);
+   fChain->SetBranchAddress("PfMuAntiIsoPhotonIso", PfMuAntiIsoPhotonIso, &b_PfMuAntiIsoPhotonIso);
+   fChain->SetBranchAddress("PfMuAntiIsoPtErr", PfMuAntiIsoPtErr, &b_PfMuAntiIsoPtErr);
+   fChain->SetBranchAddress("PfMuAntiIsoNMatches", PfMuAntiIsoNMatches, &b_PfMuAntiIsoNMatches);
    fChain->SetBranchAddress("PfMu2MaxLepExc", &PfMu2MaxLepExc, &b_PfMu2MaxLepExc);
    fChain->SetBranchAddress("PfMu2NObjsTot", &PfMu2NObjsTot, &b_PfMu2NObjsTot);
    fChain->SetBranchAddress("PfMu2NObjs", &PfMu2NObjs, &b_PfMu2NObjs);

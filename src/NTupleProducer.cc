@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.18 2012/07/26 13:46:30 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.19 2012/08/04 09:49:08 peruzzi Exp $
 //
 //
 
@@ -1950,7 +1950,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
        
-       { // start PF stuff from Nicholas
+       { // start PF stuff from Nicolas
 
 	 reco::PhotonCollection::const_iterator gamIterSl;
 
@@ -1973,62 +1973,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
 	 fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
 
-	 /*
-	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[phoqi] = 0;
-	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[phoqi] = 0;
-	 fT_pho_Cone04PhotonIso_dR8_dEta0_pt0[phoqi] = 0;
-	 fT_pho_Cone04PhotonIso_dR8_dEta0_pt5[phoqi] = 0;
-
-     fT_pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] = 0;
-     fT_pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] = 0;
-     fT_pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] = 0;  
-     fT_pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] = 0;
-
-     fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[phoqi] = 0;
-
-     fT_pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] = 0;
-     fT_pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] = 0;
-     fT_pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] = 0;
-     fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] = 0;
-
-     fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old[phoqi] = 0;
-
-     fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] = 0;
-     fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] = 0;
-
-     fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] = 0;
-     fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] = 0;
-
-     fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] = 0;
-     fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] = 0;
-
-     fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] = 0; //pour reference
-     fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] = 0;
-     fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] = 0;
-	 */
 
 
 	 //Look for associated PF objects
@@ -2037,8 +1981,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 fT_pho_isPFPhoton[phoqi] = 0;
 	 fT_pho_isPFElectron[phoqi] = 0;
-
-	 int iPFduplicata=-1;
 
 	 //Find PFPhoton
 	 int iphot=-1;
@@ -2087,244 +2029,163 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   fT_pho_isPFElectron[phoqi] = 1;
 	   PhotonToPFElectronMatchingArray[phoqi] = iel;
 	 }
-
-	 /*
-	 double photonPhi;
-	 double photonEta;
-	 double photonVz;
-
-	 double phoSC_GeomEta = gamIter->superCluster()->eta();
-	 double phoSC_GeomPhi = gamIter->superCluster()->phi();
-
-	 if (FoundPFPhoton){ //use PFPhoton
-
-	   fT_pho_isPFPhoton[phoqi] = 1;
-	   fT_pho_isPFElectron[phoqi] = 0;
-
-	   if (pfPhotonHandle->size()>0){
-	     double Emin=4000;
-	     reco::PhotonCollection::const_iterator pfgamIterSl;
-	     for (reco::PhotonCollection::const_iterator pfgamIter = pfPhotonHandle->begin(); pfgamIter != pfPhotonHandle->end(); ++pfgamIter){
-	       if (fabs((*pfCandidates)[iphot].energy()-pfgamIter->energy())<Emin) {
-		 Emin = fabs((*pfCandidates)[iphot].energy()-pfgamIter->energy());
-		 pfgamIterSl=pfgamIter;       
-	       }
-	     }
-	     if (Emin<4000){
-	       fT_pho_ChargedHadronIso[phoqi] = pfgamIterSl->chargedHadronIso();
-	       fT_pho_NeutralHadronIso[phoqi] = pfgamIterSl->neutralHadronIso();
-	       fT_pho_PhotonIso[phoqi] = pfgamIterSl->photonIso();
-	     }
-	   }
-
-	   iPFduplicata = iphot;
-	   photonPhi = (*pfCandidates)[iphot].phi();
-	   photonEta = (*pfCandidates)[iphot].eta();
-	   //photonVz = (*pfCandidates)[iphot].vz();
-	   photonVz = gamIter->vz();
-	 }
-
-	 else if (!FoundPFPhoton && FoundPFElectron){ //use PFElectron
-
-
-	   fT_pho_isPFPhoton[phoqi] = 0;
-	   fT_pho_isPFElectron[phoqi] = 1;
-
-	   fT_pho_ChargedHadronIso[phoqi] = elIterSl->pfIsolationVariables().chargedHadronIso;
-	   fT_pho_NeutralHadronIso[phoqi] = elIterSl->pfIsolationVariables().neutralHadronIso;
-	   fT_pho_PhotonIso[phoqi] = elIterSl->pfIsolationVariables().photonIso;
-
-	   iPFduplicata = iel;
-	   photonPhi = (*pfCandidates)[iel].phi();
-	   photonEta = (*pfCandidates)[iel].eta();
-	   //photonVz = (*pfCandidates)[iphot].vz();
-	   photonVz = gamIter->vz();
- 
-	 }
-
-	 else if (!FoundPFPhoton && !FoundPFElectron){ //e/g only => use cones
-
-	   fT_pho_isPFPhoton[phoqi] = 0;
-	   fT_pho_isPFElectron[phoqi] = 0;
-
-
-	   photonPhi = phoSC_GeomPhi;
-	   photonEta = phoSC_GeomEta;
-	   //photonVz = (*pfCandidates)[iel].vz();
-	   photonVz = gamIter->vz();
-	 }
-	
-	 if (FoundPFPhoton && FoundPFElectron){ //both => we have used PFPhoton
-
-	   fT_pho_isPFPhoton[phoqi] = 1;
-	   fT_pho_isPFElectron[phoqi] = 1;
-
-	 }
-	 */
- 
 	 
-	 int pho_Cone06NbPfCand;
-	 int pho_Cone06PfCandType[500];
-	 float pho_Cone06PfCandPt[500];
-	 float pho_Cone06PfCandDz[500];
-	 int pho_Cone06PfCandIsFromPU[500]; 
-	 float pho_Cone06PfCandDxy[500];
-	 float pho_Cone06PfCandDeltaRrecomputed[500];
-	 float pho_Cone06PfCandDeltaEtarecomputed[500];
-	 float pho_Cone06PfCandDeltaPhirecomputed[500];
+
+	 int PfCandType[10000];
+	 float PfCandPt[10000];
+	 float PfCandPx[10000];
+	 float PfCandPy[10000];
+	 float PfCandPz[10000];
+	 float PfCandPtAtVtx[10000];
+	 float PfCandPxAtVtx[10000];
+	 float PfCandPyAtVtx[10000];
+	 float PfCandPzAtVtx[10000];
+	 float PfCandVx[10000];
+	 float PfCandVy[10000];
+	 float PfCandVz[10000];
+	 float PfCandDxy[10000];
+	 float PfCandDz[10000];
+	 int PfCandIsFromPU[10000]; 
+	 float PfCandDeltaRrecomputed[10000];
+	 float PfCandDeltaEtarecomputed[10000];
+	 float PfCandDeltaPhirecomputed[10000];
 	 
-	 //int pho_Cone06PfCandOverlap[500];
-	 //float pho_Cone06PfCandEta[500];
-	 //float pho_Cone06PfCandPhi[500];
-	 //float pho_Cone06PfCandDeltaR[500];
-	 //float pho_Cone06PfCandDeltaEta[500];
-	 //float pho_Cone06PfCandDeltaPhi[500];
-	 //float pho_Cone06PfCandPtrecomputed[500];
 
-	 //Recompute pflow isolation keeping all the pfcandidates in a 0.6 cone
-	 pho_Cone06NbPfCand = 0;
-	 int ipf=0;
+	 //Recompute pflow isolation keeping all the pfcandidates in a 0.4 cone
 
-	 float photonEta = gamIter->superCluster()->eta();
-	 float photonPhi = gamIter->superCluster()->phi();
+	     
+	 float photonVx = gamIter->vx();
+	 float photonVy = gamIter->vy();
 	 float photonVz = gamIter->vz();
-
-	 //if (iphot!=-1){
-    
-	 double dR;
-	 int type = -1;
-
+	     
 	 for( int i=0; i<ncand; ++i ) {
 	   
-	   dR = DeltaR(photonPhi, (*pfCandidates)[i].phi(), photonEta, (*pfCandidates)[i].eta());
-	   //if (dR<0.6 && dR>1e-05){
-	   
-	   type = FindPFCandType((*pfCandidates)[i].pdgId());
-	   //cout << "type=" << type<<endl;
+	   int type = FindPFCandType((*pfCandidates)[i].pdgId());
 
-	   { // decide which pf candidates will be stored
-	     math::XYZVector vCand = math::XYZVector(gamIter->superCluster()->x(), gamIter->superCluster()->y(), gamIter->superCluster()->z());
-	     float r = vCand.R();
-	     math::XYZVector pfvtx((*pfCandidates)[i].vx(), (*pfCandidates)[i].vy(), (*pfCandidates)[i].vz());
-	     math::XYZVector pvm(((*pfCandidates)[i].momentum()*r/(*pfCandidates)[i].momentum().R()) + pfvtx);
-	     
-	     if (type==2) storethispfcand[i]=1;
-	     if (fabs(photonEta-(*pfCandidates)[i].eta())<0.4) storethispfcand[i]=1;
-	     if (fabs(vCand.Eta()-pvm.Eta())<0.4) storethispfcand[i]=1;
-	     if (type==1 && dR<0.4) storethispfcand[i]=1;
-	     if (type==1 && DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta())<0.4) storethispfcand[i]=1;
+	   if ((FoundPFPhoton && i==iphot) || (FoundPFElectron && i==iel)) {
+	     storethispfcand[i]=1;
+	     continue;
 	   }
-
-	   if (FoundPFPhoton && i==iphot) continue;
-	   if (FoundPFElectron && i==iel) continue;
 	   
 	   if (type==0 || type==1 || type==2){
 	   
-	     //if (dR<0.6){
+	     PfCandType[i] = type;
+
+	     PfCandPt[i] = (*pfCandidates)[i].pt();
+	     PfCandPx[i] = (*pfCandidates)[i].px();
+	     PfCandPy[i] = (*pfCandidates)[i].py();
+	     PfCandPz[i] = (*pfCandidates)[i].pz();
+	     PfCandVx[i] = (*pfCandidates)[i].vx();
+	     PfCandVy[i] = (*pfCandidates)[i].vy();
+	     PfCandVz[i] = (*pfCandidates)[i].vz();
+
+	     math::XYZVector photon_direction = math::XYZVector(gamIter->superCluster()->x()-PfCandVx[i], \
+								gamIter->superCluster()->y()-PfCandVy[i], \
+								gamIter->superCluster()->z()-PfCandVz[i]);
+	     float photon_eta = photon_direction.eta();
+	     float photon_phi = photon_direction.phi();
+	 
+	     float pfcand_eta = (*pfCandidates)[i].eta();
+	     float pfcand_phi = (*pfCandidates)[i].phi();
+	     
+	     PfCandDeltaRrecomputed[i] = reco::deltaR(photon_eta,photon_phi,pfcand_eta,pfcand_phi);
+	     PfCandDeltaEtarecomputed[i] = photon_eta-pfcand_eta;
+	     PfCandDeltaPhirecomputed[i] = reco::deltaPhi(photon_phi,pfcand_phi);
+
+	     bool usetrackref=false;
+	     if (type==1 && (*pfCandidates)[i].trackRef().isNonnull()) usetrackref=true;
+
+	     if (usetrackref){ // use momentum (and vtx) of the track for dxy and dz calculation
+	       PfCandPtAtVtx[i] = (*pfCandidates)[i].trackRef()->pt();
+	       PfCandPxAtVtx[i] = (*pfCandidates)[i].trackRef()->px();
+	       PfCandPyAtVtx[i] = (*pfCandidates)[i].trackRef()->py();
+	       PfCandPzAtVtx[i] = (*pfCandidates)[i].trackRef()->pz();
+
+	       bool bad=false;
+	       if ((*pfCandidates)[i].vx()!=(*pfCandidates)[i].trackRef()->vx()) bad=true;
+	       if ((*pfCandidates)[i].vy()!=(*pfCandidates)[i].trackRef()->vy()) bad=true;
+	       if ((*pfCandidates)[i].vz()!=(*pfCandidates)[i].trackRef()->vz()) bad=true;
+	       if (bad) edm::LogWarning("NTP") << "@SUB=analyze"
+					       << "Something wrong with trackRef vertex for charged hadron pfcandidate";
+	     }
+	     else {
+	       PfCandPtAtVtx[i] = PfCandPt[i];
+               PfCandPxAtVtx[i] = PfCandPx[i];
+               PfCandPyAtVtx[i] = PfCandPy[i];
+               PfCandPzAtVtx[i] = PfCandPz[i];
+	     }
+	  
+	     PfCandDxy[i] =  ( -(PfCandVx[i]-photonVx)*PfCandPyAtVtx[i] +(PfCandVy[i]-photonVy)*PfCandPxAtVtx[i] ) / PfCandPtAtVtx[i];
+	     PfCandDz[i] = (PfCandVz[i]-photonVz) - ( (PfCandVx[i]-photonVx)*PfCandPxAtVtx[i]+(PfCandVy[i]-photonVy)*PfCandPyAtVtx[i] )/PfCandPtAtVtx[i] * PfCandPzAtVtx[i]/PfCandPtAtVtx[i];
+	     PfCandDxy[i] = fabs(PfCandDxy[i]);
+	     PfCandDz[i] = fabs(PfCandDz[i]);
+ 
+
+	     PfCandIsFromPU[i] = -1;
+	     if (type==1){
+	       reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
+	       if (chvtx.isNull() || chvtx.key()==0) PfCandIsFromPU[i] = 0;
+	       else PfCandIsFromPU[i] = 1;
+	     }
+
+	     double pt = PfCandPt[i];
+	     double dEta = PfCandDeltaEtarecomputed[i];
+	     double dPhi = PfCandDeltaPhirecomputed[i];
+	     double dR = PfCandDeltaRrecomputed[i];
+	     double dz = PfCandDz[i];
+	     double dxy = PfCandDxy[i];
+
+	     if (type==2) storethispfcand[i]=true;
+	     if (type==1 && dR<0.4) storethispfcand[i]=true;
+	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
 	       
-	       bool isOverlapping = false;
-	       //isOverlapping = CheckPhotonPFCandOverlap(gamIter->superCluster(), pfCandidates, i);
-	       
-	       pho_Cone06PfCandType[ipf] = type;
-	       //pho_Cone06PfCandOverlap[ipf] = isOverlapping;
-	       
-	       //pho_Cone06PfCandEta[ipf] = (*pfCandidates)[i].eta();
-	       //pho_Cone06PfCandPhi[ipf] = (*pfCandidates)[i].phi();
-	       //pho_Cone06PfCandDeltaR[ipf] = DeltaR( photonPhi, (*pfCandidates)[i].phi(),photonEta,(*pfCandidates)[i].eta());
-	       //pho_Cone06PfCandDeltaEta[ipf] = (*pfCandidates)[i].eta()-photonEta;
-	       //pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
-	       pho_Cone06PfCandPt[ipf] = (*pfCandidates)[i].pt();
-	       pho_Cone06PfCandDz[ipf] = fabs((*pfCandidates)[i].vz()-photonVz);
-	       pho_Cone06PfCandDxy[ipf] = fabs(( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt());
+	     if (type==0){ //Neutral Hadron
+	       if (dR<0.1) fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] += pt;
+	       if (dR<0.2) fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] += pt;
+	       if (dR<0.3) fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] += pt;
+	       if (dR<0.4) fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] += pt;
+	     }
 
-	       math::XYZVector vCand = math::XYZVector(gamIter->superCluster()->x(), gamIter->superCluster()->y(), gamIter->superCluster()->z());
-	       float r = vCand.R();
-	       math::XYZVector pfvtx((*pfCandidates)[i].vx(), (*pfCandidates)[i].vy(), (*pfCandidates)[i].vz());
-	       math::XYZVector pvm(((*pfCandidates)[i].momentum()*r/(*pfCandidates)[i].momentum().R()) + pfvtx);
-
-	       //float dR = deltaR(vCand.Eta(), vCand.Phi(), pvm.Eta(), pvm.Phi());
-	       //float dEta = fabs(vCand.Eta() - pvm.Eta());
-	       //double dPhi = fabs(vCand.Phi() - pvm.Phi());
-
-	       pho_Cone06PfCandDeltaRrecomputed[ipf] = DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta());
-	       pho_Cone06PfCandDeltaEtarecomputed[ipf] = pvm.Eta() - vCand.Eta();
-	       pho_Cone06PfCandDeltaPhirecomputed[ipf] = reco::deltaPhi(vCand.Phi(),pvm.Phi());
-	       //pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();
-
-	       pho_Cone06PfCandIsFromPU[ipf] = -1;
-		 if (type==1){
-		   //cout << "A" << endl;
-		   reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
-		   //cout << "B"<<endl;
-		   if (chvtx.isNull() || chvtx.key()==0) pho_Cone06PfCandIsFromPU[ipf] = 0;
-		   else pho_Cone06PfCandIsFromPU[ipf] = 1;
-		   //cout << "C"<<endl;
-		 }
-
-	       
-	       //if (dR<0.4 && isOverlapping==false) {
-	       //FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pho_Cone06PfCandIsFromPU[ipf], pfCandidates, i, phoqi);
-	       //{ //		 FillPhotonIsoVariables_Frixione_Neutrals(type, ipf, phoqi);
-
-
-	       double pt = pho_Cone06PfCandPt[ipf];
-	       double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
-	       double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
-	       double dR = sqrt(dEta*dEta+dPhi*dPhi);
-	       double dz = pho_Cone06PfCandDz[ipf];
-	       double dxy = pho_Cone06PfCandDxy[ipf];
-	       
-	       if (type==0){ //Neutral Hadron
-		 if (dR<0.1) fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] += pt;
-		 if (dR<0.2) fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] += pt;
-		 if (dR<0.3) fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] += pt;
-		 if (dR<0.4) fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] += pt;
+	     if (type==2) { //Photon
+	       bool vetoed=false;
+	       if (fabs(dEta)<0.015 && gamIter->isEB()) vetoed=true;
+	       else if (gamIter->isEE()){
+		 float sceta = gamIter->superCluster()->eta();
+		 float rescaled_dEta = dEta/tanh(sceta); // ignoring the sign, we square after
+		 float rescaled_dR = sqrt(dPhi*dPhi+rescaled_dEta*rescaled_dEta);
+		 float limit_dR = 0.00864*fabs(sinh(sceta))*4;
+		 if (rescaled_dR<limit_dR) vetoed=true;
 	       }
-	       if (type==2) { //Photon
-		 
-		 if ((fabs(dEta)>0.015 && gamIter->isEB())||(dR>0.07 && gamIter->isEE())){
-		   if (dR<0.1) fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
-		   if (dR<0.2) fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
-		   if (dR<0.3) fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;  
-		   if (dR<0.4) fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
-		 }
+	       if (!vetoed){
+		 if (dR<0.1) fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
+		 if (dR<0.2) fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
+		 if (dR<0.3) fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;  
+		 if (dR<0.4) fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
 	       }
+	     }
 	   
-	       // FillPhotonIsoVariables_Frixione_ChHad(type, pho_Cone06PfCandIsFromPU[ipf], ipf, phoqi);
-
-	       //bool isPU=pho_Cone06PfCandIsFromPU[ipf];
-	       //double pt = pho_Cone06PfCandPt[ipf];
-	       //double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
-	       //double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
-	       //double dR = sqrt(dEta*dEta+dPhi*dPhi);
-	       
-  
-	       if (type==1){ //Charged Hadron
-    
-		 //dz/dxy
-		 if (dz<0.2 && dxy<0.1 && dR>0.02){
-		   if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
-		   if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
-		   if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
-		   if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
-		 }
-		 
+	     if (type==1){ //Charged Hadron
+	       //dz/dxy
+	       if (fabs(dz)<0.2 && fabs(dxy)<0.1 && dR>0.02){
+		 if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		 if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		 if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		 if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
 	       }
+		 
+	     }
 	       
 	       
 	   }
 
-	       ipf++;
-
 	 }
 	     
-	 pho_Cone06NbPfCand = ipf;
 	 
 	 fT_pho_Cone03PFCombinedIso[phoqi] = (fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi]+fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi]+fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi]) / fTPhotPt[phoqi];
 	 fT_pho_Cone04PFCombinedIso[phoqi] = (fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi]+fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi]+fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi]) / fTPhotPt[phoqi];
 
 
-       }     // end PF stuff from Nicholas
+       }     // end PF stuff from Nicolas
 
 
 
@@ -3843,9 +3704,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PfCandTrackRefPx", &fTPfCandTrackRefPx, "PfCandTrackRefPx[NPfCand]/F");
 	fEventTree->Branch("PfCandTrackRefPy", &fTPfCandTrackRefPy, "PfCandTrackRefPy[NPfCand]/F");
 	fEventTree->Branch("PfCandTrackRefPz", &fTPfCandTrackRefPz, "PfCandTrackRefPz[NPfCand]/F");
-	fEventTree->Branch("PfCandTrackRefVx", &fTPfCandTrackRefVx, "PfCandTrackRefVx[NPfCand]/F");
-	fEventTree->Branch("PfCandTrackRefVy", &fTPfCandTrackRefVy, "PfCandTrackRefVy[NPfCand]/F");
-	fEventTree->Branch("PfCandTrackRefVz", &fTPfCandTrackRefVz, "PfCandTrackRefVz[NPfCand]/F");
+//	fEventTree->Branch("PfCandTrackRefVx", &fTPfCandTrackRefVx, "PfCandTrackRefVx[NPfCand]/F");
+//	fEventTree->Branch("PfCandTrackRefVy", &fTPfCandTrackRefVy, "PfCandTrackRefVy[NPfCand]/F");
+//	fEventTree->Branch("PfCandTrackRefVz", &fTPfCandTrackRefVz, "PfCandTrackRefVz[NPfCand]/F");
 
 	// Photons:
 	fEventTree->Branch("NPhotons"         ,&fTnphotons          ,"NPhotons/I");
