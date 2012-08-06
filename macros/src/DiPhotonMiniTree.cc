@@ -42,11 +42,11 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
-  OutputTree[6] = new TTree("Tree_singlephoton_inclusiveimpinging_sel","Tree_singlephoton_inclusiveimpinging_sel");
+  OutputTree[6] = new TTree("Tree_singlephoton_inclusive_sel","Tree_singlephoton_inclusive_sel");
 
   //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
-  for (int i=0; i<6; i++){
+  for (int i=0; i<7; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -722,19 +722,26 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
 };
 
 
-bool DiPhotonMiniTree::SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing){
+bool DiPhotonMiniTree::SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> &passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    if (fTR->PhoPt[*it]>40) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
 
   if (passing.size()<1) return false;
-
-  if (fTR->PhoPt[passing.at(0)]<40) return false;
 
   return true;
 
 };
 
-bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> passing){
+bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> &passing){
 
   if (passing.size()<2) return false;
+
+  passing.resize(2); // keep only the first two
+
 
   float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
   float deta=fTR->PhoEta[passing.at(0)]-fTR->PhoEta[passing.at(1)];
@@ -1162,6 +1169,7 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition
       
   } // end pf cand loop
 
+  if (invert) return !found;
   return found;
 
 };
