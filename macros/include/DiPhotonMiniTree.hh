@@ -22,6 +22,7 @@
 #include "helper/Utilities.hh"
 
 #include "Math/Vector3D.h"
+#include "TVector3.h"
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
@@ -48,7 +49,7 @@ private:
   std::vector<int> PhotonSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
-  std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing);
+  std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert=false);
   bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool StandardEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool TriggerSelection();
@@ -56,7 +57,7 @@ private:
   void ResetVars();
   void Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex);  
 
-  double etaTransformation(float EtaParticle, float Zvertex);
+  //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
