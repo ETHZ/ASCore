@@ -42,8 +42,9 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
+  OutputTree[6] = new TTree("Tree_singlephoton_inclusiveimpinging_sel","Tree_singlephoton_inclusiveimpinging_sel");
 
-  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
+  //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
   for (int i=0; i<6; i++){
 
@@ -211,6 +212,9 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("photrail_PhoMCmatchindex",&photrail_PhoMCmatchindex,"photrail_PhoMCmatchindex/I");
   OutputTree[i]->Branch("photrail_PhoMCmatchexitcode",&photrail_PhoMCmatchexitcode,"photrail_PhoMCmatchexitcode/I");
 
+  OutputTree[i]->Branch("pholead_hasimpingingtrack",&pholead_hasimpingingtrack,"pholead_hasimpingingtrack/I");
+  OutputTree[i]->Branch("photrail_hasimpingingtrack",&photrail_hasimpingingtrack,"photrail_hasimpingingtrack/I");
+
   }
 
 
@@ -275,11 +279,11 @@ void DiPhotonMiniTree::Analyze(){
 
   if (!TriggerSelection()) return;
 
-  std::vector<int> passing_selection[6];
+  std::vector<int> passing_selection[7];
 
-  bool pass[6];
+  bool pass[7];
 
-  for (int sel_cat=0; sel_cat<6; sel_cat++){
+  for (int sel_cat=0; sel_cat<7; sel_cat++){
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -301,8 +305,9 @@ void DiPhotonMiniTree::Analyze(){
       if (sel_cat!=3) passing = ApplyPixelVeto(fTR,passing,0);
       if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1);
       passing = PhotonSelection(fTR,passing);
-      if (sel_cat!=5) passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection)
       if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks
+      else if (sel_cat==6) passing=passing;
+      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection)
     }
 
     if (sel_cat==0 || sel_cat==3){
@@ -320,6 +325,9 @@ void DiPhotonMiniTree::Analyze(){
     if (sel_cat==5){ // impinging track
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
+    if (sel_cat==6){
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
 
     passing_selection[sel_cat] = passing;
 
@@ -327,7 +335,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<6; sel_cat++){
+  for (int sel_cat=0; sel_cat<7; sel_cat++){
 
     if (!pass[sel_cat]) continue;
 
@@ -335,7 +343,7 @@ void DiPhotonMiniTree::Analyze(){
 
     int minsize=999;
     if (sel_cat==0 || sel_cat==3) minsize=2;
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5) minsize=1;
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6) minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
       std::cout << "Error!!!" << std::endl;
@@ -355,7 +363,7 @@ void DiPhotonMiniTree::Analyze(){
       OutputTree[sel_cat]->Fill();
     }
 
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5){
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6){
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
@@ -443,6 +451,10 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
   pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
   pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
+  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
+  int a;
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,false,GetPFCandRemovals(fTR,index));
 
 };
 
@@ -517,16 +529,20 @@ void DiPhotonMiniTree::FillTrail(int index){
   photrail_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
   photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
+  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
+  int a;
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,false,GetPFCandRemovals(fTR,index));
 
 };
 
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<6; i++) OutputTree[i]->Write();	
+  for (int i=0; i<7; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
-  histo_PFPhotonDepositAroundImpingingTrack->Write();
+  //  histo_PFPhotonDepositAroundImpingingTrack->Write();
 	
   fOutputFile->Close();
 

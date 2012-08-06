@@ -81,7 +81,7 @@ private:
 
   int impinging_track_pfcand[100];
 
-  TTree* OutputTree[6];
+  TTree* OutputTree[7];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
@@ -190,6 +190,7 @@ private:
   Int_t pholead_Pho_isPFPhoton, photrail_Pho_isPFPhoton;
   Int_t pholead_Pho_isPFElectron, photrail_Pho_isPFElectron;
 
+  Int_t pholead_hasimpingingtrack, photrail_hasimpingingtrack;
 
   Int_t pholead_PhoMCmatchindex, photrail_PhoMCmatchindex;
   Int_t pholead_PhoMCmatchexitcode, photrail_PhoMCmatchexitcode;
