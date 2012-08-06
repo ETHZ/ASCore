@@ -50,12 +50,17 @@ private:
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert=false);
+  bool FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, bool invert, std::vector<int> removals);
+  std::vector<int> GetPFCandRemovals(TreeReader *fTR, int phoqi);
   bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool StandardEventSelection(TreeReader *fTR, std::vector<int> passing);
   bool TriggerSelection();
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
   void Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex);  
+
+  void FillLead(int index);
+  void FillTrail(int index);
 
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
