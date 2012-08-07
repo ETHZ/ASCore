@@ -42,11 +42,13 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
-  OutputTree[6] = new TTree("Tree_singlephoton_inclusive_sel","Tree_singlephoton_inclusive_sel");
+  OutputTree[6] = new TTree("Tree_singlephoton_sel_noimpingingcut","Tree_singlephoton_sel_noimpingingcut");
+  OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
+  OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
 
   //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
-  for (int i=0; i<7; i++){
+  for (int i=0; i<9; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -279,11 +281,11 @@ void DiPhotonMiniTree::Analyze(){
 
   if (!TriggerSelection()) return;
 
-  std::vector<int> passing_selection[7];
+  std::vector<int> passing_selection[9];
 
-  bool pass[7];
+  bool pass[9];
 
-  for (int sel_cat=0; sel_cat<7; sel_cat++){
+  for (int sel_cat=0; sel_cat<9; sel_cat++){
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -301,41 +303,38 @@ void DiPhotonMiniTree::Analyze(){
     passing = PhotonPreSelection(fTR,passing);
 
     // comment this block for the noselection running
-    {
-      if (sel_cat!=3) passing = ApplyPixelVeto(fTR,passing,0);
-      if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1);
-      passing = PhotonSelection(fTR,passing);
+    if (sel_cat!=7) { // only presel cat7 
+
+      if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1); // DY cat3
+      else passing = ApplyPixelVeto(fTR,passing,0);
+
+      if (sel_cat==8) passing = PhotonSelection(fTR,passing,"invert_sieie_cut"); // sieie sideband cat8
+      else passing=PhotonSelection(fTR,passing);
+
       if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks
-      else if (sel_cat==6) passing=passing;
-      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection)
+      else if (sel_cat==6) passing=passing; // no impinging track cut
+      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
+
     }
 
-    if (sel_cat==0 || sel_cat==3){
+    if (sel_cat==0 || sel_cat==3){ // diphoton cats
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
-    if (sel_cat==1 || sel_cat==2){
+    else { // photon-by-photon cats
       if (sel_cat==1) passing = SignalSelection(fTR,passing);
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
+      //      if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
+      //      if (sel_cat==5) passing = BackgroundSelection(fTR,passing); // uncomment to make impinging track only from the fakes (only in MC!) 
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
-    if (sel_cat==4){ // random cone
-      //      passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!)
-      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
-    }
-    if (sel_cat==5){ // impinging track
-      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
-    }
-    if (sel_cat==6){
-      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
-    }
-
+    
     passing_selection[sel_cat] = passing;
 
   }
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<7; sel_cat++){
+  for (int sel_cat=0; sel_cat<9; sel_cat++){
 
     if (!pass[sel_cat]) continue;
 
@@ -343,7 +342,7 @@ void DiPhotonMiniTree::Analyze(){
 
     int minsize=999;
     if (sel_cat==0 || sel_cat==3) minsize=2;
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6) minsize=1;
+    else minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
       std::cout << "Error!!!" << std::endl;
@@ -363,7 +362,7 @@ void DiPhotonMiniTree::Analyze(){
       OutputTree[sel_cat]->Fill();
     }
 
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6){
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6 || sel_cat==7 || sel_cat==8){
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
@@ -539,7 +538,7 @@ void DiPhotonMiniTree::FillTrail(int index){
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<7; i++) OutputTree[i]->Write();	
+  for (int i=0; i<9; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
   //  histo_PFPhotonDepositAroundImpingingTrack->Write();
@@ -661,7 +660,12 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
 
 };
 
-std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<int> passing){
+std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<int> passing, TString mode){
+
+  if (mode!="" && mode!="invert_sieie_cut"){
+    std::cout << "Error" << std::endl;
+    return std::vector<int>();
+  }
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // HoverE cut
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
@@ -676,8 +680,14 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
     float sieie=fTR->PhoSigmaIetaIeta[*it];
     bool pass=0;
+    if (mode=="invert_sieie_cut"){ // sieie sideband
+      if (fabs(eta)<1.4442 && sieie>0.011 && sieie<0.014) pass=1;
+      if (fabs(eta)>1.56 && sieie>0.030 && sieie<0.034) pass=1;
+    }
+    else {
     if (fabs(eta)<1.4442 && sieie<0.011) pass=1;
     if (fabs(eta)>1.56 && sieie<0.030) pass=1;
+    }
     if (!pass) it=passing.erase(it); else it++;
   }
 

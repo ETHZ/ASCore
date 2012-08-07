@@ -46,7 +46,7 @@ private:
   std::vector<int> ApplyPixelVeto(TreeReader *fTR, vector<int> passing, bool forelectron=0);
   std::vector<int> PhotonPreSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> GenLevelIsolationCut(TreeReader *fTR, vector<int> passing);
-  std::vector<int> PhotonSelection(TreeReader *fTR, vector<int> passing);
+  std::vector<int> PhotonSelection(TreeReader *fTR, vector<int> passing, TString mode="");
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert=false);
@@ -81,7 +81,7 @@ private:
 
   int impinging_track_pfcand[100];
 
-  TTree* OutputTree[7];
+  TTree* OutputTree[9];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
