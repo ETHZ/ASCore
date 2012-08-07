@@ -38,13 +38,17 @@ public:
   virtual ~JZBAnalysis();
   const bool IsCustomMu2012(const int);
   const bool IsCustomEl2012(const int);
+  const bool IsCustomPhoton2012(const int);
   const float EffArea(float); //Used for the calculation of Electron isolation
+  const float IndividualEffArea(float abseta, string type);
   const bool IsCustomJet(const int);
   const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
   const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);
+  int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
   float ElPFIso(int index);
   float MuPFIso(int index);
+  float PhoPFIso(int index);
 
   string outputFileName_; // public name of the output file name
 
@@ -54,11 +58,13 @@ public:
 
   // Fill generator information
   void GeneratorInfo();
+  
+  void DoFSRStudy(bool fdoGenInfo,TreeReader *fTR);
 
 private:
 
   //enum counters_t { count_begin, EV=count_begin, TR, MU, EL, JE, PJ, count_end };
-  enum counters_t { count_begin, EV=count_begin, TR, MU, PFMU, EL, PFEL, JE, PJ, count_end };
+  enum counters_t { count_begin, EV=count_begin, TR, MU, PFMU, EL, PFEL, JE, PJ, PH, count_end };
 
   Monitor counters[count_end];
 
