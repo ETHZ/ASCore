@@ -164,6 +164,7 @@ public:
   float pfJetScaleUnc[jMax];
   float pfJetDphiMet[jMax];
   float pfJetDphiZ[jMax];
+  float pfBJetDphiZ[jMax];
   float CorrectionRatio[jMax];
   float pfHT;
   float pfGoodHT;
@@ -438,6 +439,7 @@ void nanoEvent::reset()
     pfJetScaleUnc[jCounter]=0;
     pfJetDphiMet[jCounter]=0;
     pfJetDphiZ[jCounter]=0;
+    pfBJetDphiZ[jCounter]=0;
     CorrectionRatio[jMax]=0;
   }
   pfJetNum=0;
@@ -797,6 +799,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetScaleUnc",nEvent.pfJetScaleUnc,"pfJetScaleUnc[pfJetNum]/F");
   myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
   myTree->Branch("pfJetDphiZ",nEvent.pfJetDphiZ,"pfJetDphiZ[pfJetNum]/F");
+  myTree->Branch("pfBJetDphiZ",nEvent.pfBJetDphiZ,"pfBJetDphiZ[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
@@ -1556,6 +1559,7 @@ void JZBAnalysis::Analyze() {
              nEvent.pfJetGoodPhiBtag[nEvent.pfJetGoodNumBtag] = jphi;
              nEvent.pfJetGoodEBtag[nEvent.pfJetGoodNumBtag] = jenergy;
              nEvent.pfJetGoodIDBtag[nEvent.pfJetGoodNumBtag]  = isJetID;
+	     nEvent.pfBJetDphiZ[nEvent.pfJetGoodNumBtag]  = aJet.DeltaPhi(zVector);
 	     nEvent.pfJetGoodNumBtag++;
         }
         nEvent.pfJetGoodNum++;
@@ -1573,7 +1577,7 @@ void JZBAnalysis::Analyze() {
     }
     
     if(nEvent.pfJetGoodNum>0) nEvent.alpha=nEvent.pfJetGoodPt[1]/nEvent.pt;
-    nEvent.mpf=1+(pfMETvector.Vect()*zVector.Vect())/(zVector.Vect()*zVector.Vect());
+    nEvent.mpf=1+(pfMETvector.Vect()*zVector.Vect())/(zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());
     nEvent.pass_b_PU_rejection=true; // this needs to be fixed (i.e. the vertex loop below needs to be implemented)
 //    for(int ivtx=0;ivtx<fTR->NVrtx;ivtx++) {
       //find vtx most compatible with our Z (not sure how, yet)
@@ -2256,7 +2260,7 @@ void AddGenPhoton(TreeReader *fTR, int index) {
     return;
   }
   nEvent.genPhotonsPt[nEvent.genPhotonsNPhotons]=fTR->genInfoPt[index];
-  nEvent.genPhotonsEta[nEvent.genPhotonsNPhotons]=fTR->genInfoPt[index];
+  nEvent.genPhotonsEta[nEvent.genPhotonsNPhotons]=fTR->genInfoEta[index];
   nEvent.genPhotonsPhi[nEvent.genPhotonsNPhotons]=fTR->genInfoPhi[index];
   nEvent.genPhotonsM[nEvent.genPhotonsNPhotons]=fTR->genInfoM[index];
   nEvent.genPhotonsIsFSR[nEvent.genPhotonsNPhotons]=0;
