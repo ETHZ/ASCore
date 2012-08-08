@@ -64,9 +64,9 @@ private:
 
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
-  bool FindCloseJetsAndPhotons(TreeReader *fTR, float eta, float phi, int phoqi);
+  bool FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
-  float CombinedPFIsolation(float eta, float phi, int phoqi);
+  float CombinedPFIsolation(int phoqi, float phi=-999, TString component="combined", float minimal_pfphotoncand_threshold_EB=0, float minimal_pfphotoncand_threshold_EE=0, std::vector<int> removals = std::vector<int>());
 
   int FindPFCandType(int id);
 
