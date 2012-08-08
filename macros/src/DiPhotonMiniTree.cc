@@ -312,8 +312,8 @@ void DiPhotonMiniTree::Analyze(){
       else if (sel_cat==5) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // for impinging track removal from combined pf iso
       else passing=PhotonSelection(fTR,passing);
 
-      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks
-      else if (sel_cat==6) passing=passing; // no impinging track cut
+      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
+      else if (sel_cat==6) passing=std::vector<int>(); // turned off
       else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
 
     }
@@ -457,7 +457,7 @@ void DiPhotonMiniTree::FillLead(int index){
   TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
   TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
   int a;
-  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,false,GetPFCandRemovals(fTR,index));
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
 
 };
 
@@ -536,7 +536,7 @@ void DiPhotonMiniTree::FillTrail(int index){
   TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
   TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
   int a;
-  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,false,GetPFCandRemovals(fTR,index));
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
 
 };
 
@@ -1016,7 +1016,7 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int p
   TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
     
   int a;
-  bool found_impinging = FindImpingingTrack(fTR,photon_position,phovtx,a,false,GetPFCandRemovals(fTR,phoqi));
+  bool found_impinging = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,phoqi));
   if (found_impinging) found=true;
 
   if (debug) std::cout << "returning " << found << std::endl;
@@ -1122,20 +1122,28 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
     TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
     TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
     
-    found = FindImpingingTrack(fTR,photon_position,phovtx,impinging_track_pfcand[phoqi],invert,GetPFCandRemovals(fTR,phoqi));
+    found = FindImpingingTrack(fTR,photon_position,phovtx,impinging_track_pfcand[phoqi],GetPFCandRemovals(fTR,phoqi));
 
-    if (found){    
-      std::vector<int> toremove;
-      toremove.push_back(impinging_track_pfcand[phoqi]);
-      float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-      const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
-      const float dR=0.4;
-      float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
-      if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy<5) found=0;
+    if (invert) { // selection = 0 impinging tracks
+      if (found) it=passing.erase(it); else it++;
     }
 
-    if (!found) it=passing.erase(it); else it++;
+    else { // selection = 1 impinging track
+
+      if (found){    
+	std::vector<int> toremove;
+	toremove.push_back(impinging_track_pfcand[phoqi]);
+	float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+	const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
+	const float dR=0.4;
+	float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
+	if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy<5) found=0;
+      }
+      
+      if (!found) it=passing.erase(it); else it++;
     
+    }
+
   }
 
   return passing;
@@ -1143,7 +1151,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
 };
 
 
-bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, bool invert, std::vector<int> removals){
+bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals){
 
   bool found = false;
 
@@ -1200,7 +1208,6 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition
       
   } // end pf cand loop
 
-  if (invert) return !found;
   return found;
 
 };
