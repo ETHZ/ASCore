@@ -1137,7 +1137,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
 	const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
 	const float dR=0.4;
 	float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
-	if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy<5) found=0;
+	if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy>5) found=0;
       }
       
       if (!found) it=passing.erase(it); else it++;
