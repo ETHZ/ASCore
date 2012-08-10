@@ -1607,7 +1607,6 @@ void JZBAnalysis::Analyze() {
       jpx/=jesC;
       jpy/=jesC;
       jpz/=jesC;
-      jenergy/=jesC;
       fJetCorrector->setJetEta(jeta);
       fJetCorrector->setJetPt(jpt);
       fJetCorrector->setJetA(fTR->JArea[i]);
