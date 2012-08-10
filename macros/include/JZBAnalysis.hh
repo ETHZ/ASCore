@@ -49,6 +49,8 @@ public:
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
+  int DetermineFlavor(bool fdoGenInfo,TreeReader *fTR);
+  bool DecaysToTaus(bool fdoGenInfo,TreeReader *fTR);
 
   string outputFileName_; // public name of the output file name
 
