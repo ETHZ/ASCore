@@ -407,7 +407,7 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[index];
   pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[index];
   pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  //pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
   pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=CombinedPFIsolation(index,-999,"photon",0,0.3);
   //  std::cout << "debug PFPhotonIso " << CombinedPFIsolation(index,-999,"photon") << " " << pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx << std::endl;
   pholead_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[index];
@@ -419,7 +419,8 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
   pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
   pholead_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
-  pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  //  pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  pholead_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
   //  std::cout << "debug PFCombinedIso " << CombinedPFIsolation(index) << " " << pholead_pho_Cone04PFCombinedIso*pholead_pt << std::endl;
   pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
   if (fTR->PhoMCmatchindex[index]>=0) pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
@@ -499,7 +500,8 @@ void DiPhotonMiniTree::FillTrail(int index){
   photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
   photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
   photrail_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
-  photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  //  photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  photrail_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
   photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
   if (fTR->PhoMCmatchindex[index]>=0) photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
   photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
@@ -704,10 +706,10 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
     const float dR=0.4;
     float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
-    if (fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]-puenergy<5) pass=1;
+    if (CombinedPFIsolation(*it,-999,"combined",0,0)-puenergy<5) pass=1;
     if (mode=="no_combiso_cut") pass=1; // pass in any case
     if (mode=="cut_combiso_sideband"){ // overwriting pass with selection for sideband
-      float combiso = fTR->pho_Cone04PFCombinedIso[*it]*fTR->PhoPt[*it]-puenergy;
+      float combiso = CombinedPFIsolation(*it,-999,"combined",0,0)-puenergy;
       if (combiso>5 && combiso<6) pass=1; else pass=0;
     }
     if (!pass) it=passing.erase(it); else it++;
@@ -1071,48 +1073,7 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
     TVector3 photon_rotated_position(photon_true_position.x(),photon_true_position.y(),photon_true_position.z());
     photon_rotated_position.SetPhi(rotated_scphi);
 
-//    for (int i=0; i<fTR->NPfCand; i++){
-//      
-//      if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-//      if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
-//
-//    if (fTR->PfCandPdgId[i]!=22) continue;
-//
-//    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
-//    TVector3 rotated_photon_direction = photon_rotated_position-pfvertex;
-//
-//    float sceta = rotated_photon_direction.Eta();
-//    float scphi = rotated_photon_direction.Phi();
-//
-//    double dEta = fTR->PfCandEta[i] - sceta;
-//    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
-//
-//    double pt = fTR->PfCandPt[i];
-//    double dR = sqrt(dEta*dEta+dPhi*dPhi);
-//
-//    if (dR>0.4) continue;
-//
-//    if (fTR->PhoisEB[phoqi]){
-//      if (fabs(dEta)<0.015) continue;
-//    }
-//    else if (fTR->PhoisEE[phoqi]){
-//      float limit_dR = 0.00864*fabs(sinh(sceta))*4;
-//      if (dR<limit_dR) continue;
-//    }
-//    else {
-//      std::cout << "Something wrong " << fTR->PhoEta[phoqi] << " " << photon_true_position.Eta() << " " << fTR->PhoisEB[phoqi] << fTR->PhoisEE[phoqi] << std::endl;
-//      return -999;
-//    }
-//
-//    result+=pt;
-//
-//  } // end pf cand loop
-//
-
-    //    std::cout << result << " " << CombinedPFIsolation(phoqi,rotated_scphi,"photon") << std::endl;
-
-    //  return result;
-  return CombinedPFIsolation(phoqi,rotated_scphi,"photon",0,0.3);
+    return CombinedPFIsolation(phoqi,rotated_scphi,"photon",0,0.3);
 
 };
 
@@ -1199,9 +1160,15 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition
     dxy=fabs(dxy);
     dz=fabs(dz);
 
-    if (pt<3) continue;
+    if (pt<1.5) continue;
     if (dR>0.4) continue;
 
+    // additional veto sieie-orthogonal
+    if (fabs(sceta)<1.4442){
+      if (fabs(dEta)<0.05) continue;
+      if (fabs(dPhi)<0.05) continue;
+    }
+    
     if (dz>0.2) continue;
     if (dxy>0.1) continue;
     if (dR<0.02) continue;
@@ -1346,6 +1313,12 @@ float DiPhotonMiniTree::CombinedPFIsolation(int phoqi, float newphi, TString com
     }
 
     if (dR>0.4) continue;
+
+    // additional veto sieie-orthogonal
+    if (fTR->PhoisEB[phoqi]){
+      if (fabs(dEta)<0.05) continue;
+      if (fabs(dPhi)<0.05) continue;
+    }
 
     if (type==2){ 
 
