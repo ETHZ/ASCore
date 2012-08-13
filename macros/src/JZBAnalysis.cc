@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.46 $";
+string sjzbversion="$Revision: 1.70.2.47 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,7 +26,7 @@ float secondLeptonPtCut = 10.0;
 bool DoExperimentalFSRRecovery = false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.46 2012/08/13 14:27:10 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.47 2012/08/13 16:53:06 fronga Exp $
 */
 
 
@@ -705,7 +705,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
 }
 
 //________________________________________________________________________________________
-const bool JZBAnalysis::passFilters( int bits ) {
+const bool JZBAnalysis::passFilters( int& bits ) {
 
   // Check event filters
   bits = 0;
