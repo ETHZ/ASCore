@@ -45,12 +45,12 @@ public:
   const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
   const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);
+  const float GetMuonWeight(float eta1, float pt1, float &EffErr);
+  const float GetElectronWeight(float eta1, float pt1, float &EffErr);
   int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
-  int DetermineFlavor(bool fdoGenInfo,TreeReader *fTR);
-  bool DecaysToTaus(bool fdoGenInfo,TreeReader *fTR);
 
   string outputFileName_; // public name of the output file name
 

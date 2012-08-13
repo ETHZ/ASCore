@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.39 $";
+string sjzbversion="$Revision: 1.70.2.44 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,7 +26,7 @@ float secondLeptonPtCut = 10.0;
 bool DoExperimentalFSRRecovery = false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.39 2012/06/18 15:12:24 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.44 2012/08/10 09:12:44 buchmann Exp $
 */
 
 
@@ -2079,28 +2079,242 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   return true;
 }
 
+
+
 const float JZBAnalysis::GetLeptonWeight(int id1, float pt1, float eta1, int id2, float pt2, float eta2, float &EffErr) {
-    //this function will become more sophisticated in the future (eta & phi based efficiency)
 
   // FIXME: Need to update!
-  EffErr = 0.0;
-  return 1.0;
+  //EffErr = 0.0;
+  //return 1.0;
+
+  float weight1;
+  float error1;
+  float weight2;
+  float error2; 
+
+  if(id1==0) weight1 = GetElectronWeight(eta1, pt1, error1);
+  if(id2==0) weight2 = GetElectronWeight(eta2, pt2, error2);
+  if(id1==1) weight1 = GetMuonWeight(eta1, pt1, error1);
+  if(id2==1) weight2 = GetMuonWeight(eta2, pt2, error2);
+
+  EffErr = TMath::Sqrt(error1*error1*weight1*weight1+error2*error2*weight2*weight2);
+  return weight1*weight2;
+
   
-    if(id1==id2&&id1==0) {
-      //ee
+  /*if(id1==id2&&id1==0) {
       EffErr=0.01;
       return 0.99;
-    }
-    if(id1==id2&&id1==1) {
-      //mm
+  }
+  if(id1==id2&&id1==1) {
+     //mm
       EffErr=0.02;
       return 0.95;
     }
-    if(id1!=id2) {
+  if(id1!=id2) {
       //em
       EffErr=0.03;
       return 0.98;
+   }*/
+
+}
+
+
+
+
+const float JZBAnalysis::GetMuonWeight(float eta1, float pt1, float &error1) {
+
+  float weight1 = 1.0;
+
+  if(abs(eta1)<1.2) {
+    if(pt1 > 10 && pt1 < 20) {
+      weight1 = 1.06;
+      error1 = 0.01;
+    } 
+    else if(pt1 > 20 && pt1 < 30) {
+      weight1 = 1.078;
+      error1 = 0.003;
     }
+    else if(pt1 > 30 && pt1 < 40) {
+      weight1 = 1.041;
+      error1 = 0.002;
+    }
+    else if(pt1 > 40 && pt1 < 60) {
+      weight1 = 1.0184;
+      error1 = 0.0008;
+    }
+    else if(pt1 > 60) { //or only between 60 and 100????
+      weight1 = 1.007;
+      error1 = 0.002;
+    }
+  }  
+  else if(abs(eta1)>1.2) {
+   if(pt1 > 10 && pt1 < 20) {
+      weight1 = 0.970;
+      error1 = 0.051;
+    }
+    else if(pt1 > 20 && pt1 < 30) {
+      weight1 = 1.025;
+      error1 = 0.003;
+    }
+    else if(pt1 > 30 && pt1 < 40) {
+      weight1 = 1.017;
+      error1 = 0.001;
+    }
+    else if(pt1 > 40 && pt1 < 60) {
+      weight1 = 1.009;
+      error1 = 0.0007;
+    }
+    else if(pt1 > 60) { //or only between 60 and 100???
+      weight1 = 1.005;
+      error1 = 0.002;
+    }
+  } 
+
+  return weight1;
+
+}
+
+
+
+const float JZBAnalysis::GetElectronWeight(float eta1, float pt1, float &error1) {
+
+
+   //This is for medium selection
+   float weight1 = 1.0;
+
+   if(abs(eta1)<0.8) {
+     if(pt1 > 10.0 && pt1 < 15.0) {
+       weight1 = 0.879; 
+       error1 = 0.040;
+     }
+     else if(pt1 > 15.0 && pt1 < 20.0) {
+       weight1 = 0.946; 
+       error1 = 0.018;
+     }
+     else if(pt1 > 20.0 && pt1 < 30.0) {
+       weight1 = 1.017; 
+       error1 = 0.004;
+     }
+     else if(pt1 > 30.0 && pt1 < 40.0) {
+       weight1 = 1.019; 
+       error1 = 0.002;
+     }
+     else if(pt1 > 40.0 && pt1 < 50.0) {
+       weight1 = 1.015; 
+       error1 = 0.001;
+     }
+     else if(pt1 > 50.0) {
+       weight1 = 1.005; 
+       error1 = 0.002;
+     }
+   }
+   else if(abs(eta1) > 0.8 && abs(eta1) < 1.442) {
+     if(pt1 > 10.0 && pt1 < 15.0) {
+       weight1 = 0.885;
+       error1 = 0.043;
+     }
+     else if(pt1 > 15.0 && pt1 < 20.0) {
+       weight1 = 0.932;
+       error1 = 0.021;
+     }
+     else if(pt1 > 20.0 && pt1 < 30.0) {
+       weight1 = 0.991;
+       error1 = 0.013;
+     }
+     else if(pt1 > 30.0 && pt1 < 40.0) {
+       weight1 = 1.002;
+       error1 = 0.002;
+     }
+     else if(pt1 > 40.0 && pt1 < 50.0) {
+       weight1 = 1.00;
+       error1 = 0.002;
+     }
+     else if(pt1 > 50.0) {
+       weight1 = 0.992;
+       error1 = 0.003;
+     }
+   }
+   else if(abs(eta1) > 1.442 && abs(eta1) < 1.556) {
+     if(pt1 > 10.0 && pt1 < 15.0) {
+       weight1 = 1.020;
+       error1 = 0.170;
+     }
+     else if(pt1 > 15.0 && pt1 < 20.0) {
+       weight1 = 1.045;
+       error1 = 0.082;
+     }
+     else if(pt1 > 20.0 && pt1 < 30. ) {
+       weight1 = 1.176;
+       error1 = 0.025;
+     }
+     else if(pt1 > 30.0 && pt1 < 40.0) {
+       weight1 = 1.038;
+       error1 = 0.011;
+     }
+     else if(pt1 > 40.0 && pt1 < 50.0) {
+       weight1 = 0.985;
+       error1 = 0.009;
+     }
+     else if(pt1 > 50.0) {
+       weight1 = 0.990;
+       error1 = 0.037;
+     }
+   }
+   else if(abs(eta1) > 1.556 && abs(eta1) < 2.0) {
+     if(pt1 > 10.0 && pt1 < 15.0) {
+       weight1 = 0.873;
+       error1 = 0.073;
+     }
+     else if(pt1 > 15.0 && pt1 < 20.0) {
+       weight1 = 0.958;
+       error1 = 0.031;
+     }
+     else if(pt1 > 20.0 && pt1 < 30. ) {
+       weight1 = 1.010;
+       error1 = 0.009;
+     }
+     else if(pt1 > 30.0 && pt1 < 40.0) {
+       weight1 = 1.010;
+       error1 = 0.004;
+     }
+     else if(pt1 > 40.0 && pt1 < 50.0) {
+       weight1 = 1.013;
+       error1 = 0.003;
+     }
+     else if(pt1 > 50.0) {
+       weight1 = 1.005;
+       error1 = 0.005;
+     }
+   }
+   else if(abs(eta1) > 2.0 && abs(eta1) < 2.5) {
+     if(pt1 > 10.0 && pt1 < 15.0) {
+       weight1 = 1.080;
+       error1 = 0.075;
+     }
+     else if(pt1 > 15.0 && pt1 < 20.0) {
+       weight1 = 1.175;
+       error1 = 0.036;
+     }
+     else if(pt1 > 20.0 && pt1 < 30. ) {
+       weight1 = 1.110;
+       error1 = 0.005;
+     }
+     else if(pt1 > 30.0 && pt1 < 40.0) {
+       weight1 = 1.074;
+       error1 = 0.005;
+     }
+     else if(pt1 > 40.0 && pt1 < 50.0) {
+       weight1 = 1.042;
+       error1 = 0.004;
+     }
+     else if(pt1 > 50.0) {
+       weight1 = 1.020;
+       error1 = 0.007;
+     }
+   }
+
+ return weight1;
+
 }
 
 const float JZBAnalysis::IndividualEffArea(float abseta, string type) {
