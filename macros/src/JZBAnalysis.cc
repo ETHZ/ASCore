@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.45 $";
+string sjzbversion="$Revision: 1.70.2.46 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,7 +26,7 @@ float secondLeptonPtCut = 10.0;
 bool DoExperimentalFSRRecovery = false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.45 2012/08/13 13:53:19 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.46 2012/08/13 14:27:10 buchmann Exp $
 */
 
 
@@ -242,6 +242,8 @@ public:
   float PUweight;
   bool passed_triggers;
   int trigger_bit;
+  bool passed_filters;
+  int filter_bit;
   float mGlu;
   float mChi;
   float mLSP;
@@ -417,6 +419,8 @@ void nanoEvent::reset()
   genJZBSel = 0;
   passed_triggers=0;
   trigger_bit = 0;
+  passed_filters=0;
+  filter_bit = 0;
   
   eta1=0; // leading leptons
   eta2=0;
@@ -701,6 +705,21 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
 }
 
 //________________________________________________________________________________________
+const bool JZBAnalysis::passFilters( int bits ) {
+
+  // Check event filters
+  bits = 0;
+  if ( !fTR->HBHENoiseFilterResult ) bits |= 1;
+  if ( !fTR->hcalLaserEventFilter )  bits |= (1<<2);
+  if ( !fTR->EcalDeadCellTriggerPrimitiveFilter ) bits |= (1<<3);
+  if ( !fTR->trackingFailureFilter ) bits |= (1<<4);
+  if ( !fTR->eeBadScFilter )         bits |= (1<<5);
+
+  return (bits==0);
+
+}
+
+//________________________________________________________________________________________
 JZBAnalysis::~JZBAnalysis(){}
 
 //________________________________________________________________________________________
@@ -935,6 +954,9 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
+  myTree->Branch("passed_filters", &nEvent.passed_filters,"passed_filters/O");
+  myTree->Branch("filter_bit", &nEvent.filter_bit,"filter_bit/I");
+
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
   myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
   myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
@@ -1369,6 +1391,9 @@ void JZBAnalysis::Analyze() {
           nEvent.trigger_bit |= (1<<2);
         }
     }
+
+  // Event filter information
+  nEvent.passed_filters = passFilters( nEvent.filter_bit );
 
   // Check if we find an OSSF pair in the acceptance (and if it is coming from a Z)
   bool isMC = (fDataType_ == "mc");
