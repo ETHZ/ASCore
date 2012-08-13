@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.44 $";
+string sjzbversion="$Revision: 1.70.2.45 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,7 +26,7 @@ float secondLeptonPtCut = 10.0;
 bool DoExperimentalFSRRecovery = false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.44 2012/08/10 09:12:44 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.45 2012/08/13 13:53:19 pablom Exp $
 */
 
 
@@ -209,7 +209,8 @@ public:
   int pfJetGoodNum50;
   int pfJetGoodNum60;
 
-  int LeadingJetFlavor;
+  int EventFlavor;
+  bool EventZToTaus;
   
   float met[mettype_max];
   float metPhi[mettype_max];
@@ -294,9 +295,13 @@ public:
   float LSP2Mopt;
   
   //Z+b variables
-  float alpha;
   float mpf;
   bool pass_b_PU_rejection;
+  
+  float Zb20_alpha;
+  float Zb30_alpha;
+  float Zb40_alpha;
+  
   
   float Zb20_bTagProbCSVBP[30]; //tested
   int Zb20_pfJetGoodNumBtag; //tested
@@ -503,7 +508,8 @@ void nanoEvent::reset()
     bTagProbCSVMVA[jCounter] = 0;
   }
 
-  LeadingJetFlavor=0;
+  EventFlavor=0;
+  EventZToTaus=false;
   
   pfJetGoodNum=0;
   pfJetGoodNumID=0;
@@ -598,7 +604,9 @@ void nanoEvent::reset()
   LSP2Mopt=0;
   
   //Z+b variables
-  alpha=0;
+  Zb20_alpha=0;
+  Zb30_alpha=0;
+  Zb40_alpha=0;
   mpf=0;
   pass_b_PU_rejection=false;
   
@@ -673,7 +681,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",2,4); // 2,3,4,6,7,10,11
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,16);
-  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,20);
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,22);
   
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
@@ -942,8 +950,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
   myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
-  myTree->Branch("LeadingJetFlavor",&nEvent.LeadingJetFlavor,"LeadingJetFlavor/I");
-  
+  myTree->Branch("EventFlavor",&nEvent.EventFlavor,"EventFlavor/I");
+  myTree->Branch("EventZToTaus",&nEvent.EventZToTaus,"EventZToTaus/O");
+    
   myTree->Branch("Zb20_pfJetGoodNum",&nEvent.Zb20_pfJetGoodNum,"Zb20_pfJetGoodNum/I");
   myTree->Branch("Zb20_pfJetGoodNumBtag",&nEvent.Zb20_pfJetGoodNumBtag,"Zb20_pfJetGoodNumBtag/I");
   myTree->Branch("Zb20_pfJetSum",&nEvent.Zb20_pfJetSum,"Zb20_pfJetSum/F");
@@ -1015,7 +1024,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
   
     //Z+b variables
-  myTree->Branch("alpha",&nEvent.alpha,"alpha/F");
+  myTree->Branch("Zb20_alpha",&nEvent.Zb20_alpha,"Zb20_alpha/F");
+  myTree->Branch("Zb30_alpha",&nEvent.Zb30_alpha,"Zb30_alpha/F");
+  myTree->Branch("Zb40_alpha",&nEvent.Zb40_alpha,"Zb40_alpha/F");
   myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
   myTree->Branch("pass_b_PU_rejection",&nEvent.pass_b_PU_rejection,"pass_b_PU_rejection/O");
 
@@ -1137,7 +1148,8 @@ void JZBAnalysis::Analyze() {
       
       DoFSRStudy(fdoGenInfo,fTR);
       
-      nEvent.LeadingJetFlavor=1000;
+      nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
+      nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
       for(int i=0;i<fTR->nGenParticles;i++) {
 	if(i>40) continue;
 //	if(fTR->genInfoStatus[i]!=1) continue;
@@ -1757,8 +1769,11 @@ void JZBAnalysis::Analyze() {
     nEvent.Zb30_pfJetSum=TMath::Sqrt(Zb30sumOfPFJets.Px()*Zb30sumOfPFJets.Px()+Zb30sumOfPFJets.Py()*Zb30sumOfPFJets.Py());
     nEvent.Zb40_pfJetSum=TMath::Sqrt(Zb40sumOfPFJets.Px()*Zb40sumOfPFJets.Px()+Zb40sumOfPFJets.Py()*Zb40sumOfPFJets.Py());
     
-    if(nEvent.pfJetGoodNum>0) nEvent.alpha=nEvent.pfJetGoodPt[1]/nEvent.pt;
+    if(nEvent.Zb20_pfJetGoodNum>0) nEvent.Zb20_alpha=nEvent.Zb20_pfJetGoodPt[1]/nEvent.pt;
+    if(nEvent.Zb30_pfJetGoodNum>0) nEvent.Zb30_alpha=nEvent.Zb30_pfJetGoodPt[1]/nEvent.pt;
+    if(nEvent.Zb40_pfJetGoodNum>0) nEvent.Zb40_alpha=nEvent.Zb40_pfJetGoodPt[1]/nEvent.pt;
     nEvent.mpf=1+(pfMETvector.Vect()*zVector.Vect())/(zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());
+    
     nEvent.pass_b_PU_rejection=true; // this needs to be fixed (i.e. the vertex loop below needs to be implemented)
 //    for(int ivtx=0;ivtx<fTR->NVrtx;ivtx++) {
       //find vtx most compatible with our Z (not sure how, yet)
@@ -2657,7 +2672,50 @@ void AddGenPhoton(TreeReader *fTR, int index) {
   nEvent.genPhotonsNPhotons++;
 }
 
+int JZBAnalysis::DetermineFlavor(bool fdoGenInfo,TreeReader *fTR) {
+  int flavorCounter[7];
+  for(int i=0;i<7;i++) flavorCounter[i]=0;
+  for(int i=0;i<fTR->nGenParticles;i++) {
+    if(fTR->genInfoStatus[i]!=3) continue;
+    if(abs(fTR->genInfoId[i])>10||abs(fTR->genInfoId[i])==0) continue; // not a quark
+    flavorCounter[abs(fTR->genInfoId[i])]++;
+  }
+  for(int i=6;i>0;i--) {
+    if(flavorCounter[i]>0) return i;
+  }
+  return 1;
+}
 
+bool JZBAnalysis::DecaysToTaus(bool fdoGenInfo,TreeReader *fTR) {
+  //built in potential to look at lepton flavors other than taus
+  int nTaus=0;
+  int nNeutrinos=0;
+  int nHad=0;
+  int nMu=0;
+  int nEl=0;
+  for(int iMother=0;iMother<fTR->nGenParticles;iMother++) {
+    if(fTR->genInfoStatus[iMother]==2) continue;
+    if(!(abs(fTR->genInfoId[iMother])==23)) continue; // not a Z
+    for(int da=iMother+1;da<fTR->nGenParticles;da++) {
+      if(fTR->genInfoStatus[da]==2) continue;
+      if(!(fTR->genInfoMo1[da]==iMother) ) continue; // not a daughter
+      int Pid=abs(fTR->genInfoId[da]);
+      if(Pid==11) nEl++;
+      if(Pid==13) nMu++;
+      if(Pid==15) nTaus++;
+      if(Pid==12) nNeutrinos++;//e neutrino
+      if(Pid==14) nNeutrinos++;//m neutrino
+      if(Pid==16) nNeutrinos++;//t neutrino
+      if(Pid>0&&Pid<10) nHad++;
+    }//end of daughter loop
+  }//end of particle loop
+  if(nTaus>0) return true;
+  return false;
+}
+  
+
+  
+  
 void JZBAnalysis::DoFSRStudy(bool fdoGenInfo,TreeReader *fTR) {
   int nGenParticles=fTR->nGenParticles;
   

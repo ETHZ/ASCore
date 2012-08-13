@@ -51,6 +51,8 @@ public:
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
+  bool DecaysToTaus(bool, TreeReader*);
+  int DetermineFlavor(bool, TreeReader*);
 
   string outputFileName_; // public name of the output file name
 
