@@ -42,7 +42,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
-  OutputTree[6] = new TTree("Tree_singlephoton_sel_noimpingingcut","Tree_singlephoton_sel_noimpingingcut");
+  OutputTree[6] = new TTree("Tree_nchargedhadrons_sel","Tree_nchargedhadrons_sel");
   OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
   OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
   OutputTree[9] = new TTree("Tree_combisosideband_sel","Tree_combisosideband_sel");
@@ -217,6 +217,8 @@ void DiPhotonMiniTree::Begin(){
 
   OutputTree[i]->Branch("pholead_hasimpingingtrack",&pholead_hasimpingingtrack,"pholead_hasimpingingtrack/I");
   OutputTree[i]->Branch("photrail_hasimpingingtrack",&photrail_hasimpingingtrack,"photrail_hasimpingingtrack/I");
+  OutputTree[i]->Branch("pholead_Nchargedhadronsincone",&pholead_Nchargedhadronsincone,"pholead_Nchargedhadronsincone/I");
+  OutputTree[i]->Branch("photrail_Nchargedhadronsincone",&photrail_Nchargedhadronsincone,"photrail_Nchargedhadronsincone/I");
 
   }
 
@@ -314,9 +316,14 @@ void DiPhotonMiniTree::Analyze(){
       else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"cut_combiso_sideband");
       else passing=PhotonSelection(fTR,passing);
 
+//      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
+//      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
+
       if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
-      else if (sel_cat==6) passing=std::vector<int>(); // turned off
-      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
+      
+      if (sel_cat==6) passing = NChargedHadronsInConeSelection(fTR,passing,0); // cut on number of charged hadrons in cone (after veto cones)
+
+
 
     }
 
@@ -380,169 +387,6 @@ void DiPhotonMiniTree::Analyze(){
 
 }
 
-
-
-void DiPhotonMiniTree::FillLead(int index){
-
-  pholead_eta = fTR->PhoEta[index];
-  pholead_px = fTR->PhoPx[index];
-  pholead_py = fTR->PhoPy[index];
-  pholead_pt = fTR->PhoPt[index];
-  pholead_pz = fTR->PhoPz[index];
-  pholead_energy = fTR->PhoEnergy[index];
-  pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[index]];
-  pholead_SCphi = fTR->SCPhi[fTR->PhotSCindex[index]];
-  pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[index];
-  pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[index];
-  pholead_PhoScSeedSeverity=fTR->PhoScSeedSeverity[index];
-  pholead_energySCdefault = CorrPhoton(fTR,index,0).E();
-  pholead_energyNewCorr = CorrPhoton(fTR,index,5).E();
-  pholead_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
-  pholead_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
-  pholead_sieie = fTR->PhoSigmaIetaIeta[index];
-  pholead_hoe = fTR->PhoHoverE[index];
-  pholead_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
-  pholead_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
-  pholead_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[index]];
-  pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  //pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=CombinedPFIsolation(index,-999,"photon",0,0.3);
-  //  std::cout << "debug PFPhotonIso " << CombinedPFIsolation(index,-999,"photon") << " " << pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx << std::endl;
-  pholead_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[index];
-  pholead_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[index];
-  pholead_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[index];
-  pholead_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[index];
-  pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[index];
-  pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[index];
-  pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
-  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
-  pholead_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
-  //  pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
-  pholead_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
-  //  std::cout << "debug PFCombinedIso " << CombinedPFIsolation(index) << " " << pholead_pho_Cone04PFCombinedIso*pholead_pt << std::endl;
-  pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
-  if (fTR->PhoMCmatchindex[index]>=0) pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
-  pholead_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
-  pholead_PhoIso03Hcal=fTR->PhoIso03Hcal[index];
-  pholead_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[index];
-  pholead_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[index];
-  pholead_PhoIso03=fTR->PhoIso03[index];
-  pholead_PhoIso04Ecal=fTR->PhoIso04Ecal[index];
-  pholead_PhoIso04Hcal=fTR->PhoIso04Hcal[index];
-  pholead_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[index];
-  pholead_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[index];
-  pholead_PhoIso04=fTR->PhoIso04[index];
-  pholead_PhoE1OverE9=fTR->PhoE1OverE9[index];
-  pholead_PhoS4OverS1=fTR->PhoS4OverS1[index];
-  pholead_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[index];
-  pholead_PhoE1x5=fTR->PhoE1x5[index];
-  pholead_PhoE2x5=fTR->PhoE2x5[index];
-  pholead_PhoE3x3=fTR->PhoE3x3[index];
-  pholead_PhoE5x5=fTR->PhoE5x5[index];
-  pholead_PhomaxEnergyXtal=fTR->PhomaxEnergyXtal[index];
-  pholead_PhoIso03HcalDepth1=fTR->PhoIso03HcalDepth1[index];
-  pholead_PhoIso03HcalDepth2=fTR->PhoIso03HcalDepth2[index];
-  pholead_PhoIso04HcalDepth1=fTR->PhoIso04HcalDepth1[index];
-  pholead_PhoIso04HcalDepth2=fTR->PhoIso04HcalDepth2[index];
-  pholead_PhoIso03nTrksSolid=fTR->PhoIso03nTrksSolid[index];
-  pholead_PhoIso03nTrksHollow=fTR->PhoIso03nTrksHollow[index];
-  pholead_PhoIso04nTrksSolid=fTR->PhoIso04nTrksSolid[index];
-  pholead_PhoIso04nTrksHollow=fTR->PhoIso04nTrksHollow[index];
-  pholead_Pho_ChargedHadronIso=fTR->Pho_ChargedHadronIso[index];
-  pholead_Pho_NeutralHadronIso=fTR->Pho_NeutralHadronIso[index];
-  pholead_Pho_PhotonIso=fTR->Pho_PhotonIso[index];
-  pholead_Pho_isPFPhoton=fTR->Pho_isPFPhoton[index];
-  pholead_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
-  pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
-  pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
-  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
-  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
-  int a;
-  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
-
-};
-
-void DiPhotonMiniTree::FillTrail(int index){
-
-  photrail_eta = fTR->PhoEta[index];
-  photrail_px = fTR->PhoPx[index];
-  photrail_py = fTR->PhoPy[index];
-  photrail_pt = fTR->PhoPt[index];
-  photrail_pz = fTR->PhoPz[index];
-  photrail_energy = fTR->PhoEnergy[index];
-  photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[index]];
-  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[index]];
-  photrail_PhoHasPixSeed=fTR->PhoHasPixSeed[index];
-  photrail_PhoHasConvTrks=fTR->PhoHasConvTrks[index];
-  photrail_PhoScSeedSeverity=fTR->PhoScSeedSeverity[index];
-  photrail_energySCdefault = CorrPhoton(fTR,index,0).E();
-  photrail_energyNewCorr = CorrPhoton(fTR,index,5).E();
-  photrail_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
-  photrail_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
-  photrail_sieie = fTR->PhoSigmaIetaIeta[index];
-  photrail_hoe = fTR->PhoHoverE[index];
-  photrail_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
-  photrail_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
-  photrail_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[index]];
-  photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  //  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
-  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=CombinedPFIsolation(index,-999,"photon",0,0.3);
-  photrail_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[index];
-  photrail_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[index];
-  photrail_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[index];
-  photrail_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[index];
-  photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[index];
-  photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[index];
-  photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
-  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
-  photrail_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
-  //  photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
-  photrail_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
-  photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
-  if (fTR->PhoMCmatchindex[index]>=0) photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
-  photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
-  photrail_PhoIso03Hcal=fTR->PhoIso03Hcal[index];
-  photrail_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[index];
-  photrail_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[index];
-  photrail_PhoIso03=fTR->PhoIso03[index];
-  photrail_PhoIso04Ecal=fTR->PhoIso04Ecal[index];
-  photrail_PhoIso04Hcal=fTR->PhoIso04Hcal[index];
-  photrail_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[index];
-  photrail_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[index];
-  photrail_PhoIso04=fTR->PhoIso04[index];
-  photrail_PhoE1OverE9=fTR->PhoE1OverE9[index];
-  photrail_PhoS4OverS1=fTR->PhoS4OverS1[index];
-  photrail_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[index];
-  photrail_PhoE1x5=fTR->PhoE1x5[index];
-  photrail_PhoE2x5=fTR->PhoE2x5[index];
-  photrail_PhoE3x3=fTR->PhoE3x3[index];
-  photrail_PhoE5x5=fTR->PhoE5x5[index];
-  photrail_PhomaxEnergyXtal=fTR->PhomaxEnergyXtal[index];
-  photrail_PhoIso03HcalDepth1=fTR->PhoIso03HcalDepth1[index];
-  photrail_PhoIso03HcalDepth2=fTR->PhoIso03HcalDepth2[index];
-  photrail_PhoIso04HcalDepth1=fTR->PhoIso04HcalDepth1[index];
-  photrail_PhoIso04HcalDepth2=fTR->PhoIso04HcalDepth2[index];
-  photrail_PhoIso03nTrksSolid=fTR->PhoIso03nTrksSolid[index];
-  photrail_PhoIso03nTrksHollow=fTR->PhoIso03nTrksHollow[index];
-  photrail_PhoIso04nTrksSolid=fTR->PhoIso04nTrksSolid[index];
-  photrail_PhoIso04nTrksHollow=fTR->PhoIso04nTrksHollow[index];
-  photrail_Pho_ChargedHadronIso=fTR->Pho_ChargedHadronIso[index];
-  photrail_Pho_NeutralHadronIso=fTR->Pho_NeutralHadronIso[index];
-  photrail_Pho_PhotonIso=fTR->Pho_PhotonIso[index];
-  photrail_Pho_isPFPhoton=fTR->Pho_isPFPhoton[index];
-  photrail_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
-  photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
-  photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
-  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
-  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
-  int a;
-  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
-
-};
 
 
 void DiPhotonMiniTree::End(){
@@ -802,6 +646,585 @@ int DiPhotonMiniTree::Count_part_isrfsr_gamma(TreeReader *fTR, std::vector<int> 
 
 };
 
+
+double DiPhotonMiniTree::phiNorm(float phi) {
+
+  const float pi = 3.1415927;
+  const float twopi = 2.0*pi;
+
+  if(phi >  pi) {phi = phi - twopi;}
+  if(phi < -pi) {phi = phi + twopi;}
+
+  return phi;
+}
+
+bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi){
+
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  photon_position.SetPhi(phi);
+  double eta = photon_position.Eta();
+
+  const bool debug=false;
+  if (debug) std::cout << "calling FindCloseJetsAndPhotons eta=" << eta << " phi=" << phi << std::endl;
+
+  const float mindR = 0.8;
+  bool found=false;
+
+  for (int i=0; i<fTR->NJets; i++){
+    if (fTR->JPt[i]<20) continue;
+    float dR = Util::GetDeltaR(eta,fTR->JEta[i],phi,fTR->JPhi[i]);
+    if (dR<mindR) found=true;
+    if (debug) if (dR<mindR) std::cout << "Found jet eta=" << fTR->JEta[i] << " phi=" << fTR->JPhi[i] << std::endl;
+  }
+
+  for (int i=0; i<fTR->NPhotons; i++){
+    if (fTR->PhoPt[i]<10) continue;
+    float dR = Util::GetDeltaR(eta,fTR->PhoEta[i],phi,fTR->PhoPhi[i]);
+    if (dR<mindR) found=true;
+    if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
+  }
+
+
+  const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
+  float puenergy =3.14*0.4*0.4*eff_area*fTR->Rho;
+  if (CombinedPFIsolation(phoqi,phi,"combined")-puenergy>5) found=true;
+
+  TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
+    
+  int a;
+  bool found_impinging = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,phoqi));
+  if (found_impinging) found=true;
+
+  if (debug) std::cout << "returning " << found << std::endl;
+  return found;
+
+};
+
+std::vector<int> DiPhotonMiniTree::GetPFCandRemovals(TreeReader *fTR, int phoqi){
+  std::vector<int> out;
+  if (fTR->Pho_isPFPhoton[phoqi]) out.push_back(fTR->pho_matchedPFPhotonCand[phoqi]);
+  if (fTR->Pho_isPFElectron[phoqi]) out.push_back(fTR->pho_matchedPFElectronCand[phoqi]);
+  return out;
+}
+
+float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
+
+  float result=0;
+  
+  //  double sceta = fTR->SCEta[fTR->PhotSCindex[phoqi]];
+  //  double scphi = fTR->SCPhi[fTR->PhotSCindex[phoqi]];
+  
+  TVector3 photon_true_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  
+  double true_scphi = photon_true_position.Phi();
+
+  double rotated_scphi = phiNorm(true_scphi+0.5*TMath::Pi());
+
+  bool isok = !(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
+  if (!isok) {
+    rotated_scphi=phiNorm(true_scphi-0.5*TMath::Pi());
+    isok=!(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
+  }
+  
+    int count=0;
+    while (!isok && count<20) {
+      rotated_scphi = phiNorm(true_scphi+randomgen->Uniform(0.8,6.28-0.8));
+      isok=!(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
+      count++;
+    }
+
+    if (count==20){
+      std::cout << "Error in random cone generation!!! Eta=" << photon_true_position.Eta() << std::endl;
+      return -999;
+    };
+
+    TVector3 photon_rotated_position(photon_true_position.x(),photon_true_position.y(),photon_true_position.z());
+    photon_rotated_position.SetPhi(rotated_scphi);
+
+    return CombinedPFIsolation(phoqi,rotated_scphi,"photon",0,0.3);
+
+};
+
+std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert){
+
+  for (int i=0; i<100; i++) impinging_track_pfcand[i]=-999;
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    
+    bool found=0;
+    int phoqi=*it;
+    
+    TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+    TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
+    
+    found = FindImpingingTrack(fTR,photon_position,phovtx,impinging_track_pfcand[phoqi],GetPFCandRemovals(fTR,phoqi));
+
+    if (invert) { // selection = 0 impinging tracks
+      if (found) it=passing.erase(it); else it++;
+    }
+
+    else { // selection = 1 impinging track
+
+      if (found){    
+	std::vector<int> toremove;
+	toremove.push_back(impinging_track_pfcand[phoqi]);
+	float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+	const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
+	const float dR=0.4;
+	float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
+	if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy>5) found=0;
+      }
+      
+      if (!found) it=passing.erase(it); else it++;
+    
+    }
+
+  }
+
+  return passing;
+  
+};
+
+
+bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals){
+
+  bool found = false;
+
+  TVector3 photon_position = caloposition;
+  TVector3 phovtx = refvertex;
+
+  for (int i=0; i<fTR->NPfCand; i++){
+    
+    bool removed = false;
+    for (int j=0; j<removals.size(); j++) {
+      if (i==removals.at(j)) removed=true;
+    }
+    if (removed) continue;
+    
+    float id = fTR->PfCandPdgId[i];
+    if (!(fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212)) continue;
+    
+    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+    TVector3 photon_direction = photon_position-pfvertex;
+      
+    double sceta = photon_direction.Eta();
+    double scphi = photon_direction.Phi();
+
+    double dEta = fTR->PfCandEta[i] - sceta;
+    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+    double pt = fTR->PfCandPt[i];
+
+    TVector3 vtxmom(fTR->PfCandTrackRefPx[i],fTR->PfCandTrackRefPy[i],fTR->PfCandTrackRefPz[i]);
+
+    if (vtxmom.x()==-999 || vtxmom.y()==-999 || vtxmom.z()==-999) {
+      std::cout << "Something wrong with vtxmom from trackref, fallback" << std::endl;
+      vtxmom = TVector3(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
+    }
+      
+    double dxy = ( -(pfvertex.x()-phovtx.x())*vtxmom.y() +(pfvertex.y()-phovtx.y())*vtxmom.x() ) / vtxmom.Perp();
+    double dz = (pfvertex.z()-phovtx.z()) - ( (pfvertex.x()-phovtx.x())*vtxmom.x() + (pfvertex.y()-phovtx.y())*vtxmom.y() ) / vtxmom.Perp() * vtxmom.z() / vtxmom.Perp();
+    dxy=fabs(dxy);
+    dz=fabs(dz);
+
+    if (pt<1.5) continue;
+    if (dR>0.4) continue;
+
+    // additional veto sieie-orthogonal
+    if (fabs(sceta)<1.4442){
+      if (fabs(dEta)<0.05) continue;
+      if (fabs(dPhi)<0.05) continue;
+    }
+    
+    if (dz>0.2) continue;
+    if (dxy>0.1) continue;
+    if (dR<0.02) continue;
+
+    if (!(fTR->PfCandHasHitInFirstPixelLayer[i])) continue;
+
+    found=1;
+    reference_index_found = i;
+    break;
+      
+  } // end pf cand loop
+
+  return found;
+
+};
+
+int DiPhotonMiniTree::CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals){
+
+  int found = 0;
+  
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
+    
+  for (int i=0; i<fTR->NPfCand; i++){
+    
+    bool removed = false;
+    for (int j=0; j<removals.size(); j++) {
+      if (i==removals.at(j)) removed=true;
+    }
+    if (removed) continue;
+    
+    float id = fTR->PfCandPdgId[i];
+    if (!(fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212)) continue;
+    
+    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+    TVector3 photon_direction = photon_position-pfvertex;
+      
+    double sceta = photon_direction.Eta();
+    double scphi = photon_direction.Phi();
+
+    double dEta = fTR->PfCandEta[i] - sceta;
+    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+    double pt = fTR->PfCandPt[i];
+
+    TVector3 vtxmom(fTR->PfCandTrackRefPx[i],fTR->PfCandTrackRefPy[i],fTR->PfCandTrackRefPz[i]);
+
+    if (vtxmom.x()==-999 || vtxmom.y()==-999 || vtxmom.z()==-999) {
+      std::cout << "Something wrong with vtxmom from trackref, fallback" << std::endl;
+      vtxmom = TVector3(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
+    }
+      
+    double dxy = ( -(pfvertex.x()-phovtx.x())*vtxmom.y() +(pfvertex.y()-phovtx.y())*vtxmom.x() ) / vtxmom.Perp();
+    double dz = (pfvertex.z()-phovtx.z()) - ( (pfvertex.x()-phovtx.x())*vtxmom.x() + (pfvertex.y()-phovtx.y())*vtxmom.y() ) / vtxmom.Perp() * vtxmom.z() / vtxmom.Perp();
+    dxy=fabs(dxy);
+    dz=fabs(dz);
+
+    if (dR>0.4) continue;
+
+    // additional veto sieie-orthogonal
+    if (fabs(sceta)<1.4442){
+      if (fabs(dEta)<0.05) continue;
+      if (fabs(dPhi)<0.05) continue;
+    }
+    
+    if (dz>0.2) continue;
+    if (dxy>0.1) continue;
+    if (dR<0.02) continue;
+
+    if (!(fTR->PfCandHasHitInFirstPixelLayer[i])) continue;
+
+    found++;
+      
+  } // end pf cand loop
+
+  return found;
+
+};
+
+std::vector<int> DiPhotonMiniTree::NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum, int maximum){
+
+  if (maximum<minimum) {
+    std::cout << "Wrong values for NChargedHadronsInCone selection!!!" << std::endl;
+    return std::vector<int>();
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    int n = CountChargedHadronsInCone(fTR,*it,GetPFCandRemovals(fTR,*it));
+    if (n>=minimum && n<=maximum) pass=1; else pass=0;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  return passing;
+
+};
+
+void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex){
+  return;
+};
+
+float DiPhotonMiniTree::CombinedPFIsolation(int phoqi, float newphi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, std::vector<int> removals){
+
+  float result=0;
+
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
+  TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
+ 
+  if (newphi==-999) newphi=photon_position.Phi();
+  else {
+    photon_position.SetPhi(newphi);
+  }
+
+  for (int i=0; i<fTR->NPfCand; i++){
+
+    if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
+    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
+
+    int type = FindPFCandType(fTR->PfCandPdgId[i]);
+
+    if (!(type==0 || type==1 || type==2)) continue;
+
+    if (component=="neutral" && type!=0) continue;
+    if (component=="charged" && type!=1) continue;
+    if (component=="photon" && type!=2) continue;
+
+    bool removed = false;
+    for (int j=0; j<removals.size(); j++) {
+      if (i==removals.at(j)) removed=true;
+    }
+    if (removed) continue;
+
+    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
+    TVector3 photon_direction = photon_position-pfvertex;
+
+    float sceta = photon_direction.Eta();
+    float scphi = photon_direction.Phi();
+
+    double dEta = fTR->PfCandEta[i] - sceta;
+    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
+
+    double pt = fTR->PfCandPt[i];
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+
+    double dxy;
+    double dz;
+
+    if (type==1){
+
+      TVector3 vtxmom(fTR->PfCandTrackRefPx[i],fTR->PfCandTrackRefPy[i],fTR->PfCandTrackRefPz[i]);
+
+      if (vtxmom.x()==-999 || vtxmom.y()==-999 || vtxmom.z()==-999) {
+	std::cout << "Something wrong with vtxmom from trackref, fallback" << std::endl;
+	vtxmom = TVector3(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
+      }
+      
+      dxy = ( -(pfvertex.x()-phovtx.x())*vtxmom.y() +(pfvertex.y()-phovtx.y())*vtxmom.x() ) / vtxmom.Perp();
+      dz = (pfvertex.z()-phovtx.z()) - ( (pfvertex.x()-phovtx.x())*vtxmom.x() + (pfvertex.y()-phovtx.y())*vtxmom.y() ) / vtxmom.Perp() * vtxmom.z() / vtxmom.Perp();
+      dxy=fabs(dxy);
+      dz=fabs(dz);
+
+    }
+
+    if (dR>0.4) continue;
+
+    // additional veto sieie-orthogonal
+    if (fTR->PhoisEB[phoqi]){
+      if (fabs(dEta)<0.05) continue;
+      if (fabs(dPhi)<0.05) continue;
+    }
+
+    if (type==2){ 
+
+      if (fTR->PhoisEB[phoqi]){
+	if (fabs(dEta)<0.015) continue;
+	if (pt<minimal_pfphotoncand_threshold_EB) continue;
+      }
+      else if (fTR->PhoisEE[phoqi]){
+	float limit_dR = 0.00864*fabs(sinh(sceta))*4;
+	if (dR<limit_dR) continue;
+	if (pt<minimal_pfphotoncand_threshold_EE) continue;
+      }
+      else {
+	std::cout << "Something wrong" << std::endl;
+	return -999;
+      }
+
+    }
+
+    if (type==1){
+
+      if (dz>0.2) continue;
+      if (dxy>0.1) continue;
+      if (dR<0.02) continue;
+
+    }
+
+
+    result+=pt;
+
+  } // end pf cand loop
+
+  return result;
+
+};
+
+
+int DiPhotonMiniTree::FindPFCandType(int id){
+
+  int type = -1;
+
+  if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
+  if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
+  if (id==22) type=2; //photons
+  if (fabs(id)==11) type=3; //electrons
+  if (fabs(id)==13) type=4; //muons
+
+  return type;
+}
+
+
+void DiPhotonMiniTree::FillLead(int index){
+
+  pholead_eta = fTR->PhoEta[index];
+  pholead_px = fTR->PhoPx[index];
+  pholead_py = fTR->PhoPy[index];
+  pholead_pt = fTR->PhoPt[index];
+  pholead_pz = fTR->PhoPz[index];
+  pholead_energy = fTR->PhoEnergy[index];
+  pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[index]];
+  pholead_SCphi = fTR->SCPhi[fTR->PhotSCindex[index]];
+  pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[index];
+  pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[index];
+  pholead_PhoScSeedSeverity=fTR->PhoScSeedSeverity[index];
+  pholead_energySCdefault = CorrPhoton(fTR,index,0).E();
+  pholead_energyNewCorr = CorrPhoton(fTR,index,5).E();
+  pholead_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
+  pholead_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
+  pholead_sieie = fTR->PhoSigmaIetaIeta[index];
+  pholead_hoe = fTR->PhoHoverE[index];
+  pholead_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
+  pholead_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
+  pholead_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[index]];
+  pholead_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  pholead_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  pholead_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  //pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=CombinedPFIsolation(index,-999,"photon",0,0.3);
+  //  std::cout << "debug PFPhotonIso " << CombinedPFIsolation(index,-999,"photon") << " " << pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx << std::endl;
+  pholead_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[index];
+  pholead_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[index];
+  pholead_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[index];
+  //  pholead_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[index];
+  pholead_pho_Cone04NeutralHadronIso_mvVtx=CombinedPFIsolation(index,-999,"neutral",0,0);
+  pholead_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[index];
+  pholead_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[index];
+  pholead_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
+  //  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
+  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=CombinedPFIsolation(index,-999,"charged",0,0);
+  pholead_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
+  //  pholead_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  pholead_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
+  //  std::cout << "debug PFCombinedIso " << CombinedPFIsolation(index) << " " << pholead_pho_Cone04PFCombinedIso*pholead_pt << std::endl;
+  pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
+  if (fTR->PhoMCmatchindex[index]>=0) pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
+  pholead_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
+  pholead_PhoIso03Hcal=fTR->PhoIso03Hcal[index];
+  pholead_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[index];
+  pholead_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[index];
+  pholead_PhoIso03=fTR->PhoIso03[index];
+  pholead_PhoIso04Ecal=fTR->PhoIso04Ecal[index];
+  pholead_PhoIso04Hcal=fTR->PhoIso04Hcal[index];
+  pholead_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[index];
+  pholead_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[index];
+  pholead_PhoIso04=fTR->PhoIso04[index];
+  pholead_PhoE1OverE9=fTR->PhoE1OverE9[index];
+  pholead_PhoS4OverS1=fTR->PhoS4OverS1[index];
+  pholead_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[index];
+  pholead_PhoE1x5=fTR->PhoE1x5[index];
+  pholead_PhoE2x5=fTR->PhoE2x5[index];
+  pholead_PhoE3x3=fTR->PhoE3x3[index];
+  pholead_PhoE5x5=fTR->PhoE5x5[index];
+  pholead_PhomaxEnergyXtal=fTR->PhomaxEnergyXtal[index];
+  pholead_PhoIso03HcalDepth1=fTR->PhoIso03HcalDepth1[index];
+  pholead_PhoIso03HcalDepth2=fTR->PhoIso03HcalDepth2[index];
+  pholead_PhoIso04HcalDepth1=fTR->PhoIso04HcalDepth1[index];
+  pholead_PhoIso04HcalDepth2=fTR->PhoIso04HcalDepth2[index];
+  pholead_PhoIso03nTrksSolid=fTR->PhoIso03nTrksSolid[index];
+  pholead_PhoIso03nTrksHollow=fTR->PhoIso03nTrksHollow[index];
+  pholead_PhoIso04nTrksSolid=fTR->PhoIso04nTrksSolid[index];
+  pholead_PhoIso04nTrksHollow=fTR->PhoIso04nTrksHollow[index];
+  pholead_Pho_ChargedHadronIso=fTR->Pho_ChargedHadronIso[index];
+  pholead_Pho_NeutralHadronIso=fTR->Pho_NeutralHadronIso[index];
+  pholead_Pho_PhotonIso=fTR->Pho_PhotonIso[index];
+  pholead_Pho_isPFPhoton=fTR->Pho_isPFPhoton[index];
+  pholead_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
+  pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
+  pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
+  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
+  int a;
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
+  pholead_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,GetPFCandRemovals(fTR,index));
+};
+
+void DiPhotonMiniTree::FillTrail(int index){
+
+  photrail_eta = fTR->PhoEta[index];
+  photrail_px = fTR->PhoPx[index];
+  photrail_py = fTR->PhoPy[index];
+  photrail_pt = fTR->PhoPt[index];
+  photrail_pz = fTR->PhoPz[index];
+  photrail_energy = fTR->PhoEnergy[index];
+  photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[index]];
+  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[index]];
+  photrail_PhoHasPixSeed=fTR->PhoHasPixSeed[index];
+  photrail_PhoHasConvTrks=fTR->PhoHasConvTrks[index];
+  photrail_PhoScSeedSeverity=fTR->PhoScSeedSeverity[index];
+  photrail_energySCdefault = CorrPhoton(fTR,index,0).E();
+  photrail_energyNewCorr = CorrPhoton(fTR,index,5).E();
+  photrail_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
+  photrail_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
+  photrail_sieie = fTR->PhoSigmaIetaIeta[index];
+  photrail_hoe = fTR->PhoHoverE[index];
+  photrail_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
+  photrail_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
+  photrail_sigmaEta = fTR->SCEtaWidth[fTR->PhotSCindex[index]];
+  photrail_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  photrail_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  photrail_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  //  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=fTR->pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[index];
+  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx=CombinedPFIsolation(index,-999,"photon",0,0.3);
+  photrail_pho_Cone01NeutralHadronIso_mvVtx=fTR->pho_Cone01NeutralHadronIso_mvVtx[index];
+  photrail_pho_Cone02NeutralHadronIso_mvVtx=fTR->pho_Cone02NeutralHadronIso_mvVtx[index];
+  photrail_pho_Cone03NeutralHadronIso_mvVtx=fTR->pho_Cone03NeutralHadronIso_mvVtx[index];
+  //  photrail_pho_Cone04NeutralHadronIso_mvVtx=fTR->pho_Cone04NeutralHadronIso_mvVtx[index];
+  photrail_pho_Cone04NeutralHadronIso_mvVtx=CombinedPFIsolation(index,-999,"neutral",0,0);
+  photrail_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[index];
+  photrail_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[index];
+  photrail_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[index];
+  //  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=fTR->pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[index];
+  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01=CombinedPFIsolation(index,-999,"charged",0,0);
+  photrail_pho_Cone03PFCombinedIso=fTR->pho_Cone03PFCombinedIso[index];
+  //  photrail_pho_Cone04PFCombinedIso=fTR->pho_Cone04PFCombinedIso[index];
+  photrail_pho_Cone04PFCombinedIso=CombinedPFIsolation(index,-999,"combined",0,0);
+  photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
+  if (fTR->PhoMCmatchindex[index]>=0) photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
+  photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
+  photrail_PhoIso03Hcal=fTR->PhoIso03Hcal[index];
+  photrail_PhoIso03TrkSolid=fTR->PhoIso03TrkSolid[index];
+  photrail_PhoIso03TrkHollow=fTR->PhoIso03TrkHollow[index];
+  photrail_PhoIso03=fTR->PhoIso03[index];
+  photrail_PhoIso04Ecal=fTR->PhoIso04Ecal[index];
+  photrail_PhoIso04Hcal=fTR->PhoIso04Hcal[index];
+  photrail_PhoIso04TrkSolid=fTR->PhoIso04TrkSolid[index];
+  photrail_PhoIso04TrkHollow=fTR->PhoIso04TrkHollow[index];
+  photrail_PhoIso04=fTR->PhoIso04[index];
+  photrail_PhoE1OverE9=fTR->PhoE1OverE9[index];
+  photrail_PhoS4OverS1=fTR->PhoS4OverS1[index];
+  photrail_PhoSigmaEtaEta=fTR->PhoSigmaEtaEta[index];
+  photrail_PhoE1x5=fTR->PhoE1x5[index];
+  photrail_PhoE2x5=fTR->PhoE2x5[index];
+  photrail_PhoE3x3=fTR->PhoE3x3[index];
+  photrail_PhoE5x5=fTR->PhoE5x5[index];
+  photrail_PhomaxEnergyXtal=fTR->PhomaxEnergyXtal[index];
+  photrail_PhoIso03HcalDepth1=fTR->PhoIso03HcalDepth1[index];
+  photrail_PhoIso03HcalDepth2=fTR->PhoIso03HcalDepth2[index];
+  photrail_PhoIso04HcalDepth1=fTR->PhoIso04HcalDepth1[index];
+  photrail_PhoIso04HcalDepth2=fTR->PhoIso04HcalDepth2[index];
+  photrail_PhoIso03nTrksSolid=fTR->PhoIso03nTrksSolid[index];
+  photrail_PhoIso03nTrksHollow=fTR->PhoIso03nTrksHollow[index];
+  photrail_PhoIso04nTrksSolid=fTR->PhoIso04nTrksSolid[index];
+  photrail_PhoIso04nTrksHollow=fTR->PhoIso04nTrksHollow[index];
+  photrail_Pho_ChargedHadronIso=fTR->Pho_ChargedHadronIso[index];
+  photrail_Pho_NeutralHadronIso=fTR->Pho_NeutralHadronIso[index];
+  photrail_Pho_PhotonIso=fTR->Pho_PhotonIso[index];
+  photrail_Pho_isPFPhoton=fTR->Pho_isPFPhoton[index];
+  photrail_Pho_isPFElectron=fTR->Pho_isPFElectron[index];
+  photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
+  photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
+  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[index]],fTR->SCy[fTR->PhotSCindex[index]],fTR->SCz[fTR->PhotSCindex[index]]);
+  TVector3 phovtx(fTR->PhoVx[index],fTR->PhoVy[index],fTR->PhoVz[index]);
+  int a;
+  photrail_hasimpingingtrack = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,index));
+  photrail_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,GetPFCandRemovals(fTR,index));
+};
+
 void DiPhotonMiniTree::ResetVars(){
 
   dipho_mgg_photon = -999;
@@ -943,6 +1366,8 @@ void DiPhotonMiniTree::ResetVars(){
   pholead_PhoMCmatchexitcode = -999;
   photrail_PhoMCmatchindex = -999;
   photrail_PhoMCmatchexitcode = -999;
+  pholead_Nchargedhadronsincone = -999;
+  photrail_Nchargedhadronsincone = -999;
 };
 
 //double DiPhotonMiniTree::etaTransformation(  float EtaParticle , float Zvertex)  {
@@ -978,393 +1403,3 @@ void DiPhotonMiniTree::ResetVars(){
 //  return ETA;
 //  //---end
 //}
-
-double DiPhotonMiniTree::phiNorm(float phi) {
-
-  const float pi = 3.1415927;
-  const float twopi = 2.0*pi;
-
-  if(phi >  pi) {phi = phi - twopi;}
-  if(phi < -pi) {phi = phi + twopi;}
-
-  return phi;
-}
-
-bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi){
-
-  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-  photon_position.SetPhi(phi);
-  double eta = photon_position.Eta();
-
-  const bool debug=false;
-  if (debug) std::cout << "calling FindCloseJetsAndPhotons eta=" << eta << " phi=" << phi << std::endl;
-
-  const float mindR = 0.8;
-  bool found=false;
-
-  for (int i=0; i<fTR->NJets; i++){
-    if (fTR->JPt[i]<20) continue;
-    float dR = Util::GetDeltaR(eta,fTR->JEta[i],phi,fTR->JPhi[i]);
-    if (dR<mindR) found=true;
-    if (debug) if (dR<mindR) std::cout << "Found jet eta=" << fTR->JEta[i] << " phi=" << fTR->JPhi[i] << std::endl;
-  }
-
-  for (int i=0; i<fTR->NPhotons; i++){
-    if (fTR->PhoPt[i]<10) continue;
-    float dR = Util::GetDeltaR(eta,fTR->PhoEta[i],phi,fTR->PhoPhi[i]);
-    if (dR<mindR) found=true;
-    if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
-  }
-
-
-  const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
-  float puenergy =3.14*0.4*0.4*eff_area*fTR->Rho;
-  if (CombinedPFIsolation(phoqi,phi,"combined")-puenergy>5) found=true;
-
-  TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
-    
-  int a;
-  bool found_impinging = FindImpingingTrack(fTR,photon_position,phovtx,a,GetPFCandRemovals(fTR,phoqi));
-  if (found_impinging) found=true;
-
-  if (debug) std::cout << "returning " << found << std::endl;
-  return found;
-
-};
-
-std::vector<int> DiPhotonMiniTree::GetPFCandRemovals(TreeReader *fTR, int phoqi){
-  std::vector<int> out;
-  if (fTR->Pho_isPFPhoton[phoqi]) out.push_back(fTR->pho_matchedPFPhotonCand[phoqi]);
-  if (fTR->Pho_isPFElectron[phoqi]) out.push_back(fTR->pho_matchedPFElectronCand[phoqi]);
-  return out;
-}
-
-float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
-
-  float result=0;
-  
-  //  double sceta = fTR->SCEta[fTR->PhotSCindex[phoqi]];
-  //  double scphi = fTR->SCPhi[fTR->PhotSCindex[phoqi]];
-  
-  TVector3 photon_true_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-  
-  double true_scphi = photon_true_position.Phi();
-
-  double rotated_scphi = phiNorm(true_scphi+0.5*TMath::Pi());
-
-  bool isok = !(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
-  if (!isok) {
-    rotated_scphi=phiNorm(true_scphi-0.5*TMath::Pi());
-    isok=!(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
-  }
-  
-    int count=0;
-    while (!isok && count<10) {
-      rotated_scphi = phiNorm(true_scphi+randomgen->Uniform(0.8,6.28-0.8));
-      isok=!(FindCloseJetsAndPhotons(fTR,rotated_scphi,phoqi));
-      count++;
-    }
-
-    if (count==10){
-      std::cout << "Error in random cone generation!!!" << std::endl;
-      return -999;
-    };
-
-    TVector3 photon_rotated_position(photon_true_position.x(),photon_true_position.y(),photon_true_position.z());
-    photon_rotated_position.SetPhi(rotated_scphi);
-
-    return CombinedPFIsolation(phoqi,rotated_scphi,"photon",0,0.3);
-
-};
-
-std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert){
-
-  for (int i=0; i<100; i++) impinging_track_pfcand[i]=-999;
-
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-    
-    bool found=0;
-    int phoqi=*it;
-    
-    TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-    TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
-    
-    found = FindImpingingTrack(fTR,photon_position,phovtx,impinging_track_pfcand[phoqi],GetPFCandRemovals(fTR,phoqi));
-
-    if (invert) { // selection = 0 impinging tracks
-      if (found) it=passing.erase(it); else it++;
-    }
-
-    else { // selection = 1 impinging track
-
-      if (found){    
-	std::vector<int> toremove;
-	toremove.push_back(impinging_track_pfcand[phoqi]);
-	float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-	const float eff_area = (fabs(eta)<1.4442) ? eff_area_EB : eff_area_EE;
-	const float dR=0.4;
-	float puenergy =3.14*dR*dR*eff_area*fTR->Rho;
-	if (CombinedPFIsolation(phoqi,-999,"combined",0,0,toremove)-puenergy>5) found=0;
-      }
-      
-      if (!found) it=passing.erase(it); else it++;
-    
-    }
-
-  }
-
-  return passing;
-  
-};
-
-
-bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals){
-
-  bool found = false;
-
-  TVector3 photon_position = caloposition;
-  TVector3 phovtx = refvertex;
-
-  for (int i=0; i<fTR->NPfCand; i++){
-    
-    bool removed = false;
-    for (int j=0; j<removals.size(); j++) {
-      if (i==removals.at(j)) removed=true;
-    }
-    if (removed) continue;
-    
-    float id = fTR->PfCandPdgId[i];
-    if (!(fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212)) continue;
-    
-    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
-    TVector3 photon_direction = photon_position-pfvertex;
-      
-    double sceta = photon_direction.Eta();
-    double scphi = photon_direction.Phi();
-
-    double dEta = fTR->PfCandEta[i] - sceta;
-    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
-    double dR = sqrt(dEta*dEta+dPhi*dPhi);
-
-    double pt = fTR->PfCandPt[i];
-
-    TVector3 vtxmom(fTR->PfCandTrackRefPx[i],fTR->PfCandTrackRefPy[i],fTR->PfCandTrackRefPz[i]);
-
-    if (vtxmom.x()==-999 || vtxmom.y()==-999 || vtxmom.z()==-999) {
-      std::cout << "Something wrong with vtxmom from trackref, fallback" << std::endl;
-      vtxmom = TVector3(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
-    }
-      
-    double dxy = ( -(pfvertex.x()-phovtx.x())*vtxmom.y() +(pfvertex.y()-phovtx.y())*vtxmom.x() ) / vtxmom.Perp();
-    double dz = (pfvertex.z()-phovtx.z()) - ( (pfvertex.x()-phovtx.x())*vtxmom.x() + (pfvertex.y()-phovtx.y())*vtxmom.y() ) / vtxmom.Perp() * vtxmom.z() / vtxmom.Perp();
-    dxy=fabs(dxy);
-    dz=fabs(dz);
-
-    if (pt<1.5) continue;
-    if (dR>0.4) continue;
-
-    // additional veto sieie-orthogonal
-    if (fabs(sceta)<1.4442){
-      if (fabs(dEta)<0.05) continue;
-      if (fabs(dPhi)<0.05) continue;
-    }
-    
-    if (dz>0.2) continue;
-    if (dxy>0.1) continue;
-    if (dR<0.02) continue;
-
-    if (!(fTR->PfCandHasHitInFirstPixelLayer[i])) continue;
-
-    found=1;
-    reference_index_found = i;
-    break;
-      
-  } // end pf cand loop
-
-  return found;
-
-};
-
-
-void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex){
-
-  return;
-
-//
-//    TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-//    TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
-//
-//    TVector3 trkvertex(fTR->PfCandVx[trkindex],fTR->PfCandVy[trkindex],fTR->PfCandVz[trkindex]);
-//    TVector3 photon_direction = photon_position-pfvertex;
-//      
-//      double sceta = photon_direction.Eta();
-//      double scphi = photon_direction.Phi();
-//
-//    double trketa = pvm_trk.Eta();
-//    double trkphi = pvm_trk.Phi();
-//
-//    double dR_trkpho = Util::GetDeltaR(sceta,trketa,scphi,trkphi);
-//    double dEta_trkpho = trketa-sceta;
-//    
-//    if (dR_trkpho>0.4) return;
-//    if (fabs(sceta)<1.479 && fabs(dEta_trkpho)<0.215) return;
-//    if (fabs(sceta)>1.479 && dR_trkpho<0.27) return;
-//
-//    
-//    for (int i=0; i<fTR->NPfCand; i++){
-//
-//      if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-//      if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
-//
-//      if (fTR->PfCandPdgId[i]!=22) continue;
-//
-//      TVector3 pfvtx(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
-//      TVector3 momentum(fTR->PfCandMomX[i],fTR->PfCandMomY[i],fTR->PfCandMomZ[i]);
-//      TVector3 pvm(momentum*r/momentum.R()+pfvtx);
-//
-//      double dEta_trk = pvm.Eta() - trketa;
-//      double dPhi_trk = Util::DeltaPhi(pvm.Phi(),trkphi);
-//      double dR_trk = sqrt(dEta_trk*dEta_trk+dPhi_trk*dPhi_trk);
-//
-//      double dEta_pho = pvm.Eta() - sceta;
-//      double dPhi_pho = Util::DeltaPhi(pvm.Phi(),scphi);
-//      double dR_pho = sqrt(dEta_pho*dEta_pho+dPhi_pho*dPhi_pho);
-//
-//      double pt = fTR->PfCandPt[i];
-//
-//
-//      if (dR_trk>0.2) continue;
-//
-//      bool error=0;
-//      if (fabs(sceta)<1.479 && fabs(dEta_pho)<0.015) error=1;
-//      if (fabs(sceta)>1.479 && dR_pho<0.07) error=1;
-//
-//      if (error) {
-//	std::cout << "Error in impinging track histo filler!!!" << std::endl;
-//	assert(1==0);
-//      }
-//
-//      histo_PFPhotonDepositAroundImpingingTrack->Fill(dR_trk,pt);
-//      
-//      
-//    } // end pf cand loop
-//
-
-};
-
-float DiPhotonMiniTree::CombinedPFIsolation(int phoqi, float newphi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, std::vector<int> removals){
-
-  float result=0;
-
-  TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
-  TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
- 
-  if (newphi==-999) newphi=photon_position.Phi();
-  else {
-    photon_position.SetPhi(newphi);
-  }
-
-  for (int i=0; i<fTR->NPfCand; i++){
-
-    if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
-
-    int type = FindPFCandType(fTR->PfCandPdgId[i]);
-
-    if (!(type==0 || type==1 || type==2)) continue;
-
-    if (component=="photon" && type!=2) continue;
-
-    bool removed = false;
-    for (int j=0; j<removals.size(); j++) {
-      if (i==removals.at(j)) removed=true;
-    }
-    if (removed) continue;
-
-    TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
-    TVector3 photon_direction = photon_position-pfvertex;
-
-    float sceta = photon_direction.Eta();
-    float scphi = photon_direction.Phi();
-
-    double dEta = fTR->PfCandEta[i] - sceta;
-    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
-
-    double pt = fTR->PfCandPt[i];
-    double dR = sqrt(dEta*dEta+dPhi*dPhi);
-
-    double dxy;
-    double dz;
-
-    if (type==1){
-
-      TVector3 vtxmom(fTR->PfCandTrackRefPx[i],fTR->PfCandTrackRefPy[i],fTR->PfCandTrackRefPz[i]);
-
-      if (vtxmom.x()==-999 || vtxmom.y()==-999 || vtxmom.z()==-999) {
-	std::cout << "Something wrong with vtxmom from trackref, fallback" << std::endl;
-	vtxmom = TVector3(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
-      }
-      
-      dxy = ( -(pfvertex.x()-phovtx.x())*vtxmom.y() +(pfvertex.y()-phovtx.y())*vtxmom.x() ) / vtxmom.Perp();
-      dz = (pfvertex.z()-phovtx.z()) - ( (pfvertex.x()-phovtx.x())*vtxmom.x() + (pfvertex.y()-phovtx.y())*vtxmom.y() ) / vtxmom.Perp() * vtxmom.z() / vtxmom.Perp();
-      dxy=fabs(dxy);
-      dz=fabs(dz);
-
-    }
-
-    if (dR>0.4) continue;
-
-    // additional veto sieie-orthogonal
-    if (fTR->PhoisEB[phoqi]){
-      if (fabs(dEta)<0.05) continue;
-      if (fabs(dPhi)<0.05) continue;
-    }
-
-    if (type==2){ 
-
-      if (fTR->PhoisEB[phoqi]){
-	if (fabs(dEta)<0.015) continue;
-	if (pt<minimal_pfphotoncand_threshold_EB) continue;
-      }
-      else if (fTR->PhoisEE[phoqi]){
-	float limit_dR = 0.00864*fabs(sinh(sceta))*4;
-	if (dR<limit_dR) continue;
-	if (pt<minimal_pfphotoncand_threshold_EE) continue;
-      }
-      else {
-	std::cout << "Something wrong" << std::endl;
-	return -999;
-      }
-
-    }
-
-    if (type==1){
-
-      if (dz>0.2) continue;
-      if (dxy>0.1) continue;
-      if (dR<0.02) continue;
-
-    }
-
-
-    result+=pt;
-
-  } // end pf cand loop
-
-  return result;
-
-};
-
-
-int DiPhotonMiniTree::FindPFCandType(int id){
-
-  int type = -1;
-
-  if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
-  if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
-  if (id==22) type=2; //photons
-  if (fabs(id)==11) type=3; //electrons
-  if (fabs(id)==13) type=4; //muons
-
-  return type;
-}

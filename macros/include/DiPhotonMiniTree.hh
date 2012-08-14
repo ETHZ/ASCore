@@ -67,8 +67,9 @@ private:
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
   float CombinedPFIsolation(int phoqi, float phi=-999, TString component="combined", float minimal_pfphotoncand_threshold_EB=0, float minimal_pfphotoncand_threshold_EE=0, std::vector<int> removals = std::vector<int>());
-
+  int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>());
   int FindPFCandType(int id);
+  std::vector<int> NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum=0, int maximum=9999);
 
   TRandom3 *randomgen;
   
@@ -195,7 +196,7 @@ private:
   Int_t pholead_PhoMCmatchindex, photrail_PhoMCmatchindex;
   Int_t pholead_PhoMCmatchexitcode, photrail_PhoMCmatchexitcode;
 
-
+  Int_t pholead_Nchargedhadronsincone, photrail_Nchargedhadronsincone;
 
 
   TH1F *fHNumPU;
