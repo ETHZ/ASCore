@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.20 2012/08/04 11:24:23 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.21 2012/08/04 16:46:10 peruzzi Exp $
 //
 //
 
@@ -465,6 +465,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	edm::ESHandle<CaloGeometry> geometry ;
 	iSetup.get<CaloGeometryRecord>().get(geometry);
+	const CaloSubdetectorGeometry *barrelGeometry = geometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
+	const CaloSubdetectorGeometry *endcapGeometry = geometry->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
 
 	edm::ESHandle<CaloTopology> theCaloTopo;
 	iSetup.get<CaloTopologyRecord>().get(theCaloTopo);
@@ -1395,6 +1397,46 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    fTSClocalcorrseed[fTnSC] = localcorrseedenergy/sc->rawEnergy();
 	    fTSClocalcorr[fTnSC] = localcorrenergy/sc->rawEnergy();
 	  }
+
+	  {
+	    std::vector<DetId> cristalli;	  
+	    for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
+	      const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
+	      for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
+	      sort(cristalli.begin(),cristalli.end());
+	      std::vector<DetId>::iterator it;
+	      it = unique(cristalli.begin(),cristalli.end());
+	      cristalli.resize(it-cristalli.begin());
+	    }
+	  
+	    uint i=0;
+	    for (i=0; i<cristalli.size(); i++){
+
+	      if ((int)i>=gMaxnSCxtals){
+		edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
+		fTgoodevent = 1;
+		break;
+	      }
+
+	      CaloCellGeometry *cellGeometry = NULL;
+	      if (cristalli.at(i).subdetId()!=EcalBarrel) {
+		edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
+		continue;
+	      } 
+	      EBDetId ebDetId  = cristalli.at(i);
+	      cellGeometry = (CaloCellGeometry*)(barrelGeometry->getGeometry(ebDetId));
+	      TVector3 xtal_position(cellGeometry->getPosition().x(),cellGeometry->getPosition().y(),cellGeometry->getPosition().z());
+	      float dphi=(dynamic_cast<const EcalBarrelGeometry*>(barrelGeometry))->deltaPhi(ebDetId);
+	      float deta=(dynamic_cast<const EcalBarrelGeometry*>(barrelGeometry))->deltaEta(ebDetId);
+	      fTSCxtalX[fTnSC][i]=xtal_position.x();
+	      fTSCxtalY[fTnSC][i]=xtal_position.y();
+	      fTSCxtalZ[fTnSC][i]=xtal_position.z();
+	      fTSCxtalEtaWidth[fTnSC][i]=deta;
+	      fTSCxtalPhiWidth[fTnSC][i]=dphi;
+	    }
+	    fTSCNXtals[fTnSC]=i;
+	  }
+
 	  fTnSC++;
 	}
 
@@ -1443,6 +1485,46 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    fTSClocalcorrseed[fTnSC] = localcorrseedenergy/sc->rawEnergy();
 	    fTSClocalcorr[fTnSC] = localcorrenergy/sc->rawEnergy();
 	  }
+
+	  {
+	    std::vector<DetId> cristalli;	  
+	    for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
+	      const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
+	      for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
+	      sort(cristalli.begin(),cristalli.end());
+	      std::vector<DetId>::iterator it;
+	      it = unique(cristalli.begin(),cristalli.end());
+	      cristalli.resize(it-cristalli.begin());
+	    }
+	  
+	    uint i=0;
+	    for (i=0; i<cristalli.size(); i++){
+
+	      if ((int)i>=gMaxnSCxtals){
+		edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
+		fTgoodevent = 1;
+		break;
+	      }
+
+	      CaloCellGeometry *cellGeometry = NULL;
+	      if (cristalli.at(i).subdetId()!=EcalEndcap) {
+		edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
+		continue;
+	      } 
+	      EEDetId eeDetId  = cristalli.at(i);
+	      cellGeometry = (CaloCellGeometry*)(endcapGeometry->getGeometry(eeDetId));
+	      TVector3 xtal_position(cellGeometry->getPosition().x(),cellGeometry->getPosition().y(),cellGeometry->getPosition().z());
+	      float dphi=(dynamic_cast<const EcalEndcapGeometry*>(endcapGeometry))->deltaPhi(eeDetId);
+	      float deta=(dynamic_cast<const EcalEndcapGeometry*>(endcapGeometry))->deltaEta(eeDetId);
+	      fTSCxtalX[fTnSC][i]=xtal_position.x();
+	      fTSCxtalY[fTnSC][i]=xtal_position.y();
+	      fTSCxtalZ[fTnSC][i]=xtal_position.z();
+	      fTSCxtalEtaWidth[fTnSC][i]=deta;
+	      fTSCxtalPhiWidth[fTnSC][i]=dphi;
+	    }
+	    fTSCNXtals[fTnSC]=i;
+	  }
+
 	  fTnSC++;
 	}
 
@@ -3894,6 +3976,12 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("SCx",&fTSCx,"SCx[NSuperClusters]/F");
 	fEventTree->Branch("SCy",&fTSCy,"SCy[NSuperClusters]/F");
 	fEventTree->Branch("SCz",&fTSCz,"SCz[NSuperClusters]/F");
+	fEventTree->Branch("SCNXtals",&fTSCNXtals,"SCNXtals[NSuperClusters]/I");
+	fEventTree->Branch("SCxtalX",&fTSCxtalX,Form("SCxtalX[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalY",&fTSCxtalY,Form("SCxtalY[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalZ",&fTSCxtalZ,Form("SCxtalZ[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalEtaWidth",&fTSCxtalEtaWidth,Form("SCxtalEtaWidth[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalPhiWidth",&fTSCxtalPhiWidth,Form("SCxtalPhiWidth[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -4822,6 +4910,17 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTSCx,gMaxnSC);
 	resetFloat(fTSCy,gMaxnSC);
 	resetFloat(fTSCz,gMaxnSC);
+	resetInt(fTSCNXtals,gMaxnSC);
+	
+	for (int i=0; i<gMaxnSC; i++) {
+	  for (int j=0; j<gMaxnSCxtals; j++) {
+	    fTSCxtalX[i][j]=-999;
+	    fTSCxtalY[i][j]=-999;
+	    fTSCxtalZ[i][j]=-999;
+	    fTSCxtalEtaWidth[i][j]=-999;
+	    fTSCxtalPhiWidth[i][j]=-999;
+	  }
+	}
 
 	fTTrkPtSumx          = -999.99;
 	fTTrkPtSumy          = -999.99;

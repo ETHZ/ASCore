@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.10 2012/07/30 08:08:12 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.11 2012/08/04 09:49:08 peruzzi Exp $
 //
 //
 
@@ -65,6 +65,21 @@ Implementation:
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
+
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/CaloTopology/interface/CaloTopology.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
+#include "DataFormats/CaloRecHit/interface/CaloCluster.h"
+#include "DataFormats/CaloRecHit/interface/CaloClusterFwd.h"
+#include "Geometry/EcalAlgo/interface/EcalBarrelGeometry.h"
+#include "Geometry/EcalAlgo/interface/EcalEndcapGeometry.h"
 
 // Helpers
 #include "Math/VectorUtil.h"
@@ -196,6 +211,7 @@ private:
         static const int gMaxngenvtx = 60;
         static const int nStoredGenParticles = 2000;
         static const int gMaxnpfcand = 2000;
+        static const int gMaxnSCxtals = 200;
 
   static const int gMax_vertexing_diphoton_pairs = 10;
   static const int gMax_vertexing_vtxes = 5;
@@ -973,6 +989,12 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   float fTSCx[gMaxnSC];
   float fTSCy[gMaxnSC];
   float fTSCz[gMaxnSC];
+  int   fTSCNXtals[gMaxnSC];
+  float fTSCxtalX[gMaxnSC][gMaxnSCxtals];
+  float fTSCxtalY[gMaxnSC][gMaxnSCxtals];
+  float fTSCxtalZ[gMaxnSC][gMaxnSCxtals];
+  float fTSCxtalEtaWidth[gMaxnSC][gMaxnSCxtals];
+  float fTSCxtalPhiWidth[gMaxnSC][gMaxnSCxtals];
 
 // Jets:
 	int fTnjets;

@@ -37,4 +37,10 @@
 <use name="RecoParticleFlow/PFClusterTools"/>
 <use name="h2gglobe/VertexAnalysis"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="Geometry/EcalAlgo"/>
+<use name="DataFormats/EcalDetId"/>
+<use name="DataFormats/DetId"/>
+<use name="DataFormats/CaloRecHit"/>
+<use name="Geometry/CaloGeometry"/>
+<use name="DataFormats/EcalRecHit"/>
 <flags   EDM_PLUGIN="1"/>
