@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.29 2012/07/19 02:00:51 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114.2.30 2012/08/02 10:21:52 buchmann Exp $
 //
 //
 
@@ -62,6 +62,11 @@
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
+
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+
+#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
+
 
 // Helpers
 #include "Math/VectorUtil.h"
@@ -222,6 +227,11 @@ private:
   edm::InputTag fAllConversionsCollForVertexing;
     
   PFIsolationEstimator isolator;
+
+  EGammaMvaEleEstimator* electronIDMVANonTrig_;
+  EGammaMvaEleEstimator* electronIDMVATrig_;
+
+  MuonMVAEstimator* fMuonIsoMVA;
 
   // Selection cuts
   float fMinMuPt;
@@ -580,6 +590,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTMuNMatches;
   std::auto_ptr<std::vector<int> >  fTMuNMatchedStations;
   std::auto_ptr<std::vector<int> >  fTMuNChambers;
+  std::auto_ptr<std::vector<float> >  fTMuIsoMVA;
   std::auto_ptr<std::vector<float> >  fTMuCaloComp;
   std::auto_ptr<std::vector<float> >  fTMuSegmComp;
   std::auto_ptr<std::vector<int> >  fTMuIsGMPT;
@@ -666,6 +677,8 @@ private:
   std::auto_ptr<std::vector<float> >  fTElDR03HcalTowerSumEt;
   std::auto_ptr<std::vector<float> >  fTElDR04HcalTowerSumEt;
   std::auto_ptr<std::vector<float> >  fTElNChi2;
+  std::auto_ptr<std::vector<float> >  fTElKfTrkchi2;
+  std::auto_ptr<std::vector<float> >  fTElKfTrkhits;
   // PF Isolation Variables
   std::auto_ptr<std::vector<float> >   fTElPfIsosCustom[gMaxNPfIsoTags];
   std::auto_ptr<std::vector<float> >  fTElPfIsosEvent[gMaxNPfIsoTags];
@@ -680,6 +693,8 @@ private:
   std::auto_ptr<std::vector<float> >  fTElClosestCtfTrackPhi;
   std::auto_ptr<std::vector<int> >  fTElClosestCtfTrackCharge;
   std::auto_ptr<std::vector<float> >  fTElIDMva;
+  std::auto_ptr<std::vector<float> >  fTElIDMVATrig;
+  std::auto_ptr<std::vector<float> >  fTElIDMVANoTrig;
   std::auto_ptr<std::vector<int> >  fTElIDTight;
   std::auto_ptr<std::vector<int> >  fTElIDLoose;
   std::auto_ptr<std::vector<int> >  fTElIDRobustTight;
@@ -694,11 +709,18 @@ private:
   std::auto_ptr<std::vector<int> >  fTElTrackerDriven;
   std::auto_ptr<std::vector<int> >  fTElBasicClustersSize;
   std::auto_ptr<std::vector<float> >  fTElfbrem;
+  std::auto_ptr<std::vector<float> >  fTElEoPout;
+  std::auto_ptr<std::vector<float> >  fTElIoEmIoP;
   std::auto_ptr<std::vector<float> >  fTElHcalOverEcal;
   std::auto_ptr<std::vector<float> >  fTElE1x5;                       // 5x5 arround seed                                     
   std::auto_ptr<std::vector<float> >  fTElE5x5;                       // 5x5 arround seed                                     
   std::auto_ptr<std::vector<float> >  fTElE2x5Max;                    // 2x5 arround seed                                     
+  std::auto_ptr<std::vector<float> >  fTElR9;                  
+  std::auto_ptr<std::vector<float> >  fTElPreShowerOverRaw;                  
+  std::auto_ptr<std::vector<float> >  fTElScEtaWidth;                  
+  std::auto_ptr<std::vector<float> >  fTElScPhiWidth;                  
   std::auto_ptr<std::vector<float> >  fTElSigmaIetaIeta;              // shower shape covariance                              
+  std::auto_ptr<std::vector<float> >  fTElSigmaIphiIphi;              // shower shape covariance                              
   std::auto_ptr<std::vector<float> >  fTElDeltaPhiSeedClusterAtCalo;  // Dphi (seed-track) at calo from p_out                 
   std::auto_ptr<std::vector<float> >  fTElDeltaEtaSeedClusterAtCalo;  // outermost track state extrapolated at calo           
   std::auto_ptr<std::vector<float> >  fTElDeltaPhiSuperClusterAtVtx;  // Dphi (sc-track) at calo extrapolated from p_in       

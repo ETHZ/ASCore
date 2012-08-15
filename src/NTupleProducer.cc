@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.34 2012/07/19 02:00:51 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.35 2012/08/02 10:21:51 buchmann Exp $
 //
 //
 
@@ -111,6 +111,7 @@
 #include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
 
 #include "DiLeptonAnalysis/NTupleProducer/interface/ETHVertexInfo.h"
+
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
@@ -319,6 +320,57 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
   isolator.initializePhotonIsolation(kTRUE);
   isolator. setConeSize(0.3);
+
+
+  // instantiate and initialize the electron ID MVA classes:
+
+  std::vector<std::string> myManualCatWeigths;
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat1.weights.xml");
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat2.weights.xml");
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat3.weights.xml");
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat4.weights.xml");
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat5.weights.xml");
+  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat6.weights.xml");
+
+  Bool_t manualCat = true;
+  
+  electronIDMVANonTrig_ = new EGammaMvaEleEstimator();
+  electronIDMVANonTrig_->initialize("BDT",
+			   EGammaMvaEleEstimator::kNonTrig,
+			   manualCat, 
+			   myManualCatWeigths);
+  
+
+  std::vector<std::string> myManualCatWeigthsTrig;
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat1.weights.xml");
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat2.weights.xml");
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat3.weights.xml");
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat4.weights.xml");
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat5.weights.xml");
+  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat6.weights.xml");
+
+  electronIDMVATrig_ = new EGammaMvaEleEstimator();
+  electronIDMVATrig_->initialize("BDT",
+			EGammaMvaEleEstimator::kTrig,
+			manualCat,
+			myManualCatWeigthsTrig); 
+
+
+  // initialize the muon isolation MVA
+  fMuonIsoMVA = new MuonMVAEstimator();
+  vector<string> muoniso_weightfiles;
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-BarrelPt5To10_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-EndcapPt5To10_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-BarrelPt10ToInf_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-EndcapPt10ToInf_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-Tracker_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-Global_V0_BDTG.weights.xml").fullPath());
+  fMuonIsoMVA->initialize("MuonIso_BDTG_IsoRings",
+                          MuonMVAEstimator::kIsoRings,
+                          true,
+                          muoniso_weightfiles);
+  fMuonIsoMVA->SetPrintMVADebug(false);
+
 }
 
 //________________________________________________________________________________________
@@ -1175,6 +1227,18 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTMuPfIsosCustom[ipfisotag]->push_back( (*muonPfIsoTagsCustom[ipfisotag])[muonRef] );
       ++ipfisotag;
     }
+ 
+    // mva iso:
+    const reco::GsfElectronCollection dummyIdentifiedEleCollection;
+    const reco::MuonCollection dummyIdentifiedMuCollection;
+    double isomva = fMuonIsoMVA->mvaValue( muon,
+                                        vertices->front(),
+                                        *pfCandidates,
+                                        *rho,
+                                        MuonEffectiveArea::kMuEAFall11MC,
+                                        dummyIdentifiedEleCollection,
+                                        dummyIdentifiedMuCollection);
+    fTMuIsoMVA->push_back( isomva );
 
     fTMuCaloComp->push_back( muon.caloCompatibility() );
     fTMuSegmComp->push_back( muon::segmentCompatibility(muon) );
@@ -1461,6 +1525,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       const GsfElectron& electron = (*electrons)[index];
       Ref<View<GsfElectron> > electronRef(electrons,index);
 
+      const EcalRecHitCollection *rechits = 0;
+
+      float seedEta = electron.superCluster()->eta();
+      if( fabs(seedEta) < 1.479 ) rechits = ebRecHits.product();
+      else rechits = eeRecHits.product(); 
+
       // Save the electron SuperCluster pointer
       elecPtr.push_back(&(*electron.superCluster()));
       trckPtr.push_back(&(*electron.gsfTrack()));
@@ -1489,6 +1559,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElDzPV                   ->push_back(electron.gsfTrack()->dz(primVtx->position()));
       fTElDzE                    ->push_back(electron.gsfTrack()->dzError());
       fTElNChi2                  ->push_back(electron.gsfTrack()->normalizedChi2());
+
+
+      // ctf track info:
+      bool validKF= false; 
+      reco::TrackRef myTrackRef = electron.closestCtfTrackRef();
+      validKF = (myTrackRef.isAvailable() && myTrackRef.isNonnull()); 
+      fTElKfTrkchi2              ->push_back( validKF ? myTrackRef->normalizedChi2() : 0 );
+      fTElKfTrkhits              ->push_back( validKF ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. );
+
 
       // Isolation:
       fTElDR03TkSumPt            ->push_back(electron.dr03TkSumPt());
@@ -1543,7 +1622,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElE1x5                      ->push_back(electron.e1x5());
       fTElE5x5                      ->push_back(electron.e5x5());
       fTElE2x5Max                   ->push_back(electron.e2x5Max());
+      fTElR9                        ->push_back(electron.superCluster()->rawEnergy()!=0. ? EcalClusterTools::e3x3(*(electron.superCluster()->seed()),rechits, topology) / electron.superCluster()->rawEnergy() : 0.);
       fTElSigmaIetaIeta             ->push_back(electron.sigmaIetaIeta());
+      std::vector<float> vCov = EcalClusterTools::localCovariances(*(electron.superCluster()->seed()), &(*rechits), topology ) ;
+      fTElSigmaIphiIphi             ->push_back(!isnan(vCov[2]) ? sqrt(vCov[2]) : 0.);
+      fTElScEtaWidth                ->push_back(electron.superCluster()->etaWidth());
+      fTElScPhiWidth                ->push_back(electron.superCluster()->phiWidth());
       fTElDeltaEtaSeedClusterAtCalo ->push_back(electron.deltaEtaSeedClusterTrackAtCalo());
       fTElDeltaPhiSeedClusterAtCalo ->push_back(electron.deltaPhiSeedClusterTrackAtCalo());
       fTElDeltaPhiSuperClusterAtVtx ->push_back(electron.deltaPhiSuperClusterTrackAtVtx());
@@ -1551,6 +1635,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElCaloEnergy                ->push_back(electron.caloEnergy());
       fTElTrkMomAtVtx               ->push_back(electron.trackMomentumAtVtx().R());
       fTElESuperClusterOverP        ->push_back(electron.eSuperClusterOverP());
+      fTElIoEmIoP                   ->push_back((1.0/electron.ecalEnergy()) - (1.0 / electron.p()));
+      fTElEoPout                    ->push_back(electron.eEleClusterOverPout());
+      fTElPreShowerOverRaw          ->push_back(electron.superCluster()->preshowerEnergy() / electron.superCluster()->rawEnergy());
       fTElNumberOfMissingInnerHits  ->push_back(electron.gsfTrack()->trackerExpectedHitsInner().numberOfHits());
       fTElTheta                     ->push_back(electron.superCluster()->position().theta());
       fTElSCEta                     ->push_back(electron.superCluster()->eta());
@@ -1581,6 +1668,13 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElIDsimpleWP90relIso ->push_back(eIDmapsimpleWP90[electronRef]);
       fTElIDsimpleWP85relIso ->push_back(eIDmapsimpleWP85[electronRef]);
       fTElIDsimpleWP80relIso ->push_back(eIDmapsimpleWP80[electronRef]);
+
+      EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
+      const TransientTrackBuilder thebuilder = *(theB.product());
+
+      fTElIDMVATrig          ->push_back( electronIDMVATrig_->mvaValue( electron, vertices->front(), thebuilder, lazyTools, false ) );
+      fTElIDMVANoTrig        ->push_back( electronIDMVANonTrig_->mvaValue( electron, vertices->front(), thebuilder, lazyTools, false ) );
+
 
       {
         fTElSCindex->push_back( -1 ); // Initialize
@@ -3582,6 +3676,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("MuNMatches");
   produces<std::vector<int> >("MuNMatchedStations");
   produces<std::vector<int> >("MuNChambers");
+  produces<std::vector<float> >("MuIsoMVA");
   produces<std::vector<float> >("MuCaloComp");
   produces<std::vector<float> >("MuSegmComp");
   produces<std::vector<int> >("MuIsGMPT");
@@ -3679,6 +3774,8 @@ void NTupleProducer::declareProducts(void) {
     produces<std::vector<float> >(("ElEvent"+(*it).label()).c_str());
   }
   produces<std::vector<float> >("ElNChi2");
+  produces<std::vector<float> >("ElKfTrkchi2");
+  produces<std::vector<float> >("ElKfTrkhits");
   produces<std::vector<int> >("ElCharge");
   produces<std::vector<int> >("ElCInfoIsGsfCtfCons");
   produces<std::vector<int> >("ElCInfoIsGsfCtfScPixCons");
@@ -3689,6 +3786,8 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElClosestCtfTrackPhi");
   produces<std::vector<int> >("ElClosestCtfTrackCharge");
   produces<std::vector<float> >("ElIDMva");
+  produces<std::vector<float> >("ElIDMVATrig");
+  produces<std::vector<float> >("ElIDMVANoTrig");
   produces<std::vector<int> >("ElIDTight");
   produces<std::vector<int> >("ElIDLoose");
   produces<std::vector<int> >("ElIDRobustTight");
@@ -3707,7 +3806,11 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElE1x5");
   produces<std::vector<float> >("ElE5x5");
   produces<std::vector<float> >("ElE2x5Max");
+  produces<std::vector<float> >("ElR9");
   produces<std::vector<float> >("ElSigmaIetaIeta");
+  produces<std::vector<float> >("ElSigmaIphiIphi");
+  produces<std::vector<float> >("ElScEtaWidth");
+  produces<std::vector<float> >("ElScPhiWidth");
   produces<std::vector<float> >("ElDeltaPhiSeedClusterAtCalo");
   produces<std::vector<float> >("ElDeltaEtaSeedClusterAtCalo");
   produces<std::vector<float> >("ElDeltaPhiSuperClusterAtVtx");
@@ -3715,6 +3818,9 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElCaloEnergy");
   produces<std::vector<float> >("ElTrkMomAtVtx");
   produces<std::vector<float> >("ElESuperClusterOverP");
+  produces<std::vector<float> >("ElPreShowerOverRaw");
+  produces<std::vector<float> >("ElEoPout");
+  produces<std::vector<float> >("ElIoEmIoP");
   produces<std::vector<int> >("ElNumberOfMissingInnerHits");
   produces<std::vector<int> >("ElSCindex");
   produces<std::vector<float> >("ElConvPartnerTrkDist");
@@ -4238,6 +4344,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuNMatches.reset(new std::vector<int> );
   fTMuNMatchedStations.reset(new std::vector<int> );
   fTMuNChambers.reset(new std::vector<int> );
+  fTMuIsoMVA.reset(new std::vector<float> );
   fTMuCaloComp.reset(new std::vector<float> );
   fTMuSegmComp.reset(new std::vector<float> );
   fTMuIsGMPT.reset(new std::vector<int> );
@@ -4337,6 +4444,8 @@ void NTupleProducer::resetProducts( void ) {
     fTElPfIsosEvent[ipfisotag++].reset(new std::vector<float> );
   }
   fTElNChi2.reset(new std::vector<float> );
+  fTElKfTrkchi2.reset(new std::vector<float> );
+  fTElKfTrkhits.reset(new std::vector<float> );
   fTElCharge.reset(new std::vector<int> );
   fTElCInfoIsGsfCtfCons.reset(new std::vector<int> );
   fTElCInfoIsGsfCtfScPixCons.reset(new std::vector<int> );
@@ -4353,6 +4462,8 @@ void NTupleProducer::resetProducts( void ) {
   fTElIDRobustLoose.reset(new std::vector<int> );
   fTElIDsimpleWPrelIso.reset(new std::vector<int> );
   fTElIDsimpleWP80relIso.reset(new std::vector<int> );
+  fTElIDMVATrig.reset(new std::vector<float> );
+  fTElIDMVANoTrig.reset(new std::vector<float> );
   fTElIDsimpleWP85relIso.reset(new std::vector<int> );
   fTElIDsimpleWP90relIso.reset(new std::vector<int> );
   fTElIDsimpleWP95relIso.reset(new std::vector<int> );
@@ -4365,7 +4476,11 @@ void NTupleProducer::resetProducts( void ) {
   fTElE1x5.reset(new std::vector<float> );
   fTElE5x5.reset(new std::vector<float> );
   fTElE2x5Max.reset(new std::vector<float> );
+  fTElR9.reset(new std::vector<float> );
   fTElSigmaIetaIeta.reset(new std::vector<float> );
+  fTElSigmaIphiIphi.reset(new std::vector<float> );
+  fTElScEtaWidth.reset(new std::vector<float> );
+  fTElScPhiWidth.reset(new std::vector<float> );
   fTElDeltaPhiSeedClusterAtCalo.reset(new std::vector<float> );
   fTElDeltaEtaSeedClusterAtCalo.reset(new std::vector<float> );
   fTElDeltaPhiSuperClusterAtVtx.reset(new std::vector<float> );
@@ -4373,6 +4488,9 @@ void NTupleProducer::resetProducts( void ) {
   fTElCaloEnergy.reset(new std::vector<float> );
   fTElTrkMomAtVtx.reset(new std::vector<float> );
   fTElESuperClusterOverP.reset(new std::vector<float> );
+  fTElIoEmIoP.reset(new std::vector<float> );
+  fTElEoPout.reset(new std::vector<float> );
+  fTElPreShowerOverRaw.reset(new std::vector<float> );
   fTElNumberOfMissingInnerHits.reset(new std::vector<int> );
   fTElSCindex.reset(new std::vector<int> );
   fTElConvPartnerTrkDist.reset(new std::vector<float> );
@@ -4956,6 +5074,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuNMatches, "MuNMatches");
   event.put(fTMuNMatchedStations, "MuNMatchedStations");
   event.put(fTMuNChambers, "MuNChambers");
+  event.put(fTMuIsoMVA, "MuIsoMVA");
   event.put(fTMuCaloComp, "MuCaloComp");
   event.put(fTMuSegmComp, "MuSegmComp");
   event.put(fTMuIsGMPT, "MuIsGMPT");
@@ -5055,6 +5174,8 @@ void NTupleProducer::putProducts( edm::Event& event ) {
     event.put(fTElPfIsosEvent[ipfisotag++], ("ElEvent"+(*it).label()).c_str());
   }
   event.put(fTElNChi2, "ElNChi2");
+  event.put(fTElKfTrkchi2, "ElKfTrkchi2");
+  event.put(fTElKfTrkhits, "ElKfTrkhits");
   event.put(fTElCharge, "ElCharge");
   event.put(fTElCInfoIsGsfCtfCons, "ElCInfoIsGsfCtfCons");
   event.put(fTElCInfoIsGsfCtfScPixCons, "ElCInfoIsGsfCtfScPixCons");
@@ -5074,6 +5195,8 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElIDsimpleWP85relIso, "ElIDsimpleWP85relIso");
   event.put(fTElIDsimpleWP90relIso, "ElIDsimpleWP90relIso");
   event.put(fTElIDsimpleWP95relIso, "ElIDsimpleWP95relIso");
+  event.put(fTElIDMVATrig, "ElIDMVATrig");
+  event.put(fTElIDMVANoTrig, "ElIDMVANoTrig");
   event.put(fTElInGap, "ElInGap");
   event.put(fTElEcalDriven, "ElEcalDriven");
   event.put(fTElTrackerDriven, "ElTrackerDriven");
@@ -5083,7 +5206,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElE1x5, "ElE1x5");
   event.put(fTElE5x5, "ElE5x5");
   event.put(fTElE2x5Max, "ElE2x5Max");
+  event.put(fTElR9, "ElR9");
   event.put(fTElSigmaIetaIeta, "ElSigmaIetaIeta");
+  event.put(fTElSigmaIphiIphi, "ElSigmaIphiIphi");
+  event.put(fTElScEtaWidth, "ElScEtaWidth");
+  event.put(fTElScPhiWidth, "ElScPhiWidth");
   event.put(fTElDeltaPhiSeedClusterAtCalo, "ElDeltaPhiSeedClusterAtCalo");
   event.put(fTElDeltaEtaSeedClusterAtCalo, "ElDeltaEtaSeedClusterAtCalo");
   event.put(fTElDeltaPhiSuperClusterAtVtx, "ElDeltaPhiSuperClusterAtVtx");
@@ -5091,6 +5218,9 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElCaloEnergy, "ElCaloEnergy");
   event.put(fTElTrkMomAtVtx, "ElTrkMomAtVtx");
   event.put(fTElESuperClusterOverP, "ElESuperClusterOverP");
+  event.put(fTElIoEmIoP, "ElIoEmIoP");
+  event.put(fTElEoPout, "ElEoPout");
+  event.put(fTElPreShowerOverRaw, "ElPreShowerOverRaw");
   event.put(fTElNumberOfMissingInnerHits, "ElNumberOfMissingInnerHits");
   event.put(fTElSCindex, "ElSCindex");
   event.put(fTElConvPartnerTrkDist, "ElConvPartnerTrkDist");
