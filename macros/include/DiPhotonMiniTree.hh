@@ -50,7 +50,7 @@ private:
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert=false);
-  bool FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals);
+  bool FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals, bool skipvetocones=false);
   std::vector<int> GetPFCandRemovals(TreeReader *fTR, int phoqi);
   bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> &passing);
   bool StandardEventSelection(TreeReader *fTR, std::vector<int> &passing);
@@ -58,6 +58,7 @@ private:
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
   void Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex);  
+  std::vector<int> GetPFCandInFootprint(TreeReader *fTR, int phoqi, float newphi=-999);
 
   void FillLead(int index);
   void FillTrail(int index);
@@ -66,8 +67,8 @@ private:
   double phiNorm(float phi);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
-  float CombinedPFIsolation(int phoqi, float phi=-999, TString component="combined", float minimal_pfphotoncand_threshold_EB=0, float minimal_pfphotoncand_threshold_EE=0, std::vector<int> removals = std::vector<int>());
-  int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>());
+  float CombinedPFIsolation(int phoqi, float phi=-999, TString component="combined", float minimal_pfphotoncand_threshold_EB=0, float minimal_pfphotoncand_threshold_EE=0, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
+  int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
   int FindPFCandType(int id);
   std::vector<int> NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum=0, int maximum=9999);
 
