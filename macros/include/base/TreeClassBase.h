@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Aug  4 13:23:11 2012 by ROOT version 5.32/01
+// Wed Aug 15 12:50:27 2012 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: NTupleProducer_42X_MC.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-14scpatch/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_40_1_Ev3.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -11,10 +11,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-
-// Header file for the classes stored in the TTree if any.
-
-// Fixed size dimensions of array or collections stored in the TTree if any.
 
 class TreeClassBase {
 public :
@@ -456,11 +452,11 @@ public :
    Float_t         Pho_conv_chi2_probability[50];   //[NPhotons]
    Float_t         Pho_conv_eoverp[50];   //[NPhotons]
    Int_t           Conv_n;
-   Bool_t          Conv_validvtx[35];   //[Conv_n]
-   Int_t           Conv_ntracks[35];   //[Conv_n]
-   Float_t         Conv_chi2_probability[35];   //[Conv_n]
-   Float_t         Conv_eoverp[35];   //[Conv_n]
-   Float_t         Conv_zofprimvtxfromtrks[35];   //[Conv_n]
+   Bool_t          Conv_validvtx[50];   //[Conv_n]
+   Int_t           Conv_ntracks[50];   //[Conv_n]
+   Float_t         Conv_chi2_probability[50];   //[Conv_n]
+   Float_t         Conv_eoverp[50];   //[Conv_n]
+   Float_t         Conv_zofprimvtxfromtrks[50];   //[Conv_n]
    Int_t           diphotons_first[10];
    Int_t           diphotons_second[10];
    Int_t           vtx_dipho_h2gglobe[10][5];
@@ -485,6 +481,12 @@ public :
    Float_t         SCx[100];   //[NSuperClusters]
    Float_t         SCy[100];   //[NSuperClusters]
    Float_t         SCz[100];   //[NSuperClusters]
+   Int_t           SCNXtals[100];   //[NSuperClusters]
+   Float_t         SCxtalX[100][200];
+   Float_t         SCxtalY[100][200];
+   Float_t         SCxtalZ[100][200];
+   Float_t         SCxtalEtaWidth[100][200];
+   Float_t         SCxtalPhiWidth[100][200];
    Int_t           NJets;
    Int_t           NJetsTot;
    Int_t           JGood[100];   //[NJets]
@@ -1441,6 +1443,12 @@ public :
    TBranch        *b_SCx;   //!
    TBranch        *b_SCy;   //!
    TBranch        *b_SCz;   //!
+   TBranch        *b_SCNXtals;   //!
+   TBranch        *b_SCxtalX;   //!
+   TBranch        *b_SCxtalY;   //!
+   TBranch        *b_SCxtalZ;   //!
+   TBranch        *b_SCxtalEtaWidth;   //!
+   TBranch        *b_SCxtalPhiWidth;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_NJetsTot;   //!
    TBranch        *b_JGood;   //!
@@ -1947,17 +1955,16 @@ public :
 #endif
 
 #ifdef TreeClassBase_cxx
-TreeClassBase::TreeClassBase(TTree *tree) : fChain(0) 
+TreeClassBase::TreeClassBase(TTree *tree)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_42X_MC.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("NTupleProducer_42X_MC.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-14scpatch/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_40_1_Ev3.root");
+      if (!f) {
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-14scpatch/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_40_1_Ev3.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("NTupleProducer_42X_MC.root:/analyze");
-      dir->GetObject("Analysis",tree);
+      tree = (TTree*)gDirectory->Get("Analysis");
 
    }
    Init(tree);
@@ -1981,8 +1988,10 @@ Long64_t TreeClassBase::LoadTree(Long64_t entry)
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
-   if (fChain->GetTreeNumber() != fCurrent) {
-      fCurrent = fChain->GetTreeNumber();
+   if (!fChain->InheritsFrom(TChain::Class()))  return centry;
+   TChain *chain = (TChain*)fChain;
+   if (chain->GetTreeNumber() != fCurrent) {
+      fCurrent = chain->GetTreeNumber();
       Notify();
    }
    return centry;
@@ -2467,6 +2476,12 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("SCx", SCx, &b_SCx);
    fChain->SetBranchAddress("SCy", SCy, &b_SCy);
    fChain->SetBranchAddress("SCz", SCz, &b_SCz);
+   fChain->SetBranchAddress("SCNXtals", SCNXtals, &b_SCNXtals);
+   fChain->SetBranchAddress("SCxtalX", SCxtalX, &b_SCxtalX);
+   fChain->SetBranchAddress("SCxtalY", SCxtalY, &b_SCxtalY);
+   fChain->SetBranchAddress("SCxtalZ", SCxtalZ, &b_SCxtalZ);
+   fChain->SetBranchAddress("SCxtalEtaWidth", SCxtalEtaWidth, &b_SCxtalEtaWidth);
+   fChain->SetBranchAddress("SCxtalPhiWidth", SCxtalPhiWidth, &b_SCxtalPhiWidth);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("NJetsTot", &NJetsTot, &b_NJetsTot);
    fChain->SetBranchAddress("JGood", JGood, &b_JGood);
