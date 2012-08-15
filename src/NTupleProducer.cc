@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.36 2012/08/15 11:02:36 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.37 2012/08/15 12:01:42 haweber Exp $
 //
 //
 
@@ -331,12 +331,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // instantiate and initialize the electron ID MVA classes:
 
   std::vector<std::string> myManualCatWeigths;
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat1.weights.xml");
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat2.weights.xml");
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat3.weights.xml");
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat4.weights.xml");
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat5.weights.xml");
-  myManualCatWeigths.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat6.weights.xml");
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat1.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat2.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat3.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat4.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat5.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_NonTrigV0_Cat6.weights.xml").fullPath());
 
   Bool_t manualCat = true;
   
@@ -348,12 +348,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   
 
   std::vector<std::string> myManualCatWeigthsTrig;
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat1.weights.xml");
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat2.weights.xml");
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat3.weights.xml");
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat4.weights.xml");
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat5.weights.xml");
-  myManualCatWeigthsTrig.push_back("../data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat6.weights.xml");
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat1.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat2.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat3.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat4.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat5.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("DiLeptonAnalysis/NTupleProducer/data/eleIDMVA_weightFiles/Electrons_BDTG_TrigV0_Cat6.weights.xml").fullPath());
 
   electronIDMVATrig_ = new EGammaMvaEleEstimator();
   electronIDMVATrig_->initialize("BDT",
