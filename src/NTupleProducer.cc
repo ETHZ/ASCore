@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.35 2012/08/02 10:21:51 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.36 2012/08/15 11:02:36 pandolf Exp $
 //
 //
 
@@ -110,6 +110,11 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
 #include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
 
+#include "SimDataFormats/JetMatching/interface/JetFlavour.h"
+#include "SimDataFormats/JetMatching/interface/JetFlavourMatching.h"
+#include "SimDataFormats/JetMatching/interface/MatchedPartons.h"
+#include "SimDataFormats/JetMatching/interface/JetMatchedPartons.h"
+
 #include "DiLeptonAnalysis/NTupleProducer/interface/ETHVertexInfo.h"
 
 
@@ -159,6 +164,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fJetTag              = iConfig.getParameter<edm::InputTag>("tag_jets");
   fJetCorrs            = iConfig.getParameter<std::string>("jetCorrs");
   fBtagTags            = iConfig.getParameter<std::vector<edm::InputTag> >("tag_btags");
+  fPartonMatch         = iConfig.getParameter<edm::InputTag>("tag_partonmatch");
   fRawCaloMETTag       = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
   fTCMETTag            = iConfig.getParameter<edm::InputTag>("tag_tcmet");
   fPFMETTag            = iConfig.getParameter<edm::InputTag>("tag_pfmet");
@@ -449,6 +455,19 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   size_t ibtag = 0;
   for ( std::vector<edm::InputTag>::const_iterator it=fBtagTags.begin(); it!=fBtagTags.end(); ++it ) 
     iEvent.getByLabel((*it),jetsBtag[ibtag++]);
+
+  FlavourMap flavours;
+  if(!fIsRealData){
+  // Get matching parton flavour for jets
+  edm::Handle<reco::JetFlavourMatchingCollection> jetMC;
+  iEvent.getByLabel(fPartonMatch, jetMC);
+  for (reco::JetFlavourMatchingCollection::const_iterator iter = jetMC->begin();
+       iter != jetMC->end(); iter++) {
+    int fl = iter->second.getFlavour();
+    //std::cout << "flavour " << fl << " ";
+    flavours.insert(FlavourMap::value_type(iter->first, fl));
+    }
+  }
 
   //Get Tracks collection
   Handle<TrackCollection> tracks;
@@ -2806,6 +2825,17 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       ++ibtag;
     }
 
+      int myFlavour=0;// unassigned == 0
+      RefToBase<reco::Jet> aJet;
+      aJet = (*jetsBtag[0])[index].first; // fill it from the collection you want to probe!
+      if (flavours.find (aJet) == flavours.end()) {
+          //std::cout <<" Cannot access flavour for this jet " << index << " - not in the Map"<<std::endl;
+	  fTJPartonFlavour->push_back(0);
+      } else {
+          myFlavour = flavours[aJet];
+          //std::cout << " Jet " << index << " has flavour = " << flavours[aJet] << " check " << myFlavour << std::endl;//comment after checks are done
+	  fTJPartonFlavour->push_back(myFlavour);
+      }
 
 
     // start computation of betaStar variable (pileUp ID)
@@ -4039,6 +4069,7 @@ void NTupleProducer::declareProducts(void) {
 	it != fBtagTags.end(); ++it ) {
     produces<std::vector<float> >(("J"+(*it).label()).c_str());
   }
+  produces<std::vector<int>   >("JPartonFlavour");
   produces<std::vector<float> >("JMass");
   produces<std::vector<float> >("JBetaStar");
   produces<std::vector<float> >("Jtrk1px");
@@ -4719,6 +4750,7 @@ void NTupleProducer::resetProducts( void ) {
 	it != fBtagTags.end(); ++it ) {
     fTJbTagProb[ibtag++].reset(new std::vector<float> );
   }
+  fTJPartonFlavour.reset(new std::vector<int> );
   fTJMass.reset(new std::vector<float> );
   fTJBetaStar.reset(new std::vector<float> );
   fTJtrk1px.reset(new std::vector<float> );
@@ -5439,6 +5471,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
 	it != fBtagTags.end(); ++it ) {
     event.put(fTJbTagProb[ibtag++], ("J"+(*it).label()).c_str());
   }
+  event.put(fTJPartonFlavour, "JPartonFlavour");
   event.put(fTJMass, "JMass");
   event.put(fTJBetaStar, "JBetaStar");
   event.put(fTJtrk1px, "Jtrk1px");

@@ -36,6 +36,9 @@ cvs co -r V00-04-01 CondFormats/EgammaObjects
 cvs co -r V00-00-08      RecoMET/METAnalyzers                             
 cvs co -r V00-00-07      RecoMET/METFilters
 
+# Parton Flavour
+cvs co -r V00-13-10 PhysicsTools/JetMCAlgos
+
 # ECAL
 addpkg RecoEcal/EgammaCoreTools V05-08-22
 cvs export -d tmpexportdir -rHEAD UserCode/peruzzi/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h

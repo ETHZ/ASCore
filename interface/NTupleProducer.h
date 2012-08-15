@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.30 2012/08/02 10:21:52 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114.2.31 2012/08/15 11:02:36 pandolf Exp $
 //
 //
 
@@ -113,7 +113,16 @@ private:
     const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
       return j1.second > j2.second;
     }
+
   };
+  struct JetRefCompare :
+    public std::binary_function<edm::RefToBase<reco::Jet>, edm::RefToBase<reco::Jet>, bool> {
+    inline bool operator () (const edm::RefToBase<reco::Jet> &j1,
+                             const edm::RefToBase<reco::Jet> &j2) const
+    { return j1.id() < j2.id() || (j1.id() == j2.id() && j1.key() < j2.key()); }
+  };
+
+  typedef std::map<edm::RefToBase<reco::Jet>, unsigned int, JetRefCompare> FlavourMap;
   
   void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
   //   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
@@ -201,6 +210,7 @@ private:
   edm::InputTag fJetTag;
   std::string fJetCorrs;
   std::vector<edm::InputTag> fBtagTags;
+  edm::InputTag fPartonMatch;
   edm::InputTag fRawCaloMETTag;
   edm::InputTag fTCMETTag;
   edm::InputTag fPFMETTag;
@@ -967,6 +977,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTJeMinDR;
 
   std::auto_ptr<std::vector<float> >  fTJbTagProb[gMaxNBtags];
+  std::auto_ptr<std::vector<int>   >  fTJPartonFlavour;
 
   std::auto_ptr<std::vector<float> >  fTJMass;
   std::auto_ptr<std::vector<float> >  fTJBetaStar;

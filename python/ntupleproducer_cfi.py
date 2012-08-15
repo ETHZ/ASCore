@@ -18,6 +18,7 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_jets         = cms.InputTag('ak5PFJets'),
 	jetCorrs         = cms.string('ak5PFL1FastL2L3'),
 	tag_btags        = cms.VInputTag(''), # No defaults: set in _cfg.py
+	tag_partonmatch  = cms.InputTag('AK5PFbyValAlgo'),
 	tag_rawcalomet   = cms.InputTag('met'),
 	tag_tcmet        = cms.InputTag('tcMet'),
 	tag_pfmet        = cms.InputTag('pfMet'),

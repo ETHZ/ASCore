@@ -57,7 +57,8 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 #options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
-options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
+options.files= 'file:////shome/haweber/files/TTW_53X_8TeV.root'
+#options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
@@ -85,7 +86,7 @@ if options.runon=='data':
     #process.GlobalTag.globaltag = "GR_P_V39_AN1"
 else:
     # CMSSW_5_2_X:
-    process.GlobalTag.globaltag = "START53_V10::All"
+    process.GlobalTag.globaltag = "START53_V7A::All"
 
 
 ### Input/Output ###############################################################
@@ -428,6 +429,21 @@ process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
                              'newPFCombinedSecondaryVertexMVABPFJetTags',
                              'newPFJetProbabilityBPFJetTags',
                              'newPFJetBProbabilityBPFJetTags']
+			     
+			     
+# parton flavour
+process.load("PhysicsTools.JetMCAlgos.CaloJetsMCFlavour_cfi")
+
+import FWCore.ParameterSet.Config as cms
+
+process.AK5PFbyRef = process.AK5byRef.clone(
+  jets = "ak5PFJets"
+)
+
+process.AK5PFbyValAlgo = process.AK5byValAlgo.clone(
+  srcByReference = "AK5PFbyRef"
+)
+
 ##########################################################################
 ### PF isolation settings ################################################
 from CommonTools.ParticleFlow.Tools.pfIsolation import setupPFElectronIso, setupPFPhotonIso
@@ -545,6 +561,9 @@ process.sc_sequence = cms.Sequence(
 #### Path ######################################################################
 
 process.p = cms.Path(
+        process.myPartons *
+        process.AK5PFbyRef *
+        process.AK5PFbyValAlgo *
         process.goodVertices * # Filter
         (
          (process.photonPartonMatch
@@ -593,6 +612,9 @@ process.outpath = cms.EndPath(process.out)
 if options.runon=='data':
     process.p.remove(process.mygenjets)
     process.p.remove(process.photonPartonMatch)
+    process.p.remove(process.myPartons)
+    process.p.remove(process.AK5PFbyRef)
+    process.p.remove(process.AK5PFbyValAlgo)
 if options.ModelScan==True:
     process.p.remove(process.hcalLaserEventFilter)
 if options.FastSim==True:
