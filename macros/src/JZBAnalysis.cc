@@ -18,15 +18,16 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.47 $";
+string sjzbversion="$Revision: 1.70.2.48 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 bool DoExperimentalFSRRecovery = false;
+bool DoFSRStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.47 2012/08/13 16:53:06 fronga Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.48 2012/08/13 16:59:02 fronga Exp $
 */
 
 
@@ -1168,7 +1169,7 @@ void JZBAnalysis::Analyze() {
 	weight_histo->Fill(1,nEvent.PUweight);
       }
       
-      DoFSRStudy(fdoGenInfo,fTR);
+      if(DoFSRStudies) DoFSRStudy(fdoGenInfo,fTR);
       
       nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
       nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
