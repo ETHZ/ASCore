@@ -333,8 +333,9 @@ void DiPhotonMiniTree::Analyze(){
     else { // photon-by-photon cats
       if (sel_cat==1) passing = SignalSelection(fTR,passing);
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
-      //      if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
-      //      if (sel_cat==5) passing = BackgroundSelection(fTR,passing); // uncomment to make impinging track only from the fakes (only in MC!) 
+      if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // uncomment to make sieie sideband template only from the fakes (only in MC!)
+      //      if (!isdata) if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
+      if (!isdata) if (sel_cat==5) passing = BackgroundSelection(fTR,passing); // uncomment to make impinging track only from the fakes (only in MC!) 
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
     
@@ -581,7 +582,12 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
-    if (!(fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)) pass=1;
+    if (!(fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)) {
+      pass=1;
+    }
+    else {
+      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>5) pass=1;
+    }
     if (!pass) it=passing.erase(it); else it++;
   }
 
