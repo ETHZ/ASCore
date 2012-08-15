@@ -38,5 +38,7 @@
 <use   name="RecoParticleFlow/PFClusterTools"/>
 <use   name="h2gglobe/VertexAnalysis"/>
 <use   name="RecoEgamma/EgammaTools"/>
+<use   name="EGamma/EGammaAnalysisTools"/>
+<use   name="Muon/MuonAnalysisTools"/>
 <flags   EDM_PLUGIN="1"/>
 <flags   CXXFLAGS="-g -fno-var-tracking-assignments"/>
