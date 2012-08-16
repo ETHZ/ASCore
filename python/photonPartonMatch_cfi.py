@@ -23,7 +23,7 @@ partonGenJets = ak5GenJets.clone()
 partonGenJets.src = cms.InputTag("partons")
 
 myPhotonJetMatch = cms.EDProducer("CandViewCombiner",
-		decay       = cms.string("partonGenJets photons"),
+		decay       = cms.string("partonGenJets myphotons"),
 		cut         = cms.string("deltaR(daughter(0).eta,daughter(0).phi,daughter(1).eta,daughter(1).phi) < 0.5 ")
 )
 

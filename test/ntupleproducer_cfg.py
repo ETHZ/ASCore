@@ -275,7 +275,7 @@ process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
 )
 #
 process.printPhotons = cms.EDAnalyzer("ParticleListDrawer",
-     src = cms.InputTag("photons"),
+     src = cms.InputTag("myphotons"),
      maxEventsToPrint = cms.untracked.int32(10)
 )
 #
