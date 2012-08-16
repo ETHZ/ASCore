@@ -70,7 +70,7 @@ options.output='NTupleProducer_53X_'+options.runon+'.root'
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
 # to check what cff to use
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 # try this in the future instead of a global tag. still gives some errors at the moment (apr17)

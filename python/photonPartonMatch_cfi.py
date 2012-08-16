@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from RecoJets.JetProducers.ak5GenJets_cfi import *
 
-photons = cms.EDFilter("CandViewShallowCloneProducer",
+myphotons = cms.EDFilter("CandViewShallowCloneProducer",
   src = cms.InputTag("genParticles"),
   cut = cms.string(" pdgId==22 && mother(0).status==3")
 )
@@ -29,7 +29,7 @@ myPhotonJetMatch = cms.EDProducer("CandViewCombiner",
 
 
 photonPartonMatch = cms.Sequence(
-	photons
+	myphotons
 #	*countFilter
 	*partons
 	*partonGenJets*myPhotonJetMatch
