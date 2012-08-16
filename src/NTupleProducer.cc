@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.21 2012/08/04 16:46:10 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.22 2012/08/14 17:26:03 peruzzi Exp $
 //
 //
 
@@ -1433,6 +1433,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	      fTSCxtalZ[fTnSC][i]=xtal_position.z();
 	      fTSCxtalEtaWidth[fTnSC][i]=deta;
 	      fTSCxtalPhiWidth[fTnSC][i]=dphi;
+	      const CaloCellGeometry::CornersVec& cellCorners (cellGeometry->getCorners());
+	      for (int k=0; k<4; k++){
+		fTSCxtalfrontX[fTnSC][i][k]=(float)(cellCorners[k].x());
+		fTSCxtalfrontY[fTnSC][i][k]=(float)(cellCorners[k].y());
+		fTSCxtalfrontZ[fTnSC][i][k]=(float)(cellCorners[k].z());
+	      }
 	    }
 	    fTSCNXtals[fTnSC]=i;
 	  }
@@ -1521,6 +1527,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	      fTSCxtalZ[fTnSC][i]=xtal_position.z();
 	      fTSCxtalEtaWidth[fTnSC][i]=deta;
 	      fTSCxtalPhiWidth[fTnSC][i]=dphi;
+	      const CaloCellGeometry::CornersVec& cellCorners (cellGeometry->getCorners());
+	      for (int k=0; k<4; k++){
+		fTSCxtalfrontX[fTnSC][i][k]=(float)(cellCorners[k].x());
+		fTSCxtalfrontY[fTnSC][i][k]=(float)(cellCorners[k].y());
+		fTSCxtalfrontZ[fTnSC][i][k]=(float)(cellCorners[k].z());
+	      }
 	    }
 	    fTSCNXtals[fTnSC]=i;
 	  }
@@ -2220,6 +2232,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     if (type==2) storethispfcand[i]=true;
 	     if (type==1 && dR<0.4) storethispfcand[i]=true;
 	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
+
+	     { // determination of distance for footprint removal method
+	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
+	       TVector3 pfvertex(PfCandVx[i],PfCandVy[i],PfCandVz[i]);
+	       TVector3 pfmomentum(PfCandPx[i],PfCandPy[i],PfCandPz[i]);
+	       pfmomentum = pfmomentum.Unit();
+	       float scalefactor=0;
+	       bool isbarrel = gamIter->isEB();
+	       if (isbarrel) scalefactor = (photon_scposition.Perp()-pfvertex.Perp())/pfmomentum.Perp();
+	       else scalefactor = (photon_scposition.z()-pfvertex.z())/pfmomentum.z();
+	       TVector3 ecalpfhit = pfvertex + scalefactor*pfmomentum;
+	       if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
+	     }
 	       
 	     if (type==0){ //Neutral Hadron
 	       if (dR<0.1) fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] += pt;
@@ -3982,6 +4007,9 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("SCxtalZ",&fTSCxtalZ,Form("SCxtalZ[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
 	fEventTree->Branch("SCxtalEtaWidth",&fTSCxtalEtaWidth,Form("SCxtalEtaWidth[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
 	fEventTree->Branch("SCxtalPhiWidth",&fTSCxtalPhiWidth,Form("SCxtalPhiWidth[%d][%d]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalfrontX",&fTSCxtalfrontX,Form("SCxtalfrontX[%d][%d][4]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalfrontY",&fTSCxtalfrontY,Form("SCxtalfrontY[%d][%d][4]/F",gMaxnSC,gMaxnSCxtals));
+	fEventTree->Branch("SCxtalfrontZ",&fTSCxtalfrontZ,Form("SCxtalfrontZ[%d][%d][4]/F",gMaxnSC,gMaxnSCxtals));
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -4919,6 +4947,11 @@ void NTupleProducer::resetTree(){
 	    fTSCxtalZ[i][j]=-999;
 	    fTSCxtalEtaWidth[i][j]=-999;
 	    fTSCxtalPhiWidth[i][j]=-999;
+	    for (int k=0; k<4; k++){                                                                                                                                            
+	      fTSCxtalfrontX[i][j][k]=-999;
+	      fTSCxtalfrontY[i][j][k]=-999;
+	      fTSCxtalfrontZ[i][j][k]=-999;
+	    } 
 	  }
 	}
 

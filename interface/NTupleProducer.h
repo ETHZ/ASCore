@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.11 2012/08/04 09:49:08 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.12 2012/08/14 17:26:04 peruzzi Exp $
 //
 //
 
@@ -995,6 +995,9 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   float fTSCxtalZ[gMaxnSC][gMaxnSCxtals];
   float fTSCxtalEtaWidth[gMaxnSC][gMaxnSCxtals];
   float fTSCxtalPhiWidth[gMaxnSC][gMaxnSCxtals];
+  float fTSCxtalfrontX[gMaxnSC][gMaxnSCxtals][4];
+  float fTSCxtalfrontY[gMaxnSC][gMaxnSCxtals][4];
+  float fTSCxtalfrontZ[gMaxnSC][gMaxnSCxtals][4];
 
 // Jets:
 	int fTnjets;
