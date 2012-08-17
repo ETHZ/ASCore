@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.12 2012/08/14 17:26:04 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.13 2012/08/16 12:09:02 peruzzi Exp $
 //
 //
 
@@ -84,6 +84,8 @@ Implementation:
 // Helpers
 #include "Math/VectorUtil.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "TGeoTube.h"
+#include "TGeoPara.h"
 
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"

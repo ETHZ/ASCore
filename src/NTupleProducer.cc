@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.22 2012/08/14 17:26:03 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.23 2012/08/16 12:09:01 peruzzi Exp $
 //
 //
 
@@ -2233,18 +2233,48 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     if (type==1 && dR<0.4) storethispfcand[i]=true;
 	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
 
+
 	     { // determination of distance for footprint removal method
 	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
+	       bool isbarrel = gamIter->isEB();
 	       TVector3 pfvertex(PfCandVx[i],PfCandVy[i],PfCandVz[i]);
 	       TVector3 pfmomentum(PfCandPx[i],PfCandPy[i],PfCandPz[i]);
 	       pfmomentum = pfmomentum.Unit();
-	       float scalefactor=0;
-	       bool isbarrel = gamIter->isEB();
-	       if (isbarrel) scalefactor = (photon_scposition.Perp()-pfvertex.Perp())/pfmomentum.Perp();
-	       else scalefactor = (photon_scposition.z()-pfvertex.z())/pfmomentum.z();
-	       TVector3 ecalpfhit = pfvertex + scalefactor*pfmomentum;
-	       if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
+	       TVector3 ecalpfhit(0,0,0);
+	       bool good=false;
+	       if (isbarrel){
+		 TGeoTube ebgeom(0,photon_scposition.Perp(),1e+10);
+ 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
+		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
+		 if (ebgeom.Contains(p)){
+		   double dist = ebgeom.DistFromInside(p,d);
+		   ecalpfhit = pfvertex + dist*pfmomentum;
+		   good=true;
+		 }
+	       }
+	       else { // EE
+		 TGeoPara eegeom(1e+10,1e+10,fabs(photon_scposition.z()),0,0,0);
+ 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
+		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
+		 if (eegeom.Contains(p)){
+		   double dist = eegeom.DistFromInside(p,d);
+		   ecalpfhit = pfvertex + dist*pfmomentum;
+		   good=true;
+		 }
+	       }
+	       if (good && ecalpfhit.Perp()!=0 && photon_scposition.Perp()!=0){
+		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
+//		 std::cout << "---" << std::endl;
+//		 std::cout << "sc " << std::endl;
+//		 photon_scposition.Print();
+//		 std::cout << "pfcand " << std::endl;
+//		 pfvertex.Print();
+//		 pfmomentum.Print();
+//		 ecalpfhit.Print();
+//		 std::cout << "---" << std::endl;
+	       }
 	     }
+
 	       
 	     if (type==0){ //Neutral Hadron
 	       if (dR<0.1) fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] += pt;
