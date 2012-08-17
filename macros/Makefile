@@ -25,7 +25,7 @@ endif
 
 LIBS           = $(ROOTLIBS) 
 
-NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
+NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer -lGeom
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) 
 ifdef DOJES
 GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lCondFormatsJetMETObjects

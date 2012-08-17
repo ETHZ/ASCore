@@ -24,6 +24,9 @@
 #include "Math/Vector3D.h"
 #include "TVector3.h"
 
+#include "TGeoPara.h"
+#include "TGeoTube.h"
+
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
   DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
@@ -34,6 +37,8 @@ public:
   void End();
 
 private:
+
+  bool global_dofootprintremoval;
 
   float eff_area_EB;
   float eff_area_EE;
@@ -50,7 +55,6 @@ private:
   std::vector<int> SignalSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> BackgroundSelection(TreeReader *fTR, vector<int> passing);
   std::vector<int> ImpingingTrackSelection(TreeReader *fTR, std::vector<int> passing, bool invert=false);
-  bool FindImpingingTrack(TreeReader *fTR, TVector3 caloposition, TVector3 refvertex, int &reference_index_found, std::vector<int> removals, bool skipvetocones=false);
   std::vector<int> GetPFCandRemovals(TreeReader *fTR, int phoqi);
   bool SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> &passing);
   bool StandardEventSelection(TreeReader *fTR, std::vector<int> &passing);
@@ -58,18 +62,25 @@ private:
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
   void Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex);  
-  std::vector<int> GetPFCandInFootprint(TreeReader *fTR, int phoqi, float newphi=-999);
+  std::vector<int> GetPFCandOutsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
+  std::vector<int> GetPFCandInsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
+  std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
+  TVector3 PropagatePFCandToEcal(int pfcandindex, TVector3 ecal_position, bool isbarrel);
+  bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
+  float PFIsolation(int phoqi, float rotation_phi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
+  float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
+  bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);
+  std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
   void FillLead(int index);
   void FillTrail(int index);
 
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
-  bool FindCloseJetsAndPhotons(TreeReader *fTR, float phi, int phoqi);
   float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
-  float CombinedPFIsolation(int phoqi, float phi=-999, TString component="combined", float minimal_pfphotoncand_threshold_EB=0, float minimal_pfphotoncand_threshold_EE=0, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
-  int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
   int FindPFCandType(int id);
+
+  int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
   std::vector<int> NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum=0, int maximum=9999);
 
   TRandom3 *randomgen;
