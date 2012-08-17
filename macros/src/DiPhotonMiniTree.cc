@@ -26,6 +26,8 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
 
   global_dofootprintremoval = true;
 
+  eegeom = TGeoPara(1,1,1,0,0,0);
+
 }
 
 DiPhotonMiniTree::~DiPhotonMiniTree(){
@@ -751,6 +753,9 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
     if (component=="charged" && type!=1) continue;
     if (component=="photon" && type!=2) continue;
 
+    TVector3 sc_position = TVector3(fTR->SCx[scindex],fTR->SCy[scindex],fTR->SCz[scindex]);
+    TVector3 ecalpfhit = PropagatePFCandToEcal(i,isbarrel ? sc_position.Perp() : sc_position.z(),isbarrel); // approximate, but much faster! Note that inputs are not changed by rotation
+
     bool inside=false;
 
     if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
@@ -759,25 +764,27 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
     for (int j=0; j<nxtals; j++){
       
       TVector3 xtal_position = TVector3(fTR->SCxtalX[scindex][j],fTR->SCxtalY[scindex][j],fTR->SCxtalZ[scindex][j]);
-      float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j];
-      float xtalPhiWidth = fTR->SCxtalPhiWidth[scindex][j];
-
-      TVector3 xtal_corners[4];
-      for (int k=0; k<4; k++) xtal_corners[k] = TVector3(fTR->SCxtalfrontX[scindex][j][k],fTR->SCxtalfrontY[scindex][j][k],fTR->SCxtalfrontZ[scindex][j][k]);
 
       if (rotation_phi!=0) {
 	TRotation r; r.RotateZ(rotation_phi);
 	xtal_position *= r;
-	for (int k=0; k<4; k++) xtal_corners[k] *= r;
       }
 
-      TVector3 ecalpfhit = PropagatePFCandToEcal(i,xtal_position,isbarrel);
+      //      TVector3 ecalpfhit = PropagatePFCandToEcal(i,xtal_position,isbarrel); // this would be the most correct
 
       if (isbarrel){
+      float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j];
+      float xtalPhiWidth = fTR->SCxtalPhiWidth[scindex][j];
 	if (fabs(ecalpfhit.Eta()-xtal_position.Eta())<xtalEtaWidth/2 && Util::DeltaPhi(ecalpfhit.Phi(),xtal_position.Phi()<xtalPhiWidth/2)) inside=true;
       }
       else { // EE
-	float hitx = ecalpfhit.x();
+	TVector3 xtal_corners[4];
+	for (int k=0; k<4; k++) xtal_corners[k] = TVector3(fTR->SCxtalfrontX[scindex][j][k],fTR->SCxtalfrontY[scindex][j][k],fTR->SCxtalfrontZ[scindex][j][k]);
+	if (rotation_phi!=0) {
+	  TRotation r; r.RotateZ(rotation_phi);
+	  for (int k=0; k<4; k++) xtal_corners[k] *= r;
+	}
+      	float hitx = ecalpfhit.x();
 	float hity = ecalpfhit.y();
 	float polx[5];
 	float poly[5];
@@ -798,7 +805,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 
 };
 
-TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, TVector3 ecal_position, bool isbarrel){
+TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel){
 
   int i = pfcandindex;
 
@@ -807,22 +814,18 @@ TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, TVector3 ecal_
   pfmomentum = pfmomentum.Unit();
   TVector3 ecalpfhit(0,0,0);
   if (isbarrel){
-    TGeoTube ebgeom(0,ecal_position.Perp(),1e+10);
     double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
     double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-    if (ebgeom.Contains(p)){
-      double dist = ebgeom.DistFromInside(p,d);
-      ecalpfhit = pfvertex + dist*pfmomentum;
-    }
+    double dist = TGeoTube::DistFromInsideS(p,d,0,position,1e+10);
+    ecalpfhit = pfvertex + dist*pfmomentum;
   }
   else { // EE
-    TGeoPara eegeom(1e+10,1e+10,fabs(ecal_position.z()),0,0,0);
+    double dim[6]={1e+10,1e+10,fabs(position),0,0,0};
     double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
     double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-    if (eegeom.Contains(p)){
-      double dist = eegeom.DistFromInside(p,d);
-      ecalpfhit = pfvertex + dist*pfmomentum;
-    }
+    eegeom.SetDimensions(dim);
+    double dist = eegeom.DistFromInside(p,d);
+    ecalpfhit = pfvertex + dist*pfmomentum;
   }
 
   return ecalpfhit;
@@ -902,6 +905,11 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, int phoqi, int &refer
 
   TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
 
+  if (dofootprintremoval){
+    std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,0,"charged");
+    for (int i=0; i<footprint.size(); i++) removals.push_back(footprint.at(i));
+  }
+
   for (int i=0; i<fTR->NPfCand; i++){
 
     if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
@@ -909,11 +917,6 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, int phoqi, int &refer
 
     int type = FindPFCandType(fTR->PfCandPdgId[i]);
     if (type!=1) continue;
-
-    if (dofootprintremoval){
-      std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,0,"charged");
-      for (int i=0; i<footprint.size(); i++) removals.push_back(footprint.at(i));
-    }
 
     bool removed = false;
     for (int j=0; j<removals.size(); j++) {
@@ -1089,6 +1092,11 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
     photon_position *= r;
   } 
 
+  if (dofootprintremoval){
+    std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,rotation_phi,"combined");
+    for (int i=0; i<footprint.size(); i++) removals.push_back(footprint.at(i));
+  }
+
   for (int i=0; i<fTR->NPfCand; i++){
 
     if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
@@ -1101,11 +1109,6 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
     if (component=="neutral" && type!=0) continue;
     if (component=="charged" && type!=1) continue;
     if (component=="photon" && type!=2) continue;
-
-    if (dofootprintremoval){
-      std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,rotation_phi,"combined");
-      for (int i=0; i<footprint.size(); i++) removals.push_back(footprint.at(i));
-    }
 
     bool removed = false;
     for (int j=0; j<removals.size(); j++) {
@@ -1218,7 +1221,7 @@ float DiPhotonMiniTree::GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pf
   TVector3 pfmomentum(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
   pfmomentum = pfmomentum.Unit();
 
-  TVector3 ecalpfhit = PropagatePFCandToEcal(i,sc_position,isbarrel);
+  TVector3 ecalpfhit = PropagatePFCandToEcal(i,isbarrel ? sc_position.Perp() : sc_position.z(),isbarrel);
 
   return Util::GetDeltaR(sc_position.Eta(),ecalpfhit.Eta(),sc_position.Phi(),ecalpfhit.Phi());
 

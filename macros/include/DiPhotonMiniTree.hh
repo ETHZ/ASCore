@@ -43,6 +43,8 @@ private:
   float eff_area_EB;
   float eff_area_EE;
 
+  TGeoPara eegeom;
+
   Float_t* kfactors;
 
   EnergyCorrection *phocorr;
@@ -65,7 +67,7 @@ private:
   std::vector<int> GetPFCandOutsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
   std::vector<int> GetPFCandInsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
-  TVector3 PropagatePFCandToEcal(int pfcandindex, TVector3 ecal_position, bool isbarrel);
+  TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
   float PFIsolation(int phoqi, float rotation_phi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
