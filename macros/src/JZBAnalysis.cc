@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.86 $";
+string sjzbversion="$Revision: 1.70.2.52 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,7 +27,7 @@ bool DoExperimentalFSRRecovery = false;
 bool DoFSRStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.86 2012/08/17 15:34:19 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.52 2012/08/17 16:05:11 pablom Exp $
 */
 
 
@@ -193,7 +193,9 @@ public:
   float pfJetGoodMl[jMax];
   float pfJetGoodM[jMax];
   float pfJetGoodPtl[jMax];
-  float  pfJetGoodID[jMax];
+  float pfJetGoodID[jMax];
+  int   pfJetGoodTracks[jMax];
+  int   pfJetGoodTracksN[jMax];
   float bTagProbCSVBP[jMax];
   float bTagProbCSVMVA[jMax];
   
@@ -208,6 +210,8 @@ public:
   float pfJetGoodMBtag[jMax];
   float pfJetGoodPtlBtag[jMax];
   bool  pfJetGoodIDBtag[jMax];
+  int   pfJetGoodTracksBtag[jMax];
+  int   pfJetGoodTracksNBtag[jMax];
 
   int pfJetGoodNum40;
   int pfJetGoodNum50;
@@ -530,7 +534,10 @@ void nanoEvent::reset()
     pfJetGoodMl[jCounter]=0;
     pfJetGoodPtl[jCounter]=0;
     pfJetGoodID[jCounter]=0;
-    pfJetGoodPtBtag[jCounter]=0;
+    pfJetGoodTracks[jCounter]=0;
+    pfJetGoodTracksBtag[jCounter]=0;
+    pfJetGoodTracksN[jCounter]=0;
+    pfJetGoodTracksNBtag[jCounter]=0;
     pfJetGoodEtaBtag[jCounter]=0;
     pfJetGoodPhiBtag[jCounter]=0;
     pfJetGoodEBtag[jCounter]=0;
@@ -978,6 +985,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNum50n1sigma",&nEvent.pfJetGoodNum50n1sigma,"pfJetGoodNum50n1sigma/I");
 
   myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum40]/F");
+  myTree->Branch("pfJetGoodTracks", nEvent.pfJetGoodTracks,"pfJetGoodTracks[pfJetGoodNum40]/I");
+  myTree->Branch("pfJetGoodTracksN", nEvent.pfJetGoodTracksN,"pfJetGoodTracksN[pfJetGoodNum40]/I");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum40]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum40]/F");
   myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum40]/F");
@@ -987,6 +996,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodPtl", nEvent.pfJetGoodPtl,"pfJetGoodPtl[pfJetGoodNum40]/F");
 
   myTree->Branch("pfJetGoodPtBtag", nEvent.pfJetGoodPtBtag,"pfJetGoodPtBag[pfJetGoodNumBtag40]/F");
+  myTree->Branch("pfJetGoodTracksBtag", nEvent.pfJetGoodTracksBtag,"pfJetGoodTracksBtag[pfJetGoodNumBtag40]/I");
+  myTree->Branch("pfJetGoodTracksNBtag", nEvent.pfJetGoodTracksNBtag,"pfJetGoodTracksNBtag[pfJetGoodNumBtag40]/I");
   myTree->Branch("pfJetGoodEtaBtag",nEvent.pfJetGoodEtaBtag,"pfJetGoodEtaBtag[pfJetGoodNumBtag40]/F");
   myTree->Branch("pfJetGoodPhiBtag",nEvent.pfJetGoodPhiBtag,"pfJetGoodPhiBtag[pfJetGoodNumBtag40]/F");
   myTree->Branch("pfJetGoodIDBtag", nEvent.pfJetGoodIDBtag,"pfJetGoodID[pfJetGoodNumBtag40]/O");
@@ -1715,7 +1726,10 @@ void JZBAnalysis::Analyze() {
       float jenergy = fTR->JE[i];
       float jesC = fTR->JEcorr[i];
       bool  isJetID = IsGoodBasicPFJet(i,0.0,3.0);
-      
+      int   ntracksch = fTR->JNAssoTracks[i];  
+      int   ntracksne = fTR->JNConstituents[i];
+
+
       jpt=jpt/jesC;
       jenergy=jenergy/jesC;
       jpx/=jesC;
@@ -1867,7 +1881,9 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum40]  = isJetID;
         nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum40] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
         nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum40] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
-        
+        nEvent.pfJetGoodTracks[nEvent.pfJetGoodNum40] = ntracksch;
+        nEvent.pfJetGoodTracksN[nEvent.pfJetGoodNum40] = ntracksne;
+
         if(isJetID>0) {
 	        nEvent.pfJetGoodNumID++;
 	        if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum40] > 0.679) nEvent.pfJetGoodNumIDBtag++;
@@ -1879,6 +1895,8 @@ void JZBAnalysis::Analyze() {
            nEvent.pfJetGoodEBtag[nEvent.pfJetGoodNumBtag40] = jenergy;
            nEvent.pfJetGoodIDBtag[nEvent.pfJetGoodNumBtag40]  = isJetID;
 	   nEvent.pfBJetDphiZ[nEvent.pfJetGoodNumBtag40]  = aJet.DeltaPhi(zVector);
+           nEvent.pfJetGoodTracksBtag[nEvent.pfJetGoodNumBtag40] = ntracksch;
+           nEvent.pfJetGoodTracksNBtag[nEvent.pfJetGoodNumBtag40] = ntracksne;
 	   nEvent.pfJetGoodNumBtag40++;
         }
         nEvent.pfJetGoodNum40++;
