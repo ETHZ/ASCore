@@ -21,6 +21,10 @@ JZBAnalyzer::~JZBAnalyzer() {
 void JZBAnalyzer::Loop(){
   Long64_t nentries = fTR->GetEntries();
   cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+  if ( fTR->GetEntries() < 1 ) {
+    cerr << " No entry found: stopping here" << endl;
+    return;
+  }
   
   // loop over all ntuple entries
   if(fMaxEvents==-1)nentries=fTR->GetEntries();
