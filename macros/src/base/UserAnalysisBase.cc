@@ -23,8 +23,8 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr, bool isData){
     fTlat = new TLatex();
     fVerbose = 0;
     fDoPileUpReweight = false;
-    string JESPathPrefix="/shome/buchmann/material/JEStxtfiles/data/GR_R_52_V7C_";
-    if(!isData) JESPathPrefix="/shome/buchmann/material/JEStxtfiles/mc/START52_V9B_";
+    string JESPathPrefix="/shome/buchmann/material/JEStxtfiles/data/GR_P_V40_AN1_";
+    if(!isData) JESPathPrefix="/shome/buchmann/material/JEStxtfiles/mc/START53_V7A_";
     
     // Put all JES-related stuff between pre-compiler flags
     //----------- Correction Object ------------------------------
