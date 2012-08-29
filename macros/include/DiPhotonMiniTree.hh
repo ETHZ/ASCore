@@ -66,11 +66,10 @@ private:
   int Count_part_isrfsr_gamma(TreeReader *fTR, vector<int> passing);
   void ResetVars();
   void Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex);  
-  std::vector<int> GetPFCandOutsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
   std::vector<int> GetPFCandInsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component);
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
   TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
-  bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
+  bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
   float PFIsolation(int phoqi, float rotation_phi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);

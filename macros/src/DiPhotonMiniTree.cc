@@ -718,18 +718,18 @@ std::vector<int> DiPhotonMiniTree::GetPFCandIDedRemovals(TreeReader *fTR, int ph
   return out;
 };
 
-std::vector<int> DiPhotonMiniTree::GetPFCandOutsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component){
-  return GetPFCandWithFootprintRemoval(fTR,phoqi,rotation_phi,global_dofootprintremoval,component);
-};
-
 std::vector<int> DiPhotonMiniTree::GetPFCandInsideFootprint(TreeReader *fTR, int phoqi, float rotation_phi, TString component){
   return GetPFCandWithFootprintRemoval(fTR,phoqi,rotation_phi,false,component);
 };
 
-
 std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component){
 
-  if (component!="neutral" && component=="charged" && component=="photon" && component=="combined") {
+  if (component!="photon"){
+    std::cout << "propagation not implemented for non photon objects!!!" << std::endl;
+    return std::vector<int>();
+  }
+
+  if (component!="neutral" && component!="charged" && component!="photon" && component!="combined") {
     std::cout << "Wrong choice for component" << std::endl;
     return std::vector<int>();
   }
@@ -757,7 +757,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
     if (component=="photon" && type!=2) continue;
 
     TVector3 sc_position = TVector3(fTR->SCx[scindex],fTR->SCy[scindex],fTR->SCz[scindex]);
-    TVector3 ecalpfhit = PropagatePFCandToEcal(i,isbarrel ? sc_position.Perp() : sc_position.z(),isbarrel); // approximate, but much faster! Note that inputs are not changed by rotation
+    //    TVector3 ecalpfhit = PropagatePFCandToEcal(i,isbarrel ? sc_position.Perp() : sc_position.z(),isbarrel); // approximate, but much faster! Note that inputs are not changed by rotation
 
     bool inside=false;
 
@@ -773,7 +773,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 	xtal_position *= r;
       }
 
-      //      TVector3 ecalpfhit = PropagatePFCandToEcal(i,xtal_position,isbarrel); // this would be the most correct
+      TVector3 ecalpfhit = PropagatePFCandToEcal(i,isbarrel ? xtal_position.Perp() : xtal_position.z(), isbarrel); // this would be the most correct
 
       if (isbarrel){
 	float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j]*(1+global_linkbyrechit_enlargement);
@@ -815,6 +815,11 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel){
 
   int i = pfcandindex;
+
+  if (FindPFCandType(fTR->PfCandPdgId[i])!=2) {
+    std::cout << "propagation not implemented for non photon objects!!!" << std::endl;
+    return TVector3(0,0,0);
+  }
 
   TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
   TVector3 pfmomentum(fTR->PfCandPx[i],fTR->PfCandPy[i],fTR->PfCandPz[i]);
@@ -877,7 +882,7 @@ std::vector<int> DiPhotonMiniTree::ImpingingTrackSelection(TreeReader *fTR, std:
     bool found=0;
     int phoqi=*it;
     
-    found = FindImpingingTrack(fTR,phoqi,impinging_track_pfcand[phoqi],global_dofootprintremoval);
+    found = FindImpingingTrack(fTR,phoqi,impinging_track_pfcand[phoqi]);
 
     if (invert) { // selection = 0 impinging tracks
       if (found) it=passing.erase(it); else it++;
@@ -937,8 +942,12 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, int phoqi, int &refer
     if (!(fTR->PfCandHasHitInFirstPixelLayer[i])) continue;
 
     if (dofootprintremoval){
-      double dR = GetPFCandDeltaRFromSC(fTR,phoqi,i,0);
-      if (dR>0.4) continue;
+      
+      std::cout << "Wrong! No propagator for charged stuff" << std::endl;
+      continue;
+
+      //      double dR = GetPFCandDeltaRFromSC(fTR,phoqi,i,0);
+      //      if (dR>0.4) continue;
     }
 
     if (!dofootprintremoval){ // veto cones
@@ -1089,6 +1098,8 @@ void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, i
 
 float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, bool dofootprintremoval, std::vector<int> removals){
 
+  // footprint removal only for photons, charged and neutrals use Poter's veto cones
+
   float result=0;
 
   TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
@@ -1100,7 +1111,7 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
   } 
 
   if (dofootprintremoval){
-    std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,rotation_phi,"combined");
+    std::vector<int> footprint = GetPFCandInsideFootprint(fTR,phoqi,rotation_phi,"photon");
     for (int i=0; i<footprint.size(); i++) removals.push_back(footprint.at(i));
   }
 
@@ -1126,12 +1137,11 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
     double pt = fTR->PfCandPt[i];
 
-    if (dofootprintremoval){
+    if (type==2 && dofootprintremoval){
       double dR = GetPFCandDeltaRFromSC(fTR,phoqi,i,rotation_phi);
       if (dR>0.4) continue;
     }
-
-    if (!dofootprintremoval){ // veto cones
+    else if (type==0 || type==1 || (type==2 && !dofootprintremoval)){ // veto cones
 
       TVector3 phovtx(fTR->PhoVx[phoqi],fTR->PhoVy[phoqi],fTR->PhoVz[phoqi]);
       TVector3 pfvertex(fTR->PfCandVx[i],fTR->PfCandVy[i],fTR->PfCandVz[i]);
@@ -1160,17 +1170,16 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
       double dEta = fTR->PfCandEta[i] - sceta;
       double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
       double dR = sqrt(dEta*dEta+dPhi*dPhi);
-
+      
       if (dR>0.4) continue;
 
-      // additional veto sieie-orthogonal
-      if (fTR->PhoisEB[phoqi]){
-	if (fabs(dEta)<0.05) continue;
-	if (fabs(dPhi)<0.05) continue;
-      }
+//      // additional veto sieie-orthogonal
+//      if (fTR->PhoisEB[phoqi]){
+//	if (fabs(dEta)<0.05) continue;
+//	if (fabs(dPhi)<0.05) continue;
+//      }
 
       if (type==2){ 
-
 	if (fTR->PhoisEB[phoqi]){
 	  if (fabs(dEta)<0.015) continue;
 	}
@@ -1182,7 +1191,6 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 	  std::cout << "Something wrong" << std::endl;
 	  return -999;
 	}
-
       }
 
       if (type==1){
@@ -1193,6 +1201,10 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
       }
 
+    }
+    else {
+      std::cout << "something wrong" << std::endl;
+      continue;
     }
 
 
@@ -1209,8 +1221,6 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 	return -999;
       }
     }
-
-
 
     result+=pt;
 
@@ -1341,7 +1351,7 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
   pholead_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
   int a;
-  pholead_hasimpingingtrack = FindImpingingTrack(fTR,index,a,global_dofootprintremoval);
+  pholead_hasimpingingtrack = FindImpingingTrack(fTR,index,a);
   //  pholead_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,remove,global_dofootprintremoval);
 };
 
@@ -1421,7 +1431,7 @@ void DiPhotonMiniTree::FillTrail(int index){
   photrail_PhoMCmatchindex=fTR->PhoMCmatchindex[index];
   photrail_PhoMCmatchexitcode=fTR->PhoMCmatchexitcode[index];
   int a;
-  photrail_hasimpingingtrack = FindImpingingTrack(fTR,index,a,global_dofootprintremoval);
+  photrail_hasimpingingtrack = FindImpingingTrack(fTR,index,a);
   //  photrail_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,remove,global_dofootprintremoval);
 };
 
