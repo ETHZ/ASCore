@@ -40,6 +40,8 @@ private:
 
   bool global_dofootprintremoval;
 
+  float global_linkbyrechit_enlargement;
+
   float eff_area_EB;
   float eff_area_EE;
 

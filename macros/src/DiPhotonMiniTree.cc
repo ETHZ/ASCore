@@ -26,6 +26,8 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
 
   global_dofootprintremoval = true;
 
+  global_linkbyrechit_enlargement = 0.25; // xtal_size_eff = (1+global_linkbyrechit_enlargement)*xtal_size
+
   eegeom = TGeoPara(1,1,1,0,0,0);
 
 }
@@ -605,7 +607,7 @@ bool DiPhotonMiniTree::SinglePhotonEventSelection(TreeReader *fTR, std::vector<i
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
-    if (fTR->PhoPt[*it]>40) pass=1;
+    if (fTR->PhoPt[*it]>30) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
 
@@ -736,6 +738,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
   
   if (scindex<0) {
     std::cout << "Error in GetPFCandOverlappingSC" << std::endl;
+
     return std::vector<int>();
   }
 
@@ -773,8 +776,8 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
       //      TVector3 ecalpfhit = PropagatePFCandToEcal(i,xtal_position,isbarrel); // this would be the most correct
 
       if (isbarrel){
-      float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j];
-      float xtalPhiWidth = fTR->SCxtalPhiWidth[scindex][j];
+	float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j]*(1+global_linkbyrechit_enlargement);
+	float xtalPhiWidth = fTR->SCxtalPhiWidth[scindex][j]*(1+global_linkbyrechit_enlargement);
 	if (fabs(ecalpfhit.Eta()-xtal_position.Eta())<xtalEtaWidth/2 && Util::DeltaPhi(ecalpfhit.Phi(),xtal_position.Phi()<xtalPhiWidth/2)) inside=true;
       }
       else { // EE
@@ -791,6 +794,10 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 	for (int k=0; k<4; k++) polx[k] = xtal_corners[k].x();
 	for (int k=0; k<4; k++) poly[k] = xtal_corners[k].y();
 	polx[4]=polx[0]; poly[4]=poly[0]; // closed polygon
+	float centerx = (polx[0]+polx[1]+polx[2]+polx[3])/4;
+	float centery = (poly[0]+poly[1]+poly[2]+poly[3])/4;
+	hitx = centerx + (hitx-centerx)*(1+global_linkbyrechit_enlargement);
+	hity = centery + (hity-centery)*(1+global_linkbyrechit_enlargement);
 	if (TMath::IsInside(hitx,hity,5,polx,poly)) inside=true;
       }
 
@@ -1166,12 +1173,10 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
 	if (fTR->PhoisEB[phoqi]){
 	  if (fabs(dEta)<0.015) continue;
-	  if (pt<minimal_pfphotoncand_threshold_EB) continue;
 	}
 	else if (fTR->PhoisEE[phoqi]){
 	  float limit_dR = 0.00864*fabs(sinh(sceta))*4;
 	  if (dR<limit_dR) continue;
-	  if (pt<minimal_pfphotoncand_threshold_EE) continue;
 	}
 	else {
 	  std::cout << "Something wrong" << std::endl;
@@ -1189,6 +1194,23 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
       }
 
     }
+
+
+    // pfcandidate threshold
+    if (type==2){ 
+      if (fTR->PhoisEB[phoqi]){
+	if (pt<minimal_pfphotoncand_threshold_EB) continue;
+      }
+      else if (fTR->PhoisEE[phoqi]){
+	if (pt<minimal_pfphotoncand_threshold_EE) continue;
+      }
+      else {
+	std::cout << "Something wrong" << std::endl;
+	return -999;
+      }
+    }
+
+
 
     result+=pt;
 
