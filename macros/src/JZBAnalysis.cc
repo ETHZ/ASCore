@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.52 $";
+string sjzbversion="$Revision: 1.70.2.53 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,7 +27,7 @@ bool DoExperimentalFSRRecovery = false;
 bool DoFSRStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.52 2012/08/17 16:05:11 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.53 2012/08/20 09:31:21 pablom Exp $
 */
 
 
@@ -762,6 +762,8 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",7,15);
   addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 15);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 15);
+
+  addPath(metTriggerPaths,"HLT_PFMET150", 1, 15);
   
 }
 
@@ -1151,6 +1153,7 @@ void JZBAnalysis::Begin(TFile *f){
     counters[EV].fill("... pass electron triggers",0.);
     counters[EV].fill("... pass muon triggers",0.);
     counters[EV].fill("... pass EM triggers",0.);
+    counters[EV].fill("... pass MET triggers",0.);
   }
   std::string types[3] = { "ee","mm","em" };
   for ( size_t itype=0; itype<3; ++itype ) {
@@ -1249,7 +1252,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.pdfWsum=fTR->pdfWsum; 
       } else {
 	//don't attempt to do PURW for model scans
-	nEvent.PUweight   = GetPUWeight(fTR->PUnumTrueInteractions);
+	nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	nEvent.weight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	weight_histo->Fill(1,nEvent.PUweight);
       }
@@ -1475,6 +1478,12 @@ void JZBAnalysis::Analyze() {
           counters[EV].fill("... pass EM triggers");
           nEvent.passed_triggers=1;
           nEvent.trigger_bit |= (1<<2);
+        }
+      if ( passTriggers(metTriggerPaths) )
+        {
+          counters[EV].fill("... pass MET triggers");
+          nEvent.passed_triggers=1;
+          nEvent.trigger_bit |= (1<<3);
         }
     }
 
@@ -1730,23 +1739,23 @@ void JZBAnalysis::Analyze() {
       int   ntracksne = fTR->JNConstituents[i];
 
 
-      jpt=jpt/jesC;
-      jenergy=jenergy/jesC;
-      jpx/=jesC;
-      jpy/=jesC;
-      jpz/=jesC;
-      fJetCorrector->setJetEta(jeta);
-      fJetCorrector->setJetPt(jpt);
-      fJetCorrector->setJetA(fTR->JArea[i]);
-      fJetCorrector->setRho(fTR->Rho);
-      double correction = fJetCorrector->getCorrection();
-      jpt*=correction;
-      jenergy*=correction;
-      jpx*=correction;
-      jpy*=correction;
-      jpz*=correction;
-      nEvent.CorrectionRatio[nEvent.pfJetNum]=correction/jesC;
-      jesC=correction;
+//      jpt=jpt/jesC;
+//      jenergy=jenergy/jesC;
+//      jpx/=jesC;
+//      jpy/=jesC;
+//      jpz/=jesC;
+//      fJetCorrector->setJetEta(jeta);
+//      fJetCorrector->setJetPt(jpt);
+//      fJetCorrector->setJetA(fTR->JArea[i]);
+//      fJetCorrector->setRho(fTR->Rho);
+//      double correction = fJetCorrector->getCorrection();
+//      jpt*=correction;
+//      jenergy*=correction;
+//      jpx*=correction;
+//      jpy*=correction;
+//      jpz*=correction;
+//      nEvent.CorrectionRatio[nEvent.pfJetNum]=correction/jesC;
+//      jesC=correction;
       
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
@@ -2568,7 +2577,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
   counters[EL].fill(" ... |eta| < 2.5");
 
-  if(!(fabs(fTR->ElPt[index]) > 10.0 ) ) return false;
+  if(!(fTR->ElPt[index]) > 10.0 ) return false;
   counters[EL].fill(" ... pT > 10");
 
   // Medium Working Point
