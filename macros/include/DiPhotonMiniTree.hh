@@ -75,6 +75,8 @@ private:
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
+  float SieieRescale(float sieie, bool isbarrel);
+
   void FillLead(int index);
   void FillTrail(int index);
 

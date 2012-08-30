@@ -470,7 +470,7 @@ std::vector<int> DiPhotonMiniTree::PhotonPreSelection(TreeReader *fTR, std::vect
 	
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // sieie cut
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    float sieie=fTR->PhoSigmaIetaIeta[*it];
+    float sieie=SieieRescale(fTR->PhoSigmaIetaIeta[*it],(bool)(fabs(eta)<1.4442));
     bool pass=0;
     if (fabs(eta)<1.4442 && sieie<0.014 && sieie>0.001) pass=1; // to add sigmaiphiphi>0.001 in the future
     if (fabs(eta)>1.56 && sieie<0.034) pass=1;
@@ -539,7 +539,7 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
 	
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // sieie cut
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    float sieie=fTR->PhoSigmaIetaIeta[*it];
+    float sieie=SieieRescale(fTR->PhoSigmaIetaIeta[*it],(bool)(fabs(eta)<1.4442));
     bool pass=0;
     if (mode=="invert_sieie_cut"){ // sieie sideband
       if (fabs(eta)<1.4442 && sieie>0.011 && sieie<0.014) pass=1;
@@ -1290,7 +1290,7 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_energyNewCorr = CorrPhoton(fTR,index,5).E();
   pholead_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
   pholead_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
-  pholead_sieie = fTR->PhoSigmaIetaIeta[index];
+  pholead_sieie = SieieRescale(fTR->PhoSigmaIetaIeta[index],(bool)(fabs(fTR->SCEta[fTR->PhotSCindex[index]])<1.4442));
   pholead_hoe = fTR->PhoHoverE[index];
   pholead_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
   pholead_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
@@ -1355,6 +1355,10 @@ void DiPhotonMiniTree::FillLead(int index){
   //  pholead_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,remove,global_dofootprintremoval);
 };
 
+float DiPhotonMiniTree::SieieRescale(float sieie, bool isbarrel){
+  return isbarrel ? 0.87*sieie+0.0011 : 0.99*sieie;
+};
+
 void DiPhotonMiniTree::FillTrail(int index){
 
   photrail_eta = fTR->PhoEta[index];
@@ -1372,7 +1376,7 @@ void DiPhotonMiniTree::FillTrail(int index){
   photrail_energyNewCorr = CorrPhoton(fTR,index,5).E();
   photrail_energyNewCorrLocal = CorrPhoton(fTR,index,6).E();
   photrail_r9 = fTR->SCR9[fTR->PhotSCindex[index]];
-  photrail_sieie = fTR->PhoSigmaIetaIeta[index];
+  photrail_sieie = SieieRescale(fTR->PhoSigmaIetaIeta[index],(bool)(fabs(fTR->SCEta[fTR->PhotSCindex[index]])<1.4442));
   photrail_hoe = fTR->PhoHoverE[index];
   photrail_brem = fTR->SCBrem[fTR->PhotSCindex[index]];
   photrail_sigmaPhi = fTR->SCPhiWidth[fTR->PhotSCindex[index]];
