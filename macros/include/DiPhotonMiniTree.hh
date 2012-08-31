@@ -38,8 +38,6 @@ public:
 
 private:
 
-  bool global_dofootprintremoval;
-
   float global_linkbyrechit_enlargement;
 
   float eff_area_EB;
@@ -70,12 +68,14 @@ private:
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
   TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
-  float PFIsolation(int phoqi, float rotation_phi, TString component, float minimal_pfphotoncand_threshold_EB, float minimal_pfphotoncand_threshold_EE, bool dofootprintremoval, std::vector<int> removals = std::vector<int>());
+  float PFIsolation(int phoqi, float rotation_phi, TString component, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
   float SieieRescale(float sieie, bool isbarrel);
+  float CalculateSCArea(TreeReader *fTR, int scindex);
+  float GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel);
 
   void FillLead(int index);
   void FillTrail(int index);
@@ -89,6 +89,9 @@ private:
   std::vector<int> NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum=0, int maximum=9999);
 
   TRandom3 *randomgen;
+
+  float scarea[100];
+  float scareaSF[100];
   
   std::string fDataType_;
   bool isdata;
@@ -215,8 +218,11 @@ private:
 
   Int_t pholead_Nchargedhadronsincone, photrail_Nchargedhadronsincone;
 
+  Float_t pholead_scarea, photrail_scarea;
+  Float_t pholead_scareaSF, photrail_scareaSF;
 
   TH1F *fHNumPU;
+  TH1F *fHNumPU_noweight;
   TH1F *fHNumVtx;
 
 };
