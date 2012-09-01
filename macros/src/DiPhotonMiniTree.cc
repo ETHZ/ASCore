@@ -1432,9 +1432,10 @@ float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel
 
   float eff_area = 0;
 
-  if (mode=="photon") eff_area = isbarrel ? 0 : 0;
+  if (mode=="photon") eff_area = isbarrel ? 0.225 : 0.594;
   if (mode=="charged") eff_area = isbarrel ? 0 : 0;
-  if (mode=="neutral") eff_area = isbarrel ? 0 : 0;
+  if (mode=="neutral") eff_area = isbarrel ? 0.077 : 0.085;
+  //  if (mode=="combined") eff_area = isbarrel ? 0.305 : 0.684; // it's the sum of the three components
 
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 
