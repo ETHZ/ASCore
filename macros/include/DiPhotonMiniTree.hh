@@ -73,6 +73,8 @@ private:
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
+  std::vector<int> DiPhotonInvariantMassCutSelection(TreeReader *fTR, std::vector<int> passing);
+
   float SieieRescale(float sieie, bool isbarrel);
   float CalculateSCArea(TreeReader *fTR, int scindex);
   float GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel);

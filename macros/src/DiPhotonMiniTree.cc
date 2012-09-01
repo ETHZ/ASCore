@@ -47,7 +47,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
   OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
-  OutputTree[6] = new TTree("Tree_nchargedhadrons_sel","Tree_nchargedhadrons_sel");
+  OutputTree[6] = new TTree("Tree_DYnocombisowithinvmasscut_sel","Tree_DYnocombisowithinvmasscut_sel");
   OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
   OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
   OutputTree[9] = new TTree("Tree_nocombisocut_sel","Tree_nocombisocut_sel");
@@ -339,21 +339,20 @@ void DiPhotonMiniTree::Analyze(){
     // comment this block for the noselection running
     if (sel_cat!=7) { // only presel cat7 
 
-      if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1); // DY cat3
+      if (sel_cat==3 || sel_cat==6) passing = ApplyPixelVeto(fTR,passing,1); // DY cat3 and DY no combiso with mass cut for eff area cat6
       else passing = ApplyPixelVeto(fTR,passing,0);
 
       if (sel_cat==8) passing = PhotonSelection(fTR,passing,"invert_sieie_cut"); // sieie sideband cat8
       else if (sel_cat==5) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // for impinging track removal from combined pf iso
-      else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"no_combiso_cut");
+      else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // no comb iso selection
+      else if (sel_cat==6) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // DY no combiso with mass cut for eff area cat6 
       else passing=PhotonSelection(fTR,passing);
 
 //      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
 //      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
 //      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
       
-      //      if (sel_cat==6) passing = NChargedHadronsInConeSelection(fTR,passing,0); // cut on number of charged hadrons in cone (after veto cones)
-      if (sel_cat==5) passing = std::vector<int>();
-      if (sel_cat==6) passing = std::vector<int>();
+      if (sel_cat==5) passing = std::vector<int>(); // momentarily turned off impinging track method
 
     }
 
@@ -363,9 +362,10 @@ void DiPhotonMiniTree::Analyze(){
     else { // photon-by-photon cats
       if (sel_cat==1) passing = SignalSelection(fTR,passing);
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
-      if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // uncomment to make sieie sideband template only from the fakes (only in MC!)
+      if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // sieie sideband template only from the fakes (only in MC!)
       //      if (!isdata) if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
       //      if (!isdata) if (sel_cat==5) passing = BackgroundSelection(fTR,passing); // uncomment to make impinging track only from the fakes (only in MC!) 
+      if (sel_cat==6) passing = DiPhotonInvariantMassCutSelection(fTR,passing); // for DY without comb iso cut 
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
     
@@ -387,7 +387,7 @@ void DiPhotonMiniTree::Analyze(){
     std::vector<int> passing = passing_selection[sel_cat];
 
     int minsize=999;
-    if (sel_cat==0 || sel_cat==3) minsize=2;
+    if (sel_cat==0 || sel_cat==3 || sel_cat==6) minsize=2;
     else minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
@@ -633,6 +633,24 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
 
 };
 
+std::vector<int> DiPhotonMiniTree::DiPhotonInvariantMassCutSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=0;
+    if (fTR->PhoPt[*it]>30) pass=1;
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  if (passing.size()<2) return std::vector<int>();
+
+  passing.resize(2);
+
+  float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
+  if (fabs(invmass0-91.2)>10) return std::vector<int>();
+
+  return passing;
+
+};
 
 bool DiPhotonMiniTree::SinglePhotonEventSelection(TreeReader *fTR, std::vector<int> &passing){
 
