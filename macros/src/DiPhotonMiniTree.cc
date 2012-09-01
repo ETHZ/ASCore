@@ -377,6 +377,11 @@ void DiPhotonMiniTree::Analyze(){
 
   for (int sel_cat=0; sel_cat<10; sel_cat++){
 
+    if (isdata){ // do not run these cats on data
+      if (sel_cat==1) continue;
+      if (sel_cat==2) continue;
+    }
+
     if (!pass[sel_cat]) continue;
 
     std::vector<int> passing = passing_selection[sel_cat];
@@ -407,7 +412,12 @@ void DiPhotonMiniTree::Analyze(){
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
-      if (sel_cat==4) pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = RandomConePhotonIsolation(fTR,passing.at(i));
+      if (sel_cat==4) {
+	pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = RandomConeIsolation(fTR,passing.at(i),"photon");
+	pholead_pho_Cone04NeutralHadronIso_mvVtx = RandomConeIsolation(fTR,passing.at(i),"neutral");
+	pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = RandomConeIsolation(fTR,passing.at(i),"charged");
+	pholead_pho_Cone04PFCombinedIso=pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx+pholead_pho_Cone04NeutralHadronIso_mvVtx+pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01;
+      }
       OutputTree[sel_cat]->Fill();
       }
     }
@@ -862,7 +872,7 @@ TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, float position
 
 };
 
-float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
+float DiPhotonMiniTree::RandomConeIsolation(TreeReader *fTR, int phoqi, TString component){
 
   float result=0;
   const double pi = TMath::Pi();
@@ -887,7 +897,7 @@ float DiPhotonMiniTree::RandomConePhotonIsolation(TreeReader *fTR, int phoqi){
     return -999;
   };
 
-  return PFIsolation(phoqi,rotation_phi,"photon");
+  return PFIsolation(phoqi,rotation_phi,component);
 
 };
 
@@ -1404,9 +1414,9 @@ float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel
 
   float eff_area = 0;
 
-  if (mode=="photon") eff_area = isbarrel? 0 : 0;
-  if (mode=="charged") eff_area = isbarrel? 0 : 0;
-  if (mode=="neutral") eff_area = isbarrel? 0 : 0;
+  if (mode=="photon") eff_area = isbarrel ? 0 : 0;
+  if (mode=="charged") eff_area = isbarrel ? 0 : 0;
+  if (mode=="neutral") eff_area = isbarrel ? 0 : 0;
 
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 

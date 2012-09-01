@@ -82,7 +82,7 @@ private:
 
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
-  float RandomConePhotonIsolation(TreeReader *fTR, int phoqi);
+  float RandomConeIsolation(TreeReader *fTR, int phoqi, TString component);
   int FindPFCandType(int id);
 
   int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
