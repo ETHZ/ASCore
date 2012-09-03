@@ -40,9 +40,6 @@ private:
 
   float global_linkbyrechit_enlargement;
 
-  float eff_area_EB;
-  float eff_area_EE;
-
   TGeoPara eegeom;
 
   Float_t* kfactors;

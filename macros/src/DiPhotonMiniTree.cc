@@ -21,9 +21,6 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   phocorr = new EnergyCorrection("photons");
   randomgen = new TRandom3(0);
 
-  eff_area_EB = 0;
-  eff_area_EE = 0;
-
   global_linkbyrechit_enlargement = 0.25; // xtal_size_eff = (1+global_linkbyrechit_enlargement)*xtal_size
 
   eegeom = TGeoPara(1,1,1,0,0,0);
@@ -1432,10 +1429,10 @@ float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel
 
   float eff_area = 0;
 
-  if (mode=="photon") eff_area = isbarrel ? 0.225 : 0.594;
-  if (mode=="charged") eff_area = isbarrel ? 0 : 0;
-  if (mode=="neutral") eff_area = isbarrel ? 0.077 : 0.085;
-  //  if (mode=="combined") eff_area = isbarrel ? 0.305 : 0.684; // it's the sum of the three components
+  if (mode=="photon") eff_area = isbarrel ? 0.161 : 0.127;
+  if (mode=="charged") eff_area = isbarrel ? 0.014 : 0.019;
+  if (mode=="neutral") eff_area = isbarrel ? 0.016 : 0.115;
+  //  if (mode=="combined") eff_area = isbarrel ? 0.158 : 0.252; // should be the sum of the three components
 
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 
