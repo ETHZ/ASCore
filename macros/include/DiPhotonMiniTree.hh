@@ -27,6 +27,12 @@
 #include "TGeoPara.h"
 #include "TGeoTube.h"
 
+typedef struct {
+  float photon;
+  float charged;
+  float neutral;
+} isolations_struct;
+
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
   DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
@@ -67,7 +73,7 @@ private:
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
   float PFIsolation(int phoqi, float rotation_phi, TString component, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
-  bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi);
+  bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi, TString mod="");
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
   std::vector<int> DiPhotonInvariantMassCutSelection(TreeReader *fTR, std::vector<int> passing);
@@ -81,7 +87,7 @@ private:
 
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
-  float RandomConeIsolation(TreeReader *fTR, int phoqi, TString component);
+  isolations_struct RandomConeIsolation(TreeReader *fTR, int phoqi, TString mod="");
   int FindPFCandType(int id);
 
   int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
@@ -101,7 +107,7 @@ private:
 
   int impinging_track_pfcand[100];
 
-  TTree* OutputTree[10];
+  TTree* OutputTree[11];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;

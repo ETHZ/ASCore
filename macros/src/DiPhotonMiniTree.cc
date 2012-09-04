@@ -48,10 +48,11 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
   OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
   OutputTree[9] = new TTree("Tree_nocombisocut_sel","Tree_nocombisocut_sel");
+  OutputTree[10] = new TTree("Tree_randomcone_nocombisocut","Tree_randomcone_nocombisocut");
 
   //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
-  for (int i=0; i<10; i++){
+  for (int i=0; i<11; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -312,11 +313,11 @@ void DiPhotonMiniTree::Analyze(){
 
   if (!TriggerSelection()) return;
 
-  std::vector<int> passing_selection[10];
+  std::vector<int> passing_selection[11];
 
-  bool pass[10];
+  bool pass[11];
 
-  for (int sel_cat=0; sel_cat<10; sel_cat++){
+  for (int sel_cat=0; sel_cat<11; sel_cat++){
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -372,7 +373,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<10; sel_cat++){
+  for (int sel_cat=0; sel_cat<11; sel_cat++){
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -405,17 +406,24 @@ void DiPhotonMiniTree::Analyze(){
       OutputTree[sel_cat]->Fill();
     }
 
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6 || sel_cat==7 || sel_cat==8 || sel_cat==9){
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6 || sel_cat==7 || sel_cat==8 || sel_cat==9 || sel_cat==10){
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
-      if (sel_cat==4) {
-	pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = RandomConeIsolation(fTR,passing.at(i),"photon");
-	pholead_pho_Cone04NeutralHadronIso_mvVtx = RandomConeIsolation(fTR,passing.at(i),"neutral");
-	pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = RandomConeIsolation(fTR,passing.at(i),"charged");
-	pholead_pho_Cone04PFCombinedIso=pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx+pholead_pho_Cone04NeutralHadronIso_mvVtx+pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01;
+      bool dofill = true;
+
+      if (sel_cat==4 || sel_cat==10) {
+	isolations_struct rcone_isos;
+	if (sel_cat==4) rcone_isos = RandomConeIsolation(fTR,passing.at(i),"");
+	if (sel_cat==10) rcone_isos = RandomConeIsolation(fTR,passing.at(i),"nocombisocut");
+	pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
+	pholead_pho_Cone04NeutralHadronIso_mvVtx = rcone_isos.neutral;
+	pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = rcone_isos.charged;
+	pholead_pho_Cone04PFCombinedIso = rcone_isos.photon+rcone_isos.neutral+rcone_isos.charged;
+	if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
       }
-      OutputTree[sel_cat]->Fill();
+
+      if (dofill) OutputTree[sel_cat]->Fill();
       }
     }
 
@@ -429,7 +437,7 @@ void DiPhotonMiniTree::Analyze(){
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<10; i++) OutputTree[i]->Write();	
+  for (int i=0; i<11; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumPU_noweight->Write();
   fHNumVtx->Write();
@@ -716,7 +724,9 @@ double DiPhotonMiniTree::phiNorm(float phi) {
   return phi;
 }
 
-bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi){
+bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi, TString mod){
+
+  if (mod!="" && mod!="nocombisocut") {std::cout << "error" << std::endl; return true;}
 
   TVector3 photon_position = TVector3(fTR->SCx[fTR->PhotSCindex[phoqi]],fTR->SCy[fTR->PhotSCindex[phoqi]],fTR->SCz[fTR->PhotSCindex[phoqi]]);
   if (rotation_phi!=0) {
@@ -746,8 +756,7 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
     if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
   }
 
-
-  if (PFIsolation(phoqi,rotation_phi,"combined")>5) found=true;
+  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>5) found=true; }
 
   if (debug) std::cout << "returning " << found << std::endl;
   return found;
@@ -887,32 +896,41 @@ TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, float position
 
 };
 
-float DiPhotonMiniTree::RandomConeIsolation(TreeReader *fTR, int phoqi, TString component){
+isolations_struct DiPhotonMiniTree::RandomConeIsolation(TreeReader *fTR, int phoqi, TString mod){
 
   float result=0;
   const double pi = TMath::Pi();
 
   double rotation_phi = pi/2;
 
-  bool isok = !(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi));
+  bool isok = !(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi,mod));
   if (!isok) {
     rotation_phi = -pi/2;
-    isok=!(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi));
+    isok=!(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi,mod));
   }
   
   int count=0;
   while (!isok && count<20) {
     rotation_phi = randomgen->Uniform(0.8,2*pi-0.8);
-    isok=!(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi));
+    isok=!(FindCloseJetsAndPhotons(fTR,rotation_phi,phoqi,mod));
     count++;
   }
 
+  isolations_struct out;
+
   if (count==20){
     std::cout << "Error in random cone generation!!!"  << std::endl;
-    return -999;
+    out.photon = -999;
+    out.charged = -999;
+    out.neutral = -999;
+    return out;
   };
 
-  return PFIsolation(phoqi,rotation_phi,component);
+
+  out.photon = PFIsolation(phoqi,rotation_phi,"photon");
+  out.charged = PFIsolation(phoqi,rotation_phi,"charged");
+  out.neutral = PFIsolation(phoqi,rotation_phi,"neutral");
+  return out;
 
 };
 
@@ -1428,12 +1446,12 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
 float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel){
 
   float eff_area = 0;
-
-  if (mode=="photon") eff_area = isbarrel ? 0.161 : 0.127;
-  if (mode=="charged") eff_area = isbarrel ? 0.014 : 0.019;
-  if (mode=="neutral") eff_area = isbarrel ? 0.016 : 0.115;
-  //  if (mode=="combined") eff_area = isbarrel ? 0.158 : 0.252; // should be the sum of the three components
-
+//
+//  if (mode=="photon") eff_area = isbarrel ? 0.161 : 0.127;
+//  if (mode=="charged") eff_area = isbarrel ? 0.014 : 0.019;
+//  if (mode=="neutral") eff_area = isbarrel ? 0.016 : 0.115;
+//  //  if (mode=="combined") eff_area = isbarrel ? 0.158 : 0.252; // should be the sum of the three components
+//
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 
 };
