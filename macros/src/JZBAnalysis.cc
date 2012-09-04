@@ -247,7 +247,7 @@ public:
   int NPdfs;
   float pdfW[100];
   float pdfWsum;
-  float PUweight;
+  float PUweight,PUweightUP,PUweightDOWN;
   bool passed_triggers;
   int trigger_bit;
   bool passed_filters;
@@ -585,6 +585,8 @@ void nanoEvent::reset()
 
   weight = 1.0;
   PUweight = 1.0;
+  PUweightUP = 1.0;
+  PUweightDOWN = 1.0;
   Efficiencyweightonly = 1.0;
   weightEffDown = 1.0;
   weightEffUp = 1.0;
@@ -731,39 +733,16 @@ void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
 JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo) :
   UserAnalysisBase(tr,dataType!="mc"), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
   // Define trigger paths to check
-  addPath(elTriggerPaths,"HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL",1,8);
-  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL",1,5);
-  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",1,10);
-  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",11, 30);
+  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",10,30);
 
-  addPath(muTriggerPaths,"HLT_DoubleMu6",1,8); // v5 is actually not used
-  addPath(muTriggerPaths,"HLT_DoubleMu7",1,2); // v1,2,5,7,8,11,12 are really used
-  addPath(muTriggerPaths,"HLT_DoubleMu7",5,8); 
-  addPath(muTriggerPaths,"HLT_DoubleMu7",11,12);
-  addPath(muTriggerPaths,"HLT_Mu13_Mu8",2,4); // 2,3,4,6,7,10,11
-  addPath(muTriggerPaths,"HLT_Mu13_Mu8",6,7);
-  addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,11);
-  addPath(muTriggerPaths,"HLT_Mu17_Mu8",2,4); // 2,3,4,6,7,10,11
-  addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
-  addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,16);
-  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,22);
+  addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,30);
+  addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,30);
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",9,20);
   
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",1,9);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",12,18);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",1,1);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",3,3);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",4,4);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",7,8);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",1,1);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",3,3);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",4,4);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",7,15);
-  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 15);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 15);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
 
-  addPath(metTriggerPaths,"HLT_PFMET150", 1, 15);
+  addPath(metTriggerPaths,"HLT_PFMET150", 2, 10);
   
 }
 
@@ -1018,6 +997,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
+//  myTree->Branch("PUweightUP",&nEvent.PUweightUP,"PUweightUP/F");
+//  myTree->Branch("PUweightDOWN",&nEvent.PUweightDOWN,"PUweightDOWN/F");
   myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
@@ -1253,6 +1234,8 @@ void JZBAnalysis::Analyze() {
       } else {
 	//don't attempt to do PURW for model scans
 	nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
+//	nEvent.PUweightUP   = GetPUWeightUP(fTR->PUnumTrueInteractions);
+//	nEvent.PUweightDOWN = GetPUWeightDOWN(fTR->PUnumTrueInteractions);
 	nEvent.weight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	weight_histo->Fill(1,nEvent.PUweight);
       }
@@ -2221,7 +2204,7 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   // Basic muon cleaning and ID
 
   // Acceptance cuts
-  if (!(fTR->MuPt[index] > 10) )       return false;
+  if (!(fTR->MuPt[index] > 10.0) )       return false;
   counters[MU].fill(" ... pt > 10");
   if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
   counters[MU].fill(" ... |eta| < 2.4");
