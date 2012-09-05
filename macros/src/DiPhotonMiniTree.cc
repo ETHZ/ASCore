@@ -1446,12 +1446,11 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
 float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel){
 
   float eff_area = 0;
-//
-//  if (mode=="photon") eff_area = isbarrel ? 0.161 : 0.127;
-//  if (mode=="charged") eff_area = isbarrel ? 0.014 : 0.019;
-//  if (mode=="neutral") eff_area = isbarrel ? 0.016 : 0.115;
-//  //  if (mode=="combined") eff_area = isbarrel ? 0.158 : 0.252; // should be the sum of the three components
-//
+
+  if (mode=="photon") eff_area = isbarrel ? 0.221 : 0.130;
+  if (mode=="charged") eff_area = isbarrel ? 0.016 : 0.017;
+  if (mode=="neutral") eff_area = isbarrel ? 0.097 : 0.132;
+
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 
 };
