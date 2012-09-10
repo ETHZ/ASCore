@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.53 $";
+string sjzbversion="$Revision: 1.70.2.55 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,7 +27,7 @@ bool DoExperimentalFSRRecovery = false;
 bool DoFSRStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.53 2012/08/20 09:31:21 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.55 2012/09/04 14:01:50 fronga Exp $
 */
 
 
@@ -2225,7 +2225,7 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   counters[MU].fill(" ... nValidHits > 0");
   if ( !(fTR->MuNPxHits[index] > 0) )       return false;
   counters[MU].fill(" ... nPxHits > 0");
-  if ( !(fTR->MuNMatches[index] > 1) )      return false;
+  if ( !(fTR->MuNMatchedStations[index] > 1) )      return false;
   counters[MU].fill(" ... nMatches > 1");
   if ( !(fTR->MuNSiLayers[index] > 5) )      return false;
   counters[MU].fill(" ... nLayers > 5");
@@ -2235,8 +2235,8 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false; //still open
   counters[MU].fill(" ... D0(pv) < 0.02");
   //HPA recommendation not POG
-  if ( !(fabs(fTR->MuDzPV[index]) < 0.2 ) ) return false; //still open
-  counters[MU].fill(" ... DZ(pv) < 0.2");
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false; //still open
+  counters[MU].fill(" ... DZ(pv) < 0.1");
 
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
@@ -2580,8 +2580,8 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
   if(!(abs(fTR->ElD0PV[index])<0.02)) return false;
   counters[EL].fill(" ... D0(PV)<0.02");
-  if(!(abs(fTR->ElDzPV[index])<0.2)) return false;
-  counters[EL].fill(" ... DZ(PV)<0.2");
+  if(!(abs(fTR->ElDzPV[index])<0.1)) return false;
+  counters[EL].fill(" ... DZ(PV)<0.1");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
   if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
