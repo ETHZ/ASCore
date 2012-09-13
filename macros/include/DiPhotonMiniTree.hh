@@ -31,11 +31,14 @@ typedef struct {
   float photon;
   float charged;
   float neutral;
+  int nphotoncand;
+  int nchargedcand;
+  int nneutralcand;
 } isolations_struct;
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL, Float_t _minthrpfphotoncandEE=0);
   virtual ~DiPhotonMiniTree();
 
   void Begin();
@@ -45,6 +48,7 @@ public:
 private:
 
   float global_linkbyrechit_enlargement;
+  float global_minthrpfphotoncandEE;
 
   TGeoPara eegeom;
 
@@ -71,7 +75,7 @@ private:
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
   TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
-  float PFIsolation(int phoqi, float rotation_phi, TString component, std::vector<int> removals = std::vector<int>());
+  float PFIsolation(int phoqi, float rotation_phi, TString component, int *counter = NULL, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi, TString mod="");
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
@@ -88,6 +92,7 @@ private:
   //  double etaTransformation(float EtaParticle, float Zvertex);
   double phiNorm(float phi);
   isolations_struct RandomConeIsolation(TreeReader *fTR, int phoqi, TString mod="");
+  isolations_struct PFConeIsolation(TreeReader *fTR, int phoqi);
   int FindPFCandType(int id);
 
   int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
@@ -225,6 +230,13 @@ private:
 
   Float_t pholead_scarea, photrail_scarea;
   Float_t pholead_scareaSF, photrail_scareaSF;
+
+  Int_t pholead_Npfcandphotonincone;
+  Int_t pholead_Npfcandchargedincone;
+  Int_t pholead_Npfcandneutralincone;
+  Int_t photrail_Npfcandphotonincone;
+  Int_t photrail_Npfcandchargedincone;
+  Int_t photrail_Npfcandneutralincone;
 
   TH1F *fHNumPU;
   TH1F *fHNumPU_noweight;
