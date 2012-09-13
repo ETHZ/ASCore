@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2, // DoubleMu3, //DoubleMu4, DoubleMu5,
-		DoubleEle1, DoubleEle2, // DoubleEle3, //DoubleEle4, DoubleEle5,
-		MuEG1, MuEG2, // MuEG3, //MuEG4, MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu2,  DoubleMu3, DoubleMu4, //DoubleMu5,
+		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, //DoubleEle5,
+		MuEG1, MuEG2, MuEG3, MuEG4, //MuEG5,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
@@ -580,6 +580,7 @@ public:
 	void initCounters();
 	void fillCutFlowHistos(Sample*);
 	void printCutFlow(gChannel, gSample, gSample);
+        void printCutFlow(gChannel);
 	// MARC void printCutFlows(TString);
 	
 	//////////////////////////////
@@ -595,6 +596,7 @@ public:
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
 	void fillKinPlots(Sample*);
+        void fillSyncCounters(Sample*); 
 	
 	//////////////////////////////
 	// I/O
@@ -649,6 +651,7 @@ public:
 	virtual std::vector< int > getNBTagsMedIndices();
 	virtual float getHT();
 	virtual float getWeightedHT();
+	virtual float getMT(int, gChannel);
 	virtual float getMT2(int, int, gChannel);
 	virtual float getMll(int, int, gChannel);
 	virtual int   getClosestJet(int, gChannel);
@@ -863,6 +866,8 @@ public:
 	private:
 	
 	Monitor fCounter[3];	
+        Monitor fCounterSync[3];
+	vector<string> fSyncCutNames;
 };
 
 #endif

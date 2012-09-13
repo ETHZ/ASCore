@@ -37,21 +37,21 @@
 
 
 int gDEBUG_EVENTNUMBER_ = -1;  
-int gDEBUG_RUNNUMBER_ = -1;    
+int gDEBUG_RUNNUMBER_ = -1;
 
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const float gMaxJetEta  = 2.4;
+static const float gMaxJetEta  = 2.5;
 static const float gMuMaxIso   = 0.10;
 static const float gElMaxIso   = 0.09;
-static const float gMinJetPt   = 40.;
+static const float gMinJetPt   = 30.;
 static const bool  gApplyZVeto = true;
 static bool  gSmearMET     = false;
 
 static const bool gDoSystStudies = false;
-
+static const bool gDoSyncExercise = true;
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -335,10 +335,12 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// DEBUG
+		//		if (Run!=gDEBUG_RUNNUMBER_) continue;
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
 		// if(jentry > 10000) break;
 		/////////////////////////////////////////////
-
+		
+			
 		/////////////////////////////////////////////
 		// Event modifications
 		// MARC how come this function is called here..?? scaleBTags(S, 0);
@@ -429,6 +431,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
 		
+		fillSyncCounters(S);
 		/////////////////////////////////////////////
 		// Systematic studies
 		if(!gDoSystStudies) continue;
@@ -483,7 +486,10 @@ void SSDLDumper::loopEvents(Sample *S){
 
 	// Stuff to execute for each sample AFTER looping on the events
 	fillCutFlowHistos(S);
-
+	printCutFlow(Muon);
+	printCutFlow(Elec);
+	printCutFlow(ElMu);
+	
 	writeHistos(S, pFile);
 	writeSigGraphs(S, Muon, pFile);
 	writeSigGraphs(S, Elec, pFile);
@@ -509,7 +515,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	if (fC_minNbjmed == 0) gEventWeight = gEventWeight0;
 	if (fC_minNbjmed == 2) gEventWeight = gEventWeight1;
 	if (fC_minNbjmed == 3) gEventWeight = gEventWeight2;
-
+	
 	///////////////////////////////////////////////////
 	// SS YIELDS
 	// MuMu Channel
@@ -1803,7 +1809,87 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 	setRegionCuts();
 	return;
 }
+void SSDLDumper::fillSyncCounters(Sample *S){
+  resetHypLeptons();
+  if (!gDoSyncExercise) return;
+  setRegionCuts(Baseline);
+  //////////////////////////////////////////////////////////////////
+  fCurrentChannel = Muon;
+  int mu1(-1), mu2(-1);
+  if(abs(isOSLLEvent(mu1, mu2)) == 1) {
+    fCounterSync[Muon].fill(fSyncCutNames[0]);
+    
+    if ((S->sname).Contains("DoubleMu"))
+      fOUTSTREAM << Run <<" "<< LumiSec <<" "<< Event <<" "<< getNJets() <<" "
+		 << getNBTagsMed() <<" "<< (pfMET>10) <<" "<<mumuSignalTrigger() <<" "<< elelSignalTrigger() 
+		 <<" "<< elmuSignalTrigger() << endl;
+    
+    if (mumuSignalTrigger()) fCounterSync[Muon].fill(fSyncCutNames[1]);
+    
+    setHypLepton1(mu1, Muon);
+    setHypLepton2(mu2, Muon);
+    
+    if (getNBTagsMed() == 0) fCounterSync[Muon].fill(fSyncCutNames[2]);
+    if (getNJets() == 0)     fCounterSync[Muon].fill(fSyncCutNames[3]);
+    if (getNJets() == 1)     fCounterSync[Muon].fill(fSyncCutNames[4]);
+    if (getNJets() >= 2)     fCounterSync[Muon].fill(fSyncCutNames[5]);
+    
+    if (pfMET      > 10)     fCounterSync[Muon].fill(fSyncCutNames[6]);
+    if (pfMETType1 > 10)     fCounterSync[Muon].fill(fSyncCutNames[7]);
+  }
+  //////////////////////////////////////////////////////////////////
+  
+  //////////////////////////////////////////////////////////////////
+  fCurrentChannel = Elec;
+  resetHypLeptons();
+  int el1(-1), el2(-1);
+  if(abs(isOSLLEvent(el1, el2)) == 2) {
+    fCounterSync[Elec].fill(fSyncCutNames[0]);
+    if ((S->sname).Contains("DoubleEl"))
+      fOUTSTREAM << Run <<" "<< LumiSec <<" "<< Event <<" "<< getNJets() <<" "
+		 << getNBTagsMed() <<" "<< (pfMET>10) <<" "<<mumuSignalTrigger() <<" "<< elelSignalTrigger() 
+		 <<" "<< elmuSignalTrigger() << endl;
+    
+    if (elelSignalTrigger()) fCounterSync[Elec].fill(fSyncCutNames[1]);
+    setHypLepton1(el1, Elec);
+    setHypLepton2(el2, Elec);
+    
+    if (getNBTagsMed() == 0) fCounterSync[Elec].fill(fSyncCutNames[2]);
+    if (getNJets() == 0)     fCounterSync[Elec].fill(fSyncCutNames[3]);
+    if (getNJets() == 1)     fCounterSync[Elec].fill(fSyncCutNames[4]);
+    if (getNJets() >= 2)     fCounterSync[Elec].fill(fSyncCutNames[5]);
+    
+    if (pfMET      > 10)     fCounterSync[Elec].fill(fSyncCutNames[6]);
+    if (pfMETType1 > 10)     fCounterSync[Elec].fill(fSyncCutNames[7]);
+  }
+  //////////////////////////////////////////////////////////////////
+  
+  //////////////////////////////////////////////////////////////////
+  fCurrentChannel = ElMu;
+  int mu(-1), el(-1);
+  resetHypLeptons();
+  if(abs(isOSLLEvent(mu, el)) == 3) {
+    fCounterSync[ElMu].fill(fSyncCutNames[0]);
+    if ((S->sname).Contains("MuEG"))
+      fOUTSTREAM << Run <<" "<< LumiSec <<" "<< Event <<" "<< getNJets() <<" "
+		 << getNBTagsMed() <<" "<< (pfMET>10) <<" "<<mumuSignalTrigger() <<" "<< elelSignalTrigger() 
+		 <<" "<< elmuSignalTrigger() << endl;
+    if (elmuSignalTrigger()) fCounterSync[ElMu].fill(fSyncCutNames[1]);
+    
+    setHypLepton1(mu, Muon);
+    setHypLepton2(el, Elec);
+    
+    if (getNBTagsMed() == 0) fCounterSync[ElMu].fill(fSyncCutNames[2]);
+    if (getNJets() == 0)     fCounterSync[ElMu].fill(fSyncCutNames[3]);
+    if (getNJets() == 1)     fCounterSync[ElMu].fill(fSyncCutNames[4]);
+    if (getNJets() >= 2)     fCounterSync[ElMu].fill(fSyncCutNames[5]);
+    
+    if (pfMET      > 10)     fCounterSync[ElMu].fill(fSyncCutNames[6]);
+    if (pfMETType1 > 10)     fCounterSync[ElMu].fill(fSyncCutNames[7]);
+  }
+  //////////////////////////////////////////////////////////////////
 
+}
 //____________________________________________________________________________
 void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
 	Channel *C;
@@ -1893,6 +1979,16 @@ void SSDLDumper::initCutNames(){
 	fEMCutNames.push_back(" ... muon passes tight cut"); //            = 15
 	fEMCutNames.push_back(" ... electron passes tight cut"); //        = 16
 	fEMCutNames.push_back(" ... both e and mu pass tight cuts"); //    = 17
+
+	fSyncCutNames.push_back("             "); //0
+	fSyncCutNames.push_back(" + triggers  "); //1
+	fSyncCutNames.push_back(" + nbjets = 0"); //2
+	fSyncCutNames.push_back(" + njets  = 0"); //3
+	fSyncCutNames.push_back(" + njets  = 1"); //4
+	fSyncCutNames.push_back(" + njets >= 2"); //5
+	fSyncCutNames.push_back(" + pfmet > 10"); //6
+	fSyncCutNames.push_back(" + t1met > 10"); //7
+
 }
 void SSDLDumper::initCounters(){
 	fCounter[Muon].fill(fMMCutNames[0],  0.);
@@ -1951,12 +2047,55 @@ void SSDLDumper::initCounters(){
 	fCounter[ElMu].fill(fEMCutNames[15], 0.);
 	fCounter[ElMu].fill(fEMCutNames[16], 0.);
 	fCounter[ElMu].fill(fEMCutNames[17], 0.);
+ 
+	fCounterSync[Muon].fill(fSyncCutNames[0], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[1], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[2], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[3], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[4], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[5], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[6], 0.);
+	fCounterSync[Muon].fill(fSyncCutNames[7], 0.);
+
+	fCounterSync[Elec].fill(fSyncCutNames[0], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[1], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[2], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[3], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[4], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[5], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[6], 0.);
+	fCounterSync[Elec].fill(fSyncCutNames[7], 0.);
+
+	fCounterSync[ElMu].fill(fSyncCutNames[0], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[1], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[2], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[3], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[4], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[5], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[6], 0.);
+	fCounterSync[ElMu].fill(fSyncCutNames[7], 0.);
+	
 }
 void SSDLDumper::fillCutFlowHistos(Sample *S){
 	for(int i=0; i<fMMCutNames.size(); i++) S->cutFlowHisto[Muon]->SetBinContent(i+1, fCounter[Muon].counts(fMMCutNames[i]));
 	for(int i=0; i<fEECutNames.size(); i++) S->cutFlowHisto[Elec]->SetBinContent(i+1, fCounter[Elec].counts(fEECutNames[i]));
 	for(int i=0; i<fEMCutNames.size(); i++) S->cutFlowHisto[ElMu]->SetBinContent(i+1, fCounter[ElMu].counts(fEMCutNames[i]));	
 }
+void SSDLDumper::printCutFlow(gChannel chan){
+  TString ch = "";
+  if(chan == Muon) ch = "MM";
+  if(chan == Elec) ch = "EE";
+  if(chan == ElMu) ch = "EM";
+
+  fOUTSTREAM << "--------------------------------------------------------" << endl;
+  fOUTSTREAM << " Cutname                                 | " << endl;  
+  for( int c = 0; c < fSyncCutNames.size(); c++ ){
+    fOUTSTREAM << setw(40) << ch + fSyncCutNames[c] << " | ";
+    fOUTSTREAM << setw(11) << setprecision(11) << fCounterSync[chan].counts(fSyncCutNames[c]) << endl;
+  }
+  
+}
+
 void SSDLDumper::printCutFlow(gChannel chan, gSample indmin, gSample indmax){
 	vector<string> names;
 	if(chan == Muon) names = fMMCutNames;
@@ -1967,7 +2106,7 @@ void SSDLDumper::printCutFlow(gChannel chan, gSample indmin, gSample indmax){
 	for(int i = 0; i <= indmax-indmin; i++) fOUTSTREAM << "--------------";
 	fOUTSTREAM << endl;
 
-	fOUTSTREAM << " Cutname                                 | ";
+
 	for(gSample i = indmin; i <= indmax; i=gSample(i+1)) fOUTSTREAM << setw(11) << fSamples[i]->sname << " | ";
 	fOUTSTREAM << endl;
 
@@ -3181,13 +3320,15 @@ float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-	return pfMETType1;
+  //	return pfMETType1;
+	return pfMET;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-	float phi = pfMETType1Phi;
-	return phi;
+  //	float phi = pfMETType1Phi;
+	float phi = pfMETPhi;
+  	return phi;
 }
 int SSDLDumper::getNJets(){
 	int njets(0);
@@ -3223,6 +3364,20 @@ float SSDLDumper::getWeightedHT(){
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) ht += getJetPt(i)*exp(-fabs(JetEta[i]));
 	return ht;
 }
+float SSDLDumper::getMT(int ind, gChannel chan){
+  // Calculates MT
+  
+  TLorentzVector pmet, plep;
+  if (chan == Muon) plep.SetPtEtaPhiM(MuPt[ind], MuEta[ind], MuPhi[ind], gMMU);
+  if (chan == Elec) plep.SetPtEtaPhiM(ElPt[ind], ElEta[ind], ElPhi[ind], gMEL);
+
+  pmet.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
+  double ETlept = sqrt(plep.M2() + plep.Perp2());
+
+  double MT = sqrt( 2*(ETlept*getMET() - plep.Px()*pmet.Px() - plep.Py()*pmet.Py()));
+  return MT;
+}
+
 float SSDLDumper::getMT2(int ind1, int ind2, gChannel chan){
 	// Calculate MT2 variable for two leptons and missing energy,
 	// assuming zero testmass
@@ -3632,6 +3787,7 @@ int SSDLDumper::isOSEvent(int &ind1, bool(SSDLDumper::*muonSelector)(int), int &
 		break;
 	}
 	if(selectedPair.size() < 2) return 0;
+	if(selectedPair.size() > 2) return 0; //FOR SYNC WITH EWKino
 
 	int result = 0;
 	if(selectedPair[0].type == 0 && selectedPair[1].type == 0) result = 1; // mu/mu
@@ -3965,7 +4121,7 @@ bool SSDLDumper::isSigSupMuEvent(){
 	setHypLepton1(mu1, Muon);
 	if(!passesJet50Cut())  return false;
 	if(getNJets() < 1)     return false;
-	if(MuMT[0] > fC_maxMt_Control)  return false;
+	if(getMT(0,Muon) > fC_maxMt_Control)  return false;
 	if(getMET() > fC_maxMet_Control)   return false;
 	if(NMus > 1)                    return false;
 	return true;
@@ -3996,6 +4152,8 @@ bool SSDLDumper::isSigSupElEvent(){
 	setHypLepton1(el1, Elec);
 	if(!passesJet50Cut())          return false;
 	if(getNJets() < 1)             return false;
+	//	if(ElMT[0] > fC_maxMt_Control) return false;
+	if(getMT(0,Elec) > fC_maxMt_Control) return false;
 	if(ElMT[0] > fC_maxMt_Control) return false;
 	if(getMET() > fC_maxMet_Control)  return false;
 	if(NEls > 1)                   return false;
@@ -4309,15 +4467,16 @@ bool SSDLDumper::isLooseMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 
 	// Veto dep cuts previously in SSDLAnalysis presel
-	if(MuEMVetoEt[muon]  > 4.0)      return false;
-	if(MuHadVetoEt[muon] > 6.0)      return false;
-	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
+	//SYNC	if(MuEMVetoEt[muon]  > 4.0)      return false;
+	//SYNC	if(MuHadVetoEt[muon] > 6.0)      return false;
+	//SYNC	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
 	
 	// require to pass tight ID:
 	if(MuPassesTightID[muon] != 1) return false;
 
 	// passes ISOLATION
-	if(MuPFIso[muon] > 1.00) return false;
+	//	if(MuPFIso[muon] > 1.00) return false;
+	if(MuPFIso[muon] > 0.15) return false;
 	return true;
 }
 bool SSDLDumper::isTightMuon(int muon){
@@ -4385,7 +4544,7 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 
 	// Reject electrons closer than 0.1 in DR to tight muons
 	for(size_t i = 0; i < NMus; ++i){
-		if(!isTightMuon(i)) continue;
+		if(!isLooseMuon(i)) continue;
 		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
 		return false;
 	}
@@ -4473,16 +4632,16 @@ bool SSDLDumper::isGoodEleForTTZ(int ele, float pt){
 }
 bool SSDLDumper::isLooseElectron(int ele){
 	if(isGoodElectron(ele) == false) return false;
-	if(ElPFIso[ele] > 1.0) return false;
-	if(ElChIsCons[ele] != 1) return false;
+	if(ElPFIso[ele] > 0.15) return false;
+	//	if(ElChIsCons[ele] != 1) return false;
 	
 	// Additional cuts for CaloIsoVL and TrkIsoVL
 	// if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	// if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	// if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
 
-	if(ElIsGoodTriggerEl[ele] != 1) return false;
-	//	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
+	//	if(ElIsGoodTriggerEl[ele] != 1) return false;
+	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	// if(ElIsGoodTriggerEl[ele] != 1) return false;
@@ -4577,13 +4736,13 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 
 	// Remove jets close to all tight leptons
 	for(size_t imu = 0; imu < NMus; ++imu){
-		if(!isTightMuon(imu)) continue;
+	  	if(!isTightMuon(imu)) continue;
 		if(!isGoodSecMuon(imu)) continue; 
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
 	for(size_t iel = 0; iel < NEls; ++iel){
-		if(!isTightElectron(iel)) continue;
+  		if(!isTightElectron(iel)) continue;
 		if(!isGoodSecElectron(iel)) continue;
 		if(Util::GetDeltaR(ElEta[iel], JetEta[jet], ElPhi[iel], JetPhi[jet]) > minDR ) continue;
 		return false;
