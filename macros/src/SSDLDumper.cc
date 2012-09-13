@@ -4185,8 +4185,8 @@ bool SSDLDumper::passesZVeto(float dm){
 	if(!gApplyZVeto) return true;
 	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
 	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
-	return !passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm); //inverted Zveto
-	// return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
+	// return !passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm); //inverted Zveto
+	return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
 }
 bool SSDLDumper::passesChVeto(int ch){
   if (ch == 0) return true;  //DON'T apply the veto
