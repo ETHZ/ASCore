@@ -104,6 +104,7 @@ public:
 
 	virtual void doAnalysis();
 	virtual void sandBox();
+	virtual void pythiaMadgraph(bool pyhia);
 	virtual void msugraKfacs(TFile *);
 	virtual void msugraLOxsecs(TFile *);
 	virtual void msugraNLOxsecs(TFile *);
@@ -141,13 +142,13 @@ public:
 
 	void makeAllIntPredictions();
         void makeIntPrediction(TString, gRegion);
-	// MARC void makeTTWIntPredictions();
-	// MARC TTWZPrediction makeIntPredictionTTW(TString, gRegion);
+	void makeTTWIntPredictions();
+	TTWZPrediction makeIntPredictionTTW(TString, gRegion);
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
 
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
 	void makeDiffPrediction();
-	// MARC void makeTTWDiffPredictions();
+	void makeTTWDiffPredictions();
 	void makeDiffPredictionTTW(int);
 
         void makeAllClosureTests();

@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2,  DoubleMu3, DoubleMu4, //DoubleMu5,
-		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, //DoubleEle5,
-		MuEG1, MuEG2, MuEG3, MuEG4, //MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3, //DoubleMu5,
+		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, //DoubleEle5,
+		MuEG1, MuEG1a, MuEG2, MuEG3, //MuEG5,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
@@ -91,6 +91,7 @@ public:
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
+		WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
 		EMEnr20, EMEnr30,
@@ -107,88 +108,18 @@ public:
 		SigSup,
 		ZDecay
 	};
-// 	enum gRegion {
-// 		region_begin,
-// 		Baseline = region_begin, //HT0MET0
-// 		HT80MET30,
-// 		HT200MET30,
-// 		HT0MET120,
-// 		HT0MET200,
-// 		HT0MET1203V, // 3rd lep veto
-// 		HT0MET2003V, // 3rd lep veto
-// 		HT0MET120JV, // jet veto
-// 		HT0MET120JV3V, // jet veto + 3rd lep veto
-// 		TTbarWPresel, TTbarWSelIncl, TTbarWSel,
-// 		TTbarWSelJU, TTbarWSelJD, TTbarWSelJS, TTbarWSelBU, TTbarWSelBD, TTbarWSelLU, TTbarWSelLD,
-// 		gNREGIONS
-// 	};
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
-		HT80MET0,
-		HT80MET0b,
 		HT80MET30,
 		HT80MET30b,
 		HT80MET30bpp,
-		HT200MET50,
-		HT200MET50b,
-		HT200MET120,
-		HT200MET120b,
-		HT320MET50,
-		HT320MET50b,
-		HT320MET120,
-		HT320MET120b,
-		HT200MET503b,
-		HT320MET0,
-		HT320MET0b,
-		MET0_80HT200b, MET0_200HT320b, MET0_320HT600b,
-		HT80_0MET30b, HT80_30MET50b, HT80_50MET120b,HT80_120MET200b,
-		HT0MET200,HT0MET120V, HT0MET120bV,HT0MET80V,HT0MET80bV,	 //EWKino regions
+		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1,	// EWino regions MET > 120
+		HT0MET200,											// EWino regions MET > 200
+		TTbarWPresel, TTbarWSel, //TTbarV selections
+		// ETHSelect, ETHSel1b, AACSelec, AACSel1b,// OS selections
 		gNREGIONS
 	};
-	//enum gRegion {
-	//	region_begin,
-	//	Baseline = region_begin,
-	//	HT80MET0,
-	//	HT80MET0b,
-	//	HT80MET30,
-	//	HT80MET30b,
-	//	HT200MET50,
-	//	HT200MET50b,
-	//	HT200MET120,
-	//	HT200MET120b,
-	//	HT320MET50,
-	//	HT320MET50b,
-	//	HT320MET120,
-	//	HT320MET120b,
-	//	HT200MET503b,
-	//	HT320MET0,
-	//	HT320MET0b,
-	//	gNREGIONS
-	//};
-	// enum gRegion {
-	// 	region_begin,
-	// 	Baseline = region_begin,
-	// 	Control,
-	// 	HT80MET120,
-	// 	HT80MET120x,  // exclusive (HT < 200)
-	// 	HT200MET30,
-	// 	HT200MET120,
-	// 	HT200MET120x, // exclusive (HT < 450)
-	// 	HT450MET50,
-	// 	HT450MET50x,  // exclusive (MET < 120)
-	// 	HT450MET120,
-	// 	HT450MET0,
-	// 	HT0MET120,
-	// 	HT0MET200,
-	// 	HT0MET120JV,  // Jet veto
-	// 	HT0MET200JV,
-	// 	HT80MET302b,  // > 1 bjet
-	// 	HT200MET302b,
-	// 	HT80MET1202b,
-	// 	// HT0MET02b,
-	// 	gNREGIONS
-	// };
 	enum gChannel {
 		channels_begin,
 		Muon = channels_begin,
@@ -310,6 +241,7 @@ public:
 		static float maxMet    [gNREGIONS];
 		static float minJetPt  [gNREGIONS];
 		static int   minNjets  [gNREGIONS];
+		static int   maxNjets  [gNREGIONS];
 		static int   minNbjets [gNREGIONS];
 		static int   maxNbjets [gNREGIONS];
 		static int   minNbjmed [gNREGIONS];
@@ -762,6 +694,7 @@ public:
 	float fC_maxMet;
 	float fC_minJetPt;
 	int   fC_minNjets;
+	int   fC_maxNjets;
 	int   fC_minNbjets;
 	int   fC_maxNbjets;
 	int   fC_minNbjmed;
