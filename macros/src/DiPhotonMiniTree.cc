@@ -830,7 +830,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
       if (isbarrel){
 	float xtalEtaWidth = fTR->SCxtalEtaWidth[scindex][j]*(1+global_linkbyrechit_enlargement);
 	float xtalPhiWidth = fTR->SCxtalPhiWidth[scindex][j]*(1+global_linkbyrechit_enlargement);
-	if (fabs(ecalpfhit.Eta()-xtal_position.Eta())<xtalEtaWidth/2 && Util::DeltaPhi(ecalpfhit.Phi(),xtal_position.Phi()<xtalPhiWidth/2)) inside=true;
+	if (fabs(ecalpfhit.Eta()-xtal_position.Eta())<xtalEtaWidth/2 && Util::DeltaPhi(ecalpfhit.Phi(),xtal_position.Phi())<xtalPhiWidth/2) inside=true;
       }
       else { // EE
 	TVector3 xtal_corners[4];
@@ -857,6 +857,8 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 
     if (outoffootprint) inside=!inside;
     if (inside) result.push_back(i);
+
+    if (inside && isbarrel) std::cout << GetPFCandDeltaRFromSC(fTR,phoqi,i,rotation_phi) << std::endl;
 
   }
 
