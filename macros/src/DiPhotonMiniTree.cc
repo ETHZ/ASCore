@@ -833,24 +833,26 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 	if (fabs(ecalpfhit.Eta()-xtal_position.Eta())<xtalEtaWidth/2 && Util::DeltaPhi(ecalpfhit.Phi(),xtal_position.Phi())<xtalPhiWidth/2) inside=true;
       }
       else { // EE
-	TVector3 xtal_corners[4];
-	for (int k=0; k<4; k++) xtal_corners[k] = TVector3(fTR->SCxtalfrontX[scindex][j][k],fTR->SCxtalfrontY[scindex][j][k],fTR->SCxtalfrontZ[scindex][j][k]);
-	if (rotation_phi!=0) {
-	  TRotation r; r.RotateZ(rotation_phi);
-	  for (int k=0; k<4; k++) xtal_corners[k] *= r;
+	if (ecalpfhit.z()*xtal_position.z()>0){
+	  TVector3 xtal_corners[4];
+	  for (int k=0; k<4; k++) xtal_corners[k] = TVector3(fTR->SCxtalfrontX[scindex][j][k],fTR->SCxtalfrontY[scindex][j][k],fTR->SCxtalfrontZ[scindex][j][k]);
+	  if (rotation_phi!=0) {
+	    TRotation r; r.RotateZ(rotation_phi);
+	    for (int k=0; k<4; k++) xtal_corners[k] *= r;
+	  }
+	  float hitx = ecalpfhit.x();
+	  float hity = ecalpfhit.y();
+	  float polx[5];
+	  float poly[5];
+	  for (int k=0; k<4; k++) polx[k] = xtal_corners[k].x();
+	  for (int k=0; k<4; k++) poly[k] = xtal_corners[k].y();
+	  polx[4]=polx[0]; poly[4]=poly[0]; // closed polygon
+	  float centerx = (polx[0]+polx[1]+polx[2]+polx[3])/4;
+	  float centery = (poly[0]+poly[1]+poly[2]+poly[3])/4;
+	  hitx = centerx + (hitx-centerx)*(1+global_linkbyrechit_enlargement);
+	  hity = centery + (hity-centery)*(1+global_linkbyrechit_enlargement);
+	  if (TMath::IsInside(hitx,hity,5,polx,poly)) inside=true;
 	}
-      	float hitx = ecalpfhit.x();
-	float hity = ecalpfhit.y();
-	float polx[5];
-	float poly[5];
-	for (int k=0; k<4; k++) polx[k] = xtal_corners[k].x();
-	for (int k=0; k<4; k++) poly[k] = xtal_corners[k].y();
-	polx[4]=polx[0]; poly[4]=poly[0]; // closed polygon
-	float centerx = (polx[0]+polx[1]+polx[2]+polx[3])/4;
-	float centery = (poly[0]+poly[1]+poly[2]+poly[3])/4;
-	hitx = centerx + (hitx-centerx)*(1+global_linkbyrechit_enlargement);
-	hity = centery + (hity-centery)*(1+global_linkbyrechit_enlargement);
-	if (TMath::IsInside(hitx,hity,5,polx,poly)) inside=true;
       }
 
     }
@@ -867,6 +869,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 };
 
 TVector3 DiPhotonMiniTree::PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel){
+  // WARNING: this propagates until EE+ or EE- at the given TMath::Abs(position.z()) for isbarrel=0, depending on where the candidate is pointing.
 
   int i = pfcandindex;
 
