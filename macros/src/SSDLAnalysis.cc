@@ -11,7 +11,7 @@ const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 
-TString SSDLAnalysis::gBaseDir = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/";
+TString SSDLAnalysis::gBaseDir = "/shome/folguera/CMSSW_5_3_2_patch4/src/DiLeptonAnalysis/NTupleProducer/macros/";
 // TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
@@ -509,7 +509,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		double ETlept = sqrt(pmu.M2() + pmu.Perp2());
 		double METpx  = fTR->PFType1METpx;
 		double METpy  = fTR->PFType1METpy;
-		fTmuMT[i]     = sqrt( 2*fTR->PFType1MET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
+		fTmuMT[i]     = sqrt( 2*(fTR->PFType1MET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy ));
 	}
 
 	// Dump electron properties
@@ -560,7 +560,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		double ETlept = sqrt(pel.M2() + pel.Perp2());
 		double METpx  = fTR->PFType1METpx;
 		double METpy  = fTR->PFType1METpy;
-		fTElMT[ind]   = sqrt( 2*fTR->PFType1MET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
+		fTElMT[ind]   = sqrt( 2*(fTR->PFType1MET*ETlept - pel.Px()*METpx - pel.Py()*METpy ));
 
 		// Electron ID
 		fTElEcalRecHitSumEt[ind] = fTR->ElDR03EcalRecHitSumEt      [elindex];

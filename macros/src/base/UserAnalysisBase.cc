@@ -441,7 +441,8 @@ bool UserAnalysisBase::IsGoodElId_LooseWP(int index){
     if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
 
     // WP80 conv. rejection
-    if(ElPassesConvRej(index) == false) return false;
+    if (fTR->ElNumberOfMissingInnerHits[index] > 1 ) return false;
+    if (!fTR->ElPassConversionVeto[index] )          return false;
     return true;
 }
 
