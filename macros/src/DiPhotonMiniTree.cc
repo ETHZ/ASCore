@@ -291,7 +291,7 @@ void DiPhotonMiniTree::Analyze(){
   // sc area and scale factor calculation for isolation
   {
     float const conearea = TMath::Pi()*0.4*0.4;
-    for (int i=0; i<fTR->NSuperClusters; i++){
+    for (int i=0; i<100; i++){
       if (i<fTR->NSuperClusters){
 	scarea[i] = CalculateSCArea(fTR,i);
 	scareaSF[i] = conearea/(conearea-scarea[i]);
