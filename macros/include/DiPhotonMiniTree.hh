@@ -98,6 +98,11 @@ private:
   int CountChargedHadronsInCone(TreeReader *fTR, int phoqi, std::vector<int> removals = std::vector<int>(), bool skipvetocones=false);
   std::vector<int> NChargedHadronsInConeSelection(TreeReader *fTR, std::vector<int> passing, int minimum=0, int maximum=9999);
 
+  std::vector<int> MuonSelection(TreeReader *fTR, std::vector<int> passing);
+  bool DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &passing);
+  float PFPhotonIsolationAroundMuon(int muqi, int *counter);
+  void FillMuonInfo(int index);
+
   TRandom3 *randomgen;
 
   float scarea[100];
@@ -112,7 +117,7 @@ private:
 
   int impinging_track_pfcand[100];
 
-  TTree* OutputTree[11];
+  TTree* OutputTree[12];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;

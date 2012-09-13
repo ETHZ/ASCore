@@ -49,10 +49,11 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
   OutputTree[9] = new TTree("Tree_nocombisocut_sel","Tree_nocombisocut_sel");
   OutputTree[10] = new TTree("Tree_randomcone_nocombisocut","Tree_randomcone_nocombisocut");
+  OutputTree[11] = new TTree("Tree_muoncone","Tree_muoncone");
 
   //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
 
-  for (int i=0; i<11; i++){
+  for (int i=0; i<12; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -320,13 +321,15 @@ void DiPhotonMiniTree::Analyze(){
   // 2 = background template generation from MC
   // 3 = DY selection (standard with reversed pixel veto)
 
-  if (!TriggerSelection()) return;
+  bool passtrigger = TriggerSelection();
 
-  std::vector<int> passing_selection[11];
+  std::vector<int> passing_selection[12];
 
-  bool pass[11];
+  bool pass[12];
 
-  for (int sel_cat=0; sel_cat<11; sel_cat++){
+  for (int sel_cat=0; sel_cat<12; sel_cat++){
+
+    if (sel_cat!=11 && !passtrigger) continue;
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -337,11 +340,18 @@ void DiPhotonMiniTree::Analyze(){
 
     std::vector<int> passing;
 
-    for (int i=0; i<fTR->NPhotons; i++){
-      passing.push_back(i);
+    if (sel_cat==11){
+      for (int i=0; i<fTR->NMus; i++){
+        passing.push_back(i);
+      }
+      passing = MuonSelection(fTR,passing);
     }
-
-    passing = PhotonPreSelection(fTR,passing);
+    else {
+      for (int i=0; i<fTR->NPhotons; i++){
+	passing.push_back(i);
+      }
+      passing = PhotonPreSelection(fTR,passing);
+    }
 
     // comment this block for the noselection running
     if (sel_cat!=7) { // only presel cat7 
@@ -363,10 +373,11 @@ void DiPhotonMiniTree::Analyze(){
 
     }
 
+
     if (sel_cat==0 || sel_cat==3){ // diphoton cats
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
-    else { // photon-by-photon cats
+    else if (sel_cat!=11) { // photon-by-photon cats
       if (sel_cat==1) passing = SignalSelection(fTR,passing);
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
       if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // sieie sideband template only from the fakes (only in MC!)
@@ -375,14 +386,19 @@ void DiPhotonMiniTree::Analyze(){
       if (sel_cat==6) passing = DiPhotonInvariantMassCutSelection(fTR,passing); // for DY without comb iso cut 
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
-    
+    else {
+      pass[sel_cat] = DiMuonFromZSelection(fTR,passing);
+    }
+
     passing_selection[sel_cat] = passing;
 
   }
 
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<11; sel_cat++){
+  for (int sel_cat=0; sel_cat<12; sel_cat++){
+
+    if (sel_cat!=11 && !passtrigger) continue;
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -394,7 +410,7 @@ void DiPhotonMiniTree::Analyze(){
     std::vector<int> passing = passing_selection[sel_cat];
 
     int minsize=999;
-    if (sel_cat==0 || sel_cat==3 || sel_cat==6) minsize=2;
+    if (sel_cat==0 || sel_cat==3 || sel_cat==6 || sel_cat==11) minsize=2;
     else minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
@@ -439,17 +455,23 @@ void DiPhotonMiniTree::Analyze(){
       }
     }
 
-  }
+    if (sel_cat==11){
+      for (int i=0; i<passing.size(); i++){
+	ResetVars();
+	FillMuonInfo(passing.at(i));
+	OutputTree[sel_cat]->Fill();
+      }
+    }
  
   //  cout << "E" << endl;
 
-}
+  }
 
-
+};
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<11; i++) OutputTree[i]->Write();	
+  for (int i=0; i<12; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumPU_noweight->Write();
   fHNumVtx->Write();
@@ -545,6 +567,29 @@ std::vector<int> DiPhotonMiniTree::PhotonPreSelection(TreeReader *fTR, std::vect
     if(fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[*it]<4) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
+
+  return passing;
+
+};
+
+std::vector<int> DiPhotonMiniTree::MuonSelection(TreeReader *fTR, std::vector<int> passing){
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    float eta=fTR->MuEta[*it];
+    if ((fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5)) it=passing.erase(it); else it++;
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    if (fTR->MuPt[*it]<10) it=passing.erase(it); else it++;
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    if (!(fTR->MuIsGlobalMuon[*it] || fTR->MuIsTrackerMuon[*it])) it=passing.erase(it); else it++;
+  }
+
+//  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+//    if (fTR->MuRelIso03[*it]>0.15) it=passing.erase(it); else it++;
+//  }
 
   return passing;
 
@@ -700,6 +745,22 @@ bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> 
   if (fTR->PhoPt[passing.at(1)]<30) return false;
   if (invmass0<80) return false;
   if (dR<0.4) return false;
+
+  return true;
+};
+
+bool DiPhotonMiniTree::DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &passing){
+
+  if (passing.size()<2) return false;
+
+  passing.resize(2); // keep only the first two
+
+  TLorentzVector mu1(fTR->MuPx[passing.at(0)],fTR->MuPy[passing.at(0)],fTR->MuPz[passing.at(0)],fTR->MuE[passing.at(0)]);
+  TLorentzVector mu2(fTR->MuPx[passing.at(1)],fTR->MuPy[passing.at(1)],fTR->MuPz[passing.at(1)],fTR->MuE[passing.at(1)]);
+
+  float invmass0 = (mu1+mu2).M();
+
+  if (fabs(invmass0-91.2)>10) return false;
 
   return true;
 };
@@ -1099,6 +1160,52 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
 };
 
+float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter){
+  
+  int temp;
+  if (counter==NULL) counter=&temp;
+  
+  float minimal_pfphotoncand_threshold_EB = 0;
+  float minimal_pfphotoncand_threshold_EE = global_minthrpfphotoncandEE;
+
+  float result=0;
+  
+  TLorentzVector mu(fTR->MuPx[muqi],fTR->MuPy[muqi],fTR->MuPz[muqi],fTR->MuE[muqi]);
+  bool isbarrel = (fabs(mu.Eta())<1.4442);
+
+  for (int i=0; i<fTR->NPfCand; i++){
+    
+    int type = FindPFCandType(fTR->PfCandPdgId[i]);
+    if (type!=2) continue;
+    
+    double pt = fTR->PfCandPt[i];
+    double dEta = fabs(fTR->PfCandEta[i] - mu.Eta());
+    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],mu.Phi());
+    double dR = sqrt(dEta*dEta+dPhi*dPhi);
+  
+    if (dR>0.4) continue;
+    if (dR<0.1) continue;
+  
+  
+    // pfcandidate threshold
+    if (isbarrel){
+      if (pt<minimal_pfphotoncand_threshold_EB) continue;
+    }
+    else {
+      if (pt<minimal_pfphotoncand_threshold_EE) continue;
+    }
+    
+    (*counter)++;
+    result+=pt;
+    
+  } // end pf cand loop
+
+  const float scaleresult = 1.066;      
+  return result*scaleresult;
+  
+};
+
+
 float DiPhotonMiniTree::GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi){
 
   int i = pfindex;
@@ -1318,6 +1425,21 @@ void DiPhotonMiniTree::FillTrail(int index){
   //  photrail_Nchargedhadronsincone = CountChargedHadronsInCone(fTR,index,remove,global_dofootprintremoval);
   photrail_scarea = scarea[fTR->PhotSCindex[index]];
   photrail_scareaSF = scareaSF[fTR->PhotSCindex[index]];
+
+};
+
+void DiPhotonMiniTree::FillMuonInfo(int index){
+
+  pholead_eta = fTR->MuEta[index];
+  pholead_px = fTR->MuPx[index];
+  pholead_py = fTR->MuPy[index];
+  pholead_pt = fTR->MuPt[index];
+  pholead_pz = fTR->MuPz[index];
+  pholead_energy = fTR->MuE[index];
+  pholead_SCeta = fTR->MuEta[index];
+  pholead_SCphi = fTR->MuPhi[index];
+  pholead_pho_Cone03PFCombinedIso = fTR->MuRelIso03[index];
+  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = PFPhotonIsolationAroundMuon(index,&pholead_Npfcandphotonincone);
 
 };
 
