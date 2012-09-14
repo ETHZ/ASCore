@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3, //DoubleMu5,
-		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, //DoubleEle5,
-		MuEG1, MuEG1a, MuEG2, MuEG3, //MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu2 , DoubleMu3, //DoubleMu5,
+		DoubleEle1              , DoubleEle2, DoubleEle3, //DoubleEle5,
+		MuEG1, MuEG2, MuEG3, //MuEG5,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
