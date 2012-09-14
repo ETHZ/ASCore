@@ -1,23 +1,26 @@
-## ###################################################################################################################
-## # Datacard for Same-sign dilepton analysis
-## #   Format is: tag \t inputfile \t datamctype \t channel \t lumi[/pb] \t color
-## #    - datamctype can be: 0(data), 1(sm mc), 2(sig mc), 3(rare sm mc), 4(rare sm mc w/ no PU)
-## #    - lumi only used for MC weights, default is set to 1.0
-## #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
-## ###################################################################################################################
-## ## # Data
+###################################################################################################################
+# Datacard for Same-sign dilepton analysis
+#   Format is: tag \t inputfile \t datamctype \t channel \t lumi[/pb] \t color
+#    - datamctype can be: 0(data), 1(sm mc), 2(sig mc), 3(rare sm mc), 4(rare sm mc w/ no PU)
+#    - lumi only used for MC weights, default is set to 1.0
+#    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
+###################################################################################################################
+## # Data
 DoubleMu1		folguera/SSDLTrees/2012/Sep13/DoubleMu-Run2012A-13Jul2012-v1-AOD.root			0	0
 #DoubleMu1a		folguera/SSDLTrees/2012/Sep13/DoubleMu-Run2012A-recover-06Aug2012-v1.root		0	0
 DoubleMu2		folguera/SSDLTrees/2012/Sep13/DoubleMu-Run2012B-13Jul2012-v4-AOD/				0	0
 DoubleMu3		folguera/SSDLTrees/2012/Sep13/DoubleMu-Run2012C-PromptReco-v2-AOD_newV/			0	0
+DoubleMu4		mdunser/SSDLTrees/2012/Sep14//DoubleElectron-Run2012C-PromptReco-v2-AOD-2.root	0	0
 DoubleEle1		folguera/SSDLTrees/2012/Sep13/DoubleElectron-Run2012A-13Jul2012-v1-AOD.root		0	1
 #DoubleEle1a	folguera/SSDLTrees/2012/Sep13/DoubleElectron-Run2012A-recover-06Aug2012-v1.root	0	1
 DoubleEle2		folguera/SSDLTrees/2012/Sep13/DoubleElectron-Run2012B-13Jul2012-v1-AOD/			0	1
 DoubleEle3		folguera/SSDLTrees/2012/Sep13/DoubleElectron-Run2012C-PromptReco-v2-AOD_newV/	0	1
+DoubleEle4		mdunser/SSDLTrees/2012/Sep14//DoubleElectron-Run2012C-PromptReco-v2-AOD-2.root	0	1
 MuEG1			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012A-13Jul2012-v1-AOD-2.root				0	2
 #MuEG1a			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012A-recover-06Aug2012-v1.root			0	2
 MuEG2			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012B-13Jul2012-v1-AOD/					0	2
 MuEG3			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012C-PromptReco-v2-AOD_newV/				0	2
+MuEG4			mdunser/SSDLTrees/2012/Sep14//MuEG-Run2012C-PromptReco-v2-AOD-2.root			0	2
 ####################################################################################################################
 # Top and EWK
 TTJets			mdunser/SSDLTrees/2012/Sep14/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1/	1	-1	225.197
