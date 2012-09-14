@@ -419,7 +419,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
 		
-		fillSyncCounters(S);
+		//		fillSyncCounters(S);
 		/////////////////////////////////////////////
 		// Systematic studies
 		if(!gDoSystStudies) continue;
