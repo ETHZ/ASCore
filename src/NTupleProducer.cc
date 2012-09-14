@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.23 2012/08/16 12:09:01 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.24 2012/08/17 10:35:01 peruzzi Exp $
 //
 //
 
@@ -2229,7 +2229,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     double dz = PfCandDz[i];
 	     double dxy = PfCandDxy[i];
 
-	     if (type==2) storethispfcand[i]=true;
 	     if (type==1 && dR<0.4) storethispfcand[i]=true;
 	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
 
@@ -2670,6 +2669,9 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	int pfcandIndex(0);
 	for (unsigned int i=0; i<pfCandidates->size(); i++){
 
+	  int type = FindPFCandType((*pfCandidates)[i].pdgId());
+	  if (type==2) storethispfcand[i]=true;
+
 	  if (storethispfcand[i]==0) continue;
 
 	  if (pfcandIndex >= gMaxnpfcand){
@@ -2699,7 +2701,6 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
 	  }
 
-	  int type = FindPFCandType((*pfCandidates)[i].pdgId());
 	  if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
 	  reco::HitPattern pattern; 
 	  if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
