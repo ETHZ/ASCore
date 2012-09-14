@@ -4718,6 +4718,7 @@ bool SSDLDumper::isGoodMuonForZVeto(int muon){
 }
 bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
 	if(isGoodMuon(muon, 10.) == false)  return false;
+	if(MuPassesTightID[muon] != 1) return false;
 	if(MuPFIso[muon] > 0.15) return false;
 
 	return true;
