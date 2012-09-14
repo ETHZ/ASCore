@@ -61,7 +61,7 @@ static const float gMZ  = 91.2;
 TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT80MET30b", "HT80MET30bpp", "HT0MET120",  "HT0MET80", "HT0MET120V", "HT0MET120bV", "HT0MET120NJ1", "HT0MET200", "HT0MET120bVlV", "HT0MET120NJ1lV", "HT0MET200lV", "TTbarWPresel", "TTbarWSel"};
 float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,            80.,          0.,          0.,           0.,            0.,             0.,          0.,              0.,               0.,            0.,             0.,        100.};
 float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         20.,          20.,         8000.,          8000.,       8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
-float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,            30.,        120.,         80.,         120.,          120.,           120.,        200.,              0.,               0.,            0.,             0.,          0.}; 
+float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,            30.,        120.,         80.,         120.,          120.,           120.,        200.,            120.,             120.,          200.,             0.,          0.}; 
 float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,       8000.,        8000.,         8000.,          8000.,       8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
 int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,          0 ,              0 ,               0 ,            0 ,             3 ,          3 };
 int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,          2 ,          99 ,           99 ,             1 ,         99 ,             99 ,               1 ,           99 ,            99 ,         99 };
@@ -4820,7 +4820,7 @@ bool SSDLDumper::isGoodEleForZVeto(int ele){
 	// Don't care about charge consistency or trigger efficiency
 	if(ele >= NEls) return false; // Sanity check
 	if(ElPt[ele] < 10.) return false;
-
+	
 	// Apply IsoCUT
 	if(ElPFIso[ele] > 0.2) return false;
 	return true;	
@@ -4838,16 +4838,18 @@ bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
 		return false;
 	}
-
-	// Additional cuts from AN-12-059_v5:
-	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
-		if(ElHoverE[ele] > 0.10)     return false;
-		if(fabs(ElDPhi[ele]) > 0.15) return false;
-	}
-	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
-		if(ElHoverE[ele] > 0.075)    return false;
-		if(fabs(ElDPhi[ele]) > 0.10) return false;
-	}
+	
+	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
+	  
+// 	// Additional cuts from AN-12-059_v5:
+// 	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
+// 		if(ElHoverE[ele] > 0.10)     return false;
+// 		if(fabs(ElDPhi[ele]) > 0.15) return false;
+// 	}
+// 	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
+// 		if(ElHoverE[ele] > 0.075)    return false;
+// 		if(fabs(ElDPhi[ele]) > 0.10) return false;
+// 	}
 	
 	return true;	
 }
