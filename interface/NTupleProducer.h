@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.31 2012/08/15 11:02:36 pandolf Exp $
+// $Id: NTupleProducer.h,v 1.114.2.32 2012/08/15 12:01:43 haweber Exp $
 //
 //
 
@@ -389,6 +389,16 @@ private:
   std::auto_ptr<std::vector<float> > fTgenInfoM;
   std::auto_ptr<std::vector<float> > fTgenInfoPromptFlag;
 
+  // LHEEvent Product
+  std::auto_ptr<std::vector<int> >  fTLHEEventID;
+  std::auto_ptr<std::vector<int> >  fTLHEEventStatus;
+  std::auto_ptr<std::vector<int> >  fTLHEEventMotherFirst;
+  std::auto_ptr<std::vector<int> >  fTLHEEventMotherSecond;
+  std::auto_ptr<std::vector<float> >  fTLHEEventPx;
+  std::auto_ptr<std::vector<float> >  fTLHEEventPy;
+  std::auto_ptr<std::vector<float> >  fTLHEEventPz;
+  std::auto_ptr<std::vector<float> >  fTLHEEventE;
+  std::auto_ptr<std::vector<float> >  fTLHEEventM;
 
   // Pile-up event info
   std::auto_ptr<int>  fTPUnumInteractions;

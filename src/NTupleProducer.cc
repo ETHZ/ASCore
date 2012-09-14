@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.37 2012/08/15 12:01:42 haweber Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.38 2012/08/15 14:06:52 pandolf Exp $
 //
 //
 
@@ -613,8 +613,20 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if(LHEEventProduct_found){ 
       const lhef::HEPEUP hepeup_ = evt->hepeup();
       const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
+//      cout << "------------" << endl;
+//      cout << pup_.size() << " NUP " << hepeup_.NUP << " IDPRUP " << hepeup_.IDPRUP <<  endl;
       float partonicHT=0;
       for(unsigned int i=0; i<pup_.size(); ++i){
+//	cout << " ID " << hepeup_.IDUP[i] << " status " << hepeup_.ISTUP[i] << " mother " << hepeup_.MOTHUP[i].first << " " << hepeup_.MOTHUP[i].second << endl;
+	fTLHEEventID                  ->push_back(hepeup_.IDUP[i]);
+	fTLHEEventStatus              ->push_back(hepeup_.ISTUP[i]);
+	fTLHEEventMotherFirst         ->push_back(hepeup_.MOTHUP[i].first);
+	fTLHEEventMotherSecond        ->push_back(hepeup_.MOTHUP[i].second);
+	fTLHEEventPx                  ->push_back(hepeup_.PUP[i][0]);
+	fTLHEEventPy                  ->push_back(hepeup_.PUP[i][1]);
+	fTLHEEventPz                  ->push_back(hepeup_.PUP[i][2]);
+	fTLHEEventE                   ->push_back(hepeup_.PUP[i][3]);
+	fTLHEEventM                   ->push_back(hepeup_.PUP[i][4]);
         if(hepeup_.ISTUP[i]!=1) continue; // quarks and gluons come out of MG/ME as stable
         int idabs=abs(hepeup_.IDUP[i]); 
         if( idabs != 21 && (idabs<1 || idabs>6) ) continue;  // gluons and quarks
@@ -3494,6 +3506,15 @@ void NTupleProducer::declareProducts(void) {
   produces<int>("LumiSection");
   produces<float>("PtHat");
   produces<float>("QCDPartonicHT");
+  produces<std::vector<int> >("LHEEventID");
+  produces<std::vector<int> >("LHEEventStatus");
+  produces<std::vector<int> >("LHEEventMotherFirst");
+  produces<std::vector<int> >("LHEEventMotherSecond");
+  produces<std::vector<float> >("LHEEventPx");
+  produces<std::vector<float> >("LHEEventPy");
+  produces<std::vector<float> >("LHEEventPz");
+  produces<std::vector<float> >("LHEEventE");
+  produces<std::vector<float> >("LHEEventM");
   produces<int>("SigProcID");
   produces<float>("PDFScalePDF");
   produces<int>("PDFID1");
@@ -4167,6 +4188,15 @@ void NTupleProducer::resetProducts( void ) {
   fTLumiSection.reset(new int(-999));
   fTPtHat.reset(new float(-999.99));
   fTQCDPartonicHT.reset(new float(-999.99));
+  fTLHEEventID.reset(new std::vector<int> );
+  fTLHEEventStatus.reset(new std::vector<int> );
+  fTLHEEventMotherFirst.reset(new std::vector<int> );
+  fTLHEEventMotherSecond.reset(new std::vector<int> );
+  fTLHEEventPx.reset(new std::vector<float> );
+  fTLHEEventPy.reset(new std::vector<float> );
+  fTLHEEventPz.reset(new std::vector<float> );
+  fTLHEEventE .reset(new std::vector<float> );
+  fTLHEEventM .reset(new std::vector<float> );
   fTSigProcID.reset(new int(-999));
   fTPDFScalePDF.reset(new float(-999.99));
   fTPDFID1.reset(new int(-999));
@@ -4898,6 +4928,15 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTLumiSection, "LumiSection");
   event.put(fTPtHat, "PtHat");
   event.put(fTQCDPartonicHT, "QCDPartonicHT");
+  event.put(fTLHEEventID, "LHEEventID");
+  event.put(fTLHEEventStatus, "LHEEventStatus");
+  event.put(fTLHEEventMotherFirst, "LHEEventMotherFirst");
+  event.put(fTLHEEventMotherSecond, "LHEEventMotherSecond");
+  event.put(fTLHEEventPx, "LHEEventPx");
+  event.put(fTLHEEventPy, "LHEEventPy");
+  event.put(fTLHEEventPz, "LHEEventPz");
+  event.put(fTLHEEventE,  "LHEEventE");
+  event.put(fTLHEEventM,  "LHEEventM");
   event.put(fTSigProcID, "SigProcID");
   event.put(fTPDFScalePDF, "PDFScalePDF");
   event.put(fTPDFID1, "PDFID1");
