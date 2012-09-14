@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2 , DoubleMu3, //DoubleMu5,
-		DoubleEle1              , DoubleEle2, DoubleEle3, //DoubleEle5,
-		MuEG1, MuEG2, MuEG3, //MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu2 , DoubleMu3, DoubleMu4, //DoubleMu5,
+		DoubleEle1              , DoubleEle2, DoubleEle3, DoubleEle4,//DoubleEle5,
+		MuEG1, MuEG2, MuEG3, MuEG4, //MuEG5,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
@@ -114,8 +114,10 @@ public:
 		HT80MET30,
 		HT80MET30b,
 		HT80MET30bpp,
+		HT0MET80, //EWkino
 		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1,	// EWino regions MET > 120
-		HT0MET200,											// EWino regions MET > 200
+		HT0MET200,   			        // EWino regions MET > 200
+		HT0MET120bVlV, HT0MET120NJ1lV,HT0MET200lV,   
 		TTbarWPresel, TTbarWSel, //TTbarV selections
 		// ETHSelect, ETHSel1b, AACSelec, AACSel1b,// OS selections
 		gNREGIONS
