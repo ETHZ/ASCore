@@ -354,7 +354,7 @@ void DiPhotonMiniTree::Analyze(){
     }
 
     // comment this block for the noselection running
-    if (sel_cat!=7) { // only presel cat7 
+    if (sel_cat!=7 && sel_cat!=11) { // only presel cat7 
 
       if (sel_cat==3 || sel_cat==6) passing = ApplyPixelVeto(fTR,passing,1); // DY cat3 and DY no combiso with mass cut for eff area cat6
       else passing = ApplyPixelVeto(fTR,passing,0);
