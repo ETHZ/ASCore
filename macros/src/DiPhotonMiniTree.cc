@@ -1439,6 +1439,7 @@ void DiPhotonMiniTree::FillMuonInfo(int index){
   pholead_SCeta = fTR->MuEta[index];
   pholead_SCphi = fTR->MuPhi[index];
   pholead_pho_Cone03PFCombinedIso = fTR->MuRelIso03[index];
+  pholead_Npfcandphotonincone = 0;
   pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = PFPhotonIsolationAroundMuon(index,&pholead_Npfcandphotonincone);
 
 };
