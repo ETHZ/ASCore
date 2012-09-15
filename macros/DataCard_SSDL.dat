@@ -21,7 +21,7 @@ MuEG1			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012A-13Jul2012-v1-AOD-2.root				0
 MuEG2			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012B-13Jul2012-v1-AOD/					0	2
 MuEG3			folguera/SSDLTrees/2012/Sep13/MuEG-Run2012C-PromptReco-v2-AOD_newV/				0	2
 MuEG4			mdunser/SSDLTrees/2012/Sep14//MuEG-Run2012C-PromptReco-v2-AOD-2.root			0	2
-####################################################################################################################
+## ####################################################################################################################
 # Top and EWK
 TTJets			mdunser/SSDLTrees/2012/Sep14/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1/	1	-1	225.197
 SingleT_t		mdunser/SSDLTrees/2012/Sep14/T_t-channel_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1.root			1	-1	55.531
@@ -47,7 +47,7 @@ ZZTo4L			mdunser/SSDLTrees/2012/Sep14/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola
 TTbarW		mdunser/SSDLTrees/2012/Sep14/TTWJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root					3	-1	0.232
 TTbarZ		mdunser/SSDLTrees/2012/Sep14/TTZJets_8TeV-madgraph_v2-Summer12_DR53X-PU_S10_START53_V7A-v1.root					3	-1	0.208
 TTbarG		mdunser/SSDLTrees/2012/Sep14/TTGJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root					3	-1	2.166
-#DPSWW		stiegerb/SSDLTrees/2011B/Dec9/MC/DoublePartonWWFastSim.root				3	-1	1.059e+06	51
+DPSWW		mdunser/SSDLTrees/2012/Sep14/WW_DoubleScattering_8TeV-pythia8-Summer12_DR53X-PU_S10_START53_V7A-v1.root			3	-1	0.5879
 WWZ			mdunser/SSDLTrees/2012/Sep14/WWZNoGstarJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root				3	-1	0.0633
 WZZ			mdunser/SSDLTrees/2012/Sep14/WZZNoGstarJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root				3	-1	0.0192
 WWG			mdunser/SSDLTrees/2012/Sep14/WWGJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root					3	-1	1.44
@@ -56,7 +56,7 @@ WWW			mdunser/SSDLTrees/2012/Sep14/WWWJets_8TeV-madgraph-Summer12_DR53X-PU_S10_S
 TTbarWW		mdunser/SSDLTrees/2012/Sep14/TTWWJets_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root					3	-1	0.002
 ####################################################################################################################
 ## Rare SM with no pileup, correct all by 1/puweight = 1/0.2674456 = 3.739078
-#W+W+		stiegerb/SSDLTrees/2011B/Dec9/MC/WplusWplus.root					4	-1	8.106e+05	51
+W+W+		mdunser/SSDLTrees/2012/Sep14/WpWpqq_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1.root						3	-1	0.2482
 W-W-		mdunser/SSDLTrees/2012/Sep14/WmWmqq_8TeV-madgraph-Summer12_DR53X-PU_S10_START53_V7A-v1-2.root					3	-1	0.08888
 #####################################################################################################################
 ### SUSY Signal

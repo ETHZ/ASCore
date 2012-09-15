@@ -101,7 +101,7 @@ void SSDLPlotter::init(TString filename){
 	
 	// Luminosity
 	// fLumiNorm = 3950.; // HPA ICHEP dataset
-	fLumiNorm = 5098.; // full dataset before TS in june
+	fLumiNorm = 9185.6; // full dataset before TS in june
 
 	// Cuts:
 	fC_minMu1pt = 20.;
@@ -136,20 +136,20 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WZ);
 	fMCBG.push_back(ZZ);
 	// MARC fMCBG.push_back(GVJets);
-	// MARC fMCBG.push_back(DPSWW);
+	fMCBG.push_back(DPSWW);
 	fMCBG.push_back(TTbarW);
 	fMCBG.push_back(TTbarZ);
 	fMCBG.push_back(TTbarG);
-	// MARC fMCBG.push_back(WpWp);
+	fMCBG.push_back(WpWp);
 	fMCBG.push_back(WmWm);
 	fMCBG.push_back(WWZ);
 	fMCBG.push_back(WZZ);
 	fMCBG.push_back(WWG);
 	fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
-//SANTI  	fMCBG.push_back(QCDMuEnr15);
-//SANTI  	fMCBG.push_back(EMEnr20);
-//SANTI  	fMCBG.push_back(EMEnr30);
+	fMCBG.push_back(QCDMuEnr15);
+	fMCBG.push_back(EMEnr20);
+	fMCBG.push_back(EMEnr30);
 
 	// MARC fMCBG.push_back(QCD15);
 	// MARC fMCBG.push_back(QCD30);
@@ -172,17 +172,17 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_tW);
 	fMCBGNoQCDNoGJets.push_back(SingleT_s);
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_s);
-	fMCBGNoQCDNoGJets.push_back(WJets);
-	fMCBGNoQCDNoGJets.push_back(DYJets);
+	// marcmarc fMCBGNoQCDNoGJets.push_back(WJets);
+	// marcmarc fMCBGNoQCDNoGJets.push_back(DYJets);
 	// MARC fMCBGNoQCDNoGJets.push_back(WW);
 	fMCBGNoQCDNoGJets.push_back(WZ);
 	fMCBGNoQCDNoGJets.push_back(ZZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(GVJets);
-	// MARC fMCBGNoQCDNoGJets.push_back(DPSWW);
+	fMCBGNoQCDNoGJets.push_back(DPSWW);
 	fMCBGNoQCDNoGJets.push_back(TTbarW);
 	fMCBGNoQCDNoGJets.push_back(TTbarZ);
 	fMCBGNoQCDNoGJets.push_back(TTbarG);
-	// MARC fMCBGNoQCDNoGJets.push_back(WpWp);
+	fMCBGNoQCDNoGJets.push_back(WpWp);
 	fMCBGNoQCDNoGJets.push_back(WmWm);
 	fMCBGNoQCDNoGJets.push_back(WWZ);
 	fMCBGNoQCDNoGJets.push_back(WZZ);
@@ -211,11 +211,11 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WZ);
 	fMCBGMuEnr.push_back(ZZ);
 	// MARC fMCBGMuEnr.push_back(GVJets);
-	// MARC fMCBGMuEnr.push_back(DPSWW);
+	fMCBGMuEnr.push_back(DPSWW);
 	fMCBGMuEnr.push_back(TTbarW);
 	fMCBGMuEnr.push_back(TTbarZ);
 	fMCBGMuEnr.push_back(TTbarG);
-	// MARC fMCBGMuEnr.push_back(WpWp);
+	fMCBGMuEnr.push_back(WpWp);
 	fMCBGMuEnr.push_back(WmWm);
 	fMCBGMuEnr.push_back(WWZ);
 	fMCBGMuEnr.push_back(WZZ);
@@ -242,11 +242,11 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WZ);
 	fMCBGEMEnr.push_back(ZZ);
 	// MARC fMCBGEMEnr.push_back(GVJets);
-	// MARC fMCBGEMEnr.push_back(DPSWW);
+	fMCBGEMEnr.push_back(DPSWW);
 	fMCBGEMEnr.push_back(TTbarW);
 	fMCBGEMEnr.push_back(TTbarZ);
 	fMCBGEMEnr.push_back(TTbarG);
-	// MARC fMCBGEMEnr.push_back(WpWp);
+	fMCBGEMEnr.push_back(WpWp);
 	fMCBGEMEnr.push_back(WmWm);
 	fMCBGEMEnr.push_back(WWZ);
 	fMCBGEMEnr.push_back(WZZ);
@@ -265,11 +265,11 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(WZ);
 	fMCRareSM.push_back(ZZ);
 	// MARC fMCRareSM.push_back(GVJets);
-	// MARC fMCRareSM.push_back(DPSWW);
+	fMCRareSM.push_back(DPSWW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
-	// MARC fMCRareSM.push_back(WpWp);
+	fMCRareSM.push_back(WpWp);
 	fMCRareSM.push_back(WmWm);
 	fMCRareSM.push_back(WWZ);
 	fMCRareSM.push_back(WZZ);
@@ -279,38 +279,38 @@ void SSDLPlotter::init(TString filename){
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
-	// fMuData    .push_back(DoubleMu3);
-	// fMuData    .push_back(DoubleMu4);
+	fMuData    .push_back(DoubleMu3);
+	fMuData    .push_back(DoubleMu4);
 	// fMuData    .push_back(DoubleMu5);
 	// fMuHadData .push_back(MuHad1);
 	// fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
 	fEGData    .push_back(DoubleEle2);
-	// fEGData    .push_back(DoubleEle3);
-	// fEGData    .push_back(DoubleEle4);
+	fEGData    .push_back(DoubleEle3);
+	fEGData    .push_back(DoubleEle4);
 	// fEGData    .push_back(DoubleEle5);
 	// fEleHadData.push_back(EleHad1);
 	// fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
 	fMuEGData  .push_back(MuEG2);
-	// fMuEGData  .push_back(MuEG3);
-	// fMuEGData  .push_back(MuEG4);
+	fMuEGData  .push_back(MuEG3);
+	fMuEGData  .push_back(MuEG4);
 	// fMuEGData  .push_back(MuEG5);
 
 	fHighPtData.push_back(DoubleMu1);
 	fHighPtData.push_back(DoubleMu2);
-	// fHighPtData.push_back(DoubleMu3);
-	// fHighPtData.push_back(DoubleMu4);
+	fHighPtData.push_back(DoubleMu3);
+	fHighPtData.push_back(DoubleMu4);
 	// fHighPtData.push_back(DoubleMu5);
 	fHighPtData.push_back(DoubleEle1);
 	fHighPtData.push_back(DoubleEle2);
-	// fHighPtData.push_back(DoubleEle3);
-	// fHighPtData.push_back(DoubleEle4);
+	fHighPtData.push_back(DoubleEle3);
+	fHighPtData.push_back(DoubleEle4);
 	// fHighPtData.push_back(DoubleEle5);
 	fHighPtData.push_back(MuEG1);
 	fHighPtData.push_back(MuEG2);
-	// fHighPtData.push_back(MuEG3);
-	// fHighPtData.push_back(MuEG4);
+	fHighPtData.push_back(MuEG3);
+	fHighPtData.push_back(MuEG4);
 	// fHighPtData.push_back(MuEG5);
 
 	// fLowPtData.push_back(MuHad1);
@@ -339,12 +339,12 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(Baseline);
 	// printOrigins(Baseline);
 
-	// foobar makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// foobar makeElIsolationPlots(false); // if true, loops on TTbar sample
-	// foobar makeElIdPlots();
-	// foobar makeNT2KinPlots(false);
-	// foobar makeNT2KinPlots(true);
-	// foobar makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIdPlots();
+	makeNT2KinPlots(false);
+	makeNT2KinPlots(true);
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
@@ -356,20 +356,20 @@ void SSDLPlotter::doAnalysis(){
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 	
-	// foobar makeFRvsPtPlots(Muon, SigSup);
-	// foobar makeFRvsPtPlots(Elec, SigSup);
-	// foobar makeFRvsPtPlots(Muon, ZDecay);
- 	// foobar makeFRvsPtPlots(Elec, ZDecay);
- 	// foobar makeFRvsEtaPlots(Muon);
- 	// foobar makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+ 	makeFRvsPtPlots(Elec, ZDecay);
+ 	makeFRvsEtaPlots(Muon);
+ 	makeFRvsEtaPlots(Elec);
 	
-	// foobar makeAllClosureTests();
+	makeAllClosureTests();
 	makeAllIntPredictions();
         
-	// foobar makeDiffPrediction();
+	makeDiffPrediction();
 	//makeTTWDiffPredictions();
 	//makeTTWIntPredictions();
-	// foobar printAllYieldTables();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -420,8 +420,8 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 	const float WZESyst2 = WZESyst*WZESyst;
 
 	TFile * pFile;
-	if (pythia) pFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Sep10_WZ_invZveto_jet60/WZTo3LNuPythia_Yields.root");
-	else pFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Sep10_WZ_invZveto_jet60/WZTo3LNu_dataAndMadgraph_Yields.root");
+	if (pythia) pFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Jul26_WZ_invZveto_jet20/WZTo3LNuPythia_Yields.root");
+	else pFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Jul26_WZ_invZveto_jet20/WZTo3LNu_dataAndMadgraph_Yields.root");
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// // RATIOS /////////////////////////////////////////////////////////////////////////
@@ -495,6 +495,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 	TH1D  * WZmadgraph_allMet_   = new TH1D("WZmadgraph_allMet_"  , "WZmadgraph_allMet_" , 50, 0. , 350.);
 	TH1D  * WZmadgraph_allHT_    = new TH1D("WZmadgraph_allHT_"   , "WZmadgraph_allHT_"  , 50, 0. , 350.);
 	TH1D  * WZmadgraph_allnJets_ = new TH1D("WZmadgraph_allnJets_", "WZmadgraph_allnJets", 10, 0 , 10);
+	TH1D  * WZmadgraph_bnJetsMet50_ = new TH1D("WZmadgraph_bnJetsMet50_", "WZmadgraph_bnJetsMet50", 10, 0 , 10);
 	TH1D  * WZmadgraph_allnJetsMet50_ = new TH1D("WZmadgraph_allnJetsMet50_", "WZmadgraph_allnJetsMet50", 10, 0 , 10);
 	TH1D  * WZmadgraph_allnJetsMet100_ = new TH1D("WZmadgraph_allnJetsMet100_", "WZmadgraph_allnJetsMet100", 10, 0 , 10);
 	TH1D  * WZmadgraph_allnJetsMet120_ = new TH1D("WZmadgraph_allnJetsMet120_", "WZmadgraph_allnJetsMet120", 10, 0 , 10);
@@ -504,6 +505,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 	TH1D  * WZpythia_allMet_   = new TH1D("WZpythia_allMet_"  , "WZpythia_allMet_" , 50, 0. , 350.);
 	TH1D  * WZpythia_allHT_    = new TH1D("WZpythia_allHT_"   , "WZpythia_allHT_"  , 50, 0. , 350.);
 	TH1D  * WZpythia_allnJets_ = new TH1D("WZpythia_allnJets_", "WZpythia_allnJets", 10, 0 , 10);
+	TH1D  * WZpythia_bnJetsMet50_ = new TH1D("WZpythia_bnJetsMet50_", "WZpythia_bnJetsMet50", 10, 0 , 10);
 	TH1D  * WZpythia_allnJetsMet50_ = new TH1D("WZpythia_allnJetsMet50_", "WZpythia_allnJetsMet50", 10, 0 , 10);
 	TH1D  * WZpythia_allnJetsMet100_ = new TH1D("WZpythia_allnJetsMet100_", "WZpythia_allnJetsMet100", 10, 0 , 10);
 	TH1D  * WZpythia_allnJetsMet120_ = new TH1D("WZpythia_allnJetsMet120_", "WZpythia_allnJetsMet120", 10, 0 , 10);
@@ -513,6 +515,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 	TH1D  * WZdata_allMet_   = new TH1D("WZdata_allMet_"  , "WZdata_allMet_" , 50, 0. , 350.);
 	TH1D  * WZdata_allHT_    = new TH1D("WZdata_allHT_"   , "WZdata_allHT_"  , 50, 0. , 350.);
 	TH1D  * WZdata_allnJets_ = new TH1D("WZdata_allnJets_", "WZdata_allnJets", 10, 0 , 10);
+	TH1D  * WZdata_bnJetsMet50_ = new TH1D("WZdata_bnJetsMet50_", "WZdata_bnJetsMet50", 10, 0 , 10);
 	TH1D  * WZdata_allnJetsMet50_ = new TH1D("WZdata_allnJetsMet50_", "WZdata_allnJetsMet50", 10, 0 , 10);
 	TH1D  * WZdata_allnJetsMet100_ = new TH1D("WZdata_allnJetsMet100_", "WZdata_allnJetsMet100", 10, 0 , 10);
 	TH1D  * WZdata_allnJetsMet120_ = new TH1D("WZdata_allnJetsMet120_", "WZdata_allnJetsMet120", 10, 0 , 10);
@@ -578,7 +581,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 						WZdata_allMet_   ->Fill(MET);
 						WZdata_allHT_    ->Fill(HT);
 						WZdata_allnJets_ ->Fill(NJ);
-						if (MET >  50. ) WZdata_allnJetsMet50_ ->Fill(NJ);
+						if (MET >  50. ) { WZdata_allnJetsMet50_ ->Fill(NJ); WZdata_bnJetsMet50_ ->Fill(NbJ); }
 						if (MET > 100. ) WZdata_allnJetsMet100_ ->Fill(NJ);
 						if (MET > 120. ) WZdata_allnJetsMet120_ ->Fill(NJ);
 						if (MET > 200. ) WZdata_allnJetsMet200_ ->Fill(NJ);
@@ -597,7 +600,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 						WZdata_allMet_   ->Fill(MET);
 						WZdata_allHT_    ->Fill(HT);
 						WZdata_allnJets_ ->Fill(NJ);
-						if (MET >  50. ) WZdata_allnJetsMet50_ ->Fill(NJ);
+						if (MET >  50. ) { WZdata_allnJetsMet50_ ->Fill(NJ); WZdata_bnJetsMet50_ ->Fill(NbJ); }
 						if (MET > 100. ) WZdata_allnJetsMet100_ ->Fill(NJ);
 						if (MET > 120. ) WZdata_allnJetsMet120_ ->Fill(NJ);
 						if (MET > 200. ) WZdata_allnJetsMet200_ ->Fill(NJ);
@@ -614,7 +617,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 						WZdata_allMet_   ->Fill(MET);
 						WZdata_allHT_    ->Fill(HT);
 						WZdata_allnJets_ ->Fill(NJ);
-						if (MET >  50. ) WZdata_allnJetsMet50_ ->Fill(NJ);
+						if (MET >  50. ) { WZdata_allnJetsMet50_ ->Fill(NJ); WZdata_bnJetsMet50_ ->Fill(NbJ); }
 						if (MET > 100. ) WZdata_allnJetsMet100_ ->Fill(NJ);
 						if (MET > 120. ) WZdata_allnJetsMet120_ ->Fill(NJ);
 						if (MET > 200. ) WZdata_allnJetsMet200_ ->Fill(NJ);
@@ -639,7 +642,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 					WZmadgraph_allMet_   ->Fill(MET, tmp_nt2_rare_mc);
 					WZmadgraph_allHT_    ->Fill(HT, tmp_nt2_rare_mc);
 					WZmadgraph_allnJets_ ->Fill(NJ, tmp_nt2_rare_mc);
-					if (MET >  50. ) WZmadgraph_allnJetsMet50_ ->Fill(NJ, tmp_nt2_rare_mc);
+					if (MET >  50. ) { WZmadgraph_allnJetsMet50_ ->Fill(NJ, tmp_nt2_rare_mc); WZmadgraph_bnJetsMet50_ ->Fill(NbJ, tmp_nt2_rare_mc); }
 					if (MET > 100. ) WZmadgraph_allnJetsMet100_ ->Fill(NJ, tmp_nt2_rare_mc);
 					if (MET > 120. ) WZmadgraph_allnJetsMet120_ ->Fill(NJ, tmp_nt2_rare_mc);
 					if (MET > 200. ) WZmadgraph_allnJetsMet200_ ->Fill(NJ, tmp_nt2_rare_mc);
@@ -648,7 +651,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 					WZpythia_allMet_   ->Fill(MET, tmp_nt2_rare_mc);
 					WZpythia_allHT_    ->Fill(HT, tmp_nt2_rare_mc);
 					WZpythia_allnJets_ ->Fill(NJ, tmp_nt2_rare_mc);
-					if (MET >  50. ) WZpythia_allnJetsMet50_ ->Fill(NJ, tmp_nt2_rare_mc);
+					if (MET >  50. ) { WZpythia_allnJetsMet50_ ->Fill(NJ, tmp_nt2_rare_mc); WZpythia_bnJetsMet50_ ->Fill(NbJ, tmp_nt2_rare_mc); }
 					if (MET > 100. ) WZpythia_allnJetsMet100_ ->Fill(NJ, tmp_nt2_rare_mc);
 					if (MET > 120. ) WZpythia_allnJetsMet120_ ->Fill(NJ, tmp_nt2_rare_mc);
 					if (MET > 200. ) WZpythia_allnJetsMet200_ ->Fill(NJ, tmp_nt2_rare_mc);
@@ -663,6 +666,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 		WZmadgraph_allnJets_ ->Write();
 		WZmadgraph_allMet_   ->Write();
 		WZmadgraph_allHT_    ->Write();
+		WZmadgraph_bnJetsMet50_  ->Write();
 		WZmadgraph_allnJetsMet50_  ->Write();
 		WZmadgraph_allnJetsMet100_ ->Write();
 		WZmadgraph_allnJetsMet120_ ->Write();
@@ -670,6 +674,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 		WZdata_allnJets_ ->Write();
 		WZdata_allMet_   ->Write();
 		WZdata_allHT_    ->Write();
+		WZdata_bnJetsMet50_  ->Write();
 		WZdata_allnJetsMet50_  ->Write();
 		WZdata_allnJetsMet100_ ->Write();
 		WZdata_allnJetsMet120_ ->Write();
@@ -681,6 +686,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 		WZpythia_allnJets_ ->Write();
 		WZpythia_allMet_   ->Write();
 		WZpythia_allHT_    ->Write();
+		WZpythia_bnJetsMet50_  ->Write();
 		WZpythia_allnJetsMet50_  ->Write();
 		WZpythia_allnJetsMet100_ ->Write();
 		WZpythia_allnJetsMet120_ ->Write();
@@ -10723,6 +10729,7 @@ void SSDLPlotter::storeWeightedPred(){
  		   nbjets    >= Region::minNbjets[Baseline] &&
  		   nbjets    <= Region::maxNbjets[Baseline] &&
  		   nbjetsmed >= Region::minNbjmed[Baseline] &&
+			
  		   passespt)
  		  {
  		//MARC if(HT        >  Region::minHT    [TTbarWPresel] &&
