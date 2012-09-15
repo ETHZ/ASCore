@@ -115,8 +115,8 @@ public:
 		HT80MET30b,
 		HT80MET30bpp,
 		HT0MET80, //EWkino
-		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1,	// EWino regions MET > 120
-		HT0MET200,   			        // EWino regions MET > 200
+		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1, HT0MET120NJ2,	// EWino regions MET > 120
+		HT0MET200, HT0MET200NJ2,  			        // EWino regions MET > 200
 		HT0MET120bVlV, HT0MET120NJ1lV,HT0MET200lV,   
 		TTbarWPresel, TTbarWSel, //TTbarV selections
 		// ETHSelect, ETHSel1b, AACSelec, AACSel1b,// OS selections
