@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Jun 15 15:13:39 2012 by ROOT version 5.32/00
+// Mon Sep 17 20:23:44 2012 by ROOT version 5.32/00
 // from TTree Analysis/AnalysisTree
-// found on file: blablabla.root
+// found on file: tautest.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -58,77 +58,86 @@ public :
    Int_t           NVrtx;
    Float_t         PUWeight;
    Int_t           NMus;
-   Int_t           IsSignalMuon[5];   //[NMus]
-   Float_t         MuPt[5];   //[NMus]
-   Float_t         MuEta[5];   //[NMus]
-   Float_t         MuPhi[5];   //[NMus]
-   Int_t           MuCharge[5];   //[NMus]
-   Float_t         MuPFIso[5];   //[NMus]
-   Float_t         MuPFChIso[5];   //[NMus]
-   Float_t         MuPFNeIso[5];   //[NMus]
-   Float_t         MuRadIso[5];   //[NMus]
-   Float_t         MuD0[5];   //[NMus]
-   Float_t         MuDz[5];   //[NMus]
-   Float_t         MuEMVetoEt[5];   //[NMus]
-   Float_t         MuHadVetoEt[5];   //[NMus]
-   Int_t           MuPassesTightID[5];   //[NMus]
-   Float_t         MuPtE[5];   //[NMus]
-   Int_t           MuGenID[5];   //[NMus]
-   Int_t           MuGenMID[5];   //[NMus]
-   Int_t           MuGenGMID[5];   //[NMus]
-   Int_t           MuGenType[5];   //[NMus]
-   Int_t           MuGenMType[5];   //[NMus]
-   Int_t           MuGenGMType[5];   //[NMus]
-   Float_t         MuMT[5];   //[NMus]
+   Int_t           IsSignalMuon[2];   //[NMus]
+   Float_t         MuPt[2];   //[NMus]
+   Float_t         MuEta[2];   //[NMus]
+   Float_t         MuPhi[2];   //[NMus]
+   Int_t           MuCharge[2];   //[NMus]
+   Float_t         MuPFIso[2];   //[NMus]
+   Float_t         MuPFChIso[2];   //[NMus]
+   Float_t         MuPFNeIso[2];   //[NMus]
+   Float_t         MuRadIso[2];   //[NMus]
+   Float_t         MuD0[2];   //[NMus]
+   Float_t         MuDz[2];   //[NMus]
+   Float_t         MuEMVetoEt[2];   //[NMus]
+   Float_t         MuHadVetoEt[2];   //[NMus]
+   Int_t           MuPassesTightID[2];   //[NMus]
+   Float_t         MuPtE[2];   //[NMus]
+   Int_t           MuGenID[2];   //[NMus]
+   Int_t           MuGenMID[2];   //[NMus]
+   Int_t           MuGenGMID[2];   //[NMus]
+   Int_t           MuGenType[2];   //[NMus]
+   Int_t           MuGenMType[2];   //[NMus]
+   Int_t           MuGenGMType[2];   //[NMus]
+   Float_t         MuMT[2];   //[NMus]
    Int_t           NEls;
-   Int_t           IsSignalElectron[5];   //[NEls]
-   Int_t           ElCharge[5];   //[NEls]
-   Int_t           ElChIsCons[5];   //[NEls]
-   Float_t         ElPt[5];   //[NEls]
-   Float_t         ElEta[5];   //[NEls]
-   Float_t         ElPhi[5];   //[NEls]
-   Float_t         ElD0[5];   //[NEls]
-   Float_t         ElD0Err[5];   //[NEls]
-   Float_t         ElDz[5];   //[NEls]
-   Float_t         ElDzErr[5];   //[NEls]
-   Float_t         ElPFIso[5];   //[NEls]
-   Float_t         ElPFChIso[5];   //[NEls]
-   Float_t         ElPFNeIso[5];   //[NEls]
-   Float_t         ElRadIso[5];   //[NEls]
-   Float_t         ElEcalRecHitSumEt[5];   //[NEls]
-   Float_t         ElHcalTowerSumEt[5];   //[NEls]
-   Float_t         ElTkSumPt[5];   //[NEls]
-   Float_t         ElDPhi[5];   //[NEls]
-   Float_t         ElDEta[5];   //[NEls]
-   Float_t         ElSigmaIetaIeta[5];   //[NEls]
-   Float_t         ElHoverE[5];   //[NEls]
-   Float_t         ElEPthing[5];   //[NEls]
-   Int_t           ElIsGoodElId_LooseWP[5];   //[NEls]
-   Int_t           ElIsGoodElId_MediumWP[5];   //[NEls]
-   Int_t           ElIsGoodTriggerEl[5];   //[NEls]
-   Int_t           ElGenID[5];   //[NEls]
-   Int_t           ElGenMID[5];   //[NEls]
-   Int_t           ElGenGMID[5];   //[NEls]
-   Int_t           ElGenType[5];   //[NEls]
-   Int_t           ElGenMType[5];   //[NEls]
-   Int_t           ElGenGMType[5];   //[NEls]
-   Float_t         ElMT[5];   //[NEls]
+   Int_t           IsSignalElectron[3];   //[NEls]
+   Int_t           ElCharge[3];   //[NEls]
+   Int_t           ElChIsCons[3];   //[NEls]
+   Float_t         ElPt[3];   //[NEls]
+   Float_t         ElEta[3];   //[NEls]
+   Float_t         ElPhi[3];   //[NEls]
+   Float_t         ElD0[3];   //[NEls]
+   Float_t         ElD0Err[3];   //[NEls]
+   Float_t         ElDz[3];   //[NEls]
+   Float_t         ElDzErr[3];   //[NEls]
+   Float_t         ElPFIso[3];   //[NEls]
+   Float_t         ElPFChIso[3];   //[NEls]
+   Float_t         ElPFNeIso[3];   //[NEls]
+   Float_t         ElRadIso[3];   //[NEls]
+   Float_t         ElEcalRecHitSumEt[3];   //[NEls]
+   Float_t         ElHcalTowerSumEt[3];   //[NEls]
+   Float_t         ElTkSumPt[3];   //[NEls]
+   Float_t         ElDPhi[3];   //[NEls]
+   Float_t         ElDEta[3];   //[NEls]
+   Float_t         ElSigmaIetaIeta[3];   //[NEls]
+   Float_t         ElHoverE[3];   //[NEls]
+   Float_t         ElEPthing[3];   //[NEls]
+   Int_t           ElIsGoodElId_LooseWP[3];   //[NEls]
+   Int_t           ElIsGoodElId_MediumWP[3];   //[NEls]
+   Int_t           ElIsGoodTriggerEl[3];   //[NEls]
+   Int_t           ElGenID[3];   //[NEls]
+   Int_t           ElGenMID[3];   //[NEls]
+   Int_t           ElGenGMID[3];   //[NEls]
+   Int_t           ElGenType[3];   //[NEls]
+   Int_t           ElGenMType[3];   //[NEls]
+   Int_t           ElGenGMType[3];   //[NEls]
+   Float_t         ElMT[3];   //[NEls]
+   Int_t           NTaus;
+   Int_t           TauCharge[5];   //[NTaus]
+   Float_t         TauPt[5];   //[NTaus]
+   Float_t         TauEta[5];   //[NTaus]
+   Float_t         TauPhi[5];   //[NTaus]
+   Float_t         TauMVAElRej[5];   //[NTaus]
+   Float_t         TauTightMuRej[5];   //[NTaus]
+   Float_t         TauLCombIsoDB[5];   //[NTaus]
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Float_t         pfMETType1;
    Float_t         pfMETType1Phi;
    Int_t           NJets;
-   Float_t         JetPt[20];   //[NJets]
-   Float_t         JetEta[20];   //[NJets]
-   Float_t         JetPhi[20];   //[NJets]
-   Float_t         JetCSVBTag[20];   //[NJets]
-   Float_t         JetProbBTag[20];   //[NJets]
-   Float_t         JetArea[20];   //[NJets]
-   Float_t         JetJECUncert[20];   //[NJets]
-   Int_t           JetPartonID[20];   //[NJets]
-   Float_t         JetGenPt[20];   //[NJets]
-   Float_t         JetGenEta[20];   //[NJets]
-   Float_t         JetGenPhi[20];   //[NJets]
+   Float_t         JetPt[14];   //[NJets]
+   Float_t         JetEta[14];   //[NJets]
+   Float_t         JetPhi[14];   //[NJets]
+   Float_t         JetEnergy[14];   //[NJets]
+   Float_t         JetCSVBTag[14];   //[NJets]
+   Float_t         JetProbBTag[14];   //[NJets]
+   Float_t         JetArea[14];   //[NJets]
+   Float_t         JetJECUncert[14];   //[NJets]
+   Int_t           JetPartonID[14];   //[NJets]
+   Float_t         JetGenPt[14];   //[NJets]
+   Float_t         JetGenEta[14];   //[NJets]
+   Float_t         JetGenPhi[14];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -222,6 +231,14 @@ public :
    TBranch        *b_ElGenMType;   //!
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElMT;   //!
+   TBranch        *b_NTaus;   //!
+   TBranch        *b_TauCharge;   //!
+   TBranch        *b_TauPt;   //!
+   TBranch        *b_TauEta;   //!
+   TBranch        *b_TauPhi;   //!
+   TBranch        *b_TauMVAElRej;   //!
+   TBranch        *b_TauTightMuRej;   //!
+   TBranch        *b_TauLCombIsoDB;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_pfMETPhi;   //!
    TBranch        *b_pfMETType1;   //!
@@ -230,6 +247,7 @@ public :
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
+   TBranch        *b_JetEnergy;   //!
    TBranch        *b_JetCSVBTag;   //!
    TBranch        *b_JetProbBTag;   //!
    TBranch        *b_JetArea;   //!
@@ -258,9 +276,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("blablabla.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("tautest.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("blablabla.root");
+         f = new TFile("tautest.root");
       }
       f->GetObject("Analysis",tree);
 
@@ -400,6 +418,14 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
+   fChain->SetBranchAddress("NTaus", &NTaus, &b_NTaus);
+   fChain->SetBranchAddress("TauCharge", TauCharge, &b_TauCharge);
+   fChain->SetBranchAddress("TauPt", TauPt, &b_TauPt);
+   fChain->SetBranchAddress("TauEta", TauEta, &b_TauEta);
+   fChain->SetBranchAddress("TauPhi", TauPhi, &b_TauPhi);
+   fChain->SetBranchAddress("TauMVAElRej", TauMVAElRej, &b_TauMVAElRej);
+   fChain->SetBranchAddress("TauTightMuRej", TauTightMuRej, &b_TauTightMuRej);
+   fChain->SetBranchAddress("TauLCombIsoDB", TauLCombIsoDB, &b_TauLCombIsoDB);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("pfMETType1", &pfMETType1, &b_pfMETType1);
@@ -408,6 +434,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+   fChain->SetBranchAddress("JetEnergy", JetEnergy, &b_JetEnergy);
    fChain->SetBranchAddress("JetCSVBTag", JetCSVBTag, &b_JetCSVBTag);
    fChain->SetBranchAddress("JetProbBTag", JetProbBTag, &b_JetProbBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
