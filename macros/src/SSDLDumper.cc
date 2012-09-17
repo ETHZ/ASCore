@@ -4999,7 +4999,8 @@ bool SSDLDumper::isBarrelElectron(int ele){
 bool SSDLDumper::isGoodTau(int tau){
 // Good taus according to EWino people
 	if(tau >= NTaus) return false; // Sanity check
-	if(TauPt[tau] < 20) return false;
+	if(TauPt[tau]  < 20) return false;
+	if(TauEta[tau] > 2.3) return false;
 
 	// Reject taus closer than 0.1 in DR to tight muons and tight electrons
 	for(size_t i = 0; i < NMus; ++i){
