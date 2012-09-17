@@ -48,6 +48,7 @@ static const float gMuMaxIso   = 0.10;
 static const float gElMaxIso   = 0.09;
 static const float gMinJetPt   = 40.;
 static const bool  gApplyZVeto = true;
+static const bool  gApplyTauVeto = true;
 static bool  gSmearMET     = false;
 
 static const bool gDoSystStudies = false;
@@ -58,23 +59,23 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
 // Regions ///////////////////////////////////////////////////////////////////////
-TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT80MET30b", "HT80MET30bpp", "HT0MET120",  "HT0MET80", "HT0MET120V", "HT0MET120bV", "HT0MET120NJ1", "HT0MET120NJ2", "HT0MET200", "HT0MET200NJ2", "HT0MET120bVlV", "HT0MET120NJ1lV", "HT0MET200lV", "TTbarWPresel", "TTbarWSel"};
-float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,            80.,          0.,          0.,           0.,            0.,             0.,             0.,          0.,             0.,              0.,               0.,            0.,             0.,        100.};
-float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         20.,          20.,         8000.,          8000.,          8000.,       8000.,          8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
-float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,            30.,        120.,         80.,         120.,          120.,           120.,           120.,        200.,           200.,            120.,             120.,          200.,             0.,          0.}; 
-float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,       8000.,        8000.,         8000.,          8000.,          8000.,       8000.,          8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
-int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             3 ,          3 };
-int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,          2 ,          99 ,           99 ,             1 ,             2 ,         99 ,             2 ,             99 ,               1 ,           99 ,            99 ,         99 };
-int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
-int   SSDLDumper::Region::maxNbjets [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,         99 ,          99 ,            0 ,            99 ,            99 ,         99 ,            99 ,              0 ,              99 ,           99 ,            99 ,         99 };
-int   SSDLDumper::Region::minNbjmed [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
-float SSDLDumper::Region::minMu1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         55.};
-float SSDLDumper::Region::minMu2pt  [SSDLDumper::gNREGIONS] = {      10.,         20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         35.};
-float SSDLDumper::Region::minEl1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         55.};
-float SSDLDumper::Region::minEl2pt  [SSDLDumper::gNREGIONS] = {      10.,         20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         35.};
-int   SSDLDumper::Region::app3rdVet [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             0 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              1 ,               1 ,            1 ,             0 ,          0 };
-int   SSDLDumper::Region::vetoTTZSel[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             0 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
-int   SSDLDumper::Region::chargeVeto[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             1 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          0 };
+TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT80MET30b","HT80MET80b1", "HT80MET30bpp", "HT0MET120",  "HT0MET80", "HT0MET120V", "HT0MET120bV", "HT0MET120NJ1", "HT0MET120NJ2", "HT0MET200", "HT0MET200NJ2", "HT0MET120bVlV", "HT0MET120NJ1lV", "HT0MET200lV", "TTbarWPresel", "TTbarWSel"};
+float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,          80.,            80.,          0.,          0.,           0.,            0.,             0.,             0.,          0.,             0.,              0.,               0.,            0.,             0.,        100.};
+float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,        8000.,          8000.,       8000.,         20.,          20.,         8000.,          8000.,          8000.,       8000.,          8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
+float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,          80.,            30.,        120.,         80.,         120.,          120.,           120.,           120.,        200.,           200.,            120.,             120.,          200.,             0.,          0.}; 
+float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,        8000.,          8000.,       8000.,       8000.,        8000.,         8000.,          8000.,          8000.,       8000.,          8000.,           8000.,            8000.,         8000.,          8000.,       8000.}; 
+int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,           2 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             3 ,          3 };
+int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,          99 ,            99 ,         99 ,          2 ,          99 ,           99 ,             1 ,             2 ,         99 ,             2 ,             99 ,               1 ,           99 ,            99 ,         99 };
+int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,           1 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
+int   SSDLDumper::Region::maxNbjets [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,          99 ,            99 ,         99 ,         99 ,          99 ,            0 ,            99 ,            99 ,         99 ,            99 ,              0 ,              99 ,           99 ,            99 ,         99 };
+int   SSDLDumper::Region::minNbjmed [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,           1 ,             2 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
+float SSDLDumper::Region::minMu1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         55.};
+float SSDLDumper::Region::minMu2pt  [SSDLDumper::gNREGIONS] = {      10.,         20.,          20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         35.};
+float SSDLDumper::Region::minEl1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         55.};
+float SSDLDumper::Region::minEl2pt  [SSDLDumper::gNREGIONS] = {      10.,         20.,          20.,          20.,            20.,         20.,         20.,          20.,           20.,            20.,            20.,         20.,            20.,             20.,              20.,           20.,            20.,         35.};
+int   SSDLDumper::Region::app3rdVet [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,           0 ,             0 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              1 ,               1 ,            1 ,             0 ,          0 };
+int   SSDLDumper::Region::vetoTTZSel[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,           0 ,             0 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          1 };
+int   SSDLDumper::Region::chargeVeto[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,           0 ,             1 ,          0 ,          0 ,           0 ,            0 ,             0 ,             0 ,          0 ,             0 ,              0 ,               0 ,            0 ,             0 ,          0 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.}; // fake ratios
@@ -561,18 +562,18 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
-			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-			// S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(0) ){
-			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(0), MuPt[0]);
-			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(0), fabs(MuEta[0]));
-			// S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
-			// S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
+			// marc S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(0), MuPt[0]);
+			// marc S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(0), fabs(MuEta[0]));
+			S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
+			S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
 
-			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-			// S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			// marc S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
@@ -655,18 +656,18 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
-			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-			// S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			// marc S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(0) ){
-			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(0), ElPt[0]);
-			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(0), fabs(ElEta[0]));
-			// S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
-			// S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
+			// marc S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(0), ElPt[0]);
+			// marc S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(0), fabs(ElEta[0]));
+			S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
+			S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
 
-			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-			// S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			// marc S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
@@ -3471,21 +3472,23 @@ bool SSDLDumper::elmuSignalTrigger(){
 bool SSDLDumper::singleMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return ( (HLT_MU8 > 0 || HLT_MU17 > 0 ) );
+	return ( HLT_MU17 > 0  );
+	// marc return ( (HLT_MU8 > 0 || HLT_MU17 > 0 ) );
 }
 float SSDLDumper::singleMuPrescale(){
 	// Pretend MC samples have prescale 1.
 	if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	if(HLT_MU8_PS > 0) return HLT_MU8_PS;
+	// marc if(HLT_MU8_PS > 0) return HLT_MU8_PS;
 	if(HLT_MU17_PS > 0) return HLT_MU17_PS;
 	return 1;
 }
 bool SSDLDumper::singleElTrigger(){
   // Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
+	return (HLT_ELE17_JET30_TIGHT > 0);
+	// marc return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
@@ -3493,9 +3496,9 @@ float SSDLDumper::singleElPrescale(){
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
 	if( HLT_ELE17_JET30_TIGHT_PS > 0 ) return HLT_ELE17_JET30_TIGHT_PS;
-	if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_TIGHT_PS;
-	if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE17_TIGHT_PS;
-	if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_TIGHT_PS;
+	// marc if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_TIGHT_PS;
+	// marc if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE17_TIGHT_PS;
+	// marc if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_TIGHT_PS;
 	return 1.;
 }
 
@@ -4269,6 +4272,15 @@ bool SSDLDumper::passes3rdLepVeto(){
 		if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
 		if(isGoodEleFor3rdLepVeto(i)) return false;
 	}
+	if (gApplyTauVeto && !passesTauVeto()) return false;
+
+	return true;
+}
+bool SSDLDumper::passesTauVeto(){
+	// Checks if there is a good tau in the event
+	for(size_t i = 0; i < NTaus; ++i){
+		if(isGoodTau(i)) return false;
+	}
 	return true;
 }
 bool SSDLDumper::passesTTZSel(){
@@ -4980,6 +4992,28 @@ bool SSDLDumper::isBarrelElectron(int ele){
 	// true if in barrel, false if in endcap
 	if(fabs(ElEta[ele]) < 1.479 ) return true;
 	return false;
+}
+//////////////////////////////////////////////////////////////////////////////
+// Taus
+//____________________________________________________________________________
+bool SSDLDumper::isGoodTau(int tau){
+// Good taus according to EWino people
+	if(tau >= NTaus) return false; // Sanity check
+	if(TauPt[tau] < 20) return false;
+
+	// Reject taus closer than 0.1 in DR to tight muons and tight electrons
+	for(size_t i = 0; i < NMus; ++i){
+		if(!isGoodMuonFor3rdLepVeto(i)) continue;
+		if(Util::GetDeltaR(MuEta[i], TauEta[tau], MuPhi[i], TauPhi[tau]) > 0.1 ) continue;
+		return false;
+	}
+	for(size_t i = 0; i < NEls; ++i){
+		if(!isGoodEleFor3rdLepVeto(i)) continue;
+		if(Util::GetDeltaR(ElEta[i], TauEta[tau], ElPhi[i], TauPhi[tau]) > 0.1 ) continue;
+		return false;
+	}
+	
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

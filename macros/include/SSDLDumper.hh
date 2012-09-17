@@ -112,7 +112,7 @@ public:
 		region_begin,
 		Baseline = region_begin,
 		HT80MET30,
-		HT80MET30b,
+		HT80MET30b, HT80MET80b1,
 		HT80MET30bpp,
 		HT0MET80, //EWkino
 		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1, HT0MET120NJ2,	// EWino regions MET > 120
@@ -621,6 +621,7 @@ public:
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
 	virtual bool passes3rdLepVeto();
+	virtual bool passesTauVeto();
 	virtual bool passesTTZSel();
 
 	virtual bool isSigSupMuEvent();
@@ -670,6 +671,8 @@ public:
 	virtual bool isChargeMatchedElectron(int);
 
 	virtual bool isBarrelElectron(int);
+
+	virtual bool isGoodTau(int);
 
 	virtual bool isGoodJet(int, float = 20.);
 	virtual float getJERScale(int);

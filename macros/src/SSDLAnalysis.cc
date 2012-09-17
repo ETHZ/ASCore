@@ -11,7 +11,8 @@ const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 
-TString SSDLAnalysis::gBaseDir = "/shome/folguera/CMSSW_5_3_2_patch4/src/DiLeptonAnalysis/NTupleProducer/macros/";
+
+TString SSDLAnalysis::gBaseDir = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/";
 // TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
@@ -287,6 +288,16 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElGenGMType",            &fTElGenGMType,         "ElGenGMType[NEls]/I");
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
+	// single-tau properties
+	fAnalysisTree->Branch("NTaus",                   &fTnqtaus,               "NTaus/I");
+	fAnalysisTree->Branch("TauCharge",               &fTTaucharge,            "TauCh[NTaus]/I");
+	fAnalysisTree->Branch("TauPt",                   &fTTaupt,                "TauPt[NTaus]/F");
+	fAnalysisTree->Branch("TauEta",                  &fTTaueta,               "TauEta[NTaus]/F");
+	fAnalysisTree->Branch("TauPhi",                  &fTTauphi,               "TauPhi[NTaus]/F");
+	fAnalysisTree->Branch("TauMVAElRej",             &fTTauMVAElRej,          "TauMVAElRej[NTaus]/F");
+	fAnalysisTree->Branch("TauTightMuRej",           &fTTauTightMuRej,        "TauTightMuRej[NTaus]/F");
+	fAnalysisTree->Branch("TauLCombIsoDB",           &fTTauLCombIsoDB,        "TauLCombIsoDB[NTaus]/F");
+
 	// jet-MET properties
 	fAnalysisTree->Branch("pfMET",         &fTpfMET,       "pfMET/F");
 	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi,    "pfMETPhi/F");
@@ -391,9 +402,11 @@ void SSDLAnalysis::FillAnalysisTree(){
 	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsMostBasicMu);
 	vector<int> looseMuInd     = MuonSelection(           &UserAnalysisBase::IsLooseMu);
 	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsLooseEl);
+	vector<int> selectedTauInd = TauSelection(            &UserAnalysisBase::IsLooseTau);
 	vector<int> selectedJetInd = PFJetSelection(15., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
 	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
+	fTnqtaus = std::min( (int)selectedTauInd.size(), fMaxNtaus);
 	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets);
 	int nLooseMus = std::min( (int)looseMuInd .size(), fMaxNmus );
 
@@ -577,6 +590,18 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTElIsGoodTriggerEl    [ind] = IsGoodTriggerEl    (elindex);
 	}
 
+	// Dump tau properties
+	for(int ind = 0; ind < fTnqtaus; ind++){
+		int tauindex = selectedTauInd[ind];
+		fTTaucharge     [ind] = fTR->TauCharge                      [tauindex];
+		fTTaupt         [ind] = fTR->TauPt                          [tauindex];
+		fTTaueta        [ind] = fTR->TauEta                         [tauindex];
+		fTTauphi        [ind] = fTR->TauPhi                         [tauindex];
+		fTTauMVAElRej   [ind] = fTR->TauElectronMVARejection        [tauindex];
+		fTTauTightMuRej [ind] = fTR->TauTightMuonRejection          [tauindex];
+		fTTauLCombIsoDB [ind] = fTR->TauLooseCombinedIsoDBSumPtCorr [tauindex];
+	}
+
 	fAnalysisTree->Fill();
 }
 void SSDLAnalysis::FillEffTree(){
@@ -716,6 +741,18 @@ void SSDLAnalysis::ResetTree(){
 		fTElGenType         [i] = -999;
 		fTElGenMType        [i] = -999;
 		fTElGenGMType       [i] = -999;
+	}
+
+	// tau properties
+	fTnqtaus = 0;
+	for(int i = 0; i < fMaxNtaus; i++){
+		fTTaucharge[i]     = -999;
+		fTTaupt[i]         = -999.99;
+		fTTaueta[i]        = -999.99;
+		fTTauphi[i]        = -999.99;
+		fTTauMVAElRej[i]   = -999.99;
+		fTTauTightMuRej[i] = -999.99;
+		fTTauLCombIsoDB[i] = -999.99;
 	}
 
 	// jet-MET properties

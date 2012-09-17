@@ -77,6 +77,7 @@ private:
 	static const int fMaxNjets = 40;
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;
+	static const int fMaxNtaus = 5;
 	
 	static TString gBaseDir;
 	
@@ -214,7 +215,17 @@ private:
 	int   fTElGenType        [fMaxNeles];
 	int   fTElGenMType       [fMaxNeles];
 	int   fTElGenGMType      [fMaxNeles];
-	
+
+	// Tau properties
+	int fTnqtaus;
+	int   fTTaucharge      [fMaxNtaus];
+	float fTTaupt          [fMaxNtaus];
+	float fTTaueta         [fMaxNtaus];
+	float fTTauphi         [fMaxNtaus];
+	float fTTauMVAElRej    [fMaxNtaus];
+	float fTTauTightMuRej  [fMaxNtaus];
+	float fTTauLCombIsoDB  [fMaxNtaus];
+
 	TTree *fLepEffTree; // lepton efficiency tree, filled once per lepton
 	int   fLETrun;
 	int   fLETevent;

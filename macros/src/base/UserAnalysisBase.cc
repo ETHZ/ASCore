@@ -507,6 +507,18 @@ float UserAnalysisBase::relElIso(int index){
     return fTR->ElRelIso03[index]; // EndCap
 }
 
+bool UserAnalysisBase::IsLooseTau(int index){
+    if(fTR->TauPt[index] < 10.)        return false;
+    if(fabs(fTR->TauEta[index]) > 2.5) return false;
+
+    // some tau ID variables
+    if( fTR->TauDecayModeFinding[index]     < 0.5 ) return false;
+    // applied in dumper if( fTR->TauElectronMVARejection[index] < 0.5 ) return false;
+    // applied in dumper if( fTR->TauTightMuonRejection[index]   < 0.5 ) return false;
+    // applied in dumper if( fTR->TauLooseCombinedIsoDBSumPtCorr[index] < 0.5 ) return false;
+    return true;
+}
+
 bool UserAnalysisBase::IsLooseEl(int index){
     if(!IsGoodBasicEl(index))         return false;
     if(fTR->ElPt[index] < 10.)        return false;
@@ -766,6 +778,23 @@ vector<int> UserAnalysisBase::ElectronSelection(bool(UserAnalysisBase::*eleSelec
 
         selectedObjInd.push_back(ind);
         selectedObjPt.push_back(fTR->ElPt[ind]);
+    }
+    return Util::VSort(selectedObjInd, selectedObjPt);
+}
+
+vector<int> UserAnalysisBase::TauSelection(bool(UserAnalysisBase::*tauSelector)(int)){
+    // Returns the vector of indices of
+    // taus sorted by Pt
+    if(tauSelector == NULL) tauSelector = &UserAnalysisBase::IsLooseTau;
+    vector<int>    selectedObjInd;
+    vector<double> selectedObjPt;
+    // form the vector of indices
+    for(int ind = 0; ind < fTR->TauNObjs; ++ind){
+        // selection
+        if((*this.*tauSelector)(ind) == false) continue;
+
+        selectedObjInd.push_back(ind);
+        selectedObjPt.push_back(fTR->TauPt[ind]);
     }
     return Util::VSort(selectedObjInd, selectedObjPt);
 }
