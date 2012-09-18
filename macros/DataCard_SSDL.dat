@@ -10,17 +10,17 @@ DoubleMu1		mdunser/SSDLTrees/2012/Sep17/DoubleMu-Run2012A-13Jul2012-v1-AOD.root	
 #DoubleMu1a		mdunser/SSDLTrees/2012/Sep17/DoubleMu-Run2012A-recover-06Aug2012-v1.root		0	0
 DoubleMu2		mdunser/SSDLTrees/2012/Sep17/DoubleMu-Run2012B-13Jul2012-v4-AOD/				0	0
 DoubleMu3		mdunser/SSDLTrees/2012/Sep17/DoubleMu-Run2012C-PromptReco-v2-AOD_newV/			0	0
-DoubleMu4		mdunser/SSDLTrees/2012/Sep17//DoubleElectron-Run2012C-PromptReco-v2-AOD-2.root	0	0
+DoubleMu4		mdunser/SSDLTrees/2012/Sep18/DoubleMu-Run2012C-PromptReco-v2-AOD-2.root			0	0
 DoubleEle1		mdunser/SSDLTrees/2012/Sep17/DoubleElectron-Run2012A-13Jul2012-v1-AOD.root		0	1
 #DoubleEle1a	mdunser/SSDLTrees/2012/Sep17/DoubleElectron-Run2012A-recover-06Aug2012-v1.root	0	1
 DoubleEle2		mdunser/SSDLTrees/2012/Sep17/DoubleElectron-Run2012B-13Jul2012-v1-AOD/			0	1
 DoubleEle3		mdunser/SSDLTrees/2012/Sep17/DoubleElectron-Run2012C-PromptReco-v2-AOD_newV/	0	1
-DoubleEle4		mdunser/SSDLTrees/2012/Sep17//DoubleElectron-Run2012C-PromptReco-v2-AOD-2.root	0	1
+DoubleEle4		mdunser/SSDLTrees/2012/Sep18/DoubleElectron-Run2012C-PromptReco-v2-AOD-2.root	0	1
 MuEG1			mdunser/SSDLTrees/2012/Sep17/MuEG-Run2012A-13Jul2012-v1-AOD-2.root				0	2
 #MuEG1a			mdunser/SSDLTrees/2012/Sep17/MuEG-Run2012A-recover-06Aug2012-v1.root			0	2
 MuEG2			mdunser/SSDLTrees/2012/Sep17/MuEG-Run2012B-13Jul2012-v1-AOD/					0	2
 MuEG3			mdunser/SSDLTrees/2012/Sep17/MuEG-Run2012C-PromptReco-v2-AOD_newV/				0	2
-MuEG4			mdunser/SSDLTrees/2012/Sep17//MuEG-Run2012C-PromptReco-v2-AOD-2.root			0	2
+MuEG4			mdunser/SSDLTrees/2012/Sep18/MuEG-Run2012C-PromptReco-v2-AOD-2.root				0	2
 ## ####################################################################################################################
 # Top and EWK
 TTJets			mdunser/SSDLTrees/2012/Sep17/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1/	1	-1	225.197
