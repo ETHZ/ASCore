@@ -179,7 +179,7 @@ def merge_and_clean():
 				if os.path.isfile(output_location+ls+'/'+dir+'_SignalEvents.txt'):
 					dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
 					isdata=True
-		dir_hadd = 'hadd -f '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root'
+		dir_hadd = 'hadd -f '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root > /dev/null'
 		dir_cat+=' >& '+output_location+dir+'_SignalEvents.txt '
 		os.system(dir_hadd)
 		if isdata:
