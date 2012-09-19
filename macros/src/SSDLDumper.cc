@@ -5003,6 +5003,9 @@ bool SSDLDumper::isGoodTau(int tau){
 	if(tau >= NTaus) return false; // Sanity check
 	if(TauPt[tau]  < 20) return false;
 	if(fabs(TauEta[tau]) > 2.3) return false;
+	if( TauMVARej[index] < 0.5 ) return false;
+	if( TauTightMuRej[index]   < 0.5 ) return false;
+	if( TauLCombIsoDB[index] < 0.5 ) return false;
 
 	// Reject taus closer than 0.1 in DR to tight muons and tight electrons
 	for(size_t i = 0; i < NMus; ++i){
