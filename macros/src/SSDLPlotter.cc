@@ -8337,10 +8337,10 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_em_tot->GetYaxis()->SetTitle(ytitle);
 
-		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
-		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
-		nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum());
-		nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum());
+		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum()+0.001);
+		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum()+0.001);
+		nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum()+0.001);
+		nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum()+0.001);
 
 		double max = nt11->Integral();
 		nt11    ->SetMaximum(max>1?max+1:1.);
@@ -10702,7 +10702,7 @@ void SSDLPlotter::storeWeightedPred(){
 			if(Region::chargeVeto[r] != 0       && (charge == Region::chargeVeto[r]) ) continue;
 			   
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
-
+			
 			S->numbers[r][chan].npp += puweight * npp;
 			S->numbers[r][chan].npf += puweight * npf;
 			S->numbers[r][chan].nfp += puweight * nfp;
@@ -10714,83 +10714,82 @@ void SSDLPlotter::storeWeightedPred(){
 		float maxpt = TMath::Max(pT1, pT2);
 		float minpt = TMath::Min(pT1, pT2);
 		
-		if(MET > 30. && maxpt > 20. && minpt > 10.){
-			fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
-			fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
-			fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
-			fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
+ 		if(MET > 30. && maxpt > 20. && minpt > 20.){
+		  if(HT        >  Region::minHT    [HT0MET80NJ2] &&  
+		     HT        <  Region::maxHT    [HT0MET80NJ2] &&
+		     njets     >= Region::minNjets [HT0MET80NJ2] &&
+		     njets     <= Region::maxNjets [HT0MET80NJ2] && 
+		     nbjets    >= Region::minNbjets[HT0MET80NJ2] &&
+		     nbjets    <= Region::maxNbjets[HT0MET80NJ2] &&
+		     nbjetsmed >= Region::minNbjmed[HT0MET80NJ2] &&
+		     nbjetsmed <= Region::maxNbjmed[HT0MET80NJ2]){
+		       
+		       fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
+		       fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
+		       fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
+		       fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
+		     }
 		}
-
 		// Check pt cuts of TTbarWSel:
- 		bool passespt = passesPtCuts(pT1, pT2, Baseline, chan);
+ 		bool passespt = passesPtCuts(pT1, pT2, HT0MET80NJ2, chan);
  		// MARC bool passespt = passesPtCuts(pT1, pT2, TTbarWSel, chan);
   	
- 		if(HT        >  Region::minHT    [Baseline] &&
- 		   HT        <  Region::maxHT    [Baseline] &&
- 		   MET       >  Region::minMet   [Baseline] &&
- 		   MET       <  Region::maxMet   [Baseline] &&
- 		   nbjets    >= Region::minNbjets[Baseline] &&
- 		   nbjets    <= Region::maxNbjets[Baseline] &&
- 		   nbjetsmed >= Region::minNbjmed[Baseline] &&
-		   
- 		   passespt)
- 		  {
- 		//MARC if(HT        >  Region::minHT    [TTbarWPresel] &&
- 		//MARC    HT        <  Region::maxHT    [TTbarWPresel] &&
- 		//MARC    MET       >  Region::minMet   [TTbarWPresel] &&
- 		//MARC    MET       <  Region::maxMet   [TTbarWPresel] &&
- 		//MARC    nbjets    >= Region::minNbjets[TTbarWPresel] &&
- 		//MARC    nbjetsmed >= Region::minNbjmed[TTbarWPresel] &&
- 		//MARC    passespt)
- 		//MARC   {
+ 		if(HT        >  Region::minHT    [HT0MET80NJ2] &&  
+		   HT        <  Region::maxHT    [HT0MET80NJ2] &&
+ 		   MET       >  Region::minMet   [HT0MET80NJ2] &&
+ 		   MET       <  Region::maxMet   [HT0MET80NJ2] &&
+		   njets     >= Region::minNjets [HT0MET80NJ2] &&
+		   njets     <= Region::maxNjets [HT0MET80NJ2] && 
+ 		   nbjets    >= Region::minNbjets[HT0MET80NJ2] &&
+ 		   nbjets    <= Region::maxNbjets[HT0MET80NJ2] &&
+ 		   nbjetsmed >= Region::minNbjmed[HT0MET80NJ2] &&
+		   nbjetsmed <= Region::maxNbjmed[HT0MET80NJ2] &&
+ 		   passespt) 		  {
  			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
  			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
  			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
  			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);			
 
- 			if(njets >= Region::minNjets [Baseline] && njets <= Region::maxNjets[Baseline]){
- 			// MARC if(njets >= Region::minNjets [TTbarWPresel]){
- 				fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[0], HT, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[1], MET, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[1], MET, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[1], MET, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[1], MET, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[3], MT2, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[3], MT2, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[3], MT2, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[3], MT2, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[4], pT1, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[4], pT1, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[4], pT1, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[4], pT1, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[5], pT2, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[5], pT2, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[5], pT2, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[5], pT2, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[6], nbjets+0.5, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[6], nbjets+0.5, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[8], nbjets+0.5, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[8], nbjets+0.5, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[8], nbjets+0.5, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[8], nbjets+0.5, puweight * nff);
-
- 				fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed, puweight * npp);
- 				fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed, puweight * npf);
- 				fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed, puweight * nfp);
- 				fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed, puweight * nff);
- 			}
- 		}
+			fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[0], HT, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[1], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[1], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[1], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[1], MET, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[3], MT2, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[3], MT2, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[3], MT2, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[3], MT2, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[4], pT1, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[4], pT1, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[4], pT1, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[4], pT1, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[5], pT2, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[5], pT2, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[5], pT2, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[5], pT2, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[6], nbjets+0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[6], nbjets+0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[8], nbjetsmed+0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[8], nbjetsmed+0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[8], nbjetsmed+0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[8], nbjetsmed+0.5, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed+0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed+0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed+0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed+0.5, puweight * nff);
+		}
 
 		if( fDO_OPT && flav<3 && flag == 0){
 			float lumi_pb = 5000.;
