@@ -86,7 +86,7 @@ private:
   bool fdoGenInfo;
   bool fmakeSmall;
 
-  std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, metTriggerPaths;
+  std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths;
 
   TRandom* rand_;
 
