@@ -10597,45 +10597,44 @@ void SSDLPlotter::storeWeightedPred(){
 	string *sname = 0;
 	int flag;
 	int   stype, flav, cat, njets, nbjets, nbjetsmed;
+	int   passZVeto, pass3rdVeto;
 	float puweight, slumi, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
 	int event, run;
 	signed int charge;
-
-	sigtree->SetBranchAddress("SystFlag", &flag);
-	sigtree->SetBranchAddress("Event",    &event);
-	sigtree->SetBranchAddress("Run",      &run);
-	sigtree->SetBranchAddress("SName",    &sname);
-	sigtree->SetBranchAddress("SType",    &stype);
-	sigtree->SetBranchAddress("SLumi",    &slumi);
-	sigtree->SetBranchAddress("PUWeight", &puweight);
-	sigtree->SetBranchAddress("Flavor",   &flav);
-	sigtree->SetBranchAddress("pT1",      &pT1);
-	sigtree->SetBranchAddress("pT2",      &pT2);
-	sigtree->SetBranchAddress("eta1",     &eta1);
-	sigtree->SetBranchAddress("eta2",     &eta2);
-	sigtree->SetBranchAddress("TLCat",    &cat);
-	sigtree->SetBranchAddress("HT",       &HT);
-	sigtree->SetBranchAddress("MET",      &MET);
-	sigtree->SetBranchAddress("MT2",      &MT2);
-	sigtree->SetBranchAddress("NJ",       &njets);
-	sigtree->SetBranchAddress("NbJ",      &nbjets);
-	sigtree->SetBranchAddress("NbJmed",   &nbjetsmed);
-	sigtree->SetBranchAddress("Charge",   &charge);
 	
+	sigtree->SetBranchAddress("SystFlag",    &flag);
+	sigtree->SetBranchAddress("Event",       &event);
+	sigtree->SetBranchAddress("Run",         &run);
+	sigtree->SetBranchAddress("SName",       &sname);
+	sigtree->SetBranchAddress("SType",       &stype);
+	sigtree->SetBranchAddress("SLumi",       &slumi);
+	sigtree->SetBranchAddress("PUWeight",    &puweight);
+	sigtree->SetBranchAddress("Flavor",      &flav);
+	sigtree->SetBranchAddress("pT1",         &pT1);
+	sigtree->SetBranchAddress("pT2",         &pT2);
+	sigtree->SetBranchAddress("eta1",        &eta1);
+	sigtree->SetBranchAddress("eta2",        &eta2);
+	sigtree->SetBranchAddress("TLCat",       &cat);
+	sigtree->SetBranchAddress("HT",          &HT);
+	sigtree->SetBranchAddress("MET",         &MET);
+	sigtree->SetBranchAddress("MT2",         &MT2);
+	sigtree->SetBranchAddress("NJ",          &njets);
+	sigtree->SetBranchAddress("NbJ",         &nbjets);
+	sigtree->SetBranchAddress("NbJmed",      &nbjetsmed);
+	sigtree->SetBranchAddress("Charge",      &charge);
+	sigtree->SetBranchAddress("Pass3rdVeto", &pass3rdVeto);
 	FakeRatios *FR = new FakeRatios();
 
 	float npp(0.), npf(0.), nfp(0.), nff(0.);
 	float f1(0.), f2(0.), p1(0.), p2(0.);
 	
-
 	TFile* file_opt;
 	TTree* tree_opt;
       float eventWeight;
 
 	if( fDO_OPT ) {
-   
-		system( "mkdir -p OPT_ttW" );
+   		system( "mkdir -p OPT_ttW" );
 		std::string outputdir_str(fOutputDir);
 		outputdir_str.erase(outputdir_str.end()-1); //get rid of last slash
 		TString file_opt_name = "OPT_ttW/opt_ttW_" + outputdir_str + ".root";
@@ -10652,7 +10651,6 @@ void SSDLPlotter::storeWeightedPred(){
 		tree_opt->Branch( "pT2",         &pT2,         "pT2/F" );
 		tree_opt->Branch( "HT",          &HT,          "HT/F" );
 		tree_opt->Branch( "MET",         &MET,         "MET/F" );
-
 	}
 
 	
@@ -10695,13 +10693,14 @@ void SSDLPlotter::storeWeightedPred(){
 // 			if(r == TTbarWSelLD && flag != 7) continue;
 			
 			// Event Selection:
-			if(HT     < Region::minHT    [r] || HT  > Region::maxHT [r]) continue;
-			if(MET    < Region::minMet   [r] || MET > Region::maxMet[r]) continue;
-			if(njets  < Region::minNjets [r] || njets  > Region::maxNjets [r]) continue;
-			if(nbjets < Region::minNbjets[r] || nbjets > Region::maxNbjets[r]) continue;
-			if(nbjetsmed < Region::minNbjmed[r]) continue;
-			if(Region::chargeVeto[r] != 0 && (charge == Region::chargeVeto[r]) ) continue;
-
+			if(HT        < Region::minHT    [r] || HT        > Region::maxHT [r])      continue;
+			if(MET       < Region::minMet   [r] || MET       > Region::maxMet[r])      continue;
+			if(njets     < Region::minNjets [r] || njets     > Region::maxNjets [r])   continue;
+			if(nbjets    < Region::minNbjets[r] || nbjets    > Region::maxNbjets[r])   continue;
+			if(nbjetsmed < Region::minNbjmed[r] || nbjetsmed > Region::maxNbjmed[r])   continue;
+			if(Region::app3rdVet[r]  != 0       && pass3rdVeto == 1)                   continue;
+			if(Region::chargeVeto[r] != 0       && (charge == Region::chargeVeto[r]) ) continue;
+			   
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
 
 			S->numbers[r][chan].npp += puweight * npp;
@@ -10733,7 +10732,7 @@ void SSDLPlotter::storeWeightedPred(){
  		   nbjets    >= Region::minNbjets[Baseline] &&
  		   nbjets    <= Region::maxNbjets[Baseline] &&
  		   nbjetsmed >= Region::minNbjmed[Baseline] &&
-			
+		   
  		   passespt)
  		  {
  		//MARC if(HT        >  Region::minHT    [TTbarWPresel] &&
