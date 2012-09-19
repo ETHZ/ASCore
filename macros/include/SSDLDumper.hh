@@ -114,8 +114,8 @@ public:
 		HT80MET30,
 		HT80MET30b, HT80MET80b1,
 		HT80MET30bpp,
-		HT0MET80, //EWkino
-		HT0MET120, HT0MET120V, HT0MET120bV, HT0MET120NJ1, HT0MET120NJ2,	// EWino regions MET > 120
+		HT0MET120,HT0MET80NJ2,HT0MET80NJ2bV,
+		HT0MET120V, HT0MET120bV, HT0MET120NJ1, HT0MET120NJ2,	// EWino regions MET > 120
 		HT0MET200, HT0MET200NJ2,  			        // EWino regions MET > 200
 		HT0MET120bVlV, HT0MET120NJ1lV,HT0MET200lV,   
 		TTbarWPresel, TTbarWSel, //TTbarV selections
@@ -247,6 +247,7 @@ public:
 		static int   minNbjets [gNREGIONS];
 		static int   maxNbjets [gNREGIONS];
 		static int   minNbjmed [gNREGIONS];
+		static int   maxNbjmed [gNREGIONS];
 		static int   app3rdVet [gNREGIONS];
 		static int   vetoTTZSel[gNREGIONS];
 		static int   chargeVeto[gNREGIONS];
@@ -703,6 +704,7 @@ public:
 	int   fC_minNbjets;
 	int   fC_maxNbjets;
 	int   fC_minNbjmed;
+	int   fC_maxNbjmed;
 	float fC_minMu1pt;
 	float fC_minMu2pt;
 	float fC_minEl1pt;
