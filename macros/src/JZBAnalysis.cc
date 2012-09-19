@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.55 $";
+string sjzbversion="$Revision: 1.70.2.56 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,7 +27,7 @@ bool DoExperimentalFSRRecovery = false;
 bool DoFSRStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.55 2012/09/04 14:01:50 fronga Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.56 2012/09/10 10:52:47 pablom Exp $
 */
 
 
@@ -1244,12 +1244,6 @@ void JZBAnalysis::Analyze() {
       
       nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
       nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
-      for(int i=0;i<fTR->nGenParticles;i++) {
-	if(i>40) continue;
-//	if(fTR->genInfoStatus[i]!=1) continue;
-//	cout << "Particle " << i << " : " << fTR->genInfoId[i] << "    from mother " << fTR->genInfoMo1[i] << endl;
-      }
-      
       
      // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
 	float chimass=0;
