@@ -27,6 +27,8 @@
 #include "TGeoPara.h"
 #include "TGeoTube.h"
 
+const int global_size_pfcandarrays = 30;
+
 typedef struct {
   float photon;
   float charged;
@@ -34,11 +36,17 @@ typedef struct {
   int nphotoncand;
   int nchargedcand;
   int nneutralcand;
+  std::vector<float> photoncandenergies;
+  std::vector<float> chargedcandenergies;
+  std::vector<float> neutralcandenergies;
+  std::vector<float> photoncandets;
+  std::vector<float> chargedcandets;
+  std::vector<float> neutralcandets;
 } isolations_struct;
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL, Float_t _minthrpfphotoncandEE=0);
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL, Float_t _minthrpfphotoncandEB=0, Float_t _minthrpfphotoncandEE=0);
   virtual ~DiPhotonMiniTree();
 
   void Begin();
@@ -48,6 +56,7 @@ public:
 private:
 
   float global_linkbyrechit_enlargement;
+  float global_minthrpfphotoncandEB;
   float global_minthrpfphotoncandEE;
 
   TGeoPara eegeom;
@@ -75,7 +84,7 @@ private:
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
   TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
-  float PFIsolation(int phoqi, float rotation_phi, TString component, int *counter = NULL, std::vector<int> removals = std::vector<int>());
+  float PFIsolation(int phoqi, float rotation_phi, TString component, int *counter = NULL, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL, std::vector<int> removals = std::vector<int>());
   float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi, TString mod="");
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
@@ -100,7 +109,7 @@ private:
 
   std::vector<int> MuonSelection(TreeReader *fTR, std::vector<int> passing);
   bool DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &passing);
-  float PFPhotonIsolationAroundMuon(int muqi, int *counter);
+  float PFPhotonIsolationAroundMuon(int muqi, int *counter, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL);
   void FillMuonInfo(int index);
 
   TRandom3 *randomgen;
@@ -242,6 +251,20 @@ private:
   Int_t photrail_Npfcandphotonincone;
   Int_t photrail_Npfcandchargedincone;
   Int_t photrail_Npfcandneutralincone;
+
+  Float_t pholead_photonpfcandenergies[global_size_pfcandarrays];
+  Float_t pholead_chargedpfcandenergies[global_size_pfcandarrays];
+  Float_t pholead_neutralpfcandenergies[global_size_pfcandarrays];
+  Float_t photrail_photonpfcandenergies[global_size_pfcandarrays];
+  Float_t photrail_chargedpfcandenergies[global_size_pfcandarrays];
+  Float_t photrail_neutralpfcandenergies[global_size_pfcandarrays];
+
+  Float_t pholead_photonpfcandets[global_size_pfcandarrays];
+  Float_t pholead_chargedpfcandets[global_size_pfcandarrays];
+  Float_t pholead_neutralpfcandets[global_size_pfcandarrays];
+  Float_t photrail_photonpfcandets[global_size_pfcandarrays];
+  Float_t photrail_chargedpfcandets[global_size_pfcandarrays];
+  Float_t photrail_neutralpfcandets[global_size_pfcandarrays];
 
   TH1F *fHNumPU;
   TH1F *fHNumPU_noweight;

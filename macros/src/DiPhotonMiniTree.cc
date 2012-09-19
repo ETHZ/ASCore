@@ -10,7 +10,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t aw, Float_t* _kfac, Float_t _minthrpfphotoncandEE) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac), global_minthrpfphotoncandEE(_minthrpfphotoncandEE){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t aw, Float_t* _kfac, Float_t _minthrpfphotoncandEB, Float_t _minthrpfphotoncandEE) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac), global_minthrpfphotoncandEB(_minthrpfphotoncandEB), global_minthrpfphotoncandEE(_minthrpfphotoncandEE){
   Util::SetStyle();	
   if (fDataType_ == "mc") isdata=false;
   else if (fDataType_ == "data") isdata=true; 
@@ -237,6 +237,18 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("photrail_Npfcandchargedincone",&photrail_Npfcandchargedincone,"photrail_Npfcandchargedincone/I");
   OutputTree[i]->Branch("photrail_Npfcandneutralincone",&photrail_Npfcandneutralincone,"photrail_Npfcandneutralincone/I");
 
+  OutputTree[i]->Branch("pholead_photonpfcandenergies",&pholead_photonpfcandenergies,"pholead_photonpfcandenergies[pholead_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("pholead_chargedpfcandenergies",&pholead_chargedpfcandenergies,"pholead_chargedpfcandenergies[pholead_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("pholead_neutralpfcandenergies",&pholead_neutralpfcandenergies,"pholead_neutralpfcandenergies[pholead_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("pholead_photonpfcandets",&pholead_photonpfcandets,"pholead_photonpfcandets[pholead_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("pholead_chargedpfcandets",&pholead_chargedpfcandets,"pholead_chargedpfcandets[pholead_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("pholead_neutralpfcandets",&pholead_neutralpfcandets,"pholead_neutralpfcandets[pholead_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcandenergies",&photrail_photonpfcandenergies,"photrail_photonpfcandenergies[pholead_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcandenergies",&photrail_chargedpfcandenergies,"photrail_chargedpfcandenergies[pholead_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcandenergies",&photrail_neutralpfcandenergies,"photrail_neutralpfcandenergies[pholead_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcandets",&photrail_photonpfcandets,"photrail_photonpfcandets[pholead_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcandets",&photrail_chargedpfcandets,"photrail_chargedpfcandets[pholead_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcandets",&photrail_neutralpfcandets,"photrail_neutralpfcandets[pholead_Npfcandneutralincone]/F");
 
   }
 
@@ -255,7 +267,7 @@ void DiPhotonMiniTree::Begin(){
 
 void DiPhotonMiniTree::Analyze(){
 
-  //    cout << "Analyze this event" << endl;
+  //     cout << "Analyze this event" << endl;
 
 
 
@@ -448,6 +460,12 @@ void DiPhotonMiniTree::Analyze(){
 	pholead_Npfcandphotonincone = rcone_isos.nphotoncand;
 	pholead_Npfcandchargedincone = rcone_isos.nchargedcand;
 	pholead_Npfcandneutralincone = rcone_isos.nneutralcand;
+	for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandenergies[i] = rcone_isos.photoncandenergies.at(i);
+	for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandenergies[i] = rcone_isos.chargedcandenergies.at(i);
+	for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandenergies[i] = rcone_isos.neutralcandenergies.at(i);
+	for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandets[i] = rcone_isos.photoncandets.at(i);
+	for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandets[i] = rcone_isos.chargedcandets.at(i);
+	for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandets[i] = rcone_isos.neutralcandets.at(i);
 	if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
       }
 
@@ -863,7 +881,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
   
   if (scindex<0) {
     std::cout << "Error in GetPFCandOverlappingSC" << std::endl;
-
+    std::cout << scindex << " " << phoqi << std::endl;
     return std::vector<int>();
   }
 
@@ -1004,9 +1022,9 @@ isolations_struct DiPhotonMiniTree::RandomConeIsolation(TreeReader *fTR, int pho
   };
 
 
-  out.photon = PFIsolation(phoqi,rotation_phi,"photon",&(out.nphotoncand));
-  out.charged = PFIsolation(phoqi,rotation_phi,"charged",&(out.nchargedcand));
-  out.neutral = PFIsolation(phoqi,rotation_phi,"neutral",&(out.nneutralcand));
+  out.photon = PFIsolation(phoqi,rotation_phi,"photon",&(out.nphotoncand),&(out.photoncandenergies),&(out.photoncandets));
+  out.charged = PFIsolation(phoqi,rotation_phi,"charged",&(out.nchargedcand),&(out.chargedcandenergies),&(out.chargedcandets));
+  out.neutral = PFIsolation(phoqi,rotation_phi,"neutral",&(out.nneutralcand),&(out.neutralcandenergies),&(out.neutralcandets));
   return out;
 
 };
@@ -1014,24 +1032,21 @@ isolations_struct DiPhotonMiniTree::RandomConeIsolation(TreeReader *fTR, int pho
 isolations_struct DiPhotonMiniTree::PFConeIsolation(TreeReader *fTR, int phoqi){
   isolations_struct out;
   out.nphotoncand=0; out.nchargedcand=0; out.nneutralcand=0;
-  out.photon = PFIsolation(phoqi,0,"photon",&(out.nphotoncand));
-  out.charged = PFIsolation(phoqi,0,"charged",&(out.nchargedcand));
-  out.neutral = PFIsolation(phoqi,0,"neutral",&(out.nneutralcand));
+  out.photon = PFIsolation(phoqi,0,"photon",&(out.nphotoncand),&(out.photoncandenergies),&(out.photoncandets));
+  out.charged = PFIsolation(phoqi,0,"charged",&(out.nchargedcand),&(out.chargedcandenergies),&(out.chargedcandets));
+  out.neutral = PFIsolation(phoqi,0,"neutral",&(out.nneutralcand),&(out.neutralcandenergies),&(out.neutralcandets));
   return out;
 };
 
-float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString component, int *counter, std::vector<int> removals){
+float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString component, int *counter, std::vector<float> *energies, std::vector<float> *ets, std::vector<int> removals){
 
-  int temp;
-  if (counter==NULL) counter=&temp;
-  
-  if (component=="combined") return PFIsolation(phoqi,rotation_phi,"photon",counter,removals) \
-			       + PFIsolation(phoqi,rotation_phi,"charged",counter,removals) \
-			       + PFIsolation(phoqi,rotation_phi,"neutral",counter,removals);
+  if (component=="combined") return PFIsolation(phoqi,rotation_phi,"photon",counter,energies,ets,removals) \
+    + PFIsolation(phoqi,rotation_phi,"charged",counter,energies,ets,removals) \
+    + PFIsolation(phoqi,rotation_phi,"neutral",counter,energies,ets,removals);
 
   if (component!="neutral" && component!="charged" && component!="photon") {std::cout << "wrong" << std::endl; return -999;} 
 
-  float minimal_pfphotoncand_threshold_EB = 0;
+  float minimal_pfphotoncand_threshold_EB = (component=="photon") ? global_minthrpfphotoncandEB : 0.0;
   float minimal_pfphotoncand_threshold_EE = (component=="photon") ? global_minthrpfphotoncandEE : 0.0;
 
   // footprint removal only for photons, charged use Poter's veto cones, nothing for neutrals
@@ -1072,6 +1087,7 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
     if (removed) continue;
 
     double pt = fTR->PfCandPt[i];
+    double energy = fTR->PfCandEnergy[i];
 
     if (type==2){
       double dR = GetPFCandDeltaRFromSC(fTR,phoqi,i,rotation_phi);
@@ -1136,7 +1152,6 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
       continue;
     }
 
-
     // pfcandidate threshold
     if (type==2){ 
       if (fTR->PhoisEB[phoqi]){
@@ -1151,7 +1166,9 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
       }
     }
 
-    (*counter)++;
+    if (counter) (*counter)++;
+    if (energies) energies->push_back(energy);
+    if (ets) ets->push_back(pt);
     result+=pt;
 
   } // end pf cand loop
@@ -1160,12 +1177,9 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
 };
 
-float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter){
+float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter, std::vector<float> *energies, std::vector<float> *ets){
   
-  int temp;
-  if (counter==NULL) counter=&temp;
-  
-  float minimal_pfphotoncand_threshold_EB = 0;
+  float minimal_pfphotoncand_threshold_EB = global_minthrpfphotoncandEB;
   float minimal_pfphotoncand_threshold_EE = global_minthrpfphotoncandEE;
 
   float result=0;
@@ -1179,6 +1193,7 @@ float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter){
     if (type!=2) continue;
     
     double pt = fTR->PfCandPt[i];
+    double energy = fTR->PfCandEnergy[i];
     double dEta = fabs(fTR->PfCandEta[i] - mu.Eta());
     double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],mu.Phi());
     double dR = sqrt(dEta*dEta+dPhi*dPhi);
@@ -1195,7 +1210,9 @@ float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter){
       if (pt<minimal_pfphotoncand_threshold_EE) continue;
     }
     
-    (*counter)++;
+    if (counter) (*counter)++;
+    if (energies) energies->push_back(energy);
+    if (ets) ets->push_back(pt);
     result+=pt;
     
   } // end pf cand loop
@@ -1294,6 +1311,12 @@ void DiPhotonMiniTree::FillLead(int index){
   pholead_Npfcandphotonincone = isos.nphotoncand;
   pholead_Npfcandchargedincone = isos.nchargedcand;
   pholead_Npfcandneutralincone = isos.nneutralcand;
+  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandenergies[i] = isos.photoncandenergies.at(i);
+  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandenergies[i] = isos.chargedcandenergies.at(i);
+  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandenergies[i] = isos.neutralcandenergies.at(i);
+  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandets[i] = isos.photoncandets.at(i);
+  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandets[i] = isos.chargedcandets.at(i);
+  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandets[i] = isos.neutralcandets.at(i);
   //  std::cout << "debug PFCombinedIso " << PFIsolation(index) << " " << pholead_pho_Cone04PFCombinedIso*pholead_pt << std::endl;
   pholead_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
   if (fTR->PhoMCmatchindex[index]>=0) pholead_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
@@ -1385,6 +1408,12 @@ void DiPhotonMiniTree::FillTrail(int index){
   photrail_Npfcandphotonincone = isos.nphotoncand;
   photrail_Npfcandchargedincone = isos.nchargedcand;
   photrail_Npfcandneutralincone = isos.nneutralcand;
+  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcandenergies[i] = isos.photoncandenergies.at(i);
+  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcandenergies[i] = isos.chargedcandenergies.at(i);
+  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcandenergies[i] = isos.neutralcandenergies.at(i);
+  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcandets[i] = isos.photoncandets.at(i);
+  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcandets[i] = isos.chargedcandets.at(i);
+  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcandets[i] = isos.neutralcandets.at(i);
   photrail_PhoPassConvSafeElectronVeto=fTR->PhoPassConvSafeElectronVeto[index];
   if (fTR->PhoMCmatchindex[index]>=0) photrail_GenPhotonIsoDR04=fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[index]];
   photrail_PhoIso03Ecal=fTR->PhoIso03Ecal[index];
@@ -1439,7 +1468,6 @@ void DiPhotonMiniTree::FillMuonInfo(int index){
   pholead_SCeta = fTR->MuEta[index];
   pholead_SCphi = fTR->MuPhi[index];
   pholead_pho_Cone03PFCombinedIso = fTR->MuRelIso03[index];
-  pholead_Npfcandphotonincone = 0;
   pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = PFPhotonIsolationAroundMuon(index,&pholead_Npfcandphotonincone);
 
 };
@@ -1597,6 +1625,18 @@ void DiPhotonMiniTree::ResetVars(){
   photrail_Npfcandphotonincone = -999;
   photrail_Npfcandchargedincone = -999;
   photrail_Npfcandneutralincone = -999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_photonpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_chargedpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_neutralpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_photonpfcandets[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_chargedpfcandets[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) pholead_neutralpfcandets[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_photonpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_chargedpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_neutralpfcandenergies[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_photonpfcandets[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_chargedpfcandets[i]=-999;
+  for (int i=0; i<global_size_pfcandarrays; i++) photrail_neutralpfcandets[i]=-999;
 };
 
 float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
