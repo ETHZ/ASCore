@@ -7723,7 +7723,9 @@ void SSDLPlotter::makeDiffPrediction(){
 	musamples = fMuData;
 	elsamples = fEGData;
 	emusamples = fMuEGData;
-
+	
+	bool plotRatios = true;
+	
 	///////////////////////////////////////////////////////////////////////////////////
 	// RATIOS /////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -8123,6 +8125,76 @@ void SSDLPlotter::makeDiffPrediction(){
 // 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
 // 		nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[j], fLumiNorm / fSamples[LM4]->getLumi());
 
+		/////////////////
+		// RATIO ////////
+		/////////////////
+		TH1D *rat    = new TH1D(Form("RAT_%s",varname.Data()), varname, nbins, bins);    rat->Sumw2();
+		TH1D *rat_mm = new TH1D(Form("RAT_MM_%s",varname.Data()), varname, nbins, bins); rat_mm->Sumw2();
+		TH1D *rat_ee = new TH1D(Form("RAT_EE_%s",varname.Data()), varname, nbins, bins); rat_ee->Sumw2();
+		TH1D *rat_em = new TH1D(Form("RAT_EM_%s",varname.Data()), varname, nbins, bins); rat_em->Sumw2();
+		
+		// Ratio plot:
+		float border = 0.3;
+		float scale = (1-border)/border;
+		
+		rat->SetFillStyle(1001);
+		rat->SetLineWidth(1);
+		rat->SetLineWidth(1);
+		rat->SetFillColor(  kGray+1);
+		rat->SetLineColor(  kGray+1);
+		rat->SetMarkerColor(kGray+1);
+		rat_mm->SetFillStyle(1001);
+		rat_mm->SetLineWidth(1);
+		rat_mm->SetLineWidth(1);
+		rat_mm->SetFillColor(  kGray+1);
+		rat_mm->SetLineColor(  kGray+1);
+		rat_mm->SetMarkerColor(kGray+1);
+		rat_em->SetFillStyle(1001);
+		rat_em->SetLineWidth(1);
+		rat_em->SetLineWidth(1);
+		rat_em->SetFillColor(  kGray+1);
+		rat_em->SetLineColor(  kGray+1);
+		rat_em->SetMarkerColor(kGray+1);
+		rat_ee->SetFillStyle(1001);
+		rat_ee->SetLineWidth(1);
+		rat_ee->SetLineWidth(1);
+		rat_ee->SetFillColor(  kGray+1);
+		rat_ee->SetLineColor(  kGray+1);
+		rat_ee->SetMarkerColor(kGray+1);
+		
+		
+		rat->SetXTitle(DiffPredYields::axis_label[j]);
+		rat->SetYTitle("");
+		rat->GetXaxis()->SetTitleSize(scale * 0.04);
+		rat->GetXaxis()->SetLabelSize(scale * nt11->GetXaxis()->GetLabelSize());
+		rat->GetYaxis()->SetLabelSize(scale * nt11->GetYaxis()->GetLabelSize());
+		rat->GetXaxis()->SetTickLength(scale * nt11->GetXaxis()->GetTickLength());
+		rat->GetYaxis()->SetTickLength(nt11->GetYaxis()->GetTickLength());
+
+		rat_mm->SetXTitle(DiffPredYields::axis_label[j]);
+		rat_mm->SetYTitle("");
+		rat_mm->GetXaxis()->SetTitleSize(scale * 0.04);
+		rat_mm->GetXaxis()->SetLabelSize(scale * nt11_mm->GetXaxis()->GetLabelSize());
+		rat_mm->GetYaxis()->SetLabelSize(scale * nt11_mm->GetYaxis()->GetLabelSize());
+		rat_mm->GetXaxis()->SetTickLength(scale * nt11_mm->GetXaxis()->GetTickLength());
+		rat_mm->GetYaxis()->SetTickLength(nt11_mm->GetYaxis()->GetTickLength());
+
+		rat_em->SetXTitle(DiffPredYields::axis_label[j]);
+		rat_em->SetYTitle("");
+		rat_em->GetXaxis()->SetTitleSize(scale * 0.04);
+		rat_em->GetXaxis()->SetLabelSize(scale * nt11_em->GetXaxis()->GetLabelSize());
+		rat_em->GetYaxis()->SetLabelSize(scale * nt11_em->GetYaxis()->GetLabelSize());
+		rat_em->GetXaxis()->SetTickLength(scale * nt11_em->GetXaxis()->GetTickLength());
+		rat_em->GetYaxis()->SetTickLength(nt11_em->GetYaxis()->GetTickLength());
+
+		rat_ee->SetXTitle(DiffPredYields::axis_label[j]);
+		rat_ee->SetYTitle("");
+		rat_ee->GetXaxis()->SetTitleSize(scale * 0.04);
+		rat_ee->GetXaxis()->SetLabelSize(scale * nt11_ee->GetXaxis()->GetLabelSize());
+		rat_ee->GetYaxis()->SetLabelSize(scale * nt11_ee->GetYaxis()->GetLabelSize());
+		rat_ee->GetXaxis()->SetTickLength(scale * nt11_ee->GetXaxis()->GetTickLength());
+		rat_ee->GetYaxis()->SetTickLength(nt11_ee->GetYaxis()->GetTickLength());
+
 		///////////////////////////////////////////////////////////////////////////////////
 		// OUTPUT /////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
@@ -8315,25 +8387,59 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_em_tot->Add(nt11_em_ss);
 		nt11_em_tot->Add(nt11_em_wz);
 		nt11_em_tot->Add(nt11_em_cm);
+		
+		TH1D *h_nt11    = (TH1D*) nt11_sf->Clone("h_nt11");       h_nt11   ->Sumw2();
+		TH1D *h_nt11_mm = (TH1D*) nt11_mm_sf->Clone("h_nt11_mm"); h_nt11_mm->Sumw2();
+		TH1D *h_nt11_em = (TH1D*) nt11_em_sf->Clone("h_nt11_em"); h_nt11_em->Sumw2();
+		TH1D *h_nt11_ee = (TH1D*) nt11_ee_sf->Clone("h_nt11_ee"); h_nt11_ee->Sumw2();
+		
+		h_nt11->Add(nt11_df);
+		h_nt11->Add(nt11_ss);
+		h_nt11->Add(nt11_wz);
+		h_nt11->Add(nt11_cm);
 
+		h_nt11_mm->Add(nt11_mm_df);
+		h_nt11_mm->Add(nt11_mm_ss);
+		h_nt11_mm->Add(nt11_mm_wz);
+		
+		h_nt11_ee->Add(nt11_ee_df);
+		h_nt11_ee->Add(nt11_ee_ss);
+		h_nt11_ee->Add(nt11_ee_wz);
+		h_nt11_ee->Add(nt11_ee_cm);
+
+		h_nt11_em->Add(nt11_em_df);
+		h_nt11_em->Add(nt11_em_ss);
+		h_nt11_em->Add(nt11_em_wz);
+		h_nt11_em->Add(nt11_em_cm);
+				
 		// Signal
 		// nt11_tot->Add(nt11_sig);
 		// nt11_mm_tot->Add(nt11_mm_sig);
 		// nt11_ee_tot->Add(nt11_ee_sig);
 		// nt11_em_tot->Add(nt11_em_sig);
 		
+		// RATIOS
+		rat   ->Divide(nt11   ,h_nt11   );
+		rat_mm->Divide(nt11_mm,h_nt11_mm);
+		rat_em->Divide(nt11_em,h_nt11_em);
+		rat_ee->Divide(nt11_ee,h_nt11_ee);
+
 		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
 		if(j==4 || j==8 || j==10) ytitle = "Events";
 		nt11_tot->Draw("goff");
+		if (plotRatios) for(size_t i = 1; i <= nt11->GetNbinsX(); ++i)     nt11_tot->GetXaxis()->SetBinLabel(i, "");
 		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_mm_tot->Draw("goff");
+		if (plotRatios) for(size_t i = 1; i <= nt11_mm->GetNbinsX(); ++i)  nt11_mm_tot->GetXaxis()->SetBinLabel(i, "");
 		nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_ee_tot->Draw("goff");
+		if (plotRatios) for(size_t i = 1; i <= nt11_ee->GetNbinsX(); ++i)  nt11_ee_tot->GetXaxis()->SetBinLabel(i, "");
 		nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_em_tot->Draw("goff");
+		if (plotRatios) for(size_t i = 1; i <= nt11_em->GetNbinsX(); ++i)  nt11_em_tot->GetXaxis()->SetBinLabel(i, "");
 		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_em_tot->GetYaxis()->SetTitle(ytitle);
 
@@ -8392,8 +8498,29 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
 		
-		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
 		c_temp->cd();
+		
+		TPad *p_plot  = new TPad("plotpad",  "Pad containing the plot", 0.00, border, 1.00, 1.00, 0, 0);
+		p_plot->SetBottomMargin(0.015);
+		if (plotRatios)	  p_plot->Draw();
+		TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio", 0.00, 0.00, 1.00, border, 0, 0);
+		p_ratio->SetTopMargin(0.025);
+		p_ratio->SetBottomMargin(0.35);
+		TLine *l3 = new TLine(nt11->GetXaxis()->GetXmin(), 1.00, nt11->GetXaxis()->GetXmax(), 1.00);
+		if (plotRatios)	{
+		  p_ratio->Draw();
+		  p_ratio->cd();
+		  rat->SetMaximum(1.8);
+		  rat->SetMinimum(0.2);
+		  rat->DrawCopy("E2");
+		  l3->SetLineWidth(2);
+		  l3->SetLineStyle(7);
+		  l3->Draw();
+		  gPad->RedrawAxis();
+		  p_ratio->Draw();
+		  p_plot->cd();
+		}
 		gPad->SetLogy();
 		
 		nt11_tot->Draw("hist");
@@ -8432,8 +8559,24 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_mm->SetTextFont(42);
 		leg_mm->SetBorderSize(0);
 		
-		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
 		c_temp->cd();
+		
+		if (plotRatios){
+		  p_plot->Draw();
+		  p_ratio->Draw();
+		  p_ratio->cd();
+		  rat_mm->SetMaximum(1.8);
+		  rat_mm->SetMinimum(0.2);
+		  rat_mm->DrawCopy("E2");
+		  l3 = new TLine(nt11_mm->GetXaxis()->GetXmin(), 1.00, nt11_mm->GetXaxis()->GetXmax(), 1.00);
+		  l3->SetLineWidth(2);
+		  l3->SetLineStyle(7);
+		  l3->Draw();
+		  gPad->RedrawAxis();
+		  p_ratio->Draw();
+		  p_plot->cd();
+		}
 		gPad->SetLogy();
 		
 		nt11_mm_tot->Draw("hist");
@@ -8472,8 +8615,24 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_ee->SetTextFont(42);
 		leg_ee->SetBorderSize(0);
 		
-		c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
 		c_temp->cd();
+
+		if (plotRatios){
+		  p_plot->Draw();
+		  p_ratio->Draw();
+		  p_ratio->cd();
+		  rat_ee->SetMaximum(1.8);
+		  rat_ee->SetMinimum(0.2);
+		  rat_ee->DrawCopy("E2");
+		  l3 = new TLine(nt11_ee->GetXaxis()->GetXmin(), 1.00, nt11_ee->GetXaxis()->GetXmax(), 1.00);
+		  l3->SetLineWidth(2);
+		  l3->SetLineStyle(7);
+		  l3->Draw();
+		  gPad->RedrawAxis();
+		  p_ratio->Draw();
+		  p_plot->cd();
+		}
 		gPad->SetLogy();
 		
 		nt11_ee_tot->Draw("hist");
@@ -8512,10 +8671,25 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_em->SetTextFont(42);
 		leg_em->SetBorderSize(0);
 		
-		c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 800);
 		c_temp->cd();
+		if (plotRatios) {
+		  p_plot->Draw();
+		  p_ratio->Draw();
+		  p_ratio->cd();
+		  rat_em->SetMaximum(1.8);
+		  rat_em->SetMinimum(0.2);
+		  rat_em->DrawCopy("E2");
+		  l3 = new TLine(nt11_em->GetXaxis()->GetXmin(), 1.00, nt11_em->GetXaxis()->GetXmax(), 1.00);
+		  l3->SetLineWidth(2);
+		  l3->SetLineStyle(7);
+		  l3->Draw();
+		  gPad->RedrawAxis();
+		  p_ratio->Draw();
+		  p_plot->cd();
+		}
 		gPad->SetLogy();
-		
+		  
 		nt11_em_tot->Draw("hist");
 		totbg_em->DrawCopy("0 E2 same");
 		nt11_em->DrawCopy("PE X0 same");
@@ -8539,7 +8713,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		// Cleanup
-		delete c_temp, leg, leg_mm, leg_em, leg_ee;
+		delete p_plot, p_ratio, c_temp, leg, leg_mm, leg_em, leg_ee;
 		delete nt11, nt11_mm, nt11_ee, nt11_em;
 		//		delete nt11_sig, nt11_mm_sig, nt11_ee_sig, nt11_em_sig;
 		delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
