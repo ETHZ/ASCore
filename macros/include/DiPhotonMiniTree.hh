@@ -42,7 +42,19 @@ typedef struct {
   std::vector<float> photoncandets;
   std::vector<float> chargedcandets;
   std::vector<float> neutralcandets;
+  std::vector<float> photoncanddetas;
+  std::vector<float> chargedcanddetas;
+  std::vector<float> neutralcanddetas;
+  std::vector<float> photoncanddphis;
+  std::vector<float> chargedcanddphis;
+  std::vector<float> neutralcanddphis;
 } isolations_struct;
+
+typedef struct {
+  float dR;
+  float dEta;
+  float dPhi;
+} angular_distances_struct;
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
@@ -84,8 +96,8 @@ private:
   std::vector<int> GetPFCandWithFootprintRemoval(TreeReader *fTR, int phoqi, float rotation_phi, bool outoffootprint, TString component);
   TVector3 PropagatePFCandToEcal(int pfcandindex, float position, bool isbarrel);
   bool FindImpingingTrack(TreeReader *fTR, int phoqi, int &reference_index_found, bool dofootprintremoval = false, std::vector<int> removals = std::vector<int>());
-  float PFIsolation(int phoqi, float rotation_phi, TString component, int *counter = NULL, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL, std::vector<int> removals = std::vector<int>());
-  float GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
+  float PFIsolation(int phoqi, float rotation_phi, TString component, int *counter = NULL, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL,  std::vector<float> *detas = NULL, std::vector<float> *dphis = NULL, std::vector<int> removals = std::vector<int>());
+  angular_distances_struct GetPFCandDeltaRFromSC(TreeReader *fTR, int phoqi, int pfindex, float rotation_phi = 0);
   bool FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_phi, int phoqi, TString mod="");
   std::vector<int> GetPFCandIDedRemovals(TreeReader *fTR, int phoqi);
 
@@ -109,7 +121,7 @@ private:
 
   std::vector<int> MuonSelection(TreeReader *fTR, std::vector<int> passing);
   bool DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &passing);
-  float PFPhotonIsolationAroundMuon(int muqi, int *counter, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL);
+  float PFPhotonIsolationAroundMuon(int muqi, int *counter, std::vector<float> *energies = NULL, std::vector<float> *ets = NULL,  std::vector<float> *detas = NULL, std::vector<float> *dphis = NULL);
   void FillMuonInfo(int index);
 
   TRandom3 *randomgen;
@@ -265,6 +277,20 @@ private:
   Float_t photrail_photonpfcandets[global_size_pfcandarrays];
   Float_t photrail_chargedpfcandets[global_size_pfcandarrays];
   Float_t photrail_neutralpfcandets[global_size_pfcandarrays];
+
+  Float_t pholead_photonpfcanddetas[global_size_pfcandarrays];
+  Float_t pholead_chargedpfcanddetas[global_size_pfcandarrays];
+  Float_t pholead_neutralpfcanddetas[global_size_pfcandarrays];
+  Float_t photrail_photonpfcanddetas[global_size_pfcandarrays];
+  Float_t photrail_chargedpfcanddetas[global_size_pfcandarrays];
+  Float_t photrail_neutralpfcanddetas[global_size_pfcandarrays];
+
+  Float_t pholead_photonpfcanddphis[global_size_pfcandarrays];
+  Float_t pholead_chargedpfcanddphis[global_size_pfcandarrays];
+  Float_t pholead_neutralpfcanddphis[global_size_pfcandarrays];
+  Float_t photrail_photonpfcanddphis[global_size_pfcandarrays];
+  Float_t photrail_chargedpfcanddphis[global_size_pfcandarrays];
+  Float_t photrail_neutralpfcanddphis[global_size_pfcandarrays];
 
   TH1F *fHNumPU;
   TH1F *fHNumPU_noweight;
