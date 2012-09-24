@@ -1145,7 +1145,7 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
       }
 
       dEta = fTR->PfCandEta[i] - sceta;
-      dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],scphi);
+      dPhi = DeltaPhiSigned(fTR->PfCandPhi[i],scphi);
       dR = sqrt(dEta*dEta+dPhi*dPhi);
       
       if (dR>0.4) continue;
@@ -1221,8 +1221,8 @@ float DiPhotonMiniTree::PFPhotonIsolationAroundMuon(int muqi, int *counter, std:
     
     double pt = fTR->PfCandPt[i];
     double energy = fTR->PfCandEnergy[i];
-    double dEta = fabs(fTR->PfCandEta[i] - mu.Eta());
-    double dPhi = Util::DeltaPhi(fTR->PfCandPhi[i],mu.Phi());
+    double dEta = fTR->PfCandEta[i] - mu.Eta();
+    double dPhi = DeltaPhiSigned(fTR->PfCandPhi[i],mu.Phi());
     double dR = sqrt(dEta*dEta+dPhi*dPhi);
   
     if (dR>0.4) continue;
@@ -1284,8 +1284,8 @@ angular_distances_struct DiPhotonMiniTree::GetPFCandDeltaRFromSC(TreeReader *fTR
 
   angular_distances_struct out;
   out.dR = Util::GetDeltaR(sc_position.Eta(),ecalpfhit.Eta(),sc_position.Phi(),ecalpfhit.Phi());
-  out.dEta = fabs(sc_position.Eta()-ecalpfhit.Eta());
-  out.dPhi = Util::DeltaPhi(sc_position.Phi(),ecalpfhit.Phi());
+  out.dEta = sc_position.Eta()-ecalpfhit.Eta();
+  out.dPhi = DeltaPhiSigned(sc_position.Phi(),ecalpfhit.Phi());
 
   return out;
 
@@ -1990,4 +1990,13 @@ std::vector<int> DiPhotonMiniTree::NChargedHadronsInConeSelection(TreeReader *fT
 
 void DiPhotonMiniTree::Fillhist_PFPhotonDepositAroundImpingingTrack(int phoqi, int trkindex){
   return;
+};
+
+float DiPhotonMiniTree::DeltaPhiSigned(float phi1, float phi2){
+  //copy-paste from reco::deltaPhi
+  double result = phi1 - phi2;
+  const float pi = TMath::Pi();
+  while (result > pi) result -= 2*pi;
+  while (result <= -pi) result += 2*pi;
+  return result;
 };
