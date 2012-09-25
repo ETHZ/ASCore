@@ -82,7 +82,6 @@ void SSDLPlotter::init(TString filename){
 	Util::SetStyle();
 	gStyle->SetOptStat(0);
 	
-
 	readDatacard(filename);
 
 	readVarNames("varnames.dat");
@@ -326,7 +325,10 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-	// return;
+	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200);
+	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
+	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2);
+	return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
@@ -349,7 +351,7 @@ void SSDLPlotter::doAnalysis(){
 	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
 	// makeMETvsHTPlotPRL();
-	// makeMETvsHTPlot0HT();
+	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
     // makeRatioPlots(Muon);
@@ -3638,7 +3640,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
     system(cmd);
 	
 	const float htmax = 1500.;
-	const float metmax = 350.;
+	const float metmax = 550.;
 	const float metmin = 50.;
 	
 	Color_t col_mm = kBlack;
@@ -3842,7 +3844,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	// leg2->Draw();
 	regleg->Draw();
 
-	drawTopLine();
+	drawTopLine(0.53, 0.8);
 	// TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
 	// pave->SetFillColor(0);
 	// pave->SetFillStyle(1001);
@@ -12441,156 +12443,119 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	eff_->Write();
 
 }
-void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2, bool pass3rdVeto){
+void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 
-	float myMinMet = minMET;
-	float myLep1Pt = pt1;
-	float myLep2Pt = pt2;
+	bool verbose = false;
+	if (verbose) fOUTSTREAM.open( "SMSoutput_"+Region::sname[reg]+".txt" );
 
-	fC_minMu1pt = myLep1Pt;
-	fC_minMu2pt = myLep2Pt;
-	fC_minEl1pt = myLep1Pt;
-	fC_minEl2pt = myLep2Pt;
-	fC_minMet   = myMinMet;
-	fC_minHT    = minHT;
-	fC_maxHT    = maxHT;
-	fC_maxMet   = maxMET;
-	fC_minNjets = 0;
-	
-	TString htString;
-	TString htTitleString;
-
-	if (fC_maxHT < 40.) {
-		htString = "HT0JV";
-		htTitleString = "N_{Jets} = 0";
-	}
-	else if (fC_minHT == 0. && fC_maxHT == 7000.) {
-		htString = "HT0";
-		htTitleString = "H_{T} > 0 GeV";
-	}
-	else {
-		htString = Form("HT%3.0f", fC_maxHT);
-		htTitleString = Form("H_{T} > %3.0f GeV", fC_maxHT);
-	}
-
+	// put the x-values that are in the scan here. those are percentage numbers. i.e. if x == 0.05 put 5
 	int nx(3);
-	TString bar[nx];
-	bar[0] = "p25";
-	bar[1] = "p50";
-	bar[2] = "p75";
+	float xvals[nx];
+	xvals[0] = 0.05;
+	xvals[1] = 0.50;
+	xvals[2] = 0.95;
 
 	TH2D * TChi_yield_      [nx];
 	TH2D * TChiRight_yield_ [nx];
 
-	bool verbose = false;
-	if (verbose) fOUTSTREAM.open(Form("SMSoutput_"+htString+"_MET%3.0f.txt", fC_minMet), ios::trunc);
 	for (int i = 0; i<nx; i++) {
-		TChi_yield_              [i] = new TH2D("TChi_yield"+bar[i]      , "TChi_yield"+bar[i]      , 101, -5, 1005    , 101 , -5 , 1005);
-		TChiRight_yield_         [i] = new TH2D("TChiRight_yield"+bar[i] , "TChiRight_yield"+bar[i] , 101, -5, 1005    , 101 , -5 , 1005);
-
+		TChi_yield_              [i] = new TH2D(Form("TChi_yield%.0f", 100*xvals[i])      , Form("TChi_yield%.0f", 100*xvals[i])      , 101, -5, 1005    , 101 , -5 , 1005);
+		TChiRight_yield_         [i] = new TH2D(Form("TChiRight_yield%.0f", 100* xvals[i]), Form("TChiRight_yield%.0f", 100*xvals[i]) , 101, -5, 1005    , 101 , -5 , 1005);
 	}
 
 	TH2D  * TChi_nPass_[nx] [5];
 	TH2D  * TChiRight_nPass_[nx] [5];
-	int nSyst(5);
-	TString foo[nSyst];
-	foo[0] = "norm";
-	foo[1] = "metdown";
-	foo[2] = "metup";
-	foo[3] = "lepdown";
-	foo[4] = "lepup";
+	int nSyst(7);
+	TString systs[nSyst];
+	systs[0] = "norm";
+	systs[1] = "metsmear";
+	systs[2] = "lepup";
+	systs[3] = "lepdown";
+	systs[4] = "JESup";
+	systs[5] = "JESdown";
+	systs[6] = "JER";
 	for (int i = 0; i<nx; i++) {
 		for (int j = 0; j<nSyst; j++) {
-		TChi_nPass_ [i][j]      = new TH2D("TChi_nPass_x"+bar[i]+"_"+foo[j]      , "TChi_nPass_x"+bar[i]+"_"+foo[i]      , 101 , -5 , 1005 , 101 , -5 , 1005);
-		TChiRight_nPass_ [i][j] = new TH2D("TChiRight_nPass_x"+bar[i]+"_"+foo[j] , "TChiRight_nPass_x"+bar[i]+"_"+foo[i] , 101 , -5 , 1005 , 101 , -5 , 1005);
+			TChi_nPass_ [i][j]      = new TH2D(Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]), Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
+			TChiRight_nPass_ [i][j] = new TH2D(Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]), Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
 		}
 	}
 
 	// get the histo with the x-secs
-	TFile * xsecFile_ = new TFile("msugraSSDL/C1N2_referencexSec.root", "READ", "xsecFile_");
-	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("C1N2");
+	TFile * xsecFile_ = new TFile("msugraSSDL/C1N2_8TeV_xsecs.root", "READ", "xsecFile_");
+	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
 
 	// get the histo with the count for each point
 	TFile * file_ = new TFile(filestring, "READ", "file_");
 	TH2D  * TChi_nTot_ [nSyst];
 	TH2D  * TChiRight_nTot_[nSyst];
 	for (int i = 0; i<nx; i++) {
-		TChi_nTot_[i]      = (TH2D  *) file_->Get("TChiStauStauCount"+bar[i]);
-		TChiRight_nTot_[i] = (TH2D  *) file_->Get("RightHandedSlepCount"+bar[i]);
+		TChi_nTot_[i]      = (TH2D  *) file_->Get(Form("ModelCount%.0f", 100*xvals[i]));
+		TChiRight_nTot_[i] = (TH2D  *) file_->Get(Form("RightHandedSlepCount%.0f", 100*xvals[i]));
 	}
+	// get the Analysis tree from the file, initialize it
 	TTree * tree_ = (TTree *) file_->Get("Analysis");
 	tree_->ResetBranchAddresses();
-
 	Init(tree_);
-	double tot_events = tree_->GetEntriesFast();
+
+	// just for counting, really
+	Long64_t tot_events = tree_->GetEntriesFast();
 	cout << "Total Number of entries: " << tot_events << endl;
 	int n_tot = 0;
-	float tightTot(0);
-	float signalTot(0);
-	float nEE(0), nEM(0), nMM(0);
+	int signalTot(0);
+	int nEE(0), nEM(0), nMM(0);
 	int nSlepSnu(0), nSlepSlep(0);
 
 	bool doSystematic = true;
+	// make a dummy sample for the systematic functions
+	Sample *S = new Sample();
+	S->datamc = 1;
+	// need to initialize the TRandom object for the systematic studies
+	SSDLDumper::fRand3 = new TRandom3(0);
 
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
-		tree_->GetEntry(jentry);
-		printProgress(jentry, tot_events, "SMS Scan");
-		int x;
-		if (m0 == 0.25) x = 0;
-		if (m0 == 0.50) x = 1;
-		if (m0 == 0.75) x = 2;
+		setRegionCuts(reg);
+		printProgress(jentry, tot_events, "SMS Scan"+Region::sname[reg]);
 		for (int i = 0; i<nSyst; i++) {
+			tree_->GetEntry(jentry); // have to reload the entry for each systematic
+			int x;                   // get the value of x. yes, in the treee it's m0
+			if (m0 == xvals[0]) x = 0;
+			if (m0 == xvals[1]) x = 1;
+			if (m0 == xvals[2]) x = 2;
+
 			if (!doSystematic) { if (i!=0) continue; }
-			fC_minMet   = myMinMet;                 // normal selection
-			fC_minMu1pt = myLep1Pt;
-			fC_minMu2pt = myLep2Pt;
-			fC_minEl1pt = myLep1Pt;
-			fC_minEl2pt = myLep2Pt;
-			if (i == 1) fC_minMet = 0.95*myMinMet;    // scale down met
-			if (i == 2) fC_minMet = 1.05*myMinMet;    // scale up met
-			if (i == 3) {
-				fC_minMu1pt = 0.98*myLep1Pt;
-				fC_minMu2pt = 0.98*myLep2Pt;
-				fC_minEl1pt = 0.98*myLep1Pt;
-				fC_minEl2pt = 0.98*myLep2Pt;
-			}
-			if (i == 4) {
-				fC_minMu1pt = 1.02*myLep1Pt;
-				fC_minMu2pt = 1.02*myLep2Pt;
-				fC_minEl1pt = 1.02*myLep1Pt;
-				fC_minEl2pt = 1.02*myLep2Pt;
-			}
+			if (i == 1) smearMET(S);
+			if (i == 2) scaleLeptons(S, 1);
+			if (i == 3) scaleLeptons(S, 2);
+			if (i == 4) smearJetPts(S, 1);
+			if (i == 5) smearJetPts(S, 2);
+			if (i == 6) smearJetPts(S, 3);
+			int   xsecBin      = xsecs->FindBin(mGlu);
+			float nloXsec      = xsecs->GetBinContent(xsecBin);
+			int   nGenBin      = TChi_nTot_[x]->FindBin(mGlu, mLSP);
+			float nGen         = TChi_nTot_[x]->GetBinContent(nGenBin);
+			int   nGenBinRight = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
+			float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
+			float weight       = fLumiNorm * nloXsec / nGen;
+			float weightRight  = fLumiNorm * nloXsec / nGenRight;
 
 			int mu1(-1), mu2(-1);
 			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-					tightTot++;
+					n_tot++;
 					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
 					signalTot++;
 					if (verbose) fOUTSTREAM << Form("MM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1], isTChiSlepSnu) << endl ;
-					n_tot++;
-					int xsecBin   = xsecs->FindBin(mGlu);
-					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gMMTrigScale);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * gMMTrigScale);
 						}
-						
 					}
 					nMM++;
 					continue;
@@ -12599,34 +12564,21 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 			}
 			int mu(-1), el(-1);
 			if( isSSLLElMuEvent(mu, el) ){
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-					tightTot++;
+					n_tot++;
 					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
 					signalTot++;
 					if (verbose) fOUTSTREAM << Form("EM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu1], isTChiSlepSnu) << endl ;
-					n_tot++;
-					int xsecBin   = xsecs->FindBin(mGlu);
-					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gEMTrigScale);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * gEETrigScale);
 						}
-						
 					}
 					nEM++;
 					continue;
@@ -12635,34 +12587,21 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 			}
 			int el1(-1), el2(-1);
 			if( isSSLLElEvent(el1, el2) ){
-				// if(!passes3rdLepVeto()) continue;
-				if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-					tightTot++;
+					n_tot++;
 					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
 					signalTot++;
 					if (verbose) fOUTSTREAM << Form("EE - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1], isTChiSlepSnu) << endl ;
-					n_tot++;
-					int xsecBin   = xsecs->FindBin(mGlu);
-					float nloXsec = 0.001 * xsecs->GetBinContent(xsecBin);
-	// cout << "DEBUG: " << __LINE__ << " isTChiSlepSnu: " << isTChiSlepSnu << " MGLU: " << mGlu << " MLSP: " << mLSP << " x: " << m0 << endl;
-
-					int nGenBin   = TChi_nTot_[x]->FindBin(mGlu, mLSP);
-					float nGen    = TChi_nTot_[x]->GetBinContent(nGenBin);
-					float weight  = fLumiNorm * nloXsec / nGen;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gEETrigScale);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
-						int nGenBinRight   = TChiRight_nTot_[x]->FindBin(mGlu, mLSP);
-						float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
-						float weightRight  = fLumiNorm * nloXsec / nGenRight;
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weight);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight* gEETrigScale);
 						}
-						
 					}
 					nEE++;
 				}
@@ -12671,36 +12610,34 @@ void SSDLPlotter::scanSMSEWKpaper( const char * filestring, float minHT, float m
 	}
 	if (verbose) cout << "Total Number of SS events: " << n_tot << endl;
 	if (verbose) cout << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
-	if (verbose) fOUTSTREAM << "Total Number of SS events: " << n_tot << endl;
-	if (verbose) fOUTSTREAM << "Total number of tight pairs: " << tightTot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/tightTot << endl;
+	if (verbose) fOUTSTREAM << "Total number of tight pairs: " << n_tot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/n_tot << endl;
 	if (verbose) fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
 	if (verbose) fOUTSTREAM << "nSlepSnu: " << nSlepSnu << " nSlepSlep: " << nSlepSlep << endl;
 
-	TH2D * TChi_eff_[nx] [nSyst];
+	TH2D * TChi_eff_      [nx] [nSyst];
 	TH2D * TChiRight_eff_ [nx] [nSyst];
 	for (int x=0; x<nx;x++) {
 		for (int i=0; i<nSyst;i++) {
-			TChi_eff_ [x][i] = new TH2D("TChi_eff_x"+bar[x]+"_"+foo[i] , "TChi_eff_x"+bar[x]+"_"+foo[i] , 101, -5, 1005    , 101 , -5 , 1005);
-			TChi_eff_ [x][i]->Divide(TChi_nPass_[x][i] , TChi_nTot_[x] , 1. , 1.);
-			TChiRight_eff_ [x][i] = new TH2D("TChiRight_eff_x"+bar[x]+"_"+foo[i] , "TChiRight_eff_x"+bar[x]+"_"+foo[i] , 101, -5, 1005    , 101 , -5 , 1005);
+			TChi_eff_      [x][i] = new TH2D(Form("TChi_eff_x%.0f_"+systs[i]      , 100*xvals[x]) , Form("TChi_eff_x%.0f_"+systs[i]     , 100*xvals[x]) , 101, -5, 1005, 101, -5, 1005);
+			TChiRight_eff_ [x][i] = new TH2D(Form("TChiRight_eff_x%.0f_"+systs[i] , 100*xvals[x]) , Form("TChiRight_eff_x%.0f_"+systs[i], 100*xvals[x]) , 101, -5, 1005, 101, -5, 1005);
+			TChi_eff_      [x][i]->Divide(TChi_nPass_[x][i]      , TChi_nTot_[x]      , 1. , 1.);
 			TChiRight_eff_ [x][i]->Divide(TChiRight_nPass_[x][i] , TChiRight_nTot_[x] , 1. , 1.);
 		}
 	}
 
 	TFile * res_;
-	if (pass3rdVeto) res_ = new TFile(Form("newSMSresults_"+htString+"_MET%d_PT%2.0f_%2.0f_with3rdLeptonVeto.root", (int) myMinMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
-	else res_ = new TFile(Form("newSMSresults_"+htString+"_MET%d_PT%2.0f_%2.0f.root", (int) myMinMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
+	res_ = new TFile("SMSresults_"+Region::sname[reg]+".root", "RECREATE", "res_");
 	res_   -> cd();
 
 	for (int x=0; x<nx;x++) {
 		TChi_yield_     [x]->Write();
 		TChi_nTot_      [x]->Write();
-		TChiRight_yield_     [x]->Write();
-		TChiRight_nTot_      [x]->Write();
+		TChiRight_yield_[x]->Write();
+		TChiRight_nTot_ [x]->Write();
 
 		for (int i=0; i<nSyst; i++) {
-			TChi_eff_  [x][i]-> Write();
-			TChi_nPass_[x][i]->Write();
+			TChi_eff_       [x][i]-> Write();
+			TChi_nPass_     [x][i]->Write();
 			TChiRight_eff_  [x][i]-> Write();
 			TChiRight_nPass_[x][i]->Write();
 		}
