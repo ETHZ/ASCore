@@ -325,10 +325,10 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200);
-	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
-	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2);
-	return;
+  //        scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200);
+  //  	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
+  //	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2);
+	//	return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
@@ -339,42 +339,42 @@ void SSDLPlotter::doAnalysis(){
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// makeOriginPlots(Baseline);
-    //     printOrigins(Baseline);
-	// makeOriginPlots(HT0MET120);
-    //     printOrigins(HT0MET120);
+	//     printOrigins(Baseline);
+	makeOriginPlots(HT0MET120);
+	printOrigins(HT0MET120);
 
- 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
- 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
- 	// makeElIdPlots();
-	// makeNT2KinPlots(false);
-	// makeNT2KinPlots(true);
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIdPlots();
+	makeNT2KinPlots(false);
+	makeNT2KinPlots(true);
 	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
 	// makeMETvsHTPlotPRL();
 	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-    // makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// make2DRatioPlots(Muon);
-	// make2DRatioPlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 	
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 
-	// makeAllClosureTests();
+	makeAllClosureTests();
 	makeAllIntPredictions();
         
-	// makeDiffPrediction();
-	//makeTTWDiffPredictions();
+	makeDiffPrediction();
+	// makeTTWDiffPredictions();
 	// makeTTWIntPredictions();
-	// printAllYieldTables();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -421,7 +421,7 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
-	const float WZESyst  = 0.5;
+	const float WZESyst  = 0.2;
 	const float WZESyst2 = WZESyst*WZESyst;
 
 	TFile * pFile;
@@ -2891,13 +2891,19 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			  Sample *S = fSamples[mcsamples[j]];
 			  TString s_name = S->sname;
 			  // sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-			  if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
-			  if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
-			  if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
-			  if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
-			  if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
-			  if ( S->getType() == 4 &&
-			       (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
+//SANTI 			  if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
+//SANTI 			  if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
+//SANTI 			  if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
+//SANTI 			  if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
+//SANTI 			  if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
+//SANTI 			  if ( S->getType() == 4 &&
+//SANTI 			       (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
+ 			  if ( S->getType() == 1)                       hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
+ 			  if ( S->getType() == 5 && S->getProc() == 7 ) hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
+ 			  if ( S->getType() == 2)                       hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
+ 			  if ( S->getType() == 3 || 
+			       (S->getType() == 5 && S->getProc() != 7)) hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
+			  if ( S->getType() == 4)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
  			}
  			hvar_mc_s[i]->Add(hvar_ttj[i]);
  			hvar_mc_s[i]->Add(hvar_ewk[i]);
@@ -3006,11 +3012,19 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			// TLegend *leg = new TLegend(0.15,0.50,0.40,0.88);
 			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
 			TLegend *leg = new TLegend(0.70,0.62,0.89,0.88);
+// 			leg->AddEntry(hvar_data[i], "Data",      "p");
+// 			leg->AddEntry(hvar_qcd[i],  "ttZ",       "f");
+// 			leg->AddEntry(hvar_db[i],   "ttW",       "f");
+// 			leg->AddEntry(hvar_rare[i], "Diboson",   "f");
+// 			leg->AddEntry(hvar_ewk[i],  "Single boson", "f");
+// 			leg->AddEntry(hvar_ttj[i],  "Top",       "f");
+// 			leg->AddEntry(hvar_rat[i],  "Ratio",     "f");
+
 			leg->AddEntry(hvar_data[i], "Data",      "p");
-			leg->AddEntry(hvar_qcd[i],  "ttZ",       "f");
-			leg->AddEntry(hvar_db[i],   "ttW",       "f");
-			leg->AddEntry(hvar_rare[i], "Diboson",   "f");
-			leg->AddEntry(hvar_ewk[i],  "Single boson", "f");
+			leg->AddEntry(hvar_qcd[i],  "QCD",       "f");
+			leg->AddEntry(hvar_db[i],   "WZ",       "f");
+			leg->AddEntry(hvar_rare[i], "Rare SM",   "f");
+			leg->AddEntry(hvar_ewk[i],  "W/Z/WW/ZZ", "f");
 			leg->AddEntry(hvar_ttj[i],  "Top",       "f");
 			leg->AddEntry(hvar_rat[i],  "Ratio",     "f");
 	
@@ -5239,11 +5253,56 @@ void SSDLPlotter::makeAllIntPredictions(){
 // 	ewkregions.push_back(HT0MET1203V);
 // 	ewkregions.push_back(HT0MET2003V);
 // 	ewkregions.push_back(HT0MET120JV3V);
+	vector<SSPrediction> ewkpreds;
  	for(size_t i = 0; i < gNREGIONS; ++i){
 	  gRegion reg = gRegion(i);
 	  TString outputname = outputdir + "DataPred_" + Region::sname[reg] + ".txt";
-	  makeIntPrediction(outputname, reg);
+	  ewkpreds.push_back(makeIntPrediction(outputname, reg));
  	}
+
+	fOUTSTREAM.close();
+	fOUTSTREAM2.close();
+	fOUTSTREAM3.close();
+	
+	// Produce Datacards only for certain regions.
+	vector<int> ewkregions;
+	ewkregions.push_back(HT0MET120NJ2bV);
+	ewkregions.push_back(HT0MET200);
+	ewkregions.push_back(HT0MET120NJ2bVlV);
+	ewkregions.push_back(HT0MET200lV);
+	
+	for (size_t i = 0; i<ewkregions.size(); i++) {
+	  gRegion reg = gRegion(ewkregions.at(i));
+	  TString datacard = outputdir + "datacard_"+ Region::sname[reg] + ".txt";
+	  fOUTSTREAM.open(datacard.Data(), ios::trunc);
+	  fOUTSTREAM <<      "#=========================================================================================" << endl;
+	  fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
+	  fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+	  fOUTSTREAM << Form("# Generated for region: %s ", Region::sname[reg].Data()) << endl;
+	  fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
+	  fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+	  fOUTSTREAM <<      "imax 1" << endl;
+	  fOUTSTREAM <<      "jmax 4" << endl;
+	  fOUTSTREAM <<      "kmax 5" << endl;
+	  fOUTSTREAM << endl << endl;
+	  fOUTSTREAM <<      "bin\t\t1" << endl;
+	  fOUTSTREAM << Form("observation\t%d", ewkpreds[reg].obs) << endl;
+	  fOUTSTREAM << endl << endl;
+	  fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
+	  fOUTSTREAM <<      "process\t\tsig\t\tfake\t\tcmid\t\twz\t\trare" << endl;
+	  fOUTSTREAM <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4" << endl;
+	  fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+			     ewkpreds[reg].s, ewkpreds[reg].fake, ewkpreds[reg].cmid, ewkpreds[reg].wz, ewkpreds[reg].rare) << endl;
+	  fOUTSTREAM << endl << endl;
+	  fOUTSTREAM <<      "lumi     lnN\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05" << endl;
+	  //	  fOUTSTREAM << Form("bgUncsf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+ewkpreds[reg].df_err/fabs(ewkpreds[reg].df))     << endl;
+	  fOUTSTREAM << Form("bgUncdf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-", 1.0+ewkpreds[reg].fake_err/ewkpreds[reg].fake) << endl;
+	  fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-", 1.0+ewkpreds[reg].cmid_err/ewkpreds[reg].cmid) << endl;
+	  fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-", 1.0+ewkpreds[reg].wz_err  /ewkpreds[reg].wz)   << endl;
+	  fOUTSTREAM << Form("bgUncrar lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f", 1.0+ewkpreds[reg].rare_err/ewkpreds[reg].rare) << endl;
+	  fOUTSTREAM << endl;
+	  fOUTSTREAM.close();
+	}
 }
 void SSDLPlotter::makeTTWIntPredictions(){
 	TString outputdir = Util::MakeOutputDir(fOutputDir + "IntPredictionsTTWZ");
@@ -5299,7 +5358,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
 	fOUTSTREAM3.close();
-	
+
 	TString datacard = outputdir + "datacard_TTWZ.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5533,7 +5592,7 @@ void SSDLPlotter::makeSystPlot(TString outputname, TString label, TH1D *nom, TH1
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, outputname, fOutputDir + fOutputSubDir);
 }
-void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
+SSPrediction SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
 
 	TLatex *lat = new TLatex();
@@ -5551,7 +5610,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
-	const float WZESyst  = 0.5;
+	const float WZESyst  = 0.2;
 	const float WZESyst2 = WZESyst*WZESyst;
 
 	musamples  = fMuData;
@@ -6060,6 +6119,40 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	fOUTSTREAM << endl;
  	
  	///////////////////////////////////////////////////////////////////////////////////
+ 	//  OUTPUT AS DATACARD  ///////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+	SSPrediction pred;
+	pred.obs      = nt2_mm+nt2_em+nt2_ee;
+ 	pred.obs_mm   = nt2_mm;
+ 	pred.obs_ee   = nt2_ee;
+ 	pred.obs_em   = nt2_em;
+	
+	pred.s        = 0.;
+	pred.s_mm     = 0.;
+	pred.s_ee     = 0.;
+	pred.s_em     = 0.;
+	
+	pred.fake     = nff_em + nff_mm + nff_ee + npf_em + nfp_em + npf_mm + npf_ee;
+	pred.fake_err = sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2 + FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2);
+	pred.sf       = npf_em + nfp_em + npf_mm + npf_ee;
+	pred.sf_err   = sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2);
+	pred.df       = nff_mm+nff_em+nff_ee;
+	pred.df_err   = sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2);
+	pred.cmid     = nt2_ee_chmid + nt2_em_chmid;
+	pred.cmid_err = sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+	pred.wz       = wz_nt2_ee + wz_nt2_mm + wz_nt2_em;
+	pred.wz_mm    = wz_nt2_mm;
+	pred.wz_ee    = wz_nt2_ee;
+	pred.wz_em    = wz_nt2_em;
+	pred.wz_err   = sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em));
+	pred.rare     = nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em;
+	pred.rare_mm  = nt2_rare_mc_mm;
+	pred.rare_ee  = nt2_rare_mc_ee;
+	pred.rare_em  = nt2_rare_mc_em;
+	pred.rare_err = sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
+
+	
+ 	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
  	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
@@ -6218,6 +6311,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_tot, hs_pred;
  	delete gr_obs;
  	delete FR;
+
+	return pred;
 }
 TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
@@ -6785,7 +6880,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR DATACARD  //////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////	
-	TTWZPrediction pred;
+	TTWZPrediction pred;	
 	pred.obs      = nt2_mm+nt2_em+nt2_ee;
 	pred.ttw      = ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em;
 	pred.ttz      = ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em;
@@ -6807,7 +6902,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	pred.rare_ee  = nt2_rare_mc_ee;
 	pred.rare_em  = nt2_rare_mc_em;
 	pred.rare_err = sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -10818,7 +10913,7 @@ void SSDLPlotter::storeWeightedPred(){
 	
 	TFile* file_opt;
 	TTree* tree_opt;
-      float eventWeight;
+	float eventWeight;
 
 	if( fDO_OPT ) {
    		system( "mkdir -p OPT_ttW" );
@@ -10902,14 +10997,14 @@ void SSDLPlotter::storeWeightedPred(){
 		float minpt = TMath::Min(pT1, pT2);
 		
  		if(MET > 30. && maxpt > 20. && minpt > 20.){
-		  if(HT        >  Region::minHT    [HT0MET80NJ2] &&  
-		     HT        <  Region::maxHT    [HT0MET80NJ2] &&
-		     njets     >= Region::minNjets [HT0MET80NJ2] &&
-		     njets     <= Region::maxNjets [HT0MET80NJ2] && 
-		     nbjets    >= Region::minNbjets[HT0MET80NJ2] &&
-		     nbjets    <= Region::maxNbjets[HT0MET80NJ2] &&
-		     nbjetsmed >= Region::minNbjmed[HT0MET80NJ2] &&
-		     nbjetsmed <= Region::maxNbjmed[HT0MET80NJ2]){
+		  if(HT        >  Region::minHT    [HT0MET120] &&  
+		     HT        <  Region::maxHT    [HT0MET120] &&
+		     njets     >= Region::minNjets [HT0MET120] &&
+		     njets     <= Region::maxNjets [HT0MET120] && 
+		     nbjets    >= Region::minNbjets[HT0MET120] &&
+		     nbjets    <= Region::maxNbjets[HT0MET120] &&
+		     nbjetsmed >= Region::minNbjmed[HT0MET120] &&
+		     nbjetsmed <= Region::maxNbjmed[HT0MET120]){
 		       
 		       fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
 		       fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);

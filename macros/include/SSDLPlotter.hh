@@ -77,6 +77,37 @@ struct TTWZPrediction {
 	float rare_em;
 	float rare_err;
 };
+struct SSPrediction {
+	int obs;
+        int obs_mm;
+        int obs_ee;
+        int obs_em;
+
+        float s;         
+        float s_mm; 
+        float s_ee; 
+        float s_em; 
+  
+	float fake;
+	float fake_err;
+	float sf;
+	float sf_err;
+	float df;
+	float df_err;
+	float cmid;
+	float cmid_err;
+  
+	float wz;
+	float wz_mm;
+	float wz_ee;
+	float wz_em;
+	float wz_err;
+	float rare;
+	float rare_mm;
+	float rare_ee;
+	float rare_em;
+	float rare_err;
+};
 
 
 class SSDLPlotter : public SSDLDumper{
@@ -142,7 +173,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-        void makeIntPrediction(TString, gRegion);
+        SSPrediction makeIntPrediction(TString, gRegion);
 	void makeTTWIntPredictions();
 	TTWZPrediction makeIntPredictionTTW(TString, gRegion);
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
