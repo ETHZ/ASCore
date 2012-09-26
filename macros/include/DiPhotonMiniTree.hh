@@ -148,8 +148,11 @@ private:
 
   Float_t event_rho;
   Int_t event_nPU;
+  Int_t event_PUOOTnumInteractionsEarly;
+  Int_t event_PUOOTnumInteractionsLate;
   Int_t event_nRecVtx;
   
+  Int_t event_CSCTightHaloID;
  
   Float_t dipho_mgg_photon;
   Float_t dipho_mgg_newCorrNoCrack;

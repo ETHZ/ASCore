@@ -61,7 +61,11 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("event_weight",&event_weight,"event_weight/F");
   OutputTree[i]->Branch("event_rho",&event_rho,"event_rho/F");
   OutputTree[i]->Branch("event_nPU",&event_nPU,"event_nPU/I");
+  OutputTree[i]->Branch("event_PUOOTnumInteractionsEarly",&event_PUOOTnumInteractionsEarly,"event_PUOOTnumInteractionsEarly/I");
+  OutputTree[i]->Branch("event_PUOOTnumInteractionsLate",&event_PUOOTnumInteractionsLate,"event_PUOOTnumInteractionsLate/I");
   OutputTree[i]->Branch("event_nRecVtx",&event_nRecVtx,"event_nRecVtx/I");
+
+  OutputTree[i]->Branch("event_CSCTightHaloID",&event_CSCTightHaloID,"event_CSCTightHaloID/I");
 
   OutputTree[i]->Branch("dipho_mgg_photon",&dipho_mgg_photon,"dipho_mgg_photon/F");
   OutputTree[i]->Branch("dipho_mgg_newCorr",&dipho_mgg_newCorr,"dipho_mgg_newCorr/F");
@@ -299,8 +303,13 @@ void DiPhotonMiniTree::Analyze(){
 
   event_weight = weight;
   event_rho = fTR->Rho;
-  if (!isdata) event_nPU = fTR->PUnumInteractions;
+  if (!isdata) {
+    event_nPU = fTR->PUnumInteractions;
+    event_PUOOTnumInteractionsEarly = fTR->PUOOTnumInteractionsEarly;
+    event_PUOOTnumInteractionsLate = fTR->PUOOTnumInteractionsLate;
+  }
   event_nRecVtx = fTR->NVrtx;
+  event_CSCTightHaloID = fTR->CSCTightHaloID;
 
   //  cout << "B" << endl;
 
@@ -772,9 +781,7 @@ bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> 
 
   float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
   float deta=fTR->PhoEta[passing.at(0)]-fTR->PhoEta[passing.at(1)];
-  float dphi=fTR->PhoPhi[passing.at(0)]-fTR->PhoPhi[passing.at(1)];
-  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
-  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+  float dphi=Util::DeltaPhi(fTR->PhoPhi[passing.at(0)],fTR->PhoPhi[passing.at(1)]);
   double dR=sqrt(dphi*dphi+deta*deta);
 
   if (fTR->PhoPt[passing.at(0)]<40) return false;
@@ -1284,8 +1291,8 @@ angular_distances_struct DiPhotonMiniTree::GetPFCandDeltaRFromSC(TreeReader *fTR
 
   angular_distances_struct out;
   out.dR = Util::GetDeltaR(sc_position.Eta(),ecalpfhit.Eta(),sc_position.Phi(),ecalpfhit.Phi());
-  out.dEta = sc_position.Eta()-ecalpfhit.Eta();
-  out.dPhi = DeltaPhiSigned(sc_position.Phi(),ecalpfhit.Phi());
+  out.dEta = ecalpfhit.Eta()-sc_position.Eta();
+  out.dPhi = DeltaPhiSigned(ecalpfhit.Phi(),sc_position.Phi());
 
   return out;
 
