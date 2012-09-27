@@ -325,10 +325,10 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-  //        scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200);
-  //  	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
-  //	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2);
-	//	return;
+        scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200lV);
+	//    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
+  	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2bVlV);
+	return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
@@ -5282,8 +5282,8 @@ void SSDLPlotter::makeAllIntPredictions(){
 	  fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
 	  fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
 	  fOUTSTREAM <<      "imax 1" << endl;
-	  fOUTSTREAM <<      "jmax 4" << endl;
-	  fOUTSTREAM <<      "kmax 5" << endl;
+	  fOUTSTREAM <<      "jmax *" << endl;
+	  fOUTSTREAM <<      "kmax *" << endl;
 	  fOUTSTREAM << endl << endl;
 	  fOUTSTREAM <<      "bin\t\t1" << endl;
 	  fOUTSTREAM << Form("observation\t%d", ewkpreds[reg].obs) << endl;
@@ -5294,8 +5294,9 @@ void SSDLPlotter::makeAllIntPredictions(){
 	  fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
 			     ewkpreds[reg].s, ewkpreds[reg].fake, ewkpreds[reg].cmid, ewkpreds[reg].wz, ewkpreds[reg].rare) << endl;
 	  fOUTSTREAM << endl << endl;
-	  fOUTSTREAM <<      "lumi     lnN\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05" << endl;
+	  fOUTSTREAM <<      "lumi     lnN\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05" << endl;
 	  //	  fOUTSTREAM << Form("bgUncsf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+ewkpreds[reg].df_err/fabs(ewkpreds[reg].df))     << endl;
+	  fOUTSTREAM << Form("sigUnc   lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+0.3/ewkpreds[reg].s)                       << endl;
 	  fOUTSTREAM << Form("bgUncdf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-", 1.0+ewkpreds[reg].fake_err/ewkpreds[reg].fake) << endl;
 	  fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-", 1.0+ewkpreds[reg].cmid_err/ewkpreds[reg].cmid) << endl;
 	  fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-", 1.0+ewkpreds[reg].wz_err  /ewkpreds[reg].wz)   << endl;
@@ -5303,7 +5304,26 @@ void SSDLPlotter::makeAllIntPredictions(){
 	  fOUTSTREAM << endl;
 	  fOUTSTREAM.close();
 	}
+
+ 	TString datacard = outputdir + "EWKdatacard.txt";
+ 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
+ 	fOUTSTREAM <<      "#=========================================================================================" << endl;
+ 	fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
+ 	fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+ 	fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM <<      "#<channel label> <observed> <total background> <total bkg uncertainty> <stat uncertainty> <wz> <wz uncertainty> <ttbar+fakes> <ttbar+fakes uncertainty> <zgamma> <zgamma uncertainty> <zz> <z uncertainty><rare> <rare uncertainty>" << endl;
+	for (size_t i = 0; i<ewkregions.size(); i++) {
+ 	  gRegion reg = gRegion(ewkregions.at(i));
+ 	  fOUTSTREAM << Form("# Generated for region: %s ", Region::sname[reg].Data()) << endl;
+	  fOUTSTREAM << Form("data %d %d %6.4f %6.4f %6.4f ",i, ewkpreds[reg].obs, 
+			     ewkpreds[reg].bkg, ewkpreds[reg].bkg_err, ewkpreds[reg].bkg_stat);
+	  fOUTSTREAM << Form("%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f",
+			     ewkpreds[reg].wz, ewkpreds[reg].wz_err, ewkpreds[reg].fake, ewkpreds[reg].fake_err,
+			     ewkpreds[reg].cmid,ewkpreds[reg].cmid_err, 0., 0., ewkpreds[reg].rare, ewkpreds[reg].rare_err) << endl;
+	  fOUTSTREAM << "#=====================================================================================================" << endl;
+ 	}	
 }
+
 void SSDLPlotter::makeTTWIntPredictions(){
 	TString outputdir = Util::MakeOutputDir(fOutputDir + "IntPredictionsTTWZ");
 	fOutputSubDir = "IntPredictionsTTWZ/";
@@ -6127,29 +6147,32 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	pred.obs_ee   = nt2_ee;
  	pred.obs_em   = nt2_em;
 	
-	pred.s        = 0.;
-	pred.s_mm     = 0.;
-	pred.s_ee     = 0.;
-	pred.s_em     = 0.;
+	pred.s        = 1.;
+	pred.s_mm     = 1.;
+	pred.s_ee     = 1.;
+	pred.s_em     = 1.;
 	
+	pred.bkg      = tot_pred;
+	pred.bkg_err  = sqrt(comb_tot_sqerr2);
+	pred.bkg_stat = sqrt(comb_tot_sqerr1);
 	pred.fake     = nff_em + nff_mm + nff_ee + npf_em + nfp_em + npf_mm + npf_ee;
-	pred.fake_err = sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2 + FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2);
+	pred.fake_err = sqrt(nDF*nDF*FakeESyst2 + nSF*nSF*FakeESyst2);
 	pred.sf       = npf_em + nfp_em + npf_mm + npf_ee;
-	pred.sf_err   = sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2);
+	pred.sf_err   = sqrt(nSF*nSF*FakeESyst2);
 	pred.df       = nff_mm+nff_em+nff_ee;
-	pred.df_err   = sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2);
+	pred.df_err   = sqrt(nDF*nDF*FakeESyst2);
 	pred.cmid     = nt2_ee_chmid + nt2_em_chmid;
-	pred.cmid_err = sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+	pred.cmid_err = sqrt(nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e2*nt2_em_chmid_e2);
 	pred.wz       = wz_nt2_ee + wz_nt2_mm + wz_nt2_em;
 	pred.wz_mm    = wz_nt2_mm;
 	pred.wz_ee    = wz_nt2_ee;
 	pred.wz_em    = wz_nt2_em;
-	pred.wz_err   = sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em));
+	pred.wz_err   = sqrt(WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em));
 	pred.rare     = nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em;
 	pred.rare_mm  = nt2_rare_mc_mm;
 	pred.rare_ee  = nt2_rare_mc_ee;
 	pred.rare_em  = nt2_rare_mc_em;
-	pred.rare_err = sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
+	pred.rare_err = sqrt(RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em));
 
 	
  	///////////////////////////////////////////////////////////////////////////////////

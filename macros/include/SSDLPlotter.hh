@@ -88,6 +88,10 @@ struct SSPrediction {
         float s_ee; 
         float s_em; 
   
+        float bkg;
+        float bkg_err;
+        float bkg_stat;                  
+
 	float fake;
 	float fake_err;
 	float sf;
