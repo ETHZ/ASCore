@@ -66,7 +66,7 @@ TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80M
 float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,            80.,          0.,            0.,              0.,           0.,             0.,               0.,          0.,                 0.,            0.,             0.,        100.};
 float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         8000.,           8000.,          39.,          8000.,            8000.,       8000.,              8000.,         8000.,          8000.,       8000.}; 
 float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,            30.,        120.,           80.,             80.,         120.,           120.,             120.,        200.,               120.,          200.,             0.,          0.}; 
-float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         8000.,           8000.,        8000.,          8000.,            8000.,       8000.,               200.,         8000.,          8000.,       8000.}; 
+float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         8000.,           8000.,        8000.,          8000.,             200.,       8000.,               200.,         8000.,          8000.,       8000.}; 
 int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             3 ,          3 };
 int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,            2 ,              2 ,           0 ,             2 ,               2 ,         99 ,                 2 ,           99 ,            99 ,         99 };
 int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             0 ,          1 };
@@ -3570,14 +3570,14 @@ void SSDLDumper::scaleLeptons(Sample *S, int flag){
 	// Shift the lepton pts for systematics studies
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
-	float scale = 0.;
+	float scale = 0.02;
 	for(size_t i = 0; i < NMus; ++i){
-		scale = getMuScale(MuPt[i], MuEta[i]);
+		// marc scale = getMuScale(MuPt[i], MuEta[i]);
 		if(flag == 1) MuPt[i] += scale*MuPt[i];
 		if(flag == 2) MuPt[i] -= scale*MuPt[i];
 	}
 	for(size_t i = 0; i < NEls; ++i){
-		scale = getElScale(ElPt[i], ElEta[i]);
+		// marc scale = getElScale(ElPt[i], ElEta[i]);
 		if(flag == 1) ElPt[i] += scale*ElPt[i];
 		if(flag == 2) ElPt[i] -= scale*ElPt[i];
 	}
