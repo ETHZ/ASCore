@@ -2,6 +2,11 @@ import os, ROOT, helper, sys
 from math import *
 
 print 'This script produces the datacards for some regions and two models'
+
+xsecFile = ROOT.TFile('C1N2_8TeV_xsecs.root', 'READ', 'xsecFile')
+xsecs = xsecFile.Get('errors')
+
+
 for region in ['HT0MET200lV','HT0MET120NJ2bVlV']:
 	infileName  = '../SMSresults_' + region +'.root'
 	canvasName  = 'exclusion_HT0_MET200lV_PT20'
@@ -126,10 +131,10 @@ for region in ['HT0MET200lV','HT0MET120NJ2bVlV']:
 					systErrJER  = abs(1 - effJER      / eff)
 					systErrTau  = 0.
 					systErrTrig = 0.
-					systErrTh   = 0.
+					systErrTh   = float(xsecs.GetBinContent(xsecs.FindBin(mChi)))
 
 					systErrTot  = sqrt(systErrMet*systErrMet + systErrLep*systErrLep + systErrJES*systErrJES + systErrJER*systErrJER)
-					statErrTot  = sqrt(nPass)
+					statErrTot  = yieldHisto.GetBinError(bin)
 
 					effErrMetSmear.Fill(mChi, mLSP, systErrMetS)
 					effErrMet     .Fill(mChi, mLSP, systErrMet )
