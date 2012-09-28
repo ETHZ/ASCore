@@ -91,7 +91,7 @@ public:
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
-		WmWm, WpWp,
+		WpWp, WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
 		EMEnr20, EMEnr30,
@@ -111,15 +111,11 @@ public:
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
-		HT80MET30,
-		HT80MET30b, HT80MET80b1,
-		HT80MET30bpp,
+		HT80MET30, HT80MET30b, HT80MET30bpp,
 		HT0MET120,HT0MET80NJ2,HT0MET80NJ2bV,
-		HT0MET120V, HT0MET120bV, HT0MET120NJ1, HT0MET120NJ2, HT0MET120NJ2bV,	// EWino regions MET > 120
-		HT0MET200, HT0MET200NJ2,  			        // EWino regions MET > 200
-		HT0MET120NJ2lV, HT0MET120NJ2bVlV, HT0MET200lV,   
+		HT0MET120V, HT0MET120NJ2, HT0MET120NJ2bV,	// EWino regions MET > 120
+		HT0MET200, HT0MET120NJ2bVlV, HT0MET200lV,   
 		TTbarWPresel, TTbarWSel, //TTbarV selections
-		// ETHSelect, ETHSel1b, AACSelec, AACSel1b,// OS selections
 		gNREGIONS
 	};
 	enum gChannel {
