@@ -49,10 +49,13 @@ static const float gElMaxIso   = 0.09;
 static const float gMinJetPt   = 40.;
 static const bool  gApplyZVeto = true;
 static const bool  gApplyTauVeto = true;
+static const bool  gInvertZVeto = false;
 static bool  gSmearMET     = false;
 
 static const bool gDoSystStudies = false;
 static const bool gDoSyncExercise = false;
+
+
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -63,7 +66,7 @@ TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80M
 float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,          80.,            80.,          0.,            0.,              0.,           0.,            0.,             0.,             0.,               0.,          0.,             0.,               0.,                 0.,            0.,             0.,        100.};
 float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,        8000.,          8000.,       8000.,         8000.,           8000.,          39.,         8000.,          8000.,          8000.,            8000.,       8000.,          8000.,            8000.,              8000.,         8000.,          8000.,       8000.}; 
 float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,          80.,            30.,        120.,           80.,             80.,         120.,          120.,           120.,           120.,             120.,        200.,           200.,             120.,               120.,          200.,             0.,          0.}; 
-float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,        8000.,          8000.,       8000.,         8000.,           8000.,        8000.,         8000.,          8000.,          8000.,            8000.,       8000.,          8000.,            8000.,              8000.,         8000.,          8000.,       8000.}; 
+float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,        8000.,          8000.,       8000.,         8000.,           8000.,        8000.,         8000.,          8000.,          8000.,            8000.,       8000.,          8000.,            8000.,               200.,         8000.,          8000.,       8000.}; 
 int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,            0 ,             0 ,             0 ,               0 ,          0 ,             0 ,               0 ,                 0 ,            0 ,             3 ,          3 };
 int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,          99 ,            99 ,         99 ,            2 ,              2 ,           0 ,           99 ,             1 ,             2 ,               2 ,         99 ,             2 ,               2 ,                 2 ,           99 ,            99 ,         99 };
 int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,           1 ,             2 ,          0 ,            0 ,              0 ,           0 ,            0 ,             0 ,             0 ,               0 ,          0 ,             0 ,               0 ,                 0 ,            0 ,             0 ,          1 };
@@ -99,8 +102,8 @@ double SSDLDumper::gNVrtxBins[gNNVrtxBins+1]  = {5, 7, 9, 11, 13, 15, 17, 19, 21
 TString SSDLDumper::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
 TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets", "NbJetsMed"};
 int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
-float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
-float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 200.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
+float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,  30.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
+float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 330.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
                                                                    "Particle Flow ME_{T} [GeV]",
                                                                    "Jet Multiplicity",
@@ -823,7 +826,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET80NJ2);
+		setRegionCuts(HT0MET120);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -868,7 +871,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET80NJ2);
+		setRegionCuts(HT0MET120);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0.;
@@ -919,7 +922,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET80NJ2);
+		setRegionCuts(HT0MET120);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -968,7 +971,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET80NJ2);
+		setRegionCuts(HT0MET120);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -1018,7 +1021,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET80NJ2);
+		setRegionCuts(HT0MET120);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -1728,8 +1731,7 @@ void SSDLDumper::fillKinPlots(Sample *S){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(Baseline);
-	//setRegionCuts(HT80MET30);
-
+	//	setRegionCuts(HT0MET120);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
 	if(mumuSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 1){ // trigger && select loose mu/mu pair
@@ -4188,10 +4190,13 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 }
 bool SSDLDumper::passesZVeto(float dm){
 	if(!gApplyZVeto) return true;
+	
+	bool passZVeto = passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
 	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
 	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
 	// return !passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm); //inverted Zveto
-	return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
+	if (gInvertZVeto) return !passZVeto;
+	else              return  passZVeto;
 }
 bool SSDLDumper::passesChVeto(int ch){
   if (ch == 0) return true;  //DON'T apply the veto
