@@ -12579,6 +12579,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	for (int i = 0; i<nx; i++) {
 		TChi_yield_              [i] = new TH2D(Form("TChi_yield%.0f", 100*xvals[i])      , Form("TChi_yield%.0f", 100*xvals[i])      , 101, -5, 1005    , 101 , -5 , 1005);
 		TChiRight_yield_         [i] = new TH2D(Form("TChiRight_yield%.0f", 100* xvals[i]), Form("TChiRight_yield%.0f", 100*xvals[i]) , 101, -5, 1005    , 101 , -5 , 1005);
+		TChi_yield_              [i]->Sumw2();
+		TChiRight_yield_         [i]->Sumw2();
 	}
 
 	int nSyst(9);
@@ -12599,6 +12601,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 		for (int j = 0; j<nSyst; j++) {
 			TChi_nPass_      [i][j] = new TH2D(Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]), Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
 			TChiRight_nPass_ [i][j] = new TH2D(Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]), Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
+			TChi_nPass_      [i][j]->Sumw2();
+			TChiRight_nPass_ [i][j]->Sumw2();
 		}
 	}
 
@@ -12613,6 +12617,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	for (int i = 0; i<nx; i++) {
 		TChi_nTot_[i]      = (TH2D  *) file_->Get(Form("ModelCount%.0f", 100*xvals[i]));
 		TChiRight_nTot_[i] = (TH2D  *) file_->Get(Form("RightHandedSlepCount%.0f", 100*xvals[i]));
+		TChi_nTot_[i]     ->Sumw2();
+		TChiRight_nTot_[i]->Sumw2();
 	}
 	// get the Analysis tree from the file, initialize it
 	TTree * tree_ = (TTree *) file_->Get("Analysis");
@@ -12745,6 +12751,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 			TChiRight_eff_ [x][i] = new TH2D(Form("TChiRight_eff_x%.0f_"+systs[i] , 100*xvals[x]) , Form("TChiRight_eff_x%.0f_"+systs[i], 100*xvals[x]) , 101, -5, 1005, 101, -5, 1005);
 			TChi_eff_      [x][i]->Divide(TChi_nPass_[x][i]      , TChi_nTot_[x]      , 1. , 1.);
 			TChiRight_eff_ [x][i]->Divide(TChiRight_nPass_[x][i] , TChiRight_nTot_[x] , 1. , 1.);
+			TChi_eff_      [x][i]->Sumw2();
+			TChiRight_eff_ [x][i]->Sumw2();
 		}
 	}
 
