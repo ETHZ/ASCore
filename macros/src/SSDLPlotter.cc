@@ -12583,7 +12583,7 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 
 	TH2D  * TChi_nPass_[nx] [5];
 	TH2D  * TChiRight_nPass_[nx] [5];
-	int nSyst(7);
+	int nSyst(9);
 	TString systs[nSyst];
 	systs[0] = "norm";
 	systs[1] = "metsmear";
@@ -12592,6 +12592,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	systs[4] = "JESup";
 	systs[5] = "JESdown";
 	systs[6] = "JER";
+	systs[7] = "METup";
+	systs[8] = "METdown";
 	for (int i = 0; i<nx; i++) {
 		for (int j = 0; j<nSyst; j++) {
 			TChi_nPass_ [i][j]      = new TH2D(Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]), Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
@@ -12648,6 +12650,8 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 			if (i == 4) smearJetPts(S, 1);
 			if (i == 5) smearJetPts(S, 2);
 			if (i == 6) smearJetPts(S, 3);
+			if (i == 7) {pfMET = pfMET + 0.05 * pfMET; }
+			if (i == 8) {pfMET = pfMET - 0.05 * pfMET; }
 			int   xsecBin      = xsecs->FindBin(mGlu);
 			float nloXsec      = xsecs->GetBinContent(xsecBin);
 			int   nGenBin      = TChi_nTot_[x]->FindBin(mGlu, mLSP);
