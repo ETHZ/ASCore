@@ -325,7 +325,7 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-        scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200lV);
+    scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200lV);
 	//    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
   	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2bVlV);
 	return;
@@ -12581,8 +12581,6 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 		TChiRight_yield_         [i] = new TH2D(Form("TChiRight_yield%.0f", 100* xvals[i]), Form("TChiRight_yield%.0f", 100*xvals[i]) , 101, -5, 1005    , 101 , -5 , 1005);
 	}
 
-	TH2D  * TChi_nPass_[nx] [5];
-	TH2D  * TChiRight_nPass_[nx] [5];
 	int nSyst(9);
 	TString systs[nSyst];
 	systs[0] = "norm";
@@ -12594,9 +12592,12 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	systs[6] = "JER";
 	systs[7] = "METup";
 	systs[8] = "METdown";
+
+	TH2D  * TChi_nPass_     [nx][nSyst];
+	TH2D  * TChiRight_nPass_[nx][nSyst];
 	for (int i = 0; i<nx; i++) {
 		for (int j = 0; j<nSyst; j++) {
-			TChi_nPass_ [i][j]      = new TH2D(Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]), Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
+			TChi_nPass_      [i][j] = new TH2D(Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]), Form("TChi_nPass_x%.0f_"+systs[j]     , 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
 			TChiRight_nPass_ [i][j] = new TH2D(Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]), Form("TChiRight_nPass_x%.0f_"+systs[j], 100*xvals[i]) , 101, -5, 1005, 101, -5, 1005);
 		}
 	}
