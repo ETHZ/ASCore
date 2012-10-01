@@ -51,7 +51,7 @@ if (len(sys.argv[1:]) != 3):                                # if not all three a
    print ' 	python crabJobs_reportT3.py DYJetsToLL  mc V0X-0Y-0Z'
    sys.exit()
 else:
-   jobName = sys.argv[1]
+   jobName = sys.argv[1].rstrip('/')
    datamc = sys.argv[2]
    ntupleVersion = sys.argv[3]
 
