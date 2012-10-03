@@ -153,6 +153,7 @@ private:
   Int_t event_nRecVtx;
   
   Int_t event_CSCTightHaloID;
+  Int_t event_NMuons;
  
   Float_t dipho_mgg_photon;
   Float_t dipho_mgg_newCorrNoCrack;
