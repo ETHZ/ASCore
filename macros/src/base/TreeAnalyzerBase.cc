@@ -49,13 +49,20 @@ void TreeAnalyzerBase::ReadJSON(const char* JSONpath) {
     if(!JSON) cout << "ERROR : JSON FILE DOES NOT EXIST" << endl;
     assert(JSON);
     if (JSON.is_open()){
-        getline (JSON,line);
+      string tmp;
+      while (JSON.good()){
+        getline (JSON,tmp);
+	line+=tmp;
+      }
     }
     JSON.close();
 
     line.erase(0,1);
     line.erase(line.size()-1);
 	
+    size_t index;
+    while( (index=line.find("  ")) != string::npos )  line.erase(index,1);
+
     // split JSON into runs with associated lumis
     string c =", \"";
     vector<string> splitted;
