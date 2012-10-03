@@ -786,8 +786,8 @@ bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> 
 
   if (fTR->PhoPt[passing.at(0)]<40) return false;
   if (fTR->PhoPt[passing.at(1)]<30) return false;
-  if (invmass0<80) return false;
-  if (dR<0.4) return false;
+  //  if (invmass0<80) return false;
+  if (dR<0.45) return false;
 
   return true;
 };
@@ -965,8 +965,8 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 	  polx[4]=polx[0]; poly[4]=poly[0]; // closed polygon
 	  float centerx = (polx[0]+polx[1]+polx[2]+polx[3])/4;
 	  float centery = (poly[0]+poly[1]+poly[2]+poly[3])/4;
-	  hitx = centerx + (hitx-centerx)*(1+global_linkbyrechit_enlargement);
-	  hity = centery + (hity-centery)*(1+global_linkbyrechit_enlargement);
+	  hitx = centerx + (hitx-centerx)/(1.0+global_linkbyrechit_enlargement);
+	  hity = centery + (hity-centery)/(1.0+global_linkbyrechit_enlargement);
 	  if (TMath::IsInside(hitx,hity,5,polx,poly)) inside=true;
 	}
       }
