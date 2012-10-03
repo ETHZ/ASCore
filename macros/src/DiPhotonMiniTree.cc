@@ -694,6 +694,18 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
   }
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    bool pass=1;
+    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+    float phi=fTR->SCPhi[fTR->PhotSCindex[*it]];
+    for (int i=0; i<fTR->NMus; i++){
+      float mueta = fTR->MuEta[i];
+      float muphi = fTR->MuPhi[i];
+      if (Util::GetDeltaR(mueta,eta,muphi,phi)<0.4) pass=0;
+    }
+    if (!pass) it=passing.erase(it); else it++;
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
     float combiso = PFIsolation(*it,0,"combined");
@@ -873,6 +885,12 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
   }
 
   if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>5) found=true; }
+
+  for (int i=0; i<fTR->NMus; i++){
+    float mueta = fTR->MuEta[i];
+    float muphi = fTR->MuPhi[i];
+    if (Util::GetDeltaR(mueta,eta,muphi,phi)<0.4) found=true;
+  }
 
   if (debug) std::cout << "returning " << found << std::endl;
   return found;
