@@ -154,6 +154,7 @@ private:
   
   Int_t event_CSCTightHaloID;
   Int_t event_NMuons;
+  Int_t event_NMuonsTot;
  
   Float_t dipho_mgg_photon;
   Float_t dipho_mgg_newCorrNoCrack;

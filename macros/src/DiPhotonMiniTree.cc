@@ -67,6 +67,7 @@ void DiPhotonMiniTree::Begin(){
 
   OutputTree[i]->Branch("event_CSCTightHaloID",&event_CSCTightHaloID,"event_CSCTightHaloID/I");
   OutputTree[i]->Branch("event_NMuons",&event_NMuons,"event_NMuons/I");
+  OutputTree[i]->Branch("event_NMuonsTot",&event_NMuonsTot,"event_NMuonsTot/I");
 
   OutputTree[i]->Branch("dipho_mgg_photon",&dipho_mgg_photon,"dipho_mgg_photon/F");
   OutputTree[i]->Branch("dipho_mgg_newCorr",&dipho_mgg_newCorr,"dipho_mgg_newCorr/F");
@@ -312,6 +313,7 @@ void DiPhotonMiniTree::Analyze(){
   event_nRecVtx = fTR->NVrtx;
   event_CSCTightHaloID = fTR->CSCTightHaloID;
   event_NMuons = fTR->NMus;
+  event_NMuonsTot = fTR->NMusTot;
 
   //  cout << "B" << endl;
 
