@@ -145,6 +145,7 @@ private:
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
   Float_t event_weight;
+  Float_t event_weight3D;
 
   Float_t event_rho;
   Int_t event_nPU;

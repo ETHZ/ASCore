@@ -59,6 +59,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
 
   OutputTree[i]->Branch("event_weight",&event_weight,"event_weight/F");
+  OutputTree[i]->Branch("event_weight3D",&event_weight3D,"event_weight3D/F");
   OutputTree[i]->Branch("event_rho",&event_rho,"event_rho/F");
   OutputTree[i]->Branch("event_nPU",&event_nPU,"event_nPU/I");
   OutputTree[i]->Branch("event_PUOOTnumInteractionsEarly",&event_PUOOTnumInteractionsEarly,"event_PUOOTnumInteractionsEarly/I");
@@ -294,6 +295,9 @@ void DiPhotonMiniTree::Analyze(){
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
+  float weight3D;
+  if (!isdata) weight3D = GetPUWeight3D(fTR->PUOOTnumInteractionsEarly,fTR->PUnumInteractions,fTR->PUOOTnumInteractionsLate);
+  else weight3D=1;
   
   event_luminormfactor=AddWeight;
 
@@ -304,6 +308,7 @@ void DiPhotonMiniTree::Analyze(){
   fHNumVtx->Fill(fTR->NVrtx,weight);
 
   event_weight = weight;
+  event_weight3D = weight3D;
   event_rho = fTR->Rho;
   if (!isdata) {
     event_nPU = fTR->PUnumInteractions;

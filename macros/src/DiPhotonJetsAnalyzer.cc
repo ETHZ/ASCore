@@ -64,6 +64,7 @@ void DiPhotonJetsAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fDiPhotonMiniTree->SetOutputFile(fOutputFile);
 	fDiPhotonMiniTree->fVerbose = fVerbose;
 	fDiPhotonMiniTree->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	fDiPhotonMiniTree->SetPileUp3DSrc(fdata_PileUp, fmc_PileUp);
 	fDiPhotonMiniTree->Begin();
 
 }
