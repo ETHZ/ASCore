@@ -71,7 +71,8 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_4_2
-    process.GlobalTag.globaltag = "GR_R_42_V19::All"
+#    process.GlobalTag.globaltag = "GR_R_42_V19::All"
+    process.GlobalTag.globaltag = "FT42_V24_AN1::All"
 else:
     # CMSSW_4_2_X:
     process.GlobalTag.globaltag = "START42_V14B::All"
