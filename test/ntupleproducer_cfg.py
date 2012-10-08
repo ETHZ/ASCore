@@ -57,7 +57,7 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 #options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
-options.files= 'file:////shome/haweber/files/TTW_53X_8TeV.root'
+options.files= 'file:////shome/haweber/files/TTW_53X.root'
 #options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
@@ -79,7 +79,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
     # CMSSW_5_3
-    process.GlobalTag.globaltag = "GR_P_V40_AN1::All"
+    process.GlobalTag.globaltag = "FT_R_53_V6::All" # For Jul13 ReReco of 2012A+B
     ### GLOBAL TAG FOR 2012C v1 and v2
     #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
     # CMSSW_5_2
@@ -172,30 +172,33 @@ process.goodVertices = cms.EDFilter("VertexSelector",
 )
 
 ### Cleaning ###################################################################
+### See https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
 
 ## The iso-based HBHE noise filter ___________________________________________||
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 
 ## The HCAL laser filter _____________________________________________________||
 process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
-process.hcalLaserEventFilter.vetoByRunEventNumber=cms.untracked.bool(False)
-process.hcalLaserEventFilter.vetoByHBHEOccupancy=cms.untracked.bool(True)
-process.hcalLaserEventFilter.taggingMode=cms.bool(True)
+process.hcalLaserEventFilter.vetoByRunEventNumber=False
+process.hcalLaserEventFilter.vetoByHBHEOccupancy=True
+process.hcalLaserEventFilter.taggingMode=True
 
 ## The ECAL dead cell trigger primitive filter _______________________________||
 process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
 ## For AOD and RECO recommendation to use recovered rechits
-process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
-process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(True)
+process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = True
 
 ## The EE bad SuperCrystal filter ____________________________________________||
 process.load('RecoMET.METFilters.eeBadScFilter_cfi')
-process.eeBadScFilter.taggingMode = cms.bool(True)
+process.eeBadScFilter.taggingMode = True
 
 ## The tracking failure filter _______________________________________________||
 process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-process.trackingFailureFilter.taggingMode = cms.bool(True)
+process.trackingFailureFilter.taggingMode = True
 
+## Laser correction filter (Run2012 A+B, Jul13 ReReco)
+process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
+process.ecalLaserCorrFilter.taggingMode = True
 
 
 ### GenJets ####################################################################
@@ -575,6 +578,7 @@ process.p = cms.Path(
 	+ process.EcalDeadCellTriggerPrimitiveFilter         # tagging mode
 	+ process.trackingFailureFilter                      # tagging mode
 	+ process.eeBadScFilter                              # tagging mode
+        + process.ecalLaserCorrFilter                        # tagging mode
 #	+ process.dump  
 	# end cleaning 
 	+ process.pfIsolationAllSequence
@@ -586,7 +590,7 @@ process.p = cms.Path(
        	+ process.metCorSequence
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
-    + process.phoIsoSequence
+        + process.phoIsoSequence
         + process.PFTau
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
@@ -601,7 +605,8 @@ process.out.outputCommands = ['drop *',
 			      'keep *_EcalDeadCellTriggerPrimitiveFilter_*_'+process.name_(),
 			      'keep *_hcalLaserEventFilter_*_'+process.name_(),
 			      'keep *_trackingFailureFilter_*_'+process.name_(),
-			      'keep *_eeBadScFilter_*_'+process.name_()
+			      'keep *_eeBadScFilter_*_'+process.name_(),
+			      'keep *_ecalLaserCorrFilter_*_'+process.name_()
 			      ] 
 
 

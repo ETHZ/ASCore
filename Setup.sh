@@ -34,7 +34,7 @@ cvs co -r V00-04-01 CondFormats/EgammaObjects
 
 #  MET Filters
 cvs co -r V00-00-08      RecoMET/METAnalyzers                             
-cvs co -r V00-00-07      RecoMET/METFilters
+cvs co -r V00-00-10      RecoMET/METFilters
 
 # Parton Flavour
 cvs co -r V00-13-10 PhysicsTools/JetMCAlgos
