@@ -49,6 +49,7 @@ public:
   const float GetMuonWeight(float eta1, float pt1, float &EffErr);
   const float GetElectronWeight(float eta1, float pt1, float &EffErr);
   int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
+  void StoreAllPhotons(vector<lepton> &photons);
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
