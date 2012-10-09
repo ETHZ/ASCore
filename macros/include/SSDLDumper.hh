@@ -573,6 +573,8 @@ public:
 	virtual void smearJetPts(Sample *S, int flag = 0);
 	virtual void scaleLeptons(Sample *S, int flag = 0);
 	virtual void smearMET(Sample *S);
+	virtual void propagateMET(TLorentzVector vec);
+	virtual void scaleMET(Sample *S, int flag = 0);
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
 	virtual float getMETPhi();

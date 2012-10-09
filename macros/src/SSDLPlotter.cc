@@ -252,8 +252,6 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WWG);
 	fMCBGEMEnr.push_back(WWW);
 	fMCBGEMEnr.push_back(ZZZ);
-	//MARC fMCBGEMEnr.push_back(QCDEMEnr10);
-	//MARC	fMCBGMuEnr.push_back(QCDMuEnr15);
 	fMCBGEMEnr.push_back(EMEnr20);
 	fMCBGEMEnr.push_back(EMEnr30);
 
@@ -325,10 +323,12 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-    scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET200lV);
-	//    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
-  	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120NJ2bVlV);
-	return;
+    // scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET200lV);
+  	// scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET120NJ2bVlV);
+    // scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET200);
+	// //    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
+  	// scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET120NJ2bV);
+	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
@@ -340,41 +340,41 @@ void SSDLPlotter::doAnalysis(){
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// makeOriginPlots(Baseline);
 	//     printOrigins(Baseline);
-	makeOriginPlots(HT0MET120);
-	printOrigins(HT0MET120);
+	// makeOriginPlots(HT0MET120);
+	// printOrigins(HT0MET120);
 
-	makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	makeElIsolationPlots(false); // if true, loops on TTbar sample
-	makeElIdPlots();
-	makeNT2KinPlots(false);
-	makeNT2KinPlots(true);
+	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	// makeElIdPlots();
+	// makeNT2KinPlots(false);
+	// makeNT2KinPlots(true);
 	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
 	// makeMETvsHTPlotPRL();
 	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
-	
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// make2DRatioPlots(Muon);
+	// make2DRatioPlots(Elec);
+	// // makeNTightLoosePlots(Muon);
+	// // makeNTightLoosePlots(Elec);
+	// 
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
-	makeAllIntPredictions();
-        
-	makeDiffPrediction();
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
+    //     
+	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
-	// makeTTWIntPredictions();
-	printAllYieldTables();
+	// // makeTTWIntPredictions();
+	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -3656,6 +3656,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	const float htmax = 1500.;
 	const float metmax = 550.;
 	const float metmin = 50.;
+	const float njetsmax = 5.25;
 	
 	Color_t col_mm = kBlack;
 	Color_t col_ee = kRed;
@@ -3674,6 +3675,22 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, metmin, metmax);
 	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, metmin, metmax);
 	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, metmin, metmax);
+
+	TH2D *hmetvsnjets_da_mm = new TH2D("Data_NjetsvsMET_mm", "Data_NjetsvsMET_mm", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjets_da_ee = new TH2D("Data_NjetsvsMET_ee", "Data_NjetsvsMET_ee", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjets_da_em = new TH2D("Data_NjetsvsMET_em", "Data_NjetsvsMET_em", njetsmax, 0., njetsmax, 100, metmin, metmax);
+
+	TH2D *hmetvsnjetswithb_da_mm = new TH2D("Data_NjetsvsMETwithb_mm", "Data_NjetsvsMETwithb_mm", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetswithb_da_ee = new TH2D("Data_NjetsvsMETwithb_ee", "Data_NjetsvsMETwithb_ee", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetswithb_da_em = new TH2D("Data_NjetsvsMETwithb_em", "Data_NjetsvsMETwithb_em", njetsmax, 0., njetsmax, 100, metmin, metmax);
+
+	TH2D *hmetvsnjetsnob_da_mm = new TH2D("Data_NjetsvsMETnob_mm", "Data_NjetsvsMETnob_mm", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetsnob_da_ee = new TH2D("Data_NjetsvsMETnob_ee", "Data_NjetsvsMETnob_ee", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetsnob_da_em = new TH2D("Data_NjetsvsMETnob_em", "Data_NjetsvsMETnob_em", njetsmax, 0., njetsmax, 100, metmin, metmax);
+
+	TH2D *hmetvsnjetsboth_da_mm = new TH2D("Data_NjetsvsMETboth_mm", "Data_NjetsvsMETboth_mm", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetsboth_da_ee = new TH2D("Data_NjetsvsMETboth_ee", "Data_NjetsvsMETboth_ee", njetsmax, 0., njetsmax, 100, metmin, metmax);
+	TH2D *hmetvsnjetsboth_da_em = new TH2D("Data_NjetsvsMETboth_em", "Data_NjetsvsMETboth_em", njetsmax, 0., njetsmax, 100, metmin, metmax);
 
 	//////////////////////////////////////////////////////////
 	// Make MET vs HT plot:
@@ -3699,6 +3716,115 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
+	//////////////////////////////////////////////////////////
+	// Make MET vs njets plot:
+	hmetvsnjets_da_mm->SetMarkerStyle(8);
+	hmetvsnjets_da_mm->SetMarkerColor(col_mm);
+	hmetvsnjets_da_mm->SetMarkerSize(1.5);
+	hmetvsnjets_da_mm->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjets_da_mm->GetXaxis()->SetNdivisions(606);
+
+	hmetvsnjets_da_ee->SetMarkerStyle(21);
+	hmetvsnjets_da_ee->SetMarkerColor(col_ee);
+	hmetvsnjets_da_ee->SetMarkerSize(1.4);
+	hmetvsnjets_da_ee->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjets_da_ee->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjets_da_em->SetMarkerStyle(23);
+	hmetvsnjets_da_em->SetMarkerColor(col_em);
+	hmetvsnjets_da_em->SetMarkerSize(1.7  );
+	hmetvsnjets_da_em->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjets_da_em->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjets_da_mm->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjets_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjets_da_ee->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjets_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjets_da_em->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjets_da_em->SetYTitle(KinPlots::axis_label[1]);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs njets plot with b-tags
+	hmetvsnjetswithb_da_mm->SetMarkerStyle(8);
+	hmetvsnjetswithb_da_mm->SetMarkerColor(col_mm);
+	hmetvsnjetswithb_da_mm->SetMarkerSize(1.5);
+	hmetvsnjetswithb_da_mm->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetswithb_da_mm->GetXaxis()->SetNdivisions(606);
+
+	hmetvsnjetswithb_da_ee->SetMarkerStyle(21);
+	hmetvsnjetswithb_da_ee->SetMarkerColor(col_ee);
+	hmetvsnjetswithb_da_ee->SetMarkerSize(1.4);
+	hmetvsnjetswithb_da_ee->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetswithb_da_ee->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetswithb_da_em->SetMarkerStyle(23);
+	hmetvsnjetswithb_da_em->SetMarkerColor(col_em);
+	hmetvsnjetswithb_da_em->SetMarkerSize(1.7  );
+	hmetvsnjetswithb_da_em->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetswithb_da_em->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetswithb_da_mm->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetswithb_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetswithb_da_ee->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetswithb_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetswithb_da_em->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetswithb_da_em->SetYTitle(KinPlots::axis_label[1]);
+
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs njets plot no b-tags
+	hmetvsnjetsnob_da_mm->SetMarkerStyle(8);
+	hmetvsnjetsnob_da_mm->SetMarkerColor(col_mm);
+	hmetvsnjetsnob_da_mm->SetMarkerSize(1.5);
+	hmetvsnjetsnob_da_mm->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsnob_da_mm->GetXaxis()->SetNdivisions(606);
+
+	hmetvsnjetsnob_da_ee->SetMarkerStyle(21);
+	hmetvsnjetsnob_da_ee->SetMarkerColor(col_ee);
+	hmetvsnjetsnob_da_ee->SetMarkerSize(1.4);
+	hmetvsnjetsnob_da_ee->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsnob_da_ee->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetsnob_da_em->SetMarkerStyle(23);
+	hmetvsnjetsnob_da_em->SetMarkerColor(col_em);
+	hmetvsnjetsnob_da_em->SetMarkerSize(1.7  );
+	hmetvsnjetsnob_da_em->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsnob_da_em->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetsnob_da_mm->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsnob_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetsnob_da_ee->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsnob_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetsnob_da_em->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsnob_da_em->SetYTitle(KinPlots::axis_label[1]);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs njets plot both
+	hmetvsnjetsboth_da_mm->SetMarkerStyle(8);
+	hmetvsnjetsboth_da_mm->SetMarkerColor(col_mm);
+	hmetvsnjetsboth_da_mm->SetMarkerSize(1.5);
+	hmetvsnjetsboth_da_mm->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsboth_da_mm->GetXaxis()->SetNdivisions(606);
+
+	hmetvsnjetsboth_da_ee->SetMarkerStyle(21);
+	hmetvsnjetsboth_da_ee->SetMarkerColor(col_ee);
+	hmetvsnjetsboth_da_ee->SetMarkerSize(1.4);
+	hmetvsnjetsboth_da_ee->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsboth_da_ee->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetsboth_da_em->SetMarkerStyle(23);
+	hmetvsnjetsboth_da_em->SetMarkerColor(col_em);
+	hmetvsnjetsboth_da_em->SetMarkerSize(1.7  );
+	hmetvsnjetsboth_da_em->GetYaxis()->SetTitleOffset(1.4);
+	hmetvsnjetsboth_da_em->GetXaxis()->SetNdivisions(500);
+
+	hmetvsnjetsboth_da_mm->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsboth_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetsboth_da_ee->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsboth_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsnjetsboth_da_em->SetXTitle(KinPlots::axis_label[2]);
+	hmetvsnjetsboth_da_em->SetYTitle(KinPlots::axis_label[1]);
+
 	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
 	// TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
@@ -3712,16 +3838,41 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 ///////////// FROM SIGEVENTS TREE
 
 	// TGraphs:
-	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000.);
-	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000.);
-	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000.);
+	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 0);
+	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 0);
+	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 0);
 	// TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, HT0MET120);
 	// TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, HT0MET120);
 	// TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, HT0MET120);
+	TGraph *gmetvsnjets_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 1);
+	TGraph *gmetvsnjets_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 1);
+	TGraph *gmetvsnjets_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 1);
+	TGraph *gmetvsnjetswithb_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 2);
+	TGraph *gmetvsnjetswithb_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 2);
+	TGraph *gmetvsnjetswithb_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 2);
+	TGraph *gmetvsnjetsnob_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 3);
+	TGraph *gmetvsnjetsnob_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 3);
+	TGraph *gmetvsnjetsnob_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 3);
+	TGraph *gmetvsnjetsboth_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000., 4);
+	TGraph *gmetvsnjetsboth_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000., 4);
+	TGraph *gmetvsnjetsboth_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000., 4);
 
-	TGraph *gmetvsht_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120.);
-	TGraph *gmetvsht_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120.);
-	TGraph *gmetvsht_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120.);
+
+	TGraph *gmetvsht_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120., 0);
+	TGraph *gmetvsht_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120., 0);
+	TGraph *gmetvsht_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120., 0);
+	TGraph *gmetvsnjets_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120., 1);
+	TGraph *gmetvsnjets_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120., 1);
+	TGraph *gmetvsnjets_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120., 1);
+	TGraph *gmetvsnjetswithb_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120., 2);
+	TGraph *gmetvsnjetswithb_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120., 2);
+	TGraph *gmetvsnjetswithb_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120., 2);
+	TGraph *gmetvsnjetsnob_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120., 3);
+	TGraph *gmetvsnjetsnob_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120., 3);
+	TGraph *gmetvsnjetsnob_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120., 3);
+	TGraph *gmetvsnjetsboth_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120., 4);
+	TGraph *gmetvsnjetsboth_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120., 4);
+	TGraph *gmetvsnjetsboth_da_em_ex = getSigEventGraph(ElMu, 0., 7000., 0., 120., 4);
 
 	gmetvsht_da_mm_ex->SetMarkerColor(16);
     gmetvsht_da_ee_ex->SetMarkerColor(16);
@@ -3729,6 +3880,30 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gmetvsht_da_mm_ex->SetMarkerSize(1.2);
     gmetvsht_da_ee_ex->SetMarkerSize(1.2);
     gmetvsht_da_em_ex->SetMarkerSize(1.2);
+	gmetvsnjets_da_mm_ex->SetMarkerColor(16);
+    gmetvsnjets_da_ee_ex->SetMarkerColor(16);
+    gmetvsnjets_da_em_ex->SetMarkerColor(16);
+	gmetvsnjets_da_mm_ex->SetMarkerSize(1.2);
+    gmetvsnjets_da_ee_ex->SetMarkerSize(1.2);
+    gmetvsnjets_da_em_ex->SetMarkerSize(1.2);
+	gmetvsnjetswithb_da_mm_ex->SetMarkerColor(16);
+    gmetvsnjetswithb_da_ee_ex->SetMarkerColor(16);
+    gmetvsnjetswithb_da_em_ex->SetMarkerColor(16);
+	gmetvsnjetswithb_da_mm_ex->SetMarkerSize(1.2);
+    gmetvsnjetswithb_da_ee_ex->SetMarkerSize(1.2);
+    gmetvsnjetswithb_da_em_ex->SetMarkerSize(1.2);
+	gmetvsnjetsnob_da_mm_ex->SetMarkerColor(16);
+    gmetvsnjetsnob_da_ee_ex->SetMarkerColor(16);
+    gmetvsnjetsnob_da_em_ex->SetMarkerColor(16);
+	gmetvsnjetsnob_da_mm_ex->SetMarkerSize(1.2);
+    gmetvsnjetsnob_da_ee_ex->SetMarkerSize(1.2);
+    gmetvsnjetsnob_da_em_ex->SetMarkerSize(1.2);
+	gmetvsnjetsboth_da_mm_ex->SetMarkerColor(16);
+    gmetvsnjetsboth_da_ee_ex->SetMarkerColor(16);
+    gmetvsnjetsboth_da_em_ex->SetMarkerColor(16);
+	gmetvsnjetsboth_da_mm_ex->SetMarkerSize(1.2);
+    gmetvsnjetsboth_da_ee_ex->SetMarkerSize(1.2);
+    gmetvsnjetsboth_da_em_ex->SetMarkerSize(1.2);
 
 ///////////////////////
 
@@ -3813,6 +3988,19 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	boxborder1->SetLineColor(14);
 	boxborder2->SetLineColor(14);
 
+	TWbox *lowhtbox1  = new TWbox(0.,      0., 0., metmax, kBlack, 0, 0);
+	TWbox *lowmetbox1 = new TWbox(0., metmin, njetsmax, minmet, kBlack, 0, 0);
+	lowhtbox1 ->SetFillColor(12);
+	lowmetbox1->SetFillColor(12);
+	lowhtbox1 ->SetFillStyle(3005);
+	lowmetbox1->SetFillStyle(3005);
+	TLine *boxborder11 = new TLine(0., minmet, 0., metmax);
+	TLine *boxborder21 = new TLine(0., minmet, njetsmax,   minmet);
+	boxborder11->SetLineWidth(1);
+	boxborder21->SetLineWidth(1);
+	boxborder11->SetLineColor(14);
+	boxborder21->SetLineColor(14);
+
 	TLine *sig1 = new TLine(lowerht, 200., htmax, 200.); // met 120 ht 80
 
 	sig1->SetLineWidth(2);
@@ -3828,6 +4016,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	regleg->SetBorderSize(0);
 	
 
+	// HT vs. MET plot first
 	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
 	c_temp->cd();
 	c_temp->SetRightMargin(0.05);
@@ -3872,11 +4061,210 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, "HTvsMET_NoHT", fOutputDir + fOutputSubDir);
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	// make lines for every jet multiplicity
+	gStyle->SetLineStyleString(11, "30 60");
+	gStyle->SetLineStyleString(12, "20 60");
+	TLine *njets1 = new TLine(0.5, metmin, 0.5, metmax);
+	njets1->SetLineWidth(2);
+	njets1->SetLineStyle(12);
+	TLine *njets2 = new TLine(1.5, metmin, 1.5, 400.);
+	njets2->SetLineWidth(2);
+	njets2->SetLineStyle(12);
+	TLine *njets3 = new TLine(2.5, metmin, 2.5, metmax);
+	njets3->SetLineWidth(2);
+	njets3->SetLineStyle(12);
+	TLine *njets4 = new TLine(3.5, metmin, 3.5, metmax);
+	njets4->SetLineWidth(2);
+	njets4->SetLineStyle(12);
+	TLine *njets5 = new TLine(4.5, metmin, 4.5, 400.);
+	njets5->SetLineWidth(2);
+	njets5->SetLineStyle(12);
+
+	// NJETS vs. MET plot second
+	TCanvas *c_temp1 = new TCanvas("C_NjetsvsMET", "Njets vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp1->cd();
+	c_temp1->SetRightMargin(0.05);
+	c_temp1->SetLeftMargin(0.13);
+
+	hmetvsnjets_da_mm->DrawCopy("axis");
+
+	gmetvsnjets_da_mm_ex->Draw("P");
+	gmetvsnjets_da_ee_ex->Draw("P");
+	gmetvsnjets_da_em_ex->Draw("P");
+
+	lowhtbox1 ->Draw();
+	lowmetbox1->Draw();
+	boxborder11->Draw();
+	boxborder21->Draw();
+
+	// sig1->Draw();
+	njets1->Draw();
+	njets2->Draw();
+	njets3->Draw();
+	njets4->Draw();
+	njets5->Draw();
+
+	lat->DrawLatex(0.27,0.78, "#splitline{N_{b-jets}^{loose} = 0 (left)}{N_{b-jets}^{loose} #geq 1 (right)}" );
+	// Graphs
+	gmetvsnjets_da_ee->Draw("P");
+	gmetvsnjets_da_em->Draw("P");
+	gmetvsnjets_da_mm->Draw("P");
+	
+	
+	leg->Draw();
+	// leg2->Draw();
+	// regleg->Draw();
+
+	drawTopLine(0.53, 0.8);
+	gPad->RedrawAxis();
+
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp1, "NjetsvsMET_NoHT", fOutputDir + fOutputSubDir);
+
+	// NJETS vs. MET plot with btags third
+	TCanvas *c_temp2 = new TCanvas("C_NjetsvsMET", "Njets vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp2->cd();
+	c_temp2->SetRightMargin(0.05);
+	c_temp2->SetLeftMargin(0.13);
+
+	hmetvsnjetswithb_da_mm->DrawCopy("axis");
+
+	gmetvsnjetswithb_da_mm_ex->Draw("P");
+	gmetvsnjetswithb_da_ee_ex->Draw("P");
+	gmetvsnjetswithb_da_em_ex->Draw("P");
+
+	lowhtbox1 ->Draw();
+	lowmetbox1->Draw();
+	boxborder11->Draw();
+	boxborder21->Draw();
+
+	// sig1->Draw();
+	njets1->Draw();
+	njets2->Draw();
+	njets3->Draw();
+	njets4->Draw();
+	njets5->Draw();
+
+	lat->DrawLatex(0.30,0.78, "N_{b-jets}^{loose} #geq 1" );
+	// Graphs
+	gmetvsnjetswithb_da_ee->Draw("P");
+	gmetvsnjetswithb_da_em->Draw("P");
+	gmetvsnjetswithb_da_mm->Draw("P");
+	
+	
+	leg->Draw();
+	// leg2->Draw();
+	// regleg->Draw();
+
+	drawTopLine(0.53, 0.8);
+	gPad->RedrawAxis();
+
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp2, "NjetsvsMET_NoHT_withBTags", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
-	delete c_temp;
+
+	// NJETS vs. MET plot no btags fourth
+	TCanvas *c_temp3 = new TCanvas("C_NjetsvsMET", "Njets vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp3->cd();
+	c_temp3->SetRightMargin(0.05);
+	c_temp3->SetLeftMargin(0.13);
+
+	hmetvsnjetsnob_da_mm->DrawCopy("axis");
+
+	gmetvsnjetsnob_da_mm_ex->Draw("P");
+	gmetvsnjetsnob_da_ee_ex->Draw("P");
+	gmetvsnjetsnob_da_em_ex->Draw("P");
+
+	lowhtbox1 ->Draw();
+	lowmetbox1->Draw();
+	boxborder11->Draw();
+	boxborder21->Draw();
+
+	// sig1->Draw();
+	njets1->Draw();
+	njets2->Draw();
+	njets3->Draw();
+	njets4->Draw();
+	njets5->Draw();
+	lat->DrawLatex(0.30,0.78, "N_{b-jets}^{loose} = 0" );
+
+	// Graphs
+	gmetvsnjetsnob_da_ee->Draw("P");
+	gmetvsnjetsnob_da_em->Draw("P");
+	gmetvsnjetsnob_da_mm->Draw("P");
+	
+	
+	leg->Draw();
+	// leg2->Draw();
+	// regleg->Draw();
+
+	drawTopLine(0.53, 0.8);
+	gPad->RedrawAxis();
+
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp3, "NjetsvsMET_NoHT_noBTags", fOutputDir + fOutputSubDir);
+	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+
+	// NJETS vs. MET plot with both fifth
+	TCanvas *c_temp4 = new TCanvas("C_NjetsvsMET", "Njets vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp4->cd();
+	c_temp4->SetRightMargin(0.05);
+	c_temp4->SetLeftMargin(0.13);
+
+	hmetvsnjetsboth_da_mm->DrawCopy("axis");
+
+	gmetvsnjetsboth_da_mm_ex->Draw("P");
+	gmetvsnjetsboth_da_ee_ex->Draw("P");
+	gmetvsnjetsboth_da_em_ex->Draw("P");
+
+	lowhtbox1 ->Draw();
+	lowmetbox1->Draw();
+	boxborder11->Draw();
+	boxborder21->Draw();
+
+	// sig1->Draw();
+	njets1->Draw();
+	njets2->Draw();
+	njets3->Draw();
+	njets4->Draw();
+	njets5->Draw();
+	lat->DrawLatex(0.30,0.78, "N_{b-jets}^{loose} #geq 0" );
+
+	// Graphs
+	gmetvsnjetsboth_da_ee->Draw("P");
+	gmetvsnjetsboth_da_em->Draw("P");
+	gmetvsnjetsboth_da_mm->Draw("P");
+	
+	
+	leg->Draw();
+	// leg2->Draw();
+	// regleg->Draw();
+
+	drawTopLine(0.53, 0.8);
+	gPad->RedrawAxis();
+
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp4, "NjetsvsMET_NoHT_both", fOutputDir + fOutputSubDir);
+	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+
+	delete c_temp, c_temp1, c_temp2, c_temp3;
 	delete leg, regleg;
 	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
 	delete gmetvsht_da_mm, gmetvsht_da_ee, gmetvsht_da_em;//, hmetvsht_mc;
+	delete hmetvsnjets_da_mm, hmetvsnjets_da_ee, hmetvsnjets_da_em;//, hmetvsnjets_mc;
+	delete gmetvsnjets_da_mm, gmetvsnjets_da_ee, gmetvsnjets_da_em;//, hmetvsnjets_mc;
+	delete hmetvsnjetswithb_da_mm, hmetvsnjetswithb_da_ee, hmetvsnjetswithb_da_em;
+	delete gmetvsnjetswithb_da_mm, gmetvsnjetswithb_da_ee, gmetvsnjetswithb_da_em;
+	delete hmetvsnjetsnob_da_mm, hmetvsnjetsnob_da_ee, hmetvsnjetsnob_da_em;
+	delete gmetvsnjetsnob_da_mm, gmetvsnjetsnob_da_ee, gmetvsnjetsnob_da_em;
+	delete hmetvsnjetsboth_da_mm, hmetvsnjetsboth_da_ee, hmetvsnjetsboth_da_em;
+	delete gmetvsnjetsboth_da_mm, gmetvsnjetsboth_da_ee, gmetvsnjetsboth_da_em;
 }
 void SSDLPlotter::makeMETvsHTPlotTau(){
 	fOutputSubDir = "KinematicPlots/HTvsMET/";
@@ -11657,12 +12045,14 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, gRegion reg){
 	
 	return sigevents;
 }
-TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, float METmin, float METmax){
+TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, float METmin, float METmax, int which){
 	TString channame = "MM";
 	if(chan == Elec) channame = "EE";
 	if(chan == ElMu) channame = "EM";
 	vector<float> ht;
 	vector<float> met;
+	vector<float> nj;
+	vector<int> nb;
 
 	TFile *pFile = TFile::Open(fOutputFileName);
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
@@ -11671,6 +12061,7 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, f
 	int flag;
 	int   stype, flav, cat;
 	float HT, MET;
+	int njets, nbjets;
 
 	sigtree->SetBranchAddress("SystFlag", &flag);
 	sigtree->SetBranchAddress("SName",    &sname);
@@ -11679,6 +12070,8 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, f
 	sigtree->SetBranchAddress("TLCat",    &cat);
 	sigtree->SetBranchAddress("HT",       &HT);
 	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("NbJ",      &nbjets);
+	sigtree->SetBranchAddress("NJ",       &njets);
 	
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
@@ -11694,28 +12087,69 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, f
 		if(HT  < HTmin  || HT  > HTmax ) continue;
 		if(MET < METmin || MET > METmax) continue;
 		
-		ht.push_back(HT);
-		met.push_back(MET);
+		// ht.push_back(HT);
+		// met.push_back(MET);
+		if ( which == 0 ) { nj.push_back(njets); ht.push_back(HT); met.push_back(MET);}
+		else if(which == 1) {
+			if (njets > 0 && nbjets >  0) {
+				if      (njets <  5) {nj.push_back(njets + 0.25); ht.push_back(HT); met.push_back(MET);}
+				else if (njets >= 5) {nj.push_back(5.25); ht.push_back(HT); met.push_back(MET);}
+			}
+			else if (njets > 0 && nbjets == 0) {
+				if      (njets <  5) {nj.push_back(njets - 0.25); ht.push_back(HT); met.push_back(MET);}
+				else if (njets >= 5) {nj.push_back(4.75); ht.push_back(HT); met.push_back(MET);}
+			}
+			else if (njets == 0) {nj.push_back(njets); ht.push_back(HT); met.push_back(MET);}
+		}
+		else if ( which == 2 && nbjets > 0){
+			if      (njets <= 5) {nj.push_back(njets); ht.push_back(HT); met.push_back(MET);}
+			else if (njets >  5) {nj.push_back(5); ht.push_back(HT); met.push_back(MET);}
+		}
+		else if ( which == 3 && nbjets == 0){
+			if      (njets <= 5) {nj.push_back(njets); ht.push_back(HT); met.push_back(MET);}
+			else if (njets >  5) {nj.push_back(5); ht.push_back(HT); met.push_back(MET);}
+		}
+		else if ( which == 4){
+			if      (njets <= 5) {nj.push_back(njets); ht.push_back(HT); met.push_back(MET);}
+			else if (njets >  5) {nj.push_back(5); ht.push_back(HT); met.push_back(MET);}
+		}
+		// nj.push_back(njets);
+		// nb.push_back(nbjets);
 	}
 	
-	const int nsig = ht.size();
+	const int nsig  = ht.size();
 	float ht_a [nsig];
 	float met_a[nsig];
+	float nj_a[nj.size()];
 	for(size_t i = 0; i < ht.size(); ++i){
 		ht_a[i] = ht[i];
 		met_a[i] = met[i];
+	}
+	for(size_t i = 0; i < nj.size(); ++i){
+		nj_a[i] = nj[i];
 	}
 	
 	Color_t color[3] = {kBlack, kBlue, kRed};
 	Size_t size = 1.5;
 	Style_t style[3] = {8, 23, 21};
 	
-	TGraph *sigevents = new TGraph(nsig, ht_a, met_a);
-	sigevents->SetName(Form("HT%4.0f-%4.0f_MET%4.0f-%4.0f_%s_SigEvents", HTmin, HTmax, METmin, METmax, channame.Data()));
-	
-	sigevents->SetMarkerColor(color[chan]);
-	sigevents->SetMarkerStyle(style[chan]);
-	sigevents->SetMarkerSize(size);
+	TGraph *sigevents;// = new TGraph(nsig, ht_a, met_a);
+	if (which == 0) {
+		sigevents = new TGraph(nsig, ht_a, met_a);
+		sigevents->SetName(Form("HT%4.0f-%4.0f_MET%4.0f-%4.0f_%s_SigEvents", HTmin, HTmax, METmin, METmax, channame.Data()));
+		
+		sigevents->SetMarkerColor(color[chan]);
+		sigevents->SetMarkerStyle(style[chan]);
+		sigevents->SetMarkerSize(size);
+	}
+	if (which > 0) {
+		sigevents = new TGraph(nj.size(), nj_a, met_a);
+		sigevents->SetName(Form("HT%4.0f-%4.0f_MET%4.0f-%4.0f_%s_SigEvents", HTmin, HTmax, METmin, METmax, channame.Data()));
+		
+		sigevents->SetMarkerColor(color[chan]);
+		sigevents->SetMarkerStyle(style[chan]);
+		sigevents->SetMarkerSize(size);
+	}
 	
 	return sigevents;
 }
@@ -12650,15 +13084,17 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 			if (m0 == xvals[1]) x = 1;
 			if (m0 == xvals[2]) x = 2;
 
-			if (!doSystematic) { if (i!=0) continue; }
+			if (!doSystematic && i!=0) continue;
 			if (i == 1) smearMET(S);
 			if (i == 2) scaleLeptons(S, 1);
 			if (i == 3) scaleLeptons(S, 2);
 			if (i == 4) smearJetPts(S, 1);
 			if (i == 5) smearJetPts(S, 2);
 			if (i == 6) smearJetPts(S, 3);
-			if (i == 7) {pfMET = pfMET + 0.05 * pfMET; }
-			if (i == 8) {pfMET = pfMET - 0.05 * pfMET; }
+			if (i == 7) scaleMET(S, 0);
+			if (i == 8) scaleMET(S, 1);
+			// fancier now if (i == 9) {pfMET = pfMET + 0.05 * pfMET; }
+			// fancier now if (i ==10) {pfMET = pfMET - 0.05 * pfMET; }
 			int   xsecBin      = xsecs->FindBin(mGlu);
 			float nloXsec      = xsecs->GetBinContent(xsecBin);
 			int   nGenBin      = TChi_nTot_[x]->FindBin(mGlu, mLSP);

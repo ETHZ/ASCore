@@ -46,7 +46,7 @@ using namespace std;
 static const float gMaxJetEta  = 2.5;
 static const float gMuMaxIso   = 0.10;
 static const float gElMaxIso   = 0.09;
-static const float gMinJetPt   = 40.;
+static  float gMinJetPt   = 40.;
 static const bool  gApplyZVeto = true;
 static const bool  gApplyTauVeto = true;
 static const bool  gInvertZVeto = false;
@@ -3551,12 +3551,59 @@ void SSDLDumper::scaleBTags(Sample *S, int flag){
 		if( is_tagged_lse &&  is_tagged_med) JetCSVBTag[i] = 1.0; // medium tagged
 	}
 }
+void SSDLDumper::scaleMET(Sample *S, int flag){
+	// first try on MET uncertainty
+	if(S->datamc == 0) return; // don't scale data
+	TLorentzVector umet, jets, leps, tmp;
+	tmp.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
+	umet += tmp; // add met
+	tmp.SetPtEtaPhiM(0., 0., 0., 0.); // reset
+	// subtract jets
+	gMinJetPt = 15.;
+	for (int i=0; i<NJets; i++) {
+		if (!isGoodJet(i)) continue;
+		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+		umet += tmp;
+		jets += tmp;
+		tmp.SetPtEtaPhiE(0., 0., 0., 0.);
+	}
+	// subtract muons
+	for (int i=0; i<NMus; i++) {
+		if (!isGoodMuon(i, 5.)) continue;
+		tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+		umet += tmp;
+		leps += tmp;
+		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	}
+	// subtract electrons
+	for (int i=0; i<NEls; i++) {
+		if (!isGoodElectron(i, 5.)) continue;
+		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+		umet += tmp;
+		leps += tmp;
+		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	}
+	// scale the unclustered energy by 10%
+	if (flag == 0) tmp.SetPtEtaPhiE(1.1 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
+	if (flag == 0) tmp.SetPtEtaPhiE(0.9 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
+	tmp -= leps;
+	tmp -= jets;
+	// reset the minPt cut for the jets . this is important!
+	gMinJetPt = 40.;
+	
+}
+void SSDLDumper::propagateMET(TLorentzVector foo){
+	TLorentzVector met;
+	met.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
+	pfMET = (met+foo).Pt();
+}
 void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Modify the jet pt for systematics studies
 	// Either shifted or smeared
-	// TRandom3 * myRand = new TRandom3(0);
+	// propagate to the MET!!
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
+	TLorentzVector jets, tmp;
 	for(size_t i = 0; i < NJets; ++i){
 		if(flag == 1){ JetPt[i] += JetJECUncert[i]*JetPt[i]; continue; }
 		if(flag == 2){ JetPt[i] -= JetJECUncert[i]*JetPt[i]; continue; }
@@ -3564,23 +3611,32 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 			if(JetGenPt[i] > -100.)	JetPt[i] = TMath::Max(float(0.), JetGenPt[i] + getJERScale(i)*(JetPt[i] - JetGenPt[i]));
 			else                    JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));
 		}
+		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+		jets += tmp;
 	}
+	propagateMET(jets);
 }
 void SSDLDumper::scaleLeptons(Sample *S, int flag){
 	// Shift the lepton pts for systematics studies
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
 	float scale = 0.02;
+	TLorentzVector leps, tmp;
 	for(size_t i = 0; i < NMus; ++i){
 		// marc scale = getMuScale(MuPt[i], MuEta[i]);
 		if(flag == 1) MuPt[i] += scale*MuPt[i];
 		if(flag == 2) MuPt[i] -= scale*MuPt[i];
+		tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+		leps += tmp;
 	}
 	for(size_t i = 0; i < NEls; ++i){
 		// marc scale = getElScale(ElPt[i], ElEta[i]);
 		if(flag == 1) ElPt[i] += scale*ElPt[i];
 		if(flag == 2) ElPt[i] -= scale*ElPt[i];
+		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+		leps += tmp;
 	}
+	propagateMET(leps);
 }
 void SSDLDumper::smearMET(Sample *S){
 	if(S->datamc == 0) return; // don't smear data

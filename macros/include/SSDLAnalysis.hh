@@ -79,6 +79,9 @@ private:
 	static const int fMaxNeles = 5;
 	static const int fMaxNtaus = 5;
 	
+	static const int nx = 3;
+	static const float x_values[nx]; // = {0.05, 0.5, 0.95};
+
 	static TString gBaseDir;
 	
 	JetCorrectionUncertainty *fJetCorrUnc;
@@ -86,26 +89,16 @@ private:
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
 	TH2D* fProcessCount[10];
-	TH2D* fRightHandedSlepCount;
-	TH2D* fRightHandedSlepCountp25;
-	TH2D* fRightHandedSlepCountp50;
-	TH2D* fRightHandedSlepCountp75;
-	TH2D* fRightHandedCount;
-	TH2D* fRightHandedCountp25;
-	TH2D* fRightHandedCountp50;
-	TH2D* fRightHandedCountp75;
-	TH2D* fTChiSlepSlepCount;
-	TH2D* fTChiSlepSlepCountp25;
-	TH2D* fTChiSlepSlepCountp50;
-	TH2D* fTChiSlepSlepCountp75;
-	TH2D* fTChiSlepSnuCount;
-	TH2D* fTChiSlepSnuCountp25;
-	TH2D* fTChiSlepSnuCountp50;
-	TH2D* fTChiSlepSnuCountp75;
-	TH2D* fTChiStauStauCount;
-	TH2D* fTChiStauStauCountp25;
-	TH2D* fTChiStauStauCountp50;
-	TH2D* fTChiStauStauCountp75;
+	TH2D* fRightHandedSlepCountAll;
+	TH2D* fRightHandedCountAll;
+	TH2D* fTChiSlepSlepCountAll;
+	TH2D* fTChiSlepSnuCountAll;
+	TH2D* fModelCountAll;
+	TH2D* fRightHandedSlepCount[nx];
+	TH2D* fRightHandedCount[nx];
+	TH2D* fTChiSlepSlepCount[nx];
+	TH2D* fTChiSlepSnuCount[nx];
+	TH2D* fModelCount[nx];
 	
 	/////////////////////////////////////
 	// Tree branches
@@ -143,7 +136,7 @@ private:
 	// MARC float fTJetbtag3[fMaxNjets]; // TCHP
 	// MARC float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
-	float fTJetJECUncert[fMaxNjets];
+	float fTJetJEC[fMaxNjets];
 	int   fTJetPartonID[fMaxNjets];
 	float fTJetGenpt [fMaxNjets];
 	float fTJetGeneta[fMaxNjets];

@@ -10,6 +10,8 @@ using namespace std;
 const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
+const int SSDLAnalysis::nx;
+const float SSDLAnalysis::x_values[nx] =  {0.05, 0.5, 0.95};
 
 
 TString SSDLAnalysis::gBaseDir = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/";
@@ -35,7 +37,7 @@ SSDLAnalysis::~SSDLAnalysis(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Begin(const char* filename){
-	cout << "DEBUG: " << __LINE__ << endl;
+	// cout << "DEBUG: " << __LINE__ << endl;
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL_2012.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
 
@@ -45,26 +47,19 @@ void SSDLAnalysis::Begin(const char* filename){
 		for (int i=0; i<10; i++) {
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
-		fRightHandedSlepCount   = new TH2D("RightHandedSlepCount", "RightHandedSlepCount",101, -5,1005,101, -5,1005);
-		fRightHandedSlepCountp25= new TH2D("RightHandedSlepCountp25", "RightHandedSlepCountp25",101, -5,1005,101, -5,1005);
-		fRightHandedSlepCountp50= new TH2D("RightHandedSlepCountp50", "RightHandedSlepCountp50",101, -5,1005,101, -5,1005);
-		fRightHandedSlepCountp75= new TH2D("RightHandedSlepCountp75", "RightHandedSlepCountp75",101, -5,1005,101, -5,1005);
-		fRightHandedCount   = new TH2D("RightHandedCount", "RightHandedCount",101, -5,1005,101, -5,1005);
-		fRightHandedCountp25= new TH2D("RightHandedCountp25", "RightHandedCountp25",101, -5,1005,101, -5,1005);
-		fRightHandedCountp50= new TH2D("RightHandedCountp50", "RightHandedCountp50",101, -5,1005,101, -5,1005);
-		fRightHandedCountp75= new TH2D("RightHandedCountp75", "RightHandedCountp75",101, -5,1005,101, -5,1005);
-		fTChiSlepSlepCount = new TH2D("TChiSlepSlepCount", "TChiSlepSlepCount",101, -5,1005,101, -5,1005);
-		fTChiSlepSlepCountp25= new TH2D("TChiSlepSlepCountp25", "TChiSlepSlepCountp25",101, -5,1005,101, -5,1005);
-		fTChiSlepSlepCountp50= new TH2D("TChiSlepSlepCountp50", "TChiSlepSlepCountp50",101, -5,1005,101, -5,1005);
-		fTChiSlepSlepCountp75= new TH2D("TChiSlepSlepCountp75", "TChiSlepSlepCountp75",101, -5,1005,101, -5,1005);
-		fTChiSlepSnuCount  = new TH2D("TChiSlepSnuCount" , "TChiSlepSnuCount" ,101, -5,1005,101, -5,1005);
-		fTChiSlepSnuCountp25  = new TH2D("TChiSlepSnuCountp25" , "TChiSlepSnuCountp25" ,101, -5,1005,101, -5,1005);
-		fTChiSlepSnuCountp50  = new TH2D("TChiSlepSnuCountp50" , "TChiSlepSnuCountp50" ,101, -5,1005,101, -5,1005);
-		fTChiSlepSnuCountp75  = new TH2D("TChiSlepSnuCountp75" , "TChiSlepSnuCountp75" ,101, -5,1005,101, -5,1005);
-		fTChiStauStauCount = new TH2D("TChiStauStauCount", "TChiStauStauCount",101, -5,1005,101, -5,1005);
-		fTChiStauStauCountp25 = new TH2D("TChiStauStauCountp25", "TChiStauStauCountp25",101, -5,1005,101, -5,1005);
-		fTChiStauStauCountp50 = new TH2D("TChiStauStauCountp50", "TChiStauStauCountp50",101, -5,1005,101, -5,1005);
-		fTChiStauStauCountp75 = new TH2D("TChiStauStauCountp75", "TChiStauStauCountp75",101, -5,1005,101, -5,1005);
+		// define all x-values for your scan in the header before running this code!
+		fRightHandedSlepCountAll    = new TH2D("RightHandedSlepCountAll" , "RightHandedSlepCountAll" , 101 , -5 , 1005 , 101 , -5 , 1005);
+		fRightHandedCountAll        = new TH2D("RightHandedCountAll"     , "RightHandedCountAll"     , 101 , -5 , 1005 , 101 , -5 , 1005);
+		fTChiSlepSlepCountAll       = new TH2D("TChiSlepSlepCountAll"    , "TChiSlepSlepCountAll"    , 101 , -5 , 1005 , 101 , -5 , 1005);
+		fTChiSlepSnuCountAll        = new TH2D("TChiSlepSnuCountAll"     , "TChiSlepSnuCountAll"     , 101 , -5 , 1005 , 101 , -5 , 1005);
+		fModelCountAll              = new TH2D("ModelCountAll"           , "ModelCountAll"           , 101 , -5 , 1005 , 101 , -5 , 1005);
+		for (int i = 0; i < nx; ++i) {
+			fRightHandedSlepCount[i] = new TH2D(Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+			fRightHandedCount[i]     = new TH2D(Form("RightHandedCount%.0f"     , 100*x_values[i]) , Form("RightHandedCount%.0f"     , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+			fTChiSlepSlepCount[i]    = new TH2D(Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+			fTChiSlepSnuCount[i]     = new TH2D(Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+			fModelCount[i]           = new TH2D(Form("ModelCount%.0f"           , 100*x_values[i]) , Form("ModelCount%.0f"           , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+		}
 	}
 	BookTree();
 	fHEvCount = new TH1F("EventCount", "Event Counter", 1, 0., 1.); // count number of generated events
@@ -78,26 +73,18 @@ void SSDLAnalysis::End(){
 		for (int i=0; i<10; i++) {
 			fProcessCount[i]->Write();
 		}
-		fRightHandedSlepCount->Write();
-		fRightHandedSlepCountp25->Write();
-		fRightHandedSlepCountp50->Write();
-		fRightHandedSlepCountp75->Write();
-		fRightHandedCount->Write();
-		fRightHandedCountp25->Write();
-		fRightHandedCountp50->Write();
-		fRightHandedCountp75->Write();
-		fTChiSlepSlepCount->Write();
-		fTChiSlepSlepCountp25->Write();
-		fTChiSlepSlepCountp50->Write();
-		fTChiSlepSlepCountp75->Write();
-		fTChiSlepSnuCount ->Write();
-		fTChiSlepSnuCountp25 ->Write();
-		fTChiSlepSnuCountp50 ->Write();
-		fTChiSlepSnuCountp75 ->Write();
-		fTChiStauStauCount ->Write();
-		fTChiStauStauCountp25->Write();
-		fTChiStauStauCountp50->Write();
-		fTChiStauStauCountp75->Write();
+		fRightHandedSlepCountAll -> Write();
+		fRightHandedCountAll     -> Write();
+		fTChiSlepSlepCountAll    -> Write();
+		fTChiSlepSnuCountAll     -> Write();
+		fModelCountAll           -> Write();
+		for (int i = 0; i < nx; ++i) {
+			fRightHandedSlepCount [i] -> Write();
+			fRightHandedCount     [i] -> Write();
+			fTChiSlepSlepCount    [i] -> Write();
+			fTChiSlepSnuCount     [i] -> Write();
+			fModelCount           [i] -> Write();
+		}
 	}
 	fOutputFile->cd();
 	fHEvCount->Write();
@@ -313,7 +300,7 @@ void SSDLAnalysis::BookTree(){
 	// MARC fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
 	// MARC fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
-	fAnalysisTree->Branch("JetJECUncert",  &fTJetJECUncert,"JetJECUncert[NJets]/F");
+	fAnalysisTree->Branch("JetJEC",        &fTJetJEC,      "JetJEC[NJets]/F");
 	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
 	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,   "JetGenPt[NJets]/F");
 	fAnalysisTree->Branch("JetGenEta",     &fTJetGeneta,   "JetGenEta[NJets]/F");
@@ -354,8 +341,13 @@ void SSDLAnalysis::FillAnalysisTree(){
 	bool isRightHanded(false);
 	float x(0);
 	if (!fIsData){
+		// --------- all the necessary histograms for counting nEvents in an SMS scan are put here. it's a bit messy
+		// ---------------------------------------------------------------------------------------------------------
 		fMsugraCount->Fill(fTR->M0, fTR->M12);
 		if (fTR->process > 0 && fTR->process < 11) fProcessCount[(fTR->process)-1]->Fill(fTR->M0, fTR->M12);
+		// define some SMS relevant variables here:
+		// isRightHanded: chargino1 decays into taus
+		// TChiSlepSnu 	: charged leptons come from chargino1 ...
 		for (int i = 0; i < fTR->NGenLeptons; i++) {
 			if ( abs(fTR->GenLeptonID[i]) == 15 || abs(fTR->GenLeptonID[i]) == 16 ) {  // 15 & 16 is tau family
 				if ( abs(fTR->GenLeptonMID[i]) == 1000024 ) isRightHanded = true; // 1000024 == chargino 1
@@ -364,29 +356,24 @@ void SSDLAnalysis::FillAnalysisTree(){
 			if ( abs(fTR->GenLeptonID[i]) == 12 || abs(fTR->GenLeptonID[i]) == 14 || abs(fTR->GenLeptonID[i]) == 16) continue; // 12, 14, 16 are neutrinos
 			if ( abs(fTR->GenLeptonMID[i]) == 1000024 ) TChiSlepSnu = true; // 1000024 == chargino 1
 		}
-		x = fTR->MassChi;
-		TChiSlepSnu ? fTChiSlepSnuCount->Fill(fTR->MassGlu, fTR->MassLSP) : fTChiSlepSlepCount->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCount->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && isRightHanded && x==0.25) fRightHandedSlepCountp25->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && isRightHanded && x==0.50) fRightHandedSlepCountp50->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && isRightHanded && x==0.75) fRightHandedSlepCountp75->Fill(fTR->MassGlu, fTR->MassLSP);
+		x = fTR->MassChi; // this doesn't make a lot of sense, but it's the way it is.
+		// MassGlu is the mass of the produced particle
+		// MassLSP is in fact the mass of the LSP
 
-		if (isRightHanded) fRightHandedCount->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (isRightHanded && x==0.25) fRightHandedCountp25->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (isRightHanded && x==0.50) fRightHandedCountp50->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (isRightHanded && x==0.75) fRightHandedCountp75->Fill(fTR->MassGlu, fTR->MassLSP);
+		// now finally filling the histograms
+		                                   fModelCountAll           -> Fill(fTR->MassGlu, fTR->MassLSP);
+		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(fTR->MassGlu, fTR->MassLSP);
+		if (isRightHanded)                 fRightHandedCountAll     -> Fill(fTR->MassGlu, fTR->MassLSP);
+		TChiSlepSnu ?                      fTChiSlepSnuCountAll     -> Fill(fTR->MassGlu, fTR->MassLSP) : fTChiSlepSlepCountAll->Fill(fTR->MassGlu, fTR->MassLSP);
 
-		if (TChiSlepSnu && x==0.25) fTChiSlepSnuCountp25->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (TChiSlepSnu && x==0.50) fTChiSlepSnuCountp50->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (TChiSlepSnu && x==0.75) fTChiSlepSnuCountp75->Fill(fTR->MassGlu, fTR->MassLSP);
+		for (int i=0; i<nx; ++i){ 
+			if (!TChiSlepSnu  && isRightHanded && x == x_values[i]) fRightHandedSlepCount[i] -> Fill( fTR->MassGlu, fTR->MassLSP);
+			if (isRightHanded &&                  x == x_values[i]) fRightHandedCount[i]     -> Fill( fTR->MassGlu, fTR->MassLSP);
+			if (TChiSlepSnu   &&                  x == x_values[i]) fTChiSlepSnuCount[i]     -> Fill( fTR->MassGlu, fTR->MassLSP);
+			if (!TChiSlepSnu  &&                  x == x_values[i]) fTChiSlepSlepCount[i]    -> Fill( fTR->MassGlu, fTR->MassLSP);
+			if (                                  x == x_values[i]) fModelCount[i]           -> Fill( fTR->MassGlu, fTR->MassLSP);
+		}
 
-		if (!TChiSlepSnu && x==0.25) fTChiSlepSlepCountp25->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && x==0.50) fTChiSlepSlepCountp50->Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && x==0.75) fTChiSlepSlepCountp75->Fill(fTR->MassGlu, fTR->MassLSP);
-		fTChiStauStauCount->Fill(fTR->MassGlu, fTR->MassLSP);
-		if(x ==0.25) fTChiStauStauCountp25->Fill(fTR->MassGlu, fTR->MassLSP);
-		if(x ==0.50) fTChiStauStauCountp50->Fill(fTR->MassGlu, fTR->MassLSP);
-		if(x ==0.75) fTChiStauStauCountp75->Fill(fTR->MassGlu, fTR->MassLSP);
 	}
 	// initial event selection: good event trigger, good primary vertex...
 	if( !IsGoodEvent() ) return;
@@ -448,7 +435,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetbtag1   [ind] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[jetindex];
 		fTJetbtag2   [ind] = fTR->JnewPFJetProbabilityBPFJetTags[jetindex];
 		fTJetArea    [ind] = fTR->JArea[jetindex];
-		fTJetJECUncert[ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex]);
+		fTJetJEC     [ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex])/fTR->JEcorr[jetindex];
 		fTJetPartonID[ind] = JetPartonMatch(jetindex);
 		int genjetind = GenJetMatch(jetindex);
 		if(genjetind > -1){
@@ -767,7 +754,7 @@ void SSDLAnalysis::ResetTree(){
 		// MARC fTJetbtag3[i]     = -999.99;
 		// MARC fTJetbtag4[i]     = -999.99;
 		fTJetArea[i]      = -999.99;
-		fTJetJECUncert[i] = -999.99;
+		fTJetJEC[i]       = -999.99;
 		fTJetPartonID[i]  = -999;
 		fTJetGenpt [i]    = -999.99;
 		fTJetGeneta[i]    = -999.99;
