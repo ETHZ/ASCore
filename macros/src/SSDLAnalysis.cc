@@ -254,6 +254,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElPFChIso",              &fTElPFchiso,           "ElPFChIso[NEls]/F");
 	fAnalysisTree->Branch("ElPFNeIso",              &fTElPFneiso,           "ElPFNeIso[NEls]/F");
 	fAnalysisTree->Branch("ElRadIso",               &fTElRadIso,            "ElRadIso[NEls]/F");
+	fAnalysisTree->Branch("ElMVAIDnoTrig",          &fTElMVAIDnoTrig,       "ElMVAIDnoTrig[NEls]/F");
+	fAnalysisTree->Branch("fTElMVAIDTrig",          &fTElMVAIDTrig,         "ElMVAIDTrig[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElHcalTowerSumEt",       &fTElHcalTowerSumEt,    "ElHcalTowerSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElTkSumPt",              &fTElTkSumPt,           "ElTkSumPt[NEls]/F");
@@ -530,6 +532,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 		double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[elindex]);
 		fTElPFneiso         [ind] = TMath::Max(0., neutral - rhocorr) / fTR->ElPt[elindex];
 		fTElRadIso          [ind] = ElRadIso(elindex);
+		fTElMVAIDnoTrig     [ind] = fTR->ElIDMVANoTrig[elindex];
+		fTElMVAIDTrig       [ind] = fTR->ElIDMVATrig[elindex];
 		
 		if(fIsData == false){ // mc truth information		
 			fTElGenID  [ind] = fTR->ElGenID  [elindex];
@@ -710,6 +714,8 @@ void SSDLAnalysis::ResetTree(){
 		fTElPFchiso         [i] = -999.99;
 		fTElPFneiso         [i] = -999.99;
 		fTElRadIso          [i] = -999.99;
+		fTElMVAIDnoTrig     [i] = -999.99;
+		fTElMVAIDTrig       [i] = -999.99;
 		fTElEcalRecHitSumEt [i] = -999.99;
 		fTElHcalTowerSumEt  [i] = -999.99;
 		fTElTkSumPt         [i] = -999.99;

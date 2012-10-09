@@ -188,6 +188,8 @@ private:
 	float fTElPFchiso        [fMaxNeles];
 	float fTElPFneiso        [fMaxNeles];
 	float fTElRadIso         [fMaxNeles];
+	float fTElMVAIDnoTrig    [fMaxNeles];
+	float fTElMVAIDTrig      [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
 	float fTElHcalTowerSumEt [fMaxNeles];
 	float fTElTkSumPt        [fMaxNeles];
