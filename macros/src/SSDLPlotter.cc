@@ -136,6 +136,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(ZZ);
 	// MARC fMCBG.push_back(GVJets);
 	fMCBG.push_back(DPSWW);
+	fMCBG.push_back(TTbarH);
 	fMCBG.push_back(TTbarW);
 	fMCBG.push_back(TTbarZ);
 	fMCBG.push_back(TTbarG);
@@ -178,6 +179,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(ZZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(GVJets);
 	fMCBGNoQCDNoGJets.push_back(DPSWW);
+	fMCBGNoQCDNoGJets.push_back(TTbarH);
 	fMCBGNoQCDNoGJets.push_back(TTbarW);
 	fMCBGNoQCDNoGJets.push_back(TTbarZ);
 	fMCBGNoQCDNoGJets.push_back(TTbarG);
@@ -211,6 +213,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(ZZ);
 	// MARC fMCBGMuEnr.push_back(GVJets);
 	fMCBGMuEnr.push_back(DPSWW);
+	fMCBGMuEnr.push_back(TTbarH);
 	fMCBGMuEnr.push_back(TTbarW);
 	fMCBGMuEnr.push_back(TTbarZ);
 	fMCBGMuEnr.push_back(TTbarG);
@@ -242,6 +245,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(ZZ);
 	// MARC fMCBGEMEnr.push_back(GVJets);
 	fMCBGEMEnr.push_back(DPSWW);
+	fMCBGEMEnr.push_back(TTbarH);
 	fMCBGEMEnr.push_back(TTbarW);
 	fMCBGEMEnr.push_back(TTbarZ);
 	fMCBGEMEnr.push_back(TTbarG);
@@ -263,6 +267,7 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZ);
 	// MARC fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
+	if(gEWKino)  fMCRareSM.push_back(TTbarH);
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
@@ -338,43 +343,45 @@ void SSDLPlotter::doAnalysis(){
 	// makePileUpPlots(true); // loops on all data!
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
-	// makeOriginPlots(Baseline);
-	//     printOrigins(Baseline);
-	// makeOriginPlots(HT0MET120);
-	// printOrigins(HT0MET120);
+	//	makeOriginPlots(Baseline);
+	//	printOrigins(Baseline);
+	makeOriginPlots(HT0MET120);
+	printOrigins(HT0MET120);
+	makeOriginPlots(HT0MET120lV);
+	printOrigins(HT0MET120lV);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIdPlots();
-	// makeNT2KinPlots(false);
-	// makeNT2KinPlots(true);
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIdPlots();
+	makeNT2KinPlots(false);
+	makeNT2KinPlots(true);
 	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
 	// makeMETvsHTPlotPRL();
 	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// make2DRatioPlots(Muon);
-	// make2DRatioPlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
 	// // makeNTightLoosePlots(Muon);
 	// // makeNTightLoosePlots(Elec);
 	// 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 
-	// makeAllClosureTests();
-	// makeAllIntPredictions();
-    //     
-	// makeDiffPrediction();
+	makeAllClosureTests();
+	makeAllIntPredictions();
+
+	makeDiffPrediction();
 	// makeTTWDiffPredictions();
 	// // makeTTWIntPredictions();
-	// printAllYieldTables();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -1519,8 +1526,8 @@ void SSDLPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(SSDL
 //____________________________________________________________________________
 void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
+	sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	system(cmd);
 
 	TH1D    *hiso_data [gNSels];
 	TH1D    *hiso_mc   [gNSels];

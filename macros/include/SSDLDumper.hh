@@ -392,7 +392,8 @@ public:
 			if( (sname.Contains("DYJets")) ||
 			    (sname.Contains("GJets"))  ||
 			    (sname) == "WJets" )   return 3;
-			if( (sname) == "TTbarW"    ||
+			if( (sname) == "TTbarH"    ||
+			    (sname) == "TTbarW"    ||
 			    (sname) == "TTbarZ"    ||
 			    (sname) == "TTbarG"    ||
 			    (sname) == "DPSWW"     ||
@@ -424,21 +425,22 @@ public:
 			if(sname.Contains("WZTo3LNu"))                  return 7; 
 			if(sname.Contains("ZZTo4L"))                    return 8; 
 			if(sname.Contains("GVJets"))                    return 9; 
-			if(sname == "TTbarW")                           return 10;
-			if(sname == "TTbarZ")                           return 11;
-			if(sname == "TTbarG")                           return 12;
-			if(sname == "W+W+" || sname == "W-W-")          return 13;
+			if(sname == "TTbarH")                           return 10;
+			if(sname == "TTbarW")                           return 11;
+			if(sname == "TTbarZ")                           return 12;
+			if(sname == "TTbarG")                           return 13;
+			if(sname == "W+W+" || sname == "W-W-")          return 14;
 			if(sname == "WWZ" ||                                     
 			   sname == "WZZ" ||                                     
 			   sname == "WWG" ||                                     
 			   sname == "ZZZ" ||                                     
-			   sname == "WWW" )                             return 14;
-			if(sname == "DPSWW")                            return 15;
+			   sname == "WWW" )                             return 15;
+			if(sname == "DPSWW")                            return 16;
 			if(sname.Contains("QCD") || 
 			   sname == "MuEnr10"    ||
 			   sname == "MuEnr15"    ||
 			   sname == "EMEnr20"    ||
-			   sname == "EMEnr30")                          return 16;
+			   sname == "EMEnr30")                          return 17;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
