@@ -87,7 +87,7 @@ public:
 		// GJets40, GJets100, GJets200,
 		WZ,ZZ, 
 		// GVJets,
-		TTbarW, TTbarZ, TTbarG, DPSWW,// WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		TTbarH, TTbarW, TTbarZ, TTbarG, DPSWW, // WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
@@ -116,6 +116,7 @@ public:
 		HT0MET120V, HT0MET120NJ2, HT0MET120NJ2bV,	// EWino regions MET > 120
 		HT0MET200, HT0MET120NJ2bVlV, HT0MET200lV,   
 		TTbarWPresel, TTbarWSel, //TTbarV selections
+		HT0MET50, HT0MET80, HT0MET50lV, HT0MET80lV, HT0MET120lV,
 		gNREGIONS
 	};
 	enum gChannel {
