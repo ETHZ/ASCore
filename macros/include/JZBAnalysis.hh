@@ -49,12 +49,13 @@ public:
   const float GetMuonWeight(float eta1, float pt1, float &EffErr);
   const float GetElectronWeight(float eta1, float pt1, float &EffErr);
   int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
-  void StoreAllPhotons(vector<lepton> &photons);
+  void StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lepton &lepton2);
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
   bool DecaysToTaus(bool, TreeReader*);
   int DetermineFlavor(bool, TreeReader*);
+  bool ShouldPhotonBeMerged(lepton &photon, float dR);
 
   string outputFileName_; // public name of the output file name
 
