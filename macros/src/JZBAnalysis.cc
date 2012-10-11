@@ -2188,7 +2188,7 @@ void JZBAnalysis::Analyze() {
       }
   }
 
-  if(nEvent.leptonNum>=3) {
+  if(nEvent.leptonNum>=3 && TriLepton1<sortedGoodgLeptons.size() && TriLepton2<sortedGoodLeptons.size() && TriLepton3<sortedGoodLeptons.size() ) {
     TLorentzVector lp1(sortedGoodLeptons[TriLepton1].p);
     TLorentzVector lp2(sortedGoodLeptons[TriLepton2].p);
     TLorentzVector lp3(sortedGoodLeptons[TriLepton3].p);
@@ -2832,7 +2832,7 @@ void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lept
     nEvent.recoPhotonsDR1[ipho]=lepton1.p.DeltaR(photons[ipho].p);
     nEvent.recoPhotonsDR2[ipho]=lepton2.p.DeltaR(photons[ipho].p);
     int photonindex = photons[ipho].index;
-    if(photonindex>=0) {
+/*    if(photonindex>=0) {
       if(VerboseModeForStudies) cout << fTR->PhoMCmatchexitcode[photonindex] << " ; " << fTR->PhoMCmatchindex[photonindex] << endl;
       if(fTR->PhoMCmatchexitcode[photonindex]>=0 && fTR->PhoMCmatchindex[photonindex]>=0) {
 	if(VerboseModeForStudies) cout << "     found a matched gen photon!!!! " << endl;
@@ -2840,7 +2840,7 @@ void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lept
 	if(VerboseModeForStudies) cout << "        gen :    pt(" << fTR->GenPhotonPt[fTR->PhoMCmatchindex[photonindex]] << ")   phi(" << fTR->GenPhotonPhi[fTR->PhoMCmatchindex[photonindex]] << ")  eta (" << fTR->GenPhotonEta[fTR->PhoMCmatchindex[photonindex]] << ") " << endl;
       }
       nEvent.recoPhotonGenIndex[ipho]=FindGenIndex(photons[ipho]);
-    }
+    }*/
   }
   if (photons.size()>30) nEvent.recoPhotonsBurst=true;
   
