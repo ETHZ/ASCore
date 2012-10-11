@@ -18,16 +18,17 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.58 $";
+string sjzbversion="$Revision: 1.70.2.59 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
-bool DoExperimentalFSRRecovery = false;
-bool DoFSRStudies=false;
+bool DoExperimentalFSRRecovery = true;
+bool DoFSRStudies=true;
+bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.58 2012/09/19 14:08:36 fronga Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.59 2012/10/08 14:24:18 buchmann Exp $
 */
 
 
@@ -87,6 +88,9 @@ public:
   float recoPhotonsPt[30];
   float recoPhotonsEta[30];
   float recoPhotonsPhi[30];
+  float recoPhotonsDR1[30];
+  float recoPhotonsDR2[30];
+  int recoPhotonGenIndex[30];
   int recoPhotonsNPhotons;
   bool recoPhotonsBurst;
     
@@ -368,6 +372,30 @@ public:
   float Zb40_pfJetGoodPt[jMax];
   float Zb40_pfJetSum;
   float Zb40_pfBJetDphiZ[jMax];
+  
+  
+  float tri_pt1;
+  float tri_pt2;
+  float tri_pt3;
+    
+  float tri_id1;
+  float tri_id2;
+  float tri_id3;
+    
+  float tri_ch1;
+  float tri_ch2;
+  float tri_ch3;
+    
+  float tri_mlll;
+  float tri_mll;
+    
+  float tri_mT;
+  
+  int tri_index1;
+  int tri_index2;
+  int tri_index3;
+  
+
 
 };
 
@@ -427,6 +455,9 @@ void nanoEvent::reset()
     recoPhotonsPt[i]=0;
     recoPhotonsEta[i]=0;
     recoPhotonsPhi[i]=0;
+    recoPhotonsDR1[i]=0;
+    recoPhotonsDR2[i]=0;
+    recoPhotonGenIndex[i]=-1;
   }
 
   genPt1=0;
@@ -726,6 +757,27 @@ void nanoEvent::reset()
     Zb40_pfJetGoodPt[i]=0;
     Zb40_pfBJetDphiZ[i]=0;
   }
+  
+  tri_pt1=0;
+  tri_pt2=0;
+  tri_pt3=0;
+  
+  tri_id1=0;
+  tri_id2=0;
+  tri_id3=0;
+    
+  tri_ch1=0;
+  tri_ch2=0;
+  tri_ch3=0;
+    
+  tri_mlll=0;
+  tri_mll=0;
+    
+  tri_mT=0;
+  tri_index1=0;
+  tri_index1=0;
+  tri_index1=0;
+
 }
 
 
@@ -875,6 +927,9 @@ void JZBAnalysis::Begin(TFile *f){
     myTree->Branch("recoPhotonsPt",nEvent.recoPhotonsPt,"recoPhotonsPt[recoPhotonsNPhotons]/F");
     myTree->Branch("recoPhotonsEta",nEvent.recoPhotonsEta,"recoPhotonsEta[recoPhotonsNPhotons]/F");
     myTree->Branch("recoPhotonsPhi",nEvent.recoPhotonsPhi,"recoPhotonsPhi[recoPhotonsNPhotons]/F");
+    myTree->Branch("recoPhotonsDR1",nEvent.recoPhotonsDR1,"recoPhotonsDR1[recoPhotonsNPhotons]/F");
+    myTree->Branch("recoPhotonsDR2",nEvent.recoPhotonsDR2,"recoPhotonsDR2[recoPhotonsNPhotons]/F");
+    myTree->Branch("recoPhotonGenIndex",nEvent.recoPhotonGenIndex,"recoPhotonGenIndex[recoPhotonsNPhotons]/I");
   }
   
   
@@ -1104,6 +1159,22 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb40_pfJetDphiZ",nEvent.Zb40_pfJetDphiZ,"Zb40_pfJetDphiZ[Zb40_pfJetGoodNum]/F");
   myTree->Branch("Zb40_pfJetGoodPt",nEvent.Zb40_pfJetGoodPt,"Zb40_pfJetGoodPt[Zb40_pfJetGoodNum]/F");
   myTree->Branch("Zb40_pfBJetDphiZ",nEvent.Zb40_pfBJetDphiZ,"Zb40_pfBJetDphiZ[Zb40_pfJetGoodNum]/F");
+  
+  myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
+  myTree->Branch("tri_pt2",&nEvent.tri_pt2,"tri_pt2/F");
+  myTree->Branch("tri_pt3",&nEvent.tri_pt3,"tri_pt3/F");  
+  myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/F");
+  myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/F");
+  myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/F");
+  myTree->Branch("tri_ch1",&nEvent.tri_ch1,"tri_ch1/F");
+  myTree->Branch("tri_ch2",&nEvent.tri_ch2,"tri_ch2/F");
+  myTree->Branch("tri_ch3",&nEvent.tri_ch3,"tri_ch3/F");
+  myTree->Branch("tri_mlll",&nEvent.tri_mlll,"tri_mlll/F");
+  myTree->Branch("tri_mll",&nEvent.tri_mll,"tri_mll/F");
+  myTree->Branch("tri_mT",&nEvent.tri_mT,"tri_mT/F");
+  myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
+  myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
+  myTree->Branch("tri_index3",&nEvent.tri_index3,"tri_index3/I");
   
   //generator information
   if(fdoGenInfo) {
@@ -1562,7 +1633,6 @@ void JZBAnalysis::Analyze() {
           photons.push_back(tmpLepton);
       }
   }
-  if(DoExperimentalFSRRecovery) StoreAllPhotons(photons);
   
   // #--- muon loop
   for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
@@ -1649,6 +1719,10 @@ void JZBAnalysis::Analyze() {
   int gPosLepton1 = 0;
   int gPosLepton2 = 1;
   
+  int TriLepton1 = 0;
+  int TriLepton2 = 1;
+  int TriLepton3 = 1;
+  
   // Check for OS combination
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
     if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[PosLepton2].charge<0) break;
@@ -1662,8 +1736,6 @@ void JZBAnalysis::Analyze() {
     nEvent.mllg=(sortedGoodgLeptons[gPosLepton1].p+sortedGoodgLeptons[gPosLepton2].p).M();
   }
 
-  
-  
   // Check for OS combination
   for(; PosLepton2 < sortedGoodLeptons.size(); PosLepton2++) {
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
@@ -1673,7 +1745,18 @@ void JZBAnalysis::Analyze() {
     return;
   }
   counters[EV].fill("... has at least 2 OS leptons");
-
+  
+  // Trileptons
+  for(; TriLepton2 < sortedGoodLeptons.size(); TriLepton2++) {
+    if(sortedGoodLeptons[0].charge*sortedGoodLeptons[TriLepton2].charge<0 &&  sortedGoodLeptons[0].type==sortedGoodLeptons[TriLepton2].type ) break; // looking for OSSF pair for Z
+  }
+  for(; TriLepton3 < sortedGoodLeptons.size(); TriLepton3++) {
+    if(TriLepton3==TriLepton1 || TriLepton3==TriLepton2) continue;
+    else break; // pick the first lepton that's left!
+  }
+  
+  if(DoExperimentalFSRRecovery) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
+  
   // Preselection
   if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
 
@@ -1695,13 +1778,13 @@ void JZBAnalysis::Analyze() {
     nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
 //    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
     
-    if(DoExperimentalFSRRecovery)    cout <<" Mll: " << nEvent.mll << "    vs mllg : " << nEvent.mllg << endl;
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
     nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
     nEvent.eta=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Eta();
     nEvent.E=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).E();
     nEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
     nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
+    if(VerboseModeForStudies) {if(DoExperimentalFSRRecovery)    cout <<" Mll: " << nEvent.mll << "    vs mllg : " << nEvent.mllg << endl;}
     
     nEvent.ElCInfoIsGsfCtfCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfCons;
     nEvent.ElCInfoIsGsfCtfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfScPixCons;
@@ -2105,6 +2188,32 @@ void JZBAnalysis::Analyze() {
       }
   }
 
+  if(nEvent.leptonNum>=3) {
+    TLorentzVector lp1(sortedGoodLeptons[TriLepton1].p);
+    TLorentzVector lp2(sortedGoodLeptons[TriLepton2].p);
+    TLorentzVector lp3(sortedGoodLeptons[TriLepton3].p);
+    
+    nEvent.tri_pt1=sortedGoodLeptons[TriLepton1].p.Pt();
+    nEvent.tri_pt2=sortedGoodLeptons[TriLepton2].p.Pt();
+    nEvent.tri_pt3=sortedGoodLeptons[TriLepton3].p.Pt();
+    
+    nEvent.tri_id1=sortedGoodLeptons[TriLepton1].type;
+    nEvent.tri_id2=sortedGoodLeptons[TriLepton2].type;
+    nEvent.tri_id3=sortedGoodLeptons[TriLepton3].type;
+    
+    nEvent.tri_ch1=sortedGoodLeptons[TriLepton1].charge;
+    nEvent.tri_ch2=sortedGoodLeptons[TriLepton2].charge;
+    nEvent.tri_ch3=sortedGoodLeptons[TriLepton3].charge;
+    
+    nEvent.tri_mlll=(lp1+lp2+lp3).M();
+    nEvent.tri_mll=(lp1+lp2).M();
+    
+    float AngleBetweenMETandThirdLepton=sortedGoodLeptons[TriLepton3].p.DeltaPhi(pfMETvector);
+    nEvent.tri_mT = sqrt(2 * nEvent.met[4] * sortedGoodLeptons[TriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
+    nEvent.tri_index1=TriLepton1;
+    nEvent.tri_index2=TriLepton2;
+    nEvent.tri_index3=TriLepton3;
+  }
   nEvent.dphiZpfMet = (s1+s2).DeltaPhi(pfMETvector);
   nEvent.dphiZs1 = (s1+s2).DeltaPhi(s1);
   nEvent.dphiZs2 = (s1+s2).DeltaPhi(s2);
@@ -2697,35 +2806,51 @@ const bool JZBAnalysis::IsCustomJet(const int index){
   return true;
 }
 
-void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons) {
+int FindGenIndex(lepton &photon) {
+  float min_dR=0.1;
+  int min_index=-1;
+  for(int i=0;i<nEvent.genPhotonsNPhotons;i++) {
+    float dR=sqrt((photon.p.Eta()-nEvent.genPhotonsEta[i])*(photon.p.Eta()-nEvent.genPhotonsEta[i])  +  (photon.p.Phi()-nEvent.genPhotonsPhi[i])*(photon.p.Phi()-nEvent.genPhotonsPhi[i]));
+    if(dR<min_dR && photon.p.Pt()/nEvent.genPhotonsPt[i]<5.0 && photon.p.Pt()/nEvent.genPhotonsPt[i]>0.2) {
+      min_index=i;
+      min_dR=dR;
+      if(VerboseModeForStudies) cout << "Maybe the photon at " << photon.p.Phi() << " : " << photon.p.Eta() << " (Pt " << photon.p.Pt() << ") corresponds to the gen one at " << nEvent.genPhotonsPhi[i] << " : " << nEvent.genPhotonsEta[i] << " (Pt " << nEvent.genPhotonsPt[i] << " ) ... dR = " << dR << endl;
+    }
+  }
+  
+  if(min_dR>0.1) return -1; // we want the best candidate to be within a certain cone (or better)
+  
+  return min_index;
+}
+
+void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lepton &lepton2) {
   for(int ipho=0;ipho<30&&ipho<photons.size();ipho++) {
     nEvent.recoPhotonsPt[ipho]=photons[ipho].p.Pt();
     nEvent.recoPhotonsEta[ipho]=photons[ipho].p.Eta();
     nEvent.recoPhotonsPhi[ipho]=photons[ipho].p.Phi();
     nEvent.recoPhotonsNPhotons++;
+    nEvent.recoPhotonsDR1[ipho]=lepton1.p.DeltaR(photons[ipho].p);
+    nEvent.recoPhotonsDR2[ipho]=lepton2.p.DeltaR(photons[ipho].p);
     int photonindex = photons[ipho].index;
     if(photonindex>=0) {
-      cout << fTR->PhoMCmatchexitcode[photonindex] << " ; " << fTR->PhoMCmatchindex[photonindex] << endl;
+      if(VerboseModeForStudies) cout << fTR->PhoMCmatchexitcode[photonindex] << " ; " << fTR->PhoMCmatchindex[photonindex] << endl;
       if(fTR->PhoMCmatchexitcode[photonindex]>=0 && fTR->PhoMCmatchindex[photonindex]>=0) {
-	cout << "     found a matched gen photon!!!! " << endl;
-	cout << "        reco:    pt(" << photons[ipho].p.Pt() << ")   phi(" << photons[ipho].p.Phi() << ")  eta (" << photons[ipho].p.Eta() << ") " << endl;
-	cout << "        gen :    pt(" << fTR->GenPhotonPt[fTR->PhoMCmatchindex[photonindex]] << ")   phi(" << fTR->GenPhotonPhi[fTR->PhoMCmatchindex[photonindex]] << ")  eta (" << fTR->GenPhotonEta[fTR->PhoMCmatchindex[photonindex]] << ") " << endl;
+	if(VerboseModeForStudies) cout << "     found a matched gen photon!!!! " << endl;
+	if(VerboseModeForStudies) cout << "        reco:    pt(" << photons[ipho].p.Pt() << ")   phi(" << photons[ipho].p.Phi() << ")  eta (" << photons[ipho].p.Eta() << ") " << endl;
+	if(VerboseModeForStudies) cout << "        gen :    pt(" << fTR->GenPhotonPt[fTR->PhoMCmatchindex[photonindex]] << ")   phi(" << fTR->GenPhotonPhi[fTR->PhoMCmatchindex[photonindex]] << ")  eta (" << fTR->GenPhotonEta[fTR->PhoMCmatchindex[photonindex]] << ") " << endl;
       }
+      nEvent.recoPhotonGenIndex[ipho]=FindGenIndex(photons[ipho]);
     }
   }
   if (photons.size()>30) nEvent.recoPhotonsBurst=true;
+  
 }
 
 
-bool ShouldPhotonBeMerged(lepton &photon, TLorentzVector &tmpVector) {
+bool JZBAnalysis::ShouldPhotonBeMerged(lepton &photon, float dR) {
+  if(photon.iso<0) return false; // the photon has already been used
   
   // we we can specify all criteria we want to use. E.g. we can make a difference between very low pt photons (as in Higgs-> ZZ) and so on. 
-  
-  
-  if(photon.iso<0) return false; // the photon has already been used
-
-  float dR=(photon.p).DeltaR(tmpVector);
-
   
   if(photon.p.Pt()>2 && photon.p.Pt()<4) { // very low pt photons (>2 GeV)
     if(dR<0.07) return true;
@@ -2737,28 +2862,44 @@ bool ShouldPhotonBeMerged(lepton &photon, TLorentzVector &tmpVector) {
   
   return false;
 }
-  
-  
 
 int JZBAnalysis::DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons) {
-    cout << "Doing FSR recovery for event " << nEvent.eventNum << " at this point with initial pt of " << tmpVector.Pt() << " and a photon collection containing " << photons.size() << " photons " << endl;
+    if(VerboseModeForStudies) cout << "Doing FSR recovery for event " << nEvent.eventNum << " at this point with initial pt of " << tmpVector.Pt() << " and a photon collection containing " << photons.size() << " photons " << endl;
     int NRecoveredFSRPhotons=0;
-    for(int ipho=0;ipho<photons.size();ipho++) {
-        cout << "Comparing photon " << ipho << " to our lepton    (photon has iso " << photons[ipho].iso << "  - a negative value means 'used up') " << endl;
-        cout << "     DeltaR : " << (photons[ipho].p).DeltaR(tmpVector) << endl;
-        if(!ShouldPhotonBeMerged(photons[ipho],tmpVector)) continue;
-        photons[ipho].iso=(-1.0)*photons[ipho].iso;//marking this photons as "recovered"
-        if(photons[ipho].iso>=0) photons[ipho].iso=-0.00000001; // if the isolation was 0 then it's pointless and we need to redo this.
-        tmpVector+=photons[ipho].p;
-        cout << "\033[1mRECOVERED PHOTON #" << ipho << " bringing the tmpVector pt to " << tmpVector.Pt() << "\033[0m" << endl;
-        NRecoveredFSRPhotons++;
-        counters[PH].fill(" ... recovered");
-    }
     
-    // not iterative yet. Plan:
-    // loop over all photons, and store the index and dR of the closest one -> combine them
-    // if there was no photon close enough, we're done
-    // if there was one, set its isolation to -999 (i.e. "used up"), and rerun the combination (until no combinable photons are left)
+    int RecoveredInThisRun=0;
+    int NRuns=0;
+    
+    while(RecoveredInThisRun || NRuns<1) {
+      NRuns++;
+      if(VerboseModeForStudies) cout << "\033[32m; Starting loop # " << NRuns << " \033[0m" << endl;
+      RecoveredInThisRun=0;
+      float dR_min=1000.0;
+      int index_min=-1;
+      
+      for(int ipho=0;ipho<photons.size();ipho++) {
+	if(VerboseModeForStudies) cout << "Comparing photon " << ipho << " to our lepton    (photon has iso " << photons[ipho].iso;
+	if(VerboseModeForStudies) { if(photons[ipho].iso < 0) cout << "  - a negative value means 'used up') "; }
+	if(VerboseModeForStudies) cout << endl;
+	float deltaR=(photons[ipho].p).DeltaR(tmpVector);
+	if(VerboseModeForStudies) cout << "     DeltaR : " << deltaR << "    current min(dR) is " << dR_min << endl;
+	if(!ShouldPhotonBeMerged(photons[ipho],deltaR)) continue;
+	if(deltaR<dR_min) {
+	  dR_min=deltaR;
+	  index_min=ipho;
+	  if(VerboseModeForStudies) cout << " *** FOUND A POTENTIAL CANDIDATE!" << endl;
+	}
+      }
+      
+      if(index_min<0) continue;
+      photons[index_min].iso=(-1.0)*photons[index_min].iso;//marking this photons as "recovered"
+      if(photons[index_min].iso>=0) photons[index_min].iso=-0.00000001; // if the isolation was 0 then it's pointless and we need to redo this.
+      tmpVector+=photons[index_min].p;
+      if(VerboseModeForStudies) cout << "\033[1mRECOVERED PHOTON #" << index_min << " bringing the tmpVector pt to " << tmpVector.Pt() << "    (in loop # " << NRuns << ") \033[0m" << endl;
+      NRecoveredFSRPhotons++;
+      RecoveredInThisRun+=1;
+      counters[PH].fill(" ... recovered");
+    }
     
     return NRecoveredFSRPhotons;
 }
@@ -2990,7 +3131,6 @@ void JZBAnalysis::DoFSRStudy(bool fdoGenInfo,TreeReader *fTR) {
   }
     
   for(int i=0;i<nGenParticles;i++) {
-	  if(fTR->genInfoStatus[i]==1&& (fTR->genInfoId[i]==22)) AddGenPhoton(fTR, i);
 	  if(fTR->genInfoStatus[i]!=3) continue;
 	  int thisParticleId = fTR->genInfoId[i];
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {//dealing with a Z
@@ -3002,6 +3142,7 @@ void JZBAnalysis::DoFSRStudy(bool fdoGenInfo,TreeReader *fTR) {
 	    
 	    nEvent.genFSRmll[nEvent.NgenZs]=Pll.M();
 	    nEvent.genFSRmllg[nEvent.NgenZs]=Pllg.M();
+	      
 	    TLorentzVector pureGenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
 	    nEvent.genFSRjzbG[nEvent.NgenZs]=(-Pllg-pureGenMETvector).Pt()-Pllg.Pt();
 	    nEvent.genFSRjzb[nEvent.NgenZs]=(-Pll-pureGenMETvector).Pt()-Pll.Pt();
