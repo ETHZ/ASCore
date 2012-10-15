@@ -662,7 +662,7 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
   for (std::vector<int>::iterator it = passing.begin(); it != passing.end(); ){
       bool pass=0;
       if (fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)
-	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<5)
+	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<10)
 	  pass=1;
       if (!pass) it=passing.erase(it); else it++;
     }
@@ -720,9 +720,9 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     float combiso = PFIsolation(*it,0,"combined");
     if (mode=="no_combiso_cut") pass=1; // pass in any case
     else if (mode=="cut_combiso_sideband"){ // selection for sideband
-      if (combiso>5 && combiso<6) pass=1;
+      if (combiso>10 && combiso<11) pass=1;
     }
-    else if (combiso<5) pass=1;
+    else if (combiso<10) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
 
@@ -752,7 +752,7 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
       pass=1;
     }
     else {
-      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>5) pass=1;
+      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>10) pass=1;
     }
     if (!pass) it=passing.erase(it); else it++;
   }
@@ -893,7 +893,7 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
     if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
   }
 
-  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>5) found=true; }
+  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>10) found=true; }
 
   for (int i=0; i<fTR->NMus; i++){
     float mueta = fTR->MuEta[i];
