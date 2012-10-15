@@ -40,14 +40,15 @@ int gDEBUG_EVENTNUMBER_ = -1;
 int gDEBUG_RUNNUMBER_ = -1;
 
 using namespace std;
-
+//////////////////////////////////////////////////////////////////////////////////
+static bool  gTTWZ     = true;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 static const float gMaxJetEta  = 2.5;
 static const float gMuMaxIso   = 0.10;
 static const float gElMaxIso   = 0.09;
-static  float gMinJetPt   = 40.;
-static const bool  gApplyZVeto = true;
+static  float gMinJetPt   = 20.;
+static const bool  gApplyZVeto = false;
 static const bool  gApplyTauVeto = true;
 static const bool  gInvertZVeto = false;
 static bool  gSmearMET     = false;
@@ -145,9 +146,9 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
-int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   10 ,      10 ,        10  ,        10  ,        10  ,       3 ,   10 ,   10 };
+int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   10 ,      10 ,        10  ,        10  ,        10  ,       3 ,   15 ,   10 };
 float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         5. ,        30. ,        30. ,       0.,    0.,    0.};
-float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        25. ,       150. ,       300. ,       3.,   50.,  100.};
+float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        25. ,       150. ,       300. ,       3.,  150.,  100.};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::IsoPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
@@ -356,23 +357,23 @@ void SSDLDumper::loopEvents(Sample *S){
 		gBtagSF1 = 1.;
 		gBtagSF2 = 1.;
 
-		// MARC if( S->datamc!=0 ) {
-		// MARC 	int ind1(-1), ind2(-1);
-		// MARC 	fDoCounting = false;
-		// MARC 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
-		// MARC 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
-		// MARC 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
-		// MARC 	fDoCounting = true;
-		// MARC }
+		if( S->datamc!=0 ) {
+			int ind1(-1), ind2(-1);
+			fDoCounting = false;
+			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
+			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
+			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
+			fDoCounting = true;
+		}
 
 		// marcs try on the b-tag scale factors:
 		if( S->datamc!=0 ) {
 			bool isFastsim = false;
-			if (S->datamc == 3) isFastsim = true;
-			// if (isFastsim) cout << "Sample name, should be only fastsim samples: " << S->sname << endl;
+			// if (S->datamc == 3) isFastsim = true;
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
-			float myweight1(1.), myweight2(1.);
+			float myweight(1.);
+			// float myweight1(1.), myweight2(1.);
 			std::vector< int > btags = getNBTagsMedIndices();
 			int nbtags = btags.size();
 			if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
@@ -395,8 +396,6 @@ void SSDLDumper::loopEvents(Sample *S){
 					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
 					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
 				}
-				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 2 btags in region: " << myweight1 << endl << endl;
-				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 3 btags in region: " << myweight2 << endl << endl;
 			}
 			gBtagSF1 = myweight1;
 			gBtagSF2 = myweight2;
@@ -404,18 +403,23 @@ void SSDLDumper::loopEvents(Sample *S){
 		}
 		
 
-		gEventWeight0 = gHLTSF * 1.;
-		gEventWeight1 = gHLTSF * gBtagSF1;
-		gEventWeight2 = gHLTSF * gBtagSF2;
+		gEventWeight  = gHLTSF * 1.;
 		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
-			gEventWeight0 *= PUWeight;
-			gEventWeight1 *= PUWeight;
-			gEventWeight2 *= PUWeight;
+			gEventWeight *= PUWeight;
 		}
 
 
 		fillKinPlots(S);
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r);
+		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1))i{
+			if (Region::minNbjmed[r] == 2) gEventWeight *= gBtagSF1;
+			if (Region::minNbjmed[r] == 3) gEventWeight *= gBtagSF2;
+			fillYields(S, r);
+		}
+		// reset the event weight to what it should be without a region cut applied
+		gEventWeight  = gHLTSF * 1.;
+		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
+			gEventWeight *= PUWeight;
+		}
 
 		fillSigEventTree(S, 0);
 		fillDiffYields(S);
@@ -505,9 +509,6 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(reg);
-	if (fC_minNbjmed == 0) gEventWeight = gEventWeight0;
-	if (fC_minNbjmed == 2) gEventWeight = gEventWeight1;
-	if (fC_minNbjmed == 3) gEventWeight = gEventWeight2;
 	
 	///////////////////////////////////////////////////
 	// SS YIELDS
@@ -791,7 +792,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
 	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
 	///////////////////////////////////////////////////
-	setRegionCuts(HT0MET80NJ2);
+	setRegionCuts();
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// SS YIELDS
@@ -805,14 +806,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(mumuSignalTrigger()){ // Trigger selection
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		if(isSSLLMuEvent(mu1, mu2)){
 			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
 			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
@@ -826,7 +829,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET120);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(Baseline);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -835,13 +839,15 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
 		resetHypLeptons();
 	}
-	setRegionCuts(HT0MET80NJ2);
+	if (gTTWZ) setRegionCuts(TTbarWPresel);
+	else setRegionCuts(HT0MET120);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EE Channel
@@ -850,14 +856,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elelSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-	        setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
@@ -871,7 +879,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET120);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(Baseline);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0.;
@@ -880,13 +889,15 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
 		resetHypLeptons();
 	}
-	setRegionCuts(HT0MET80NJ2);
+	if (gTTWZ) setRegionCuts(TTbarWPresel);
+	else setRegionCuts(HT0MET120);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
@@ -895,14 +906,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
@@ -922,7 +935,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET120);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(Baseline);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -931,13 +945,15 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
 		resetHypLeptons();
 	}
-	setRegionCuts(HT0MET80NJ2);
+	if (gTTWZ) setRegionCuts(TTbarWPresel);
+	else setRegionCuts(HT0MET120);
 
 	///////////////////////////////////////////////////
 	// OS YIELDS
@@ -950,14 +966,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
@@ -971,7 +989,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET120);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(Baseline);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -980,13 +999,15 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
 		resetHypLeptons();
 	}
-	setRegionCuts(HT0MET80NJ2);
+	if (gTTWZ) setRegionCuts(TTbarWPresel);
+	else setRegionCuts(HT0MET120);
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
@@ -994,14 +1015,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
@@ -1021,7 +1044,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		setRegionCuts(HT0MET120);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(Baseline);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -1030,7 +1054,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(HT0MET80NJ2);
+		if (gTTWZ) setRegionCuts(TTbarWPresel);
+		else setRegionCuts(HT0MET120);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
@@ -1039,7 +1064,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 	fChargeSwitch = 0;
 	resetHypLeptons();
-	setRegionCuts(HT0MET80NJ2);
+	if (gTTWZ) setRegionCuts(TTbarWPresel);
+	else setRegionCuts(HT0MET120);
 }
 void SSDLDumper::fillDiffVar(  Sample *S, int lep1, int lep2, float val, int bin, gChannel chan){
 	if(bin > gNDiffVars-1){
@@ -3649,13 +3675,13 @@ float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-  //	return pfMETType1;
+  	//return pfMETType1;
 	return pfMET;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-  //	float phi = pfMETType1Phi;
+  	// float phi = pfMETType1Phi;
 	float phi = pfMETPhi;
   	return phi;
 }
@@ -5137,13 +5163,13 @@ float SSDLDumper::getHLTSF_MuEG( float pt, float eta, const std::string& runPeri
 	return sqrt(0.95);
 }
 float SSDLDumper::diMuonHLTSF2012(){
-	return 0.882;
+	return 0.872;
 }
 float SSDLDumper::muEleHLTSF2012(){
-	return 0.922;
+	return 0.925;
 }
 float SSDLDumper::diEleHLTSF2012(){
-	return 0.949;
+	return 0.954;
 }
 SSDLDumper::ValueAndError SSDLDumper::getMuMuHLTSF( float pt, float eta, const std::string& runPeriod ) {
 	// These numbers taken from AN2011-399-v4
