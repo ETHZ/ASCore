@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.59 $";
+string sjzbversion="$Revision: 1.70.2.61 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.59 2012/10/08 14:24:18 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.61 2012/10/11 15:34:47 buchmann Exp $
 */
 
 
@@ -388,6 +388,7 @@ public:
     
   float tri_mlll;
   float tri_mll;
+  float tri_submll;
     
   float tri_mT;
   
@@ -772,6 +773,7 @@ void nanoEvent::reset()
     
   tri_mlll=0;
   tri_mll=0;
+  tri_submll=0;
     
   tri_mT=0;
   tri_index1=0;
@@ -1171,6 +1173,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_ch3",&nEvent.tri_ch3,"tri_ch3/F");
   myTree->Branch("tri_mlll",&nEvent.tri_mlll,"tri_mlll/F");
   myTree->Branch("tri_mll",&nEvent.tri_mll,"tri_mll/F");
+  myTree->Branch("tri_submll",&nevent.tri_submll,"tri_submll/F");
   myTree->Branch("tri_mT",&nEvent.tri_mT,"tri_mT/F");
   myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
   myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
@@ -2207,6 +2210,7 @@ void JZBAnalysis::Analyze() {
     
     nEvent.tri_mlll=(lp1+lp2+lp3).M();
     nEvent.tri_mll=(lp1+lp2).M();
+    nEvent.tri_submll=(lp2+lp3).M();
     
     float AngleBetweenMETandThirdLepton=sortedGoodLeptons[TriLepton3].p.DeltaPhi(pfMETvector);
     nEvent.tri_mT = sqrt(2 * nEvent.met[4] * sortedGoodLeptons[TriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
