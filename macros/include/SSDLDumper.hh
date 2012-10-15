@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2 , DoubleMu3, DoubleMu4, //DoubleMu5,
-		DoubleEle1              , DoubleEle2, DoubleEle3, DoubleEle4,//DoubleEle5,
-		MuEG1, MuEG2, MuEG3, MuEG4, //MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 ,
+		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
+		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
@@ -472,7 +472,7 @@ public:
 		inline int getNProcs(){return 17;} // make sure this number corresponds to the number of
 		                                   // processes define in the previous method
 		TTree* getTree(){
-			file = TFile::Open(location);
+			if (!file || !file->IsOpen()) file = TFile::Open(location);
 			if(file->IsZombie()){
 				cout << "SSDLDumper::Sample::getTree() ==> Error opening file " << location << endl;
 				exit(1);
@@ -481,7 +481,7 @@ public:
 			return tree;
 		}
 		TH1F* getEvCount(){
-			file = TFile::Open(location);
+			if (!file || !file->IsOpen()) file = TFile::Open(location);
 			if(file->IsZombie()){
 				cout << "SSDLDumper::Sample::getEvCount() ==> Error opening file " << location << endl;
 				exit(1);
