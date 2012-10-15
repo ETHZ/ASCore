@@ -1173,7 +1173,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_ch3",&nEvent.tri_ch3,"tri_ch3/F");
   myTree->Branch("tri_mlll",&nEvent.tri_mlll,"tri_mlll/F");
   myTree->Branch("tri_mll",&nEvent.tri_mll,"tri_mll/F");
-  myTree->Branch("tri_submll",&nevent.tri_submll,"tri_submll/F");
+  myTree->Branch("tri_submll",&nEvent.tri_submll,"tri_submll/F");
   myTree->Branch("tri_mT",&nEvent.tri_mT,"tri_mT/F");
   myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
   myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
