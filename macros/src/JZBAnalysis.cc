@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.61 $";
+string sjzbversion="$Revision: 1.70.2.63 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.61 2012/10/11 15:34:47 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.63 2012/10/15 12:26:40 buchmann Exp $
 */
 
 
@@ -105,9 +105,6 @@ public:
   int   genMID2gen;
   int   genMID1;
   int   genMID2;
-  int   genMID3;
-  int   genMID4;
-  int   genMID5;
   int   genGMID1gen;
   int   genGMID2gen;
   int   genGMID1;
@@ -377,21 +374,27 @@ public:
   float tri_pt1;
   float tri_pt2;
   float tri_pt3;
-    
+  float tri_eta1;
+  float tri_eta2;
+  float tri_eta3;
   float tri_id1;
   float tri_id2;
   float tri_id3;
-    
   float tri_ch1;
   float tri_ch2;
   float tri_ch3;
-    
   float tri_mlll;
   float tri_mll;
   float tri_submll;
-    
   float tri_mT;
-  
+  int tri_genMID1;
+  int tri_genMID2;
+  int tri_genMID3;
+  float tri_dR01;
+  float tri_dR02;
+  float tri_dR12;
+  float tri_WZB;
+  float tri_JWZB;
   int tri_index1;
   int tri_index2;
   int tri_index3;
@@ -474,9 +477,6 @@ void nanoEvent::reset()
   genMID2gen=0;
   genMID1=0;
   genMID2=0;
-  genMID3=0;
-  genMID4=0;
-  genMID5=0;
   genGMID1gen=0;
   genGMID2gen=0;
   genGMID1=0;
@@ -779,7 +779,15 @@ void nanoEvent::reset()
   tri_index1=0;
   tri_index1=0;
   tri_index1=0;
-
+  
+  tri_genMID1=0;
+  tri_genMID2=0;
+  tri_genMID3=0;
+  tri_dR01=0;
+  tri_dR02=0;
+  tri_dR12=0;
+  tri_WZB=0;
+  tri_JWZB=0;
 }
 
 
@@ -948,9 +956,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("genMID2gen",&nEvent.genMID2gen,"genMID2gen/I");
   myTree->Branch("genMID1",&nEvent.genMID1,"genMID1/I");
   myTree->Branch("genMID2",&nEvent.genMID2,"genMID2/I");
-  myTree->Branch("genMID3",&nEvent.genMID3,"genMID3/I");
-  myTree->Branch("genMID4",&nEvent.genMID4,"genMID4/I");
-  myTree->Branch("genMID5",&nEvent.genMID5,"genMID5/I");
   myTree->Branch("genGMID1gen",&nEvent.genGMID1gen,"genGMID1gen/I");
   myTree->Branch("genGMID2gen",&nEvent.genGMID2gen,"genGMID2gen/I");
   myTree->Branch("genGMID1",&nEvent.genGMID1,"genGMID1/I");
@@ -1178,6 +1183,17 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
   myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
   myTree->Branch("tri_index3",&nEvent.tri_index3,"tri_index3/I");
+  
+  myTree->Branch("tri_genMID1",&nEvent.tri_genMID1,"tri_genMID1/I");
+  myTree->Branch("tri_genMID2",&nEvent.tri_genMID2,"tri_genMID2/I");
+  myTree->Branch("tri_genMID3",&nEvent.tri_genMID3,"tri_genMID3/I");
+  
+  myTree->Branch("tri_dR01",&nEvent.tri_dR01,"tri_dR01/F");
+  myTree->Branch("tri_dR02",&nEvent.tri_dR02,"tri_dR02/F");
+  myTree->Branch("tri_dR12",&nEvent.tri_dR12,"tri_dR12/F");
+
+  myTree->Branch("tri_WZB",&nEvent.tri_WZB,"tri_WZB/F");
+  myTree->Branch("tri_JWZB",&nEvent.tri_JWZB,"tri_JWZB/F");
   
   //generator information
   if(fdoGenInfo) {
@@ -2217,6 +2233,26 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_index1=TriLepton1;
     nEvent.tri_index2=TriLepton2;
     nEvent.tri_index3=TriLepton3;
+    
+    int i1 = sortedGoodLeptons[TriLepton1].index;
+    int i2 = sortedGoodLeptons[TriLepton2].index;
+    int i3 = sortedGoodLeptons[TriLepton3].index;
+
+    nEvent.tri_genMID1 = (sortedGoodLeptons[TriLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]); // WW study
+    nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]); // WW study
+    nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]); // WW study
+    
+    nEvent.tri_dR01 = lp1.DeltaR(lp2);
+    nEvent.tri_dR02 = lp1.DeltaR(lp3); 
+    nEvent.tri_dR12 = lp2.DeltaR(lp3);
+
+    nEvent.tri_eta1 = lp1.Eta();
+    nEvent.tri_eta2 = lp1.Eta();
+    nEvent.tri_eta2 = lp2.Eta();
+    
+    nEvent.tri_WZB  = (lp1+lp2).Pt() - (lp3+pfMETvector).Pt();  // Z.Pt() - W.Pt()
+    nEvent.tri_JWZB = sumOfPFJets.Pt() - (lp1 + lp2 + lp3 + pfMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
+
   }
   nEvent.dphiZpfMet = (s1+s2).DeltaPhi(pfMETvector);
   nEvent.dphiZs1 = (s1+s2).DeltaPhi(s1);
@@ -2284,7 +2320,6 @@ void JZBAnalysis::Analyze() {
     nEvent.genId1Sel    = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenID[i1]:fTR->ElGenID[i1]);
     nEvent.genId2Sel    = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenID[i2]:fTR->ElGenID[i2]);
     nEvent.genJZBSel    = nEvent.genRecoilSel - (genLep1 + genLep2).Pt();
-	
   }
   myTree->Fill();
 }
