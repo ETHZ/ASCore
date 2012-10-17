@@ -35,6 +35,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 static const bool gEWKino = true;
+static const bool gRunSMSscan = true;
 
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -324,17 +325,35 @@ void SSDLPlotter::init(TString filename){
 	// fLowPtData.push_back(MuEG3);
 	// fLowPtData.push_back(MuEG4);
 }
+void SSDLPlotter::doSMSscans(TString region){
+        // This macro runs over the the SMS scans 
+        if (!gRunSMSscan) return;      
+	
+	TString pathtofile = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
+	TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
+	
+	// Find which region do I want
+	for (size_t i=0; i<gNREGIONS; ++i) {
+	  gRegion reg = gRegion(i);
+	  if (Region::sname[reg] == region) 
+	    scanSMS(pathtofile + filename, reg);	    
+	}
+
+// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET120NJ2bVlV);
+// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET200);
+// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET120NJ2bV);
+	//    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
+	
+  
+}
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
-    // scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET200lV);
-  	// scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET120NJ2bVlV);
-    // scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET200);
-	// //    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
-  	// scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall_allx.root", HT0MET120NJ2bV);
-	// return;
-	
+        // return;
+  
+        if (gRunSMSscan) return; //DO NOT RUN THE ANALYSIS IF RUNNING THE SCAN
+
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBG, 1);
@@ -6357,11 +6376,12 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << "----------------------------------------------------------------------------------------------" << endl;
  	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
  	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
- 
+
  	vector<int> mcbkg;
 	mcbkg.push_back(ZZ);
 // MARC 	mcbkg.push_back(GVJets);
  	mcbkg.push_back(DPSWW);
+	mcbkg.push_back(TTbarH);
 	mcbkg.push_back(TTbarW);
 	mcbkg.push_back(TTbarZ);
 	mcbkg.push_back(TTbarG);
@@ -9392,7 +9412,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	raremc.push_back(WWG);
 	raremc.push_back(WWW);
 	raremc.push_back(ZZZ);
-	
+
 	for(size_t i = 0; i < raremc.size(); ++i){
 		Sample *S = fSamples[raremc[i]];
 		float scale = fLumiNorm / S->getLumi();
@@ -11434,16 +11454,16 @@ void SSDLPlotter::storeWeightedPred(){
  		bool passespt = passesPtCuts(pT1, pT2, HT0MET80NJ2, chan);
  		// MARC bool passespt = passesPtCuts(pT1, pT2, TTbarWSel, chan);
   	
- 		if(HT        >  Region::minHT    [HT0MET80NJ2] &&  
-		   HT        <  Region::maxHT    [HT0MET80NJ2] &&
- 		   MET       >  Region::minMet   [HT0MET80NJ2] &&
- 		   MET       <  Region::maxMet   [HT0MET80NJ2] &&
-		   njets     >= Region::minNjets [HT0MET80NJ2] &&
-		   njets     <= Region::maxNjets [HT0MET80NJ2] && 
- 		   nbjets    >= Region::minNbjets[HT0MET80NJ2] &&
- 		   nbjets    <= Region::maxNbjets[HT0MET80NJ2] &&
- 		   nbjetsmed >= Region::minNbjmed[HT0MET80NJ2] &&
-		   nbjetsmed <= Region::maxNbjmed[HT0MET80NJ2] &&
+ 		if(HT        >  Region::minHT    [HT0MET120] &&  
+		   HT        <  Region::maxHT    [HT0MET120] &&
+ 		   MET       >  Region::minMet   [HT0MET120] &&
+ 		   MET       <  Region::maxMet   [HT0MET120] &&
+		   njets     >= Region::minNjets [HT0MET120] &&
+		   njets     <= Region::maxNjets [HT0MET120] && 
+ 		   nbjets    >= Region::minNbjets[HT0MET120] &&
+ 		   nbjets    <= Region::maxNbjets[HT0MET120] &&
+ 		   nbjetsmed >= Region::minNbjmed[HT0MET120] &&
+		   nbjetsmed <= Region::maxNbjmed[HT0MET120] &&
  		   passespt) 		  {
  			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
  			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
@@ -13052,7 +13072,7 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
 
 	// get the histo with the count for each point
-	TFile * file_ = new TFile(filestring, "READ", "file_");
+	TFile * file_ = TFile::Open(filestring); //, "READ", "file_");
 	TH2D  * TChi_nTot_ [nSyst];
 	TH2D  * TChiRight_nTot_[nSyst];
 	for (int i = 0; i<nx; i++) {
@@ -13084,6 +13104,7 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		setRegionCuts(reg);
 		printProgress(jentry, tot_events, "SMS Scan"+Region::sname[reg]);
+		
 		for (int i = 0; i<nSyst; i++) {
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
 			int x;                   // get the value of x. yes, in the treee it's m0
@@ -13216,5 +13237,10 @@ void SSDLPlotter::scanSMS( const char * filestring, gRegion reg){
 			TChiRight_nPass_[x][i]->Write();
 		}
 	}
+	file_->Close();
+	res_->Close();
+
+	delete S;
+	delete res_;
 
 }

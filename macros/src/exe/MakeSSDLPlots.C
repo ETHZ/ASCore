@@ -16,7 +16,7 @@ using namespace std;
 //_____________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLPlotter [-d dir] [-v verbose] [-m mode] [-c datacard]" << endl;
+	cout << "Usage: RunSSDLPlotter [-d dir] [-v verbose] [-s region] [-m mode] [-c datacard]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir        is the output directory               " << endl;
 	cout << "                 default is TempOutput/               " << endl;
@@ -24,6 +24,8 @@ void usage( int status = 0 ) {
 	cout << "                 default is 0 (quiet mode)            " << endl;
 	cout << "     datacard   is the datacard to be used            " << endl;
 	cout << "                 default is 'datacard.dat'            " << endl;
+	cout << "     region     is the search region you want to apply to the SMS scans  " << endl;
+	cout << "                 default is none                      " << endl;
 	cout << endl;
 	exit(status);
 }
@@ -34,14 +36,16 @@ int main(int argc, char* argv[]) {
 	TString outputdir = "SSDLPlots/";
 	TString datacard  = "DataCard_SSDL.dat";
 	int verbose = 0;
+	TString region = "";
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:c:v:m:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:c:v:s:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
 			case 'c': datacard = TString(optarg); break;
+ 		        case 's': region = TString(optarg); break; 
 			case '?':
 			case 'h': usage(0); break;
 			default:
@@ -60,6 +64,9 @@ int main(int argc, char* argv[]) {
 	tA->setVerbose(verbose);
 	tA->init(datacard);
 	tA->doAnalysis();
+	if (region != "")	
+	  tA->doSMSscans(region);
+
 	delete tA;
 	return 0;
 }

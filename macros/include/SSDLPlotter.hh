@@ -136,7 +136,7 @@ public:
 	virtual ~SSDLPlotter();
 
 	virtual void init(TString filename = "samples.dat");
-
+        virtual void doSMSscans(TString);
 	virtual void doAnalysis();
 	virtual void sandBox();
 	virtual void pythiaMadgraph(bool pyhia);
