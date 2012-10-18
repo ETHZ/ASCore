@@ -1905,7 +1905,7 @@ void JZBAnalysis::Analyze() {
   
   int TriLepton1 = 0;
   int TriLepton2 = 1;
-  int TriLepton3 = 1;
+  int TriLepton3 = 2;
   
   // Check for OS combination
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
@@ -1931,12 +1931,10 @@ void JZBAnalysis::Analyze() {
   counters[EV].fill("... has at least 2 OS leptons");
   
   // Trileptons
-  for(; TriLepton2 < sortedGoodLeptons.size(); TriLepton2++) {
-    if(sortedGoodLeptons[0].charge*sortedGoodLeptons[TriLepton2].charge<0 &&  sortedGoodLeptons[0].type==sortedGoodLeptons[TriLepton2].type ) break; // looking for OSSF pair for Z
-  }
-  for(; TriLepton3 < sortedGoodLeptons.size(); TriLepton3++) {
-    if(TriLepton3==TriLepton1 || TriLepton3==TriLepton2) continue;
-    else break; // pick the first lepton that's left!
+  if(sortedGoodLeptons[0].charge*sortedGoodLeptons[1].charge>0 || sortedGoodLeptons[0].type!=sortedGoodLeptons[1].type) {
+    //since we assume the first two leptons to come from the Z they should be same flavor and opposite sign. if they're not then we just reject the event.
+    TriLepton2=sortedGoodgLeptons.size()+5; // i.e. don't use this event :-)
+    TriLepton3=sortedGoodgLeptons.size()+6;
   }
   
   if(DoExperimentalFSRRecovery) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
@@ -3240,15 +3238,11 @@ void JZBAnalysis::GeneratorInfo(void) {
       if(sortedGLeptons.size()>2) {
 	int genTriLepton1 = 0;
 	int genTriLepton2 = 1;
-	int genTriLepton3 = 1;
+	int genTriLepton3 = 2;
 	
-	for(; genTriLepton2 < sortedGLeptons.size(); genTriLepton2++) {
-	  if(sortedGLeptons[0].charge*sortedGLeptons[genTriLepton2].charge<0 &&  abs(sortedGLeptons[0].type)==abs(sortedGLeptons[genTriLepton2].type) ) break; // looking for OSSF pair for Z
-	}
-	
-	for(; genTriLepton3 < sortedGLeptons.size(); genTriLepton3++) {
-	  if(genTriLepton3==genTriLepton1 || genTriLepton3==genTriLepton2) continue;
-	  else break; // pick the first lepton that's left!
+	if(sortedGLeptons[0].charge*sortedGLeptons[genTriLepton2].charge>0 ||  abs(sortedGLeptons[0].type)!=abs(sortedGLeptons[genTriLepton2].type) ) {
+	  genTriLepton2=sortedGLeptons.size()+5;
+	  genTriLepton3=sortedGLeptons.size()+5;
 	}
 	
 	if(sortedGLeptons.size()>=3 && genTriLepton1<sortedGLeptons.size() && genTriLepton2<sortedGLeptons.size() && genTriLepton3<sortedGLeptons.size() ) {
