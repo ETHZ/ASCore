@@ -1905,7 +1905,7 @@ void JZBAnalysis::Analyze() {
   
   int TriLepton1 = 0;
   int TriLepton2 = 1;
-  int TriLepton3 = 2;
+  int TriLepton3 = 1;
   
   // Check for OS combination
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
@@ -1930,11 +1930,24 @@ void JZBAnalysis::Analyze() {
   }
   counters[EV].fill("... has at least 2 OS leptons");
   
+  float mindiff=-1;
+  int BestCandidate=sortedGoodLeptons.size();
+  
   // Trileptons
-  if(sortedGoodLeptons[0].charge*sortedGoodLeptons[1].charge>0 || sortedGoodLeptons[0].type!=sortedGoodLeptons[1].type) {
-    //since we assume the first two leptons to come from the Z they should be same flavor and opposite sign. if they're not then we just reject the event.
-    TriLepton2=sortedGoodgLeptons.size()+5; // i.e. don't use this event :-)
-    TriLepton3=sortedGoodgLeptons.size()+6;
+  for(; TriLepton2 < sortedGoodLeptons.size(); TriLepton2++) {
+    if(sortedGoodLeptons[0].charge*sortedGoodLeptons[TriLepton2].charge<0 &&  sortedGoodLeptons[0].type==sortedGoodLeptons[TriLepton2].type ) {
+      float curr_mindiff=abs((sortedGoodLeptons[0].p+sortedGoodLeptons[TriLepton2].p).M()-91.2);
+      if(mindiff<0||curr_mindiff<mindiff) {
+	mindiff=curr_mindiff;
+	BestCandidate=TriLepton2;
+      }
+    }
+  }
+  TriLepton2=BestCandidate;
+  
+  for(; TriLepton3 < sortedGoodLeptons.size(); TriLepton3++) {
+    if(TriLepton3==TriLepton1 || TriLepton3==TriLepton2) continue;
+    else break; // pick the first lepton that's left!
   }
   
   if(DoExperimentalFSRRecovery) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
