@@ -390,16 +390,65 @@ public:
   int tri_genMID1;
   int tri_genMID2;
   int tri_genMID3;
-  float tri_dR01;
-  float tri_dR02;
   float tri_dR12;
+  float tri_dR13;
+  float tri_dR23;
   float tri_WZB;
   float tri_JWZB;
   int tri_index1;
   int tri_index2;
   int tri_index3;
+  bool tri_GoodZMatch;
+  bool tri_GoodWMatch;
   
-
+  float gentri_pt1;
+  float gentri_pt2;
+  float gentri_pt3;
+  float gentri_eta1;
+  float gentri_eta2;
+  float gentri_eta3;
+  float gentri_id1;
+  float gentri_id2;
+  float gentri_id3;
+  float gentri_ch1;
+  float gentri_ch2;
+  float gentri_ch3;
+  float gentri_mlll;
+  float gentri_mll;
+  float gentri_submll;
+  float gentri_mT;
+  int gentri_genMID1;
+  int gentri_genMID2;
+  int gentri_genMID3;
+  float gentri_dR12;
+  float gentri_dR13;
+  float gentri_dR23;
+  float gentri_WZB;
+  float gentri_JWZB;
+  bool gentri_GoodZMatch;
+  bool gentri_GoodWMatch;
+  
+  float pgentri_pt1;
+  float pgentri_pt2;
+  float pgentri_pt3;
+  float pgentri_eta1;
+  float pgentri_eta2;
+  float pgentri_eta3;
+  float pgentri_id1;
+  float pgentri_id2;
+  float pgentri_id3;
+  float pgentri_ch1;
+  float pgentri_ch2;
+  float pgentri_ch3;
+  float pgentri_mlll;
+  float pgentri_mll;
+  float pgentri_submll;
+  float pgentri_mT;
+  float pgentri_dR12;
+  float pgentri_dR13;
+  float pgentri_dR23;
+  float pgentri_WZB;
+  float pgentri_JWZB;
 
 };
 
@@ -783,11 +832,64 @@ void nanoEvent::reset()
   tri_genMID1=0;
   tri_genMID2=0;
   tri_genMID3=0;
-  tri_dR01=0;
-  tri_dR02=0;
   tri_dR12=0;
+  tri_dR13=0;
+  tri_dR23=0;
   tri_WZB=0;
   tri_JWZB=0;
+  
+  gentri_pt1=0;
+  gentri_pt2=0;
+  gentri_pt3=0;
+  
+  gentri_id1=0;
+  gentri_id2=0;
+  gentri_id3=0;
+    
+  gentri_ch1=0;
+  gentri_ch2=0;
+  gentri_ch3=0;
+    
+  gentri_mlll=0;
+  gentri_mll=0;
+  gentri_submll=0;
+    
+  gentri_mT=0;
+  
+  gentri_genMID1=0;
+  gentri_genMID2=0;
+  gentri_genMID3=0;
+  gentri_dR12=0;
+  gentri_dR13=0;
+  gentri_dR23=0;
+  gentri_WZB=0;
+  gentri_JWZB=0;
+  
+  gentri_GoodZMatch=false;
+  gentri_GoodWMatch=false;
+  
+  pgentri_pt1=0;
+  pgentri_pt2=0;
+  pgentri_pt3=0;
+  pgentri_eta1=0;
+  pgentri_eta2=0;
+  pgentri_eta3=0;
+  pgentri_id1=0;
+  pgentri_id2=0;
+  pgentri_id3=0;
+  pgentri_ch1=0;
+  pgentri_ch2=0;
+  pgentri_ch3=0;
+  pgentri_mlll=0;
+  pgentri_mll=0;
+  pgentri_submll=0;
+  pgentri_mT=0;
+  pgentri_dR12=0;
+  pgentri_dR13=0;
+  pgentri_dR23=0;
+  pgentri_WZB=0;
+  pgentri_JWZB=0;
+
 }
 
 
@@ -1188,12 +1290,75 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_genMID2",&nEvent.tri_genMID2,"tri_genMID2/I");
   myTree->Branch("tri_genMID3",&nEvent.tri_genMID3,"tri_genMID3/I");
   
-  myTree->Branch("tri_dR01",&nEvent.tri_dR01,"tri_dR01/F");
-  myTree->Branch("tri_dR02",&nEvent.tri_dR02,"tri_dR02/F");
+  myTree->Branch("tri_GoodZMatch",&nEvent.tri_GoodZMatch,"tri_GoodZMatch/O");
+  myTree->Branch("tri_GoodWMatch",&nEvent.tri_GoodWMatch,"tri_GoodWMatch/O");
+
   myTree->Branch("tri_dR12",&nEvent.tri_dR12,"tri_dR12/F");
+  myTree->Branch("tri_dR13",&nEvent.tri_dR13,"tri_dR13/F");
+  myTree->Branch("tri_dR23",&nEvent.tri_dR23,"tri_dR23/F");
 
   myTree->Branch("tri_WZB",&nEvent.tri_WZB,"tri_WZB/F");
   myTree->Branch("tri_JWZB",&nEvent.tri_JWZB,"tri_JWZB/F");
+  
+  myTree->Branch("gentri_eta1",&nEvent.gentri_eta1,"gentri_eta1/F");
+  myTree->Branch("gentri_eta",&nEvent.gentri_eta2,"gentri_eta2/F");
+  myTree->Branch("gentri_eta3",&nEvent.gentri_eta3,"gentri_eta3/F");  
+  myTree->Branch("gentri_pt1",&nEvent.gentri_pt1,"gentri_pt1/F");
+  myTree->Branch("gentri_pt2",&nEvent.gentri_pt2,"gentri_pt2/F");
+  myTree->Branch("gentri_pt3",&nEvent.gentri_pt3,"gentri_pt3/F");  
+  myTree->Branch("gentri_id1",&nEvent.gentri_id1,"gentri_id1/F");
+  myTree->Branch("gentri_id2",&nEvent.gentri_id2,"gentri_id2/F");
+  myTree->Branch("gentri_id3",&nEvent.gentri_id3,"gentri_id3/F");
+  myTree->Branch("gentri_ch1",&nEvent.gentri_ch1,"gentri_ch1/F");
+  myTree->Branch("gentri_ch2",&nEvent.gentri_ch2,"gentri_ch2/F");
+  myTree->Branch("gentri_ch3",&nEvent.gentri_ch3,"gentri_ch3/F");
+  myTree->Branch("gentri_mlll",&nEvent.gentri_mlll,"gentri_mlll/F");
+  myTree->Branch("gentri_mll",&nEvent.gentri_mll,"gentri_mll/F");
+  myTree->Branch("gentri_submll",&nEvent.gentri_submll,"gentri_submll/F");
+  myTree->Branch("gentri_mT",&nEvent.gentri_mT,"gentri_mT/F");
+  
+  myTree->Branch("gentri_genMID1",&nEvent.gentri_genMID1,"gentri_genMID1/I");
+  myTree->Branch("gentri_genMID2",&nEvent.gentri_genMID2,"gentri_genMID2/I");
+  myTree->Branch("gentri_genMID3",&nEvent.gentri_genMID3,"gentri_genMID3/I");
+  
+  myTree->Branch("gentri_dR12",&nEvent.gentri_dR12,"gentri_dR12/F");
+  myTree->Branch("gentri_dR13",&nEvent.gentri_dR13,"gentri_dR13/F");
+  myTree->Branch("gentri_dR23",&nEvent.gentri_dR23,"gentri_dR23/F");
+
+  myTree->Branch("gentri_WZB",&nEvent.gentri_WZB,"gentri_WZB/F");
+  myTree->Branch("gentri_JWZB",&nEvent.gentri_JWZB,"gentri_JWZB/F");
+  
+  myTree->Branch("gentri_GoodZMatch",&nEvent.gentri_GoodZMatch,"gentri_GoodZMatch/O");
+  myTree->Branch("gentri_GoodWMatch",&nEvent.gentri_GoodWMatch,"gentri_GoodWMatch/O");
+  
+
+  
+  myTree->Branch("pgentri_eta1",&nEvent.pgentri_eta1,"pgentri_eta1/F");
+  myTree->Branch("pgentri_eta",&nEvent.pgentri_eta2,"pgentri_eta2/F");
+  myTree->Branch("pgentri_eta3",&nEvent.pgentri_eta3,"pgentri_eta3/F");  
+  myTree->Branch("pgentri_pt1",&nEvent.pgentri_pt1,"pgentri_pt1/F");
+  myTree->Branch("pgentri_pt2",&nEvent.pgentri_pt2,"pgentri_pt2/F");
+  myTree->Branch("pgentri_pt3",&nEvent.pgentri_pt3,"pgentri_pt3/F");  
+  myTree->Branch("pgentri_id1",&nEvent.pgentri_id1,"pgentri_id1/F");
+  myTree->Branch("gentri_id2",&nEvent.pgentri_id2,"pgentri_id2/F");
+  myTree->Branch("pgentri_id3",&nEvent.pgentri_id3,"pgentri_id3/F");
+  myTree->Branch("pgentri_ch1",&nEvent.pgentri_ch1,"pgentri_ch1/F");
+  myTree->Branch("pgentri_ch2",&nEvent.pgentri_ch2,"pgentri_ch2/F");
+  myTree->Branch("pgentri_ch3",&nEvent.pgentri_ch3,"pgentri_ch3/F");
+  myTree->Branch("pgentri_mlll",&nEvent.pgentri_mlll,"pgentri_mlll/F");
+  myTree->Branch("pgentri_mll",&nEvent.pgentri_mll,"pgentri_mll/F");
+  myTree->Branch("pgentri_submll",&nEvent.pgentri_submll,"pgentri_submll/F");
+  myTree->Branch("pgentri_mT",&nEvent.pgentri_mT,"pgentri_mT/F");
+  
+  myTree->Branch("pgentri_dR12",&nEvent.pgentri_dR12,"pgentri_dR12/F");
+  myTree->Branch("pgentri_dR13",&nEvent.pgentri_dR13,"pgentri_dR13/F");
+  myTree->Branch("pgentri_dR23",&nEvent.pgentri_dR23,"pgentri_dR23/F");
+
+  myTree->Branch("pgentri_WZB",&nEvent.pgentri_WZB,"pgentri_WZB/F");
+  myTree->Branch("pgentri_JWZB",&nEvent.pgentri_JWZB,"pgentri_JWZB/F");
+  
+  
+
   
   //generator information
   if(fdoGenInfo) {
@@ -2242,13 +2407,22 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]); // WW study
     nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]); // WW study
     
-    nEvent.tri_dR01 = lp1.DeltaR(lp2);
-    nEvent.tri_dR02 = lp1.DeltaR(lp3); 
-    nEvent.tri_dR12 = lp2.DeltaR(lp3);
+    if(abs(nEvent.tri_genMID1)==15) nEvent.tri_genMID1=(sortedGoodLeptons[TriLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]); // WW study
+    if(abs(nEvent.tri_genMID2)==15) nEvent.tri_genMID2=(sortedGoodLeptons[TriLepton2].type?fTR->MuGenGMID[i3]:fTR->ElGenGMID[i2]); // WW study
+    if(abs(nEvent.tri_genMID3)==15) nEvent.tri_genMID3=(sortedGoodLeptons[TriLepton3].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i3]); // WW study
+    
+    nEvent.tri_GoodZMatch=false;
+    nEvent.tri_GoodWMatch=false;
+    if(nEvent.tri_genMID1==23 && nEvent.tri_genMID1 ==23) nEvent.tri_GoodZMatch=true;
+    if(abs(nEvent.tri_genMID3)==24 ) nEvent.tri_GoodWMatch=true;
+
+    nEvent.tri_dR12 = lp1.DeltaR(lp2);
+    nEvent.tri_dR13 = lp1.DeltaR(lp3); 
+    nEvent.tri_dR23 = lp2.DeltaR(lp3);
 
     nEvent.tri_eta1 = lp1.Eta();
-    nEvent.tri_eta2 = lp1.Eta();
     nEvent.tri_eta2 = lp2.Eta();
+    nEvent.tri_eta3 = lp3.Eta();
     
     nEvent.tri_WZB  = (lp1+lp2).Pt() - (lp3+pfMETvector).Pt();  // Z.Pt() - W.Pt()
     nEvent.tri_JWZB = sumOfPFJets.Pt() - (lp1 + lp2 + lp3 + pfMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
@@ -3004,11 +3178,15 @@ void JZBAnalysis::GeneratorInfo(void) {
 
   // Number of good jets
   nEvent.genNjets = 0;
+  TLorentzVector sumOfGenJets(0,0,0,0);
   for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
     if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
     if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
     ++nEvent.genNjets;
     if ( fabs(fTR->GenJetEta[jIndex])>3.0 ) continue;
+    TLorentzVector gJet;
+    gJet.SetPtEtaPhiE(fTR->GenJetPt[jIndex],fTR->GenJetEta[jIndex],fTR->GenJetPhi[jIndex],fTR->GenJetE[jIndex]);
+    sumOfGenJets+=gJet;
     ++nEvent.genNjetsTwoSix;
   }
 
@@ -3058,7 +3236,130 @@ void JZBAnalysis::GeneratorInfo(void) {
           nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
 	  nEvent.dphigenZgenMet = (sortedGLeptons[i1].p + sortedGLeptons[i2].p).DeltaPhi(GenMETvector);
         }
-    }
+
+      if(sortedGLeptons.size()>2) {
+	int genTriLepton1 = 0;
+	int genTriLepton2 = 1;
+	int genTriLepton3 = 1;
+	
+	for(; genTriLepton2 < sortedGLeptons.size(); genTriLepton2++) {
+	  if(sortedGLeptons[0].charge*sortedGLeptons[genTriLepton2].charge<0 &&  abs(sortedGLeptons[0].type)==abs(sortedGLeptons[genTriLepton2].type) ) break; // looking for OSSF pair for Z
+	}
+	
+	for(; genTriLepton3 < sortedGLeptons.size(); genTriLepton3++) {
+	  if(genTriLepton3==genTriLepton1 || genTriLepton3==genTriLepton2) continue;
+	  else break; // pick the first lepton that's left!
+	}
+	
+	if(sortedGLeptons.size()>=3 && genTriLepton1<sortedGLeptons.size() && genTriLepton2<sortedGLeptons.size() && genTriLepton3<sortedGLeptons.size() ) {
+	  TLorentzVector lp1(sortedGLeptons[genTriLepton1].p);
+	  TLorentzVector lp2(sortedGLeptons[genTriLepton2].p);
+	  TLorentzVector lp3(sortedGLeptons[genTriLepton3].p);
+	  
+	  nEvent.gentri_pt1=sortedGLeptons[genTriLepton1].p.Pt();
+	  nEvent.gentri_pt2=sortedGLeptons[genTriLepton2].p.Pt();
+	  nEvent.gentri_pt3=sortedGLeptons[genTriLepton3].p.Pt();
+	  
+	  nEvent.gentri_id1=sortedGLeptons[genTriLepton1].type;
+	  nEvent.gentri_id2=sortedGLeptons[genTriLepton2].type;
+	  nEvent.gentri_id3=sortedGLeptons[genTriLepton3].type;
+	  
+	  nEvent.gentri_ch1=sortedGLeptons[genTriLepton1].charge;
+	  nEvent.gentri_ch2=sortedGLeptons[genTriLepton2].charge;
+	  nEvent.gentri_ch3=sortedGLeptons[genTriLepton3].charge;
+	  
+	  nEvent.gentri_mlll=(lp1+lp2+lp3).M();
+	  nEvent.gentri_mll=(lp1+lp2).M();
+	  nEvent.gentri_submll=(lp2+lp3).M();
+	  
+	  float AngleBetweenMETandThirdLepton=sortedGLeptons[genTriLepton3].p.DeltaPhi(GenMETvector);
+	  nEvent.gentri_mT = sqrt(2 * nEvent.genMET * sortedGLeptons[genTriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
+	  
+	  nEvent.gentri_genMID1 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton1].index];
+	  nEvent.gentri_genMID2 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton2].index];
+	  nEvent.gentri_genMID3 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton3].index];
+	  
+	  nEvent.gentri_GoodZMatch=false;
+	  nEvent.gentri_GoodWMatch=false;
+	  if(nEvent.gentri_genMID1==23 && nEvent.gentri_genMID1 ==23) nEvent.gentri_GoodZMatch=true;
+	  if(abs(nEvent.gentri_genMID3)==24 ) nEvent.gentri_GoodWMatch=true;
+	    
+	  nEvent.gentri_dR12 = lp1.DeltaR(lp2);
+	  nEvent.gentri_dR13 = lp1.DeltaR(lp3); 
+	  nEvent.gentri_dR23 = lp2.DeltaR(lp3);
+	  
+	  nEvent.gentri_eta1 = lp1.Eta();
+	  nEvent.gentri_eta2 = lp2.Eta();
+	  nEvent.gentri_eta3 = lp3.Eta();
+	  
+	  nEvent.gentri_WZB  = (lp1+lp2).Pt() - (lp3+GenMETvector).Pt();  // Z.Pt() - W.Pt()
+//	  nEvent.gentri_JWZB = sumOfGenJets.Pt() - (lp1 + lp2 + lp3 + GenMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
+	  nEvent.gentri_JWZB = (lp3 + GenMETvector + sumOfGenJets).Pt() - (lp1 + lp2).Pt(); // Jets.pt() - (Z+W).Pt()
+	  
+	} // end of three or more usable leptons
+	  // ** and now the pure generator one (i.e. no combinatorial errors!) -- only for WZ otherwise this is pointless!
+	  
+	int pgenTriLepton1 = 0;
+	int pgenTriLepton2 = 0;
+	int pgenTriLepton3 = 0;
+	
+	for(; pgenTriLepton1 < sortedGLeptons.size(); pgenTriLepton1++) {
+	  int mother=abs(fTR->GenLeptonMID[sortedGLeptons[pgenTriLepton1].index]);
+	  if(mother==15) mother=abs(fTR->GenLeptonGMID[sortedGLeptons[pgenTriLepton1].index]);
+	  if(mother==23) break; // found a lepton coming from a Z
+	}
+	for(pgenTriLepton2=pgenTriLepton1+1; pgenTriLepton2 < sortedGLeptons.size(); pgenTriLepton2++) {
+	  int mother=abs(fTR->GenLeptonMID[sortedGLeptons[pgenTriLepton2].index]);
+	  if(mother==15) mother=abs(fTR->GenLeptonGMID[sortedGLeptons[pgenTriLepton2].index]);
+	  if(mother==23) break; // found a lepton coming from a Z
+	}
+	for(; pgenTriLepton3 < sortedGLeptons.size(); pgenTriLepton3++) {
+	  int mother=abs(fTR->GenLeptonMID[sortedGLeptons[pgenTriLepton3].index]);
+	  if(mother==15) mother=abs(fTR->GenLeptonGMID[sortedGLeptons[pgenTriLepton3].index]);
+	  if(mother==24) break; // found a lepton coming from a W
+	}
+	
+	if(sortedGLeptons.size()>=3 && pgenTriLepton1<sortedGLeptons.size() && pgenTriLepton2<sortedGLeptons.size() && pgenTriLepton3<sortedGLeptons.size() ) {
+	  TLorentzVector lp1(sortedGLeptons[pgenTriLepton1].p);
+	  TLorentzVector lp2(sortedGLeptons[pgenTriLepton2].p);
+	  TLorentzVector lp3(sortedGLeptons[pgenTriLepton3].p);
+	  
+	  nEvent.pgentri_pt1=sortedGLeptons[pgenTriLepton1].p.Pt();
+	  nEvent.pgentri_pt2=sortedGLeptons[pgenTriLepton2].p.Pt();
+	  nEvent.pgentri_pt3=sortedGLeptons[pgenTriLepton3].p.Pt();
+	  
+	  nEvent.pgentri_id1=sortedGLeptons[pgenTriLepton1].type;
+	  nEvent.pgentri_id2=sortedGLeptons[pgenTriLepton2].type;
+	  nEvent.pgentri_id3=sortedGLeptons[pgenTriLepton3].type;
+	  
+	  nEvent.pgentri_ch1=sortedGLeptons[pgenTriLepton1].charge;
+	  nEvent.pgentri_ch2=sortedGLeptons[pgenTriLepton2].charge;
+	  nEvent.pgentri_ch3=sortedGLeptons[pgenTriLepton3].charge;
+	  
+	  nEvent.pgentri_mlll=(lp1+lp2+lp3).M();
+	  nEvent.pgentri_mll=(lp1+lp2).M();
+	  nEvent.pgentri_submll=(lp2+lp3).M();
+	  
+	  float AngleBetweenMETandThirdLepton=sortedGLeptons[pgenTriLepton3].p.DeltaPhi(GenMETvector);
+	  nEvent.pgentri_mT = sqrt(2 * nEvent.genMET * sortedGLeptons[pgenTriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
+	  
+	  nEvent.pgentri_dR12 = lp1.DeltaR(lp2);
+	  nEvent.pgentri_dR13 = lp1.DeltaR(lp3); 
+	  nEvent.pgentri_dR23 = lp2.DeltaR(lp3);
+	  
+	  nEvent.pgentri_eta1 = lp1.Eta();
+	  nEvent.pgentri_eta2 = lp2.Eta();
+	  nEvent.pgentri_eta3 = lp3.Eta();
+	  
+	  nEvent.pgentri_WZB  = (lp1+lp2).Pt() - (lp3+GenMETvector).Pt();  // Z.Pt() - W.Pt()
+	  nEvent.pgentri_JWZB = (lp3 + GenMETvector + sumOfGenJets).Pt() - (lp1 + lp2).Pt(); // Jets.pt() - (Z+W).Pt()
+	  
+	} // end of Z/W pure gen info
+
+	
+	  
+	}//end of if tehre are three or more gleptons
+    }//end of if there are any gleptons
 }
 
 void FindDaughters(TreeReader *fTR, int nGenParticles, int iMother, TLorentzVector &Pll, TLorentzVector &Pllg, vector<TLorentzVector> &Leptons) {
