@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.67 $";
+string sjzbversion="$Revision: 1.70.2.68 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.67 2012/10/18 14:34:39 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.68 2012/10/22 06:01:23 buchmann Exp $
 */
 
 
@@ -812,6 +812,10 @@ void nanoEvent::reset()
   tri_pt2=0;
   tri_pt3=0;
   
+  tri_eta1=0;
+  tri_eta2=0;
+  tri_eta3=0;
+    
   tri_id1=0;
   tri_id2=0;
   tri_id3=0;
@@ -1271,7 +1275,10 @@ void JZBAnalysis::Begin(TFile *f){
   
   myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
   myTree->Branch("tri_pt2",&nEvent.tri_pt2,"tri_pt2/F");
-  myTree->Branch("tri_pt3",&nEvent.tri_pt3,"tri_pt3/F");  
+  myTree->Branch("tri_pt3",&nEvent.tri_pt3,"tri_pt3/F");
+  myTree->Branch("tri_eta1",&nEvent.tri_eta1,"tri_eta1/F");
+  myTree->Branch("tri_eta2",&nEvent.tri_eta2,"tri_eta2/F");
+  myTree->Branch("tri_eta3",&nEvent.tri_eta3,"tri_eta3/F");
   myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/F");
   myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/F");
   myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/F");
