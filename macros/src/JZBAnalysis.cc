@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.63 $";
+string sjzbversion="$Revision: 1.70.2.67 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.63 2012/10/15 12:26:40 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.67 2012/10/18 14:34:39 buchmann Exp $
 */
 
 
@@ -3253,10 +3253,20 @@ void JZBAnalysis::GeneratorInfo(void) {
 	int genTriLepton2 = 1;
 	int genTriLepton3 = 2;
 	
-	if(sortedGLeptons[0].charge*sortedGLeptons[genTriLepton2].charge>0 ||  abs(sortedGLeptons[0].type)!=abs(sortedGLeptons[genTriLepton2].type) ) {
-	  genTriLepton2=sortedGLeptons.size()+5;
-	  genTriLepton3=sortedGLeptons.size()+5;
+	float mindiff=-1;
+	int BestCandidate=sortedGLeptons.size();
+	// Trileptons
+	for(; genTriLepton2 < sortedGLeptons.size(); genTriLepton2++) {
+	  if(sortedGLeptons[0].charge*sortedGLeptons[genTriLepton2].charge<0 &&  sortedGLeptons[0].type==sortedGLeptons[genTriLepton2].type ) {
+	    float curr_mindiff=abs((sortedGLeptons[0].p+sortedGLeptons[genTriLepton2].p).M()-91.2);
+	    if(mindiff<0||curr_mindiff<mindiff) {
+	      mindiff=curr_mindiff;
+	      BestCandidate=genTriLepton2;
+	    }
+	  }
 	}
+	
+	genTriLepton2=BestCandidate;
 	
 	if(sortedGLeptons.size()>=3 && genTriLepton1<sortedGLeptons.size() && genTriLepton2<sortedGLeptons.size() && genTriLepton3<sortedGLeptons.size() ) {
 	  TLorentzVector lp1(sortedGLeptons[genTriLepton1].p);
@@ -3285,6 +3295,10 @@ void JZBAnalysis::GeneratorInfo(void) {
 	  nEvent.gentri_genMID1 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton1].index];
 	  nEvent.gentri_genMID2 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton2].index];
 	  nEvent.gentri_genMID3 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton3].index];
+	  
+	  if(abs(nEvent.gentri_genMID1)==15) nEvent.gentri_genMID1=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton1].index];
+	  if(abs(nEvent.gentri_genMID2)==15) nEvent.gentri_genMID2=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton2].index];
+	  if(abs(nEvent.gentri_genMID3)==15) nEvent.gentri_genMID3=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton3].index];
 	  
 	  nEvent.gentri_GoodZMatch=false;
 	  nEvent.gentri_GoodWMatch=false;
