@@ -130,7 +130,6 @@ public:
 
 	bool fDO_OPT;
 
-	SSDLPlotter();
 	SSDLPlotter(TString);
 	SSDLPlotter(TString, TString);
 	virtual ~SSDLPlotter();
@@ -144,7 +143,8 @@ public:
 	virtual void msugraLOxsecs(TFile *);
 	virtual void msugraNLOxsecs(TFile *);
 	virtual void scanMSUGRA(const char * filestring);
-	virtual void scanSMS( const char * filestring, gRegion);
+	virtual void scanSMS( const char * filestring, int);
+	// old virtual void scanSMS( const char * filestring, gRegion);
 	// virtual void scanSMSEWKpaper( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2, bool pass3rdVeto);
 	virtual void plotWeightedHT();
 
@@ -166,20 +166,24 @@ public:
 	void make2DRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
 
-	void makeOriginPlots(gRegion);
+	void makeOriginPlots(int);
+	// old void makeOriginPlots(gRegion);
 	
 	void makeIsoVsMETPlot(gSample);
 	void makePileUpPlots(bool write = true);
 	
 	void makePRLPlot1();
 	
-	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void makeNT012Plots(vector<int>, gChannel, int region = 0, gHiLoSwitch = HighPt);
+	// old void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-        SSPrediction makeIntPrediction(TString, gRegion);
+        SSPrediction makeIntPrediction(TString, int);
+        // old SSPrediction makeIntPrediction(TString, gRegion);
 	void makeTTWIntPredictions();
-	TTWZPrediction makeIntPredictionTTW(TString, gRegion);
+	TTWZPrediction makeIntPredictionTTW(TString, int);
+	// old TTWZPrediction makeIntPredictionTTW(TString, gRegion);
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
 
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
@@ -188,12 +192,14 @@ public:
 	void makeDiffPredictionTTW(int);
 
         void makeAllClosureTests();
-	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
+	void makeIntMCClosure(vector<int>, TString, int region = 0);
+	// void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
 
 	void makeTTbarClosure();
         void makeRelIsoTTSigPlots();
 	
-	void storeWeightedPred();
+	void storeWeightedPred(int reg);
+	// void storeWeightedPred(gRegion reg);
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only
 	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta
 	float getPRatio(gChannel, float, int = 0);
@@ -228,9 +234,11 @@ public:
 	void printYieldsShort(float = -1);
 	
 	void printAllYieldTables();
-	void printMCYieldTable(TString, gRegion = Baseline);
+	void printMCYieldTable(TString, int region = 0);
+	// old void printMCYieldTable(TString, gRegion = Baseline);
 
-	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
+	TGraph* getSigEventGraph(gChannel, int region = 0);
+	// old TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
 	// TGraph* getSigEventGraph(gChannel, float, float, float, float);
 	TGraph* getSigEventGraph(gChannel, float, float, float, float, int = 0);
 
@@ -244,27 +252,39 @@ public:
 	void labelOriginAxis(TAxis*, gChannel);
 	void label2OriginAxes(TAxis*, TAxis*, gChannel);
 	
-	void printOrigins(gRegion = Baseline);
-	void printMuOriginTable(gRegion = Baseline);
+	void printOrigins(int region = 0);
+	void printMuOriginTable(int region = 0);
+	// old void printOrigins(gRegion = Baseline);
+	// old void printMuOriginTable(gRegion = Baseline);
 	void printMuOriginHeader(TString);
-	void printMuOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void printMuOriginFromSample(Sample*, int,  int region = 0, gHiLoSwitch = HighPt);
+	void print2MuOriginsFromSample(Sample*, int,  int region = 0, gHiLoSwitch = HighPt);
+	// old void printMuOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	// old void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
-	void printElOriginTable(gRegion = Baseline);
+	void printElOriginTable( int region = 0);
+	// old void printElOriginTable(gRegion = Baseline);
 	void printElOriginHeader(TString);
-	void printElOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void printElOriginFromSample(Sample*, int,  int region = 0, gHiLoSwitch = HighPt);
+	void print2ElOriginsFromSample(Sample*, int,  int region = 0, gHiLoSwitch = HighPt);
+	// old void printElOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	// old void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
-	void printEMuOriginTable(gRegion = Baseline);
+	void printEMuOriginTable( int region = 0);
+	// old void printEMuOriginTable(gRegion = Baseline);
 	void printEMuOriginHeader(TString);
-	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void printEMuOriginsFromSample(Sample*, int,  int region = 0, gHiLoSwitch = HighPt);
+	// old void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
-	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void printOriginSummary(vector<int>, int, gChannel,  int region = 0, gHiLoSwitch = HighPt);
+	void printOriginSummary2L(vector<int>, int, gChannel,  int region = 0, gHiLoSwitch = HighPt);
+	// old void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
+	// old void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
 	virtual void drawTopLine(float = 0.60, float = 1.0, float = 0.13);
 	virtual void drawTopLineSim(float = 0.60, float = 1.0, float = 0.13);
-	virtual void drawRegionSel(gRegion);
+	virtual void drawRegionSel(int);
+	// old virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	
 	vector<int> fMCBG;    // SM background MC samples

@@ -23,6 +23,7 @@ def usage():
 	print '--------------------------------------------------------------------'
 	print 'The config file must look as follows:'
 	print '        DumperLocation     <path to the RunSSDLDumper executable>'
+	print '        DumperConfig       <path to the configuration file for the SSDLDumper>'
 	print '        OutputLocation     <the desired output location. make sure the folder exists and that there is NO allYields.root in it!>'
 	print '        OutdirNode         <temporary folder on the workernodes /scratch/ directory'
 	print '                           this dir will be created and stuff will be moved out of it, so it doesn\'t really matter what it\'s called>'
@@ -73,7 +74,7 @@ def mk_dir_string(line):
 	
 
 def mk_single_string(line, full_location=False, indiv_dir=False):
-	string = dumper_location + ' -v 1'
+	string = dumper_location + ' -v 1 -p '+dumper_config+' '
 	if not full_location:
 		string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+ line.split()[1]
 		#string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+ line.split()[1]
@@ -112,6 +113,8 @@ def read_config(config_name):
 		arg = line.split()[1]
 		if opt == 'DumperLocation':
 			info['dumper_location'] = arg
+		if opt == 'DumperConfig':
+			info['dumper_config'] = arg
 		elif opt == 'OutdirNode':
 			if not arg[-1]== '/':
 				arg+='/'
@@ -139,19 +142,6 @@ def check_commands():
 			print '[status] `hadd\' exists...'
 			return True
 	else:
-		#print '[status] `root\' and `hadd\' do not exist!'
-		#print '[status] trying to obtain them...'
-		#os.system('cd '+release_dir+' ; eval `scramv1 runtime -sh`')
-		#os.system('eval `scramv1 runtime -sh`')
-		#print '[status] checking again...'
-		#if commands.getstatusoutput('which root')[0]==0:
-		#	print '[status] `root\' exists now...'
-		#	if not commands.getstatusoutput('which hadd')[0]:
-		#		print '[status] and so does `hadd\'...'
-		#elif commands.getstatusoutput('which root')[0] == 256:
-		#		print '[ERROR] could not obtain `root\' and `hadd\''
-		#		print '[ERROR] you should have the output files in your output directory, you will have to merge them yourself.'
-		#		print '[status] cleaning up the mess...'
 		return False
 			
 def clean():
@@ -185,14 +175,8 @@ def merge_and_clean():
 		if isdata:
 			os.system(dir_cat)
 
-	# print '[status] done with the special dirs, now merging all together.'
-	# hadd_string = 'hadd '+output_location+'SSDLYields.root'
-	# for ls in os.listdir(output_location):
-	# 	if ls.endswith('.root'):
-	# 		hadd_string+=' '+output_location+ls
-	# os.system(hadd_string)
-
 	os.system('rm -r tmp/ ; rm ssdl_* ; rm sgejob-* -rf')
+	#os.system('rm sgejob-* -rf') # no cleaning up, for debugging puposes
 	for ls in os.listdir(output_location):
 		if os.path.isdir(output_location+ls) and 'output' in ls:
 			os.system('rm -rf '+output_location+ls)
@@ -217,7 +201,7 @@ def check_on_jobs(jobnames, time_elapsed):
 def do_stuff(config_name):
 	print '[status] starting script...'
 
-	global srm_path, dcap_path, dumper_location, output_location, user, noj, release_dir, output_node
+	global srm_path, dcap_path, dumper_location, dumper_config, output_location, user, noj, release_dir, output_node
 	global special_dirs
 	special_dirs = []
 	
@@ -226,6 +210,7 @@ def do_stuff(config_name):
 	
 	cardFile        =  open(info_dict['cardfile_name'], 'r')
 	dumper_location = info_dict['dumper_location']
+	dumper_config = info_dict['dumper_config']
 	output_location = info_dict['output_location']
 	output_node     = info_dict['output_node']
 	batch_script    = info_dict['batch_script']
@@ -243,6 +228,8 @@ def do_stuff(config_name):
 	if not os.path.isdir(output_location):
 		print '[status] creating output directory:', output_location
 		os.system('mkdir '+output_location)
+		# copy the dumper_config into the output directory for future reference and the plotter
+		os.system('cp '+dumper_config+' '+output_location)
 	else:
 		print '[WARNING] output directory', output_location, 'already exists, this might lead to problems.'
 
@@ -251,34 +238,18 @@ def do_stuff(config_name):
 		os.system('rm -r tmp')
 	os.mkdir('tmp')
 	
-	#lm_cardFile  = open('tmp/tmp_datacard_lm.dat'  , 'w')
-	#qcd_cardFile = open('tmp/tmp_datacard_qcd.dat' , 'w')
-	#ww_cardFile  = open('tmp/tmp_datacard_ww.dat'  , 'w')
-
-	
 	print '[status] reading info and creating cards...'
 	print '[status] searching for all the files on the SE'
 	for line in cardFile.readlines():
 		if '#' in line or len(line) == 0:
 			continue
 		if line.split()[1].endswith('.root'):
-		#	if 'LM' in line.split()[0]:
-		#		lm_cardFile.writelines(mk_card_line(line))
-		#	elif 'QCD' in line.split()[0]:
-		#		qcd_cardFile.writelines(mk_card_line(line))
-		#	elif 'WW' in line.split()[0]:
-		#		ww_cardFile.writelines(mk_card_line(line))
-		#	else:
 			commit_strings.append(mk_single_string(line))
 		else:
 			print '[status] looking up single files for', line.split()[0]
 			special_dirs.append(line.split()[0])
 			commit_strings.extend(mk_dir_string(line))
 		
-	#lm_cardFile.close()
-	#qcd_cardFile.close()
-	#ww_cardFile.close()
-	
 	cardFile.close()
 	
 	for card in os.listdir('tmp'):
@@ -286,7 +257,7 @@ def do_stuff(config_name):
 			continue
 		if os.path.getsize(os.path.abspath('.')+'/tmp/'+card) == 0:
 			continue
-		commit_strings.append(dumper_location + ' -v 1 -l ' + os.path.abspath('.')+'/tmp/'+card+' -o '+output_node)
+		commit_strings.append(dumper_location + ' -v 1 -p '+dumper_config+' -l ' + os.path.abspath('.')+'/tmp/'+card+' -o '+output_node)
 	
 	print '[status] starting to submit jobs...'
 	global jobnames
@@ -326,6 +297,7 @@ def do_stuff(config_name):
 		#os.system('qsub -q all.q  -N job_'+str(ind)+' '+tmpScript_name)
 		print commit
 		if not dryrun:
+			#os.system('qsub -q all.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
 			os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
 			jobnames.append('ssdl_'+str(ind))
 	print '[status] submitted', len(commit_strings), 'jobs'
@@ -340,13 +312,6 @@ def do_stuff(config_name):
 		## 	print_status(time_elapsed, jobnames)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
 
-	## while (int(commands.getoutput('qstat | wc -l'))-2)>0:
-	## 	os.system('sleep 1')
-	## 	time_elapsed+=1
-	## 	if not time_elapsed%60:
-	## 		print_status(time_elapsed)
-	## print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
-	
 	if not dryrun:
 		if check_commands():
 			merge_and_clean()

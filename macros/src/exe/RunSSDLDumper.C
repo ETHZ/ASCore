@@ -16,7 +16,7 @@ using namespace std;
 //_____________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-x cross-section]" << endl;
+	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-x cross-section] [-p configfile]" << endl;
 	cout << "  where:" << endl;
 	cout << "     verbose         sets the verbose level                  " << endl;
 	cout << "                        default is 0 (quiet mode)            " << endl;
@@ -39,6 +39,8 @@ void usage( int status = 0 ) {
 	cout << "     cross-section   Is the cross-section for each MC sample " << endl;
 	cout << "     datacard        switches to input of a datacard         " << endl;
 	cout << "                     containing several input files          " << endl;
+	cout << "     configfile      configfile input of regions and global  " << endl;
+	cout << "                     parameters.                             " << endl;
 	cout << "     output          is the output directory                 " << endl;
 	cout << endl;
 	exit(status);
@@ -47,9 +49,10 @@ void usage( int status = 0 ) {
 //_____________________________________________________________________________________
 int main(int argc, char* argv[]) {
 // Default options
-	TString datacard = "";
-	TString inputfile = "";
-	TString outputdir = "";
+	TString datacard   = "";
+	TString configfile = "";
+	TString inputfile  = "";
+	TString outputdir  = "";
 	TString name = "";
 	int channel = -1; // ignore(-1), mumu(0), elel(1), elmu(2)
 	int verbose = 0;
@@ -60,13 +63,14 @@ int main(int argc, char* argv[]) {
 
 	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "v:l:i:n:m:o:c:g:x:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "v:l:i:n:m:o:c:g:p:x:h?")) != -1 ) {
 		switch (ch) {
 			case 'v': verbose    = atoi(optarg);         break;
 			case 'm': datamc     = atoi(optarg);         break;
 			case 'c': channel    = atoi(optarg);         break;
 			case 'x': xsec       = strtod(optarg, NULL); break;
 			case 'l': datacard   = TString(optarg);      break;
+			case 'p': configfile = TString(optarg);      break;
 			case 'i': inputfile  = TString(optarg);      break;
 			case 'n': name       = TString(optarg);      break;
 			case 'o': outputdir  = TString(optarg);      break;
@@ -112,9 +116,11 @@ int main(int argc, char* argv[]) {
 	if(verbose > 0 && !card) cout << " Channel is:        " << chan << endl;
 	if(verbose > 0 && !card) cout << " Cross-section is:  " << xsec << endl;
 	if(verbose > 0 &&  card) cout << " Datacard is:       " << datacard << endl;
+	if(verbose > 0)          cout << " Configuration is:  " << configfile << endl;
 	if(verbose > 0)          cout << " Outputdir is:      " << outputdir << endl;
 
-	SSDLDumper *tA = new SSDLDumper();
+	// SSDLDumper *tA = new SSDLDumper();
+	SSDLDumper *tA = new SSDLDumper(configfile);
 	tA->setVerbose(verbose);
 	tA->setOutputDir(outputdir);
 	if(!card) tA->init(inputfile, name, datamc, xsec, channel);

@@ -35,26 +35,33 @@
 #include <iomanip>
 #include <time.h> // access to date/time
 
+#include <typeinfo>
 
 int gDEBUG_EVENTNUMBER_ = -1;  
 int gDEBUG_RUNNUMBER_ = -1;
 
 using namespace std;
-//////////////////////////////////////////////////////////////////////////////////
-static bool  gTTWZ     = true;
+
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const float gMaxJetEta  = 2.5;
-static const float gMuMaxIso   = 0.10;
-static const float gElMaxIso   = 0.09;
-static  float gMinJetPt   = 20.;
-static const bool  gApplyZVeto = false;
 static const bool  gApplyTauVeto = true;
-static const bool  gInvertZVeto = false;
-static bool  gSmearMET     = false;
+static       bool  gSmearMET     = false;
 
 static const bool gDoSystStudies = false;
 static const bool gDoSyncExercise = false;
+float gMuMaxIso     ;
+float gElMaxIso     ;
+float gMinJetPt     ;
+float gMaxJetEta    ;
+bool  gTTWZ         ;
+bool  gApplyZVeto   ;
+bool  gInvertZVeto  ;
+TString tmp_gBaseRegion;
+
+// std::vector< SSDLDumper::Region* > gRegions;
+// std::vector< SSDLDumper::Region* >::iterator regIt;
+// std::map<TString , int> gRegion;
+// int gNREGIONS;
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -62,25 +69,6 @@ static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
-// Regions ///////////////////////////////////////////////////////////////////////
-TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT80MET30b", "HT80MET30bpp", "HT0MET120", "HT0MET80NJ2", "HT0MET80NJ2bV", "HT0MET120V", "HT0MET120NJ2", "HT0MET120NJ2bV", "HT0MET200", "HT0MET120NJ2bVlV", "HT0MET200lV", "TTbarWPresel", "TTbarWSel", "HT0MET50", "HT0MET80", "HT0MET50lV", "HT0MET80lV", "HT0MET120lV"};
-float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,          80.,            80.,          0.,            0.,              0.,           0.,             0.,               0.,          0.,                 0.,            0.,             0.,        100.,         0.,         0.,           0.,           0.,            0.};
-float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         8000.,           8000.,          39.,          8000.,            8000.,       8000.,              8000.,         8000.,          8000.,       8000.,      8000.,      8000.,        8000.,        8000.,         8000.};
-float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,            30.,        120.,           80.,             80.,         120.,           120.,             120.,        200.,               120.,          200.,             0.,          0.,        50.,        80.,          50.,          80.,          120.};
-float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    8000.,       8000.,        8000.,          8000.,       8000.,         8000.,           8000.,        8000.,          8000.,             200.,       8000.,               200.,         8000.,          8000.,       8000.,      8000.,      8000.,        8000.,        8000.,         8000.};
-int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             3 ,          3 ,         0 ,         0 ,           0 ,           0 ,            0 };
-int   SSDLDumper::Region::maxNjets  [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,            2 ,              2 ,           0 ,             2 ,               2 ,         99 ,                 2 ,           99 ,            99 ,         99 ,        99 ,        99 ,          99 ,          99 ,           99 };
-int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             0 ,          1 ,         0 ,         0 ,           0 ,           0 ,            0 };
-int   SSDLDumper::Region::maxNbjets [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,           99 ,              0 ,          99 ,            99 ,               0 ,         99 ,                 0 ,           99 ,            99 ,         99 ,        99 ,        99 ,          99 ,          99 ,           99 };
-int   SSDLDumper::Region::minNbjmed [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           2 ,             2 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             0 ,          1 ,         0 ,         0 ,           0 ,           0 ,            0 };
-int   SSDLDumper::Region::maxNbjmed [SSDLDumper::gNREGIONS] = {      99 ,         99 ,          99 ,            99 ,         99 ,           99 ,             99 ,          99 ,            99 ,              99 ,         99 ,                99 ,           99 ,            99 ,         99 ,        99 ,        99 ,          99 ,          99 ,           99 };
-float SSDLDumper::Region::minMu1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,           20.,             20.,          20.,            20.,              20.,         20.,                20.,           20.,            20.,         55.,        20.,        20.,          20.,          20.,           20.};
-float SSDLDumper::Region::minMu2pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,           20.,             20.,          20.,            20.,              20.,         20.,                20.,           20.,            20.,         35.,        20.,        20.,          20.,          20.,           20.};
-float SSDLDumper::Region::minEl1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,           20.,             20.,          20.,            20.,              20.,         20.,                20.,           20.,            20.,         55.,        20.,        20.,          20.,          20.,           20.};
-float SSDLDumper::Region::minEl2pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,            20.,         20.,           20.,             20.,          20.,            20.,              20.,         20.,                20.,           20.,            20.,         35.,        20.,        20.,          20.,          20.,           20.};
-int   SSDLDumper::Region::app3rdVet [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             0 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 1 ,            1 ,             0 ,          0 ,         0 ,         0 ,           1 ,           1 ,            1 };
-int   SSDLDumper::Region::vetoTTZSel[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             0 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             0 ,          1 ,         0 ,         0 ,           0 ,           0 ,            0 };
-int   SSDLDumper::Region::chargeVeto[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,             1 ,          0 ,            0 ,              0 ,           0 ,             0 ,               0 ,          0 ,                 0 ,            0 ,             0 ,          0 ,         0 ,         0 ,           0 ,           0 ,            0 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.}; // fake ratios
@@ -160,8 +148,110 @@ TString SSDLDumper::gEMULabel[2] = {"mu", "el"};
 TString SSDLDumper::gChanLabel[3] = {"MM", "EM", "EE"}; // make SURE this is the same order as gChannel enum!
 TString SSDLDumper::gHiLoLabel[3] = {"HighPt", "LowPt", "TauChan"};
 
+void setVariables(char buffer[1000]){
+	char va[1], t[100], n[100], val[100];
+	TString v, type, name, value;
+	if( sscanf(buffer, "%s\t%s\t%s\t%s", va, t, n, val) > 3){
+		v = va; type = t; name = n; value = val;
+		if (v != "v") {cout << "ERROR in reading variables!!" << endl; exit(1); }
+		if      (type == "bool"    && name =="gTTWZ"        ) gTTWZ        = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gApplyZVeto"  ) gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gInvertZVeto" ) gInvertZVeto = ((value == "1" || value == "true") ? true:false);
+		else if (type == "TString" && name =="gBaseRegion"  ) tmp_gBaseRegion  = value; // this is the only one which is needed in the plotter
+		else if (type == "float"   && name =="gMuMaxIso"    ) gMuMaxIso    = value.Atof();
+		else if (type == "float"   && name =="gElMaxIso"    ) gElMaxIso    = value.Atof();
+		else if (type == "float"   && name =="gMaxJetEta"   ) gMaxJetEta   = value.Atof();
+		else if (type == "float"   && name =="gMinJetPt"    ) gMinJetPt    = value.Atof();
+		else {cout << "ERROR in reading variables!!" << endl; exit(1); }
+	}
+	else{
+		cout << " SSDLDumper::setVariables ==> Wrong configfile format for special variables. Have a look in the dumperconfig.cfg for more info. Aborting..." << endl;
+		exit(1);
+	}
+
+}
 //____________________________________________________________________________
-SSDLDumper::SSDLDumper(){}
+SSDLDumper::SSDLDumper(TString configfile){
+	char buffer[1000];
+	ifstream IN(configfile);
+
+	// TString name;
+	float miMu1, miMu2, miEl1, miEl2;
+	float miHT, maHT, miMET, maMET, miJetPt  ;
+	int   miNj, maNj, miNb, maNb, miNbm, maNbm, ve3rd, veTTZ, veCha;
+
+	char name[100];
+	cout << "====================================" << endl;
+	cout << "Reading Configuration file " << configfile << endl;
+	int counter(0);
+
+	while( IN.getline(buffer, 600, '\n') ){
+		if (buffer[0] == '#') continue; // Skip lines commented with '#'
+		if (strlen(buffer) == 0)  continue; // Skip empty lines
+		if (buffer[0] == 'v') { //set the special variables from the config file
+			setVariables(buffer);
+			continue;
+		}
+		if( sscanf(buffer, "%s\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t%d\t%d", 
+                            name, &miHT, &maHT, &miMET, &maMET, &miNj, &maNj, &miNb, &maNb, &miNbm, &maNbm, &miMu1, &miMu2, &miEl1, &miEl2, &ve3rd, &veTTZ, &veCha) > 17){
+			SSDLDumper::Region * tmp_region  = new SSDLDumper::Region();
+			tmp_region->sname      = (TString) name;
+			tmp_region->minHT      = miHT;
+			tmp_region->maxHT      = maHT;
+			tmp_region->minMet     = miMET;
+			tmp_region->maxMet     = maMET;
+			tmp_region->minNjets   = miNj;
+			tmp_region->maxNjets   = maNj;
+			tmp_region->minNbjets  = miNb;
+			tmp_region->maxNbjets  = maNb;
+			tmp_region->minNbjmed  = miNbm;
+			tmp_region->maxNbjmed  = maNbm;
+			tmp_region->minMu1pt   = miMu1;
+			tmp_region->minMu2pt   = miMu2;
+			tmp_region->minEl1pt   = miEl1;
+			tmp_region->minEl2pt   = miEl2;
+			tmp_region->app3rdVet  = ve3rd;
+			tmp_region->vetoTTZSel = veTTZ;
+			tmp_region->chargeVeto = veCha;
+			SSDLDumper::gRegion[name] = counter;
+			counter++;
+
+
+			SSDLDumper::gRegions.push_back(tmp_region);
+			cout << "----------------  LOADING REGION  ------------------------------" << endl;
+				cout << Form("%13s/%3.0f/%4.0f/%3.0f/%3.0f",
+				tmp_region->sname.Data()       ,
+				tmp_region->minHT       ,
+				tmp_region->maxHT       ,
+				tmp_region->minMet      ,
+				tmp_region->maxMet  ) << endl;
+			cout << "--------------------------------------------------------" << endl;
+			//delete tmp_region;
+		}
+		else{
+			cout << " SSDLDumper::readConfig ==> Wrong configfile format in file " << configfile << " detected, aborting..." << endl;
+			exit(1);
+		}
+
+
+	}
+	SSDLDumper::gNREGIONS = SSDLDumper::gRegions.size();
+	
+	IN.close();
+
+	cout << "================  GLOBAL PARAMETERS  ===================" << endl;
+	cout << Form("gTTWZ = %d\ngApplyZVeto = %d\ngInvertZVeto = %d\ngMuMaxIso = %3.2f\ngElMaxIso = %3.2f\ngMinJetPt = %3.2f\ngMaxJetEta = %3.2f\ngBaseRegion = %s",
+		gTTWZ       ,
+		gApplyZVeto ,
+		gInvertZVeto,
+		gMuMaxIso   ,
+		gElMaxIso   ,
+		gMinJetPt   ,
+		gMaxJetEta   ,
+		tmp_gBaseRegion.Data()  ) << endl;
+	cout << "========================================================" << endl;
+	SSDLDumper::gBaseRegion = tmp_gBaseRegion;
+}
 
 //____________________________________________________________________________
 SSDLDumper::~SSDLDumper(){
@@ -171,16 +261,15 @@ SSDLDumper::~SSDLDumper(){
 
 //____________________________________________________________________________
 void SSDLDumper::init(TString inputfile, TString sname, int datamc, float xsec, int chan){
-	fSample = new Sample(inputfile, sname, datamc, xsec, chan);
-	fSamples.push_back(fSample);
+	fSamples.push_back(new Sample(inputfile, sname, datamc, xsec, gNREGIONS, chan));
 
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
 	if(fVerbose > 0) cout << " Initializing SSDLDumper ... " << endl;
-	if(fVerbose > 0) cout << "   Running on:      " << fSample->location << endl;
-	if(fVerbose > 0) cout << "   Naming it:       " << fSample->sname << endl;
-	if(fVerbose > 0) cout << "   Is data/mc:      " << fSample->datamc << endl;
-	if(fVerbose > 0) cout << "   x-section is:    " << fSample->xsec << endl;
-	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSample->getLumi() << endl;
+	if(fVerbose > 0) cout << "   Running on:      " << fSamples.back()->location << endl;
+	if(fVerbose > 0) cout << "   Naming it:       " << fSamples.back()->sname << endl;
+	if(fVerbose > 0) cout << "   Is data/mc:      " << fSamples.back()->datamc << endl;
+	if(fVerbose > 0) cout << "   x-section is:    " << fSamples.back()->xsec << endl;
+	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSamples.back()->getLumi() << endl;
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
 	init();
 }
@@ -212,6 +301,7 @@ void SSDLDumper::init(){
 	TH1::AddDirectory(kFALSE);
 }
 
+
 void SSDLDumper::readDatacard(TString cardfile){
 	char buffer[1000];
 	ifstream IN(cardfile);
@@ -229,25 +319,24 @@ void SSDLDumper::readDatacard(TString cardfile){
 		xsec = 1.0;
 		if (buffer[0] == '#') continue; // Skip lines commented with '#'
 		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f", sname, inputfile, &datamc, &chan, &xsec) > 3){
-			Sample *S = new Sample(inputfile, sname, datamc, xsec, chan);
 
-			fSamples.push_back(S);
-			fSampleMap[sname] = S;
+			fSamples.push_back(new Sample(inputfile, sname, datamc, xsec, gNREGIONS, chan));
+			fSampleMap[sname] = fSamples.back(); // S;
 			if(fVerbose > 1 && fVerbose < 3){
 				cout << Form("%13s/%2d/%2d/%12.2f - %s",
-				S->sname.Data()   ,
-				S->datamc         ,
-				S->chansel        ,
-				S->xsec           ,
-				S->location.Data()) << endl;
+				fSamples.back()->sname.Data()   ,
+				fSamples.back()->datamc         ,
+				fSamples.back()->chansel        ,
+				fSamples.back()->xsec           ,
+				fSamples.back()->location.Data()) << endl;
 			}
 			if(fVerbose > 2){
 				cout << " ---- " << endl;
-				cout << "  New sample added: " << S->sname     << endl;
-				cout << "   Input:      "      << S->location  << endl;
-				cout << "   DataMC:     "      << S->datamc    << endl;
-				cout << "   Channel:    "      << S->chansel   << endl;
-				cout << "   XSec:       "      << S->xsec      << endl;
+				cout << "  New sample added: " << fSamples.back()->sname     << endl;
+				cout << "   Input:      "      << fSamples.back()->location  << endl;
+				cout << "   DataMC:     "      << fSamples.back()->datamc    << endl;
+				cout << "   Channel:    "      << fSamples.back()->chansel   << endl;
+				cout << "   XSec:       "      << fSamples.back()->xsec      << endl;
 			}
 		}
 		else{
@@ -337,7 +426,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		// REJECT DOUBLE COUNTED EVENTS
 		/////////////////////////////////////////////
-		if (AvoidDoubleCountingOfFakes(S)) continue;
+		// double counting of fakes if (S->datamc!=0 && AvoidDoubleCountingOfFakes(S)) continue;
 			
 		/////////////////////////////////////////////
 		// Event modifications
@@ -361,6 +450,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		gBtagSF1 = 1.;
 		gBtagSF2 = 1.;
 
+		int m1(-1), m2(-1);
 		if( S->datamc!=0 ) {
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
@@ -376,7 +466,7 @@ void SSDLDumper::loopEvents(Sample *S){
 			// if (S->datamc == 3) isFastsim = true;
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
-			//			float myweight(1.);
+			// float myweight(1.);
 			float myweight1(1.), myweight2(1.);
 			std::vector< int > btags = getNBTagsMedIndices();
 			int nbtags = btags.size();
@@ -414,9 +504,9 @@ void SSDLDumper::loopEvents(Sample *S){
 
 
 		fillKinPlots(S);
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
-			if (Region::minNbjmed[r] == 2) gEventWeight *= gBtagSF1;
-			if (Region::minNbjmed[r] == 3) gEventWeight *= gBtagSF2;
+		for(int r = 0; r < gNREGIONS; r++){
+			if (gRegions[r]->minNbjmed == 2) gEventWeight *= gBtagSF1;
+			if (gRegions[r]->minNbjmed == 3) gEventWeight *= gBtagSF2;
 			fillYields(S, r);
 		}
 		// reset the event weight to what it should be without a region cut applied
@@ -426,6 +516,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		}
 
 		fillSigEventTree(S, 0);
+		m1 = -1; m2 = -1;
 		fillDiffYields(S);
 		fillRatioPlots(S);
 		fillMuIsoPlots(S);
@@ -436,7 +527,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		// Systematic studies
 		if(!gDoSystStudies) continue;
-		fChain->GetEntry(jentry); // reset tree vars
+//		fChain->GetEntry(jentry); // reset tree vars
 		// scaleBTags(S, 0);
 
 // 		// Jet pts scaled down
@@ -509,7 +600,7 @@ void SSDLDumper::loopEvents(Sample *S){
 }
 
 //____________________________________________________________________________
-void SSDLDumper::fillYields(Sample *S, gRegion reg){
+void SSDLDumper::fillYields(Sample *S, int reg){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(reg);
@@ -519,7 +610,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	// MuMu Channel
 	resetHypLeptons();
 	fDoCounting = false;
-	if(reg == Baseline) fDoCounting = true;
+	if(reg == gRegion[gBaseRegion]) fDoCounting = true;
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
@@ -531,7 +622,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[17]); // ... both muons pass tight cut
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline){
+				if(S->datamc == 0 && reg == gRegion[gBaseRegion]){
 				  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
@@ -616,7 +707,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[17]); // " ... both electrons pass tight cut
 				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
 				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
+				if(S->datamc == 0 && reg == gRegion[gBaseRegion] && HighPt == HighPt){
 					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
@@ -719,7 +810,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[17]);
 				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
 				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
+				if(S->datamc == 0 && reg == gRegion[gBaseRegion] && HighPt == HighPt){
 					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
@@ -810,16 +901,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(mumuSignalTrigger()){ // Trigger selection
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLMuEvent(mu1, mu2)){
 			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
 			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
@@ -833,9 +922,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(Baseline);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minMet = 30.;
+// cout << __LINE__ << "min HT: " << fC_minHT << " minMET: " << fC_minMet << " minNjets: " << fC_minNjets << " minNbjets: " << fC_minNbjets << endl;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getMET(), 7, Muon);
@@ -843,15 +932,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
 		resetHypLeptons();
 	}
-	if (gTTWZ) setRegionCuts(TTbarWPresel);
-	else setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EE Channel
@@ -860,16 +947,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elelSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
@@ -883,8 +968,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(Baseline);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0.;
@@ -893,15 +977,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
 		resetHypLeptons();
 	}
-	if (gTTWZ) setRegionCuts(TTbarWPresel);
-	else setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
@@ -910,16 +992,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
@@ -939,8 +1019,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(Baseline);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -949,15 +1028,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
 		resetHypLeptons();
 	}
-	if (gTTWZ) setRegionCuts(TTbarWPresel);
-	else setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 
 	///////////////////////////////////////////////////
 	// OS YIELDS
@@ -970,16 +1047,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
@@ -993,8 +1068,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(Baseline);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -1003,15 +1077,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
 		resetHypLeptons();
 	}
-	if (gTTWZ) setRegionCuts(TTbarWPresel);
-	else setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
@@ -1019,16 +1091,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
@@ -1048,8 +1118,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// MET BINNING, HT > 0
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(Baseline);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
@@ -1058,8 +1127,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		
 		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		if (gTTWZ) setRegionCuts(TTbarWPresel);
-		else setRegionCuts(HT0MET120);
+		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
@@ -1068,8 +1136,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 	fChargeSwitch = 0;
 	resetHypLeptons();
-	if (gTTWZ) setRegionCuts(TTbarWPresel);
-	else setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 }
 void SSDLDumper::fillDiffVar(  Sample *S, int lep1, int lep2, float val, int bin, gChannel chan){
 	if(bin > gNDiffVars-1){
@@ -1473,7 +1540,6 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		}
 		fChargeSwitch = 0;
 	}
-
 	setRegionCuts();
 	return;
 }
@@ -1760,8 +1826,7 @@ void SSDLDumper::fillKinPlots(Sample *S){
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	setRegionCuts(Baseline);
-	//	setRegionCuts(HT0MET120);
+	setRegionCuts(gRegion[gBaseRegion]);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
 	if(mumuSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 1){ // trigger && select loose mu/mu pair
@@ -2110,7 +2175,7 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 void SSDLDumper::fillSyncCounters(Sample *S){
   resetHypLeptons();
   if (!gDoSyncExercise) return;
-  setRegionCuts(Baseline);
+  setRegionCuts(gRegion[gBaseRegion]);
   //////////////////////////////////////////////////////////////////
   fCurrentChannel = Muon;
   int mu1(-1), mu2(-1);
@@ -2189,7 +2254,7 @@ void SSDLDumper::fillSyncCounters(Sample *S){
 
 }
 //____________________________________________________________________________
-void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
+void SSDLDumper::storeNumbers(Sample *S, gChannel chan, int reg){
 	Channel *C;
 	if(chan == Muon) C = &S->region[reg][HighPt].mm;
 	if(chan == Elec) C = &S->region[reg][HighPt].ee;
@@ -2721,14 +2786,15 @@ void SSDLDumper::bookHistos(Sample *S){
 		}
 	}
 
-	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
+		int r = gRegion[(*regIt)->sname];
 		Region *R = &S->region[r][HighPt];
 		for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
 			Channel *C;
 			if(c == Muon) C = &R->mm;
 			if(c == Elec) C = &R->ee;
 			if(c == ElMu) C = &R->em;
-			TString rootname = S->sname + "_" + Region::sname[r] + "_" + gChanLabel[c];
+			TString rootname = S->sname + "_" + (*regIt)->sname + "_" + gChanLabel[c];
 			// Yields common for all channels and data-mc:
 			C->nt20_pt  = new TH2D(rootname + "_NT20_pt",  "NT20_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_pt ->Sumw2();
 			C->nt10_pt  = new TH2D(rootname + "_NT10_pt",  "NT10_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_pt ->Sumw2();
@@ -2873,7 +2939,8 @@ void SSDLDumper::deleteHistos(Sample *S){
 		}
 	}
 
-	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+	for(regIt = gRegions.begin(); regIt != gRegions.end() ; regIt++){
+		int r = gRegion[(*regIt)->sname];
 		Region *R = &S->region[r][HighPt];
 		for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
 			Channel *C;
@@ -3039,9 +3106,10 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	}
 
 	// Yields
-	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
+		int r = gRegion[(*regIt)->sname];
 		Region *R = &S->region[r][HighPt];
-		TString temp = S->sname + "/" + Region::sname[r];
+		TString temp = S->sname + "/" + gRegions[r]->sname;
 		TDirectory* rdir = Util::FindOrCreate(temp, pFile);
 		rdir->cd();
 
@@ -3268,14 +3336,15 @@ int  SSDLDumper::readHistos(TString filename){
 
 		// Yields
 		for(size_t HighPt = 0; HighPt < 2; ++HighPt){
-			for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){ // Loop over regions
+			for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){ // Loop over regions
+				int r = gRegion[(*regIt)->sname];
 				Region *R = &S->region[r][HighPt];
 				for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
 					Channel *C;
 					if(ch == Muon) C = &R->mm;
 					if(ch == Elec) C = &R->ee;
 					if(ch == ElMu) C = &R->em;
-					TString root = S->sname +"/"+ Region::sname[r] +"/"+ S->sname +"_"+ Region::sname[r] +"_"+ gChanLabel[ch];
+					TString root = S->sname +"/"+ gRegions[r]->sname +"/"+ S->sname +"_"+ gRegions[r]->sname +"_"+ gChanLabel[ch];
 					getObjectSafe(pFile, root + "_NT20_pt",  C->nt20_pt );
 					getObjectSafe(pFile, root + "_NT10_pt" , C->nt10_pt );
 					getObjectSafe(pFile, root + "_NT01_pt" , C->nt01_pt );
@@ -3589,6 +3658,7 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	umet += tmp; // add met
 	tmp.SetPtEtaPhiM(0., 0., 0., 0.); // reset
 	// subtract jets
+	float tmp_minJetPt = gMinJetPt;
 	gMinJetPt = 15.;
 	for (int i=0; i<NJets; i++) {
 		if (!isGoodJet(i)) continue;
@@ -3615,17 +3685,21 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	}
 	// scale the unclustered energy by 10%
 	if (flag == 0) tmp.SetPtEtaPhiE(1.1 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
-	if (flag == 0) tmp.SetPtEtaPhiE(0.9 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
+	if (flag == 1) tmp.SetPtEtaPhiE(0.9 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
+	// subtract the leptons and jets again
 	tmp -= leps;
 	tmp -= jets;
 	// reset the minPt cut for the jets . this is important!
-	gMinJetPt = 40.;
+	gMinJetPt = tmp_minJetPt;
+	// set the new MET value -- ATTENTION: this is only for pfMET, not Type1 corrected MET
+	pfMET = tmp.Pt();
 	
 }
-void SSDLDumper::propagateMET(TLorentzVector foo){
+void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
 	met.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
-	pfMET = (met+foo).Pt();
+	// set the pfMET to the old MET minus original vector plus new vector
+	pfMET = (met-oVec+nVec).Pt();
 }
 void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Modify the jet pt for systematics studies
@@ -3633,10 +3707,12 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// propagate to the MET!!
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
-	TLorentzVector jets, tmp;
+	TLorentzVector ojets, jets, tmp;
 	for(size_t i = 0; i < NJets; ++i){
-		if(flag == 1){ JetPt[i] += JetJECUncert[i]*JetPt[i]; continue; }
-		if(flag == 2){ JetPt[i] -= JetJECUncert[i]*JetPt[i]; continue; }
+		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+		ojets += tmp;
+		if(flag == 1){ JetPt[i] += JetJEC[i]*JetPt[i]; continue; }
+		if(flag == 2){ JetPt[i] -= JetJEC[i]*JetPt[i]; continue; }
 		if(flag == 3){
 			if(JetGenPt[i] > -100.)	JetPt[i] = TMath::Max(float(0.), JetGenPt[i] + getJERScale(i)*(JetPt[i] - JetGenPt[i]));
 			else                    JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));
@@ -3644,15 +3720,17 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
 		jets += tmp;
 	}
-	propagateMET(jets);
+	propagateMET(jets, ojets);
 }
 void SSDLDumper::scaleLeptons(Sample *S, int flag){
 	// Shift the lepton pts for systematics studies
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
 	float scale = 0.02;
-	TLorentzVector leps, tmp;
+	TLorentzVector oleps, leps, tmp;
 	for(size_t i = 0; i < NMus; ++i){
+		tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+		oleps += tmp;
 		// marc scale = getMuScale(MuPt[i], MuEta[i]);
 		if(flag == 1) MuPt[i] += scale*MuPt[i];
 		if(flag == 2) MuPt[i] -= scale*MuPt[i];
@@ -3660,13 +3738,15 @@ void SSDLDumper::scaleLeptons(Sample *S, int flag){
 		leps += tmp;
 	}
 	for(size_t i = 0; i < NEls; ++i){
+		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+		oleps += tmp;
 		// marc scale = getElScale(ElPt[i], ElEta[i]);
 		if(flag == 1) ElPt[i] += scale*ElPt[i];
 		if(flag == 2) ElPt[i] -= scale*ElPt[i];
 		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
 		leps += tmp;
 	}
-	propagateMET(leps);
+	propagateMET(leps, oleps);
 }
 void SSDLDumper::smearMET(Sample *S){
 	if(S->datamc == 0) return; // don't smear data
@@ -3933,24 +4013,24 @@ void SSDLDumper::setHypLepton3(int index, gChannel chan){
 
 //////////////////////////////////////////////////////////////////////////////
 // Event Selections:
-void SSDLDumper::setRegionCuts(gRegion reg){
-	fC_minMu1pt   = Region::minMu1pt  [reg];
-	fC_minMu2pt   = Region::minMu2pt  [reg];
-	fC_minEl1pt   = Region::minEl1pt  [reg];
-	fC_minEl2pt   = Region::minEl2pt  [reg];
-	fC_minHT      = Region::minHT     [reg];
-	fC_maxHT      = Region::maxHT     [reg];
-	fC_minMet     = Region::minMet    [reg];
-	fC_maxMet     = Region::maxMet    [reg];
-	fC_minNjets   = Region::minNjets  [reg];
-	fC_maxNjets   = Region::maxNjets  [reg];
-	fC_minNbjets  = Region::minNbjets [reg];
-	fC_maxNbjets  = Region::maxNbjets [reg];
-	fC_minNbjmed  = Region::minNbjmed [reg];
-	fC_maxNbjmed  = Region::maxNbjmed [reg];
-	fC_app3rdVet  = Region::app3rdVet [reg];
-	fC_vetoTTZSel = Region::vetoTTZSel[reg];
-	fC_chargeVeto = Region::chargeVeto[reg];
+void SSDLDumper::setRegionCuts(int reg){
+	fC_minMu1pt   = gRegions[reg]->minMu1pt   ;
+	fC_minMu2pt   = gRegions[reg]->minMu2pt   ;
+	fC_minEl1pt   = gRegions[reg]->minEl1pt   ;
+	fC_minEl2pt   = gRegions[reg]->minEl2pt   ;
+	fC_minHT      = gRegions[reg]->minHT      ;
+	fC_maxHT      = gRegions[reg]->maxHT      ;
+	fC_minMet     = gRegions[reg]->minMet     ;
+	fC_maxMet     = gRegions[reg]->maxMet     ;
+	fC_minNjets   = gRegions[reg]->minNjets   ;
+	fC_maxNjets   = gRegions[reg]->maxNjets   ;
+	fC_minNbjets  = gRegions[reg]->minNbjets  ;
+	fC_maxNbjets  = gRegions[reg]->maxNbjets  ;
+	fC_minNbjmed  = gRegions[reg]->minNbjmed  ;
+	fC_maxNbjmed  = gRegions[reg]->maxNbjmed  ;
+	fC_app3rdVet  = gRegions[reg]->app3rdVet  ;
+	fC_vetoTTZSel = gRegions[reg]->vetoTTZSel ;
+	fC_chargeVeto = gRegions[reg]->chargeVeto ;
 }
 
 //____________________________________________________________________________
@@ -4571,13 +4651,12 @@ bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
 }
 //____________________________________________________________________________
 bool SSDLDumper::AvoidDoubleCountingOfFakes(Sample *S){
-  if (S->getType() == 4) { //Check for non-prompt leptons only if the sample is rare MC
-    // If the event is not matched to a pair of prompt leptons in GEN the event is rejected.
-    
-    if (!isGenMatchedSUSYMuMuEvent() && 
-	!isGenMatchedSUSYEEEvent()   && 
-	!isGenMatchedSUSYEMuEvent()) return true;
-  }
+	if (S->getType() == 4) { //Check for non-prompt leptons only if the sample is rare MC
+		// If the event is not matched to a pair of prompt leptons in GEN the event is rejected.
+		if (!isGenMatchedSUSYMuMuEvent() && 
+		    !isGenMatchedSUSYEEEvent()   && 
+		    !isGenMatchedSUSYEMuEvent()) return true;
+	}
   
   return false;
 }
@@ -4795,22 +4874,22 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 //////////////////////////////////////////////////////////////////////////////
 // Object selections:
 //////////////////////////////////////////////////////////////////////////////
-bool SSDLDumper::passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan){
+bool SSDLDumper::passesPtCuts(float pT1, float pT2, int reg, gChannel chan){
 	if(chan == ElMu){
 		if(pT1 > pT2){
-			if(pT1 < Region::minMu1pt[reg]) return false;
-			if(pT2 < Region::minEl2pt[reg]) return false;
+			if(pT1 < gRegions[reg]->minMu1pt) return false;
+			if(pT2 < gRegions[reg]->minEl2pt) return false;
 		}
 		if(pT1 < pT2){
-			if(pT1 < Region::minMu2pt[reg]) return false;
-			if(pT2 < Region::minEl1pt[reg]) return false;
+			if(pT1 < gRegions[reg]->minMu2pt) return false;
+			if(pT2 < gRegions[reg]->minEl1pt) return false;
 		}
 	}
 	else{
-		if(chan == Muon && pT1 < Region::minMu1pt[reg]) return false;
-		if(chan == Muon && pT2 < Region::minMu2pt[reg]) return false;
-		if(chan == Elec && pT1 < Region::minEl1pt[reg]) return false;
-		if(chan == Elec && pT2 < Region::minEl2pt[reg]) return false;
+		if(chan == Muon && pT1 < gRegions[reg]->minMu1pt) return false;
+		if(chan == Muon && pT2 < gRegions[reg]->minMu2pt) return false;
+		if(chan == Elec && pT1 < gRegions[reg]->minEl1pt) return false;
+		if(chan == Elec && pT2 < gRegions[reg]->minEl2pt) return false;
 	}
 	return true;
 }

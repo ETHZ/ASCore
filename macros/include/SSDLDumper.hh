@@ -78,7 +78,7 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 ,
+		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
@@ -94,7 +94,8 @@ public:
 		WpWp, WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
-		EMEnr20, EMEnr30,
+		EMEnr20, 
+// EMEnr30,
 		// QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		// QCD1000, QCD1400, QCD1800,
 		gNSAMPLES
@@ -108,17 +109,17 @@ public:
 		SigSup,
 		ZDecay
 	};
-	enum gRegion {
-		region_begin,
-		Baseline = region_begin,
-		HT80MET30, HT80MET30b, HT80MET30bpp,
-		HT0MET120,HT0MET80NJ2,HT0MET80NJ2bV,
-		HT0MET120V, HT0MET120NJ2, HT0MET120NJ2bV,	// EWino regions MET > 120
-		HT0MET200, HT0MET120NJ2bVlV, HT0MET200lV,   
-		TTbarWPresel, TTbarWSel, //TTbarV selections
-		HT0MET50, HT0MET80, HT0MET50lV, HT0MET80lV, HT0MET120lV,
-		gNREGIONS
-	};
+	// enum gRegion {
+	// 	region_begin,
+	// 	Baseline = region_begin,
+	// 	HT80MET30, HT80MET30b, HT80MET30bpp,
+	// 	HT0MET120,HT0MET80NJ2,HT0MET80NJ2bV,
+	// 	HT0MET120V, HT0MET120NJ2, HT0MET120NJ2bV,	// EWino regions MET > 120
+	// 	HT0MET200, HT0MET120NJ2bVlV, HT0MET200lV,   
+	// 	TTbarWPresel, TTbarWSel, //TTbarV selections
+	// 	HT0MET50, HT0MET80, HT0MET50lV, HT0MET80lV, HT0MET120lV,
+	// 	gNREGIONS
+	// };
 	enum gChannel {
 		channels_begin,
 		Muon = channels_begin,
@@ -226,28 +227,55 @@ public:
 		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
 	};
 	
+	// old struct Region{
+	// old 	static TString sname[gNREGIONS];
+	// old 	// Two different pt cuts
+	// old 	static float minMu1pt[gNREGIONS];
+	// old 	static float minMu2pt[gNREGIONS];
+	// old 	static float minEl1pt[gNREGIONS];
+	// old 	static float minEl2pt[gNREGIONS];
+	// old 	// Custom selections for every region
+	// old 	static float minHT     [gNREGIONS];
+	// old 	static float maxHT     [gNREGIONS];
+	// old 	static float minMet    [gNREGIONS];
+	// old 	static float maxMet    [gNREGIONS];
+	// old 	static float minJetPt  [gNREGIONS];
+	// old 	static int   minNjets  [gNREGIONS];
+	// old 	static int   maxNjets  [gNREGIONS];
+	// old 	static int   minNbjets [gNREGIONS];
+	// old 	static int   maxNbjets [gNREGIONS];
+	// old 	static int   minNbjmed [gNREGIONS];
+	// old 	static int   maxNbjmed [gNREGIONS];
+	// old 	static int   app3rdVet [gNREGIONS];
+	// old 	static int   vetoTTZSel[gNREGIONS];
+	// old 	static int   chargeVeto[gNREGIONS];
+	// old 	
+	// old 	Channel mm;
+	// old 	Channel em;
+	// old 	Channel ee;
+	// old };
 	struct Region{
-		static TString sname[gNREGIONS];
+		TString sname;
 		// Two different pt cuts
-		static float minMu1pt[gNREGIONS];
-		static float minMu2pt[gNREGIONS];
-		static float minEl1pt[gNREGIONS];
-		static float minEl2pt[gNREGIONS];
+		float minMu1pt;
+		float minMu2pt;
+		float minEl1pt;
+		float minEl2pt;
 		// Custom selections for every region
-		static float minHT     [gNREGIONS];
-		static float maxHT     [gNREGIONS];
-		static float minMet    [gNREGIONS];
-		static float maxMet    [gNREGIONS];
-		static float minJetPt  [gNREGIONS];
-		static int   minNjets  [gNREGIONS];
-		static int   maxNjets  [gNREGIONS];
-		static int   minNbjets [gNREGIONS];
-		static int   maxNbjets [gNREGIONS];
-		static int   minNbjmed [gNREGIONS];
-		static int   maxNbjmed [gNREGIONS];
-		static int   app3rdVet [gNREGIONS];
-		static int   vetoTTZSel[gNREGIONS];
-		static int   chargeVeto[gNREGIONS];
+		float minHT    ;
+		float maxHT    ;
+		float minMet   ;
+		float maxMet   ;
+		float minJetPt ;
+		int   minNjets ;
+		int   maxNjets ;
+		int   minNbjets;
+		int   maxNbjets;
+		int   minNbjmed;
+		int   maxNbjmed;
+		int   app3rdVet;
+		int   vetoTTZSel;
+		int   chargeVeto;
 		
 		Channel mm;
 		Channel em;
@@ -322,19 +350,36 @@ public:
 	static TString gEMULabel[2];
 	static TString gChanLabel[gNCHANNELS];
 	static TString gHiLoLabel[3];
+	std::vector< SSDLDumper::Region* > gRegions;
+	std::vector< SSDLDumper::Region* >::iterator regIt;
+	std::map<TString , int> gRegion;
+	int gNREGIONS;
+	TString gBaseRegion;
 
 	class Sample{
 	public:
 		Sample(){};
-		Sample(TString loc, TString tag, int dm, float xs, int cs = -1, int col = 1){
+		Sample(TString loc, TString tag, int dm, float xs, int nregions, int cs = -1, int col = 1){
 			location = loc;
 			sname    = tag;
 			datamc   = dm;
 			chansel  = cs;
 			xsec     = xs;
 			color    = col;
+			numbers = new NumberSet*[nregions];
+			region  = new Region   *[nregions];
+            for ( size_t i = 0; i<nregions; ++i ) region[i]  = new Region   [2];
+            for ( size_t i = 0; i<nregions; ++i ) numbers[i] = new NumberSet[gNCHANNELS];
+            //region[0] = new Region[gNREGIONS*gNCHANNELS];
+            file = NULL;
+            tree = NULL;
 		};
-		~Sample(){};
+		~Sample(){
+			delete[] region[0];
+			delete[] region;
+			delete[] numbers[0];
+			delete[] numbers;
+        };
 		
 		TString name;
 		TString sname;
@@ -350,9 +395,11 @@ public:
 		int chansel; // -1: Ignore, 0: mumu, 1: elel, 2: elmu
 		int proc;    // process type, to group binned samples like QCD and give latex namees
 		TH1D *cutFlowHisto[gNCHANNELS];
-		Region region[gNREGIONS][2];
+//		Region region[gNREGIONS][2];
+		Region **region;
 		DiffPredYields diffyields[gNCHANNELS];
-		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
+		NumberSet **numbers; // summary of integrated numbers
+//		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 		IsoPlots isoplots[2]; // e and mu
 		IdPlots  idplots; // only for electrons
@@ -494,8 +541,8 @@ public:
 			file->Close();
 		}
 	};
-	
-	SSDLDumper();
+
+	SSDLDumper(TString configfile = "dumperconfig.cfg");
 	virtual ~SSDLDumper();
 
 	virtual void init();
@@ -507,7 +554,8 @@ public:
 	virtual void loop();              // loop on all samples if several
 	virtual void loopEvents(Sample*); // perform loop on single sample
 	
-	void storeNumbers(Sample*, gChannel, gRegion);
+	// old void storeNumbers(Sample*, gChannel, gRegion);
+	void storeNumbers(Sample*, gChannel, int);
 	
 	// Cutflow
 	void initCutNames();
@@ -521,7 +569,8 @@ public:
 	// Fillers
 	void fillSigEventTree(Sample*, int);
 	void resetSigEventTree();
-	void fillYields(Sample*, gRegion);
+	// old void fillYields(Sample*, gRegion);
+	void fillYields(Sample*, int);
 	void fillDiffYields(Sample*);
 	void fillDiffVar(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
 	void fillDiffVarOS(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
@@ -576,7 +625,7 @@ public:
 	virtual void smearJetPts(Sample *S, int flag = 0);
 	virtual void scaleLeptons(Sample *S, int flag = 0);
 	virtual void smearMET(Sample *S);
-	virtual void propagateMET(TLorentzVector vec);
+	virtual void propagateMET(TLorentzVector vec1, TLorentzVector vec2);
 	virtual void scaleMET(Sample *S, int flag = 0);
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
@@ -633,9 +682,11 @@ public:
 	virtual bool isZElElEvent(int&, int&);
 	virtual bool isZElElChMisIdEvent(int&, int&);
 
-	virtual bool isGenMatchedSUSYDiLepEvent();
-	virtual bool isGenMatchedSUSYDiLepEvent(int&, int&);
+	// virtual bool isGenMatchedSUSYDiLepEvent();
+	// virtual bool isGenMatchedSUSYDiLepEvent(int&, int&);
 
+	virtual bool AvoidDoubleCountingOfFakes(Sample*);
+	virtual bool isGenMatchedSUSYMuMuEvent();
 	virtual bool isGenMatchedSUSYEEEvent();
 	virtual bool isGenMatchedSUSYEMuEvent();
 
@@ -643,7 +694,8 @@ public:
 	virtual bool isSSLLElEvent(int&, int&);
 	virtual bool isSSLLElMuEvent(int&, int&);
 
-	virtual bool passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan);
+	// old virtual bool passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan);
+	virtual bool passesPtCuts(float pT1, float pT2, int reg, gChannel chan);
 	
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
@@ -723,7 +775,8 @@ public:
 	lepton fHypLepton2;
 	lepton fHypLepton3;
 	
-	void setRegionCuts(gRegion reg = Baseline);
+	// old void setRegionCuts(gRegion reg = Baseline);
+	void setRegionCuts(int reg = 0);
 	
 	const int     getNFPtBins(gChannel); // fake ratios
 	const double *getFPtBins (gChannel);
