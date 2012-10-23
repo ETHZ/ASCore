@@ -148,6 +148,7 @@ private:
   Float_t event_weight3D;
 
   Float_t event_rho;
+  Float_t event_sigma;
   Int_t event_nPU;
   Int_t event_PUOOTnumInteractionsEarly;
   Int_t event_PUOOTnumInteractionsLate;

@@ -43,7 +43,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[2] = new TTree("Tree_background_template","Tree_background_template");
   OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
   OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
-  OutputTree[5] = new TTree("Tree_impinging_track_template", "Tree_impinging_track_template");
+  OutputTree[5] = new TTree("Tree_doublerandomcone_sel", "Tree_doublerandomcone_sel");
   OutputTree[6] = new TTree("Tree_DYnocombisowithinvmasscut_sel","Tree_DYnocombisowithinvmasscut_sel");
   OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
   OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
@@ -61,6 +61,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("event_weight",&event_weight,"event_weight/F");
   OutputTree[i]->Branch("event_weight3D",&event_weight3D,"event_weight3D/F");
   OutputTree[i]->Branch("event_rho",&event_rho,"event_rho/F");
+  OutputTree[i]->Branch("event_sigma",&event_sigma,"event_sigma/F");
   OutputTree[i]->Branch("event_nPU",&event_nPU,"event_nPU/I");
   OutputTree[i]->Branch("event_PUOOTnumInteractionsEarly",&event_PUOOTnumInteractionsEarly,"event_PUOOTnumInteractionsEarly/I");
   OutputTree[i]->Branch("event_PUOOTnumInteractionsLate",&event_PUOOTnumInteractionsLate,"event_PUOOTnumInteractionsLate/I");
@@ -310,6 +311,7 @@ void DiPhotonMiniTree::Analyze(){
   event_weight = weight;
   event_weight3D = weight3D;
   event_rho = fTR->Rho;
+  event_sigma = fTR->Sigma;
   if (!isdata) {
     event_nPU = fTR->PUnumInteractions;
     event_PUOOTnumInteractionsEarly = fTR->PUOOTnumInteractionsEarly;
@@ -402,7 +404,6 @@ void DiPhotonMiniTree::Analyze(){
       else passing = ApplyPixelVeto(fTR,passing,0);
 
       if (sel_cat==8) passing = PhotonSelection(fTR,passing,"invert_sieie_cut"); // sieie sideband cat8
-      else if (sel_cat==5) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // for impinging track removal from combined pf iso
       else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // no comb iso selection
       else if (sel_cat==6) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // DY no combiso with mass cut for eff area cat6 
       else passing=PhotonSelection(fTR,passing);
@@ -411,12 +412,11 @@ void DiPhotonMiniTree::Analyze(){
 //      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
 //      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
       
-      if (sel_cat==5) passing = std::vector<int>(); // momentarily turned off impinging track method
 
     }
 
 
-    if (sel_cat==0 || sel_cat==3){ // diphoton cats
+    if (sel_cat==0 || sel_cat==3 || sel_cat==5){ // diphoton cats
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
     else if (sel_cat!=11) { // photon-by-photon cats
@@ -424,7 +424,6 @@ void DiPhotonMiniTree::Analyze(){
       if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
       if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // sieie sideband template only from the fakes (only in MC!)
       //      if (!isdata) if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
-      //      if (!isdata) if (sel_cat==5) passing = BackgroundSelection(fTR,passing); // uncomment to make impinging track only from the fakes (only in MC!) 
       if (sel_cat==6) passing = DiPhotonInvariantMassCutSelection(fTR,passing); // for DY without comb iso cut 
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
@@ -452,7 +451,7 @@ void DiPhotonMiniTree::Analyze(){
     std::vector<int> passing = passing_selection[sel_cat];
 
     int minsize=999;
-    if (sel_cat==0 || sel_cat==3 || sel_cat==6 || sel_cat==11) minsize=2;
+    if (sel_cat==0 || sel_cat==3 || sel_cat==5 || sel_cat==6 || sel_cat==11) minsize=2;
     else minsize=1;
 
     if (!(passing_selection[sel_cat].size()>=minsize)){
@@ -460,20 +459,71 @@ void DiPhotonMiniTree::Analyze(){
       continue;
     }
 
-    if (sel_cat==0 || sel_cat==3){
+    if (sel_cat==0 || sel_cat==3 || sel_cat==5){
       ResetVars();
       FillLead(passing.at(0));
       FillTrail(passing.at(1));
+      bool dofill=true;
+      if (sel_cat==5){
+	{
+	  isolations_struct rcone_isos;
+	  rcone_isos = RandomConeIsolation(fTR,passing.at(0),"");
+	  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
+	  pholead_pho_Cone04NeutralHadronIso_mvVtx = rcone_isos.neutral;
+	  pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = rcone_isos.charged;
+	  pholead_pho_Cone04PFCombinedIso = rcone_isos.photon+rcone_isos.neutral+rcone_isos.charged;
+	  pholead_Npfcandphotonincone = rcone_isos.nphotoncand;
+	  pholead_Npfcandchargedincone = rcone_isos.nchargedcand;
+	  pholead_Npfcandneutralincone = rcone_isos.nneutralcand;
+	  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandenergies[i] = rcone_isos.photoncandenergies.at(i);
+	  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandenergies[i] = rcone_isos.chargedcandenergies.at(i);
+	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandenergies[i] = rcone_isos.neutralcandenergies.at(i);
+	  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcandets[i] = rcone_isos.photoncandets.at(i);
+	  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcandets[i] = rcone_isos.chargedcandets.at(i);
+	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcandets[i] = rcone_isos.neutralcandets.at(i);
+	  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcanddetas[i] = rcone_isos.photoncanddetas.at(i);
+	  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcanddetas[i] = rcone_isos.chargedcanddetas.at(i);
+	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcanddetas[i] = rcone_isos.neutralcanddetas.at(i);
+	  for (int i=0; i<pholead_Npfcandphotonincone && i<global_size_pfcandarrays; i++) pholead_photonpfcanddphis[i] = rcone_isos.photoncanddphis.at(i);
+	  for (int i=0; i<pholead_Npfcandchargedincone && i<global_size_pfcandarrays; i++) pholead_chargedpfcanddphis[i] = rcone_isos.chargedcanddphis.at(i);
+	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcanddphis[i] = rcone_isos.neutralcanddphis.at(i);
+	  if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
+	}
+	{
+	  isolations_struct rcone_isos;
+	  rcone_isos = RandomConeIsolation(fTR,passing.at(1),"");
+	  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
+	  photrail_pho_Cone04NeutralHadronIso_mvVtx = rcone_isos.neutral;
+	  photrail_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = rcone_isos.charged;
+	  photrail_pho_Cone04PFCombinedIso = rcone_isos.photon+rcone_isos.neutral+rcone_isos.charged;
+	  photrail_Npfcandphotonincone = rcone_isos.nphotoncand;
+	  photrail_Npfcandchargedincone = rcone_isos.nchargedcand;
+	  photrail_Npfcandneutralincone = rcone_isos.nneutralcand;
+	  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcandenergies[i] = rcone_isos.photoncandenergies.at(i);
+	  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcandenergies[i] = rcone_isos.chargedcandenergies.at(i);
+	  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcandenergies[i] = rcone_isos.neutralcandenergies.at(i);
+	  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcandets[i] = rcone_isos.photoncandets.at(i);
+	  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcandets[i] = rcone_isos.chargedcandets.at(i);
+	  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcandets[i] = rcone_isos.neutralcandets.at(i);
+	  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcanddetas[i] = rcone_isos.photoncanddetas.at(i);
+	  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcanddetas[i] = rcone_isos.chargedcanddetas.at(i);
+	  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcanddetas[i] = rcone_isos.neutralcanddetas.at(i);
+	  for (int i=0; i<photrail_Npfcandphotonincone && i<global_size_pfcandarrays; i++) photrail_photonpfcanddphis[i] = rcone_isos.photoncanddphis.at(i);
+	  for (int i=0; i<photrail_Npfcandchargedincone && i<global_size_pfcandarrays; i++) photrail_chargedpfcanddphis[i] = rcone_isos.chargedcanddphis.at(i);
+	  for (int i=0; i<photrail_Npfcandneutralincone && i<global_size_pfcandarrays; i++) photrail_neutralpfcanddphis[i] = rcone_isos.neutralcanddphis.at(i);
+	  if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
+	}
+      }
       float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
       float invmass5 = (CorrPhoton(fTR,passing.at(0),5)+CorrPhoton(fTR,passing.at(1),5)).M();
       float invmass6 = (CorrPhoton(fTR,passing.at(0),6)+CorrPhoton(fTR,passing.at(1),6)).M();
       dipho_mgg_photon = invmass0;
       dipho_mgg_newCorr = invmass5;
       dipho_mgg_newCorrLocal = invmass6;
-      OutputTree[sel_cat]->Fill();
+      if (dofill) OutputTree[sel_cat]->Fill();
     }
 
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==5 || sel_cat==6 || sel_cat==7 || sel_cat==8 || sel_cat==9 || sel_cat==10){
+    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==6 || sel_cat==7 || sel_cat==8 || sel_cat==9 || sel_cat==10){
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
