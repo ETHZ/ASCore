@@ -255,7 +255,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElPFNeIso",              &fTElPFneiso,           "ElPFNeIso[NEls]/F");
 	fAnalysisTree->Branch("ElRadIso",               &fTElRadIso,            "ElRadIso[NEls]/F");
 	fAnalysisTree->Branch("ElMVAIDnoTrig",          &fTElMVAIDnoTrig,       "ElMVAIDnoTrig[NEls]/F");
-	fAnalysisTree->Branch("fTElMVAIDTrig",          &fTElMVAIDTrig,         "ElMVAIDTrig[NEls]/F");
+	fAnalysisTree->Branch("ElMVAIDTrig",            &fTElMVAIDTrig,         "ElMVAIDTrig[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElHcalTowerSumEt",       &fTElHcalTowerSumEt,    "ElHcalTowerSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElTkSumPt",              &fTElTkSumPt,           "ElTkSumPt[NEls]/F");
