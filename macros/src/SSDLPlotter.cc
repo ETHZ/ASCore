@@ -13217,7 +13217,6 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 		printProgress(jentry, tot_events, "SMS Scan "+gRegions[reg]->sname);
 		for (int i = 0; i<nSyst; i++) {
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
-if (mGlu > 250. || mLSP > 250.) continue;
 			int x;                   // get the value of x. yes, in the treee it's m0
 			if (m0 == xvals[0]) x = 0;
 			if (m0 == xvals[1]) x = 1;
