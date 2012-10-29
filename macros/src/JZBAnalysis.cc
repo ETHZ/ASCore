@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.71 $";
+string sjzbversion="$Revision: 1.70.2.72 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -29,7 +29,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.71 2012/10/29 10:21:38 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.72 2012/10/29 15:52:21 pablom Exp $
 */
 
 
@@ -480,12 +480,19 @@ public:
   float tri_ch2;
   float tri_ch3;
   float tri_mlll;
+  float tri_badmll;
   float tri_mll;
   float tri_submll;
+  float tri_badsubmll;
   float tri_mT;
+  float tri_badmT;
   int tri_genMID1;
   int tri_genMID2;
   int tri_genMID3;
+  int tri_badgenMID1;
+  int tri_badgenMID2;
+  int tri_badgenMID3;
+
   float tri_dR12;
   float tri_dR13;
   float tri_dR23;
@@ -494,6 +501,9 @@ public:
   int tri_index1;
   int tri_index2;
   int tri_index3;
+  int tri_badindex1;
+  int tri_badindex2;
+  int tri_badindex3;
   bool tri_GoodZMatch;
   bool tri_GoodWMatch;
   
@@ -511,11 +521,17 @@ public:
   float gentri_ch3;
   float gentri_mlll;
   float gentri_mll;
+  float gentri_badmll;
   float gentri_submll;
+  float gentri_badsubmll;
   float gentri_mT;
+  float gentri_badmT;
   int gentri_genMID1;
   int gentri_genMID2;
   int gentri_genMID3;
+  int gentri_badgenMID1;
+  int gentri_badgenMID2;
+  int gentri_badgenMID3;
   float gentri_dR12;
   float gentri_dR13;
   float gentri_dR23;
@@ -1029,6 +1045,16 @@ void nanoEvent::reset()
   tri_mlll=0;
   tri_mll=0;
   tri_submll=0;
+  
+  tri_badmll=0;
+  tri_badsubmll=0;
+  tri_badmT=0;
+  tri_badgenMID1=0;
+  tri_badgenMID2=0;
+  tri_badgenMID3=0;
+  tri_badindex1=0;
+  tri_badindex2=0;
+  tri_badindex3=0;
     
   tri_mT=0;
   tri_index1=0;
@@ -1070,6 +1096,13 @@ void nanoEvent::reset()
   gentri_dR23=0;
   gentri_WZB=0;
   gentri_JWZB=0;
+  
+  gentri_badmll=0;
+  gentri_badsubmll=0;
+  gentri_badmT=0;
+  gentri_badgenMID1=0;
+  gentri_badgenMID2=0;
+  gentri_badgenMID3=0;
   
   gentri_GoodZMatch=false;
   gentri_GoodWMatch=false;
@@ -1572,12 +1605,31 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
   myTree->Branch("tri_index3",&nEvent.tri_index3,"tri_index3/I");
   
+  myTree->Branch("tri_badsubmll",&nEvent.tri_badsubmll,"tri_badsubmll/F");
+  myTree->Branch("tri_badmll",&nEvent.tri_badmll,"tri_badmll/F");
+  myTree->Branch("tri_badmT",&nEvent.tri_badmT,"tri_badmT/F");
+  myTree->Branch("tri_badgenMID1",&nEvent.tri_badgenMID1,"tri_badgenMID1/I");
+  myTree->Branch("tri_badgenMID2",&nEvent.tri_badgenMID2,"tri_badgenMID2/I");
+  myTree->Branch("tri_badgenMID3",&nEvent.tri_badgenMID3,"tri_badgenMID3/I");
+  myTree->Branch("tri_GoodZMatch",&nEvent.tri_GoodZMatch,"tri_GoodZMatch/O");
+  myTree->Branch("tri_GoodWMatch",&nEvent.tri_GoodWMatch,"tri_GoodWMatch/O");
+  myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
+  myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
+  myTree->Branch("tri_index3",&nEvent.tri_index3,"tri_index3/I");
+  
   myTree->Branch("tri_genMID1",&nEvent.tri_genMID1,"tri_genMID1/I");
   myTree->Branch("tri_genMID2",&nEvent.tri_genMID2,"tri_genMID2/I");
   myTree->Branch("tri_genMID3",&nEvent.tri_genMID3,"tri_genMID3/I");
   
-  myTree->Branch("tri_GoodZMatch",&nEvent.tri_GoodZMatch,"tri_GoodZMatch/O");
-  myTree->Branch("tri_GoodWMatch",&nEvent.tri_GoodWMatch,"tri_GoodWMatch/O");
+  
+  myTree->Branch("gentri_badsubmll",&nEvent.gentri_badsubmll,"gentri_badsubmll/F");
+  myTree->Branch("gentri_badmll",&nEvent.gentri_badmll,"gentri_badmll/F");
+  myTree->Branch("gentri_badmT",&nEvent.gentri_badmT,"gentri_badmT/F");
+  myTree->Branch("gentri_badgenMID1",&nEvent.gentri_badgenMID1,"gentri_badgenMID1/I");
+  myTree->Branch("gentri_badgenMID2",&nEvent.gentri_badgenMID2,"gentri_badgenMID2/I");
+  myTree->Branch("gentri_badgenMID3",&nEvent.gentri_badgenMID3,"gentri_badgenMID3/I");
+  myTree->Branch("gentri_GoodZMatch",&nEvent.gentri_GoodZMatch,"gentri_GoodZMatch/O");
+  myTree->Branch("gentri_GoodWMatch",&nEvent.gentri_GoodWMatch,"gentri_GoodWMatch/O");
 
   myTree->Branch("tri_dR12",&nEvent.tri_dR12,"tri_dR12/F");
   myTree->Branch("tri_dR13",&nEvent.tri_dR13,"tri_dR13/F");
@@ -2201,6 +2253,10 @@ void JZBAnalysis::Analyze() {
   int TriLepton2 = 1;
   int TriLepton3 = 1;
   
+  int BadTriLepton1 = 0;
+  int BadTriLepton2 = 1;
+  int BadTriLepton3 = 1;
+  
   // Check for OS combination
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
     if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[PosLepton2].charge<0) break;
@@ -2243,6 +2299,34 @@ void JZBAnalysis::Analyze() {
     if(TriLepton3==TriLepton1 || TriLepton3==TriLepton2) continue;
     else break; // pick the first lepton that's left!
   }
+  
+  //****************//
+  
+  
+  mindiff=-1;
+  BestCandidate=sortedGoodLeptons.size();
+  
+  // Trileptons
+  for(; BadTriLepton2 < sortedGoodLeptons.size(); BadTriLepton2++) {
+    if(sortedGoodLeptons[0].charge*sortedGoodLeptons[BadTriLepton2].charge<0 ) { //ignore flavor to get mismatch rate
+      float curr_mindiff=abs((sortedGoodLeptons[0].p+sortedGoodLeptons[BadTriLepton2].p).M()-91.2);
+      if(mindiff<0||curr_mindiff<mindiff) {
+	mindiff=curr_mindiff;
+	BestCandidate=BadTriLepton2;
+      }
+    }
+  }
+  BadTriLepton2=BestCandidate;
+  
+  for(; BadTriLepton3 < sortedGoodLeptons.size(); BadTriLepton3++) {
+    if(BadTriLepton3==BadTriLepton1 || BadTriLepton3==BadTriLepton2) continue;
+    else break; // pick the first lepton that's left!
+  }
+  
+
+  
+  
+  //***************//
   
   if(DoExperimentalFSRRecovery) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
   
@@ -2321,7 +2405,7 @@ void JZBAnalysis::Analyze() {
 
   nEvent.Zb30CHS_pfJetGoodNum=0;
   nEvent.Zb30CHS_pfJetGoodNumBtag=0;
-    // #--- PF jet loop (this is what we use)
+    // #--- PF jet loop (with CHS - not what we usually use)
   vector<lepton> pfCHSGoodJets;
   for(int i =0 ; i<fTR->PFCHSNJets;i++) // PF jet loop
     {
@@ -2864,23 +2948,44 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_mll=(lp1+lp2).M();
     nEvent.tri_submll=(lp2+lp3).M();
     
+    nEvent.tri_badmll=(sortedGoodLeptons[BadTriLepton1].p+sortedGoodLeptons[BadTriLepton2].p).M();
+    nEvent.tri_badsubmll=(sortedGoodLeptons[BadTriLepton2].p+sortedGoodLeptons[BadTriLepton3].p).M();
+    
     float AngleBetweenMETandThirdLepton=sortedGoodLeptons[TriLepton3].p.DeltaPhi(pfMETvector);
     nEvent.tri_mT = sqrt(2 * nEvent.met[4] * sortedGoodLeptons[TriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
     nEvent.tri_index1=TriLepton1;
     nEvent.tri_index2=TriLepton2;
     nEvent.tri_index3=TriLepton3;
     
+    AngleBetweenMETandThirdLepton=sortedGoodLeptons[BadTriLepton3].p.DeltaPhi(pfMETvector);
+    nEvent.tri_badmT = sqrt(2 * nEvent.met[4] * sortedGoodLeptons[BadTriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
+    nEvent.tri_badindex1=BadTriLepton1;
+    nEvent.tri_badindex2=BadTriLepton2;
+    nEvent.tri_badindex3=BadTriLepton3;
+
     int i1 = sortedGoodLeptons[TriLepton1].index;
     int i2 = sortedGoodLeptons[TriLepton2].index;
     int i3 = sortedGoodLeptons[TriLepton3].index;
 
-    nEvent.tri_genMID1 = (sortedGoodLeptons[TriLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]); // WW study
-    nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]); // WW study
-    nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]); // WW study
+    int bi1 = sortedGoodLeptons[BadTriLepton1].index;
+    int bi2 = sortedGoodLeptons[BadTriLepton2].index;
+    int bi3 = sortedGoodLeptons[BadTriLepton3].index;
+
+    nEvent.tri_genMID1 = (sortedGoodLeptons[TriLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]);
+    nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]);
+    nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]);
     
-    if(abs(nEvent.tri_genMID1)==15) nEvent.tri_genMID1=(sortedGoodLeptons[TriLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]); // WW study
-    if(abs(nEvent.tri_genMID2)==15) nEvent.tri_genMID2=(sortedGoodLeptons[TriLepton2].type?fTR->MuGenGMID[i3]:fTR->ElGenGMID[i2]); // WW study
-    if(abs(nEvent.tri_genMID3)==15) nEvent.tri_genMID3=(sortedGoodLeptons[TriLepton3].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i3]); // WW study
+    if(abs(nEvent.tri_genMID1)==15) nEvent.tri_genMID1=(sortedGoodLeptons[TriLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]);
+    if(abs(nEvent.tri_genMID2)==15) nEvent.tri_genMID2=(sortedGoodLeptons[TriLepton2].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i2]);
+    if(abs(nEvent.tri_genMID3)==15) nEvent.tri_genMID3=(sortedGoodLeptons[TriLepton3].type?fTR->MuGenGMID[i3]:fTR->ElGenGMID[i3]);
+    
+    nEvent.tri_badgenMID1 = (sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenMID[bi1]:fTR->ElGenMID[bi1]);
+    nEvent.tri_badgenMID2 = (sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenMID[bi2]:fTR->ElGenMID[bi2]);
+    nEvent.tri_badgenMID3 = (sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenMID[bi3]:fTR->ElGenMID[bi3]);
+    
+    if(abs(nEvent.tri_badgenMID1)==15) nEvent.tri_badgenMID1=(sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenGMID[bi1]:fTR->ElGenGMID[bi1]);
+    if(abs(nEvent.tri_badgenMID2)==15) nEvent.tri_badgenMID2=(sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenGMID[bi2]:fTR->ElGenGMID[bi2]);
+    if(abs(nEvent.tri_badgenMID3)==15) nEvent.tri_badgenMID3=(sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenGMID[bi3]:fTR->ElGenGMID[bi3]);
     
     nEvent.tri_GoodZMatch=false;
     nEvent.tri_GoodWMatch=false;
@@ -3742,6 +3847,10 @@ void JZBAnalysis::GeneratorInfo(void) {
 	int genTriLepton2 = 1;
 	int genTriLepton3 = 2;
 	
+	int genBadTriLepton1 = 0;
+	int genBadTriLepton2 = 1;
+	int genBadTriLepton3 = 1;
+	
 	float mindiff=-1;
 	int BestCandidate=sortedGLeptons.size();
 	// Trileptons
@@ -3756,6 +3865,33 @@ void JZBAnalysis::GeneratorInfo(void) {
 	}
 	
 	genTriLepton2=BestCandidate;
+	
+	
+	for(; genTriLepton3 < sortedGLeptons.size(); genTriLepton3++) {
+	  if(genTriLepton3==genTriLepton1 || genTriLepton3==genTriLepton2) continue;
+	  else break; // pick the first lepton that's left!
+	}
+  
+	mindiff=-1;
+	BestCandidate=sortedGLeptons.size();
+	// Trileptons
+	for(; genBadTriLepton2 < sortedGLeptons.size(); genBadTriLepton2++) {
+	  if(sortedGLeptons[0].charge*sortedGLeptons[genBadTriLepton2].charge<0) {
+	    float curr_mindiff=abs((sortedGLeptons[0].p+sortedGLeptons[genBadTriLepton2].p).M()-91.2);
+	    if(mindiff<0||curr_mindiff<mindiff) {
+	      mindiff=curr_mindiff;
+	      BestCandidate=genBadTriLepton2;
+	    }
+	  }
+	}
+	
+	genBadTriLepton2=BestCandidate;
+	
+	
+	for(; genBadTriLepton3 < sortedGLeptons.size(); genBadTriLepton3++) {
+	  if(genBadTriLepton3==genBadTriLepton1 || genBadTriLepton3==genBadTriLepton2) continue;
+	  else break; // pick the first lepton that's left!
+	}
 	
 	if(sortedGLeptons.size()>=3 && genTriLepton1<sortedGLeptons.size() && genTriLepton2<sortedGLeptons.size() && genTriLepton3<sortedGLeptons.size() ) {
 	  TLorentzVector lp1(sortedGLeptons[genTriLepton1].p);
@@ -3778,16 +3914,30 @@ void JZBAnalysis::GeneratorInfo(void) {
 	  nEvent.gentri_mll=(lp1+lp2).M();
 	  nEvent.gentri_submll=(lp2+lp3).M();
 	  
+	  nEvent.gentri_badmll=(sortedGLeptons[genBadTriLepton1].p+sortedGLeptons[genBadTriLepton2].p).M();
+	  nEvent.gentri_badsubmll=(sortedGLeptons[genBadTriLepton2].p+sortedGLeptons[genBadTriLepton3].p).M();
+    
 	  float AngleBetweenMETandThirdLepton=sortedGLeptons[genTriLepton3].p.DeltaPhi(GenMETvector);
 	  nEvent.gentri_mT = sqrt(2 * nEvent.genMET * sortedGLeptons[genTriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
+	  
+	  AngleBetweenMETandThirdLepton=sortedGLeptons[genBadTriLepton3].p.DeltaPhi(GenMETvector);
+	  nEvent.gentri_badmT = sqrt(2 * nEvent.genMET * sortedGLeptons[genBadTriLepton3].p.Pt() * ( 1 - cos(AngleBetweenMETandThirdLepton)));
 	  
 	  nEvent.gentri_genMID1 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton1].index];
 	  nEvent.gentri_genMID2 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton2].index];
 	  nEvent.gentri_genMID3 = fTR->GenLeptonMID[sortedGLeptons[genTriLepton3].index];
 	  
+	  nEvent.gentri_badgenMID1 = fTR->GenLeptonMID[sortedGLeptons[genBadTriLepton1].index];
+	  nEvent.gentri_badgenMID2 = fTR->GenLeptonMID[sortedGLeptons[genBadTriLepton2].index];
+	  nEvent.gentri_badgenMID3 = fTR->GenLeptonMID[sortedGLeptons[genBadTriLepton3].index];
+	  
 	  if(abs(nEvent.gentri_genMID1)==15) nEvent.gentri_genMID1=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton1].index];
 	  if(abs(nEvent.gentri_genMID2)==15) nEvent.gentri_genMID2=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton2].index];
 	  if(abs(nEvent.gentri_genMID3)==15) nEvent.gentri_genMID3=fTR->GenLeptonGMID[sortedGLeptons[genTriLepton3].index];
+	  
+	  if(abs(nEvent.gentri_badgenMID1)==15) nEvent.gentri_badgenMID1=fTR->GenLeptonGMID[sortedGLeptons[genBadTriLepton1].index];
+	  if(abs(nEvent.gentri_badgenMID2)==15) nEvent.gentri_badgenMID2=fTR->GenLeptonGMID[sortedGLeptons[genBadTriLepton2].index];
+	  if(abs(nEvent.gentri_badgenMID3)==15) nEvent.gentri_badgenMID3=fTR->GenLeptonGMID[sortedGLeptons[genBadTriLepton3].index];
 	  
 	  nEvent.gentri_GoodZMatch=false;
 	  nEvent.gentri_GoodWMatch=false;
