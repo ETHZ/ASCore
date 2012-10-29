@@ -1667,6 +1667,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb3010_alpha",&nEvent.Zb3010_alpha,"Zb3010_alpha/F");
   myTree->Branch("Zb20_alpha",&nEvent.Zb20_alpha,"Zb20_alpha/F");
   myTree->Branch("Zb30_alpha",&nEvent.Zb30_alpha,"Zb30_alpha/F");
+  myTree->Branch("Zb30_SecEta3_alpha",&nEvent.Zb30_SecEta3_alpha,"Zb30_SecEta3_alpha/F");
+  myTree->Branch("Zb30_SecEta5_alpha",&nEvent.Zb30_SecEta5_alpha,"Zb30_SecEta5_alpha/F");
   myTree->Branch("Zb30_p5Clean_alpha",&nEvent.Zb30_p5Clean_alpha,"Zb30_p5Clean_alpha/F");
   myTree->Branch("Zb30_leading1p3_alpha",&nEvent.Zb30_leading1p3_alpha,"Zb30_leading1p3_alpha/F");
   myTree->Branch("Zb40_alpha",&nEvent.Zb40_alpha,"Zb40_alpha/F");
