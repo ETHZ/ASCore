@@ -81,10 +81,10 @@ public:
 		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
-		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
+		TTJets1, TTJets2, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
-		// GJets40, GJets100, GJets200,
+		GJets200, GJets400, WW,
 		WZ,ZZ, 
 		// GVJets,
 		TTbarH, TTbarW, TTbarZ, TTbarG, DPSWW, // WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
@@ -435,7 +435,7 @@ public:
 			    (sname) == "EMEnr20"    ||
 			    (sname) == "EMEnr30"    ) return 1;
 			if( (sname.Contains("SingleT")) ||
-			    (sname) == "TTJets" )  return 2;
+			    (sname.Contains("TTJets") ) )return 2;
 			if( (sname.Contains("DYJets")) ||
 			    (sname.Contains("GJets"))  ||
 			    (sname) == "WJets" )   return 3;
@@ -463,7 +463,7 @@ public:
 		}
 		int getProc(){ // used for binned samples
 			if(datamc == 0)                                 return 0;
-			if(sname == "TTJets" )                          return 1;
+			if(sname.Contains("TTJets") )                   return 1;
 			if(sname.Contains("SingleT"))                   return 2;
 			if(sname == "WJets" )                           return 3;
 			if(sname.Contains("DYJets"))                    return 4;

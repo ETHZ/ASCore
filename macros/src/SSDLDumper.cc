@@ -5100,9 +5100,9 @@ bool SSDLDumper::isLooseElectron(int ele){
 	if(ElChIsCons[ele] != 1) return false;
 	
 	// Additional cuts for CaloIsoVL and TrkIsoVL
-	// if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	// if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	// if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
 
 	if(ElIsGoodTriggerEl[ele] != 1) return false;
 	// if(ElIsGoodElId_LooseWP[ele] != 1) return false;
@@ -5125,8 +5125,14 @@ bool SSDLDumper::isLooseElectron(int ele){
 }
 bool SSDLDumper::isTightElectron(int ele){
 	if(!isLooseElectron(ele))       return false;
-	if(ElIsGoodElId_MediumWP[ele] != 1) return false;
-	// OS guys if(ElIsGoodElId_LooseWP[ele] != 1) return false;
+	if (gTTWZ) {
+		if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.956) return false;
+		if(fabs(ElEta[ele]) > 0.8   && fabs(ElEta[ele]) < 1.479 && ElMVAIDTrig[ele] < 0.949) return false;
+		if(fabs(ElEta[ele]) > 1.479 && fabs(ElEta[ele]) < 2.5   && ElMVAIDTrig[ele] < 0.968) return false;
+	}
+	else {
+	  if(ElIsGoodElId_MediumWP[ele] != 1) return false;
+	}
 
 	if(ElPFIso[ele] > gElMaxIso) return false;
 
