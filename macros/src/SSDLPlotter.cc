@@ -116,7 +116,8 @@ void SSDLPlotter::init(TString filename){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
-	fMCBG.push_back(TTJets);
+	fMCBG.push_back(TTJets1);
+	fMCBG.push_back(TTJets2);
 	fMCBG.push_back(SingleT_t);
 	fMCBG.push_back(SingleTbar_t);
 	fMCBG.push_back(SingleT_tW);
@@ -162,7 +163,8 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(QCD1400);
 	// MARC fMCBG.push_back(QCD1800);
 
-	fMCBGNoQCDNoGJets.push_back(TTJets);
+	fMCBGNoQCDNoGJets.push_back(TTJets1);
+	fMCBGNoQCDNoGJets.push_back(TTJets2);
 	fMCBGNoQCDNoGJets.push_back(SingleT_t);
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_t);
 	fMCBGNoQCDNoGJets.push_back(SingleT_tW);
@@ -193,7 +195,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
 	// MARC fMCBGNoQCDNoGJetsSig.push_back(LM6);
 
-	fMCBGMuEnr.push_back(TTJets);
+	fMCBGMuEnr.push_back(TTJets1);
+	fMCBGMuEnr.push_back(TTJets2);
 	fMCBGMuEnr.push_back(SingleT_t);
 	fMCBGMuEnr.push_back(SingleTbar_t);
 	fMCBGMuEnr.push_back(SingleT_tW);
@@ -225,7 +228,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(QCDMuEnr15);
 
 
-	fMCBGEMEnr.push_back(TTJets);
+	fMCBGEMEnr.push_back(TTJets1);
+	fMCBGEMEnr.push_back(TTJets2);
 	fMCBGEMEnr.push_back(SingleT_t);
 	fMCBGEMEnr.push_back(SingleTbar_t);
 	fMCBGEMEnr.push_back(SingleT_tW);
@@ -322,24 +326,16 @@ void SSDLPlotter::init(TString filename){
 	// fLowPtData.push_back(MuEG4);
 }
 void SSDLPlotter::doSMSscans(TString region){
-        // This macro runs over the the SMS scans 
-        if (!gRunSMSscan) return;      
+	// This macro runs over the the SMS scans 
+	if (!gRunSMSscan) return;      
 	
-	TString pathtofile = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
-	TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
+//	TString pathtofile = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
+//	TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
+	TString pathtofile = "";
+	TString filename   = "/shome/mdunser/ssdltrees/ewino8tev/SMS-TChiStauStau_mchi20-100to1000_mchi10-0to975_0x50_8TeV-Pythia6Z_v2.root";
 	
-	// Find which region do I want
-	for (size_t i=0; i<gNREGIONS; ++i) {
-	  if (gRegions[i]->sname == region) 
-	    scanSMS(pathtofile + filename, i);	    
-	}
+	scanSMS(pathtofile + filename, gRegion[region]);
 
-// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET120NJ2bVlV);
-// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET200);
-// 	scanSMS("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root", HT0MET120NJ2bV);
-	//    	scanSMS("/shome/mdunser/ssdltrees/ewino8tev/tchislepsnusmall.root", HT0MET120V);
-	
-  
 }
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
@@ -347,12 +343,12 @@ void SSDLPlotter::doAnalysis(){
 	// pythiaMadgraph(false);
         // return;
   
-        if (gRunSMSscan) return; //DO NOT RUN THE ANALYSIS IF RUNNING THE SCAN
+	// if (gRunSMSscan) return; //DO NOT RUN THE ANALYSIS IF RUNNING THE SCAN
 
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBG, 1);
-	storeWeightedPred(gRegion["HT0MET120"]);
+	storeWeightedPred(gRegion[gBaseRegion]);
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -1667,7 +1663,8 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		////////////////////////////////////////////////////
 		// Fill ttbar histos
 		// Sample loop
-		TTree *tree = fSamples[TTJets]->getTree();
+	// attention, this only loops on one of the ttbar samples
+		TTree *tree = fSamples[TTJets1]->getTree();
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -1677,7 +1674,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		Long64_t nentries = fChain->GetEntriesFast();
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			printProgress(jentry, nentries, fSamples[TTJets]->name);
+			printProgress(jentry, nentries, fSamples[TTJets1]->name);
 
 			Long64_t ientry = LoadTree(jentry);
 			if (ientry < 0) break;
@@ -1747,7 +1744,8 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// }
 			////////////////////////////////////////////////////
 		}
-		fSamples[TTJets]->cleanUp();
+	// attention, this only loops on one of the ttbar samples
+		fSamples[TTJets1]->cleanUp();
 		cout << endl;
 	}
 	////////////////////////////////////////////////////
@@ -2207,7 +2205,8 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	if(dottbar){
 		// Fill ttbar histos
 		// Sample loop
-		TTree *tree = fSamples[TTJets]->getTree();
+	// attention, this only loops on one of the ttbar samples
+		TTree *tree = fSamples[TTJets1]->getTree();
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -2217,7 +2216,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		Long64_t nentries = fChain->GetEntriesFast();
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			printProgress(jentry, nentries, fSamples[TTJets]->name);
+			printProgress(jentry, nentries, fSamples[TTJets1]->name);
 
 			Long64_t ientry = LoadTree(jentry);
 			if (ientry < 0) break;
@@ -2272,7 +2271,8 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			}
 			////////////////////////////////////////////////////
 		}
-		fSamples[TTJets]->cleanUp();
+	// attention, this only loops on one of the ttbar samples
+		fSamples[TTJets1]->cleanUp();
 		cout << endl;
 	}
 	////////////////////////////////////////////////////
@@ -6757,6 +6757,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	ofstream OUT(filename.Data(), ios::trunc);
 
+	bool separateTTH = false;
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
@@ -7043,38 +7044,6 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
  	OUT << "      OS-YIELDS  ||   N_B   |   N_E   ||   N_BB  |   N_EB  |   N_EE  ||" << endl;
  	OUT << "-----------------------------------------------------------------------" << endl;
 
-// old	// Abbreviations
-// old	float fb  = gEChMisIDB;
-// old	float fbE = gEChMisIDB_E;
-// old	float fe  = gEChMisIDE;
-// old	float feE = gEChMisIDE_E;
-// old
-// old	// Simple error propagation assuming error on number of events is sqrt(N)
-// old	nt2_ee_chmid    = 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os;
-// old	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-// old	nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
-// old
-// old	nt2_em_chmid    = fb*nt2_em_BB_os + fe*nt2_em_EE_os;
-// old	nt2_em_chmid_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
-// old	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
-
-// old	///////////////////////////////////////////////////////////////////////////////////
-// old	// PRINTOUT ///////////////////////////////////////////////////////////////////////
-// old	///////////////////////////////////////////////////////////////////////////////////
-// old	OUT << "--------------------------------------------------------------" << endl;
-// old	OUT << "       E-ChMisID  ||       Barrel       |       Endcap      ||" << endl;
-// old	OUT << "--------------------------------------------------------------" << endl;
-// old	OUT << "                  ||";
-// old	OUT << setw(7)  << setprecision(2) << fb  << " ± " << setw(7) << setprecision(3) << fbE  << " |";
-// old	OUT << setw(7)  << setprecision(2) << fe  << " ± " << setw(7) << setprecision(3) << feE  << " ||";
-// old	OUT << endl;
-// old	OUT << "--------------------------------------------------------------" << endl << endl;
-// old
-// old	OUT << "-----------------------------------------------------------------------" << endl;
-// old	OUT << "                 ||       E/Mu        ||             E/E             ||" << endl;
-// old	OUT << "      OS-YIELDS  ||   N_B   |   N_E   ||   N_BB  |   N_EB  |   N_EE  ||" << endl;
-// old	OUT << "-----------------------------------------------------------------------" << endl;
-
 	float mc_os_em_bb_sum(0.), mc_os_em_ee_sum(0.);
 	float mc_os_ee_bb_sum(0.), mc_os_ee_eb_sum(0.), mc_os_ee_ee_sum(0.);
 
@@ -7141,7 +7110,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	mcbkg.push_back(ZZ);
 	// MARC mcbkg.push_back(GVJets);
 	mcbkg.push_back(DPSWW);
-	// mcbkg.push_back(TTbarH);
+	if (!separateTTH) mcbkg.push_back(TTbarH);
 	mcbkg.push_back(TTbarG);
 	mcbkg.push_back(WpWp);
 	mcbkg.push_back(WmWm);
@@ -7235,10 +7204,12 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	ttz_nt2_em, sqrt(ttz_nt2_em_e1),
 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1));
 
-	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttH Prod.",
-	tth_nt2_mm, sqrt(tth_nt2_mm_e1),
-	tth_nt2_em, sqrt(tth_nt2_em_e1),
-	tth_nt2_ee, sqrt(tth_nt2_ee_e1));
+	if (separateTTH) {
+		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttH Prod.",
+		tth_nt2_mm, sqrt(tth_nt2_mm_e1),
+		tth_nt2_em, sqrt(tth_nt2_em_e1),
+		tth_nt2_ee, sqrt(tth_nt2_ee_e1));
+	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	// Just add different errors in quadrature (they are independent)
 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat()                                   + nt2_rare_mc_mm_e1 + wz_nt2_mm_e1;
@@ -7325,15 +7296,16 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1 + RareESyst2*ttz_nt2_ee*ttz_nt2_ee),
 	ttz_nt2_mm, sqrt(ttz_nt2_mm_e1 + RareESyst2*ttz_nt2_mm*ttz_nt2_mm),
 	ttz_nt2_em, sqrt(ttz_nt2_em_e1 + RareESyst2*ttz_nt2_em*ttz_nt2_em));
-	fOUTSTREAM3 << Form("tth: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	tth_nt2_mm + tth_nt2_em + tth_nt2_ee,
-	sqrt(tth_nt2_mm_e1 + tth_nt2_em_e1 + tth_nt2_em_e1 + RareESyst2*(tth_nt2_mm + tth_nt2_em + tth_nt2_ee)*(tth_nt2_mm + tth_nt2_em + tth_nt2_ee)),
-	tth_nt2_ee, sqrt(tth_nt2_ee_e1 + RareESyst2*tth_nt2_ee*tth_nt2_ee),
-	tth_nt2_mm, sqrt(tth_nt2_mm_e1 + RareESyst2*tth_nt2_mm*tth_nt2_mm),
-	tth_nt2_em, sqrt(tth_nt2_em_e1 + RareESyst2*tth_nt2_em*tth_nt2_em));
-	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+	if (separateTTH) {
+		fOUTSTREAM3 << Form("tth: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+		tth_nt2_mm + tth_nt2_em + tth_nt2_ee,
+		sqrt(tth_nt2_mm_e1 + tth_nt2_em_e1 + tth_nt2_em_e1 + RareESyst2*(tth_nt2_mm + tth_nt2_em + tth_nt2_ee)*(tth_nt2_mm + tth_nt2_em + tth_nt2_ee)),
+		tth_nt2_ee, sqrt(tth_nt2_ee_e1 + RareESyst2*tth_nt2_ee*tth_nt2_ee),
+		tth_nt2_mm, sqrt(tth_nt2_mm_e1 + RareESyst2*tth_nt2_mm*tth_nt2_mm),
+		tth_nt2_em, sqrt(tth_nt2_em_e1 + RareESyst2*tth_nt2_em*tth_nt2_em));
+		fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+	}
 	fOUTSTREAM3 << endl;
-	
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR AN TABLE  /////////////////////////////////////////////////////////
@@ -7380,18 +7352,20 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	ttz_nt2_em, sqrt(ttz_nt2_em_e1 + RareESyst2*ttz_nt2_em*ttz_nt2_em),
 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1 + RareESyst2*ttz_nt2_ee*ttz_nt2_ee),
 	ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em, sqrt(ttz_nt2_mm_e1 + ttz_nt2_ee_e1 + ttz_nt2_em_e1 + RareESyst2*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)));
-	fOUTSTREAM << Form("ttH Prod.      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
-	tth_nt2_mm, sqrt(tth_nt2_mm_e1 + RareESyst2*tth_nt2_mm*tth_nt2_mm),
-	tth_nt2_em, sqrt(tth_nt2_em_e1 + RareESyst2*tth_nt2_em*tth_nt2_em),
-	tth_nt2_ee, sqrt(tth_nt2_ee_e1 + RareESyst2*tth_nt2_ee*tth_nt2_ee),
-	tth_nt2_ee + tth_nt2_mm + tth_nt2_em, sqrt(tth_nt2_mm_e1 + tth_nt2_ee_e1 + tth_nt2_em_e1 + RareESyst2*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)));
+	if (separateTTH) {
+		fOUTSTREAM << Form("ttH Prod.      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
+		tth_nt2_mm, sqrt(tth_nt2_mm_e1 + RareESyst2*tth_nt2_mm*tth_nt2_mm),
+		tth_nt2_em, sqrt(tth_nt2_em_e1 + RareESyst2*tth_nt2_em*tth_nt2_em),
+		tth_nt2_ee, sqrt(tth_nt2_ee_e1 + RareESyst2*tth_nt2_ee*tth_nt2_ee),
+		tth_nt2_ee + tth_nt2_mm + tth_nt2_em, sqrt(tth_nt2_mm_e1 + tth_nt2_ee_e1 + tth_nt2_em_e1 + RareESyst2*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)));
+	}
 	fOUTSTREAM << endl;
 	
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR DATACARD  //////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////	
-	TTWZPrediction pred;	
+	TTWZPrediction pred;
 	pred.obs      = nt2_mm+nt2_em+nt2_ee;
 	pred.ttw      = ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em;
 	pred.ttz      = ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em;
@@ -7496,10 +7470,11 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	h_pred_wz   ->SetBinContent(3, wz_nt2_em);
 	h_pred_wz   ->SetBinContent(4, wz_nt2_ee + wz_nt2_mm + wz_nt2_em);
 	
-	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee + wz_nt2_ee);
-	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm + wz_nt2_mm);
-	h_pred_mc->SetBinContent(3, nt2_rare_mc_em + wz_nt2_em);
-	h_pred_mc->SetBinContent(4, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em + wz_nt2_ee + wz_nt2_mm + wz_nt2_em);
+	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
+	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
+	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
+	h_pred_mc->SetBinContent(4, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em);
+
 	
 	h_pred_ttw->SetBinContent(1, ttw_nt2_ee);
 	h_pred_ttw->SetBinContent(2, ttw_nt2_mm);
@@ -7533,7 +7508,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_ttw);
 	hs_pred->Add(h_pred_ttz);
-	hs_pred->Add(h_pred_tth);
+	if (separateTTH) hs_pred->Add(h_pred_tth);
 	
 	float max = 2.0*h_pred_tot->GetBinContent(4);
 	
@@ -7546,7 +7521,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	h_pred_wz   ->SetMaximum(max>1?max+1:1.);
 	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
 	h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
-	h_pred_tth  ->SetMaximum(max>1?max+1:1.);
+	if (separateTTH) h_pred_tth  ->SetMaximum(max>1?max+1:1.);
 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
 	hs_pred     ->SetMaximum(max>1?max+1:1.);
 	
@@ -7563,7 +7538,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	leg->AddEntry(h_obs,        "Data","p");
 	leg->AddEntry(h_pred_ttw,   "t#bar{t} + W","f");
 	leg->AddEntry(h_pred_ttz,   "t#bar{t} + Z","f");
-	leg->AddEntry(h_pred_tth,   "t#bar{t} + H","f");
+	if (separateTTH) leg->AddEntry(h_pred_tth,   "t#bar{t} + H","f");
 	leg->AddEntry(h_pred_sfake, "Fakes","f");
 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
 	leg->AddEntry(h_pred_wz,    "WZ","f");
@@ -11173,7 +11148,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	float elfratio_allmc(0.), elfratio_allmc_e(0.);
 	float elpratio_allmc(0.), elpratio_allmc_e(0.);
 
-	vector<int> ttjets; ttjets.push_back(TTJets);
+	vector<int> ttjets; ttjets.push_back(TTJets1);  ttjets.push_back(TTJets2);
 	// calculateRatio(ttjets, Muon,     SigSup, mufratio_allmc, mufratio_allmc_e);
 	// calculateRatio(ttjets, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
 	// calculateRatio(ttjets, Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
@@ -11191,9 +11166,10 @@ void SSDLPlotter::makeTTbarClosure(){
 	float nt_me(0.), nl_me(0.),  np_me(0.), nf_me(0.);
 	float nt_ee(0.), nl_ee(0.),  np_ee(0.), nf_ee(0.);
 
-	Sample *S = fSamples[TTJets];
+	// attention, this only loops on one of the ttbar samples
+	Sample *S = fSamples[TTJets1];
 	TTree *tree = S->getTree();
-	fCurrentSample = TTJets;
+	fCurrentSample = TTJets1;
 
 	// Event loop
 	tree->ResetBranchAddresses();
@@ -11279,7 +11255,8 @@ void SSDLPlotter::makeTTbarClosure(){
 	cout << endl;
 	S->cleanUp();
 	// Scale by luminosity:
-	float scale = fLumiNorm / fSamples[TTJets]->getLumi();
+	// attention, this only loops on one of the ttbar samples
+	float scale = fLumiNorm / fSamples[TTJets1]->getLumi();
 	nt_mm*=scale; nl_mm*=scale; np_mm*=scale; nf_mm*=scale;
 	nt_em*=scale; nl_em*=scale; np_em*=scale; nf_em*=scale;
 	nt_me*=scale; nl_me*=scale; np_me*=scale; nf_me*=scale;
@@ -12330,7 +12307,8 @@ void SSDLPlotter::makeOriginPlots(int reg){
 			if(i == 0) horigin_mc[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
 			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
 			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
-			if (s_name == "TTJets") {
+	// attention, this only loops on one of the ttbar samples
+			if (s_name == "TTJets1") {
 				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
 				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
 				if(i == 2) horigin_tt[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
@@ -13139,11 +13117,14 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 	if (verbose) fOUTSTREAM.open( "SMSoutput_"+gRegions[reg]->sname+".txt" );
 
 	// put the x-values that are in the scan here. those are percentage numbers. i.e. if x == 0.05 put 5
-	int nx(3);
+	int nx(1);
 	float xvals[nx];
-	xvals[0] = 0.05;
-	xvals[1] = 0.50;
-	xvals[2] = 0.95;
+	xvals[0] = 0.5;
+	// hack for staustau int nx(3);
+	// hack for staustau float xvals[nx];
+	// hack for staustau xvals[0] = 0.05;
+	// hack for staustau xvals[1] = 0.50;
+	// hack for staustau xvals[2] = 0.95;
 
 	TH2D * TChi_yield_      [nx];
 	TH2D * TChiRight_yield_ [nx];
@@ -13217,10 +13198,10 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 		printProgress(jentry, tot_events, "SMS Scan "+gRegions[reg]->sname);
 		for (int i = 0; i<nSyst; i++) {
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
-			int x;                   // get the value of x. yes, in the treee it's m0
-			if (m0 == xvals[0]) x = 0;
-			if (m0 == xvals[1]) x = 1;
-			if (m0 == xvals[2]) x = 2;
+			int x=0;                   // get the value of x. yes, in the treee it's m0
+			// hack for staustau if (m0 == xvals[0]) x = 0;
+			// hack for staustau if (m0 == xvals[1]) x = 1;
+			// hack for staustau if (m0 == xvals[2]) x = 2;
 
 			if (!doSystematic && i!=0) continue;
 			if (i == 1) smearMET(S);
