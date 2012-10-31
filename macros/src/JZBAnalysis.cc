@@ -466,6 +466,7 @@ public:
   float Zb40_pfJetSum;
   float Zb40_pfBJetDphiZ[jMax];
   
+  float fact;
   
   float tri_pt1;
   float tri_pt2;
@@ -1027,6 +1028,7 @@ void nanoEvent::reset()
   }
   
   tri_pt1=0;
+  fact=1.0;
   tri_pt2=0;
   tri_pt3=0;
   
@@ -1585,6 +1587,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb40_pfJetGoodPt",nEvent.Zb40_pfJetGoodPt,"Zb40_pfJetGoodPt[Zb40_pfJetGoodNum]/F");
   myTree->Branch("Zb40_pfBJetDphiZ",nEvent.Zb40_pfBJetDphiZ,"Zb40_pfBJetDphiZ[Zb40_pfJetGoodNum]/F");
   
+  myTree->Branch("MetFactor",&nEvent.fact,"MetFactor/F");
   myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
   myTree->Branch("tri_pt2",&nEvent.tri_pt2,"tri_pt2/F");
   myTree->Branch("tri_pt3",&nEvent.tri_pt3,"tri_pt3/F");
@@ -2391,12 +2394,12 @@ void JZBAnalysis::Analyze() {
   float type1METpy = fTR->PFType1METpy;
   
   //Use this factor to stretch MET and, consequently, also JZB.
-  float fact = 1.0;
-//  fact = r->Gaus(1.08,0.1);
+  nEvent.fact = 1.0;
+//  nEvent.fact = r->Gaus(1.08,0.1);
 
-  TLorentzVector pfMETvector(fact*pfMETpx,fact*pfMETpy,0,0);
-  TLorentzVector tcMETvector(fact*tcMETpx,fact*tcMETpy,0,0);
-  TLorentzVector type1METvector(fact*type1METpx,fact*type1METpy,0,0);
+  TLorentzVector pfMETvector(nEvent.fact*pfMETpx,nEvent.fact*pfMETpy,0,0);
+  TLorentzVector tcMETvector(nEvent.fact*tcMETpx,nEvent.fact*tcMETpy,0,0);
+  TLorentzVector type1METvector(nEvent.fact*type1METpx,nEvent.fact*type1METpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
   TLorentzVector zVector;
   zVector.SetPtEtaPhiE(nEvent.pt,nEvent.eta,nEvent.phi,nEvent.E);
@@ -2821,7 +2824,7 @@ void JZBAnalysis::Analyze() {
   nEvent.met[SUMET]=fTR->SumEt;
   
   
-  nEvent.met[4] = fact * nEvent.met[4];
+  nEvent.met[4] = nEvent.fact * nEvent.met[4];
 
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
