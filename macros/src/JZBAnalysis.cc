@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.72 $";
+string sjzbversion="$Revision: 1.70.2.73 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -29,7 +29,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.72 2012/10/29 15:52:21 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.73 2012/10/29 17:10:48 buchmann Exp $
 */
 
 
@@ -1613,9 +1613,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_badgenMID3",&nEvent.tri_badgenMID3,"tri_badgenMID3/I");
   myTree->Branch("tri_GoodZMatch",&nEvent.tri_GoodZMatch,"tri_GoodZMatch/O");
   myTree->Branch("tri_GoodWMatch",&nEvent.tri_GoodWMatch,"tri_GoodWMatch/O");
-  myTree->Branch("tri_index1",&nEvent.tri_index1,"tri_index1/I");
-  myTree->Branch("tri_index2",&nEvent.tri_index2,"tri_index2/I");
-  myTree->Branch("tri_index3",&nEvent.tri_index3,"tri_index3/I");
   
   myTree->Branch("tri_genMID1",&nEvent.tri_genMID1,"tri_genMID1/I");
   myTree->Branch("tri_genMID2",&nEvent.tri_genMID2,"tri_genMID2/I");
@@ -1630,6 +1627,10 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("gentri_badgenMID3",&nEvent.gentri_badgenMID3,"gentri_badgenMID3/I");
   myTree->Branch("gentri_GoodZMatch",&nEvent.gentri_GoodZMatch,"gentri_GoodZMatch/O");
   myTree->Branch("gentri_GoodWMatch",&nEvent.gentri_GoodWMatch,"gentri_GoodWMatch/O");
+
+  myTree->Branch("tri_badindex1",&nEvent.tri_badindex1,"tri_badindex1/I");
+  myTree->Branch("tri_badindex2",&nEvent.tri_badindex2,"tri_badindex2/I");
+  myTree->Branch("tri_badindex3",&nEvent.tri_badindex3,"tri_badindex3/I");
 
   myTree->Branch("tri_dR12",&nEvent.tri_dR12,"tri_dR12/F");
   myTree->Branch("tri_dR13",&nEvent.tri_dR13,"tri_dR13/F");
@@ -2300,9 +2301,6 @@ void JZBAnalysis::Analyze() {
     else break; // pick the first lepton that's left!
   }
   
-  //****************//
-  
-  
   mindiff=-1;
   BestCandidate=sortedGoodLeptons.size();
   
@@ -2394,7 +2392,7 @@ void JZBAnalysis::Analyze() {
   
   //Use this factor to stretch MET and, consequently, also JZB.
   float fact = 1.0;
-  //fact = r->Gaus(1.08,0.1);
+//  fact = r->Gaus(1.08,0.1);
 
   TLorentzVector pfMETvector(fact*pfMETpx,fact*pfMETpy,0,0);
   TLorentzVector tcMETvector(fact*tcMETpx,fact*tcMETpy,0,0);
@@ -2971,26 +2969,30 @@ void JZBAnalysis::Analyze() {
     int bi2 = sortedGoodLeptons[BadTriLepton2].index;
     int bi3 = sortedGoodLeptons[BadTriLepton3].index;
 
-    nEvent.tri_genMID1 = (sortedGoodLeptons[TriLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]);
-    nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]);
-    nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]);
     
-    if(abs(nEvent.tri_genMID1)==15) nEvent.tri_genMID1=(sortedGoodLeptons[TriLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]);
-    if(abs(nEvent.tri_genMID2)==15) nEvent.tri_genMID2=(sortedGoodLeptons[TriLepton2].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i2]);
-    if(abs(nEvent.tri_genMID3)==15) nEvent.tri_genMID3=(sortedGoodLeptons[TriLepton3].type?fTR->MuGenGMID[i3]:fTR->ElGenGMID[i3]);
-    
-    nEvent.tri_badgenMID1 = (sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenMID[bi1]:fTR->ElGenMID[bi1]);
-    nEvent.tri_badgenMID2 = (sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenMID[bi2]:fTR->ElGenMID[bi2]);
-    nEvent.tri_badgenMID3 = (sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenMID[bi3]:fTR->ElGenMID[bi3]);
-    
-    if(abs(nEvent.tri_badgenMID1)==15) nEvent.tri_badgenMID1=(sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenGMID[bi1]:fTR->ElGenGMID[bi1]);
-    if(abs(nEvent.tri_badgenMID2)==15) nEvent.tri_badgenMID2=(sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenGMID[bi2]:fTR->ElGenGMID[bi2]);
-    if(abs(nEvent.tri_badgenMID3)==15) nEvent.tri_badgenMID3=(sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenGMID[bi3]:fTR->ElGenGMID[bi3]);
-    
-    nEvent.tri_GoodZMatch=false;
-    nEvent.tri_GoodWMatch=false;
-    if(nEvent.tri_genMID1==23 && nEvent.tri_genMID1 ==23) nEvent.tri_GoodZMatch=true;
-    if(abs(nEvent.tri_genMID3)==24 ) nEvent.tri_GoodWMatch=true;
+    if(fDataType_ == "mc" ) {
+      nEvent.tri_genMID1 = (sortedGoodLeptons[TriLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]);
+      nEvent.tri_genMID2 = (sortedGoodLeptons[TriLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]);
+      nEvent.tri_genMID3 = (sortedGoodLeptons[TriLepton3].type?fTR->MuGenMID[i3]:fTR->ElGenMID[i3]);
+      
+      if(abs(nEvent.tri_genMID1)==15) nEvent.tri_genMID1=(sortedGoodLeptons[TriLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]);
+      if(abs(nEvent.tri_genMID2)==15) nEvent.tri_genMID2=(sortedGoodLeptons[TriLepton2].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i2]);
+      if(abs(nEvent.tri_genMID3)==15) nEvent.tri_genMID3=(sortedGoodLeptons[TriLepton3].type?fTR->MuGenGMID[i3]:fTR->ElGenGMID[i3]);
+      
+      nEvent.tri_badgenMID1 = (sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenMID[bi1]:fTR->ElGenMID[bi1]);
+      nEvent.tri_badgenMID2 = (sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenMID[bi2]:fTR->ElGenMID[bi2]);
+      nEvent.tri_badgenMID3 = (sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenMID[bi3]:fTR->ElGenMID[bi3]);
+      
+      if(abs(nEvent.tri_badgenMID1)==15) nEvent.tri_badgenMID1=(sortedGoodLeptons[BadTriLepton1].type?fTR->MuGenGMID[bi1]:fTR->ElGenGMID[bi1]);
+      if(abs(nEvent.tri_badgenMID2)==15) nEvent.tri_badgenMID2=(sortedGoodLeptons[BadTriLepton2].type?fTR->MuGenGMID[bi2]:fTR->ElGenGMID[bi2]);
+      if(abs(nEvent.tri_badgenMID3)==15) nEvent.tri_badgenMID3=(sortedGoodLeptons[BadTriLepton3].type?fTR->MuGenGMID[bi3]:fTR->ElGenGMID[bi3]);
+      
+      nEvent.tri_GoodZMatch=false;
+      nEvent.tri_GoodWMatch=false;
+      if(nEvent.tri_genMID1==23 && nEvent.tri_genMID1 ==23) nEvent.tri_GoodZMatch=true;
+      if(abs(nEvent.tri_genMID3)==24 ) nEvent.tri_GoodWMatch=true;
+    }
+      
 
     nEvent.tri_dR12 = lp1.DeltaR(lp2);
     nEvent.tri_dR13 = lp1.DeltaR(lp3); 
