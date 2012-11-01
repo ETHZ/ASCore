@@ -1482,7 +1482,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb2010_pfJetGoodPt",nEvent.Zb2010_pfJetGoodPt,"Zb2010_pfJetGoodPt[Zb2010_pfJetGoodNum]/F");
   myTree->Branch("Zb2010_pfBJetDphiZ",nEvent.Zb2010_pfBJetDphiZ,"Zb2010_pfBJetDphiZ[Zb2010_pfJetGoodNum]/F");
 
-  myTree->Branch("ZbCHS_alpha",&nEvent.ZbCHS_alpha, "ZbCHS_alpha/F");
+  myTree->Branch("Zb30CHS_alpha",&nEvent.ZbCHS_alpha, "Zb30CHS_alpha/F");
   myTree->Branch("Zb30CHS_pfJetGoodNum",&nEvent.Zb30CHS_pfJetGoodNum,"Zb30CHS_pfJetGoodNum/I");
   myTree->Branch("Zb30CHS_pfJetGoodNumBtag",&nEvent.Zb30CHS_pfJetGoodNumBtag,"Zb30CHS_pfJetGoodNumBtag/I");
   myTree->Branch("Zb30CHS_bTagProbCSVBP",nEvent.Zb30CHS_bTagProbCSVBP,"Zb30CHS_bTagProbCSVBP[Zb30CHS_pfJetGoodNum]/F");
