@@ -2473,7 +2473,7 @@ void JZBAnalysis::Analyze() {
       float jpz = fTR->JPz[i];
       float jenergy = fTR->JE[i];
       float jesC = fTR->JEcorr[i];
-      bool  isJetID = IsGoodBasicPFJet(i,0.0,3.0);
+      bool  isJetID = IsGoodBasicPFJet(i,0.0,5.0);
       int   ntracksch = fTR->JNAssoTracks[i];  
       int   ntracksne = fTR->JNConstituents[i];
 
