@@ -2534,8 +2534,7 @@ void JZBAnalysis::Analyze() {
       nEvent.pfHT    += jpt;
       
       // Keep central jets
-      if ( !(fabs(jeta)<3.0 ) ) continue;
-      counters[PJ].fill("... |eta|<3.0");
+      if ( !(fabs(jeta)<5.0 ) ) continue;
       
       // Flag good jets failing ID
       if (!isJetID) { 
@@ -2543,17 +2542,16 @@ void JZBAnalysis::Analyze() {
       } else {
         counters[PJ].fill("... pass Jet ID");
       }
-      nEvent.pfGoodHT += jpt;
-      sumOfPFJets += aJet;
+      if ( !(fabs(jeta)<5.0 ) ) continue;
       
       lepton tmpLepton;
       tmpLepton.p = aJet;
       tmpLepton.charge = 0;
       tmpLepton.index = i;
       tmpLepton.type = -1;
-      pfGoodJets.push_back(tmpLepton);
       
       bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
+      
       if((nEvent.Zb2010_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) ||
 	(nEvent.Zb2010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
 	//Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
@@ -2567,7 +2565,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.Zb2010_pfJetGoodPt[nEvent.Zb2010_pfJetGoodNum]=jpt;
 	nEvent.Zb2010_pfJetGoodNum++;
       }
-      if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<1.3) ||
+      if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) ||
 	(nEvent.ZbMikko_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<5.0)) && IsOutsidep5Cone ) {
 	//Full Mikko selection: 15/10, first within 1.3, second within 5.0; cleaning within 0.5, 
 	nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
@@ -2702,7 +2700,7 @@ void JZBAnalysis::Analyze() {
       }
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
 	//Z+b selection with 30 GeV jets, leading jet within |eta|<1.3
-	if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>1.3) continue; // leading jet must be within |eta|<1.3
+	if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>2.4) continue; // leading jet must be within |eta|<1.3 - this needs to be checked at analysis level, not here.
 	nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.679) {
 	  nEvent.Zb30_leading1p3_pfBJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -2726,6 +2724,12 @@ void JZBAnalysis::Analyze() {
 	nEvent.Zb40_pfJetGoodNum++;
       }
       
+      if ( !(fabs(jeta)<3.0 ) ) continue;
+      counters[PJ].fill("... |eta|<3.0");
+      nEvent.pfGoodHT += jpt;
+      sumOfPFJets += aJet;
+      pfGoodJets.push_back(tmpLepton);
+
       if ( jpt>40 ) {
         counters[PJ].fill("... pass tight jet selection");
         nEvent.pfTightHT += jpt;
