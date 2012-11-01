@@ -257,8 +257,9 @@ public:
 	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
-	virtual void drawTopLine(float = 0.60, float = 1.0, float = 0.13);
-	virtual void drawTopLineSim(float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawTopLine(        float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawTopLineNoPrelim(float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawTopLineSim(     float = 0.60, float = 1.0, float = 0.13);
 	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	

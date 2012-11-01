@@ -78,6 +78,7 @@ public:
 		GJets40, GJets100, GJets200,
 		GVJets, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		// Exclude LM samples from datacard and here for running on Jun20/Oct23 ttV
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
@@ -98,6 +99,7 @@ public:
 		Baseline = region_begin, //HT0MET0
 		HT80MET30,
 		HT200MET30,
+		// HT0MET50,
 		HT0MET120,
 		HT0MET200,
 		HT0MET1203V, // 3rd lep veto
