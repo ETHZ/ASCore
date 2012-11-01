@@ -25,6 +25,37 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
 
   eegeom = TGeoPara(1,1,1,0,0,0);
 
+  float _binsdef_single_gamma_EB_eta[n_templates_EB+1] = {0,0.2,0.4,0.6,0.8,1,1.2,1.4442}; 
+  float _binsdef_single_gamma_EE_eta[n_templates_EE+1] = {1.56,1.653,1.8,2,2.2,2.5};
+  float _eff_areas_EB_photon_data[n_templates_EB] = {2.004668e-01,2.000222e-01,2.083325e-01,2.129163e-01,2.082317e-01,1.982015e-01,1.383834e-01}; 
+  float _eff_areas_EE_photon_data[n_templates_EE] = {3.727486e-02,5.494237e-02,7.876623e-02,1.006998e-01,8.432818e-02};
+  float _eff_areas_EB_charged_data[n_templates_EB] = {2.707052e-02,2.715322e-02,2.181513e-02,2.302210e-02,2.296409e-02,2.010706e-02,2.016756e-02};
+  float _eff_areas_EE_charged_data[n_templates_EE] = {1.667700e-02,1.863876e-02,1.442144e-02,1.656359e-02,1.121806e-02}; 
+  float _eff_areas_EB_neutral_data[n_templates_EB] = {1.008816e-01,9.405549e-02,8.752698e-02,9.280508e-02,1.083173e-01,1.327634e-01,1.648043e-01}; 
+  float _eff_areas_EE_neutral_data[n_templates_EE] = {1.665812e-01,1.587098e-01,1.496094e-01,1.669686e-01,2.647152e-01}; 
+  float _eff_areas_EB_photon_MC[n_templates_EB] = {2.049085e-01,2.037967e-01,2.129352e-01,2.154778e-01,2.155464e-01,2.037776e-01,1.407869e-01};
+  float _eff_areas_EE_photon_MC[n_templates_EE] = {4.410657e-02,6.010713e-02,9.360530e-02,1.421708e-01,1.269196e-01};
+  float _eff_areas_EB_charged_MC[n_templates_EB] = {3.131846e-02,3.181332e-02,3.066015e-02,2.876652e-02,2.709936e-02,2.977523e-02,2.038828e-02};
+  float _eff_areas_EE_charged_MC[n_templates_EE] = {2.047554e-02,1.836507e-02,1.890404e-02,1.743312e-02,9.424824e-03}; 
+  float _eff_areas_EB_neutral_MC[n_templates_EB] = {8.039549e-02,8.165860e-02,8.187589e-02,8.591983e-02,9.982728e-02,1.248690e-01,1.519101e-01}; 
+  float _eff_areas_EE_neutral_MC[n_templates_EE] = {1.622648e-01,1.533238e-01,1.456079e-01,1.670986e-01,2.775698e-01}; 
+
+
+  binsdef_single_gamma_EB_eta.assign(_binsdef_single_gamma_EB_eta,_binsdef_single_gamma_EB_eta+n_templates_EB+1);
+  binsdef_single_gamma_EE_eta.assign(_binsdef_single_gamma_EE_eta,_binsdef_single_gamma_EE_eta+n_templates_EE+1);
+  eff_areas_EB_photon_data.assign(_eff_areas_EB_photon_data ,_eff_areas_EB_photon_data +n_templates_EB);
+  eff_areas_EE_photon_data.assign(_eff_areas_EE_photon_data ,_eff_areas_EE_photon_data +n_templates_EE);
+  eff_areas_EB_charged_data.assign(_eff_areas_EB_charged_data ,_eff_areas_EB_charged_data +n_templates_EB);
+  eff_areas_EE_charged_data.assign(_eff_areas_EE_charged_data ,_eff_areas_EE_charged_data +n_templates_EE);
+  eff_areas_EB_neutral_data.assign(_eff_areas_EB_neutral_data ,_eff_areas_EB_neutral_data +n_templates_EB);
+  eff_areas_EE_neutral_data.assign(_eff_areas_EE_neutral_data ,_eff_areas_EE_neutral_data +n_templates_EE);
+  eff_areas_EB_photon_MC.assign(_eff_areas_EB_photon_MC ,_eff_areas_EB_photon_MC +n_templates_EB);
+  eff_areas_EE_photon_MC.assign(_eff_areas_EE_photon_MC ,_eff_areas_EE_photon_MC +n_templates_EE);
+  eff_areas_EB_charged_MC.assign(_eff_areas_EB_charged_MC ,_eff_areas_EB_charged_MC +n_templates_EB);
+  eff_areas_EE_charged_MC.assign(_eff_areas_EE_charged_MC ,_eff_areas_EE_charged_MC +n_templates_EE);
+  eff_areas_EB_neutral_MC.assign(_eff_areas_EB_neutral_MC ,_eff_areas_EB_neutral_MC +n_templates_EB);
+  eff_areas_EE_neutral_MC.assign(_eff_areas_EE_neutral_MC ,_eff_areas_EE_neutral_MC +n_templates_EE);
+  
 }
 
 DiPhotonMiniTree::~DiPhotonMiniTree(){
@@ -712,7 +743,7 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
   for (std::vector<int>::iterator it = passing.begin(); it != passing.end(); ){
       bool pass=0;
       if (fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)
-	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<5)
+	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<10)
 	  pass=1;
       if (!pass) it=passing.erase(it); else it++;
     }
@@ -772,7 +803,7 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     else if (mode=="cut_combiso_sideband"){ // selection for sideband
       //      if (combiso> && combiso<) pass=1;
     }
-    else if (combiso<9999) pass=1;
+    else if (combiso<10) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
 
@@ -802,7 +833,7 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
       pass=1;
     }
     else {
-      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>5) pass=1;
+      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>10) pass=1;
     }
     if (!pass) it=passing.erase(it); else it++;
   }
@@ -943,7 +974,7 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
     if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
   }
 
-  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>9999) found=true; }
+  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>10) found=true; }
 
   for (int i=0; i<fTR->NMus; i++){
     float mueta = fTR->MuEta[i];
@@ -1801,17 +1832,59 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
   return area;
 };
 
-float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel){
+float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, float eta){
+
+  eta=fabs(eta);
+  bool isbarrel = (eta<1.4442);
+
+  int bin = Choose_bin_eta(fabs(eta),isbarrel ? 0 : 1);
 
   float eff_area = 0;
-  
-//  if (mode=="photon") eff_area = isbarrel ? 0.221 : 0.130;
-//  if (mode=="charged") eff_area = isbarrel ? 0.016 : 0.017;
-//  if (mode=="neutral") eff_area = isbarrel ? 0.097 : 0.132;
-  
+
+  std::vector<float> *eff_areas_EB_photon = isdata ?  &eff_areas_EB_photon_data :  &eff_areas_EB_photon_MC;
+  std::vector<float> *eff_areas_EB_charged = isdata ? &eff_areas_EB_charged_data : &eff_areas_EB_charged_MC;
+  std::vector<float> *eff_areas_EB_neutral = isdata ? &eff_areas_EB_neutral_data : &eff_areas_EB_neutral_MC;
+  std::vector<float> *eff_areas_EE_photon = isdata ?  &eff_areas_EB_photon_data :  &eff_areas_EB_photon_MC;
+  std::vector<float> *eff_areas_EE_charged = isdata ? &eff_areas_EE_charged_data : &eff_areas_EE_charged_MC;
+  std::vector<float> *eff_areas_EE_neutral = isdata ? &eff_areas_EE_neutral_data : &eff_areas_EE_neutral_MC;
+
+  if (mode=="photon") eff_area = isbarrel ?  (*eff_areas_EB_photon)[bin] :  (*eff_areas_EE_photon)[bin];
+  if (mode=="charged") eff_area = isbarrel ? (*eff_areas_EB_charged)[bin] : (*eff_areas_EE_charged)[bin];
+  if (mode=="neutral") eff_area = isbarrel ? (*eff_areas_EB_neutral)[bin] : (*eff_areas_EE_neutral)[bin];
+
+  if (eff_area==0) std::cout << "Warning: problem in eta-dependent EA" << std::endl;
+
   return TMath::Pi()*0.4*0.4*eff_area*fTR->Rho;
 
 };
+
+Int_t DiPhotonMiniTree::Choose_bin_eta(float eta, int region){
+
+  eta=fabs(eta);
+
+  int index;
+
+  std::vector<float> *cuts;
+
+  if (region==0) {cuts=&binsdef_single_gamma_EB_eta; index=n_templates_EB;}
+  if (region==1) {cuts=&binsdef_single_gamma_EE_eta; index=n_templates_EE;}
+
+  assert (index!=0);
+
+  (*cuts)[index]=9999;
+
+  if (eta<(*cuts)[0]){
+    std::cout << "WARNING: called bin choice for out-of-range value " << eta << " cuts[0]=" << (*cuts)[0] << std::endl;
+    return -999;
+  }
+
+  for (int i=0; i<index; i++) if ((eta>=(*cuts)[i]) && (eta<(*cuts)[i+1])) return i;
+
+  std::cout << "WARNING: called bin choice for out-of-range value " << eta << std::endl;
+  return -999;
+
+};
+
 
 //double DiPhotonMiniTree::etaTransformation(  float EtaParticle , float Zvertex)  {
 //

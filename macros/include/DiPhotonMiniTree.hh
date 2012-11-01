@@ -103,9 +103,11 @@ private:
 
   std::vector<int> DiPhotonInvariantMassCutSelection(TreeReader *fTR, std::vector<int> passing);
 
+  Int_t Choose_bin_eta(float eta, int region);
+
   float SieieRescale(float sieie, bool isbarrel);
   float CalculateSCArea(TreeReader *fTR, int scindex);
-  float GetPUEnergy(TreeReader *fTR, TString mode, bool isbarrel);
+  float GetPUEnergy(TreeReader *fTR, TString mode, float eta);
 
   void FillLead(int index);
   void FillTrail(int index);
@@ -127,6 +129,25 @@ private:
   float DeltaPhiSigned(float phi1, float phi2);
 
   TRandom3 *randomgen;
+
+  static const int n_templates_EB=7;
+  static const int n_templates_EE=5;
+
+  std::vector<float> binsdef_single_gamma_EB_eta;
+  std::vector<float> binsdef_single_gamma_EE_eta;
+  std::vector<float> eff_areas_EB_photon_data;
+  std::vector<float> eff_areas_EE_photon_data;
+  std::vector<float> eff_areas_EB_charged_data;
+  std::vector<float> eff_areas_EE_charged_data;
+  std::vector<float> eff_areas_EB_neutral_data;
+  std::vector<float> eff_areas_EE_neutral_data;
+  std::vector<float> eff_areas_EB_photon_MC;
+  std::vector<float> eff_areas_EE_photon_MC;
+  std::vector<float> eff_areas_EB_charged_MC;
+  std::vector<float> eff_areas_EE_charged_MC;
+  std::vector<float> eff_areas_EB_neutral_MC;
+  std::vector<float> eff_areas_EE_neutral_MC;
+
 
   float scarea[100];
   float scareaSF[100];
