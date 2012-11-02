@@ -34,7 +34,7 @@ struct lepton {
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
-  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false);
+  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false, vector<string> fileList=vector<string>());
   virtual ~JZBAnalysis();
   const bool IsCustomMu2012(const int);
   const bool IsCustomEl2012(const int);
@@ -56,6 +56,7 @@ public:
   bool DecaysToTaus(bool, TreeReader*);
   int DetermineFlavor(bool, TreeReader*);
   bool ShouldPhotonBeMerged(lepton &photon, float dR);
+  int ExtractFileNumber(string fileName);
 
   string outputFileName_; // public name of the output file name
 
@@ -87,6 +88,7 @@ private:
   bool fisModelScan;
   bool fdoGenInfo;
   bool fmakeSmall;
+  int fFile;
 
   std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths;
 

@@ -505,6 +505,9 @@ public:
   int tri_badindex1;
   int tri_badindex2;
   int tri_badindex3;
+  int tri_badid1;
+  int tri_badid2;
+  int tri_badid3;
   bool tri_GoodZMatch;
   bool tri_GoodWMatch;
   
@@ -1057,6 +1060,10 @@ void nanoEvent::reset()
   tri_badindex1=0;
   tri_badindex2=0;
   tri_badindex3=0;
+  tri_badid1=0;
+  tri_badid2=0;
+  tri_badid3=0;
+  
     
   tri_mT=0;
   tri_index1=0;
@@ -1155,9 +1162,34 @@ void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
 
 }
 
+int split(string s, string ch, string temp[]) { 
+  //splits a string into an array of strings using ch as delimiter
+  int cnt=0, ndx;
+  while (s!="") {  
+    ndx=s.find(ch);
+    if (ndx<0) {temp[cnt]=s; s=""; }
+    else if (ndx==0) {temp[cnt]=""; s=s.substr(1); }
+    else {temp[cnt]=s.substr(0,ndx);s=s.substr(ndx+1);  }
+    cnt++;
+  }
+  return cnt;
+}
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo) :
+int JZBAnalysis::ExtractFileNumber(string pathname) {
+  if(pathname=="") return -1;
+  size_t found=pathname.find_last_of("/\\");
+  string file = pathname.substr(found+1);
+  string Parts[20];
+  for(int i=0;i<20;i++) Parts[i]="";
+  split(file, "_", Parts);
+  if(Parts[3]=="") return -1;
+  return atoi(Parts[3].c_str()); // 1 is NTUpleProducer, 2 is CMSSW version, 3 is file number (!), 4 is retry number, 5 is "unique" identifier.root
+}
+
+JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo, vector<string> fileList) :
   UserAnalysisBase(tr,dataType!="mc"), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
+  if(fileList.size()==1) fFile=ExtractFileNumber(fileList[0]);
+  else fFile=-1;
   // Define trigger paths to check
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",10,30);
 
@@ -1232,6 +1264,7 @@ void JZBAnalysis::Begin(TFile *f){
   
   myTree = new TTree("events","events");
 
+  myTree->Branch("NTupleNumber",&fFile,"NTupleNumber/I");
   myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
   myTree->Branch("NRecoveredPhotons",&nEvent.NRecoveredPhotons,"NRecoveredPhotons/O");
   myTree->Branch("mll",&nEvent.mll,"mll/F");
@@ -1634,6 +1667,10 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_badindex1",&nEvent.tri_badindex1,"tri_badindex1/I");
   myTree->Branch("tri_badindex2",&nEvent.tri_badindex2,"tri_badindex2/I");
   myTree->Branch("tri_badindex3",&nEvent.tri_badindex3,"tri_badindex3/I");
+
+  myTree->Branch("tri_badid1",&nEvent.tri_badid1,"tri_badid1/I");
+  myTree->Branch("tri_badid2",&nEvent.tri_badid2,"tri_badid2/I");
+  myTree->Branch("tri_badid3",&nEvent.tri_badid3,"tri_badid3/I");
 
   myTree->Branch("tri_dR12",&nEvent.tri_dR12,"tri_dR12/F");
   myTree->Branch("tri_dR13",&nEvent.tri_dR13,"tri_dR13/F");
@@ -2968,6 +3005,10 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_badindex2=BadTriLepton2;
     nEvent.tri_badindex3=BadTriLepton3;
 
+    nEvent.tri_badid1=sortedGoodLeptons[BadTriLepton1].type;
+    nEvent.tri_badid2=sortedGoodLeptons[BadTriLepton2].type;
+    nEvent.tri_badid3=sortedGoodLeptons[BadTriLepton3].type;
+    
     int i1 = sortedGoodLeptons[TriLepton1].index;
     int i2 = sortedGoodLeptons[TriLepton2].index;
     int i3 = sortedGoodLeptons[TriLepton3].index;

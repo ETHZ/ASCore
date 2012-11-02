@@ -10,7 +10,7 @@ JZBAnalyzer::JZBAnalyzer(std::vector<std::string>& fileList, std::string dataTyp
    : TreeAnalyzerBase(fileList) {
   f_isModelScan=isModelScan;
   f_doGenInfo=doGenInfo;
-  fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning,isModelScan,makeSmall,doGenInfo);
+  fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning,isModelScan,makeSmall,doGenInfo,fileList);
 }
 
 JZBAnalyzer::~JZBAnalyzer() {
