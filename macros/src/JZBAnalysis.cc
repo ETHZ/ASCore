@@ -465,6 +465,9 @@ public:
   float Zb40_pfJetGoodPt[jMax];
   float Zb40_pfJetSum;
   float Zb40_pfBJetDphiZ[jMax];
+    
+  bool ZbMikko__IsClean;
+  bool Zb30_p5Clean_IsClean;
   
   float fact;
   
@@ -1030,6 +1033,9 @@ void nanoEvent::reset()
     Zb40_pfBJetDphiZ[i]=0;
   }
   
+  ZbMikko__IsClean=true;
+  Zb30_p5Clean_IsClean=true;
+
   tri_pt1=0;
   fact=1.0;
   tri_pt2=0;
@@ -1619,6 +1625,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb40_pfJetDphiZ",nEvent.Zb40_pfJetDphiZ,"Zb40_pfJetDphiZ[Zb40_pfJetGoodNum]/F");
   myTree->Branch("Zb40_pfJetGoodPt",nEvent.Zb40_pfJetGoodPt,"Zb40_pfJetGoodPt[Zb40_pfJetGoodNum]/F");
   myTree->Branch("Zb40_pfBJetDphiZ",nEvent.Zb40_pfBJetDphiZ,"Zb40_pfBJetDphiZ[Zb40_pfJetGoodNum]/F");
+    
+  myTree->Branch("ZbMikko__IsClean",&nEvent.ZbMikko__IsClean,"ZbMikko__IsClean/O");
+  myTree->Branch("Zb30_p5Clean_IsClean",&nEvent.Zb30_p5Clean_IsClean,"Zb30_p5Clean_IsClean/O");
   
   myTree->Branch("MetFactor",&nEvent.fact,"MetFactor/F");
   myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
@@ -2532,7 +2541,8 @@ void JZBAnalysis::Analyze() {
 //      jpz*=correction;
 //      nEvent.CorrectionRatio[nEvent.pfJetNum]=correction/jesC;
 //      jesC=correction;
-      
+      if ( !(jpt>10) ) continue;
+
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
       // lepton-jet cleaning
@@ -2551,13 +2561,207 @@ void JZBAnalysis::Analyze() {
         counters[PJ].fill("... pass lepton 2 veto");
       }
       
-      // Keep jets over min. pt threshold
-      if ( !(jpt>20) ) continue;
-      counters[PJ].fill("... pt>20.");
-
       //Get Uncertainty
       fJECUnc->setJetEta(jeta);
       fJECUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
+      
+      // Keep central jets
+      if ( !(fabs(jeta)<5.0 ) ) continue;
+      
+      // Flag good jets failing ID
+      if (!isJetID) { 
+        nEvent.badJet = 1;
+      }
+        
+      lepton tmpLepton;
+      tmpLepton.p = aJet;
+      tmpLepton.charge = 0;
+      tmpLepton.index = i;
+      tmpLepton.type = -1;
+      
+        
+      bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
+      
+      if((nEvent.Zb2010_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
+          //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
+          nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]>0.679) {
+              nEvent.Zb2010_pfBJetDphiZ[nEvent.Zb2010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb2010_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb2010_pfJetGoodEta[nEvent.Zb2010_pfJetGoodNum]=jeta;
+          nEvent.Zb2010_pfJetDphiZ[nEvent.Zb2010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb2010_pfJetGoodPt[nEvent.Zb2010_pfJetGoodNum]=jpt;
+          nEvent.Zb2010_pfJetGoodNum++;
+      }
+      
+      if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.ZbMikko_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<5.0))) {
+          //Full Mikko selection: 15/10, first within 1.3, second within 5.0; cleaning within 0.5,
+          nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]>0.679) {
+              nEvent.ZbMikko_pfBJetDphiZ[nEvent.ZbMikko_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.ZbMikko_pfJetGoodNumBtag++;
+          }
+          nEvent.ZbMikko_pfJetGoodEta[nEvent.ZbMikko_pfJetGoodNum]=jeta;
+          nEvent.ZbMikko_pfJetDphiZ[nEvent.ZbMikko_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.ZbMikko_pfJetGoodPt[nEvent.ZbMikko_pfJetGoodNum]=jpt;
+          nEvent.ZbMikko_pfJetGoodNum++;
+          if(!IsOutsidep5Cone) nEvent.ZbMikko__IsClean=false;
+      }
+        
+      if((nEvent.Zb3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.Zb3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
+          //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
+          nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.679) {
+              nEvent.Zb3010_pfBJetDphiZ[nEvent.Zb3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb3010_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb3010_pfJetGoodEta[nEvent.Zb3010_pfJetGoodNum]=jeta;
+          nEvent.Zb3010_pfJetDphiZ[nEvent.Zb3010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb3010_pfJetGoodPt[nEvent.Zb3010_pfJetGoodNum]=jpt;
+          nEvent.Zb3010_pfJetGoodNum++;
+      }
+      
+      if((nEvent.Zb1510_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1510_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
+          //Z+b selection with 15 GeV leading jet, 10 GeV sub-leading jet
+          nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]>0.679) {
+              nEvent.Zb1510_pfBJetDphiZ[nEvent.Zb1510_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb1510_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb1510_pfJetGoodEta[nEvent.Zb1510_pfJetGoodNum]=jeta;
+          nEvent.Zb1510_pfJetDphiZ[nEvent.Zb1510_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb1510_pfJetGoodPt[nEvent.Zb1510_pfJetGoodNum]=jpt;
+          nEvent.Zb1510_pfJetGoodNum++;
+      }
+        
+      if((nEvent.Zb1530_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1530_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
+          //Z+b selection with 15 GeV leading jet, 30 GeV sub-leading jet
+          nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]>0.679) {
+              nEvent.Zb1530_pfBJetDphiZ[nEvent.Zb1530_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb1530_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb1530_pfJetGoodEta[nEvent.Zb1530_pfJetGoodNum]=jeta;
+          nEvent.Zb1530_pfJetDphiZ[nEvent.Zb1530_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb1530_pfJetGoodPt[nEvent.Zb1530_pfJetGoodNum]=jpt;
+          nEvent.Zb1530_pfJetGoodNum++;
+      }
+      
+      if((nEvent.Zb2030_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2030_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
+          //Z+b selection with 20 GeV leading jet, 30 GeV sub-leading jet
+          nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]>0.679) {
+              nEvent.Zb2030_pfBJetDphiZ[nEvent.Zb2030_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb2030_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb2030_pfJetGoodEta[nEvent.Zb2030_pfJetGoodNum]=jeta;
+          nEvent.Zb2030_pfJetDphiZ[nEvent.Zb2030_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb2030_pfJetGoodPt[nEvent.Zb2030_pfJetGoodNum]=jpt;
+          nEvent.Zb2030_pfJetGoodNum++;
+      }
+      
+      if (jpt>20 && isJetID && abs(jeta)<2.4) {
+          //Z+b selection with 20 GeV jets
+          nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]>0.679) {
+              nEvent.Zb20_pfBJetDphiZ[nEvent.Zb20_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb20_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb20_pfJetGoodEta[nEvent.Zb20_pfJetGoodNum]=jeta;
+          nEvent.Zb20_pfJetDphiZ[nEvent.Zb20_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb20_pfJetGoodPt[nEvent.Zb20_pfJetGoodNum]=jpt;
+          nEvent.Zb20_pfJetGoodNum++;
+      }
+        
+      if (jpt>30 && isJetID && abs(jeta)<2.4) {
+          //Z+b selection with 30 GeV jets
+          nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.679) {
+              nEvent.Zb30_pfBJetDphiZ[nEvent.Zb30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb30_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb30_pfJetGoodEta[nEvent.Zb30_pfJetGoodNum]=jeta;
+          nEvent.Zb30_pfJetDphiZ[nEvent.Zb30_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb30_pfJetGoodPt[nEvent.Zb30_pfJetGoodNum]=jpt;
+          nEvent.Zb30_pfJetGoodNum++;
+      }
+        
+      if (jpt>30 && isJetID && abs(jeta)<2.4) {
+          //Z+b selection with 30 GeV jets
+          nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]>0.679) {
+              nEvent.Zb30_p5Clean_pfBJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb30_p5Clean_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb30_p5Clean_pfJetGoodEta[nEvent.Zb30_p5Clean_pfJetGoodNum]=jeta;
+          nEvent.Zb30_p5Clean_pfJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb30_p5Clean_pfJetGoodPt[nEvent.Zb30_p5Clean_pfJetGoodNum]=jpt;
+          nEvent.Zb30_p5Clean_pfJetGoodNum++;
+          if(!IsOutsidep5Cone) nEvent.Zb30_p5Clean_IsClean=false;
+      }
+
+      if (jpt>30 && isJetID && abs(jeta)<3.0) {
+          //Z+b selection with 30 GeV jets, subleading up to |eta|<3.0 (note: checking at analysis level that leading jet is within 1.3)
+          nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]>0.679) {
+              nEvent.Zb30_SecEta3_pfBJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb30_SecEta3_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb30_SecEta3_pfJetGoodEta[nEvent.Zb30_SecEta3_pfJetGoodNum]=jeta;
+          nEvent.Zb30_SecEta3_pfJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb30_SecEta3_pfJetGoodPt[nEvent.Zb30_SecEta3_pfJetGoodNum]=jpt;
+          nEvent.Zb30_SecEta3_pfJetGoodNum++;
+      }
+        
+      if (jpt>30 && isJetID && abs(jeta)<5.0) {
+          //Z+b selection with 30 GeV jets, subleading up to |eta|<5.0 (note: checking at analysis level that leading jet is within 1.3)
+          nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]>0.679) {
+              nEvent.Zb30_SecEta5_pfBJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb30_SecEta5_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb30_SecEta5_pfJetGoodEta[nEvent.Zb30_SecEta5_pfJetGoodNum]=jeta;
+          nEvent.Zb30_SecEta5_pfJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb30_SecEta5_pfJetGoodPt[nEvent.Zb30_SecEta5_pfJetGoodNum]=jpt;
+          nEvent.Zb30_SecEta5_pfJetGoodNum++;
+      }
+
+      if (jpt>30 && isJetID && abs(jeta)<2.4) {
+          //Z+b selection with 30 GeV jets, leading jet within |eta|<1.3
+          if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>2.4) continue; // leading jet must be within |eta|<1.3 - this needs to be checked at analysis level, not here.
+          nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.679) {
+              nEvent.Zb30_leading1p3_pfBJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb30_leading1p3_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb30_leading1p3_pfJetGoodEta[nEvent.Zb30_leading1p3_pfJetGoodNum]=jeta;
+          nEvent.Zb30_leading1p3_pfJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb30_leading1p3_pfJetGoodPt[nEvent.Zb30_leading1p3_pfJetGoodNum]=jpt;
+          nEvent.Zb30_leading1p3_pfJetGoodNum++;
+      }
+        
+      if (jpt>40 && isJetID && abs(jeta)<2.4) {
+          //Z+b selection with 40 GeV jets
+          nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+          if(nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]>0.679) {
+              nEvent.Zb40_pfBJetDphiZ[nEvent.Zb40_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
+              nEvent.Zb40_pfJetGoodNumBtag++;
+          }
+          nEvent.Zb40_pfJetGoodEta[nEvent.Zb40_pfJetGoodNum]=jeta;
+          nEvent.Zb40_pfJetDphiZ[nEvent.Zb40_pfJetGoodNum]=aJet.DeltaPhi(zVector);
+          nEvent.Zb40_pfJetGoodPt[nEvent.Zb40_pfJetGoodNum]=jpt;
+          nEvent.Zb40_pfJetGoodNum++;
+      }
+      
+      if ( !(fabs(jeta)<3.0 ) ) continue;
+      counters[PJ].fill("... |eta|<3.0");
+      // Keep jets over min. pt threshold
+      if ( !(jpt>20) ) continue;
+      counters[PJ].fill("... pt>20.");
+        
+      if(!nEvent.badJet) counters[PJ].fill("... pass Jet ID");
+
       float unc = fJECUnc->getUncertainty(true); 
       nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
       nEvent.pfJetEta[nEvent.pfJetNum]   = jeta;
@@ -2569,200 +2773,6 @@ void JZBAnalysis::Analyze() {
       nEvent.pfJetDphiZ[nEvent.pfJetNum] = aJet.DeltaPhi(zVector);
       nEvent.pfJetNum = nEvent.pfJetNum +1;
       nEvent.pfHT    += jpt;
-      
-      // Keep central jets
-      if ( !(fabs(jeta)<5.0 ) ) continue;
-      
-      // Flag good jets failing ID
-      if (!isJetID) { 
-        nEvent.badJet = 1;
-      } else {
-        counters[PJ].fill("... pass Jet ID");
-      }
-      if ( !(fabs(jeta)<5.0 ) ) continue;
-      
-      lepton tmpLepton;
-      tmpLepton.p = aJet;
-      tmpLepton.charge = 0;
-      tmpLepton.index = i;
-      tmpLepton.type = -1;
-      
-      bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
-      
-      if((nEvent.Zb2010_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.Zb2010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-	//Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-	nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]>0.679) {
-	  nEvent.Zb2010_pfBJetDphiZ[nEvent.Zb2010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb2010_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb2010_pfJetGoodEta[nEvent.Zb2010_pfJetGoodNum]=jeta;
-	nEvent.Zb2010_pfJetDphiZ[nEvent.Zb2010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb2010_pfJetGoodPt[nEvent.Zb2010_pfJetGoodNum]=jpt;
-	nEvent.Zb2010_pfJetGoodNum++;
-      }
-      if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.ZbMikko_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<5.0)) && IsOutsidep5Cone ) {
-	//Full Mikko selection: 15/10, first within 1.3, second within 5.0; cleaning within 0.5, 
-	nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]>0.679) {
-	  nEvent.ZbMikko_pfBJetDphiZ[nEvent.ZbMikko_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.ZbMikko_pfJetGoodNumBtag++;
-	}
-	nEvent.ZbMikko_pfJetGoodEta[nEvent.ZbMikko_pfJetGoodNum]=jeta;
-	nEvent.ZbMikko_pfJetDphiZ[nEvent.ZbMikko_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.ZbMikko_pfJetGoodPt[nEvent.ZbMikko_pfJetGoodNum]=jpt;
-	nEvent.ZbMikko_pfJetGoodNum++;
-      }
-      
-      
-      if((nEvent.Zb3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.Zb3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-	//Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-	nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.679) {
-	  nEvent.Zb3010_pfBJetDphiZ[nEvent.Zb3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb3010_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb3010_pfJetGoodEta[nEvent.Zb3010_pfJetGoodNum]=jeta;
-	nEvent.Zb3010_pfJetDphiZ[nEvent.Zb3010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb3010_pfJetGoodPt[nEvent.Zb3010_pfJetGoodNum]=jpt;
-	nEvent.Zb3010_pfJetGoodNum++;
-      }
-      
-      if((nEvent.Zb1510_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.Zb1510_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-	//Z+b selection with 15 GeV leading jet, 10 GeV sub-leading jet
-	nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]>0.679) {
-	  nEvent.Zb1510_pfBJetDphiZ[nEvent.Zb1510_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb1510_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb1510_pfJetGoodEta[nEvent.Zb1510_pfJetGoodNum]=jeta;
-	nEvent.Zb1510_pfJetDphiZ[nEvent.Zb1510_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb1510_pfJetGoodPt[nEvent.Zb1510_pfJetGoodNum]=jpt;
-	nEvent.Zb1510_pfJetGoodNum++;
-      }
-      
-      if((nEvent.Zb1530_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.Zb1530_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
-	//Z+b selection with 15 GeV leading jet, 30 GeV sub-leading jet
-	nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]>0.679) {
-	  nEvent.Zb1530_pfBJetDphiZ[nEvent.Zb1530_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb1530_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb1530_pfJetGoodEta[nEvent.Zb1530_pfJetGoodNum]=jeta;
-	nEvent.Zb1530_pfJetDphiZ[nEvent.Zb1530_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb1530_pfJetGoodPt[nEvent.Zb1530_pfJetGoodNum]=jpt;
-	nEvent.Zb1530_pfJetGoodNum++;
-      }
-      
-      if((nEvent.Zb2030_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) ||
-	(nEvent.Zb2030_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
-	//Z+b selection with 20 GeV leading jet, 30 GeV sub-leading jet
-	nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]>0.679) {
-	  nEvent.Zb2030_pfBJetDphiZ[nEvent.Zb2030_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb2030_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb2030_pfJetGoodEta[nEvent.Zb2030_pfJetGoodNum]=jeta;
-	nEvent.Zb2030_pfJetDphiZ[nEvent.Zb2030_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb2030_pfJetGoodPt[nEvent.Zb2030_pfJetGoodNum]=jpt;
-	nEvent.Zb2030_pfJetGoodNum++;
-      }
-      
-      if (jpt>20 && isJetID && abs(jeta)<2.4) {
-	//Z+b selection with 20 GeV jets
-	nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]>0.679) {
-	  nEvent.Zb20_pfBJetDphiZ[nEvent.Zb20_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb20_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb20_pfJetGoodEta[nEvent.Zb20_pfJetGoodNum]=jeta;
-	nEvent.Zb20_pfJetDphiZ[nEvent.Zb20_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb20_pfJetGoodPt[nEvent.Zb20_pfJetGoodNum]=jpt;
-	nEvent.Zb20_pfJetGoodNum++;
-      }
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-	//Z+b selection with 30 GeV jets
-	nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.679) {
-	  nEvent.Zb30_pfBJetDphiZ[nEvent.Zb30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb30_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb30_pfJetGoodEta[nEvent.Zb30_pfJetGoodNum]=jeta;
-	nEvent.Zb30_pfJetDphiZ[nEvent.Zb30_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb30_pfJetGoodPt[nEvent.Zb30_pfJetGoodNum]=jpt;
-	nEvent.Zb30_pfJetGoodNum++;
-      }
-      if (jpt>30 && isJetID && abs(jeta)<2.4 && IsOutsidep5Cone) {
-	//Z+b selection with 30 GeV jets
-	nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]>0.679) {
-	  nEvent.Zb30_p5Clean_pfBJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb30_p5Clean_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb30_p5Clean_pfJetGoodEta[nEvent.Zb30_p5Clean_pfJetGoodNum]=jeta;
-	nEvent.Zb30_p5Clean_pfJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb30_p5Clean_pfJetGoodPt[nEvent.Zb30_p5Clean_pfJetGoodNum]=jpt;
-	nEvent.Zb30_p5Clean_pfJetGoodNum++;
-      }
-      if (jpt>30 && isJetID && abs(jeta)<3.0) {
-	//Z+b selection with 30 GeV jets, subleading up to |eta|<3.0
-	if(nEvent.Zb30_SecEta3_pfJetGoodNum==0 && abs(jeta)>2.4) continue;
-	nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]>0.679) {
-	  nEvent.Zb30_SecEta3_pfBJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb30_SecEta3_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb30_SecEta3_pfJetGoodEta[nEvent.Zb30_SecEta3_pfJetGoodNum]=jeta;
-	nEvent.Zb30_SecEta3_pfJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb30_SecEta3_pfJetGoodPt[nEvent.Zb30_SecEta3_pfJetGoodNum]=jpt;
-	nEvent.Zb30_SecEta3_pfJetGoodNum++;
-      }
-      if (jpt>30 && isJetID && abs(jeta)<5.0) {
-	//Z+b selection with 30 GeV jets, subleading up to |eta|<5.0
-	if(nEvent.Zb30_SecEta5_pfJetGoodNum==0 && abs(jeta)>2.4) continue;
-	nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]>0.679) {
-	  nEvent.Zb30_SecEta5_pfBJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb30_SecEta5_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb30_SecEta5_pfJetGoodEta[nEvent.Zb30_SecEta5_pfJetGoodNum]=jeta;
-	nEvent.Zb30_SecEta5_pfJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb30_SecEta5_pfJetGoodPt[nEvent.Zb30_SecEta5_pfJetGoodNum]=jpt;
-	nEvent.Zb30_SecEta5_pfJetGoodNum++;
-      }
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-	//Z+b selection with 30 GeV jets, leading jet within |eta|<1.3
-	if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>2.4) continue; // leading jet must be within |eta|<1.3 - this needs to be checked at analysis level, not here.
-	nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.679) {
-	  nEvent.Zb30_leading1p3_pfBJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb30_leading1p3_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb30_leading1p3_pfJetGoodEta[nEvent.Zb30_leading1p3_pfJetGoodNum]=jeta;
-	nEvent.Zb30_leading1p3_pfJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb30_leading1p3_pfJetGoodPt[nEvent.Zb30_leading1p3_pfJetGoodNum]=jpt;
-	nEvent.Zb30_leading1p3_pfJetGoodNum++;
-      }
-      if (jpt>40 && isJetID && abs(jeta)<2.4) {
-	//Z+b selection with 40 GeV jets
-	nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]>0.679) {
-	  nEvent.Zb40_pfBJetDphiZ[nEvent.Zb40_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-	  nEvent.Zb40_pfJetGoodNumBtag++;
-	}
-	nEvent.Zb40_pfJetGoodEta[nEvent.Zb40_pfJetGoodNum]=jeta;
-	nEvent.Zb40_pfJetDphiZ[nEvent.Zb40_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-	nEvent.Zb40_pfJetGoodPt[nEvent.Zb40_pfJetGoodNum]=jpt;
-	nEvent.Zb40_pfJetGoodNum++;
-      }
-      
-      if ( !(fabs(jeta)<3.0 ) ) continue;
-      counters[PJ].fill("... |eta|<3.0");
       nEvent.pfGoodHT += jpt;
       sumOfPFJets += aJet;
       pfGoodJets.push_back(tmpLepton);
@@ -3131,7 +3141,7 @@ void JZBAnalysis::End(TFile *f){
   weight_histo->Write();
 
   // Dump statistics
-  if (0) { // Put that to 0 if you are annoyed
+  if (1) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
