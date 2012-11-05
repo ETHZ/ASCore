@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.73 $";
+string sjzbversion="$Revision: 1.70.2.80 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -29,7 +29,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.73 2012/10/29 17:10:48 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.80 2012/11/05 18:25:06 buchmann Exp $
 */
 
 
@@ -46,6 +46,7 @@ public:
 
   float mll; // di-lepton system
   float mllg; // di-lepton system
+  float minc;
   float pt;
   float phi;
   float eta;
@@ -577,6 +578,7 @@ void nanoEvent::reset()
 
   mll=0; // di-lepton system
   mllg=0;
+  minc=0;
   pt=0;
   phi=0;
   eta=0;
@@ -1274,6 +1276,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
   myTree->Branch("NRecoveredPhotons",&nEvent.NRecoveredPhotons,"NRecoveredPhotons/O");
   myTree->Branch("mll",&nEvent.mll,"mll/F");
+  myTree->Branch("minc",&nEvent.minc,"minc/F");
   myTree->Branch("mllg",&nEvent.mllg,"mllg/F");
   myTree->Branch("pt",&nEvent.pt,"pt/F");
   myTree->Branch("phi",&nEvent.phi,"phi/F");
@@ -2398,6 +2401,7 @@ void JZBAnalysis::Analyze() {
     nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
 //    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
     
+    nEvent.minc=sortedGoodLeptons[PosLepton2].p.Pt()+sortedGoodLeptons[PosLepton1].p.Pt();
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
     nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
     nEvent.eta=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Eta();
@@ -2442,6 +2446,7 @@ void JZBAnalysis::Analyze() {
   //Use this factor to stretch MET and, consequently, also JZB.
   nEvent.fact = 1.0;
 //  nEvent.fact = r->Gaus(1.08,0.1);
+  nEvent.minc+= fTR->PFMET;
 
   TLorentzVector pfMETvector(nEvent.fact*pfMETpx,nEvent.fact*pfMETpy,0,0);
   TLorentzVector tcMETvector(nEvent.fact*tcMETpx,nEvent.fact*tcMETpy,0,0);
@@ -2789,6 +2794,7 @@ void JZBAnalysis::Analyze() {
         nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum40] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
         nEvent.pfJetGoodTracks[nEvent.pfJetGoodNum40] = ntracksch;
         nEvent.pfJetGoodTracksN[nEvent.pfJetGoodNum40] = ntracksne;
+        nEvent.minc+=jpt;
 
         if(isJetID>0) {
 	        nEvent.pfJetGoodNumID++;
