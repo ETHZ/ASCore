@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.81 $";
+string sjzbversion="$Revision: 1.70.2.82 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -29,7 +29,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.81 2012/11/05 22:32:07 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.82 2012/11/06 16:53:47 buchmann Exp $
 */
 
 
@@ -2927,7 +2927,7 @@ void JZBAnalysis::Analyze() {
   nEvent.jzb[PFJZB] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
   nEvent.sjzb[PFJZB] = GausRandom(nEvent.jzb[PFJZB]+3.9,7); // to be used with pfMET
 
-  nEvent.FSRjzb = pfNoCutsJetVector.Pt() - (fs1+fs2).Pt();
+  nEvent.FSRjzb = FSRpfNoCutsJetVector.Pt() - (fs1+fs2).Pt();
     
   nEvent.dphi_sumJetVSZ[RECOILJZB] = 0.; // kicked recoil.DeltaPhi(s1+s2);
   nEvent.sumJetPt[RECOILJZB] = 0.;//kicked recoil.Pt(); 
