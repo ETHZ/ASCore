@@ -404,6 +404,7 @@ void DiPhotonMiniTree::Analyze(){
   std::vector<int> passing_selection[14];
 
   bool pass[14];
+  int pass12_whoisrcone;
 
   for (int sel_cat=0; sel_cat<14; sel_cat++){
 
@@ -456,9 +457,12 @@ void DiPhotonMiniTree::Analyze(){
     else if (sel_cat==12){
       std::vector<int> passing_bkg = PhotonSelection(fTR,passing,"invert_sieie_cut");
       std::vector<int> newpassing;
-      if (passing_bkg.size()>1 && passing.size()>2){
-	if (passing[0]!=passing_bkg[0]) newpassing.push_back(passing[0]); else newpassing.push_back(passing[1]);
-	newpassing.push_back(passing_bkg[0]);
+      if (passing_bkg.size()>=1 && passing.size()>=2){
+	int fondo = passing_bkg[0];
+	int forcone;
+	if (passing[0]!=fondo) forcone = passing[0]; else forcone = passing[1];
+	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoisrcone=1;}
+	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoisrcone=0;}
       }
       passing=newpassing;
       pass[sel_cat] = StandardEventSelection(fTR,passing);
@@ -510,7 +514,7 @@ void DiPhotonMiniTree::Analyze(){
       FillTrail(passing.at(1));
       bool dofill=true;
 
-      if (sel_cat==5 || sel_cat==12) {
+      if (sel_cat==5 || (sel_cat==12 && pass12_whoisrcone==0)) {
 	  isolations_struct rcone_isos;
 	  rcone_isos = RandomConeIsolation(fTR,passing.at(0),"");
 	  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
@@ -534,7 +538,7 @@ void DiPhotonMiniTree::Analyze(){
 	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcanddphis[i] = rcone_isos.neutralcanddphis.at(i);
 	  if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
 	}
-      if (sel_cat==5) {
+      if (sel_cat==5 || (sel_cat==12 && pass12_whoisrcone==1)) {
 	  isolations_struct rcone_isos;
 	  rcone_isos = RandomConeIsolation(fTR,passing.at(1),"");
 	  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
