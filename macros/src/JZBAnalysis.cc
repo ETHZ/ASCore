@@ -18,18 +18,18 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.80 $";
+string sjzbversion="$Revision: 1.70.2.81 $";
 string sjzbinfo="";
 TRandom3 *r;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
-bool DoExperimentalFSRRecovery = false;
-bool DoFSRStudies=false;
+bool DoExperimentalFSRRecovery = true;
+bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.80 2012/11/05 18:25:06 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.81 2012/11/05 22:32:07 buchmann Exp $
 */
 
 
@@ -60,6 +60,8 @@ public:
   float iso2;
   bool  isConv1; // Photon conversion flag
   bool  isConv2;
+    
+  float FSRjzb;
 
   float genFSRmll[30];
   float genFSRmllg[30];
@@ -599,6 +601,8 @@ void nanoEvent::reset()
   iso2=0;
   isConv1 = false;
   isConv2 = false;
+  
+  FSRjzb=0;
   
   NgenZs=0;
   NgenRecPho=0;
@@ -1289,6 +1293,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
   myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
 
+  myTree->Branch("FSRjzb",&nEvent.FSRjzb,"FSRjzb/F");
   myTree->Branch("NgenZs",&nEvent.NgenZs,"NgenZs/I");
   myTree->Branch("NgenRecPho",&nEvent.NgenRecPho,"NgenRecPho/I");
   myTree->Branch("NgenLeps",&nEvent.NgenLeps,"NgenLeps/I");
@@ -2331,6 +2336,13 @@ void JZBAnalysis::Analyze() {
     if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
+    
+  int FSRPosLepton1 = 0;
+  int FSRPosLepton2 = 0;
+  for(; PosLepton2 < sortedGoodgLeptons.size(); PosLepton2++) {
+        if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[PosLepton2].charge<0) break;
+  }
+    
   counters[EV].fill("... has at least 2 OS leptons");
   
   float mindiff=-1;
@@ -2872,6 +2884,9 @@ void JZBAnalysis::Analyze() {
 
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
   TLorentzVector s2 = sortedGoodLeptons[PosLepton2].p;
+    
+  TLorentzVector fs1 = sortedGoodgLeptons[FSRPosLepton1].p;
+  TLorentzVector fs2 = sortedGoodgLeptons[FSRPosLepton2].p;
 
   nEvent.met[RAW]=fTR->RawMET;
   nEvent.met[T1PFMET]=fTR->PFType1MET;
@@ -2885,6 +2900,7 @@ void JZBAnalysis::Analyze() {
 
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
+  TLorentzVector FSRpfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
   TLorentzVector type1NoCutsJetVector(0,0,0,0); // same as pf, but type1 corrected
   TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
   nEvent.metPhi[RAW]=0.;//kicked! caloMETvector.Phi();
@@ -2896,6 +2912,7 @@ void JZBAnalysis::Analyze() {
 
   // remove the leptons from PFMET and tcMET
   pfNoCutsJetVector = -pfMETvector - s1 - s2;
+  FSRpfNoCutsJetVector = -pfMETvector - fs1 - fs2;
   type1NoCutsJetVector = -type1METvector - s1 - s2;
   tcNoCutsJetVector = -tcMETvector - s1 - s2;
 
@@ -2910,6 +2927,8 @@ void JZBAnalysis::Analyze() {
   nEvent.jzb[PFJZB] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
   nEvent.sjzb[PFJZB] = GausRandom(nEvent.jzb[PFJZB]+3.9,7); // to be used with pfMET
 
+  nEvent.FSRjzb = pfNoCutsJetVector.Pt() - (fs1+fs2).Pt();
+    
   nEvent.dphi_sumJetVSZ[RECOILJZB] = 0.; // kicked recoil.DeltaPhi(s1+s2);
   nEvent.sumJetPt[RECOILJZB] = 0.;//kicked recoil.Pt(); 
   nEvent.jzb[RECOILJZB] = 0.;//kicked recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
@@ -3732,16 +3751,16 @@ void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lept
 
 
 bool JZBAnalysis::ShouldPhotonBeMerged(lepton &photon, float dR) {
-  if(photon.iso<0) return false; // the photon has already been used
+  if(photon.iso<0.0) return false; // the photon has already been used
   
   // we we can specify all criteria we want to use. E.g. we can make a difference between very low pt photons (as in Higgs-> ZZ) and so on. 
   
-  if(photon.p.Pt()>2 && photon.p.Pt()<4) { // very low pt photons (>2 GeV)
-    if(dR<0.07) return true;
-  }
+//  if(photon.p.Pt()>2 && photon.p.Pt()<4) { // very low pt photons (>2 GeV)
+//    if(dR<0.07) return true;
+//  }
   
   if(photon.p.Pt()>4) { // all other photons (>4 GeV)
-    if(dR>0.07 && dR<0.5) return true;
+    if(dR>0.1 && dR<0.5) return true;
   }
   
   return false;
