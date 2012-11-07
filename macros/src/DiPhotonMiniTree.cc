@@ -100,6 +100,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("event_PUOOTnumInteractionsEarly",&event_PUOOTnumInteractionsEarly,"event_PUOOTnumInteractionsEarly/I");
   OutputTree[i]->Branch("event_PUOOTnumInteractionsLate",&event_PUOOTnumInteractionsLate,"event_PUOOTnumInteractionsLate/I");
   OutputTree[i]->Branch("event_nRecVtx",&event_nRecVtx,"event_nRecVtx/I");
+  OutputTree[i]->Branch("event_pass12whoisrcone",&event_pass12whoisrcone,"event_pass12whoisrcone/I");
 
   OutputTree[i]->Branch("event_CSCTightHaloID",&event_CSCTightHaloID,"event_CSCTightHaloID/I");
   OutputTree[i]->Branch("event_NMuons",&event_NMuons,"event_NMuons/I");
@@ -441,7 +442,7 @@ void DiPhotonMiniTree::Analyze(){
       if (sel_cat==8 || sel_cat==13) passing = PhotonSelection(fTR,passing,"invert_sieie_cut"); // sieie sideband cat8
       else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // no comb iso selection
       else if (sel_cat==6) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // DY no combiso with mass cut for eff area cat6 
-      else if (sel_cat==12) passing=passing;
+      else if (sel_cat==5 || sel_cat==12) passing=passing;
       else passing=PhotonSelection(fTR,passing);
 
 //      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
@@ -513,6 +514,8 @@ void DiPhotonMiniTree::Analyze(){
       FillLead(passing.at(0));
       FillTrail(passing.at(1));
       bool dofill=true;
+
+      if (sel_cat==12) event_pass12whoisrcone=pass12_whoisrcone;
 
       if (sel_cat==5 || (sel_cat==12 && pass12_whoisrcone==0)) {
 	  isolations_struct rcone_isos;
@@ -1666,6 +1669,7 @@ void DiPhotonMiniTree::FillMuonInfo(int index){
 
 void DiPhotonMiniTree::ResetVars(){
 
+  event_pass12whoisrcone = -999;
   dipho_mgg_photon = -999;
   dipho_mgg_newCorr = -999;
   dipho_mgg_newCorrLocal = -999;

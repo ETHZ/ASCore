@@ -174,6 +174,7 @@ private:
   Int_t event_PUOOTnumInteractionsEarly;
   Int_t event_PUOOTnumInteractionsLate;
   Int_t event_nRecVtx;
+  Int_t event_pass12whoisrcone;
   
   Int_t event_CSCTightHaloID;
   Int_t event_NMuons;
