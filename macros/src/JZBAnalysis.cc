@@ -60,6 +60,7 @@ public:
   float iso2;
   bool  isConv1; // Photon conversion flag
   bool  isConv2;
+  float FSRjzb;
 
   float genFSRmll[30];
   float genFSRmllg[30];
@@ -628,6 +629,7 @@ void nanoEvent::reset()
   iso2=0;
   isConv1 = false;
   isConv2 = false;
+  FSRjzb=0;
   
   NgenZs=0;
   NgenRecPho=0;
@@ -1354,6 +1356,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
   myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
 
+  myTree->Branch("FSRjzb",&nEvent.FSRjzb,"FSRjzb/F");
   myTree->Branch("NgenZs",&nEvent.NgenZs,"NgenZs/I");
   myTree->Branch("NgenRecPho",&nEvent.NgenRecPho,"NgenRecPho/I");
   myTree->Branch("NgenLeps",&nEvent.NgenLeps,"NgenLeps/I");
@@ -2439,6 +2442,13 @@ void JZBAnalysis::Analyze() {
     if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
+  
+  int FSRPosLepton1 = 0;
+  int FSRPosLepton2 = 0;
+  for(; PosLepton2 < sortedGoodgLeptons.size(); PosLepton2++) {
+    if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[PosLepton2].charge<0) break; 	 
+  }
+  
   counters[EV].fill("... has at least 2 OS leptons");
   
   float mindiff=-1;
@@ -3026,6 +3036,9 @@ void JZBAnalysis::Analyze() {
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
   TLorentzVector s2 = sortedGoodLeptons[PosLepton2].p;
 
+  TLorentzVector fs1 = sortedGoodgLeptons[FSRPosLepton1].p;
+  TLorentzVector fs2 = sortedGoodgLeptons[FSRPosLepton2].p;
+  
   nEvent.met[RAW]=fTR->RawMET;
   nEvent.met[T1PFMET]=fTR->PFType1MET;
   nEvent.met[TCMET]=fTR->TCMET;
@@ -3037,7 +3050,8 @@ void JZBAnalysis::Analyze() {
   nEvent.met[4] = nEvent.fact * nEvent.met[4];
 
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
-  TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
+  TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered)
+  TLorentzVector FSRpfNoCutsJetVector(0,0,0,0);
   TLorentzVector type1NoCutsJetVector(0,0,0,0); // same as pf, but type1 corrected
   TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
   nEvent.metPhi[RAW]=0.;//kicked! caloMETvector.Phi();
@@ -3049,6 +3063,7 @@ void JZBAnalysis::Analyze() {
 
   // remove the leptons from PFMET and tcMET
   pfNoCutsJetVector = -pfMETvector - s1 - s2;
+  FSRpfNoCutsJetVector = -pfMETvector - fs1 - fs2;
   type1NoCutsJetVector = -type1METvector - s1 - s2;
   tcNoCutsJetVector = -tcMETvector - s1 - s2;
 
@@ -3063,6 +3078,8 @@ void JZBAnalysis::Analyze() {
   nEvent.jzb[PFJZB] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
   nEvent.sjzb[PFJZB] = GausRandom(nEvent.jzb[PFJZB]+3.9,7); // to be used with pfMET
 
+  nEvent.FSRjzb = FSRpfNoCutsJetVector.Pt() - (fs1+fs2).Pt();
+  
   nEvent.dphi_sumJetVSZ[RECOILJZB] = 0.; // kicked recoil.DeltaPhi(s1+s2);
   nEvent.sumJetPt[RECOILJZB] = 0.;//kicked recoil.Pt(); 
   nEvent.jzb[RECOILJZB] = 0.;//kicked recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
