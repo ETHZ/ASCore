@@ -223,6 +223,8 @@ public:
 
         void makeAllClosureTests();
 	void makeIntMCClosure(vector<int>, TString, int region = 0);
+	void makeAllClosureTestsTTW();
+	void makeIntMCClosureTTW(vector<int> samples, TString filename, int reg);
 	// void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
 
 	void makeTTbarClosure();
@@ -332,6 +334,7 @@ public:
 	vector<int> fEleHadData;  // EG data samples
 	vector<int> fHighPtData;  // All high pt triggered data
 	vector<int> fLowPtData;   // All lepton cross HT triggered data
+	vector<int> fClosureSamples;
 
 	TLatex *fLatex;
 	
