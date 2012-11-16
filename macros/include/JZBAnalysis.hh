@@ -57,6 +57,7 @@ public:
   int DetermineFlavor(bool, TreeReader*);
   bool ShouldPhotonBeMerged(lepton &photon, float dR);
   int ExtractFileNumber(string fileName);
+  float GetBWeight(int JetFlavor, float JetPt, float JetEta);
 
   string outputFileName_; // public name of the output file name
 
@@ -90,6 +91,9 @@ private:
   bool fmakeSmall;
   int fFile;
 
+  TFile *CSV_CorrectionFile;
+  TH2F *CSV_EfficiencyCorrection;
+  TH2F *CSV_MisTagCorrection;
   std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths;
 
   TRandom* rand_;
