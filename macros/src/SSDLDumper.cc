@@ -5103,7 +5103,11 @@ bool SSDLDumper::isLooseElectron(int ele){
 	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
-
+	if (gTTWZ) {
+		if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.949) return false;
+		if(fabs(ElEta[ele]) > 0.8   && fabs(ElEta[ele]) < 1.479 && ElMVAIDTrig[ele] < 0.921) return false;
+		if(fabs(ElEta[ele]) > 1.479 && fabs(ElEta[ele]) < 2.5   && ElMVAIDTrig[ele] < 0.956) return false;
+	}
 	if(ElIsGoodTriggerEl[ele] != 1) return false;
 	// if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	
