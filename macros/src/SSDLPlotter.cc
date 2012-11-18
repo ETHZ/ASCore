@@ -293,8 +293,8 @@ void SSDLPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	fillRatios(fMuData,    fEGData, 0);
-	fillRatios(fMCBGMuEnr, fMCBG,   1);
+	// fillRatios(fMuData,    fEGData, 0);
+	// fillRatios(fMCBGMuEnr, fMCBG,   1);
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -316,8 +316,8 @@ void SSDLPlotter::doAnalysis(){
 	// makeRatioPlots(Elec);
 	// make2DRatioPlots(Muon);
 	// make2DRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Elec);
 	
 	// makeFRvsPtPlots(Muon, SigSup);
 	// makeFRvsPtPlots(Elec, SigSup);
@@ -330,14 +330,14 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 	
-	storeWeightedPred();
+	// storeWeightedPred();
 
 	// makeAllIntPredictions();
 	// makeAllClosureTests();
 	// makeDiffPrediction();
 
-	makeTTWIntPredictions();
-	makeTTWDiffPredictions();
+	// makeTTWIntPredictions();
+	// makeTTWDiffPredictions();
 
 	// printAllYieldTables();
 	
@@ -4231,7 +4231,7 @@ void SSDLPlotter::make2DRatioPlots(gChannel chan){
 }
 void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	TString name;
-	if(chan == Muon)     name = "Muons";
+	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
 	fOutputSubDir = "Ratios/" + name + "/NTightLoose/";
@@ -4239,17 +4239,10 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 
-	vector<int> datasamples;
 	vector<int> mcsamples;
 
-	if(chan == Muon){
-		datasamples = fMuData;
-		mcsamples   = fMCBGMuEnr;
-	}
-	if(chan == Elec){
-		datasamples = fEGData;
-		mcsamples   = fMCBG;
-	}
+	if(chan == Muon) mcsamples   = fMCBGMuEnr;
+	if(chan == Elec) mcsamples   = fMCBG;
 
 	// Customization
 	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "p_{T}(Closest Jet) (GeV)", "p_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
@@ -4257,26 +4250,78 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	for(size_t i = 0; i < gNRatioVars; ++i){
 		THStack *hsntight = new THStack(Form("NTight_%s", FRatioPlots::var_name[i].Data()), "Stack of tight");
 		THStack *hsnloose = new THStack(Form("NLoose_%s", FRatioPlots::var_name[i].Data()), "Stack of loose");
+
+		TH1D *hntight_qcd  = new TH1D("NTight_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hntight_ttj  = new TH1D("NTight_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hntight_ewk  = new TH1D("NTight_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hntight_rare = new TH1D("NTight_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hntight_db   = new TH1D("NTight_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+
+		TH1D *hnloose_qcd  = new TH1D("NLoose_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hnloose_ttj  = new TH1D("NLoose_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hnloose_ewk  = new TH1D("NLoose_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hnloose_rare = new TH1D("NLoose_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hnloose_db   = new TH1D("NLoose_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+
+		hntight_qcd ->SetFillColor(kYellow-4);
+		hntight_db  ->SetFillColor(kSpring-9);
+		hntight_ewk ->SetFillColor(kAzure+8);
+		hntight_ttj ->SetFillColor(kAzure-5);
+		hntight_rare->SetFillColor(kGreen+1);
+
+		hnloose_qcd ->SetFillColor(kYellow-4);
+		hnloose_db  ->SetFillColor(kSpring-9);
+		hnloose_ewk ->SetFillColor(kAzure+8);
+		hnloose_ttj ->SetFillColor(kAzure-5);
+		hnloose_rare->SetFillColor(kGreen+1);
+
 		const unsigned int nmcsamples = mcsamples.size();
 
-		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
 		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		leg->AddEntry(hntight_qcd,  "QCD",       "f");
+		leg->AddEntry(hntight_ewk,  "Single boson", "f");
+		leg->AddEntry(hntight_ttj,  "Top",       "f");
+		leg->AddEntry(hntight_db,   "Diboson",   "f");
+		leg->AddEntry(hntight_rare, "Rare SM",   "f");
+
+		// Fill tight/loose yields:
 		for(size_t j = 0; j < mcsamples.size(); ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			FRatioPlots *rat;
 			if(chan == Muon) rat = &S->ratioplots[0];
 			if(chan == Elec) rat = &S->ratioplots[1];
-			rat->ntight[i]->SetFillColor(S->color);
-			rat->nloose[i]->SetFillColor(S->color);
 			float scale = fLumiNorm / S->getLumi();
 			rat->ntight[i]->Scale(scale);
 			rat->nloose[i]->Scale(scale);
-			hsntight->Add(rat->ntight[i]);
-			hsnloose->Add(rat->nloose[i]);
 
-			if(rat->nloose[i]->Integral() < 1 ) continue;
-			leg->AddEntry(rat->ntight[i], S->sname.Data(), "f");
+			// if(rat->nloose[i]->Integral() < 1 ) continue;
+
+			if ( S->getType() == 1) hntight_qcd ->Add(rat->ntight[i]);
+			if ( S->getType() == 2) hntight_ttj ->Add(rat->ntight[i]);
+			if ( S->getType() == 3) hntight_ewk ->Add(rat->ntight[i]);
+			if ( S->getType() == 4) hntight_rare->Add(rat->ntight[i]);
+			if ( S->getType() == 5) hntight_db  ->Add(rat->ntight[i]);
+
+			if ( S->getType() == 1) hnloose_qcd ->Add(rat->nloose[i]);
+			if ( S->getType() == 2) hnloose_ttj ->Add(rat->nloose[i]);
+			if ( S->getType() == 3) hnloose_ewk ->Add(rat->nloose[i]);
+			if ( S->getType() == 4) hnloose_rare->Add(rat->nloose[i]);
+			if ( S->getType() == 5) hnloose_db  ->Add(rat->nloose[i]);
+
+			// leg->AddEntry(rat->ntight[i], S->sname.Data(), "f");
 		}
+		hsntight->Add(hntight_qcd );
+		hsntight->Add(hntight_ttj );
+		hsntight->Add(hntight_ewk );
+		hsntight->Add(hntight_rare);
+		hsntight->Add(hntight_db  );
+
+		hsnloose->Add(hnloose_qcd );
+		hsnloose->Add(hnloose_ttj );
+		hsnloose->Add(hnloose_ewk );
+		hsnloose->Add(hnloose_rare);
+		hsnloose->Add(hnloose_db  );
+
 		hsntight->Draw();
 		hsntight->GetXaxis()->SetTitle(axis_name[i]);
 		hsnloose->Draw();
@@ -4299,10 +4344,118 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 		hsnloose->Draw("hist");
 		leg->Draw();
 
-		Util::PrintNoEPS(c_tight, Form("NTight_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir, fOutputFile);
-		Util::PrintNoEPS(c_loose, Form("NLoose_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir, fOutputFile);	
+		Util::PrintPDF(c_tight, Form("NTight_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir);
+		Util::PrintPDF(c_loose, Form("NLoose_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir);	
 		delete hsntight, hsnloose, c_tight, c_loose, leg;
 	}
+
+	// Lepton Pt binning
+	THStack *hsntight = new THStack(Form("NTight_Pt"), "Stack of tight");
+	THStack *hsnloose = new THStack(Form("NLoose_Pt"), "Stack of loose");
+
+	TH1D *hntight_qcd  = new TH1D("NTight_QCD_Pt"   , "NTight Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hntight_ttj  = new TH1D("NTight_TTjets_Pt", "NTight Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hntight_ewk  = new TH1D("NTight_EWK_Pt"   , "NTight Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hntight_rare = new TH1D("NTight_Rare_Pt"  , "NTight Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hntight_db   = new TH1D("NTight_DB_Pt"    , "NTight Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hnloose_qcd  = new TH1D("NLoose_QCD_Pt"   , "NLoose Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hnloose_ttj  = new TH1D("NLoose_TTjets_Pt", "NLoose Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hnloose_ewk  = new TH1D("NLoose_EWK_Pt"   , "NLoose Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hnloose_rare = new TH1D("NLoose_Rare_Pt"  , "NLoose Pt", getNFPtBins(chan), getFPtBins(chan));
+	TH1D *hnloose_db   = new TH1D("NLoose_DB_Pt"    , "NLoose Pt", getNFPtBins(chan), getFPtBins(chan));
+
+	hntight_qcd ->SetFillColor(kYellow-4);
+	hntight_db  ->SetFillColor(kSpring-9);
+	hntight_ewk ->SetFillColor(kAzure+8);
+	hntight_ttj ->SetFillColor(kAzure-5);
+	hntight_rare->SetFillColor(kGreen+1);
+
+	hnloose_qcd ->SetFillColor(kYellow-4);
+	hnloose_db  ->SetFillColor(kSpring-9);
+	hnloose_ewk ->SetFillColor(kAzure+8);
+	hnloose_ttj ->SetFillColor(kAzure-5);
+	hnloose_rare->SetFillColor(kGreen+1);
+
+	const unsigned int nmcsamples = mcsamples.size();
+
+	TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+	leg->AddEntry(hntight_qcd,  "QCD",       "f");
+	leg->AddEntry(hntight_ewk,  "Single boson", "f");
+	leg->AddEntry(hntight_ttj,  "Top",       "f");
+	leg->AddEntry(hntight_db,   "Diboson",   "f");
+	leg->AddEntry(hntight_rare, "Rare SM",   "f");
+
+	// Fill tight/loose yields:
+	for(size_t j = 0; j < mcsamples.size(); ++j){
+		Sample *S = fSamples[mcsamples[j]];
+
+		Channel *C;
+		if(chan == Muon) C = &S->region[Baseline][HighPt].mm;
+		if(chan == Elec) C = &S->region[Baseline][HighPt].ee;
+		TH1D *ntight = C->fntight->ProjectionX();
+		TH1D *nloose = C->fnloose->ProjectionX();
+
+
+		float scale = fLumiNorm / S->getLumi();
+		ntight->Scale(scale);
+		nloose->Scale(scale);
+
+		// if(rat->nloose[i]->Integral() < 1 ) continue;
+
+		if ( S->getType() == 1) hntight_qcd ->Add(ntight);
+		if ( S->getType() == 2) hntight_ttj ->Add(ntight);
+		if ( S->getType() == 3) hntight_ewk ->Add(ntight);
+		if ( S->getType() == 4) hntight_rare->Add(ntight);
+		if ( S->getType() == 5) hntight_db  ->Add(ntight);
+
+		if ( S->getType() == 1) hnloose_qcd ->Add(nloose);
+		if ( S->getType() == 2) hnloose_ttj ->Add(nloose);
+		if ( S->getType() == 3) hnloose_ewk ->Add(nloose);
+		if ( S->getType() == 4) hnloose_rare->Add(nloose);
+		if ( S->getType() == 5) hnloose_db  ->Add(nloose);
+
+		// leg->AddEntry(rat->ntight[i], S->sname.Data(), "f");
+	}
+	hsntight->Add(hntight_qcd );
+	hsntight->Add(hntight_ttj );
+	hsntight->Add(hntight_ewk );
+	hsntight->Add(hntight_rare);
+	hsntight->Add(hntight_db  );
+
+	hsnloose->Add(hnloose_qcd );
+	hsnloose->Add(hnloose_ttj );
+	hsnloose->Add(hnloose_ewk );
+	hsnloose->Add(hnloose_rare);
+	hsnloose->Add(hnloose_db  );
+
+	hsntight->Draw();
+	if(chan == Muon) hsntight->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
+	if(chan == Elec) hsntight->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
+	hsnloose->Draw();
+	if(chan == Muon) hsnloose->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
+	if(chan == Elec) hsnloose->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
+
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	TCanvas *c_tight = new TCanvas("NTight_Pt", "Tight Stack", 0, 0, 800, 600);
+	TCanvas *c_loose = new TCanvas("NLoose_Pt", "Loose Stack", 0, 0, 800, 600);
+
+
+	c_tight->cd();
+	gPad->SetLogy();
+	hsntight->Draw("hist");
+	leg->Draw();
+
+	c_loose->cd();
+	gPad->SetLogy();
+	hsnloose->Draw("hist");
+	leg->Draw();
+
+	Util::PrintPDF(c_tight, "NTight_Pt", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_loose, "NLoose_Pt", fOutputDir + fOutputSubDir);	
+	delete hsntight, hsnloose, c_tight, c_loose, leg;
 	fOutputSubDir = "";
 }
 
