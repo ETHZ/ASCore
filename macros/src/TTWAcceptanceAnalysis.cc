@@ -33,14 +33,14 @@ void TTWAcceptanceAnalysis::Analyze(){
 	std::vector<OrderPair> lmOrdered;
 	
 	for (int i = 0; i < fTR->NGenLeptons; ++i) { // loop on muons
-		bool tau = ((abs(fTR->GenLeptonMID[i]) == 15) && (abs(fTR->GenLeptonGMID[i] == 24 || abs(fTR->GenLeptonGMID[i] == 6))));
-		if(abs(fTR->GenLeptonMID[i]) != 6 && abs(fTR->GenLeptonMID[i]) != 24 && !tau) continue;
+		bool tau = ((abs(fTR->GenLeptonMID[i]) == 15) && (abs(fTR->GenLeptonGMID[i]) == 24 || abs(fTR->GenLeptonGMID[i]) == 23 || abs(fTR->GenLeptonGMID[i]) == 6) );
+		if(abs(fTR->GenLeptonMID[i]) != 6 && abs(fTR->GenLeptonMID[i]) != 24 && abs(fTR->GenLeptonMID[i]) != 23 && !tau) continue;
 		if(fTR->GenLeptonID[i] ==  13) lmOrdered.push_back(make_pair(i,fTR->GenLeptonPt[i]));
 		if(fTR->GenLeptonID[i] == -13) lpOrdered.push_back(make_pair(i,fTR->GenLeptonPt[i]));
 	}
 	for (int i = 0; i < fTR->NGenLeptons; ++i) { // loop on electrons
-		bool tau = ((abs(fTR->GenLeptonMID[i]) == 15) && (abs(fTR->GenLeptonGMID[i] == 24 || abs(fTR->GenLeptonGMID[i] == 6))));
-		if(abs(fTR->GenLeptonMID[i]) != 6 && abs(fTR->GenLeptonMID[i]) != 24 && !tau) continue;
+		bool tau = ((abs(fTR->GenLeptonMID[i]) == 15) && (abs(fTR->GenLeptonGMID[i]) == 24 || abs(fTR->GenLeptonGMID[i]) == 23 || abs(fTR->GenLeptonGMID[i]) == 6) );
+		if(abs(fTR->GenLeptonMID[i]) != 6 && abs(fTR->GenLeptonMID[i]) != 24 && abs(fTR->GenLeptonMID[i]) != 23 && !tau) continue;
 		if(fTR->GenLeptonID[i] ==  11) lmOrdered.push_back(make_pair(i,fTR->GenLeptonPt[i]));
 		if(fTR->GenLeptonID[i] == -11) lpOrdered.push_back(make_pair(i,fTR->GenLeptonPt[i]));
 	}
