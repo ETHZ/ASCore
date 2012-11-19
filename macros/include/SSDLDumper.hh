@@ -81,23 +81,18 @@ public:
 		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
-		TTJets1, TTJets2, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
+		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
 		GJets200, GJets400, WW,
 		WZ,ZZ,
-		// GVJets,
-		TTbarH, TTbarW, TTbarZ, TTbarG, DPSWW, // WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		TTbarH, TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
 		WpWp, WmWm,
-		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
-	//	QCDMuEnr15,
-	//	EMEnr20, 
-// EMEnr30,
-		// QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
-		// QCD1000, QCD1400, QCD1800,
+		QCDMuEnr15,
+		QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		gNSAMPLES
 	};
 	enum gHiLoSwitch{
@@ -187,6 +182,12 @@ public:
 		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
+		
+		// duplicate for only ttbar use
+		TH2D *fntight_ttbar; // pt vs eta
+		TH2D *fnloose_ttbar; 
+		TH2D *pntight_ttbar; // pt vs eta
+		TH2D *pnloose_ttbar;
 		
 		TEfficiency *fratio_pt;
 		TEfficiency *pratio_pt;
@@ -319,6 +320,8 @@ public:
 		TH1D *hsiesie[gNSels];
 		TH1D *hdphi[gNSels];
 		TH1D *hdeta[gNSels];
+		TH1D *hmvaid[gNSels];
+		TH1D *hmedwp[gNSels];
 		//TH1D *hid_pt[gNSels][gNMuFPtBins];
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
@@ -435,7 +438,7 @@ public:
 			    (sname) == "EMEnr20"    ||
 			    (sname) == "EMEnr30"    ) return 1;
 			if( (sname.Contains("SingleT")) ||
-			    (sname.Contains("TTJets") ) )return 2;
+			    (sname)  =="TTJets"  ) return 2;
 			if( (sname.Contains("DYJets")) ||
 			    (sname.Contains("GJets"))  ||
 			    (sname) == "WJets" )   return 3;
@@ -443,6 +446,7 @@ public:
 			    (sname) == "TTbarW"    ||
 			    (sname) == "TTbarZ"    ||
 			    (sname) == "TTbarG"    ||
+			    (sname) == "TbZ"       ||
 			    (sname) == "DPSWW"     ||
 			    (sname) == "WWZ"       ||
 			    (sname) == "WZZ"       ||
@@ -463,7 +467,7 @@ public:
 		}
 		int getProc(){ // used for binned samples
 			if(datamc == 0)                                 return 0;
-			if(sname.Contains("TTJets") )                   return 1;
+			if(sname == "TTJets" )                          return 1;
 			if(sname.Contains("SingleT"))                   return 2;
 			if(sname == "WJets" )                           return 3;
 			if(sname.Contains("DYJets"))                    return 4;
@@ -488,6 +492,7 @@ public:
 			   sname == "MuEnr15"    ||
 			   sname == "EMEnr20"    ||
 			   sname == "EMEnr30")                          return 17;
+			if(sname == "TbZ")                              return 18;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
@@ -840,6 +845,10 @@ public:
 	float       fSETree_eta2;
 	float		fSETree_PFIso1;
 	float		fSETree_PFIso2;
+	float		fSETree_MVAID1;
+	float		fSETree_MVAID2;
+	float		fSETree_medWP1;
+	float		fSETree_medWP2;
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
