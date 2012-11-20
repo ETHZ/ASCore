@@ -212,7 +212,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("NVrtx",         &fTnvrtx,     "NVrtx/I");
 	fAnalysisTree->Branch("PUWeight",      &fTpuweight,  "PUWeight/F");
 
-	
 	// single-muon properties
 	fAnalysisTree->Branch("NMus"          ,&fTnqmus,          "NMus/I");
 	fAnalysisTree->Branch("IsSignalMuon"  ,&fTIsSignalMuon,   "IsSignalMuon[NMus]/I");
@@ -220,6 +219,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuEta"         ,&fTmueta,          "MuEta[NMus]/F");
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
+	fAnalysisTree->Branch("MuDetIso"      ,&fTmudetiso,       "MuDetIso[NMus]/F");
 	fAnalysisTree->Branch("MuPFIso"       ,&fTmupfiso,        "MuPFIso[NMus]/F");
 	fAnalysisTree->Branch("MuPFChIso"     ,&fTmupfchiso,      "MuPFChIso[NMus]/F");
 	fAnalysisTree->Branch("MuPFNeIso"     ,&fTmupfneiso,      "MuPFNeIso[NMus]/F");
@@ -250,6 +250,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElD0Err",                &fTElD0Err,             "ElD0Err[NEls]/F");
 	fAnalysisTree->Branch("ElDz",                   &fTEldz,                "ElDz[NEls]/F");
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
+	fAnalysisTree->Branch("ElDetIso",               &fTElDetIso,            "ElDetIso[NEls]/F");
 	fAnalysisTree->Branch("ElPFIso",                &fTElPFIso,             "ElPFIso[NEls]/F");
 	fAnalysisTree->Branch("ElPFChIso",              &fTElPFchiso,           "ElPFChIso[NEls]/F");
 	fAnalysisTree->Branch("ElPFNeIso",              &fTElPFneiso,           "ElPFNeIso[NEls]/F");
@@ -264,8 +265,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElSigmaIetaIeta",        &fTElSigmaIetaIeta,     "ElSigmaIetaIeta[NEls]/F");
 	fAnalysisTree->Branch("ElHoverE",               &fTElHoverE,            "ElHoverE[NEls]/F");
 	fAnalysisTree->Branch("ElEPthing",              &fTElEPthing,           "ElEPthing[NEls]/F");
-	// MARC fAnalysisTree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
-	// MARC fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_LooseWP",      &fTElIsGoodElId_LooseWP,   "ElIsGoodElId_LooseWP[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_MediumWP",     &fTElIsGoodElId_MediumWP,  "ElIsGoodElId_MediumWP[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodTriggerEl",     &fTElIsGoodTriggerEl,  "ElIsGoodTrigger[NEls]/I");
@@ -299,8 +298,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,   "JetEnergy[NJets]/F");
 	fAnalysisTree->Branch("JetCSVBTag",    &fTJetbtag1,    "JetCSVBTag[NJets]/F");
 	fAnalysisTree->Branch("JetProbBTag",   &fTJetbtag2,    "JetProbBTag[NJets]/F");
-	// MARC fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
-	// MARC fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
 	fAnalysisTree->Branch("JetJEC",        &fTJetJEC,      "JetJEC[NJets]/F");
 	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
@@ -473,6 +470,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuphi   [i] = fTR->MuPhi     [index];
 		fTmucharge[i] = fTR->MuCharge  [index];
 		fTmupfiso [i] = MuPFIso(index);
+		fTmudetiso[i] = fTR->MuRelIso03[index];
 		fTmupfchiso[i] = fTR->MuPfIsoR03ChHad[index] / fTR->MuPt[index];
 		fTmupfneiso[i] = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] ) / fTR->MuPt[index];
 		fTmuradiso[i] = MuRadIso(index);
@@ -527,6 +525,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTEldz              [ind] = fTR->ElDzPV                  [elindex];
 		fTElDzErr           [ind] = fTR->ElDzE                   [elindex];
 		fTElPFIso           [ind] = ElPFIso(elindex);
+		fTElDetIso          [ind] = relElIso(elindex);
 		fTElPFchiso         [ind] = fTR->ElEventelPFIsoValueCharged03PFIdStandard[elindex] / fTR->ElPt[elindex];
 		double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[elindex] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[elindex];
 		double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[elindex]);
@@ -679,6 +678,7 @@ void SSDLAnalysis::ResetTree(){
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
 		fTmupfiso       [i] = -999.99;
+		fTmudetiso      [i] = -999.99;
 		fTmupfchiso     [i] = -999.99;
 		fTmupfneiso     [i] = -999.99;
 		fTmuradiso      [i] = -999.99;
@@ -710,6 +710,7 @@ void SSDLAnalysis::ResetTree(){
 		fTElD0Err           [i] = -999.99;
 		fTEldz              [i] = -999.99;
 		fTElDzErr           [i] = -999.99;
+		fTElDetIso          [i] = -999.99;
 		fTElPFIso           [i] = -999.99;
 		fTElPFchiso         [i] = -999.99;
 		fTElPFneiso         [i] = -999.99;

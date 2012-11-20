@@ -153,6 +153,7 @@ private:
 	float fTmupt          [fMaxNmus];
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
+	float fTmudetiso      [fMaxNmus];
 	float fTmupfiso       [fMaxNmus];
 	float fTmupfchiso     [fMaxNmus];
 	float fTmupfneiso     [fMaxNmus];
@@ -184,6 +185,7 @@ private:
 	float fTElD0Err          [fMaxNeles];
 	float fTEldz             [fMaxNeles];
 	float fTElDzErr          [fMaxNeles];
+	float fTElDetIso         [fMaxNeles];
 	float fTElPFIso          [fMaxNeles];
 	float fTElPFchiso        [fMaxNeles];
 	float fTElPFneiso        [fMaxNeles];
