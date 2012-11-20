@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.3 2012/04/12 08:46:34 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.4 2012/04/16 13:14:08 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -170,10 +170,11 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
    // Define the input variables that shall be used for the MVA training
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
-   factory->AddVariable( "pT1"      , "Lead Lepton p_{T}", "GeV", 'F');
-   factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
-   factory->AddVariable( "pT2"      , "Sublead Lepton p_{T}", "GeV", 'F');
+   //factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
+   //factory->AddVariable( "TMath::Max(pT1,pT2)"      , "Lead Lepton p_{T}", "GeV", 'F');
    factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
+   //factory->AddVariable( "M3"       , "M_{3}", "GeV", 'F');
+   factory->AddVariable( "TMath::Min(pT1,pT2)"      , "Sublead Lepton p_{T}", "GeV", 'F');
    //factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
    //factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
    //factory->AddVariable( "NJ"       , "N Jets", "", 'I');
@@ -202,7 +203,7 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
       TFile *input(0);
       //TString fname = "../macros/tmva_example.root";
       //TString fname = "opt_ttW_Apr10_Iso005_NoZVeto_jet20.root";
-      TString fname = "opt_ttW_Apr12_Iso005_NoZVeto_jet20_new.root";
+      TString fname = "opt_ttW_Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization.root";
       //TString fname = "opt_ttW_" + selectionName + ".root";
       if (!gSystem->AccessPathName( fname )) {
          input = TFile::Open( fname ); // check if file in local directory exists
@@ -220,9 +221,14 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
       
       TTree* opt_tree = (TTree*)input->Get("tree_opt");
 
-      
-      TTree *signal     = (TTree*)opt_tree->CopyTree("SName==\"TTbarW\"");
-      TTree *background = (TTree*)opt_tree->CopyTree("SName==\"TTJets\" || SName==\"DYJets\" || SName==\"WZTo3LNu\"");
+      TFile* signalFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/TTbarW_Yields.root");      
+      TTree *signal     = (TTree*)signalFile->Get("SigEvents");
+
+      TChain* background = new TChain("SigEvents");
+      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/TTJets_Yields.root");
+      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/WZTo3LNu_Yields.root");
+
+      //TTree *background = (TTree*)opt_tree->CopyTree("SName==\"TTJets\" || SName==\"DYJets\" || SName==\"WZTo3LNu\"");
       //TTree *background = (TTree*)opt_tree->CopyTree("SName==\"DYJets\"");
 
 
@@ -277,24 +283,18 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
    // expression need to exist in the original TTree)
    //    for signal    : factory->SetSignalWeightExpression("weight1*weight2");
    //    for background: factory->SetBackgroundWeightExpression("weight1*weight2");
-   factory->SetSignalWeightExpression("eventWeight");
-   factory->SetBackgroundWeightExpression("eventWeight");
+   //factory->SetSignalWeightExpression("eventWeight");
+   factory->SetBackgroundWeightExpression("1./SLumi");
 
    // Apply additional cuts on the signal and background samples (can be different)
-   float ptLep1_min_presel = 20.;
-   float ptLep2_min_presel = 20.;
-   int nJ_min_presel = 3.;
-   int nbJ_min_presel = 1.;
-   char presel[500];
-   sprintf( presel, "NJ>=%d && NbJ>=%d && pT1>%f && pT2>%f", nJ_min_presel, nbJ_min_presel, ptLep1_min_presel, ptLep2_min_presel );
 
-   TCut mycuts = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
-   TCut mycutb = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycutb = "abs(var1)<0.5";
+   TCut mycuts = "NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+   TCut mycutb = "NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycutb = "abs(var1)<0.5";
 
-   if( btagMed_presel_ ) {
-     mycuts += "NbJmed>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
-     mycutb += "NbJmed>0"; // for example: TCut mycutb = "abs(var1)<0.5";
-   }
+   //if( btagMed_presel_ ) {
+   //  mycuts += "NbJmed>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+   //  mycutb += "NbJmed>0"; // for example: TCut mycutb = "abs(var1)<0.5";
+   //}
 
 
    // tell the factory to use all remaining events in the trees after training for testing:
@@ -320,19 +320,11 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
 
       std::string bookConditions;
       bookConditions = "H:!V:FitMethod=MC";
-      bookConditions += ":VarProp[0]=FMax"; //pt1
-      bookConditions += ":VarProp[1]=FMax"; //MET
-      bookConditions += ":VarProp[2]=FMax"; //pt2
-      bookConditions += ":VarProp[3]=FMax"; //HT
-// factory->AddVariable( "pT1"      , "Lead Lepton p_{T}", "GeV", 'F');
-// factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
-// factory->AddVariable( "pT2"      , "Sublead Lepton p_{T}", "GeV", 'F');
-// factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
-// factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
-// factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
-// factory->AddVariable( "NJ"       , "N Jets", "", 'I');
-      bookConditions += ":EffSel:SampleSize=500000000";
-      //bookConditions += ":EffSel:SampleSize=500000000";
+      bookConditions += ":VarProp[0]=FMax"; //HT
+      bookConditions += ":VarProp[1]=FMax"; //pt2
+
+      bookConditions += ":EffSel:SampleSize=50000000";
+      //bookConditions += ":EffSel:SampleSize=50000";
 
       factory->BookMethod( TMVA::Types::kCuts, "Cuts", bookConditions.c_str() );
       //factory->BookMethod( TMVA::Types::kCuts, "Cuts", 
@@ -555,7 +547,14 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
 
        for( unsigned iCut=0; iCut<cutsMin.size(); ++iCut) {
          TString varName = factory->DefaultDataSetInfo().GetVariableInfo(iCut).GetInternalName();
-         ofs << varName << " "  << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+         if( varName=="TMath_Min_pT1,pT2_") {
+           ofs << "pT1 " << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+           ofs << "pT2 " << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+           found_pT1 = true;
+           found_pT2 = true;
+         } else {
+           ofs << varName << " "  << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+         }
          if( varName=="pT1" ) found_pT1 = true;
          if( varName=="pT2" ) found_pT2 = true;
          if( varName=="NJ" ) found_NJ = true;
