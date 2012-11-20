@@ -490,7 +490,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTmutype   [i] = mu.get_type();
 			fTmumotype [i] = mo.get_type();
 			fTmugmotype[i] = gmo.get_type();
-			
 		} else{
 			fTmuid     [i] = -888;
 			fTmumoid   [i] = -888;
@@ -541,7 +540,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTElGenType  [ind] = el.get_type();
 			fTElGenMType [ind] = emo.get_type();
 			fTElGenGMType[ind] = egmo.get_type();
-			
 		}
 		else{
 			fTElGenID    [ind] = -888;
