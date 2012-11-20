@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Sep 17 20:23:44 2012 by ROOT version 5.32/00
+// Thu Nov 15 15:09:02 2012 by ROOT version 5.32/00
 // from TTree Analysis/AnalysisTree
-// found on file: tautest.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -63,6 +63,7 @@ public :
    Float_t         MuEta[5];   //[NMus]
    Float_t         MuPhi[5];   //[NMus]
    Int_t           MuCharge[5];   //[NMus]
+   Float_t         MuDetIso[5];   //[NMus]
    Float_t         MuPFIso[5];   //[NMus]
    Float_t         MuPFChIso[5];   //[NMus]
    Float_t         MuPFNeIso[5];   //[NMus]
@@ -91,10 +92,13 @@ public :
    Float_t         ElD0Err[5];   //[NEls]
    Float_t         ElDz[5];   //[NEls]
    Float_t         ElDzErr[5];   //[NEls]
+   Float_t         ElDetIso[5];   //[NEls]
    Float_t         ElPFIso[5];   //[NEls]
    Float_t         ElPFChIso[5];   //[NEls]
    Float_t         ElPFNeIso[5];   //[NEls]
    Float_t         ElRadIso[5];   //[NEls]
+   Float_t         ElMVAIDnoTrig[5];   //[NEls]
+   Float_t         ElMVAIDTrig[5];   //[NEls]
    Float_t         ElEcalRecHitSumEt[5];   //[NEls]
    Float_t         ElHcalTowerSumEt[5];   //[NEls]
    Float_t         ElTkSumPt[5];   //[NEls]
@@ -126,18 +130,18 @@ public :
    Float_t         pfMETType1;
    Float_t         pfMETType1Phi;
    Int_t           NJets;
-   Float_t         JetPt[25];   //[NJets]
-   Float_t         JetEta[25];   //[NJets]
-   Float_t         JetPhi[25];   //[NJets]
-   Float_t         JetEnergy[25];   //[NJets]
-   Float_t         JetCSVBTag[25];   //[NJets]
-   Float_t         JetProbBTag[25];   //[NJets]
-   Float_t         JetArea[25];   //[NJets]
-   Float_t         JetJECUncert[25];   //[NJets]
-   Int_t           JetPartonID[25];   //[NJets]
-   Float_t         JetGenPt[25];   //[NJets]
-   Float_t         JetGenEta[25];   //[NJets]
-   Float_t         JetGenPhi[25];   //[NJets]
+   Float_t         JetPt[20];   //[NJets]
+   Float_t         JetEta[20];   //[NJets]
+   Float_t         JetPhi[20];   //[NJets]
+   Float_t         JetEnergy[20];   //[NJets]
+   Float_t         JetCSVBTag[20];   //[NJets]
+   Float_t         JetProbBTag[20];   //[NJets]
+   Float_t         JetArea[20];   //[NJets]
+   Float_t         JetJEC[20];   //[NJets]
+   Int_t           JetPartonID[20];   //[NJets]
+   Float_t         JetGenPt[20];   //[NJets]
+   Float_t         JetGenEta[20];   //[NJets]
+   Float_t         JetGenPhi[20];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -181,6 +185,7 @@ public :
    TBranch        *b_MuEta;   //!
    TBranch        *b_MuPhi;   //!
    TBranch        *b_MuCharge;   //!
+   TBranch        *b_MuDetIso;   //!
    TBranch        *b_MuPFIso;   //!
    TBranch        *b_MuPFChIso;   //!
    TBranch        *b_MuPFNeIso;   //!
@@ -209,10 +214,13 @@ public :
    TBranch        *b_ElD0Err;   //!
    TBranch        *b_ElDz;   //!
    TBranch        *b_ElDzErr;   //!
+   TBranch        *b_ElDetIso;   //!
    TBranch        *b_ElPFIso;   //!
    TBranch        *b_ElPFChIso;   //!
    TBranch        *b_ElPFNeIso;   //!
    TBranch        *b_ElRadIso;   //!
+   TBranch        *b_ElMVAIDnoTrig;   //!
+   TBranch        *b_ElMVAIDTrig;   //!
    TBranch        *b_ElEcalRecHitSumEt;   //!
    TBranch        *b_ElHcalTowerSumEt;   //!
    TBranch        *b_ElTkSumPt;   //!
@@ -251,7 +259,7 @@ public :
    TBranch        *b_JetCSVBTag;   //!
    TBranch        *b_JetProbBTag;   //!
    TBranch        *b_JetArea;   //!
-   TBranch        *b_JetJECUncert;   //!
+   TBranch        *b_JetJEC;   //!
    TBranch        *b_JetPartonID;   //!
    TBranch        *b_JetGenPt;   //!
    TBranch        *b_JetGenEta;   //!
@@ -276,9 +284,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("tautest.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("tautest.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root");
       }
       f->GetObject("Analysis",tree);
 
@@ -368,6 +376,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
    fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
    fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
+   fChain->SetBranchAddress("MuDetIso", MuDetIso, &b_MuDetIso);
    fChain->SetBranchAddress("MuPFIso", MuPFIso, &b_MuPFIso);
    fChain->SetBranchAddress("MuPFChIso", MuPFChIso, &b_MuPFChIso);
    fChain->SetBranchAddress("MuPFNeIso", MuPFNeIso, &b_MuPFNeIso);
@@ -396,10 +405,13 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
    fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
+   fChain->SetBranchAddress("ElDetIso", ElDetIso, &b_ElDetIso);
    fChain->SetBranchAddress("ElPFIso", ElPFIso, &b_ElPFIso);
    fChain->SetBranchAddress("ElPFChIso", ElPFChIso, &b_ElPFChIso);
    fChain->SetBranchAddress("ElPFNeIso", ElPFNeIso, &b_ElPFNeIso);
    fChain->SetBranchAddress("ElRadIso", ElRadIso, &b_ElRadIso);
+   fChain->SetBranchAddress("ElMVAIDnoTrig", ElMVAIDnoTrig, &b_ElMVAIDnoTrig);
+   fChain->SetBranchAddress("ElMVAIDTrig", ElMVAIDTrig, &b_ElMVAIDTrig);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
    fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
    fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
@@ -438,7 +450,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetCSVBTag", JetCSVBTag, &b_JetCSVBTag);
    fChain->SetBranchAddress("JetProbBTag", JetProbBTag, &b_JetProbBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
-   fChain->SetBranchAddress("JetJECUncert", JetJECUncert, &b_JetJECUncert);
+   fChain->SetBranchAddress("JetJEC", JetJEC, &b_JetJEC);
    fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
    fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
    fChain->SetBranchAddress("JetGenEta", JetGenEta, &b_JetGenEta);
