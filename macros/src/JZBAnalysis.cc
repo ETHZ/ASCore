@@ -24,8 +24,8 @@ TRandom3 *r;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
-bool DoExperimentalFSRRecovery = false;
-bool DoFSRStudies=false;
+bool DoExperimentalFSRRecovery = true;
+bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
@@ -3003,7 +3003,7 @@ void JZBAnalysis::Analyze() {
     if(nEvent.Zb40_pfJetGoodNum>0) nEvent.Zb40_alpha=nEvent.Zb40_pfJetGoodPt[1]/nEvent.pt;
     if(nEvent.ZbMikko_pfJetGoodNum>0) nEvent.ZbMikko_alpha=nEvent.ZbMikko_pfJetGoodPt[1]/nEvent.pt;
     nEvent.mpf=1+(type1METvector.Vect()*zVector.Vect())/(zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());
-    nEvent.fake_mpf=1+((type1METvector.Vect()+0.1*zVector.Vect())*zVector.Vect())/(1.1*zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());//we decrease all jets by 10%
+    nEvent.fake_mpf=1+((type1METvector.Vect()+( 1.0 / 1.05  -  1 )*zVector.Vect())*zVector.Vect())/(1.05*zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());//we simulate a missing correction of 10%
     
     nEvent.pass_b_PU_rejection=true; // this needs to be fixed (i.e. the vertex loop below needs to be implemented)
 //    for(int ivtx=0;ivtx<fTR->NVrtx;ivtx++) {
@@ -3904,14 +3904,9 @@ void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lept
 bool JZBAnalysis::ShouldPhotonBeMerged(lepton &photon, float dR) {
   if(photon.iso<0) return false; // the photon has already been used
   
-  // we we can specify all criteria we want to use. E.g. we can make a difference between very low pt photons (as in Higgs-> ZZ) and so on. 
-  
-  if(photon.p.Pt()>2 && photon.p.Pt()<4) { // very low pt photons (>2 GeV)
-    if(dR<0.07) return true;
-  }
-  
+  // we we can specify all criteria we want to use.
   if(photon.p.Pt()>4) { // all other photons (>4 GeV)
-    if(dR>0.07 && dR<0.5) return true;
+    if(dR>0.1 && dR<0.3) return true; // values determined from dedicated DY FSR study
   }
   
   return false;
