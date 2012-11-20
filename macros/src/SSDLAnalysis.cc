@@ -482,17 +482,15 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuPassesTightID[i] = IsGoodBasicMu(index);
 		
 		if(fIsData == false){ // mc truth information
-			fTmuid     [i] = fTR->MuGenID  [index];
-			fTmumoid   [i] = fTR->MuGenMID [index];
-			fTmugmoid  [i] = fTR->MuGenGMID[index];
+		        fTIsSignalMuon[i] = IsSignalMuon(index, fTmuid[i], fTmumoid[i], fTmugmoid[i])? 1:0;
 			pdgparticle mu, mo, gmo;
-			GetPDGParticle(mu,  abs(fTR->MuGenID  [index]));
-			GetPDGParticle(mo,  abs(fTR->MuGenMID [index]));
-			GetPDGParticle(gmo, abs(fTR->MuGenGMID[index]));
+			GetPDGParticle(mu,  abs(fTmuid     [i]));
+			GetPDGParticle(mo,  abs(fTmumoid   [i]));
+			GetPDGParticle(gmo, abs(fTmugmoid  [i]));
 			fTmutype   [i] = mu.get_type();
 			fTmumotype [i] = mo.get_type();
 			fTmugmotype[i] = gmo.get_type();
-			fTIsSignalMuon[i] = IsSignalMuon(index)? 1:0;
+			
 		} else{
 			fTmuid     [i] = -888;
 			fTmumoid   [i] = -888;
@@ -535,17 +533,15 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTElMVAIDTrig       [ind] = fTR->ElIDMVATrig[elindex];
 		
 		if(fIsData == false){ // mc truth information		
-			fTElGenID  [ind] = fTR->ElGenID  [elindex];
-			fTElGenMID [ind] = fTR->ElGenMID [elindex];
-			fTElGenGMID[ind] = fTR->ElGenGMID[elindex];
+		        fTIsSignalElectron[ind] = IsSignalElectron(elindex, fTElGenID  [ind], fTElGenMID [ind], fTElGenGMID[ind])? 1:0;
 			pdgparticle el, emo, egmo;
-			GetPDGParticle(el,   abs(fTR->ElGenID  [elindex]));
-			GetPDGParticle(emo,  abs(fTR->ElGenMID [elindex]));
-			GetPDGParticle(egmo, abs(fTR->ElGenGMID[elindex]));
+			GetPDGParticle(el,   abs(fTElGenID  [ind]));
+			GetPDGParticle(emo,  abs(fTElGenMID [ind]));
+			GetPDGParticle(egmo, abs(fTElGenGMID[ind]));
 			fTElGenType  [ind] = el.get_type();
 			fTElGenMType [ind] = emo.get_type();
 			fTElGenGMType[ind] = egmo.get_type();
-			fTIsSignalElectron[ind] = IsSignalElectron(elindex)? 1:0;
+			
 		}
 		else{
 			fTElGenID    [ind] = -888;
@@ -793,6 +789,11 @@ void SSDLAnalysis::ResetEffTree(){
 //____________________________________________________________________________
 // Some same-sign specific object selections
 bool SSDLAnalysis::IsSignalMuon(int index){
+  int dummy1, dummy2, dummy3;
+  return  IsSignalMuon(index,dummy1,dummy2,dummy3);
+}
+bool SSDLAnalysis::IsSignalMuon(int index, int &muid, int &mumoid, int &mugmoid){
+
 	int matched = -1;
 	// Match to a gen muon
 	float mindr(100.);
@@ -801,25 +802,82 @@ bool SSDLAnalysis::IsSignalMuon(int index){
 		float eta = fTR->GenLeptonEta[i];
 		float phi = fTR->GenLeptonPhi[i];
 		float DR = Util::GetDeltaR(eta, fTR->MuEta[index], phi, fTR->MuPhi[index]);
-
 		if(DR > mindr) continue; // minimize DR
 		mindr = DR;
 		matched = i;
 	}
 
-	if(mindr > 0.2) return false; // max distance
-	if(matched < 0) return false; // match unsuccessful
+	bool isGenMuon = true;
+        bool isSignalGenMuon = false;	
+	if(mindr > 0.2) isGenMuon = false; // max distance
+	if(matched < 0) isGenMuon = false; // match unsuccessful
 
 	pdgparticle mo, gmo;
-	GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
-	GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
-	
-	if(mo.get_type() > 10  || gmo.get_type() > 10)  return false; // mother is SM hadron
-	if(mo.get_type() == 9  || gmo.get_type() == 9)  return true; // matched to susy
-	if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) return true; // mother is gauge or higgs, but not gamma or gluon
-	return false; // default
+	if (isGenMuon){
+	  GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
+	  GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
+	  if(mo.get_type() > 10  || gmo.get_type() > 10)  isSignalGenMuon = false; // mother is SM hadron
+	  if(mo.get_type() == 9  || gmo.get_type() == 9)  isSignalGenMuon = true; // matched to susy
+	  if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) isSignalGenMuon = true; // mother is gauge or higgs, but not gamma or gluon
+	  if(abs(mo.get_pdgid()) == 15 && (abs(gmo.get_pdgid()) == 6 ||abs(gmo.get_pdgid()) == 23 ||abs(gmo.get_pdgid()) == 24 ) ) isSignalGenMuon = true; // mother is a tau and grandma is a top/W/Z
+	  if(abs(mo.get_pdgid()) == 6) isSignalGenMuon = true; // mother is a top
+	  // If we've matched to a gen muon, then we'll set the ids now and exit
+	  muid   = fTR->GenLeptonID  [matched];
+	  mumoid = fTR->GenLeptonMID [matched];
+	  mugmoid= fTR->GenLeptonGMID[matched];
+	  return isSignalGenMuon;
+	}
+
+	// Otherwise, we'll look for a gen particle in a larger cone and match to whatever is closest
+	int matchedPart = -1;
+	// Match to a gen particle
+	float mindrPart(100.);
+	for(size_t i = 0; i < fTR->nGenParticles; ++i){
+	  if(fTR->genInfoStatus[i] != 1  && fTR->genInfoStatus[i] != 3 ) continue; 
+	  float eta = fTR->genInfoEta[i];
+	  float phi = fTR->genInfoPhi[i];
+	  float DR = Util::GetDeltaR(eta, fTR->MuEta[index], phi, fTR->MuPhi[index]);
+	  if(DR > mindrPart) continue; // minimize DR
+	  mindrPart = DR;
+	  matchedPart = i;
+	}
+
+        bool isGenPart = true;
+        bool isSignalGenPart = false;
+	if(mindrPart > 0.3) isGenPart = false; // max distance
+	if(matchedPart < 0) isGenPart = false; // match unsuccessful
+
+	if (isGenPart){
+	  //keep going back until we get a mother with a different id
+	  int moIndex = fTR->genInfoMo1[matchedPart];
+	  while (fTR->genInfoId[matchedPart] == fTR->genInfoId[moIndex]){
+	    moIndex  = fTR->genInfoMo1[moIndex];
+	  }
+	  //keep going back until we get a grandmother with a different id
+	  int gmoIndex = fTR->genInfoMo1[moIndex];
+	  while (fTR->genInfoId[moIndex] == fTR->genInfoId[gmoIndex]){
+	    gmoIndex  = fTR->genInfoMo1[gmoIndex];
+	  }
+	  GetPDGParticle(mo ,  abs(fTR->genInfoId[moIndex] ));
+	  GetPDGParticle(gmo,  abs(fTR->genInfoId[gmoIndex]));
+	  muid   = fTR->genInfoId[matchedPart];
+	  mumoid = mo.get_pdgid() ;
+	  mugmoid= gmo.get_pdgid() ;
+	  return false;
+	}
+
+	//If we really didn't find a match to a lepton or any other particle, set everything to zero
+	muid   = 0;
+	mumoid = 0;
+	mugmoid= 0;
+	return false;
 }
 bool SSDLAnalysis::IsSignalElectron(int index){
+  int dummy1, dummy2, dummy3;
+  return  IsSignalElectron(index,dummy1,dummy2,dummy3);
+}
+bool SSDLAnalysis::IsSignalElectron(int index, int &elid, int &elmoid, int &elgmoid){
+
 	int matched = -1;
 	// Match to a gen electron
 	float mindr(100.);
@@ -828,23 +886,76 @@ bool SSDLAnalysis::IsSignalElectron(int index){
 		float eta = fTR->GenLeptonEta[i];
 		float phi = fTR->GenLeptonPhi[i];
 		float DR = Util::GetDeltaR(eta, fTR->ElEta[index], phi, fTR->ElPhi[index]);
-
 		if(DR > mindr) continue; // minimize DR
 		mindr = DR;
 		matched = i;
 	}
 
-	if(mindr > 0.2) return false; // max distance
-	if(matched < 0) return false; // match unsuccessful
+	bool isGenElectron = true;
+        bool isSignalGenElectron = false;	
+	if(mindr > 0.2) isGenElectron = false; // max distance
+	if(matched < 0) isGenElectron = false; // match unsuccessful
 
 	pdgparticle mo, gmo;
-	GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
-	GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
-	
-	if(mo.get_type() > 10  || gmo.get_type() > 10)  return false; // mother is SM hadron
-	if(mo.get_type() == 9  || gmo.get_type() == 9)  return true; // matched to susy
-	if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) return true; // mother is gauge or higgs, but not gamma or gluon
-	return false; // default
+	if (isGenElectron){
+	  GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
+	  GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
+	  if(mo.get_type() > 10  || gmo.get_type() > 10)  isSignalGenElectron = false; // mother is SM hadron
+	  if(mo.get_type() == 9  || gmo.get_type() == 9)  isSignalGenElectron = true; // matched to susy
+	  if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) isSignalGenElectron = true; // mother is gauge or higgs, but not gamma or gluon
+	  if(abs(mo.get_pdgid()) == 15 && (abs(gmo.get_pdgid()) == 6 ||abs(gmo.get_pdgid()) == 23 ||abs(gmo.get_pdgid()) == 24 ) ) isSignalGenElectron = true; // mother is a tau and grandma is a top/W/Z
+	  if(abs(mo.get_pdgid()) == 6) isSignalGenElectron = true; // mother is a top
+	  // If we've matched to a gen electron, then we'll set the ids now and exit
+	  elid   = fTR->GenLeptonID  [matched];
+	  elmoid = fTR->GenLeptonMID [matched];
+	  elgmoid= fTR->GenLeptonGMID[matched];
+	  return isSignalGenElectron;
+	}
+
+	// Otherwise, we'll look for a gen particle in a larger(?) cone
+	// and match to whatever is closest
+	int matchedPart = -1;
+	// Match to a gen particle
+	float mindrPart(100.);
+	for(size_t i = 0; i < fTR->nGenParticles; ++i){
+	  if(fTR->genInfoStatus[i] != 1  && fTR->genInfoStatus[i] != 3 ) continue; 
+	  float eta = fTR->genInfoEta[i];
+	  float phi = fTR->genInfoPhi[i];
+	  float DR = Util::GetDeltaR(eta, fTR->ElEta[index], phi, fTR->ElPhi[index]);
+	  if(DR > mindrPart) continue; // minimize DR
+	  mindrPart = DR;
+	  matchedPart = i;
+	}
+
+        bool isGenPart = true;
+        bool isSignalGenPart = false;
+	if(mindrPart > 0.3) isGenPart = false; // max distance
+	if(matchedPart < 0) isGenPart = false; // match unsuccessful
+
+	if (isGenPart){
+	  //keep going back until we get a mother with a different id
+	  int moIndex = fTR->genInfoMo1[matchedPart];
+	  while (fTR->genInfoId[matchedPart] == fTR->genInfoId[moIndex]){
+	    moIndex  = fTR->genInfoMo1[moIndex];
+	  }
+	  //keep going back until we get a grandmother with a different id
+	  int gmoIndex = fTR->genInfoMo1[moIndex];
+	  while (fTR->genInfoId[moIndex] == fTR->genInfoId[gmoIndex]){
+	    gmoIndex  = fTR->genInfoMo1[gmoIndex];
+	  }
+	  GetPDGParticle(mo ,  abs(fTR->genInfoId[moIndex] ));
+	  GetPDGParticle(gmo,  abs(fTR->genInfoId[gmoIndex]));	
+	  elid   = fTR->genInfoId[matchedPart];
+	  elmoid = mo.get_pdgid() ;
+	  elgmoid= gmo.get_pdgid() ;
+	  return false;
+	}
+
+	//If we really didn't find a match to a lepton or any other particle, set everything to zero
+	elid   = 0;
+	elmoid = 0;
+	elgmoid= 0;
+	return false;	
 }
 bool SSDLAnalysis::IsTightMuon(int toggle, int index){
 	if(toggle == 1){
