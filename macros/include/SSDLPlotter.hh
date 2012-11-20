@@ -169,6 +169,7 @@ public:
 	virtual void doAnalysis();
 	virtual void sandBox();
 	virtual void pythiaMadgraph(bool pyhia);
+	virtual void makeROCCurve();
 	virtual void msugraKfacs(TFile *);
 	virtual void msugraLOxsecs(TFile *);
 	virtual void msugraNLOxsecs(TFile *);
@@ -256,6 +257,7 @@ public:
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
 	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
+	void getPassedTotalTTbar(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);

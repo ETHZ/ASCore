@@ -36,6 +36,7 @@ using namespace std;
 // Global parameters:
 static const bool gEWKino = true;
 static const bool gRunSMSscan = true;
+static const bool gRatiosFromTTbar = false;
 
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -117,8 +118,7 @@ void SSDLPlotter::init(TString filename){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
-	fMCBG.push_back(TTJets1);
-	fMCBG.push_back(TTJets2);
+	fMCBG.push_back(TTJets);
 	fMCBG.push_back(SingleT_t);
 	fMCBG.push_back(SingleTbar_t);
 	fMCBG.push_back(SingleT_tW);
@@ -139,6 +139,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(TTbarW);
 	fMCBG.push_back(TTbarZ);
 	fMCBG.push_back(TTbarG);
+	fMCBG.push_back(TbZ);
 	fMCBG.push_back(WpWp);
 	fMCBG.push_back(WmWm);
 	fMCBG.push_back(WWZ);
@@ -146,10 +147,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WWG);
 	fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
-//	fMCBG.push_back(MuEnr15);
-//	fMCBG.push_back(EMEnr20);
-//	fMCBG.push_back(EMEnr30);
-
+	// QCD:
+	fMCBG.push_back(QCDMuEnr15);
 	fMCBG.push_back(QCD80);
 	fMCBG.push_back(QCD120);
 	fMCBG.push_back(QCD170);
@@ -157,13 +156,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(QCD470);
 	fMCBG.push_back(QCD600);
 	fMCBG.push_back(QCD800);
-	
-	// MARC fMCBG.push_back(QCD1000);
-	// MARC fMCBG.push_back(QCD1400);
-	// MARC fMCBG.push_back(QCD1800);
 
-	fMCBGNoQCDNoGJets.push_back(TTJets1);
-	fMCBGNoQCDNoGJets.push_back(TTJets2);
+	fMCBGNoQCDNoGJets.push_back(TTJets);
 	fMCBGNoQCDNoGJets.push_back(SingleT_t);
 	fMCBGNoQCDNoGJets.push_back(SingleTbar_t);
 	fMCBGNoQCDNoGJets.push_back(SingleT_tW);
@@ -181,6 +175,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(TTbarW);
 	fMCBGNoQCDNoGJets.push_back(TTbarZ);
 	fMCBGNoQCDNoGJets.push_back(TTbarG);
+	fMCBGNoQCDNoGJets.push_back(TbZ);
 	fMCBGNoQCDNoGJets.push_back(WpWp);
 	fMCBGNoQCDNoGJets.push_back(WmWm);
 	fMCBGNoQCDNoGJets.push_back(WWZ);
@@ -189,14 +184,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(WWW);
 	fMCBGNoQCDNoGJets.push_back(ZZZ);
 
-	// MARC fMCBGSig = fMCBG;
-	// MARC fMCBGSig.push_back(LM6);
-	fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
-	// MARC fMCBGNoQCDNoGJetsSig.push_back(LM6);
-	
 	// input samples for closure tests
-	fClosureSamples.push_back(TTJets1);
-	fClosureSamples.push_back(TTJets2);
+	fClosureSamples.push_back(TTJets);
 	fClosureSamples.push_back(SingleT_t);
 	fClosureSamples.push_back(SingleTbar_t);
 	fClosureSamples.push_back(SingleT_tW);
@@ -207,8 +196,7 @@ void SSDLPlotter::init(TString filename){
 	fClosureSamples.push_back(WW);
 	fClosureSamples.push_back(WJets);
 	
-	fMCBGMuEnr.push_back(TTJets1);
-	fMCBGMuEnr.push_back(TTJets2);
+	fMCBGMuEnr.push_back(TTJets);
 	fMCBGMuEnr.push_back(SingleT_t);
 	fMCBGMuEnr.push_back(SingleTbar_t);
 	fMCBGMuEnr.push_back(SingleT_tW);
@@ -230,6 +218,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(TTbarW);
 	fMCBGMuEnr.push_back(TTbarZ);
 	fMCBGMuEnr.push_back(TTbarG);
+	fMCBGMuEnr.push_back(TbZ);
 	fMCBGMuEnr.push_back(WpWp);
 	fMCBGMuEnr.push_back(WmWm);
 	fMCBGMuEnr.push_back(WWZ);
@@ -237,11 +226,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WWG);
 	fMCBGMuEnr.push_back(WWW);
 	fMCBGMuEnr.push_back(ZZZ);
-	// MARC fMCBGMuEnr.push_back(QCDMuEnr10);
-	fMCBGMuEnr.push_back(MuEnr15);
-	
-	fMCBGEMEnr.push_back(TTJets1);
-	fMCBGEMEnr.push_back(TTJets2);
+	fMCBGMuEnr.push_back(QCDMuEnr15);
+	fMCBGEMEnr.push_back(TTJets);
 	fMCBGEMEnr.push_back(SingleT_t);
 	fMCBGEMEnr.push_back(SingleTbar_t);
 	fMCBGEMEnr.push_back(SingleT_tW);
@@ -263,6 +249,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(TTbarW);
 	fMCBGEMEnr.push_back(TTbarZ);
 	fMCBGEMEnr.push_back(TTbarG);
+	fMCBGEMEnr.push_back(TbZ);
 	fMCBGEMEnr.push_back(WpWp);
 	fMCBGEMEnr.push_back(WmWm);
 	fMCBGEMEnr.push_back(WWZ);
@@ -270,11 +257,16 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WWG);
 	fMCBGEMEnr.push_back(WWW);
 	fMCBGEMEnr.push_back(ZZZ);
-	fMCBGEMEnr.push_back(EMEnr20);
-	fMCBGEMEnr.push_back(EMEnr30);
+
+	fMCBGEMEnr.push_back(QCD80);
+	fMCBGEMEnr.push_back(QCD120);
+	fMCBGEMEnr.push_back(QCD170);
+	fMCBGEMEnr.push_back(QCD300);
+	fMCBGEMEnr.push_back(QCD470);
+	fMCBGEMEnr.push_back(QCD600);
+	fMCBGEMEnr.push_back(QCD800);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
-	// MARC fMCBGMuEnrSig.push_back(LM6);
 
 
 	fMCRareSM.push_back(WZ);
@@ -285,6 +277,7 @@ void SSDLPlotter::init(TString filename){
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
+	fMCRareSM.push_back(TbZ);
 	fMCRareSM.push_back(WpWp);
 	fMCRareSM.push_back(WmWm);
 	fMCRareSM.push_back(WWZ);
@@ -359,19 +352,22 @@ void SSDLPlotter::doAnalysis(){
 //        if (gRunSMSscan) return; //DO NOT RUN THE ANALYSIS IF RUNNING THE SCAN
 
 	if(readHistos(fOutputFileName) != 0) return;
-//	fillRatios(fMuData, fEGData, 0);
-//	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	fillRatios(fMuData, fEGData, 0);
+	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	storeWeightedPred(gRegion[gBaseRegion]);
 	
 	
+	// ------------------- the following is for testing and closure things
 	// fill fake ratios to run closure tests
-	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 0);
-	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
+//	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 0);
+//	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 //	fillRatios(fMuData, fEGData, 0);
 //	fillRatios(fMuData, fEGData, 1);
+//	storeWeightedPred(gRegion[gBaseRegion]);
 	
 	
-	storeWeightedPred(gRegion[gBaseRegion]);
 
+	// makeROCCurve(); return;
 	// makePileUpPlots(true); // loops on all data!
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
@@ -411,10 +407,10 @@ void SSDLPlotter::doAnalysis(){
 	makeAllClosureTestsTTW();
 //	makeAllIntPredictions();
 
-//	makeDiffPrediction();
-//	makeTTWDiffPredictions();
-//	makeTTWIntPredictions();
-//	printAllYieldTables();
+	makeDiffPrediction();
+	makeTTWDiffPredictions();
+	makeTTWIntPredictions();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 //	makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
@@ -748,6 +744,196 @@ void SSDLPlotter::pythiaMadgraph(bool pythia){
 		WZpythia_allnJetsMet120_ ->Write();
 		WZpythia_allnJetsMet200_ ->Write();
 	}
+}
+void SSDLPlotter::makeROCCurve(){
+
+	cout << "making the ROC curves. might take a while..." << endl;
+	fOutputSubDir = "ElectronIDPlots/";
+	ofstream OUT(fOutputDir+fOutputSubDir+"ROCCurveInfo.txt", ios::trunc);
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+	string *sname = 0;
+	int flag;
+	int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
+	float puweight, pT1, pT2, HT, MET, MT2, SLumi;
+	float eta1, eta2, mll, mvaid1, mvaid2, medwp1, medwp2;
+	float pfiso1, pfiso2;
+
+	sigtree->SetBranchAddress("SystFlag", &flag);
+	sigtree->SetBranchAddress("SName",    &sname);
+	sigtree->SetBranchAddress("SType",    &SType);
+	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("SLumi",    &SLumi);
+	sigtree->SetBranchAddress("Flavor",   &Flavor);
+	sigtree->SetBranchAddress("pT1",      &pT1);
+	sigtree->SetBranchAddress("pT2",      &pT2);
+	sigtree->SetBranchAddress("eta1",     &eta1);
+	sigtree->SetBranchAddress("eta2",     &eta2);
+	sigtree->SetBranchAddress("TLCat",    &TLCat);
+	sigtree->SetBranchAddress("HT",       &HT);
+	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("MT2",      &MT2);
+	sigtree->SetBranchAddress("NJ",       &NJ);
+	sigtree->SetBranchAddress("NbJ",      &NbJ);
+	sigtree->SetBranchAddress("NbJmed",   &NbJmed);
+	sigtree->SetBranchAddress("Mll",      &mll);
+	sigtree->SetBranchAddress("PFIso1",   &pfiso1);
+	sigtree->SetBranchAddress("PFIso2",   &pfiso2);
+	sigtree->SetBranchAddress("MVAID1",   &mvaid1);
+	sigtree->SetBranchAddress("MVAID2",   &mvaid2);
+	sigtree->SetBranchAddress("medWP1",   &medwp1);
+	sigtree->SetBranchAddress("medWP2",   &medwp2);
+
+
+	std::vector< std::pair < float , float> > etas;
+	std::vector< std::pair < float , float> >::const_iterator eit;
+	etas.push_back( make_pair(0.    , 0.8  ) );
+	etas.push_back( make_pair(0.8   , 1.479) );
+	etas.push_back( make_pair(1.479 , 2.5  ) );
+	
+	for (eit = etas.begin(); eit != etas.end(); eit++) {
+		std::vector < std::pair < float, float >  > points_mvaid; // fill ttw eff in the first float, (1-ttj eff) in second float
+	
+		float ttw_medwp_eff, ttj_medwp_eff;
+		for (float cut = 0.5; cut <= 1.; cut+=0.002) {
+
+			ttw_medwp_eff = 0.; ttj_medwp_eff = 0.;
+			int n_ttw_tot(0), n_ttw_pass(0);
+			int n_ttw_medwp_pass(0);
+			int n_ttj_tot(0), n_ttj_pass(0);
+			int n_ttj_medwp_pass(0);
+
+			for( int i = 0; i < sigtree->GetEntries(); i++ ){
+				sigtree->GetEntry(i);
+				
+				if (*sname != "TTJets" && *sname != "TTbarW" ) continue; // just look at relevant samples
+				if (Flavor != 2) continue; // only interested in events with two electrons
+				// preselection
+				if (pfiso1 > 0.05 || pfiso2 > 0.05 ) continue;
+				if (NJ  < 3)      continue;
+
+				// pt cuts
+				gChannel chan = gChannel(Flavor);
+				if(chan == ElMu){
+					if(pT1 > pT2){
+						if(pT1 < 20.) continue;
+						if(pT2 < 20.) continue;
+					}
+					if(pT1 < pT2){
+						if(pT1 < 20.) continue;
+						if(pT2 < 20.) continue;
+					}
+				}
+				else{
+					if(pT1 < 20.) continue;
+					if(pT2 < 20.) continue;
+				}
+
+				// get TTbarW events
+				if (*sname == "TTbarW") {
+					// first lepton
+					if (fabs(eta1) > eit->first  && fabs(eta1) < eit->second) {
+						n_ttw_tot ++;
+						if (mvaid1 > cut) n_ttw_pass++;
+						if (medwp1 == 1 ) n_ttw_medwp_pass++;
+					}
+					// second lepton
+					if (fabs(eta2) > eit->first  && fabs(eta2) < eit->second) {
+						n_ttw_tot ++;
+						if (mvaid2 > cut) n_ttw_pass++;
+						if (medwp2 == 1 ) n_ttw_medwp_pass++;
+					}
+				}
+				// get TTJets events
+				if (*sname == "TTJets" ) {
+					// first lepton
+					if (fabs(eta1) > eit->first  && fabs(eta1) < eit->second) {
+						n_ttj_tot ++;
+						if (mvaid1 > cut) n_ttj_pass++;
+						if (medwp1 == 1 ) n_ttj_medwp_pass++;
+					}
+					// second lepton
+					if (fabs(eta2) > eit->first  && fabs(eta2) < eit->second) {
+						n_ttj_tot ++;
+						if (mvaid2 > cut) n_ttj_pass++;
+						if (medwp2 == 1 ) n_ttj_medwp_pass++;
+					}
+				}
+			} // end loop on events in the tree
+
+			// calculate the efficiencies
+			ttw_medwp_eff = (float) n_ttw_medwp_pass/n_ttw_tot;
+			ttj_medwp_eff = (float) n_ttj_medwp_pass/n_ttj_tot;
+			float ttw_mvaid_eff = (float) n_ttw_pass/n_ttw_tot;
+			float ttj_mvaid_eff = (float) n_ttj_pass/n_ttj_tot;
+
+			points_mvaid.push_back( make_pair(ttw_mvaid_eff, 1. - ttj_mvaid_eff) );
+			OUT << Form("Values: %4.3f \t %4.3f \t %4.3f --- sig eff: %4.3f || (1 - fake eff): %4.3f", cut, cut, cut, ttw_mvaid_eff, ttj_mvaid_eff) << endl;
+			OUT << Form("         medium WP              --- sig eff: %4.3f || (1 - fake eff): %4.3f", ttw_medwp_eff, ttj_medwp_eff) << endl;
+			// cout<< Form("Values: %4.3f \t %4.3f \t %4.3f --- sig eff: %4.3f || (1 - fake eff): %4.3f", cut, cut, cut, ttw_mvaid_eff, ttj_mvaid_eff) << endl;
+			// cout<< Form("         medium WP              --- sig eff: %4.3f || (1 - fake eff): %4.3f", ttw_medwp_eff, ttj_medwp_eff) << endl;
+
+		}
+
+	// CREATING THE HISTGRAMS AND COSMETICS
+	// ------------------------------------
+	TH2D * h_medwp = new TH2D("medium WP ROC", "medium WP ROC", 50, 0., 1., 50, 0., 1.);
+	TH2D * h_mvaid = new TH2D("MVA ID ROC"   , "MVA ID ROC"   , 50, 0., 1., 50, 0., 1.);
+	
+	// some cosmetics for the drawing
+	h_medwp->SetMarkerStyle(21);
+	h_medwp->SetMarkerColor(8);
+	h_medwp->SetMarkerSize(1.1);
+
+	h_mvaid->SetMarkerStyle(20);
+	h_mvaid->SetMarkerColor(9);
+	h_mvaid->SetMarkerSize(1.1);
+	
+	h_mvaid->GetXaxis()->SetTitle("signal eff.");
+	h_mvaid->GetYaxis()->SetTitle("1 - ttj eff.");
+
+	// FILLING THE HISTGRAMS
+	// ---------------------
+	// fill the medium WP histogram, it's just one point...
+	h_medwp->Fill(ttw_medwp_eff, 1. - ttj_medwp_eff);
+	// loop over all the mva ID points and fill them into the histogram
+	std::vector< std::pair < float, float > >::const_iterator it;
+	for (it = points_mvaid.begin(); it != points_mvaid.end(); it++) {
+		h_mvaid->Fill(it->first, it->second);
+	}
+
+	TLegend *leg = new TLegend(0.15,0.62,0.50,0.88);
+	leg->AddEntry(h_medwp,   "medium WP","p");
+	leg->AddEntry(h_mvaid,   "MVA ID"   ,"p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	// leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
+
+	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
+	c_temp->cd();
+	
+	h_mvaid->Draw("");
+	h_medwp->Draw("same");
+	leg->Draw();
+	lat->DrawLatex(0.25,0.40, Form("%3.2f < |#eta| < %3.2f", eit->first, eit->second));
+	
+	drawTopLine(0.56);
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, Form("ROCcurve_eta%d", (int) eit->second), fOutputDir + fOutputSubDir);
+	delete c_temp;	
+	delete h_medwp, h_mvaid;
+
+	}
+	OUT.close();
+
 }
 void SSDLPlotter::plotWeightedHT(){
 	fOutputSubDir = "sandbox/";
@@ -1686,17 +1872,10 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		////////////////////////////////////////////////////
 		// Fill ttbar histos
 		// Sample loop
-	// attention, this only loops on one of the ttbar samples
 // LUKAS		TTree *tree = fSamples[TTJets1]->getTree();
-		
-		
 // LUKAS		TFile * file_ = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct26/TT_CT10_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1/output_0.root", "READ", "file_");
-		
 		TFile * file_ = new TFile("/shome/lbaeni/top/CMSSW_5_3_2_patch4/src/DiLeptonAnalysis/NTupleProducer/macros/TT_CT10_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1_output_0.root", "READ", "file_");
 		TTree * tree = (TTree *) file_->Get("Analysis");
-		
-		
-		
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -1706,7 +1885,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		Long64_t nentries = fChain->GetEntriesFast();
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			printProgress(jentry, nentries, fSamples[TTJets1]->name); //FIXME only TTJets1 for the moment
+			printProgress(jentry, nentries, fSamples[TTJets]->name);
 
 			Long64_t ientry = LoadTree(jentry);
 			if (ientry < 0) break;
@@ -1776,8 +1955,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// }
 			////////////////////////////////////////////////////
 		}
-	// attention, this only loops on one of the ttbar samples
-//		fSamples[TTJets1]->cleanUp();
+		fSamples[TTJets]->cleanUp();
 		cout << endl;
 	} // end dottbar
 	////////////////////////////////////////////////////
@@ -2249,7 +2427,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		// Fill ttbar histos
 		// Sample loop
 	// attention, this only loops on one of the ttbar samples
-		TTree *tree = fSamples[TTJets1]->getTree();
+		TTree *tree = fSamples[TTJets]->getTree();
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -2259,7 +2437,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		Long64_t nentries = fChain->GetEntriesFast();
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			printProgress(jentry, nentries, fSamples[TTJets1]->name); //FIXME only TTJets1 for the moment
+			printProgress(jentry, nentries, fSamples[TTJets]->name);
 
 			Long64_t ientry = LoadTree(jentry);
 			if (ientry < 0) break;
@@ -2315,7 +2493,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			////////////////////////////////////////////////////
 		}
 	// attention, this only loops on one of the ttbar samples
-		fSamples[TTJets1]->cleanUp();
+		fSamples[TTJets]->cleanUp();
 		cout << endl;
 	}
 	////////////////////////////////////////////////////
@@ -2664,26 +2842,27 @@ void SSDLPlotter::makeElIdPlots(){
 	vector<int> mcsamples = fMCBGEMEnr;
 	vector<int> datasamples = fEGData;
 	
-	TH1D    *data [4] [gNSels];
-	TH1D    *qcd  [4] [gNSels];
-	TH1D    *ttj  [4] [gNSels];
-	TH1D    *ewk  [4] [gNSels];
-	TH1D    *rare [4] [gNSels];
-	TH1D    *db   [4] [gNSels];
-	TH1D	*ttbar[4] [gNSels];
-	THStack *mc_s [4] [gNSels];
+	int nids = 6;
+	TH1D    *data [nids] [gNSels];
+	TH1D    *qcd  [nids] [gNSels];
+	TH1D    *ttj  [nids] [gNSels];
+	TH1D    *ewk  [nids] [gNSels];
+	TH1D    *rare [nids] [gNSels];
+	TH1D    *db   [nids] [gNSels];
+	TH1D	*ttbar[nids] [gNSels];
+	THStack *mc_s [nids] [gNSels];
 
-	float intscale[4];
-	double datamax[4], mcmax[4], max[4];
-	double axismin[4], axismax[4];
+	float intscale[nids];
+	double datamax[nids], mcmax[nids], max[nids];
+	double axismin[nids], axismax[nids];
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
 
-	// loop k is over the 4 ID variables: HoE, sigmaIetaIeta, dEta, dPhi
-	for (int k =0 ; k<4 ; k++){
+	// loop k is over the electron ID variables: HoE, sigmaIetaIeta, dEta, dPhi, mvaID, medium WP pass bool
+	for (int k =0 ; k<nids ; k++){
 		TString varName;
 		switch (k) {
 			case 0: 
@@ -2706,14 +2885,27 @@ void SSDLPlotter::makeElIdPlots(){
 				axismin[k] = -0.15;
 				axismax[k] =  0.15;
 				break ;
+			case 4: 
+				varName = "ElMVAID";
+				axismin[k] = -1.;
+				axismax[k] =  1.;
+				break ;
+			case 5: 
+				varName = "ElmedWP";
+				axismin[k] =  0.;
+				axismax[k] =  2.;
+				break ;
 		}
 		for(size_t i = 0; i < gNSels; ++i){
-			data [k][i]  = new TH1D("El"+varName+"Data_"          + IdPlots::sel_name[i], "Electron "+varName+" in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
-			qcd  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
-			ttj  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
-			ewk  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
-			rare [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
-			db   [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			int nbins;
+			if (k != 5) nbins = IdPlots::nbins[i] ;
+			else nbins = 3;
+			data [k][i]  = new TH1D("El"+varName+"Data_"          + IdPlots::sel_name[i], "Electron "+varName+" in Data for "  + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
+			qcd  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
+			ttj  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
+			ewk  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
+			rare [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
+			db   [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], nbins, axismin[k], axismax[k]);
 			mc_s [k][i]  = new THStack("El"+varName+"MC_stacked_" + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i]);
 
 			data [k][i]->Sumw2();
@@ -2747,6 +2939,8 @@ void SSDLPlotter::makeElIdPlots(){
 					case 1: S->idplots.hsiesie[i]->Scale(lumiscale); break;
 					case 2: S->idplots.hdeta[i]->Scale(lumiscale); break;
 					case 3: S->idplots.hdphi[i]->Scale(lumiscale); break;
+					case 4: S->idplots.hmvaid[i]->Scale(lumiscale); break;
+					case 5: S->idplots.hmedwp[i]->Scale(lumiscale); break;
 				}
 			}
 
@@ -2758,6 +2952,8 @@ void SSDLPlotter::makeElIdPlots(){
 					case 1: data[k][i]->Add(S->idplots.hsiesie[i]); break;
 					case 2: data[k][i]->Add(S->idplots.hdeta[i]); break;
 					case 3: data[k][i]->Add(S->idplots.hdphi[i]); break;
+					case 4: data[k][i]->Add(S->idplots.hmvaid[i]); break;
+					case 5: data[k][i]->Add(S->idplots.hmedwp[i]); break;
 				}
 			}
 
@@ -2770,6 +2966,8 @@ void SSDLPlotter::makeElIdPlots(){
 					case 1: intscale[k] += S->idplots.hsiesie[i]->Integral(); break;
 					case 2: intscale[k] += S->idplots.hdeta[i]->Integral(); break;
 					case 3: intscale[k] += S->idplots.hdphi[i]->Integral(); break;
+					case 4: intscale[k] += S->idplots.hmvaid[i]->Integral(); break;
+					case 5: intscale[k] += S->idplots.hmedwp[i]->Integral(); break;
 				}
 			}
 			intscale[k] = data[k][i]->Integral() / intscale[k];
@@ -2781,6 +2979,8 @@ void SSDLPlotter::makeElIdPlots(){
 					case 1: S -> idplots.hsiesie[i] -> Scale(intscale[k]); break;
 					case 2: S -> idplots.hdeta[i]   -> Scale(intscale[k]); break;
 					case 3: S -> idplots.hdphi[i]   -> Scale(intscale[k]); break;
+					case 4: S -> idplots.hmvaid[i]  -> Scale(intscale[k]); break;
+					case 5: S -> idplots.hmedwp[i]  -> Scale(intscale[k]); break;
 				}
 			}
 
@@ -2794,6 +2994,8 @@ void SSDLPlotter::makeElIdPlots(){
 					case 1: histo = S->idplots.hsiesie[i]; break;
 					case 2: histo = S->idplots.hdeta[i]  ; break;
 					case 3: histo = S->idplots.hdphi[i]  ; break;
+					case 4: histo = S->idplots.hmvaid[i] ; break;
+					case 5: histo = S->idplots.hmedwp[i] ; break;
 				}
 				if ( S->getType() == 1) qcd [k][i]->Add( histo );
 				if ( S->getType() == 2) ttj [k][i]->Add( histo );
@@ -2834,7 +3036,7 @@ void SSDLPlotter::makeElIdPlots(){
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
 
-			gPad->SetLogy();
+			if (k != 5) gPad->SetLogy();
 			mc_s[k][i]->Draw("hist");
 			data[k][i]->DrawCopy("PE X0 same");
 			leg->Draw();
@@ -5359,7 +5561,8 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	H_ntight->Sumw2();
 	H_nloose->Sumw2();
 
-	getPassedTotal(samples, chan, fp, H_ntight, H_nloose, output);
+	if (gRatiosFromTTbar) getPassedTotalTTbar(samples, chan, fp, H_ntight, H_nloose, output);
+	else getPassedTotal(samples, chan, fp, H_ntight, H_nloose, output);
 	h_2d->Divide(H_ntight, H_nloose, 1., 1., "B");
 
 	TH1D *hmuloosept  = H_nloose->ProjectionX();
@@ -5562,7 +5765,7 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		if(S->datamc == 0) scale = 1;
 
 		Channel *C;
-			// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
 		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
 		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		TH2D *ntight, *nloose;
@@ -5585,6 +5788,40 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 	if(output){
 		printObject(h_passed, TString("Passed") + name, "colz");
 		printObject(h_total,  TString("Total")  + name, "colz");
+	}	
+}
+void SSDLPlotter::getPassedTotalTTbar(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output){
+	if(fVerbose>2) cout << "---------------" << endl;
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
+
+		float scale = fLumiNorm / S->getLumi();
+		if(S->datamc == 0) scale = 1; // this function doesn't really make sense for data, since the histograms aren't filled.
+
+		Channel *C;
+		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+		TH2D *ntight, *nloose;
+		if(fp == SigSup){
+			ntight = C->fntight_ttbar;
+			nloose = C->fnloose_ttbar;
+		} else if(fp == ZDecay){
+			ntight = C->pntight_ttbar;
+			nloose = C->pnloose_ttbar;
+		}
+		h_passed->Add(ntight, scale);
+		h_total ->Add(nloose, scale);
+	}
+	TString name = "";
+	for(size_t i = 0; i < samples.size(); ++i){
+		int sample = samples[i];
+		if(i > 0) name += "_";
+		name += fSamples[sample]->sname;
+	}
+	if(output){
+		printObject(h_passed, TString("Passed") + name + TString("_onlyTTbar"), "colz");
+		printObject(h_total,  TString("Total")  + name + TString("_onlyTTbar"), "colz");
 	}	
 }
 TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, bool output){
@@ -6964,6 +7201,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 	mcbkg.push_back(TTbarW);
 	mcbkg.push_back(TTbarZ);
 	mcbkg.push_back(TTbarG);
+	mcbkg.push_back(TbZ);
  	mcbkg.push_back(WpWp);
  	mcbkg.push_back(WmWm);
  	mcbkg.push_back(WWZ);
@@ -7689,6 +7927,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	mcbkg.push_back(DPSWW);
 	if (!separateTTH) mcbkg.push_back(TTbarH);
 	mcbkg.push_back(TTbarG);
+	mcbkg.push_back(TbZ);
 	mcbkg.push_back(WpWp);
 	mcbkg.push_back(WmWm);
 	mcbkg.push_back(WWZ);
@@ -9074,6 +9313,7 @@ void SSDLPlotter::makeDiffPrediction(){
 
 		for(size_t i = 0; i < fMCRareSM.size(); ++i){
 			Sample *S = fSamples[fMCRareSM[i]];
+			if (fMCRareSM[i] == WZ) continue;
 			float scale = fLumiNorm / S->getLumi();
 			nt11_mm_ss->Add(S->diffyields[Muon].hnt11[j], scale);
 			nt11_ee_ss->Add(S->diffyields[Elec].hnt11[j], scale);
@@ -12548,7 +12788,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	float elfratio_allmc(0.), elfratio_allmc_e(0.);
 	float elpratio_allmc(0.), elpratio_allmc_e(0.);
 
-	vector<int> ttjets;  ttjets.push_back(TTJets1); ttjets.push_back(TTJets2);
+	vector<int> ttjets;  ttjets.push_back(TTJets);
 	// calculateRatio(ttjets, Muon,     SigSup, mufratio_allmc, mufratio_allmc_e);
 	// calculateRatio(ttjets, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
 	// calculateRatio(ttjets, Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
@@ -12566,10 +12806,9 @@ void SSDLPlotter::makeTTbarClosure(){
 	float nt_me(0.), nl_me(0.),  np_me(0.), nf_me(0.);
 	float nt_ee(0.), nl_ee(0.),  np_ee(0.), nf_ee(0.);
 
-	// attention, this only loops on one of the ttbar samples
-	Sample *S = fSamples[TTJets1];
+	Sample *S = fSamples[TTJets];
 	TTree *tree = S->getTree();
-	fCurrentSample = TTJets1;
+	fCurrentSample = TTJets;
 
 	// Event loop
 	tree->ResetBranchAddresses();
@@ -12655,8 +12894,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	cout << endl;
 	S->cleanUp();
 	// Scale by luminosity:
-	// attention, this only loops on one of the ttbar samples
-	float scale = fLumiNorm / fSamples[TTJets1]->getLumi();
+	float scale = fLumiNorm / fSamples[TTJets]->getLumi();
 	nt_mm*=scale; nl_mm*=scale; np_mm*=scale; nf_mm*=scale;
 	nt_em*=scale; nl_em*=scale; np_em*=scale; nf_em*=scale;
 	nt_me*=scale; nl_me*=scale; np_me*=scale; nf_me*=scale;
@@ -13725,7 +13963,7 @@ void SSDLPlotter::makeOriginPlots(int reg){
 			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
 			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
 	// attention, this only loops on one of the ttbar samples
-			if (s_name == "TTJets1") {
+			if (s_name == "TTJets") {
 				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
 				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
 				if(i == 2) horigin_tt[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
