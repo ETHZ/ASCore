@@ -627,12 +627,15 @@ public:
 
 	// Event and Object selectors:
 	virtual void scaleBTags(Sample *S, int flag = 0);
+	virtual void saveBTags();
+	virtual void resetBTags();
 	virtual void smearJetPts(Sample *S, int flag = 0);
 	virtual void scaleLeptons(Sample *S, int flag = 0);
 	virtual void smearMET(Sample *S);
 	virtual void propagateMET(TLorentzVector vec1, TLorentzVector vec2);
 	virtual void scaleMET(Sample *S, int flag = 0);
 	virtual float getJetPt(int); // for shifting and smearing
+	virtual float getM3();
 	virtual float getMET();
 	virtual float getMETPhi();
 	virtual int getNJets();
@@ -781,7 +784,7 @@ public:
 	lepton fHypLepton3;
 	
 	// old void setRegionCuts(gRegion reg = Baseline);
-	void setRegionCuts(int reg = 0);
+	void setRegionCuts(int reg);
 	
 	const int     getNFPtBins(gChannel); // fake ratios
 	const double *getFPtBins (gChannel);
@@ -837,6 +840,7 @@ public:
 	int         fSETree_NJ;
 	int         fSETree_NbJ;
 	int         fSETree_NbJmed;
+	float       fSETree_M3;
 	float       fSETree_MT2;
 	float       fSETree_Mll;
 	float       fSETree_pT1;
@@ -857,6 +861,7 @@ public:
 	vector<float> fSigEv_HI_EM_HT;
 	vector<float> fSigEv_HI_EM_MET;
 	
+	vector<float> fSaved_Tags;
 	
 	TFile *fStorageFile;
 	TString fOutputFileName;
