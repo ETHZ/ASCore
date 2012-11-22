@@ -542,40 +542,41 @@ void SSDLDumper::loopEvents(Sample *S){
 
  		// Jet pts scaled down
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		smearJetPts(S, 2);
  		fillYields(S, gRegion["TTbarWSelJD"]);
  		fillSigEventTree(S, 2);
 
  		// Jet pts smeared
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		smearJetPts(S, 3);
  		fillYields(S, gRegion["TTbarWSelJS"]);
  		fillSigEventTree(S, 3);
 
  		// Btags scaled up
  		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
  		scaleBTags(S, 1);
  		fillYields(S, gRegion["TTbarWSelBU"]);
  		fillSigEventTree(S, 4);
 
  		// Btags scaled down
  		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
  		scaleBTags(S, 2);
  		fillYields(S, gRegion["TTbarWSelBD"]);
  		fillSigEventTree(S, 5);
 		
-		resetBTags();
 
  		// Lepton pts scaled up
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		scaleLeptons(S, 1);
  		fillYields(S, gRegion["TTbarWSelLU"]);
  		fillSigEventTree(S, 6);
 
  		// Lepton pts scaled down
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		scaleLeptons(S, 2);
  		fillYields(S, gRegion["TTbarWSelLD"]);
  		fillSigEventTree(S, 7);
