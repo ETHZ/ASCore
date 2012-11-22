@@ -6052,18 +6052,18 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	
 	vector<int> ttwregions;
 	ttwregions.push_back(gRegion["TTbarWPresel"]);
-	ttwregions.push_back(gRegion["TTbarWPreselpp"]);
-	// MARC ttwregions.push_back(TTbarWSelIncl);
 	ttwregions.push_back(gRegion["TTbarWSel"]);
-	ttwregions.push_back(gRegion["TTbarWSelpp"]);
-	// MARC ttwregions.push_back(TTbarWSelJU);
-	// MARC ttwregions.push_back(TTbarWSelJD);
-	// MARC ttwregions.push_back(TTbarWSelJS);
-	// MARC ttwregions.push_back(TTbarWSelBU);
-	// MARC ttwregions.push_back(TTbarWSelBD);
-	// MARC ttwregions.push_back(TTbarWSelLU);
-	// MARC ttwregions.push_back(TTbarWSelLD);
+	ttwregions.push_back(gRegion["TTbarWSelJU"]);
+	ttwregions.push_back(gRegion["TTbarWSelJD"]);
+	ttwregions.push_back(gRegion["TTbarWSelJS"]);
+	ttwregions.push_back(gRegion["TTbarWSelBU"]);
+	ttwregions.push_back(gRegion["TTbarWSelBD"]);
+	ttwregions.push_back(gRegion["TTbarWSelLU"]);
+	ttwregions.push_back(gRegion["TTbarWSelLD"]);
+	// MARC ttwregions.push_back(gRegion["TTbarWSelIncl"]);
 	
+	// ttwregions.push_back(gRegion["TTbarWPreselpp"]);
+	// ttwregions.push_back(gRegion["TTbarWSelpp"]);
 	vector<TTWZPrediction> ttwzpreds;
 	for(size_t i = 0; i < ttwregions.size(); ++i){
 		int reg = ttwregions[i];
@@ -6071,14 +6071,14 @@ void SSDLPlotter::makeTTWIntPredictions(){
 		ttwzpreds.push_back(makeIntPredictionTTW(outputname, reg));
 	}
 	
-	const int inm = 2;
-	const int iju = 3;
-	const int ijd = 4;
-	const int ijs = 5;
-	const int ibu = 6;
-	const int ibd = 7;
-	const int ilu = 8;
-	const int ild = 9;
+	const int inm = 1;
+	const int iju = 2;
+	const int ijd = 3;
+	const int ijs = 4;
+	const int ibu = 5;
+	const int ibd = 6;
+	const int ilu = 7;
+	const int ild = 8;
 	
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
@@ -7935,26 +7935,27 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	mcbkg.push_back(WWG);
 	mcbkg.push_back(WWW);
 	mcbkg.push_back(ZZZ);
+
 	for(size_t i = 0; i < mcbkg.size(); ++i){
 		Sample *S = fSamples[mcbkg[i]];
 		float scale = fLumiNorm/S->getLumi();
 		
-		float temp_nt2_mm = scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em = scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee = scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 		
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
 		nt2_rare_mc_ee += temp_nt2_ee;
 		
-		nt2_rare_mc_mm_e1 += scale*scale * S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-		nt2_rare_mc_em_e1 += scale*scale * S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
-		nt2_rare_mc_ee_e1 += scale*scale * S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
+		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale * S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale * S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale * S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
 		
 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
-					temp_nt2_mm, scale*S->numbers[reg][Muon].tt_avweight * S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
-					temp_nt2_em, scale*S->numbers[reg][ElMu].tt_avweight * S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
-					temp_nt2_ee, scale*S->numbers[reg][Elec].tt_avweight * S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
+					temp_nt2_mm, gMMTrigScale*scale*S->numbers[reg][Muon].tt_avweight * S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
+					temp_nt2_em, gEMTrigScale*scale*S->numbers[reg][ElMu].tt_avweight * S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
+					temp_nt2_ee, gEETrigScale*scale*S->numbers[reg][Elec].tt_avweight * S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
 	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
@@ -7966,13 +7967,13 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-	float wz_nt2_mm = wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float wz_nt2_em = wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float wz_nt2_ee = wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 	
-	float wz_nt2_mm_e1 = wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float wz_nt2_em_e1 = wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
-	float wz_nt2_ee_e1 = wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 	
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
 				wz_nt2_mm, sqrt(wz_nt2_mm_e1),
@@ -7984,31 +7985,31 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	///////////////////////////////////////////
 	// ttX production
 	float ttwscale = fLumiNorm/fSamples[TTbarW]->getLumi();
-	float ttw_nt2_mm = ttwscale*fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float ttw_nt2_em = ttwscale*fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float ttw_nt2_ee = ttwscale*fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float ttw_nt2_mm = gMMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttw_nt2_em = gEMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttw_nt2_ee = gEETrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 	
-	float ttw_nt2_mm_e1 = ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][Muon].tt_avweight*fSamples[TTbarW]->numbers[reg][Muon].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float ttw_nt2_em_e1 = ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarW]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->GetEntries());
-	float ttw_nt2_ee_e1 = ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][Elec].tt_avweight*fSamples[TTbarW]->numbers[reg][Elec].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+	float ttw_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][Muon].tt_avweight*fSamples[TTbarW]->numbers[reg][Muon].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float ttw_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarW]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float ttw_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttwscale*ttwscale * fSamples[TTbarW]->numbers[reg][Elec].tt_avweight*fSamples[TTbarW]->numbers[reg][Elec].tt_avweight * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 	
 	float ttzscale = fLumiNorm/fSamples[TTbarZ]->getLumi();
-	float ttz_nt2_mm = ttzscale*fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float ttz_nt2_em = ttzscale*fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float ttz_nt2_ee = ttzscale*fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float ttz_nt2_mm = gMMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttz_nt2_em = gEMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttz_nt2_ee = gEETrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 	
-	float ttz_nt2_mm_e1 = ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][Muon].tt_avweight*fSamples[TTbarZ]->numbers[reg][Muon].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float ttz_nt2_em_e1 = ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
-	float ttz_nt2_ee_e1 = ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight*fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+	float ttz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][Muon].tt_avweight*fSamples[TTbarZ]->numbers[reg][Muon].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float ttz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float ttz_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight*fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	float tthscale = fLumiNorm/fSamples[TTbarH]->getLumi();
-	float tth_nt2_mm = tthscale*fSamples[TTbarH]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float tth_nt2_em = tthscale*fSamples[TTbarH]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float tth_nt2_ee = tthscale*fSamples[TTbarH]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float tth_nt2_mm = gMMTrigScale*tthscale*fSamples[TTbarH]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float tth_nt2_em = gEMTrigScale*tthscale*fSamples[TTbarH]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float tth_nt2_ee = gEETrigScale*tthscale*fSamples[TTbarH]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
-	float tth_nt2_mm_e1 = tthscale*tthscale * fSamples[TTbarH]->numbers[reg][Muon].tt_avweight*fSamples[TTbarH]->numbers[reg][Muon].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float tth_nt2_em_e1 = tthscale*tthscale * fSamples[TTbarH]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarH]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].em.nt20_pt->GetEntries());
-	float tth_nt2_ee_e1 = tthscale*tthscale * fSamples[TTbarH]->numbers[reg][Elec].tt_avweight*fSamples[TTbarH]->numbers[reg][Elec].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+	float tth_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*tthscale*tthscale * fSamples[TTbarH]->numbers[reg][Muon].tt_avweight*fSamples[TTbarH]->numbers[reg][Muon].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float tth_nt2_em_e1 = gEMTrigScale*gEMTrigScale*tthscale*tthscale * fSamples[TTbarH]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarH]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float tth_nt2_ee_e1 = gEETrigScale*gEETrigScale*tthscale*tthscale * fSamples[TTbarH]->numbers[reg][Elec].tt_avweight*fSamples[TTbarH]->numbers[reg][Elec].tt_avweight * fSamples[TTbarH]->getError2(fSamples[TTbarH]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttW Prod.",
 				ttw_nt2_mm, sqrt(ttw_nt2_mm_e1),
@@ -13048,6 +13049,7 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 	float eta1, eta2;
 	int event, run;
 	signed int charge;
+
 	
 	sigtree->SetBranchAddress("SystFlag",    &flag);
 	sigtree->SetBranchAddress("Event",       &event);
@@ -13075,12 +13077,14 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 	float npp(0.), npf(0.), nfp(0.), nff(0.);
 	float f1(0.), f2(0.), p1(0.), p2(0.);
 	
+
 	TFile* file_opt;
 	TTree* tree_opt;
 	float eventWeight;
 
 	if( fDO_OPT ) {
-   		system( "mkdir -p OPT_ttW" );
+
+		system( "mkdir -p OPT_ttW" );
 		std::string outputdir_str(fOutputDir);
 		outputdir_str.erase(outputdir_str.end()-1); //get rid of last slash
 		TString file_opt_name = "OPT_ttW/opt_ttW_" + outputdir_str + ".root";
@@ -13097,6 +13101,7 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 		tree_opt->Branch( "pT2",         &pT2,         "pT2/F" );
 		tree_opt->Branch( "HT",          &HT,          "HT/F" );
 		tree_opt->Branch( "MET",         &MET,         "MET/F" );
+
 	}
 
 	
@@ -13146,9 +13151,8 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			if(nbjetsmed < gRegions[r]->minNbjmed || nbjetsmed > gRegions[r]->maxNbjmed)   continue;
 			if(gRegions[r]->app3rdVet  != 0       && pass3rdVeto == 1)                     continue;
 			if(gRegions[r]->chargeVeto != 0       && (charge == gRegions[r]->chargeVeto) ) continue;
-			   
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
-			
+
 			S->numbers[r][chan].npp += puweight * npp;
 			S->numbers[r][chan].npf += puweight * npf;
 			S->numbers[r][chan].nfp += puweight * nfp;
@@ -13161,24 +13165,23 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 		float minpt = TMath::Min(pT1, pT2);
 		
  		if(MET > 30. && maxpt > 20. && minpt > 20.){
-		  if(HT        >= gRegions[baseRegion]->minHT     &&
-		     HT        <  gRegions[baseRegion]->maxHT     &&
-		     njets     >= gRegions[baseRegion]->minNjets  &&
-		     njets     <= gRegions[baseRegion]->maxNjets  && 
-		     nbjets    >= gRegions[baseRegion]->minNbjets &&
-		     nbjets    <= gRegions[baseRegion]->maxNbjets &&
-		     nbjetsmed >= gRegions[baseRegion]->minNbjmed &&
-		     nbjetsmed <= gRegions[baseRegion]->maxNbjmed){
-		       
-		       fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
-		       fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
-		       fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
-		       fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
-		     }
+		  // not in benjamins code if(HT        >= gRegions[baseRegion]->minHT     &&
+		  // not in benjamins code    HT        <  gRegions[baseRegion]->maxHT     &&
+		  // not in benjamins code    njets     >= gRegions[baseRegion]->minNjets  &&
+		  // not in benjamins code    njets     <= gRegions[baseRegion]->maxNjets  && 
+		  // not in benjamins code    nbjets    >= gRegions[baseRegion]->minNbjets &&
+		  // not in benjamins code    nbjets    <= gRegions[baseRegion]->maxNbjets &&
+		  // not in benjamins code    nbjetsmed >= gRegions[baseRegion]->minNbjmed &&
+		  // not in benjamins code    nbjetsmed <= gRegions[baseRegion]->maxNbjmed){
+			fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
+		  // not in benjamins code    }
 		}
-		// Check pt cuts of TTbarWSel:
+
+		// Check pt cuts of baseRegion:
  		bool passespt = passesPtCuts(pT1, pT2, baseRegion, chan);
- 		// MARC bool passespt = passesPtCuts(pT1, pT2, TTbarWSel, chan);
 		
 		if(HT        >= gRegions[baseRegion]->minHT     &&
 		   HT        <  gRegions[baseRegion]->maxHT     &&
@@ -13188,28 +13191,16 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
  		   nbjets    <= gRegions[baseRegion]->maxNbjets &&
  		   nbjetsmed >= gRegions[baseRegion]->minNbjmed &&
 		   nbjetsmed <= gRegions[baseRegion]->maxNbjmed &&
- 		   passespt) 		  {
+ 		   passespt) 		  
+		{
 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
- 			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
- 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
  			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);
-		}
   	
- 		if(HT        >= gRegions[baseRegion]->minHT     &&
-		   HT        <  gRegions[baseRegion]->maxHT     &&
- 		   MET       >  gRegions[baseRegion]->minMet    &&
- 		   MET       <  gRegions[baseRegion]->maxMet    &&
-		   njets     >= gRegions[baseRegion]->minNjets  &&
-		   njets     <= gRegions[baseRegion]->maxNjets  && 
- 		   nbjets    >= gRegions[baseRegion]->minNbjets &&
- 		   nbjets    <= gRegions[baseRegion]->maxNbjets &&
- 		   nbjetsmed >= gRegions[baseRegion]->minNbjmed &&
-		   nbjetsmed <= gRegions[baseRegion]->maxNbjmed &&
- 		   passespt) 		  {
-// 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
-// 			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
-// 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
-// 			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);			
+ 		if(njets     >= gRegions[baseRegion]->minNjets  &&
+		   njets     <= gRegions[baseRegion]->maxNjets  )
+		   {
 
 			fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
 			fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
@@ -13250,6 +13241,7 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed+0.5, puweight * npf);
 			fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed+0.5, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed+0.5, puweight * nff);
+		   }
 		}
 
 		if( fDO_OPT && flav<3 && flag == 0){
