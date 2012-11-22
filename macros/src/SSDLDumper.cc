@@ -454,10 +454,11 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		// Compute event-by-event weights:
 		gHLTSF = 1.;
+		gBtagSF  = 1.;
 		gBtagSF1 = 1.;
 		gBtagSF2 = 1.;
 
-		int m1(-1), m2(-1);
+		fDoCounting = false;
 		// disable for now if( S->datamc!=0 ) {
 		// disable for now 	int ind1(-1), ind2(-1);
 		// disable for now 	fDoCounting = false;
@@ -502,26 +503,26 @@ void SSDLDumper::loopEvents(Sample *S){
 		// disable for now }
 		
 		
-		gEventWeight  = gHLTSF * 1.;
-		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
-			gEventWeight *= PUWeight; // PU weight is always 1. for data, so no problem here
-		}
+		gEventWeight  = gHLTSF * gBtagSF;
+		if( S->datamc!=4 ) gEventWeight *= PUWeight; // no pu weight for mc with no pu, that really doesn't exist anymore in 2012, so it's fine
 
 
 		fillKinPlots(S);
-		for(int r = 0; r < gNREGIONS; r++){
-			if (gRegions[r]->minNbjmed == 2) gEventWeight *= gBtagSF1;
-			if (gRegions[r]->minNbjmed == 3) gEventWeight *= gBtagSF2;
-			fillYields(S, r);
-		}
-		// reset the event weight to what it should be without a region cut applied
-		gEventWeight  = gHLTSF * 1.;
-		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
-			gEventWeight *= PUWeight; // PU weight is always 1. for data, so no problem here
-		}
+		for(int r = 0; r < gRegion["TTbarWPresel"]; r++) fillYields(S, r);
+
+		// disable for now // reset the event weight to what it should be without a region cut applied
+		// disable for now gEventWeight  = gHLTSF * 1.;
+		// disable for now if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
+		// disable for now 	gEventWeight *= PUWeight; // PU weight is always 1. for data, so no problem here
+		// disable for now }
+
+		fillYields(S, gRegion["TTbarWPresel"]);
+
+		fDoCounting = true;
+		fillYields(S, gRegion["TTbarWSel"]);
+		fDoCounting = false;
 
 		fillSigEventTree(S, 0);
-		m1 = -1; m2 = -1;
 		fillDiffYields(S);
 		fillRatioPlots(S);
 		fillMuIsoPlots(S);
@@ -566,7 +567,6 @@ void SSDLDumper::loopEvents(Sample *S){
  		fillYields(S, gRegion["TTbarWSelBD"]);
  		fillSigEventTree(S, 5);
 		
-
  		// Lepton pts scaled up
  		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
@@ -5110,7 +5110,7 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 	// Remove jets close to all tight leptons
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isTightMuon(imu)) continue;
-		if(!isGoodSecMuon(imu)) continue; // pt  > 10 MARC is that true?
+		if(!isGoodSecMuon(imu)) continue; // pt  > 10
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
