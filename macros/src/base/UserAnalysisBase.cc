@@ -297,6 +297,7 @@ bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacu
 // MUONS
 bool UserAnalysisBase::IsMostBasicMu(int index){
     // Most basic muons for Z-veto in 2012
+    if(MuPFIso(index) > 1.0) return false;
     if((fTR->MuIsGlobalMuon[index] == 0 && fTR->MuIsTrackerMuon[index] == 0 ))  return false;
     if(fTR->MuIsPFMuon[index] == 0) return false;
     return true;
@@ -386,8 +387,6 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 }
 
 bool UserAnalysisBase::IsGoodTriggerEl(int index){
-    // Electrons with Veto WP (corresponds to WP 95 from 2011)
-    // if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
     if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
         if(fTR->ElSigmaIetaIeta            [index] > 0.011 ) return false;
         if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.15 ) return false;
@@ -404,6 +403,7 @@ bool UserAnalysisBase::IsGoodTriggerEl(int index){
     // ECAL gap veto
     if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
 
+	// the following two cuts are applied in the basicEle function
     // if(fabs(fTR->ElD0PV[index]) > 0.04) return false;
     // if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
 
@@ -477,13 +477,14 @@ bool UserAnalysisBase::IsGoodElId_MediumWP(int index){
 
 float UserAnalysisBase::Aeff(float eta) {
 	float abseta = fabs(eta); // making sure we're looking at |eta|
-	if(abseta < 1.0)   return 0.10;
-	if(abseta < 1.479) return 0.12;
-	if(abseta < 2.0)   return 0.085;
-	if(abseta < 2.2)   return 0.11;
-	if(abseta < 2.3)   return 0.12;
-	if(abseta < 2.4)   return 0.12;
-	return 0.13;
+	// now for HCP dataset for cone of dR < 0.3
+	if(abseta < 1.0)   return 0.13;
+	if(abseta < 1.479) return 0.14;
+	if(abseta < 2.0)   return 0.07;
+	if(abseta < 2.2)   return 0.09;
+	if(abseta < 2.3)   return 0.11;
+	if(abseta < 2.4)   return 0.11;
+	return 0.14;
 }
 
 float UserAnalysisBase::ElPFIso(int index){
@@ -532,8 +533,9 @@ bool UserAnalysisBase::IsLooseEl(int index){
     // Requiring VETO WP: no further requirements need to be applied.
 
     // Loose isolation criteria
-    if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
-    if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
+	if(ElPFIso(index) > 1.0) return false;
+    // if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
+    // if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
 
     return true;
 }
