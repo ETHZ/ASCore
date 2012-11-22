@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.81 $";
+string sjzbversion="$Revision: 1.70.2.87 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -29,7 +29,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.81 2012/11/05 22:32:07 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.87 2012/11/20 16:56:11 buchmann Exp $
 */
 
 
@@ -269,6 +269,18 @@ public:
   float ZbCHS1010_BTagWgt;
   float Zb3010_BTagWgt;
   float Zb30_BTagWgt;
+  
+  float ZbCHS30_BTagWgtUp;
+  float ZbCHS3010_BTagWgtUp;
+  float ZbCHS1010_BTagWgtUp;
+  float Zb3010_BTagWgtUp;
+  float Zb30_BTagWgtUp;
+  
+  float ZbCHS30_BTagWgtDown;
+  float ZbCHS3010_BTagWgtDown;
+  float ZbCHS1010_BTagWgtDown;
+  float Zb3010_BTagWgtDown;
+  float Zb30_BTagWgtDown;
   
   int NPdfs;
   float pdfW[100];
@@ -857,6 +869,18 @@ void nanoEvent::reset()
   Zb3010_BTagWgt = 1.0 ;
   Zb30_BTagWgt = 1.0 ;
   
+  ZbCHS30_BTagWgtUp = 1.0 ;
+  ZbCHS3010_BTagWgtUp = 1.0 ;
+  ZbCHS1010_BTagWgtUp = 1.0 ;
+  Zb3010_BTagWgtUp = 1.0 ;
+  Zb30_BTagWgtUp = 1.0 ;
+  
+  ZbCHS30_BTagWgtDown = 1.0 ;
+  ZbCHS3010_BTagWgtDown = 1.0 ;
+  ZbCHS1010_BTagWgtDown = 1.0 ;
+  Zb3010_BTagWgtDown = 1.0 ;
+  Zb30_BTagWgtDown = 1.0 ;
+  
   mGlu=0;
   mChi=0;
   mLSP=0;
@@ -1300,9 +1324,11 @@ JZBAnalysis::~JZBAnalysis(){}
 void JZBAnalysis::Begin(TFile *f){
 
   
-  CSV_CorrectionFile = new TFile("/shome/buchmann/material/Corrections/CVST.root");
-  CSV_EfficiencyCorrection = (TH2F*)CSV_CorrectionFile->Get("CVST_EffCorr");
-  CSV_MisTagCorrection = (TH2F*)CSV_CorrectionFile->Get("CVST_MisTagCorr");
+  CSV_CorrectionFile = new TFile("/shome/buchmann/material/Corrections/CSVT_Complete.root");
+  CSV_EfficiencyCorrection = (TH2F*)CSV_CorrectionFile->Get("EfficiencyCorrection");
+  CSV_EfficiencyCorrectionUncert = (TH2F*)CSV_CorrectionFile->Get("EfficiencyCorrectionUncertainty");
+  CSV_MisTagCorrection = (TH2F*)CSV_CorrectionFile->Get("MisTag");
+  CSV_MisTagCorrectionUncert = (TH2F*)CSV_CorrectionFile->Get("MisTagUncertainty");
   f->cd();
 
   rand_ = new TRandom();
@@ -1568,6 +1594,18 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ZbCHS1010_BTagWgt",&nEvent.ZbCHS1010_BTagWgt,"ZbCHS1010_BTagWgt/F");
   myTree->Branch("Zb3010_BTagWgt",&nEvent.Zb3010_BTagWgt,"Zb3010_BTagWgt/F");
   myTree->Branch("Zb30_BTagWgt",&nEvent.Zb30_BTagWgt,"Zb30_BTagWgt/F");
+  
+  myTree->Branch("ZbCHS30_BTagWgtUp",&nEvent.ZbCHS30_BTagWgtUp,"ZbCHS30_BTagWgtUp/F");
+  myTree->Branch("ZbCHS3010_BTagWgtUp",&nEvent.ZbCHS3010_BTagWgtUp,"ZbCHS3010_BTagWgtUp/F");
+  myTree->Branch("ZbCHS1010_BTagWgtUp",&nEvent.ZbCHS1010_BTagWgtUp,"ZbCHS1010_BTagWgtUp/F");
+  myTree->Branch("Zb3010_BTagWgtUp",&nEvent.Zb3010_BTagWgtUp,"Zb3010_BTagWgtUp/F");
+  myTree->Branch("Zb30_BTagWgtUp",&nEvent.Zb30_BTagWgtUp,"Zb30_BTagWgtUp/F");
+  
+  myTree->Branch("ZbCHS30_BTagWgtDown",&nEvent.ZbCHS30_BTagWgtDown,"ZbCHS30_BTagWgtDown/F");
+  myTree->Branch("ZbCHS3010_BTagWgt",&nEvent.ZbCHS3010_BTagWgtDown,"ZbCHS3010_BTagWgtDown/F");
+  myTree->Branch("ZbCHS1010_BTagWgt",&nEvent.ZbCHS1010_BTagWgtDown,"ZbCHS1010_BTagWgtDown/F");
+  myTree->Branch("Zb3010_BTagWgt",&nEvent.Zb3010_BTagWgtDown,"Zb3010_BTagWgtDown/F");
+  myTree->Branch("Zb30_BTagWgt",&nEvent.Zb30_BTagWgtDown,"Zb30_BTagWgtDown/F");
   
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
@@ -1939,18 +1977,30 @@ void JZBAnalysis::Begin(TFile *f){
 //------------------------------------------------------------------------------
 bool momentumComparator(lepton i, lepton j) { return (i.p.Pt()>j.p.Pt()); }
 
-float JZBAnalysis::GetBWeight(int JetFlavor, float JetPt, float JetEta) {
+float JZBAnalysis::GetBWeight(int JetFlavor, float JetPt, float JetEta, float &Uncert) {
+  Uncert=0.0;
+  
   if(abs(JetFlavor)==4||abs(JetFlavor)==5) {
     //return weight from efficiency correction
     int Bin = CSV_EfficiencyCorrection->FindBin(JetPt,JetEta);
     float weight = CSV_EfficiencyCorrection->GetBinContent(Bin);
-    if(weight<0) return 1.0;
+    Bin=CSV_EfficiencyCorrectionUncert->FindBin(JetPt,JetEta);
+    Uncert=CSV_EfficiencyCorrectionUncert->GetBinContent(Bin);
+    if(weight<0) {
+      Uncert=0.0;
+      return 1.0;
+    }
     else return weight;
   } else {
     //return weight from mistag correction
     int Bin = CSV_MisTagCorrection->FindBin(JetPt,JetEta);
     float weight = CSV_MisTagCorrection->GetBinContent(Bin);
-    if(weight<0) return 1.0;
+    Bin = CSV_MisTagCorrectionUncert->FindBin(JetPt,JetEta);
+    Uncert=CSV_MisTagCorrectionUncert->GetBinContent(Bin);
+    if(weight<0) {
+      Uncert=0.0;
+      return 1.0;
+    }
     else return weight;
   }
 }
@@ -2609,7 +2659,12 @@ void JZBAnalysis::Analyze() {
       bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
 
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
-        if(nEvent.ZbCHS30_pfJetGoodNum==0) nEvent.ZbCHS30_BTagWgt = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta));
+        if(nEvent.ZbCHS30_pfJetGoodNum==0) {
+	  float Uncert;
+	  nEvent.ZbCHS30_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
+	  nEvent.ZbCHS30_BTagWgtUp   = nEvent.ZbCHS30_BTagWgt+Uncert;
+	  nEvent.ZbCHS30_BTagWgtDown = nEvent.ZbCHS30_BTagWgt-Uncert;
+	}
   
         nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]=fTR->PFCHSJcombinedSecondaryVertexBJetTags[i];
         if(nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]>0.679) {
@@ -2624,7 +2679,13 @@ void JZBAnalysis::Analyze() {
       
       if((nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
 	//Z+b selection with 30 GeV leading jet, 10 GeV sub-leading jet
-	if(nEvent.ZbCHS3010_pfJetGoodNum==0) nEvent.ZbCHS3010_BTagWgt = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta));
+	if(nEvent.ZbCHS3010_pfJetGoodNum==0) {
+	  float Uncert;
+	  nEvent.ZbCHS3010_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
+	  nEvent.ZbCHS3010_BTagWgtDown = nEvent.ZbCHS3010_BTagWgt-Uncert;
+	  nEvent.ZbCHS3010_BTagWgtUp   = nEvent.ZbCHS3010_BTagWgt+Uncert;
+	}
+	
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.679) {
 	  nEvent.ZbCHS3010_pfBJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -2638,7 +2699,13 @@ void JZBAnalysis::Analyze() {
 
       if(nEvent.ZbCHS1010_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) {
 	//Z+b selection with 10 GeV leading jet, 10 GeV sub-leading jet
-	if(nEvent.ZbCHS1010_pfJetGoodNum==0) nEvent.ZbCHS1010_BTagWgt = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta));
+	if(nEvent.ZbCHS1010_pfJetGoodNum==0) {
+	  float Uncert;
+	  nEvent.ZbCHS1010_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
+	  nEvent.ZbCHS1010_BTagWgtDown = nEvent.ZbCHS1010_BTagWgt - Uncert;
+	  nEvent.ZbCHS1010_BTagWgtUp   = nEvent.ZbCHS1010_BTagWgt + Uncert;
+	}
+	  
 	nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]>0.679) {
 	  nEvent.ZbCHS1010_pfBJetDphiZ[nEvent.ZbCHS1010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -2771,7 +2838,13 @@ void JZBAnalysis::Analyze() {
         
       if((nEvent.Zb3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.Zb3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-          if(nEvent.Zb3010_pfJetGoodNum==0) nEvent.Zb3010_BTagWgt = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta));
+          if(nEvent.Zb3010_pfJetGoodNum==0) {
+	    float Uncert;
+	    nEvent.Zb3010_BTagWgt     = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
+	    nEvent.Zb3010_BTagWgtDown = nEvent.Zb3010_BTagWgt - Uncert;
+	    nEvent.Zb3010_BTagWgtUp   = nEvent.Zb3010_BTagWgt + Uncert;
+	  }
+	    
           nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
           if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.679) {
               nEvent.Zb3010_pfBJetDphiZ[nEvent.Zb3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -2837,7 +2910,12 @@ void JZBAnalysis::Analyze() {
         
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
           //Z+b selection with 30 GeV jets
-          if(nEvent.Zb30_pfJetGoodNum==0) nEvent.Zb30_BTagWgt = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta));
+          if(nEvent.Zb30_pfJetGoodNum==0) {
+	    float Uncert;
+	    nEvent.Zb30_BTagWgt     = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
+	    nEvent.Zb30_BTagWgtDown = nEvent.Zb30_BTagWgt - Uncert;
+	    nEvent.Zb30_BTagWgtUp   = nEvent.Zb30_BTagWgt + Uncert;
+	  }
           nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
           if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.679) {
               nEvent.Zb30_pfBJetDphiZ[nEvent.Zb30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -3887,7 +3965,7 @@ void JZBAnalysis::StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lept
     int photonindex = photons[ipho].index;
     if(photonindex>=0) {
       if(VerboseModeForStudies) cout << fTR->PhoMCmatchexitcode[photonindex] << " ; " << fTR->PhoMCmatchindex[photonindex] << endl;
-      if(fTR->PhoMCmatchexitcode[photonindex]>=0 && fTR->PhoMCmatchindex[photonindex]>=0) {
+      if(fDataType_ == "mc" && fTR->PhoMCmatchexitcode[photonindex]>=0 && fTR->PhoMCmatchindex[photonindex]>=0) {
 	if(VerboseModeForStudies) cout << "     found a matched gen photon!!!! " << endl;
 	if(VerboseModeForStudies) cout << "        reco:    pt(" << photons[ipho].p.Pt() << ")   phi(" << photons[ipho].p.Phi() << ")  eta (" << photons[ipho].p.Eta() << ") " << endl;
 	if(VerboseModeForStudies) cout << "        gen :    pt(" << fTR->GenPhotonPt[fTR->PhoMCmatchindex[photonindex]] << ")   phi(" << fTR->GenPhotonPhi[fTR->PhoMCmatchindex[photonindex]] << ")  eta (" << fTR->GenPhotonEta[fTR->PhoMCmatchindex[photonindex]] << ") " << endl;
