@@ -1986,6 +1986,7 @@ float JZBAnalysis::GetBWeight(int JetFlavor, float JetPt, float JetEta, float &U
     float weight = CSV_EfficiencyCorrection->GetBinContent(Bin);
     Bin=CSV_EfficiencyCorrectionUncert->FindBin(JetPt,JetEta);
     Uncert=CSV_EfficiencyCorrectionUncert->GetBinContent(Bin);
+    if(Uncert<0) Uncert=0.0;
     if(weight<0) {
       Uncert=0.0;
       return 1.0;
@@ -1997,6 +1998,7 @@ float JZBAnalysis::GetBWeight(int JetFlavor, float JetPt, float JetEta, float &U
     float weight = CSV_MisTagCorrection->GetBinContent(Bin);
     Bin = CSV_MisTagCorrectionUncert->FindBin(JetPt,JetEta);
     Uncert=CSV_MisTagCorrectionUncert->GetBinContent(Bin);
+    if(Uncert<0) Uncert=0.0;
     if(weight<0) {
       Uncert=0.0;
       return 1.0;
