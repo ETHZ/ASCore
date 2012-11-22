@@ -660,11 +660,19 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
+	
+	if(singleMuTrigger() && S->sname == "TTJets" && !IsSignalMuon[0] && abs(MuGenMID[0])!=15){
+		if( isTightMuon(0) ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+		if( isLooseMuon(0) ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+	}
+	if(doubleMuTrigger() && S->sname == "TTJets" && IsSignalMuon[mu2]){
+		if( isTightMuon(mu2) ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+		if( isLooseMuon(mu2) ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+	}
 
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
 			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-			if (S->sname == "TTJets") S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
@@ -676,14 +684,12 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 
 			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
-			if (S->sname == "TTJets") S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
 	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
 		if( isTightMuon(mu2) ){
 			S->region[reg][HighPt].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			if (S->sname == "TTJets") S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(mu2) ){
@@ -693,7 +699,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 			// S->region[reg][HighPt].mm.pratio_eta->FillWeighted(isTightMuon(mu2), gEventWeight, fabs(MuEta[mu2]));
 
 			S->region[reg][HighPt].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			if (S->sname == "TTJets") S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 	}
@@ -759,11 +764,18 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
+	if(singleElTrigger() && S->sname == "TTJets" && !IsSignalElectron[0] && abs(ElGenMID[0])!=15){
+		if( isTightElectron(0) ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+		if( isLooseElectron(0) ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+	}
+	if(doubleElTrigger() && S->sname == "TTJets" && IsSignalElectron[el2]){
+		if( isTightElectron(el2) ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+		if( isLooseElectron(el2) ) S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+	}
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
 			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
 			// marc S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->sname == "TTJets") S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(0) ){
@@ -774,7 +786,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 
 			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
 			// marc S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->sname == "TTJets") S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
@@ -782,7 +793,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	if(doubleElTrigger() && isZElElEvent(el1, el2)){
 		if( isTightElectron(el2) ){
 			S->region[reg][HighPt].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			if(S->sname == "TTJets") S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(el2) ){
@@ -792,7 +802,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 			// S->region[reg][HighPt].ee.pratio_eta->FillWeighted(isTightElectron(el2), gEventWeight, fabs(ElEta[el2]));
 
 			S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			if(S->sname == "TTJets") S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 	}
