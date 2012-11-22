@@ -777,8 +777,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-
-
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
 			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
@@ -4839,7 +4837,6 @@ bool SSDLDumper::isFakeMuon(int muon){
 	return true;
 }
 bool SSDLDumper::isPromptMuon(int muon){
-	if(isLooseMuon(muon) == false) return false;
 
 	// Mother or Grandmother is a SM hadron:
 	if(MuGenMType[muon] > 10 || MuGenGMType[muon] > 10) return false;
@@ -4856,6 +4853,7 @@ bool SSDLDumper::isPromptMuon(int muon){
 	
 	// Mother is a top
 	if(abs(MuGenMID[muon]) == 6) return true;
+	
 	return false;
 }
 bool SSDLDumper::isChargeMatchedMuon(int mu){
@@ -5033,7 +5031,6 @@ bool SSDLDumper::isFakeElectron(int ele){
 	return true;
 }
 bool SSDLDumper::isPromptElectron(int ele){
-	if(isLooseElectron(ele) == false) return false;
 
 	// Matched to electron
 	if(abs(ElGenID[ele]) != 11) return false;
