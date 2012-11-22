@@ -27,25 +27,33 @@ int main( int argc, char* argv[] ) {
     selectionType = selectionType_str;
   }
 
-  std::cout << "marc's ZBi: " << ZBiCalculator::computeZBi( 9.95,  3.93, 1.59 ) << std::endl;
 
   // this sets the style:
   DrawBase* db = new DrawBase("OPT_ZBi");
   db->set_lumiOnRightSide();
-  db->set_lumiNormalization(4980.);
+  db->set_lumiNormalization(30000.);
 
   TPaveText* label_sqrt = db->get_labelSqrt();
     
 
-  SSDLPlotter* plotter = new SSDLPlotter();
+  TString config = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/dumperconfig.cfg";
+
+std::cout << "0" << std::endl;
+  SSDLPlotter* plotter = new SSDLPlotter(config);
+std::cout << "1" << std::endl;
   //std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
-  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr12_Iso005_NoZVeto_jet20_new";
+  std::string outputdir = "/shome/pandolf/CMSSW_5_3_6_optTTW/src/DiLeptonAnalysis/NTupleProducer/macros/OPT_ttW";
   plotter->setVerbose(1);
+std::cout << "2" << std::endl;
   plotter->fDO_OPT = false;
+std::cout << "3" << std::endl;
   plotter->setOutputDir(outputdir);
+std::cout << "4" << std::endl;
   plotter->init("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/DataCard_SSDL.dat");
+std::cout << "5" << std::endl;
   plotter->readHistos(plotter->fOutputFileName);
-  plotter->storeWeightedPred();
+std::cout << "6" << std::endl;
+  plotter->storeWeightedPred(4);
   //plotter->doAnalysis();
 
 
@@ -54,7 +62,7 @@ int main( int argc, char* argv[] ) {
   std::string ZBiFileName = optcutsdir + "/ZBiScan.txt";
 
   ofstream ofs_ZBi(ZBiFileName.c_str());
-  ofs_ZBi << "Expected for 5 fb-1:" << std::endl;
+  ofs_ZBi << "Expected for 30 fb-1:" << std::endl;
   ofs_ZBi << "Seff   \tS     \tB +- s(B)\tZBi" << std::endl;
 
   TGraphErrors* gr_ZBi = new TGraphErrors(0);
@@ -62,7 +70,7 @@ int main( int argc, char* argv[] ) {
   float effS_ZBi_max = 0.;
   float effMax = 0.;
 
-  float nTotal_s = 1089608.; //hardwired!!! HORRIBLE!!
+  float nTotal_s = 195845.; //hardwired!!! HORRIBLE!!
 
   for( unsigned iEff=1; iEff<10; ++iEff ) {
 
@@ -264,7 +272,7 @@ std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
 
   TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effMax*100., 10, 0., 1.6*ZBi_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
-  h2_axes_gr->SetYTitle("ZBi (5 fb^{-1})");
+  h2_axes_gr->SetYTitle("ZBi (30 fb^{-1})");
   h2_axes_gr->SetXTitle("Signal Efficiency [%]");
 
 
