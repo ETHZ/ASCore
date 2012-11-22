@@ -78,21 +78,26 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
+		// data samples
 		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
+		// fake samples
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
 		GJets200, GJets400, WW,
+		// start of the rares
 		WZ,ZZ,
 		TTbarH, TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
 		WpWp, WmWm,
+		// QCD samples
 		QCDMuEnr15,
 		QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
+		QCDEM20, QCDEM30, QCDEM80, QCDEM170, QCDEM250,
 		gNSAMPLES
 	};
 	enum gHiLoSwitch{
@@ -568,7 +573,7 @@ public:
 	void fillCutFlowHistos(Sample*);
 	void printCutFlow(gChannel, gSample, gSample);
         void printCutFlow(gChannel);
-	// MARC void printCutFlows(TString);
+	void printCutFlows(TString);
 	
 	//////////////////////////////
 	// Fillers

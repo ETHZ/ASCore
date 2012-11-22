@@ -436,8 +436,8 @@ void SSDLDumper::loopEvents(Sample *S){
 			
 		/////////////////////////////////////////////
 		// Event modifications
+		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
 		saveBTags(); // this just saves the btag values for each jet.
-		// MARC how come this function is called here..?? scaleBTags(S, 0);
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -458,48 +458,48 @@ void SSDLDumper::loopEvents(Sample *S){
 		gBtagSF2 = 1.;
 
 		int m1(-1), m2(-1);
-		if( S->datamc!=0 ) {
-			int ind1(-1), ind2(-1);
-			fDoCounting = false;
-			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
-			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
-			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
-			fDoCounting = true;
-		}
+		// disable for now if( S->datamc!=0 ) {
+		// disable for now 	int ind1(-1), ind2(-1);
+		// disable for now 	fDoCounting = false;
+		// disable for now 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
+		// disable for now 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
+		// disable for now 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
+		// disable for now 	fDoCounting = true;
+		// disable for now }
 
-		// marcs try on the b-tag scale factors:
-		if( S->datamc!=0 ) {
-			bool isFastsim = false;
-			int ind1(-1), ind2(-1);
-			fDoCounting = false;
-			float myweight1(1.), myweight2(1.);
-			std::vector< int > btags = getNBTagsMedIndices();
-			int nbtags = btags.size();
-			if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
-				if (fVerbose > 2 && nbtags > 1) {
-					cout << "There are " << nbtags << " btags in this event!" << endl;
-					cout << "jet pt of 0th btagged-jet: " << getJetPt(btags[0]) << endl;
-					cout << "      index and tagger value: " << btags[0] << "  " << JetCSVBTag[btags[0]] << endl;
-					cout << "jet pt of 1th btagged-jet: " << getJetPt(btags[1]) << endl;
-					cout << "      index and tagger value: " << btags[1] << "  " << JetCSVBTag[btags[1]] << endl;
-					cout << endl;
-				}
-				if (nbtags == 2) {
-					myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]), isFastsim);
-				}
-				if (nbtags == 3) {
-					myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
-					myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
-				}
-				if (nbtags  > 3) {
-					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
-					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
-				}
-			}
-			gBtagSF1 = myweight1;
-			gBtagSF2 = myweight2;
-			fDoCounting = true;
-		}
+		// disable for now // marcs try on the b-tag scale factors:
+		// disable for now if( S->datamc!=0 ) {
+		// disable for now 	bool isFastsim = false;
+		// disable for now 	int ind1(-1), ind2(-1);
+		// disable for now 	fDoCounting = false;
+		// disable for now 	float myweight1(1.), myweight2(1.);
+		// disable for now 	std::vector< int > btags = getNBTagsMedIndices();
+		// disable for now 	int nbtags = btags.size();
+		// disable for now 	if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
+		// disable for now 		if (fVerbose > 2 && nbtags > 1) {
+		// disable for now 			cout << "There are " << nbtags << " btags in this event!" << endl;
+		// disable for now 			cout << "jet pt of 0th btagged-jet: " << getJetPt(btags[0]) << endl;
+		// disable for now 			cout << "      index and tagger value: " << btags[0] << "  " << JetCSVBTag[btags[0]] << endl;
+		// disable for now 			cout << "jet pt of 1th btagged-jet: " << getJetPt(btags[1]) << endl;
+		// disable for now 			cout << "      index and tagger value: " << btags[1] << "  " << JetCSVBTag[btags[1]] << endl;
+		// disable for now 			cout << endl;
+		// disable for now 		}
+		// disable for now 		if (nbtags == 2) {
+		// disable for now 			myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]), isFastsim);
+		// disable for now 		}
+		// disable for now 		if (nbtags == 3) {
+		// disable for now 			myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
+		// disable for now 			myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
+		// disable for now 		}
+		// disable for now 		if (nbtags  > 3) {
+		// disable for now 			myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
+		// disable for now 			myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
+		// disable for now 		}
+		// disable for now 	}
+		// disable for now 	gBtagSF1 = myweight1;
+		// disable for now 	gBtagSF2 = myweight2;
+		// disable for now 	fDoCounting = true;
+		// disable for now }
 		
 		
 		gEventWeight  = gHLTSF * 1.;
@@ -533,7 +533,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		// Systematic studies
 		if(!gDoSystStudies) continue;
 		fChain->GetEntry(jentry); // reset tree vars
-		// resetBTags(S, 0);
+		resetBTags();
 
  		// Jet pts scaled down
  		smearJetPts(S, 1);
@@ -554,15 +554,19 @@ void SSDLDumper::loopEvents(Sample *S){
 
  		// Btags scaled up
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		scaleBTags(S, 1);
  		fillYields(S, gRegion["TTbarWSelBU"]);
  		fillSigEventTree(S, 4);
 
  		// Btags scaled down
  		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
  		scaleBTags(S, 2);
  		fillYields(S, gRegion["TTbarWSelBD"]);
  		fillSigEventTree(S, 5);
+		
+		resetBTags();
 
  		// Lepton pts scaled up
  		fChain->GetEntry(jentry); // reset tree vars
@@ -661,14 +665,22 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		resetHypLeptons();
 	}
 	
-	if(singleMuTrigger() && S->sname == "TTJets" && !IsSignalMuon[0] && abs(MuGenMID[0])!=15){
-		if( isTightMuon(0) ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-		if( isLooseMuon(0) ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+	// filling histos for ttbar only ratios. this is a fairly random place to do this, but ok...
+	if(S->sname == "TTJets"){
+		for (int i =0 ; i < NMus; ++i) {
+			if( isLooseMuon(i) && !isPromptMuon(i) ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) && !isPromptMuon(i) ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isLooseMuon(i) &&  isPromptMuon(i) ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) &&  isPromptMuon(i) ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+		}
+		for (int i =0 ; i < NEls; ++i) {
+			if( isLooseElectron(i) && !isPromptElectron(i) ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) && !isPromptElectron(i) ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isLooseElectron(i) &&  isPromptElectron(i) ) S->region[reg][HighPt].ee.pnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) &&  isPromptElectron(i) ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+		}
 	}
-	if(doubleMuTrigger() && S->sname == "TTJets" && IsSignalMuon[mu2]){
-		if( isTightMuon(mu2) ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-		if( isLooseMuon(mu2) ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-	}
+	// end filling the ttbar ratio histograms
 
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
@@ -764,14 +776,8 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-	if(singleElTrigger() && S->sname == "TTJets" && !IsSignalElectron[0] && abs(ElGenMID[0])!=15){
-		if( isTightElectron(0) ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-		if( isLooseElectron(0) ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-	}
-	if(doubleElTrigger() && S->sname == "TTJets" && IsSignalElectron[el2]){
-		if( isTightElectron(el2) ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-		if( isLooseElectron(el2) ) S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-	}
+
+
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
 			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
@@ -1118,19 +1124,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		// Other binnings, ttbarW preselection
 		setRegionCuts(gRegion[gBaseRegion]);
 		if(isSSLLElMuEvent(mu, el)){
-			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
-			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
-			fillDiffVarOS(S, mu, el, getMT2(mu, el, ElMu), 3, ElMu);
-			fillDiffVarOS(S, mu, el, getNBTags()+0.5,      6, ElMu);
-			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,   8, ElMu);
-			float ptmax = MuPt[mu];
-			float ptmin = ElPt[el];
-			if(ptmin > ptmax){
-				ptmin = MuPt[mu];
-				ptmax = ElPt[el];
-			}
-			fillDiffVarOS(S, mu, el, ptmax,          4, ElMu);
-			fillDiffVarOS(S, mu, el, ptmin,          5, ElMu);
+			fillDiffVarOS(S, mu, el, getHT(),                        0, ElMu);
+			fillDiffVarOS(S, mu, el, getMET(),                       1, ElMu);
+			fillDiffVarOS(S, mu, el, getMT2(mu, el, ElMu),           3, ElMu);
+			fillDiffVarOS(S, mu, el, TMath::Max(MuPt[mu], ElPt[el]), 4, ElMu);
+			fillDiffVarOS(S, mu, el, TMath::Min(MuPt[mu], ElPt[el]), 5, ElMu);
+			fillDiffVarOS(S, mu, el, getNBTags()+0.5,                6, ElMu);
+			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,             8, ElMu);
 		}
 		resetHypLeptons();
 
@@ -1514,7 +1514,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		// EM CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
 		if (elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
 			if ( isTightMuon(ind1) && isTightElectron(ind2)) {
-				fSETree_M3     = getM3();
+				fSETree_M3      = getM3();
 				fSETree_MT2     = getMT2(ind1, ind2, ElMu);
 				fSETree_Mll     = getMll(ind1, ind2, ElMu);
 				fSETree_HT      = getHT();
@@ -1543,7 +1543,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		// EE CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
 		if (elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
 			if ( isTightElectron(ind1) && isTightElectron(ind2)) {
-				fSETree_M3     = getM3();
+				fSETree_M3      = getM3();
 				fSETree_MT2     = getMT2(ind1, ind2, Elec);
 				fSETree_Mll     = getMll(ind1, ind2, Elec);
 				fSETree_HT      = getHT();
@@ -2251,41 +2251,41 @@ void SSDLDumper::printCutFlow(gChannel chan, gSample indmin, gSample indmax){
 	for(int i = 0; i <= indmax-indmin; i++) fOUTSTREAM << "--------------";
 	fOUTSTREAM << endl;	
 }
-// MARC void SSDLDumper::printCutFlows(TString filename){
-// MARC 	fOUTSTREAM.open(filename.Data(), ios::trunc);
-// MARC 	fOUTSTREAM << " Printing Cutflow for Mu/Mu channel..." << endl;
-// MARC 	// printCutFlow(Muon, DoubleMu1, EleHad2);
-// MARC 	printCutFlow(Muon, DoubleMu1, DoubleMu5);
-// MARC 	printCutFlow(Muon, TTJets, GJets200);
-// MARC 	printCutFlow(Muon, GVJets, WmWm);
-// MARC 	printCutFlow(Muon, LM0, LM6);
-// MARC 	printCutFlow(Muon, LM7, LM13);
-// MARC 	printCutFlow(Muon, QCDMuEnr10, QCD470);
-// MARC 	printCutFlow(Muon, QCD600, gNSAMPLES);
-// MARC 	fOUTSTREAM << endl << endl;
-// MARC 	
-// MARC 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
-// MARC 	printCutFlow(ElMu, MuEG1, MuEG5);
-// MARC 	printCutFlow(ElMu, TTJets, GJets200);
-// MARC 	printCutFlow(ElMu, GVJets, WmWm);
-// MARC 	printCutFlow(ElMu, LM0, LM6);
-// MARC 	printCutFlow(ElMu, LM7, LM13);
-// MARC 	printCutFlow(ElMu, QCDMuEnr10, QCD470);
-// MARC 	printCutFlow(ElMu, QCD600, gNSAMPLES);
-// MARC 	fOUTSTREAM << endl << endl;
-// MARC 	
-// MARC 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
-// MARC 	printCutFlow(Elec, DoubleEle1, DoubleEle5);
-// MARC 	printCutFlow(Elec, TTJets, GJets200);
-// MARC 	printCutFlow(Elec, GVJets, WmWm);
-// MARC 	printCutFlow(Elec, LM0, LM6);
-// MARC 	printCutFlow(Elec, LM7, LM13);
-// MARC 	printCutFlow(Elec, QCDMuEnr10, QCD470);
-// MARC 	printCutFlow(Elec, QCD600, gNSAMPLES);
-// MARC 	fOUTSTREAM << endl << endl;
-// MARC 
-// MARC 	fOUTSTREAM.close();
-// MARC }
+void SSDLDumper::printCutFlows(TString filename){
+	fOUTSTREAM.open(filename.Data(), ios::trunc);
+	fOUTSTREAM << " Printing Cutflow for Mu/Mu channel..." << endl;
+	// printCutFlow(Muon, DoubleMu1, EleHad2);
+	printCutFlow(Muon, DoubleMu1, DoubleMu4);
+	printCutFlow(Muon, TTJets, GJets400);
+	printCutFlow(Muon, WW, WmWm);
+	// printCutFlow(Muon, LM0, LM6);
+	// printCutFlow(Muon, LM7, LM13);
+	printCutFlow(Muon, QCDMuEnr15, QCD800);
+	// printCutFlow(Muon, QCD600, gNSAMPLES);
+	fOUTSTREAM << endl << endl;
+	
+	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
+	printCutFlow(ElMu, MuEG1, MuEG4);
+	printCutFlow(ElMu, TTJets, GJets400);
+	printCutFlow(ElMu, WW, WmWm);
+	// printCutFlow(ElMu, LM0, LM6);
+	// printCutFlow(ElMu, LM7, LM13);
+	printCutFlow(ElMu, QCDMuEnr15, QCD800);
+	// printCutFlow(ElMu, QCD600, gNSAMPLES);
+	fOUTSTREAM << endl << endl;
+	
+	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
+	printCutFlow(Elec, DoubleEle1, DoubleEle4);
+	printCutFlow(Elec, TTJets, GJets400);
+	printCutFlow(Elec, WW, WmWm);
+	// printCutFlow(Elec, LM0, LM6);
+	// printCutFlow(Elec, LM7, LM13);
+	printCutFlow(Elec, QCDEM20, QCDEM250);
+	// printCutFlow(Elec, QCD600, gNSAMPLES);
+	fOUTSTREAM << endl << endl;
+
+	fOUTSTREAM.close();
+}
 
 //____________________________________________________________________________
 void SSDLDumper::bookSigEvTree(){
@@ -2774,7 +2774,7 @@ void SSDLDumper::deleteHistos(Sample *S){
 			if(c == Elec){
 				delete C->nt20_OS_BB_pt;
 				delete C->nt20_OS_EE_pt;
-				delete C->nt20_OS_EB_pt;		  
+				delete C->nt20_OS_EB_pt;
 			}
 			if(c == ElMu){
 				delete C->nt20_OS_BB_pt;
@@ -4082,7 +4082,6 @@ int SSDLDumper::isOSEvent(int &ind1, bool(SSDLDumper::*muonSelector)(int), int &
 		break;
 	}
 	if(selectedPair.size() < 2) return 0;
-	if(selectedPair.size() > 2) return 0; //FOR SYNC WITH EWKino
 
 	int result = 0;
 	if(selectedPair[0].type == 0 && selectedPair[1].type == 0) result = 1; // mu/mu
@@ -4316,6 +4315,7 @@ bool SSDLDumper::passesTauVeto(){
 bool SSDLDumper::passesTTZSel(){
 	int ind1(-1), ind2(-1);
 	gChannel chan = Muon;
+	bool pass = true;
 
 	// OS Dilepton:
 	// Store leptons in vectors
@@ -4369,9 +4369,13 @@ bool SSDLDumper::passesTTZSel(){
 			if(l1.type == 1) chan = Elec;
 		}
 	}
-	if(bestMZ > 1000) return false;
+	if(bestMZ > 1000) pass = false;
 	tmp_Leptons_p.clear();
 	tmp_Leptons_m.clear();
+	
+	// Want to use hyp leptons only temporary! Have to set them to original later
+	lepton orig_hyplep1 = lepton(fHypLepton1.p, fHypLepton1.charge, fHypLepton1.type, fHypLepton1.index);
+	lepton orig_hyplep2 = lepton(fHypLepton2.p, fHypLepton2.charge, fHypLepton2.type, fHypLepton2.index);
 	
 	setHypLepton1(ind1, chan);
 	setHypLepton2(ind2, chan);
@@ -4402,14 +4406,18 @@ bool SSDLDumper::passesTTZSel(){
 			break;
 		}
 	}
-	if(found3rd == false) return false;
+	if(found3rd == false) pass = false;
 	
 	// Cut on jets and btags
-	if(getNJets() < 3)     return false;
-	if(getHT() < 120.)     return false;
-	if(getNBTags() < 2)    return false;
-	if(getNBTagsMed() < 1) return false;
-	return true;
+	if(getNJets() < 3)     pass = false;
+	if(getHT() < 120.)     pass = false;
+	if(getNBTags() < 2)    pass = false;
+	if(getNBTagsMed() < 1) pass = false;
+
+	resetHypLeptons();
+	lepton fHypLepton1 = lepton(orig_hyplep1.p, orig_hyplep1.charge, orig_hyplep1.type, orig_hyplep1.index);
+	lepton fHypLepton2 = lepton(orig_hyplep2.p, orig_hyplep2.charge, orig_hyplep2.type, orig_hyplep2.index);
+	return pass;
 }
 
 //____________________________________________________________________________
@@ -4450,7 +4458,7 @@ bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	setHypLepton1(mu1, Muon);
 	setHypLepton2(mu2, Muon);
 
-	if(getMET() > 20.)    return false;
+	if(getMET() > 20.) return false;
 	if(getNJets() < 2) return false;
 	return true;
 }
@@ -4481,8 +4489,8 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	setHypLepton1(el1, Elec);
 	setHypLepton2(el2, Elec);
 
-	if(getMET() > 20.)  return false;
-	if(getNJets() < 2)  return false;
+	if(getMET() > 20.) return false;
+	if(getNJets() < 2) return false;
 	return true;
 }
 bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
@@ -4577,7 +4585,7 @@ bool SSDLDumper::isSSLLMuEvent(int& mu1, int& mu2){
 
 	if(fC_vetoTTZSel && passesTTZSel()) return false; // ttZ veto
 	// if(fDoCounting) fCounter[Muon].fill(fMMCutNames[8]);
-	
+
 	if(getNJets() < fC_minNjets || getNJets() > fC_maxNjets) return false;    // njets cut
 	if(fDoCounting) fCounter[Muon].fill(fMMCutNames[9]);
 
@@ -4800,6 +4808,7 @@ bool SSDLDumper::isLooseMuon(int muon){
 	return true;
 }
 bool SSDLDumper::isTightMuon(int muon){
+	if(isGoodMuon(muon) == false)  return false; // again
 	if(isLooseMuon(muon) == false) return false;
 	if (gTTWZ) {
 		if(MuDetIso[muon] > gMuMaxIso) return false; // using detector isolation for ttWZ as requested by f.p.
@@ -4844,6 +4853,8 @@ bool SSDLDumper::isPromptMuon(int muon){
 	// Mother is a tau from W or Z
 	if(abs(MuGenMID[muon]) == 15 && MuGenGMType[muon] == 4) return true;
 	
+	// Mother is a top
+	if(abs(MuGenMID[muon]) == 6) return true;
 	return false;
 }
 bool SSDLDumper::isChargeMatchedMuon(int mu){
@@ -4865,7 +4876,8 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 
 	// Reject electrons closer than 0.1 in DR to tight muons
 	for(size_t i = 0; i < NMus; ++i){
-		if(!isLooseMuon(i)) continue;
+		// MARC why is this here? if(!isLooseMuon(i)) continue;
+		if(!isTightMuon(i)) continue;
 		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
 		return false;
 	}
@@ -4894,7 +4906,7 @@ bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
 		return false;
 	}
-	
+
 	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	  
 // 	// Additional cuts from AN-12-059_v5:
@@ -5013,6 +5025,7 @@ bool SSDLDumper::isGoodSecElectron(int ele, float ptcut){
 	if(ElPt[ele] < ptcut) return false;
 	return true;
 }
+
 //____________________________________________________________________________
 bool SSDLDumper::isFakeElectron(int ele){
 	if(isPromptElectron(ele)) return false;
@@ -5020,6 +5033,9 @@ bool SSDLDumper::isFakeElectron(int ele){
 }
 bool SSDLDumper::isPromptElectron(int ele){
 	if(isLooseElectron(ele) == false) return false;
+
+	// Matched to electron
+	if(abs(ElGenID[ele]) != 11) return false;
 
 	// Mother or Grandmother is a SM hadron:
 	if(ElGenMType[ele] > 10 || ElGenGMType[ele] > 10) return false;
@@ -5033,6 +5049,9 @@ bool SSDLDumper::isPromptElectron(int ele){
 
 	// Mother is a tau from W or Z
 	if(abs(ElGenMID[ele]) == 15 && ElGenGMType[ele] == 4) return true;
+	
+	// Mother is a top
+	if(abs(ElGenMID[ele]) == 6) return true;
 	
 	return false;
 }
@@ -5092,13 +5111,13 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 
 	// Remove jets close to all tight leptons
 	for(size_t imu = 0; imu < NMus; ++imu){
-	  	if(!isTightMuon(imu)) continue;
-		if(!isGoodSecMuon(imu)) continue; 
+		if(!isTightMuon(imu)) continue;
+		if(!isGoodSecMuon(imu)) continue; // pt  > 10 MARC is that true?
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
 	for(size_t iel = 0; iel < NEls; ++iel){
-  		if(!isTightElectron(iel)) continue;
+		if(!isTightElectron(iel)) continue;
 		if(!isGoodSecElectron(iel)) continue;
 		if(Util::GetDeltaR(ElEta[iel], JetEta[jet], ElPhi[iel], JetPhi[jet]) > minDR ) continue;
 		return false;
