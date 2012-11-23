@@ -21,39 +21,38 @@ std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string
 
 int main( int argc, char* argv[] ) {
 
-  std::string selectionType = "Apr10_Iso005_NoZVeto_jet20";
+  std::string selectionType = "Nov23";
   if( argc>1 ) {
     std::string selectionType_str(argv[1]);
     selectionType = selectionType_str;
   }
 
 
+  float lumi = 30000.;
+
+
   // this sets the style:
   DrawBase* db = new DrawBase("OPT_ZBi");
   db->set_lumiOnRightSide();
-  db->set_lumiNormalization(30000.);
+  db->set_lumiNormalization(lumi);
 
   TPaveText* label_sqrt = db->get_labelSqrt();
     
 
-  TString config = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/dumperconfig.cfg";
+  std::string dir = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov22_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/";
+  std::string config = dir + "/dumperconfig.cfg";
 
-std::cout << "0" << std::endl;
   SSDLPlotter* plotter = new SSDLPlotter(config);
-std::cout << "1" << std::endl;
   //std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
   std::string outputdir = "/shome/pandolf/CMSSW_5_3_6_optTTW/src/DiLeptonAnalysis/NTupleProducer/macros/OPT_ttW";
   plotter->setVerbose(1);
-std::cout << "2" << std::endl;
   plotter->fDO_OPT = false;
-std::cout << "3" << std::endl;
   plotter->setOutputDir(outputdir);
-std::cout << "4" << std::endl;
-  plotter->init("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/DataCard_SSDL.dat");
-std::cout << "5" << std::endl;
+  plotter->init("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/DataCard_SSDL.dat");
   plotter->readHistos(plotter->fOutputFileName);
-std::cout << "6" << std::endl;
-  plotter->storeWeightedPred(4);
+  plotter->fillRatios(plotter->fMuData,    plotter->fEGData, 0);
+  plotter->fillRatios(plotter->fMCBGMuEnr, plotter->fMCBG, 1);
+  plotter->storeWeightedPred(plotter->gRegion[plotter->gBaseRegion]);
   //plotter->doAnalysis();
 
 
@@ -72,7 +71,7 @@ std::cout << "6" << std::endl;
 
   float nTotal_s = 195845.; //hardwired!!! HORRIBLE!!
 
-  for( unsigned iEff=1; iEff<10; ++iEff ) {
+  for( unsigned iEff=1; iEff<=10; ++iEff ) {
 
     char infileName[300];
     sprintf( infileName, "%s/cuts_Seff%d.txt", optcutsdir.c_str(), iEff*10);
@@ -127,17 +126,19 @@ std::cout << "6" << std::endl;
 
     SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(min_ht, 10000., min_met, 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
 
-    float b_pred_mm = ssdlpred.bg_mm;
-    float b_pred_em = ssdlpred.bg_em;
-    float b_pred_ee = ssdlpred.bg_ee;
+    float lumi_SF = lumi/plotter->fLumiNorm;
 
-    float b_pred_mm_err = ssdlpred.bg_mm_err;
-    float b_pred_em_err = ssdlpred.bg_em_err;
-    float b_pred_ee_err = ssdlpred.bg_ee_err;
+    float b_pred_mm = ssdlpred.bg_mm*lumi_SF;
+    float b_pred_em = ssdlpred.bg_em*lumi_SF;
+    float b_pred_ee = ssdlpred.bg_ee*lumi_SF;
 
-    float s_mm = ssdlpred.s_mm;
-    float s_em = ssdlpred.s_em;
-    float s_ee = ssdlpred.s_ee;
+    float b_pred_mm_err = ssdlpred.bg_mm_err*lumi_SF;
+    float b_pred_em_err = ssdlpred.bg_em_err*lumi_SF;
+    float b_pred_ee_err = ssdlpred.bg_ee_err*lumi_SF;
+
+    float s_mm = ssdlpred.s_mm*lumi_SF;
+    float s_em = ssdlpred.s_em*lumi_SF;
+    float s_ee = ssdlpred.s_ee*lumi_SF;
 
     float b_pred = b_pred_mm + b_pred_em + b_pred_ee;
     float b_pred_err = sqrt( b_pred_mm_err*b_pred_mm_err + b_pred_em_err*b_pred_em_err + b_pred_ee_err*b_pred_ee_err );
@@ -168,7 +169,7 @@ std::cout << "6" << std::endl;
     h1_bg->SetFillColor( 38 );
 
 
-    float effS = (s_mm+s_em+s_ee)*0.1633*5000./nTotal_s/(0.22*0.22*0.67);
+    float effS = (s_mm+s_em+s_ee)/(0.232*lumi*0.22*0.22*0.67);
 
     if( effS > effMax )
       effMax = effS;
@@ -270,9 +271,9 @@ std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
   gr_ZBi->SetMarkerColor(kRed+3);
 
 
-  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effMax*100., 10, 0., 1.6*ZBi_max ); 
+  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.1*effMax*100., 10, 0., 1.6*ZBi_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
-  h2_axes_gr->SetYTitle("ZBi (30 fb^{-1})");
+  h2_axes_gr->SetYTitle("Expected ZBi (30 fb^{-1})");
   h2_axes_gr->SetXTitle("Signal Efficiency [%]");
 
 
