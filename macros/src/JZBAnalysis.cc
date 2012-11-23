@@ -2475,7 +2475,7 @@ void JZBAnalysis::Analyze() {
   
   // Check for OS combination
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
-    if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[PosLepton2].charge<0) break;
+    if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[gPosLepton2].charge<0) break;
   }
 //  // Check for SS combination
 //  for(; PosLepton2 < sortedGoodgLeptons.size(); PosLepton2++) {
@@ -2548,7 +2548,7 @@ void JZBAnalysis::Analyze() {
   
   //***************//
   
-  if(DoExperimentalFSRRecovery) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
+  if(DoExperimentalFSRRecovery && PosLepton2<sortedGoodLeptons.size()) StoreAllPhotons(photons,sortedGoodLeptons[PosLepton1],sortedGoodLeptons[PosLepton2]);
   
   // Preselection
   if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
@@ -2661,7 +2661,7 @@ void JZBAnalysis::Analyze() {
       bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
 
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
-        if(nEvent.ZbCHS30_pfJetGoodNum==0) {
+        if(nEvent.ZbCHS30_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
 	  nEvent.ZbCHS30_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
 	  nEvent.ZbCHS30_BTagWgtUp   = nEvent.ZbCHS30_BTagWgt+Uncert;
@@ -2681,7 +2681,7 @@ void JZBAnalysis::Analyze() {
       
       if((nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
 	//Z+b selection with 30 GeV leading jet, 10 GeV sub-leading jet
-	if(nEvent.ZbCHS3010_pfJetGoodNum==0) {
+	if(nEvent.ZbCHS3010_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
 	  nEvent.ZbCHS3010_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
 	  nEvent.ZbCHS3010_BTagWgtDown = nEvent.ZbCHS3010_BTagWgt-Uncert;
@@ -2701,7 +2701,7 @@ void JZBAnalysis::Analyze() {
 
       if(nEvent.ZbCHS1010_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) {
 	//Z+b selection with 10 GeV leading jet, 10 GeV sub-leading jet
-	if(nEvent.ZbCHS1010_pfJetGoodNum==0) {
+	if(nEvent.ZbCHS1010_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
 	  nEvent.ZbCHS1010_BTagWgt     = GetBWeight(abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
 	  nEvent.ZbCHS1010_BTagWgtDown = nEvent.ZbCHS1010_BTagWgt - Uncert;
@@ -2840,7 +2840,7 @@ void JZBAnalysis::Analyze() {
         
       if((nEvent.Zb3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.Zb3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-          if(nEvent.Zb3010_pfJetGoodNum==0) {
+          if(nEvent.Zb3010_pfJetGoodNum==0 && isMC) {
 	    float Uncert;
 	    nEvent.Zb3010_BTagWgt     = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
 	    nEvent.Zb3010_BTagWgtDown = nEvent.Zb3010_BTagWgt - Uncert;
@@ -2912,7 +2912,7 @@ void JZBAnalysis::Analyze() {
         
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
           //Z+b selection with 30 GeV jets
-          if(nEvent.Zb30_pfJetGoodNum==0) {
+          if(nEvent.Zb30_pfJetGoodNum==0  && isMC) {
 	    float Uncert;
 	    nEvent.Zb30_BTagWgt     = GetBWeight(abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
 	    nEvent.Zb30_BTagWgtDown = nEvent.Zb30_BTagWgt - Uncert;
