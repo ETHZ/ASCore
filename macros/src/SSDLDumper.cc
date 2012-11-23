@@ -4837,6 +4837,7 @@ bool SSDLDumper::isFakeMuon(int muon){
 	return true;
 }
 bool SSDLDumper::isPromptMuon(int muon){
+	if(isLooseMuon(muon) == false) return false;
 
 	// Mother or Grandmother is a SM hadron:
 	if(MuGenMType[muon] > 10 || MuGenGMType[muon] > 10) return false;
@@ -5031,6 +5032,7 @@ bool SSDLDumper::isFakeElectron(int ele){
 	return true;
 }
 bool SSDLDumper::isPromptElectron(int ele){
+	if(isLooseElectron(ele) == false) return false;
 
 	// Matched to electron
 	if(abs(ElGenID[ele]) != 11) return false;
