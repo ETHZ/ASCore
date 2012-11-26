@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.24 2012/08/17 10:35:01 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.25 2012/09/14 10:09:00 peruzzi Exp $
 //
 //
 
@@ -178,6 +178,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
+	fSrcSigma             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcSigma");
 	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
 	pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
 	pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
@@ -353,6 +354,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<double> rho;
 	iEvent.getByLabel(fSrcRho,rho);
 	fTrho = *rho;
+
+	// sigma for L1FastJet
+	edm::Handle<double> sigma;
+	iEvent.getByLabel(fSrcSigma,sigma);
+	fTsigma = *sigma;
 	
 	// rho for L1FastJet running PFnoPU
 	edm::Handle<double> rhoNoPU;
@@ -3467,6 +3473,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumFilled]/F");
 	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumFilled]/F");
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
+	fEventTree->Branch("Sigma"              ,&fTsigma              ,"Sigma/F");
 	fEventTree->Branch("RhoPFnoPU"        ,&fTrhoPFnoPU        ,"RhoPFnoPU/F");
 	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumFilled]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
@@ -4347,6 +4354,7 @@ void NTupleProducer::resetTree(){
 	fTHBHENoiseFlagIso  = -999;
 	fTcscTightHaloID    = -999;
 	fTrho               = -999;
+	fTsigma               = -999;
 	fTrhoPFnoPU         = -999;
 
 	fTecalDeadTPFilterFlag = -999;
