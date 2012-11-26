@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.25 2012/09/14 10:09:00 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.26 2012/11/26 16:07:29 peruzzi Exp $
 //
 //
 
@@ -294,7 +294,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
 	vAna = new HggVertexAnalyzer(vtxAlgoParams);
 	vConv= new HggVertexFromConversions(vtxAlgoParams);
-	vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
+	if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 
 }
 
