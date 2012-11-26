@@ -8720,19 +8720,27 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
 	
 	// Abbreviations
-	float fb  = gEChMisIDB;
-	float fbE = gEChMisIDB_E;
-	float fe  = gEChMisIDE;
-	float feE = gEChMisIDE_E;
-
+	float fbb(0.),fee(0.),feb(0.);
+	float fbbE(0.),feeE(0.),febE(0.);
+	float fbb_mc(0.),fee_mc(0.),feb_mc(0.);
+	float fbbE_mc(0.),feeE_mc(0.),febE_mc(0.);
+	
+	calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+	calculateChMisIdProb(fEGData, EB, feb, febE);
+	calculateChMisIdProb(fEGData, EE, fee, feeE);
+	
+	calculateChMisIdProb(fMCBG, BB, fbb_mc, fbbE_mc);
+	calculateChMisIdProb(fMCBG, EB, feb_mc, febE_mc);
+	calculateChMisIdProb(fMCBG, EE, fee_mc, feeE_mc);
+	
 	// Simple error propagation assuming error on number of events is sqrt(N)
-	nt2_ee_chmid    = 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os;
-	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-	nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
-
-	nt2_em_chmid    = fb*nt2_em_BB_os + fe*nt2_em_EE_os;
-	nt2_em_chmid_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
-	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+	nt2_ee_chmid    = 2*fbb*nt2_ee_BB_os                           + 2*fee*nt2_ee_EE_os                      + 2*feb*nt2_ee_EB_os;
+	nt2_ee_chmid_e1 = sqrt( 4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)  + 4*fee*fee*FR->getEStat2(nt2_ee_EE_os)   + 4*feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+	nt2_ee_chmid_e2 = sqrt( nt2_ee_BB_os*nt2_ee_BB_os*4*fbbE*fbbE  + 4*feeE*feeE*nt2_ee_EE_os*nt2_ee_EE_os   + 4*febE*febE*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+	
+	nt2_em_chmid    = fbb*nt2_em_BB_os + fee*nt2_em_EE_os;
+	nt2_em_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os*fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os*feeE*feeE );
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
