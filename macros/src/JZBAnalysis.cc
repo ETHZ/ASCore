@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.90 $";
+string sjzbversion="$Revision: 1.70.2.92 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.90 2012/11/23 16:21:02 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.92 2012/11/27 08:11:22 buchmann Exp $
 */
 
 
@@ -1698,8 +1698,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
-//  myTree->Branch("PUweightUP",&nEvent.PUweightUP,"PUweightUP/F");
-//  myTree->Branch("PUweightDOWN",&nEvent.PUweightDOWN,"PUweightDOWN/F");
+  myTree->Branch("PUweightUP",&nEvent.PUweightUP,"PUweightUP/F");
+  myTree->Branch("PUweightDOWN",&nEvent.PUweightDOWN,"PUweightDOWN/F");
   myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
@@ -2285,8 +2285,8 @@ void JZBAnalysis::Analyze() {
       } else {
 	//don't attempt to do PURW for model scans
 	nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
-//	nEvent.PUweightUP   = GetPUWeightUP(fTR->PUnumTrueInteractions);
-//	nEvent.PUweightDOWN = GetPUWeightDOWN(fTR->PUnumTrueInteractions);
+	nEvent.PUweightUP   = GetPUWeightUp(fTR->PUnumTrueInteractions);
+	nEvent.PUweightDOWN = GetPUWeightDown(fTR->PUnumTrueInteractions);
 	nEvent.weight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	weight_histo->Fill(1,nEvent.PUweight);
       }
