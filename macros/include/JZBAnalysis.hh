@@ -57,7 +57,8 @@ public:
   int DetermineFlavor(bool, TreeReader*);
   bool ShouldPhotonBeMerged(lepton &photon, float dR);
   int ExtractFileNumber(string fileName);
-  float GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta, float &Uncert);
+  float GetBWeight(int JetFlavor, float JetPt, float JetEta);
+
   string outputFileName_; // public name of the output file name
 
   void Begin(TFile *f);
@@ -90,25 +91,9 @@ private:
   bool fmakeSmall;
   int fFile;
 
-  TFile *CSVT_CorrectionFile;
-  TFile *CSVM_CorrectionFile;
-  TFile *CSVL_CorrectionFile;
-  
-  TH2F *CSVT_EfficiencyCorrection;
-  TH2F *CSVT_MisTagCorrection;
-  TH2F *CSVT_EfficiencyCorrectionUncert;
-  TH2F *CSVT_MisTagCorrectionUncert;
-  
-  TH2F *CSVM_EfficiencyCorrection;
-  TH2F *CSVM_MisTagCorrection;
-  TH2F *CSVM_EfficiencyCorrectionUncert;
-  TH2F *CSVM_MisTagCorrectionUncert;
-  
-  TH2F *CSVL_EfficiencyCorrection;
-  TH2F *CSVL_MisTagCorrection;
-  TH2F *CSVL_EfficiencyCorrectionUncert;
-  TH2F *CSVL_MisTagCorrectionUncert;
-  
+  TFile *CSV_CorrectionFile;
+  TH2F *CSV_EfficiencyCorrection;
+  TH2F *CSV_MisTagCorrection;
   std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths;
 
   TRandom* rand_;
