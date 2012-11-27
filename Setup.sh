@@ -15,16 +15,16 @@ cd $CMSSW_BASE/src/
 
 # Pat: from SWGuidePATRecipes
 # tags from SWGuidePATReleaseNotes V08-09-11-00
-addpkg DataFormats/PatCandidates   V06-05-01 
-addpkg PhysicsTools/PatAlgos       V08-09-21
-addpkg CommonTools/ParticleFlow    V00-03-15
+addpkg DataFormats/PatCandidates   V06-05-06-03
+addpkg PhysicsTools/PatAlgos       V08-09-42
+addpkg CommonTools/ParticleFlow    V00-03-16
 
 # revert back to the tag we proposed originally and is in the official recipe:
-addpkg RecoParticleFlow/PFProducer V15-01-11
+addpkg RecoParticleFlow/PFProducer V15-02-06
 
 # Type1MET
 addpkg JetMETCorrections/Type1MET  V04-06-09
-addpkg PhysicsTools/PatUtils V03-09-23
+addpkg PhysicsTools/PatUtils V03-09-26
 addpkg CommonTools/RecoUtils V00-00-12
 
 # Updated Tau discriminators (not including advanced MVA isolation: breaks CHS postfix)
