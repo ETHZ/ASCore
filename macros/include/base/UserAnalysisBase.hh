@@ -44,6 +44,8 @@ public:
     // PileUp reweighting;
     virtual void  SetPileUpSrc(string, string = "");
     virtual float GetPUWeight(float);
+    virtual float GetPUWeightUp(float);
+    virtual float GetPUWeightDown(float);
 
     TreeReader *fTR;
     TString fOutputDir;
@@ -149,6 +151,8 @@ private:
     // Pile UP reweighting
   bool fDoPileUpReweight;
   reweight::LumiReWeighting   *fPUWeight;
+  reweight::LumiReWeighting   *fPUWeightUp;
+  reweight::LumiReWeighting   *fPUWeightDown;
 
 
 };

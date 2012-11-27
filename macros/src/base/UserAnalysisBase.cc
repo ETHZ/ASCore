@@ -230,6 +230,8 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacu
     return true;
 }
 
+
+
 // bool UserAnalysisBase::IsGoodBasicPFJetPAT(int index, double ptcut, double absetacut){
 //     // Basic PF jet cleaning and ID cuts
 //     // cut at pt of ptcut (default = 30 GeV)
@@ -1324,7 +1326,20 @@ void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
     if(data_PileUp.size() == 0 || mc_PileUp.size() == 0 ) return;
     if(fDoPileUpReweight  == 1 ) {cout << "ERROR in SetPileUpSrc: fPUWeight already initialized" << endl; return; }
     
-    fPUWeight = new reweight::LumiReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
+    TFile *fpu = new TFile(data_PileUp.c_str());
+    string pileupUp="pileupUp";
+    string pileupDown="pileupDown";
+    if(!((TH1D*)fpu->Get("pileupUp"))||!((TH1D*)fpu->Get("pileupDown"))) {
+      //the user supplied a file with only the standard histogram, which does not contain the up and down shapes
+      cout << "Did not find up and down shapes in provided file " << endl;
+      pileupUp="pileup";
+      pileupDown="pileup";
+    }
+    fpu->Close();
+    
+    fPUWeight     = new reweight::LumiReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
+    fPUWeightUp   = new reweight::LumiReWeighting( mc_PileUp, data_PileUp,"pileup",pileupUp);
+    fPUWeightDown = new reweight::LumiReWeighting( mc_PileUp, data_PileUp,"pileup",pileupDown);
     fDoPileUpReweight = true;
 }
 
@@ -1333,5 +1348,15 @@ void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
 float UserAnalysisBase::GetPUWeight(float nPUTrueinteractions){
     if(! fDoPileUpReweight) return -999.99;
     else return fPUWeight->weight( nPUTrueinteractions); 
+}
+
+float UserAnalysisBase::GetPUWeightUp(float nPUTrueinteractions){
+    if(! fDoPileUpReweight) return -999.99;
+    else return fPUWeightUp->weight( nPUTrueinteractions); 
+}
+
+float UserAnalysisBase::GetPUWeightDown(float nPUTrueinteractions){
+    if(! fDoPileUpReweight) return -999.99;
+    else return fPUWeightDown->weight( nPUTrueinteractions); 
 }
 
