@@ -7,7 +7,6 @@
 #include "TTree.h"
 #include <cstdlib>
 #include <assert.h>
-
 using namespace std;
 
 
@@ -395,6 +394,10 @@ public:
   float Zb3010_alpha;
   float ZbCHS3010_alpha;
   float ZbCHS1010_alpha;
+  float ZbCHS3010_alphaUp;
+  float ZbCHS1010_alphaUp;
+  float ZbCHS3010_alphaDown;
+  float ZbCHS1010_alphaDown;
   float Zb20_alpha;
   float Zb30_alpha;
   float Zb30_p5Clean_alpha;
@@ -1017,6 +1020,10 @@ void nanoEvent::reset()
   Zb3010_alpha=0;
   ZbCHS3010_alpha=0;
   ZbCHS1010_alpha=0;
+  ZbCHS3010_alphaUp=0;
+  ZbCHS1010_alphaUp=0;
+  ZbCHS3010_alphaDown=0;
+  ZbCHS1010_alphaDown=0;
   ZbCHS30_alpha=0;
   Zb1510_alpha=0;
   Zb1530_alpha=0;
@@ -1318,7 +1325,26 @@ TH1F *weight_histo;
 
 nanoEvent nEvent;
 
+float GetCoreResolutionScalingFactor(float jeta) {
+  jeta=abs(jeta);
+  if(jeta<=1.1) return 1.07;
+  if(jeta<1.7) return 1.10;
+  if(jeta<2.3) return 1.07;
+  if(jeta<5.0) return 1.18;
+  return 1.0; // not defined out here - don't smear
+}
 
+float JZBAnalysis::smearedJetPt(float jpt, float jeta, int i) {
+  //jet resolution oversmearing as described here: 
+  //https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+  if(fDataType_!= "mc") return jpt; // if we're dealing with data we don't smear!
+  int genIndex = fTR->JGenJetIndex[i];
+  if(genIndex<0) return jpt; // no associated gen jet
+  float genPt = fTR->GenJetPt[genIndex];
+  float c = GetCoreResolutionScalingFactor(jeta);
+  return max((float)0.,genPt+c*(jpt-genPt));
+}
+  
 void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
                           unsigned int start, unsigned int end) {
 
@@ -2061,6 +2087,10 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("Zb3010_alpha",&nEvent.Zb3010_alpha,"Zb3010_alpha/F");
   myTree->Branch("ZbCHS3010_alpha",&nEvent.ZbCHS3010_alpha,"ZbCHS3010_alpha/F");
   myTree->Branch("ZbCHS1010_alpha",&nEvent.ZbCHS1010_alpha,"ZbCHS1010_alpha/F");
+  myTree->Branch("ZbCHS3010_alphaUp",&nEvent.ZbCHS3010_alphaUp,"ZbCHS3010_alphaUp/F");
+  myTree->Branch("ZbCHS1010_alphaUp",&nEvent.ZbCHS1010_alphaUp,"ZbCHS1010_alphaUp/F");
+  myTree->Branch("ZbCHS3010_alphaDown",&nEvent.ZbCHS3010_alphaDown,"ZbCHS3010_alphaDown/F");
+  myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
   myTree->Branch("Zb20_alpha",&nEvent.Zb20_alpha,"Zb20_alpha/F");
   myTree->Branch("Zb30_alpha",&nEvent.Zb30_alpha,"Zb30_alpha/F");
   myTree->Branch("Zb30_SecEta3_alpha",&nEvent.Zb30_SecEta3_alpha,"Zb30_SecEta3_alpha/F");
@@ -2805,6 +2835,8 @@ void JZBAnalysis::Analyze() {
       float jenergy = fTR->PFCHSJE[i];
       bool isJetID = fTR->PFCHSJIDLoose[i];
       
+      float smeared_jpt = smearedJetPt(jpt,jeta,i);
+
       TLorentzVector aJet(0,0,0,0);
       aJet.SetPtEtaPhiE(jpt, jeta, jphi, jenergy);
 
@@ -2865,6 +2897,11 @@ void JZBAnalysis::Analyze() {
 	  nEvent.ZbCHS3010_BTagWgtLUp   = nEvent.ZbCHS3010_BTagWgtL+Uncert;
 	}
 	
+	if(nEvent.ZbCHS3010_pfJetGoodNum==1) {
+	  nEvent.ZbCHS3010_alphaUp = smeared_jpt;
+	  nEvent.ZbCHS3010_alphaDown = jpt*jpt/smeared_jpt;
+	}
+	
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.679) {
 	  nEvent.ZbCHS3010_pfBJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -2891,6 +2928,11 @@ void JZBAnalysis::Analyze() {
 	  nEvent.ZbCHS1010_BTagWgtLUp   = nEvent.ZbCHS1010_BTagWgtL + Uncert;
 	}
 	  
+	if(nEvent.ZbCHS1010_pfJetGoodNum==1) {
+	  nEvent.ZbCHS1010_alphaUp = smeared_jpt;
+	  nEvent.ZbCHS1010_alphaDown = jpt*jpt/smeared_jpt;
+	}
+	
 	nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]>0.679) {
 	  nEvent.ZbCHS1010_pfBJetDphiZ[nEvent.ZbCHS1010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
@@ -3264,8 +3306,16 @@ void JZBAnalysis::Analyze() {
     
     if(nEvent.Zb2010_pfJetGoodNum>0) nEvent.Zb2010_alpha=nEvent.Zb2010_pfJetGoodPt[1]/nEvent.pt;
     if(nEvent.Zb3010_pfJetGoodNum>0) nEvent.Zb3010_alpha=nEvent.Zb3010_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.ZbCHS3010_pfJetGoodNum>0) nEvent.ZbCHS3010_alpha=nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.ZbCHS1010_pfJetGoodNum>0) nEvent.ZbCHS1010_alpha=nEvent.ZbCHS1010_pfJetGoodPt[1]/nEvent.pt;
+    if(nEvent.ZbCHS3010_pfJetGoodNum>0) {
+      nEvent.ZbCHS3010_alpha=nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
+      nEvent.ZbCHS3010_alphaUp=nEvent.ZbCHS3010_alphaUp/nEvent.pt;
+      nEvent.ZbCHS3010_alphaDown=nEvent.ZbCHS3010_alphaDown/nEvent.pt;
+    }
+    if(nEvent.ZbCHS1010_pfJetGoodNum>0) {
+      nEvent.ZbCHS1010_alpha=nEvent.ZbCHS1010_pfJetGoodPt[1]/nEvent.pt;
+      nEvent.ZbCHS1010_alphaUp=nEvent.ZbCHS1010_alphaUp/nEvent.pt;
+      nEvent.ZbCHS1010_alphaDown=nEvent.ZbCHS1010_alphaDown/nEvent.pt;
+    }
     if(nEvent.Zb1510_pfJetGoodNum>0) nEvent.Zb1510_alpha=nEvent.Zb1510_pfJetGoodPt[1]/nEvent.pt;
     if(nEvent.Zb1530_pfJetGoodNum>0) nEvent.Zb1530_alpha=nEvent.Zb1530_pfJetGoodPt[1]/nEvent.pt;
     if(nEvent.Zb2030_pfJetGoodNum>0) nEvent.Zb2030_alpha=nEvent.Zb2030_pfJetGoodPt[1]/nEvent.pt;
