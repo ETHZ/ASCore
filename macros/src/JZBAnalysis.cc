@@ -17,18 +17,18 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.93 $";
+string sjzbversion="$Revision: 1.70.2.94 $";
 string sjzbinfo="";
 TRandom3 *r;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
-bool DoExperimentalFSRRecovery = true;
-bool DoFSRStudies=true;
+bool DoExperimentalFSRRecovery = false;
+bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.93 2012/11/27 16:40:25 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.94 2012/11/28 15:36:57 buchmann Exp $
 */
 
 
@@ -1367,7 +1367,7 @@ float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
   float c = GetCoreResolutionScalingFactor(jeta);
   return max((float)0.,genPt+c*(jpt-genPt));
 }
-  
+
 void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
                           unsigned int start, unsigned int end) {
 
@@ -2309,7 +2309,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
 	nEvent.PUweightUP   = GetPUWeightUp(fTR->PUnumTrueInteractions);
 	nEvent.PUweightDOWN = GetPUWeightDown(fTR->PUnumTrueInteractions);
-	nEvent.weight     = GetPUWeight(fTR->PUnumTrueInteractions);
+	nEvent.weight     = nEvent.PUweight;
 	weight_histo->Fill(1,nEvent.PUweight);
       }
       
@@ -2641,7 +2641,7 @@ void JZBAnalysis::Analyze() {
           float pz= fTR->ElPz[elIndex];
           float energy =  fTR->ElE[elIndex];
           TLorentzVector tmpVector(px,py,pz,energy);
-	  TLorentzVector tmpVectorG(px,py,pz,energy);
+          TLorentzVector tmpVectorG(px,py,pz,energy);
           if(DoExperimentalFSRRecovery&&photons.size()>0) nEvent.NRecoveredPhotons+=DoFSRRecovery(tmpVectorG,photons);
           int tmpCharge=fTR->ElCharge[elIndex];
           double pedestal=0.;
@@ -2856,7 +2856,6 @@ void JZBAnalysis::Analyze() {
       bool isJetID = fTR->PFCHSJIDLoose[i];
       
       float smeared_jpt = smearedJetPt(jpt,jeta,jphi);
-
       TLorentzVector aJet(0,0,0,0);
       aJet.SetPtEtaPhiE(jpt, jeta, jphi, jenergy);
 
