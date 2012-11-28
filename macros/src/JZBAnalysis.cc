@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.92 $";
+string sjzbversion="$Revision: 1.70.2.93 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.92 2012/11/27 08:11:22 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.93 2012/11/27 16:40:25 buchmann Exp $
 */
 
 
@@ -1334,12 +1334,35 @@ float GetCoreResolutionScalingFactor(float jeta) {
   return 1.0; // not defined out here - don't smear
 }
 
-float JZBAnalysis::smearedJetPt(float jpt, float jeta, int i) {
+int JZBAnalysis::FindGenJetIndex(float jpt, float jeta, float jphi) {
+  int matchedindex=-1;
+  float mindr=999.99;
+  for(int ijet=0;ijet<fTR->NGenJets;ijet++) {
+    double dr=sqrt( (jeta-fTR->GenJetEta[ijet]) * (jeta-fTR->GenJetEta[ijet]) + (jphi-fTR->GenJetPhi[ijet])*(jphi-fTR->GenJetPhi[ijet]));
+    if(dr>0.3) continue;
+    
+    if(dr>mindr) continue;
+    
+    //restrict it to a factor of two between reco pt and gen pt
+    float ndpt = (fTR->GenJetPt[ijet]-jpt)/(fTR->GenJetPt[ijet]);
+    if(ndpt>2) continue;
+    
+    mindr=dr;
+    matchedindex=ijet;
+  }
+  
+  return matchedindex;
+}
+    
+    
+
+float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
   //jet resolution oversmearing as described here: 
   //https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
   if(fDataType_!= "mc") return jpt; // if we're dealing with data we don't smear!
-  int genIndex = fTR->JGenJetIndex[i];
-  if(genIndex<0) return jpt; // no associated gen jet
+
+  int genIndex = FindGenJetIndex(jpt,jeta,jphi);
+  if(genIndex<0) return -jpt; // no associated gen jet
   float genPt = fTR->GenJetPt[genIndex];
   float c = GetCoreResolutionScalingFactor(jeta);
   return max((float)0.,genPt+c*(jpt-genPt));
@@ -2253,7 +2276,6 @@ bool is_charged_lepton(int code) {
 void JZBAnalysis::Analyze() {
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
-
   counters[EV].fill("All events");
   nEvent.reset();
   // Fill generic information
@@ -2559,7 +2581,6 @@ void JZBAnalysis::Analyze() {
       counters[PH].fill("All photons");
       if(IsCustomPhoton2012(phoIndex))
       {
-          counters[MU].fill("... pass mu selection");
           float px= fTR->PhoPx[phoIndex];
           float py= fTR->PhoPy[phoIndex];
           float pz= fTR->PhoPz[phoIndex];
@@ -2747,7 +2768,6 @@ void JZBAnalysis::Analyze() {
   
   // Preselection
   if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
-
     nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
     nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
     nEvent.iso1 = sortedGoodLeptons[PosLepton1].iso;
@@ -2835,7 +2855,7 @@ void JZBAnalysis::Analyze() {
       float jenergy = fTR->PFCHSJE[i];
       bool isJetID = fTR->PFCHSJIDLoose[i];
       
-      float smeared_jpt = smearedJetPt(jpt,jeta,i);
+      float smeared_jpt = smearedJetPt(jpt,jeta,jphi);
 
       TLorentzVector aJet(0,0,0,0);
       aJet.SetPtEtaPhiE(jpt, jeta, jphi, jenergy);
@@ -2898,8 +2918,14 @@ void JZBAnalysis::Analyze() {
 	}
 	
 	if(nEvent.ZbCHS3010_pfJetGoodNum==1) {
-	  nEvent.ZbCHS3010_alphaUp = smeared_jpt;
-	  nEvent.ZbCHS3010_alphaDown = jpt*jpt/smeared_jpt;
+	  if(smeared_jpt>0) {
+	    nEvent.ZbCHS3010_alphaUp = smeared_jpt;
+	    nEvent.ZbCHS3010_alphaDown = jpt*jpt/smeared_jpt;
+	  } else {
+	    //jet did not correspond to any gen jet - smearing doesn't make much sense.
+	    nEvent.ZbCHS3010_alphaUp = 10e7;
+	    nEvent.ZbCHS3010_alphaDown = 10e7;
+	  }
 	}
 	
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
@@ -2929,8 +2955,14 @@ void JZBAnalysis::Analyze() {
 	}
 	  
 	if(nEvent.ZbCHS1010_pfJetGoodNum==1) {
-	  nEvent.ZbCHS1010_alphaUp = smeared_jpt;
-	  nEvent.ZbCHS1010_alphaDown = jpt*jpt/smeared_jpt;
+	  if(smeared_jpt>0) {
+	    nEvent.ZbCHS1010_alphaUp = smeared_jpt;
+	    nEvent.ZbCHS1010_alphaDown = jpt*jpt/smeared_jpt;
+	  } else {
+	    //jet did not correspond to any gen jet - smearing doesn't make much sense.
+	    nEvent.ZbCHS1010_alphaUp = 10e6;
+	    nEvent.ZbCHS1010_alphaDown = 10e6;
+	  }
 	}
 	
 	nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
@@ -3651,7 +3683,7 @@ void JZBAnalysis::End(TFile *f){
       counters[iCount].print();
     }
   }
-
+  
 }
 
 template<class T>
