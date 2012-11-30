@@ -337,6 +337,7 @@ public:
 	vector<int> fHighPtData;  // All high pt triggered data
 	vector<int> fLowPtData;   // All lepton cross HT triggered data
 	vector<int> fClosureSamples;
+	vector<int> fTTJets;
 
 	TLatex *fLatex;
 	
