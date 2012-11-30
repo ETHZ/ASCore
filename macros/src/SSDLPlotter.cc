@@ -149,6 +149,11 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(ZZZ);
 	// QCD:
 	fMCBG.push_back(QCDMuEnr15);
+	fMCBG.push_back(QCDEM20);
+	fMCBG.push_back(QCDEM30);
+	fMCBG.push_back(QCDEM80);
+	fMCBG.push_back(QCDEM170);
+	fMCBG.push_back(QCDEM250);
 	fMCBG.push_back(QCD80);
 	fMCBG.push_back(QCD120);
 	fMCBG.push_back(QCD170);
@@ -196,6 +201,8 @@ void SSDLPlotter::init(TString filename){
 	fClosureSamples.push_back(WW);
 	fClosureSamples.push_back(WJets);
 	
+	fTTJets.push_back(TTJets);
+	
 	fMCBGMuEnr.push_back(TTJets);
 	fMCBGMuEnr.push_back(SingleT_t);
 	fMCBGMuEnr.push_back(SingleTbar_t);
@@ -227,6 +234,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WWW);
 	fMCBGMuEnr.push_back(ZZZ);
 	fMCBGMuEnr.push_back(QCDMuEnr15);
+	
 	fMCBGEMEnr.push_back(TTJets);
 	fMCBGEMEnr.push_back(SingleT_t);
 	fMCBGEMEnr.push_back(SingleTbar_t);
@@ -257,14 +265,11 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WWG);
 	fMCBGEMEnr.push_back(WWW);
 	fMCBGEMEnr.push_back(ZZZ);
-
-	fMCBGEMEnr.push_back(QCD80);
-	fMCBGEMEnr.push_back(QCD120);
-	fMCBGEMEnr.push_back(QCD170);
-	fMCBGEMEnr.push_back(QCD300);
-	fMCBGEMEnr.push_back(QCD470);
-	fMCBGEMEnr.push_back(QCD600);
-	fMCBGEMEnr.push_back(QCD800);
+	fMCBGEMEnr.push_back(QCDEM20);
+	fMCBGEMEnr.push_back(QCDEM30);
+	fMCBGEMEnr.push_back(QCDEM80);
+	fMCBGEMEnr.push_back(QCDEM170);
+	fMCBGEMEnr.push_back(QCDEM250);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
 
@@ -287,6 +292,7 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZZ);
 
 	fMuData    .push_back(DoubleMu1);
+	fMuData    .push_back(DoubleMu1a);
 	fMuData    .push_back(DoubleMu2);
 	fMuData    .push_back(DoubleMu3);
 	fMuData    .push_back(DoubleMu4);
@@ -294,6 +300,7 @@ void SSDLPlotter::init(TString filename){
 	// fMuHadData .push_back(MuHad1);
 	// fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
+	fEGData    .push_back(DoubleEle1a);
 	fEGData    .push_back(DoubleEle2);
 	fEGData    .push_back(DoubleEle3);
 	fEGData    .push_back(DoubleEle4);
@@ -301,22 +308,26 @@ void SSDLPlotter::init(TString filename){
 	// fEleHadData.push_back(EleHad1);
 	// fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
+	fMuEGData  .push_back(MuEG1a);
 	fMuEGData  .push_back(MuEG2);
 	fMuEGData  .push_back(MuEG3);
 	fMuEGData  .push_back(MuEG4);
 	// fMuEGData  .push_back(MuEG5);
 
 	fHighPtData.push_back(DoubleMu1);
+	fHighPtData.push_back(DoubleMu1a);
 	fHighPtData.push_back(DoubleMu2);
 	fHighPtData.push_back(DoubleMu3);
 	fHighPtData.push_back(DoubleMu4);
 	// fHighPtData.push_back(DoubleMu5);
 	fHighPtData.push_back(DoubleEle1);
+	fHighPtData.push_back(DoubleEle1a);
 	fHighPtData.push_back(DoubleEle2);
 	fHighPtData.push_back(DoubleEle3);
 	fHighPtData.push_back(DoubleEle4);
 	// fHighPtData.push_back(DoubleEle5);
 	fHighPtData.push_back(MuEG1);
+	fHighPtData.push_back(MuEG1a);
 	fHighPtData.push_back(MuEG2);
 	fHighPtData.push_back(MuEG3);
 	fHighPtData.push_back(MuEG4);
@@ -353,7 +364,7 @@ void SSDLPlotter::doAnalysis(){
 
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
-	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 	storeWeightedPred(gRegion[gBaseRegion]);
 	
 	
@@ -363,6 +374,8 @@ void SSDLPlotter::doAnalysis(){
 //	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 //	fillRatios(fMuData, fEGData, 0);
 //	fillRatios(fMuData, fEGData, 1);
+//	fillRatios(fTTJets, fTTJets, 0);
+//	fillRatios(fTTJets, fTTJets, 1);
 //	storeWeightedPred(gRegion[gBaseRegion]);
 	
 	
@@ -1872,7 +1885,9 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		////////////////////////////////////////////////////
 		// Fill ttbar histos
 		// Sample loop
-// LUKAS		TTree *tree = fSamples[TTJets1]->getTree();
+// LUKAS		TTree *tree = fSamples[TTJets]->getTree();
+		
+		
 // LUKAS		TFile * file_ = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct26/TT_CT10_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1/output_0.root", "READ", "file_");
 		TFile * file_ = new TFile("/shome/lbaeni/top/CMSSW_5_3_2_patch4/src/DiLeptonAnalysis/NTupleProducer/macros/TT_CT10_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1_output_0.root", "READ", "file_");
 		TTree * tree = (TTree *) file_->Get("Analysis");
@@ -2426,7 +2441,6 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	if(dottbar){
 		// Fill ttbar histos
 		// Sample loop
-	// attention, this only loops on one of the ttbar samples
 		TTree *tree = fSamples[TTJets]->getTree();
 
 		// Event loop
@@ -4731,13 +4745,15 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	if(chan == Muon){
 		datasamples = fMuData;
-//		mcsamples	=fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
+//		mcsamples	= fTTJets;
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-//		mcsamples	=fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
+//		mcsamples	= fTTJets;
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
@@ -4854,13 +4870,15 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	if(chan == Muon){
 		datasamples = fMuData;
-//		mcsamples	=fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
+//		mcsamples	= fTTJets;
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-//		mcsamples	=fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
+//		mcsamples	= fTTJets;
 	}
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
@@ -4971,11 +4989,13 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		datasamples = fMuData;
 //		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
+//		mcsamples   = fTTJets;
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
 //		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
+//		mcsamples   = fTTJets;
 	}
 
 	// Customization
@@ -5601,20 +5621,35 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 
 		float scale = fLumiNorm/S->getLumi(); // Normalize all
 		if(S->datamc == 0) scale = 1;
-		if(fp == SigSup){
-			// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
-			ntight += scale * S->numbers[gRegion[gBaseRegion]][chan].nsst;
-			nloose += scale * S->numbers[gRegion[gBaseRegion]][chan].nssl;
-
-			ntight_sam += S->numbers[gRegion[gBaseRegion]][chan].nsst;
-			nloose_sam += S->numbers[gRegion[gBaseRegion]][chan].nssl;
+		if (gRatiosFromTTbar) {
+			Channel *C;
+			if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+			if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+			if(fp == SigSup){
+				ntight = C->fntight_ttbar->GetEntries();
+				nloose = C->fnloose_ttbar->GetEntries();
+			}
+			if(fp == ZDecay){
+				ntight = C->pntight_ttbar->GetEntries();
+				nloose = C->pnloose_ttbar->GetEntries();
+			}
 		}
-		if(fp == ZDecay){
-			ntight += scale * S->numbers[gRegion[gBaseRegion]][chan].nzt;
-			nloose += scale * S->numbers[gRegion[gBaseRegion]][chan].nzl;
-
-			ntight_sam += S->numbers[gRegion[gBaseRegion]][chan].nzt;
-			nloose_sam += S->numbers[gRegion[gBaseRegion]][chan].nzl;
+		else {
+			if(fp == SigSup){
+				// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+				ntight += scale * S->numbers[gRegion[gBaseRegion]][chan].nsst;
+				nloose += scale * S->numbers[gRegion[gBaseRegion]][chan].nssl;
+				
+				ntight_sam += S->numbers[gRegion[gBaseRegion]][chan].nsst;
+				nloose_sam += S->numbers[gRegion[gBaseRegion]][chan].nssl;
+			}
+			if(fp == ZDecay){
+				ntight += scale * S->numbers[gRegion[gBaseRegion]][chan].nzt;
+				nloose += scale * S->numbers[gRegion[gBaseRegion]][chan].nzl;
+				
+				ntight_sam += S->numbers[gRegion[gBaseRegion]][chan].nzt;
+				nloose_sam += S->numbers[gRegion[gBaseRegion]][chan].nzl;
+			}
 		}
 		v_ntight.push_back(ntight_sam);
 		v_nloose.push_back(nloose_sam);
@@ -11997,7 +12032,12 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  	///////////////////////////////////////////////////////////////////////////////////
  	float mf(0.), mf_e(0.), mp(0.), mp_e(0.), ef(0.), ef_e(0.), ep(0.), ep_e(0.);
 	
- 	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+// 	calculateRatio(fTTJets, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+// 	calculateRatio(fTTJets, Muon, ZDecay, mp, mp_e);
+// 	calculateRatio(fTTJets, Elec, SigSup, ef, ef_e);
+// 	calculateRatio(fTTJets, Elec, ZDecay, ep, ep_e);
+	
+	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
  	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
  	calculateRatio(fMCBGEMEnr, Elec, SigSup, ef, ef_e);
  	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
@@ -13953,7 +13993,6 @@ void SSDLPlotter::makeOriginPlots(int reg){
 			if(i == 0) horigin_mc[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
 			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
 			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
-	// attention, this only loops on one of the ttbar samples
 			if (s_name == "TTJets") {
 				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
 				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
@@ -14056,60 +14095,60 @@ void SSDLPlotter::printMuOriginTable(int reg){
 	fOUTSTREAM << "-------------------------------------------" << endl;
 	fOUTSTREAM << " Printing origins for Mu/Mu channel..." << endl;
 
-// LUKAS	printMuOriginHeader("NT20");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		print2MuOriginsFromSample(fSamples[i], 2, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary2L(fMCBGMuEnr, 2, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-// LUKAS	printMuOriginHeader("NT10");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		print2MuOriginsFromSample(fSamples[i], 1, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary2L(fMCBGMuEnr, 1, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-// LUKAS	printMuOriginHeader("NT00");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		print2MuOriginsFromSample(fSamples[i], 0, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary2L(fMCBGMuEnr, 0, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-//
-// LUKAS	printMuOriginHeader("SSTi");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		printMuOriginFromSample(fSamples[i], 1, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary(fMCBGMuEnr, 1, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-// LUKAS	printMuOriginHeader("SSLo");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		printMuOriginFromSample(fSamples[i], 2, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary(fMCBGMuEnr, 2, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-// LUKAS	printMuOriginHeader("Z Ti");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		printMuOriginFromSample(fSamples[i], 3, reg);
-// LUKAS	}
-// LUKAS	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-// LUKAS	printOriginSummary(fMCBGMuEnr, 3, Muon, reg);
-// LUKAS	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
-// LUKAS	printMuOriginHeader("Z Lo");
-// LUKAS	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// LUKAS		if(i > MuEnr15) continue;
-// LUKAS		printMuOriginFromSample(fSamples[i], 4, reg);
-// LUKAS	}
+	printMuOriginHeader("NT20");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		print2MuOriginsFromSample(fSamples[i], 2, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(fMCBGMuEnr, 2, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+	printMuOriginHeader("NT10");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		print2MuOriginsFromSample(fSamples[i], 1, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(fMCBGMuEnr, 1, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+	printMuOriginHeader("NT00");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		print2MuOriginsFromSample(fSamples[i], 0, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(fMCBGMuEnr, 0, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+
+	printMuOriginHeader("SSTi");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		printMuOriginFromSample(fSamples[i], 1, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(fMCBGMuEnr, 1, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+	printMuOriginHeader("SSLo");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		printMuOriginFromSample(fSamples[i], 2, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(fMCBGMuEnr, 2, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+	printMuOriginHeader("Z Ti");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		printMuOriginFromSample(fSamples[i], 3, reg);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(fMCBGMuEnr, 3, Muon, reg);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+	printMuOriginHeader("Z Lo");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(i > QCDMuEnr15) continue;
+		printMuOriginFromSample(fSamples[i], 4, reg);
+	}
 	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
 	printOriginSummary(fMCBGMuEnr, 4, Muon, reg);
 	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
