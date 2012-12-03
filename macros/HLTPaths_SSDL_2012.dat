@@ -53,6 +53,7 @@ Path	HLT_Mu17_Mu8_v18
 Path	HLT_Mu17_Mu8_v19
 Path	HLT_Mu17_Mu8_v20
 Path	HLT_Mu17_Mu8_v21
+Path	HLT_Mu17_Mu8_v22
 
 PATHSET
 Name	HLT_MU17_TKMU8
@@ -61,6 +62,7 @@ Path	HLT_Mu17_TkMu8_v10
 Path	HLT_Mu17_TkMu8_v11
 Path	HLT_Mu17_TkMu8_v12
 Path	HLT_Mu17_TkMu8_v13
+Path	HLT_Mu17_TkMu8_v14
 
 PATHSET
 Name	HLT_ELE17_ELE8_TIGHT
@@ -68,6 +70,7 @@ Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v16
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v17
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v18
+Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v19
 
 PATHSET
 Name	HLT_MU8_ELE17_TIGHT
