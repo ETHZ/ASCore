@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.95 $";
+string sjzbversion="$Revision: 1.70.2.96 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.95 2012/11/28 17:49:58 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.96 2012/12/04 18:12:00 pablom Exp $
 */
 
 
@@ -2228,13 +2228,8 @@ float JZBAnalysis::GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta
     if(weight<=0) {
       Uncert=0.0;
       return 1.0;
-    }
-    else {
-      if(weight<0.1) {
-	cout <<" weight turned out to be <0.1 : " << weight << endl;
-	cout << "flavor is " << JetFlavor << endl;
-	return weight;
-      }
+    } else {
+      return weight;
     }
   }
 }
