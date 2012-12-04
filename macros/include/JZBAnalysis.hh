@@ -54,6 +54,7 @@ public:
   float MuPFIso(int index);
   float PhoPFIso(int index);
   bool DecaysToTaus(bool, TreeReader*);
+  bool MatchTrigger(lepton *);
   int DetermineFlavor(bool, TreeReader*);
   bool ShouldPhotonBeMerged(lepton &photon, float dR);
   int ExtractFileNumber(string fileName);
@@ -61,6 +62,7 @@ public:
   float smearedJetPt(float pt, float eta, float phi);
   int FindGenJetIndex(float jpt, float jeta, float jphi);
   string outputFileName_; // public name of the output file name
+  
 
   void Begin(TFile *f);
   void Analyze();
@@ -111,7 +113,7 @@ private:
   TH2F *CSVL_EfficiencyCorrectionUncert;
   TH2F *CSVL_MisTagCorrectionUncert;
   
-  std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths;
+  std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths, singleElTriggerPaths, singleMuTriggerPaths;
 
   TRandom* rand_;
 

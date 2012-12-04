@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.94 $";
+string sjzbversion="$Revision: 1.70.2.95 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.94 2012/11/28 15:36:57 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.95 2012/11/28 17:49:58 buchmann Exp $
 */
 
 
@@ -563,6 +563,9 @@ public:
   float tri_eta1;
   float tri_eta2;
   float tri_eta3;
+  float tri_singleTrigger1;
+  float tri_singleTrigger2;
+  float tri_singleTrigger3;
   float tri_id1;
   float tri_id2;
   float tri_id3;
@@ -1216,6 +1219,10 @@ void nanoEvent::reset()
   tri_eta1=0;
   tri_eta2=0;
   tri_eta3=0;
+  
+  tri_singleTrigger1 = false;
+  tri_singleTrigger2 = false;
+  tri_singleTrigger3 = false;
     
   tri_id1=0;
   tri_id2=0;
@@ -1424,6 +1431,10 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   
   //FIXME: to be filled in with info. from Kostas
   addPath(htTriggerPaths,"", 0, 0);
+
+  addPath(singleElTriggerPaths, "HLT_Ele27_WP80", 0, 20);
+  addPath(singleMuTriggerPaths, "HLT_IsoMu24_eta2p1", 0, 20);
+
 }
 
 //________________________________________________________________________________________
@@ -1943,6 +1954,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_eta1",&nEvent.tri_eta1,"tri_eta1/F");
   myTree->Branch("tri_eta2",&nEvent.tri_eta2,"tri_eta2/F");
   myTree->Branch("tri_eta3",&nEvent.tri_eta3,"tri_eta3/F");
+  myTree->Branch("tri_singleTrigger1",&nEvent.tri_singleTrigger1,"tri_singleTrigger1/F");
+  myTree->Branch("tri_singleTrigger2",&nEvent.tri_singleTrigger2,"tri_singleTrigger2/F");
+  myTree->Branch("tri_singleTrigger3",&nEvent.tri_singleTrigger3,"tri_singleTrigger3/F");
   myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/F");
   myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/F");
   myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/F");
@@ -3528,6 +3542,10 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_ch2=sortedGoodLeptons[TriLepton2].charge;
     nEvent.tri_ch3=sortedGoodLeptons[TriLepton3].charge;
     
+    nEvent.tri_singleTrigger1 = MatchTrigger(&sortedGoodLeptons[TriLepton1]);
+    nEvent.tri_singleTrigger2 = MatchTrigger(&sortedGoodLeptons[TriLepton2]);
+    nEvent.tri_singleTrigger3 = MatchTrigger(&sortedGoodLeptons[TriLepton3]);
+    
     nEvent.tri_mlll=(lp1+lp2+lp3).M();
     nEvent.tri_mll=(lp1+lp2).M();
     nEvent.tri_submll=(lp2+lp3).M();
@@ -3591,6 +3609,7 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_eta1 = lp1.Eta();
     nEvent.tri_eta2 = lp2.Eta();
     nEvent.tri_eta3 = lp3.Eta();
+    
     
     nEvent.tri_WZB  = (lp1+lp2).Pt() - (lp3+pfMETvector).Pt();  // Z.Pt() - W.Pt()
     nEvent.tri_JWZB = sumOfPFJets.Pt() - (lp1 + lp2 + lp3 + pfMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
@@ -4755,4 +4774,41 @@ void JZBAnalysis::DoFSRStudy(bool fdoGenInfo,TreeReader *fTR) {
 	  }
 	}// done with gen info loop
 }
+
+
+
+bool JZBAnalysis::MatchTrigger(lepton *a) {
+
+  //cout << "We are testing lepton: " << a->p << " which is of type: " << a->type << endl;
+  if(a->type == 0) {
+    if(! passTriggers(singleElTriggerPaths)) return false; 
+    for(int k = 0; k < fTR->NHLTObjs[1]; k++) {
+      if(abs(fTR->HLTObjectID1[k]) == 11) {
+        TLorentzVector tmpVector(0, 0, 0, 0);
+        tmpVector.SetPtEtaPhiM(fTR->HLTObjectPt1[k], fTR->HLTObjectEta1[k],
+                               fTR->HLTObjectPhi1[k], a->p.M());
+        if(tmpVector.DeltaR(a->p)<0.1) {
+          return true;
+        }
+      }
+    }
+  } else {
+    if(! passTriggers(singleMuTriggerPaths)) return false; 
+    for(int k = 0; k < fTR->NHLTObjs[0]; k++) {
+      if(abs(fTR->HLTObjectID0[k]) == 13) {
+        TLorentzVector tmpVector(0, 0, 0, 0);
+        tmpVector.SetPtEtaPhiM(fTR->HLTObjectPt0[k], fTR->HLTObjectEta0[k],
+                               fTR->HLTObjectPhi0[k], a->p.M());
+        if(tmpVector.DeltaR(a->p)<0.1) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+
+}
+
+
 
