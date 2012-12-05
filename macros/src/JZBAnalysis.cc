@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.97 $";
+string sjzbversion="$Revision: 1.70.2.98 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.97 2012/12/04 21:12:30 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.98 2012/12/05 16:14:49 pablom Exp $
 */
 
 
@@ -564,12 +564,12 @@ public:
   float tri_eta2;
   float tri_eta3;
   bool tri_MatchFound;
-  float tri_id1;
-  float tri_id2;
-  float tri_id3;
-  float tri_ch1;
-  float tri_ch2;
-  float tri_ch3;
+  int tri_id1;
+  int tri_id2;
+  int tri_id3;
+  int tri_ch1;
+  int tri_ch2;
+  int tri_ch3;
   float tri_mlll;
   float tri_badmll;
   float tri_mll;
@@ -1951,12 +1951,12 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_eta2",&nEvent.tri_eta2,"tri_eta2/F");
   myTree->Branch("tri_eta3",&nEvent.tri_eta3,"tri_eta3/F");
   myTree->Branch("tri_MatchFound",&nEvent.tri_MatchFound,"tri_MatchFound/O");
-  myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/F");
-  myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/F");
-  myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/F");
-  myTree->Branch("tri_ch1",&nEvent.tri_ch1,"tri_ch1/F");
-  myTree->Branch("tri_ch2",&nEvent.tri_ch2,"tri_ch2/F");
-  myTree->Branch("tri_ch3",&nEvent.tri_ch3,"tri_ch3/F");
+  myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/I");
+  myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/I");
+  myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/I");
+  myTree->Branch("tri_ch1",&nEvent.tri_ch1,"tri_ch1/I");
+  myTree->Branch("tri_ch2",&nEvent.tri_ch2,"tri_ch2/I");
+  myTree->Branch("tri_ch3",&nEvent.tri_ch3,"tri_ch3/I");
   myTree->Branch("tri_mlll",&nEvent.tri_mlll,"tri_mlll/F");
   myTree->Branch("tri_mll",&nEvent.tri_mll,"tri_mll/F");
   myTree->Branch("tri_submll",&nEvent.tri_submll,"tri_submll/F");
@@ -2908,7 +2908,7 @@ void JZBAnalysis::Analyze() {
 	}
   
         nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]=fTR->PFCHSJcombinedSecondaryVertexBJetTags[i];
-        if(nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]>0.679) {
+        if(nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]>0.244) {
           nEvent.ZbCHS30_pfBJetDphiZ[nEvent.ZbCHS30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
           nEvent.ZbCHS30_pfJetGoodNumBtag++;
         }
@@ -2945,7 +2945,7 @@ void JZBAnalysis::Analyze() {
 	}
 	
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.679) {
+	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.244) {
 	  nEvent.ZbCHS3010_pfBJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
 	  nEvent.ZbCHS3010_pfJetGoodNumBtag++;
 	}
@@ -2955,7 +2955,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.ZbCHS3010_pfJetGoodNum++;
       }
 
-      if(nEvent.ZbCHS1010_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) {
+      if(jpt>10 && isJetID && abs(jeta)<2.4) {
 	//Z+b selection with 10 GeV leading jet, 10 GeV sub-leading jet
 	if(nEvent.ZbCHS1010_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
@@ -2976,13 +2976,13 @@ void JZBAnalysis::Analyze() {
 	    nEvent.ZbCHS1010_alphaDown = jpt*jpt/smeared_jpt;
 	  } else {
 	    //jet did not correspond to any gen jet - smearing doesn't make much sense.
-	    nEvent.ZbCHS1010_alphaUp = 10e6;
-	    nEvent.ZbCHS1010_alphaDown = 10e6;
+	    nEvent.ZbCHS1010_alphaUp = 10e7;
+	    nEvent.ZbCHS1010_alphaDown = 10e7;
 	  }
 	}
 	
 	nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	if(nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]>0.679) {
+	if(nEvent.ZbCHS1010_bTagProbCSVBP[nEvent.ZbCHS1010_pfJetGoodNum]>0.244) {
 	  nEvent.ZbCHS1010_pfBJetDphiZ[nEvent.ZbCHS1010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
 	  nEvent.ZbCHS1010_pfJetGoodNumBtag++;
 	}
@@ -3087,7 +3087,7 @@ void JZBAnalysis::Analyze() {
       if((nEvent.Zb2010_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
           nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]>0.244) {
               nEvent.Zb2010_pfBJetDphiZ[nEvent.Zb2010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb2010_pfJetGoodNumBtag++;
           }
@@ -3100,7 +3100,7 @@ void JZBAnalysis::Analyze() {
       if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.ZbMikko_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<5.0))) {
           //Full Mikko selection: 15/10, first within 1.3, second within 5.0; cleaning within 0.5,
           nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]>0.679) {
+          if(nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]>0.244) {
               nEvent.ZbMikko_pfBJetDphiZ[nEvent.ZbMikko_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.ZbMikko_pfJetGoodNumBtag++;
           }
@@ -3127,7 +3127,7 @@ void JZBAnalysis::Analyze() {
 	  }
 	    
           nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.244) {
               nEvent.Zb3010_pfBJetDphiZ[nEvent.Zb3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb3010_pfJetGoodNumBtag++;
           }
@@ -3140,7 +3140,7 @@ void JZBAnalysis::Analyze() {
       if((nEvent.Zb1510_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1510_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 15 GeV leading jet, 10 GeV sub-leading jet
           nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]>0.244) {
               nEvent.Zb1510_pfBJetDphiZ[nEvent.Zb1510_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb1510_pfJetGoodNumBtag++;
           }
@@ -3153,7 +3153,7 @@ void JZBAnalysis::Analyze() {
       if((nEvent.Zb1530_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1530_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 15 GeV leading jet, 30 GeV sub-leading jet
           nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]>0.244) {
               nEvent.Zb1530_pfBJetDphiZ[nEvent.Zb1530_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb1530_pfJetGoodNumBtag++;
           }
@@ -3166,7 +3166,7 @@ void JZBAnalysis::Analyze() {
       if((nEvent.Zb2030_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2030_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
           //Z+b selection with 20 GeV leading jet, 30 GeV sub-leading jet
           nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]>0.244) {
               nEvent.Zb2030_pfBJetDphiZ[nEvent.Zb2030_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb2030_pfJetGoodNumBtag++;
           }
@@ -3179,7 +3179,7 @@ void JZBAnalysis::Analyze() {
       if (jpt>20 && isJetID && abs(jeta)<2.4) {
           //Z+b selection with 20 GeV jets
           nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]>0.244) {
               nEvent.Zb20_pfBJetDphiZ[nEvent.Zb20_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb20_pfJetGoodNumBtag++;
           }
@@ -3204,7 +3204,7 @@ void JZBAnalysis::Analyze() {
 	    nEvent.Zb30_BTagWgtLUp   = nEvent.Zb30_BTagWgtL + Uncert;
 	  }
           nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.244) {
               nEvent.Zb30_pfBJetDphiZ[nEvent.Zb30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb30_pfJetGoodNumBtag++;
           }
@@ -3217,7 +3217,7 @@ void JZBAnalysis::Analyze() {
       if (jpt>30 && isJetID && abs(jeta)<2.4) {
           //Z+b selection with 30 GeV jets
           nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]>0.244) {
               nEvent.Zb30_p5Clean_pfBJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb30_p5Clean_pfJetGoodNumBtag++;
           }
@@ -3231,7 +3231,7 @@ void JZBAnalysis::Analyze() {
       if (jpt>30 && isJetID && abs(jeta)<3.0) {
           //Z+b selection with 30 GeV jets, subleading up to |eta|<3.0 (note: checking at analysis level that leading jet is within 1.3)
           nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]>0.244) {
               nEvent.Zb30_SecEta3_pfBJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb30_SecEta3_pfJetGoodNumBtag++;
           }
@@ -3244,7 +3244,7 @@ void JZBAnalysis::Analyze() {
       if (jpt>30 && isJetID && abs(jeta)<5.0) {
           //Z+b selection with 30 GeV jets, subleading up to |eta|<5.0 (note: checking at analysis level that leading jet is within 1.3)
           nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]>0.244) {
               nEvent.Zb30_SecEta5_pfBJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb30_SecEta5_pfJetGoodNumBtag++;
           }
@@ -3258,7 +3258,7 @@ void JZBAnalysis::Analyze() {
           //Z+b selection with 30 GeV jets, leading jet within |eta|<1.3
           if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>2.4) continue; // leading jet must be within |eta|<1.3 - this needs to be checked at analysis level, not here.
           nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.244) {
               nEvent.Zb30_leading1p3_pfBJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb30_leading1p3_pfJetGoodNumBtag++;
           }
@@ -3271,7 +3271,7 @@ void JZBAnalysis::Analyze() {
       if (jpt>40 && isJetID && abs(jeta)<2.4) {
           //Z+b selection with 40 GeV jets
           nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]>0.679) {
+          if(nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]>0.244) {
               nEvent.Zb40_pfBJetDphiZ[nEvent.Zb40_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
               nEvent.Zb40_pfJetGoodNumBtag++;
           }
