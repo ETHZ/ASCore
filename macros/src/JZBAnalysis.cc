@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.96 $";
+string sjzbversion="$Revision: 1.70.2.97 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.96 2012/12/04 18:12:00 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.97 2012/12/04 21:12:30 buchmann Exp $
 */
 
 
@@ -563,9 +563,7 @@ public:
   float tri_eta1;
   float tri_eta2;
   float tri_eta3;
-  float tri_singleTrigger1;
-  float tri_singleTrigger2;
-  float tri_singleTrigger3;
+  bool tri_MatchFound;
   float tri_id1;
   float tri_id2;
   float tri_id3;
@@ -1220,9 +1218,7 @@ void nanoEvent::reset()
   tri_eta2=0;
   tri_eta3=0;
   
-  tri_singleTrigger1 = false;
-  tri_singleTrigger2 = false;
-  tri_singleTrigger3 = false;
+  tri_MatchFound = false;
     
   tri_id1=0;
   tri_id2=0;
@@ -1954,9 +1950,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_eta1",&nEvent.tri_eta1,"tri_eta1/F");
   myTree->Branch("tri_eta2",&nEvent.tri_eta2,"tri_eta2/F");
   myTree->Branch("tri_eta3",&nEvent.tri_eta3,"tri_eta3/F");
-  myTree->Branch("tri_singleTrigger1",&nEvent.tri_singleTrigger1,"tri_singleTrigger1/F");
-  myTree->Branch("tri_singleTrigger2",&nEvent.tri_singleTrigger2,"tri_singleTrigger2/F");
-  myTree->Branch("tri_singleTrigger3",&nEvent.tri_singleTrigger3,"tri_singleTrigger3/F");
+  myTree->Branch("tri_MatchFound",&nEvent.tri_MatchFound,"tri_MatchFound/O");
   myTree->Branch("tri_id1",&nEvent.tri_id1,"tri_id1/F");
   myTree->Branch("tri_id2",&nEvent.tri_id2,"tri_id2/F");
   myTree->Branch("tri_id3",&nEvent.tri_id3,"tri_id3/F");
@@ -2691,14 +2685,14 @@ void JZBAnalysis::Analyze() {
   int gPosLepton2 = 1;
   
   int TriLepton1 = 0;
-  int TriLepton2 = 1;
-  int TriLepton3 = 1;
+  int TriLepton2 = 0;
+  int TriLepton3 = 0;
   
   int BadTriLepton1 = 0;
-  int BadTriLepton2 = 1;
-  int BadTriLepton3 = 1;
+  int BadTriLepton2 = 0;
+  int BadTriLepton3 = 0;
   
-  // Check for OS combination
+  // Check for OS combination (FSR)
   for(; gPosLepton2 < sortedGoodgLeptons.size(); gPosLepton2++) {
     if(sortedGoodgLeptons[0].charge*sortedGoodgLeptons[gPosLepton2].charge<0) break;
   }
@@ -2731,8 +2725,21 @@ void JZBAnalysis::Analyze() {
   float mindiff=-1;
   int BestCandidate=sortedGoodLeptons.size();
   
-  // Trileptons
+  // Trileptons: the highest pt lepton that fired the trigger is our first lepton!
+  nEvent.tri_MatchFound=false;
+  for(int ilep=0;ilep<sortedGoodLeptons.size();ilep++) {
+    if(MatchTrigger(&sortedGoodLeptons[ilep])) {
+      TriLepton1=ilep;
+      nEvent.tri_MatchFound=true;
+      break;
+    }
+  }
+  
+  if(!nEvent.tri_MatchFound) TriLepton1=0;
+  BadTriLepton1=TriLepton1;
+  
   for(; TriLepton2 < sortedGoodLeptons.size(); TriLepton2++) {
+    if(TriLepton2==TriLepton1) continue;
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[TriLepton2].charge<0 &&  sortedGoodLeptons[0].type==sortedGoodLeptons[TriLepton2].type ) {
       float curr_mindiff=abs((sortedGoodLeptons[0].p+sortedGoodLeptons[TriLepton2].p).M()-91.2);
       if(mindiff<0||curr_mindiff<mindiff) {
@@ -2753,6 +2760,7 @@ void JZBAnalysis::Analyze() {
   
   // Trileptons
   for(; BadTriLepton2 < sortedGoodLeptons.size(); BadTriLepton2++) {
+    if(BadTriLepton2==BadTriLepton1) continue;
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[BadTriLepton2].charge<0 ) { //ignore flavor to get mismatch rate
       float curr_mindiff=abs((sortedGoodLeptons[0].p+sortedGoodLeptons[BadTriLepton2].p).M()-91.2);
       if(mindiff<0||curr_mindiff<mindiff) {
@@ -3536,10 +3544,6 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_ch1=sortedGoodLeptons[TriLepton1].charge;
     nEvent.tri_ch2=sortedGoodLeptons[TriLepton2].charge;
     nEvent.tri_ch3=sortedGoodLeptons[TriLepton3].charge;
-    
-    nEvent.tri_singleTrigger1 = MatchTrigger(&sortedGoodLeptons[TriLepton1]);
-    nEvent.tri_singleTrigger2 = MatchTrigger(&sortedGoodLeptons[TriLepton2]);
-    nEvent.tri_singleTrigger3 = MatchTrigger(&sortedGoodLeptons[TriLepton3]);
     
     nEvent.tri_mlll=(lp1+lp2+lp3).M();
     nEvent.tri_mll=(lp1+lp2).M();
