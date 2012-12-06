@@ -24,6 +24,7 @@ import os
 from os import popen
 import commands
 import time
+from sys import stdout
 try:
         from multiprocessing import Pool
 except ImportError:
@@ -79,7 +80,8 @@ def checklist(joblist,currlist):
       jobfinished.append(int(i)) 
   for job in jobfinished:
     joblist.remove(int(job))
-  print "\033[0F\033[2K Jobs left:"+str(len(joblist))+" / "+str(totaljobnumber)
+  stdout.write("\r Jobs left: "+str(len(joblist))+" / " +str(totaljobnumber))
+  stdout.flush()
 
 #-------------------------------------------------------------#
 # getFiles method: Obtains a list with the name of the files  #
@@ -176,7 +178,7 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   thisjobnumber=0
 
   cmd = " ".join(['qsub','-q all.q','-N',"RMG"+str(step)+taskName,'-o',stdout,'-e',stderr,nameOfDirectory+taskName+'/'+nameOfConf2+' '+str(step)])
-  print cmd
+#  print cmd
   if options.dryrun: return thisjobnumber
 
   pipe=popen(cmd)#"qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
@@ -324,7 +326,7 @@ def process(task, conf):
   
   numberOfFiles = len(allmyfiles)
   if(numberOfFiles == 0):
-    showMessage("No files found in "+str(fask[0]))
+    showMessage("No files found in "+str(task[0]))
     return "Error"
 
   correctList = [];
@@ -386,7 +388,7 @@ def join_directory(path,filelist,username) :
 	cleanpath=path;
 	if (cleanpath[len(cleanpath)-1]=="/") : # remove trailing slash
 		cleanpath=cleanpath[0:len(cleanpath)-2]
-	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root > /dev/null "
+	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root "
 	for item in filelist:
 		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/ntuples/"+item
 		commands.getstatusoutput(copycommand)
@@ -397,7 +399,7 @@ def join_directory(path,filelist,username) :
 		
 
 def check_directory(path,username) :
-	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+path
+	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/ProcessedTrees/"+path
 	print "\033[1;34m Going to checkout the subdirectory "+complete_path+" \033[0m "
 	listoffiles=[]
 	supposedtobejoined=False;
