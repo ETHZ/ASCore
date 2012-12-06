@@ -264,62 +264,6 @@ public:
   float weightEffUp;
   float Efficiencyweightonly;
 
-  float ZbCHS30_BTagWgtT;
-  float ZbCHS3010_BTagWgtT;
-  float ZbCHS1010_BTagWgtT;
-  float Zb3010_BTagWgtT;
-  float Zb30_BTagWgtT;
-  
-  float ZbCHS30_BTagWgtTUp;
-  float ZbCHS3010_BTagWgtTUp;
-  float ZbCHS1010_BTagWgtTUp;
-  float Zb3010_BTagWgtTUp;
-  float Zb30_BTagWgtTUp;
-  
-  float ZbCHS30_BTagWgtTDown;
-  float ZbCHS3010_BTagWgtTDown;
-  float ZbCHS1010_BTagWgtTDown;
-  float Zb3010_BTagWgtTDown;
-  float Zb30_BTagWgtTDown;
-  
-  float ZbCHS30_BTagWgtM;
-  float ZbCHS3010_BTagWgtM;
-  float ZbCHS1010_BTagWgtM;
-  float Zb3010_BTagWgtM;
-  float Zb30_BTagWgtM;
-  
-  float ZbCHS30_BTagWgtMUp;
-  float ZbCHS3010_BTagWgtMUp;
-  float ZbCHS1010_BTagWgtMUp;
-  float Zb3010_BTagWgtMUp;
-  float Zb30_BTagWgtMUp;
-  
-  float ZbCHS30_BTagWgtMDown;
-  float ZbCHS3010_BTagWgtMDown;
-  float ZbCHS1010_BTagWgtMDown;
-  float Zb3010_BTagWgtMDown;
-  float Zb30_BTagWgtMDown;
-  
-  float ZbCHS30_BTagWgtL;
-  float ZbCHS3010_BTagWgtL;
-  float ZbCHS1010_BTagWgtL;
-  float Zb3010_BTagWgtL;
-  float Zb30_BTagWgtL;
-  
-  float ZbCHS30_BTagWgtLUp;
-  float ZbCHS3010_BTagWgtLUp;
-  float ZbCHS1010_BTagWgtLUp;
-  float Zb3010_BTagWgtLUp;
-  float Zb30_BTagWgtLUp;
-  
-  float ZbCHS30_BTagWgtLDown;
-  float ZbCHS3010_BTagWgtLDown;
-  float ZbCHS1010_BTagWgtLDown;
-  float Zb3010_BTagWgtLDown;
-  float Zb30_BTagWgtLDown;
-  
-
-
   
   int NPdfs;
   float pdfW[100];
@@ -386,36 +330,14 @@ public:
   float fake_mpf;
   bool pass_b_PU_rejection;
   
-  float Zb2010_alpha;
-  float ZbMikko_alpha;
-  float Zb1510_alpha;
-  float Zb1530_alpha;
-  float Zb2030_alpha;
-  float Zb3010_alpha;
   float ZbCHS3010_alpha;
-  float ZbCHS1010_alpha;
   float ZbCHS3010_alphaUp;
-  float ZbCHS1010_alphaUp;
   float ZbCHS3010_alphaDown;
-  float ZbCHS1010_alphaDown;
-  float Zb20_alpha;
-  float Zb30_alpha;
-  float Zb30_p5Clean_alpha;
-  float Zb30_SecEta3_alpha;
-  float Zb30_SecEta5_alpha;
-  float Zb40_alpha;
-  float Zb30_leading1p3_alpha;
   
-  float ZbCHS30_alpha;
-  float ZbCHS30_bTagProbCSVBP[jMax]; 
-  int ZbCHS30_pfJetGoodNumBtag; 
-  float ZbCHS30_pfJetGoodEta[jMax]; 
-  int ZbCHS30_pfJetGoodNum;
-  float ZbCHS30_pfJetDphiZ[jMax];
-  float ZbCHS30_pfJetGoodPt[jMax];
-  float ZbCHS30_pfJetSum;
-  float ZbCHS30_pfBJetDphiZ[jMax];
-
+  float ZbCHS1010_alpha;
+  float ZbCHS1010_alphaUp;
+  float ZbCHS1010_alphaDown;
+  
   float ZbCHS3010_bTagProbCSVBP[jMax]; 
   int ZbCHS3010_pfJetGoodNumBtag; 
   float ZbCHS3010_pfJetGoodEta[jMax]; 
@@ -434,129 +356,36 @@ public:
   float ZbCHS1010_pfJetSum;
   float ZbCHS1010_pfBJetDphiZ[jMax];
 
+  float ZbCHS3010_BTagWgtT;
+  float ZbCHS3010_BTagWgtTUp;
+  float ZbCHS3010_BTagWgtTDown;
 
-  float Zb2010_bTagProbCSVBP[jMax];
-  int Zb2010_pfJetGoodNumBtag; 
-  float Zb2010_pfJetGoodEta[jMax]; 
-  int Zb2010_pfJetGoodNum;
-  float Zb2010_pfJetDphiZ[jMax];
-  float Zb2010_pfJetGoodPt[jMax];
-  float Zb2010_pfJetSum;
-  float Zb2010_pfBJetDphiZ[jMax];
+  float ZbCHS1010_BTagWgtT;
+  float ZbCHS1010_BTagWgtTUp;
+  float ZbCHS1010_BTagWgtTDown;
   
-  float ZbMikko_bTagProbCSVBP[jMax];
-  int ZbMikko_pfJetGoodNumBtag; 
-  float ZbMikko_pfJetGoodEta[jMax]; 
-  int ZbMikko_pfJetGoodNum;
-  float ZbMikko_pfJetDphiZ[jMax];
-  float ZbMikko_pfJetGoodPt[jMax];
-  float ZbMikko_pfJetSum;
-  float ZbMikko_pfBJetDphiZ[jMax];
+  float ZbCHS3010_BTagWgtM;
+  float ZbCHS3010_BTagWgtMUp;
+  float ZbCHS3010_BTagWgtMDown;
   
-  float Zb3010_bTagProbCSVBP[jMax];
-  int Zb3010_pfJetGoodNumBtag; 
-  float Zb3010_pfJetGoodEta[jMax]; 
-  int Zb3010_pfJetGoodNum;
-  float Zb3010_pfJetDphiZ[jMax];
-  float Zb3010_pfJetGoodPt[jMax];
-  float Zb3010_pfJetSum;
-  float Zb3010_pfBJetDphiZ[jMax];
+  float ZbCHS1010_BTagWgtM;
+  float ZbCHS1010_BTagWgtMUp;
+  float ZbCHS1010_BTagWgtMDown;
   
-  float Zb1510_bTagProbCSVBP[jMax];
-  int Zb1510_pfJetGoodNumBtag; 
-  float Zb1510_pfJetGoodEta[jMax]; 
-  int Zb1510_pfJetGoodNum;
-  float Zb1510_pfJetDphiZ[jMax];
-  float Zb1510_pfJetGoodPt[jMax];
-  float Zb1510_pfJetSum;
-  float Zb1510_pfBJetDphiZ[jMax];
+  float ZbCHS3010_BTagWgtL;
+  float ZbCHS3010_BTagWgtLUp;
+  float ZbCHS3010_BTagWgtLDown;
   
-  float Zb1530_bTagProbCSVBP[jMax];
-  int Zb1530_pfJetGoodNumBtag; 
-  float Zb1530_pfJetGoodEta[jMax]; 
-  int Zb1530_pfJetGoodNum;
-  float Zb1530_pfJetDphiZ[jMax];
-  float Zb1530_pfJetGoodPt[jMax];
-  float Zb1530_pfJetSum;
-  float Zb1530_pfBJetDphiZ[jMax];
+  float ZbCHS1010_BTagWgtL;
+  float ZbCHS1010_BTagWgtLUp;
+  float ZbCHS1010_BTagWgtLDown;
   
-  float Zb2030_bTagProbCSVBP[jMax];
-  int Zb2030_pfJetGoodNumBtag; 
-  float Zb2030_pfJetGoodEta[jMax]; 
-  int Zb2030_pfJetGoodNum;
-  float Zb2030_pfJetDphiZ[jMax];
-  float Zb2030_pfJetGoodPt[jMax];
-  float Zb2030_pfJetSum;
-  float Zb2030_pfBJetDphiZ[jMax];
-  
-  float Zb20_bTagProbCSVBP[jMax];
-  int Zb20_pfJetGoodNumBtag; 
-  float Zb20_pfJetGoodEta[jMax]; 
-  int Zb20_pfJetGoodNum;
-  float Zb20_pfJetDphiZ[jMax];
-  float Zb20_pfJetGoodPt[jMax];
-  float Zb20_pfJetSum;
-  float Zb20_pfBJetDphiZ[jMax];
-  
-  float Zb30_bTagProbCSVBP[jMax]; 
-  int Zb30_pfJetGoodNumBtag; 
-  float Zb30_pfJetGoodEta[jMax]; 
-  int Zb30_pfJetGoodNum;
-  float Zb30_pfJetDphiZ[jMax];
-  float Zb30_pfJetGoodPt[jMax];
-  float Zb30_pfJetSum;
-  float Zb30_pfBJetDphiZ[jMax];
 
-  float Zb30_p5Clean_bTagProbCSVBP[jMax]; 
-  int Zb30_p5Clean_pfJetGoodNumBtag; 
-  float Zb30_p5Clean_pfJetGoodEta[jMax]; 
-  int Zb30_p5Clean_pfJetGoodNum;
-  float Zb30_p5Clean_pfJetDphiZ[jMax];
-  float Zb30_p5Clean_pfJetGoodPt[jMax];
-  float Zb30_p5Clean_pfJetSum;
-  float Zb30_p5Clean_pfBJetDphiZ[jMax];
 
-  float Zb30_SecEta3_bTagProbCSVBP[jMax]; 
-  int Zb30_SecEta3_pfJetGoodNumBtag; 
-  float Zb30_SecEta3_pfJetGoodEta[jMax]; 
-  int Zb30_SecEta3_pfJetGoodNum;
-  float Zb30_SecEta3_pfJetDphiZ[jMax];
-  float Zb30_SecEta3_pfJetGoodPt[jMax];
-  float Zb30_SecEta3_pfJetSum;
-  float Zb30_SecEta3_pfBJetDphiZ[jMax];
-
-  float Zb30_SecEta5_bTagProbCSVBP[jMax]; 
-  int Zb30_SecEta5_pfJetGoodNumBtag; 
-  float Zb30_SecEta5_pfJetGoodEta[jMax]; 
-  int Zb30_SecEta5_pfJetGoodNum;
-  float Zb30_SecEta5_pfJetDphiZ[jMax];
-  float Zb30_SecEta5_pfJetGoodPt[jMax];
-  float Zb30_SecEta5_pfJetSum;
-  float Zb30_SecEta5_pfBJetDphiZ[jMax];
-
-  float Zb30_leading1p3_bTagProbCSVBP[jMax]; 
-  int Zb30_leading1p3_pfJetGoodNumBtag; 
-  float Zb30_leading1p3_pfJetGoodEta[jMax]; 
-  int Zb30_leading1p3_pfJetGoodNum;
-  float Zb30_leading1p3_pfJetDphiZ[jMax];
-  float Zb30_leading1p3_pfJetGoodPt[jMax];
-  float Zb30_leading1p3_pfJetSum;
-  float Zb30_leading1p3_pfBJetDphiZ[jMax];
-
-  float Zb40_bTagProbCSVBP[jMax];
-  int Zb40_pfJetGoodNumBtag;
-  float Zb40_pfJetGoodEta[jMax];
-  int Zb40_pfJetGoodNum;
-  float Zb40_pfJetDphiZ[jMax];
-  float Zb40_pfJetGoodPt[jMax];
-  float Zb40_pfJetSum;
-  float Zb40_pfBJetDphiZ[jMax];
-    
-  bool ZbMikko__IsClean;
-  bool Zb30_p5Clean_IsClean;
   
   float fact;
   
+ //Trilepton variables
   float tri_pt1;
   float tri_pt2;
   float tri_pt3;
@@ -907,59 +736,32 @@ void nanoEvent::reset()
   weightEffDown = 1.0;
   weightEffUp = 1.0;
 
-  ZbCHS30_BTagWgtT = 1.0 ;
   ZbCHS3010_BTagWgtT = 1.0 ;
   ZbCHS1010_BTagWgtT = 1.0 ;
-  Zb3010_BTagWgtT = 1.0 ;
-  Zb30_BTagWgtT = 1.0 ;
   
-  ZbCHS30_BTagWgtTUp = 1.0 ;
   ZbCHS3010_BTagWgtTUp = 1.0 ;
   ZbCHS1010_BTagWgtTUp = 1.0 ;
-  Zb3010_BTagWgtTUp = 1.0 ;
-  Zb30_BTagWgtTUp = 1.0 ;
   
-  ZbCHS30_BTagWgtTDown = 1.0 ;
   ZbCHS3010_BTagWgtTDown = 1.0 ;
   ZbCHS1010_BTagWgtTDown = 1.0 ;
-  Zb3010_BTagWgtTDown = 1.0 ;
-  Zb30_BTagWgtTDown = 1.0 ;
 
-  ZbCHS30_BTagWgtM = 1.0 ;
   ZbCHS3010_BTagWgtM = 1.0 ;
   ZbCHS1010_BTagWgtM = 1.0 ;
-  Zb3010_BTagWgtM = 1.0 ;
-  Zb30_BTagWgtM = 1.0 ;
   
-  ZbCHS30_BTagWgtMUp = 1.0 ;
   ZbCHS3010_BTagWgtMUp = 1.0 ;
   ZbCHS1010_BTagWgtMUp = 1.0 ;
-  Zb3010_BTagWgtMUp = 1.0 ;
-  Zb30_BTagWgtMUp = 1.0 ;
   
-  ZbCHS30_BTagWgtMDown = 1.0 ;
   ZbCHS3010_BTagWgtMDown = 1.0 ;
   ZbCHS1010_BTagWgtMDown = 1.0 ;
-  Zb3010_BTagWgtMDown = 1.0 ;
-  Zb30_BTagWgtMDown = 1.0 ;
   
-  ZbCHS30_BTagWgtL = 1.0 ;
   ZbCHS3010_BTagWgtL = 1.0 ;
   ZbCHS1010_BTagWgtL = 1.0 ;
-  Zb3010_BTagWgtL = 1.0 ;
-  Zb30_BTagWgtL = 1.0 ;
   
-  ZbCHS30_BTagWgtLUp = 1.0 ;
   ZbCHS3010_BTagWgtLUp = 1.0 ;
   ZbCHS1010_BTagWgtLUp = 1.0 ;
-  Zb3010_BTagWgtLUp = 1.0 ;
-  Zb30_BTagWgtLUp = 1.0 ;
   
-  ZbCHS30_BTagWgtLDown = 1.0 ;
   ZbCHS3010_BTagWgtLDown = 1.0 ;
   ZbCHS1010_BTagWgtLDown = 1.0 ;
-  Zb3010_BTagWgtLDown = 1.0 ;
-  Zb30_BTagWgtLDown = 1.0 ;
   
   mGlu=0;
   mChi=0;
@@ -1016,86 +818,15 @@ void nanoEvent::reset()
   LSP2Mopt=0;
   
   //Z+b variables
-  Zb2010_alpha=0;
-  ZbMikko_alpha=0;
-  Zb3010_alpha=0;
   ZbCHS3010_alpha=0;
   ZbCHS1010_alpha=0;
   ZbCHS3010_alphaUp=0;
   ZbCHS1010_alphaUp=0;
   ZbCHS3010_alphaDown=0;
   ZbCHS1010_alphaDown=0;
-  ZbCHS30_alpha=0;
-  Zb1510_alpha=0;
-  Zb1530_alpha=0;
-  Zb2030_alpha=0;
-  Zb20_alpha=0;
-  Zb30_alpha=0;
-  Zb30_p5Clean_alpha=0;
-  Zb30_SecEta3_alpha=0;
-  Zb30_SecEta5_alpha=0;
-  Zb30_leading1p3_alpha=0;
-  Zb40_alpha=0;
   mpf=0;
   fake_mpf=0;
   pass_b_PU_rejection=false;
-  
-  Zb1510_pfJetGoodNumBtag=0;
-  Zb1510_pfJetGoodNum=0;
-  Zb1510_pfJetSum=0;
-  
-  Zb1530_pfJetGoodNumBtag=0;
-  Zb1530_pfJetGoodNum=0;
-  Zb1530_pfJetSum=0;
-  
-  Zb2030_pfJetGoodNumBtag=0;
-  Zb2030_pfJetGoodNum=0;
-  Zb2030_pfJetSum=0;
-  
-  Zb2010_pfJetGoodNumBtag=0;
-  Zb2010_pfJetGoodNum=0;
-  Zb2010_pfJetSum=0;
-  
-  ZbMikko_pfJetGoodNumBtag=0;
-  ZbMikko_pfJetGoodNum=0;
-  ZbMikko_pfJetSum=0;
-  
-  Zb3010_pfJetGoodNumBtag=0;
-  Zb3010_pfJetGoodNum=0;
-  Zb3010_pfJetSum=0;
-  
-  Zb20_pfJetGoodNumBtag=0;
-  Zb20_pfJetGoodNum=0;
-  Zb20_pfJetSum=0;
-  
-  Zb30_p5Clean_pfJetGoodNumBtag=0;
-  Zb30_p5Clean_pfJetGoodNum=0;
-  Zb30_p5Clean_pfJetSum=0;
-  
-  Zb30_leading1p3_pfJetGoodNumBtag=0;
-  Zb30_leading1p3_pfJetGoodNum=0;
-  Zb30_leading1p3_pfJetSum=0;
-
-  Zb30_pfJetGoodNumBtag=0;
-  Zb30_pfJetGoodNum=0;
-  Zb30_pfJetSum=0;
-
-  Zb30_SecEta3_pfJetGoodNumBtag=0;
-  Zb30_SecEta3_pfJetGoodNum=0;
-  Zb30_SecEta3_pfJetSum=0;
-
-  Zb30_SecEta5_pfJetGoodNumBtag=0;
-  Zb30_SecEta5_pfJetGoodNum=0;
-  Zb30_SecEta5_pfJetSum=0;
-
-  Zb40_pfJetGoodNumBtag=0;
-  Zb40_pfJetGoodNum=0;
-  Zb40_pfJetSum=0;
-
-  ZbCHS30_alpha = 0;
-  ZbCHS30_pfJetGoodNumBtag = 0;
-  ZbCHS30_pfJetGoodNum = 0;
-  ZbCHS30_pfJetSum = 0;
   
   ZbCHS3010_pfJetGoodNumBtag=0;
   ZbCHS3010_pfJetGoodNum=0;
@@ -1108,13 +839,6 @@ void nanoEvent::reset()
 
 
   for(int i=0;i<jMax;i++) {
-  
-    ZbCHS30_bTagProbCSVBP[i] = 0;
-    ZbCHS30_pfJetGoodEta[i] = 0;
-    ZbCHS30_pfJetDphiZ[i] = 0;
-    ZbCHS30_pfJetGoodPt[i] = 0;
-    ZbCHS30_pfBJetDphiZ[i] = 0;
-
     ZbCHS3010_bTagProbCSVBP[i] = 0;
     ZbCHS3010_pfJetGoodEta[i] = 0;
     ZbCHS3010_pfJetDphiZ[i] = 0;
@@ -1126,89 +850,8 @@ void nanoEvent::reset()
     ZbCHS1010_pfJetDphiZ[i] = 0;
     ZbCHS1010_pfJetGoodPt[i] = 0;
     ZbCHS1010_pfBJetDphiZ[i] = 0;
-
-    Zb1510_bTagProbCSVBP[i]=0;
-    Zb1510_pfJetGoodEta[i]=0;
-    Zb1510_pfJetDphiZ[i]=0;
-    Zb1510_pfJetGoodPt[i]=0;
-    Zb1510_pfBJetDphiZ[i]=0;
-
-    Zb1530_bTagProbCSVBP[i]=0;
-    Zb1530_pfJetGoodEta[i]=0;
-    Zb1530_pfJetDphiZ[i]=0;
-    Zb1530_pfJetGoodPt[i]=0;
-    Zb1530_pfBJetDphiZ[i]=0;
-
-    Zb2030_bTagProbCSVBP[i]=0;
-    Zb2030_pfJetGoodEta[i]=0;
-    Zb2030_pfJetDphiZ[i]=0;
-    Zb2030_pfJetGoodPt[i]=0;
-    Zb2030_pfBJetDphiZ[i]=0;
-
-    Zb2010_bTagProbCSVBP[i]=0;
-    Zb2010_pfJetGoodEta[i]=0;
-    Zb2010_pfJetDphiZ[i]=0;
-    Zb2010_pfJetGoodPt[i]=0;
-    Zb2010_pfBJetDphiZ[i]=0;
-
-    ZbMikko_bTagProbCSVBP[i]=0;
-    ZbMikko_pfJetGoodEta[i]=0;
-    ZbMikko_pfJetDphiZ[i]=0;
-    ZbMikko_pfJetGoodPt[i]=0;
-    ZbMikko_pfBJetDphiZ[i]=0;
-
-    Zb3010_bTagProbCSVBP[i]=0;
-    Zb3010_pfJetGoodEta[i]=0;
-    Zb3010_pfJetDphiZ[i]=0;
-    Zb3010_pfJetGoodPt[i]=0;
-    Zb3010_pfBJetDphiZ[i]=0;
-
-    Zb20_bTagProbCSVBP[i]=0;
-    Zb20_pfJetGoodEta[i]=0;
-    Zb20_pfJetDphiZ[i]=0;
-    Zb20_pfJetGoodPt[i]=0;
-    Zb20_pfBJetDphiZ[i]=0;
-
-    Zb30_bTagProbCSVBP[i]=0;
-    Zb30_pfJetGoodEta[i]=0;
-    Zb30_pfJetDphiZ[i]=0;
-    Zb30_pfJetGoodPt[i]=0;
-    Zb30_pfBJetDphiZ[i]=0;
-
-    Zb30_p5Clean_bTagProbCSVBP[i]=0;
-    Zb30_p5Clean_pfJetGoodEta[i]=0;
-    Zb30_p5Clean_pfJetDphiZ[i]=0;
-    Zb30_p5Clean_pfJetGoodPt[i]=0;
-    Zb30_p5Clean_pfBJetDphiZ[i]=0;
-
-    Zb30_SecEta3_bTagProbCSVBP[i]=0;
-    Zb30_SecEta3_pfJetGoodEta[i]=0;
-    Zb30_SecEta3_pfJetDphiZ[i]=0;
-    Zb30_SecEta3_pfJetGoodPt[i]=0;
-    Zb30_SecEta3_pfBJetDphiZ[i]=0;
-
-    Zb30_SecEta5_bTagProbCSVBP[i]=0;
-    Zb30_SecEta5_pfJetGoodEta[i]=0;
-    Zb30_SecEta5_pfJetDphiZ[i]=0;
-    Zb30_SecEta5_pfJetGoodPt[i]=0;
-    Zb30_SecEta5_pfBJetDphiZ[i]=0;
-
-    Zb30_leading1p3_bTagProbCSVBP[i]=0;
-    Zb30_leading1p3_pfJetGoodEta[i]=0;
-    Zb30_leading1p3_pfJetDphiZ[i]=0;
-    Zb30_leading1p3_pfJetGoodPt[i]=0;
-    Zb30_leading1p3_pfBJetDphiZ[i]=0;
-
-    Zb40_bTagProbCSVBP[i]=0;
-    Zb40_pfJetGoodEta[i]=0;
-    Zb40_pfJetDphiZ[i]=0;
-    Zb40_pfJetGoodPt[i]=0;
-    Zb40_pfBJetDphiZ[i]=0;
   }
   
-  ZbMikko__IsClean=true;
-  Zb30_p5Clean_IsClean=true;
-
   tri_pt1=0;
   fact=1.0;
   tri_pt2=0;
@@ -1734,59 +1377,32 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
 
-  myTree->Branch("ZbCHS30_BTagWgtT",&nEvent.ZbCHS30_BTagWgtT,"ZbCHS30_BTagWgtT/F");
   myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtT,"ZbCHS3010_BTagWgtT/F");
   myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtT,"ZbCHS1010_BTagWgtT/F");
-  myTree->Branch("Zb3010_BTagWgtT",&nEvent.Zb3010_BTagWgtT,"Zb3010_BTagWgtT/F");
-  myTree->Branch("Zb30_BTagWgtT",&nEvent.Zb30_BTagWgtT,"Zb30_BTagWgtT/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtTUp",&nEvent.ZbCHS30_BTagWgtTUp,"ZbCHS30_BTagWgtTUp/F");
   myTree->Branch("ZbCHS3010_BTagWgtTUp",&nEvent.ZbCHS3010_BTagWgtTUp,"ZbCHS3010_BTagWgtTUp/F");
   myTree->Branch("ZbCHS1010_BTagWgtTUp",&nEvent.ZbCHS1010_BTagWgtTUp,"ZbCHS1010_BTagWgtTUp/F");
-  myTree->Branch("Zb3010_BTagWgtTUp",&nEvent.Zb3010_BTagWgtTUp,"Zb3010_BTagWgtTUp/F");
-  myTree->Branch("Zb30_BTagWgtTUp",&nEvent.Zb30_BTagWgtTUp,"Zb30_BTagWgtTUp/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtTDown",&nEvent.ZbCHS30_BTagWgtTDown,"ZbCHS30_BTagWgtTDown/F");
-  myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtTDown,"ZbCHS3010_BTagWgtTDown/F");
-  myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtTDown,"ZbCHS1010_BTagWgtTDown/F");
-  myTree->Branch("Zb3010_BTagWgtT",&nEvent.Zb3010_BTagWgtTDown,"Zb3010_BTagWgtTDown/F");
-  myTree->Branch("Zb30_BTagWgtT",&nEvent.Zb30_BTagWgtTDown,"Zb30_BTagWgtTDown/F");
+  myTree->Branch("ZbCHS3010_BTagWgtTDown",&nEvent.ZbCHS3010_BTagWgtTDown,"ZbCHS3010_BTagWgtTDown/F");
+  myTree->Branch("ZbCHS1010_BTagWgtTDown",&nEvent.ZbCHS1010_BTagWgtTDown,"ZbCHS1010_BTagWgtTDown/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtM",&nEvent.ZbCHS30_BTagWgtM,"ZbCHS30_BTagWgtM/F");
   myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtM,"ZbCHS3010_BTagWgtM/F");
   myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtM,"ZbCHS1010_BTagWgtM/F");
-  myTree->Branch("Zb3010_BTagWgtM",&nEvent.Zb3010_BTagWgtM,"Zb3010_BTagWgtM/F");
-  myTree->Branch("Zb30_BTagWgtM",&nEvent.Zb30_BTagWgtM,"Zb30_BTagWgtM/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtMUp",&nEvent.ZbCHS30_BTagWgtMUp,"ZbCHS30_BTagWgtMUp/F");
   myTree->Branch("ZbCHS3010_BTagWgtMUp",&nEvent.ZbCHS3010_BTagWgtMUp,"ZbCHS3010_BTagWgtMUp/F");
   myTree->Branch("ZbCHS1010_BTagWgtMUp",&nEvent.ZbCHS1010_BTagWgtMUp,"ZbCHS1010_BTagWgtMUp/F");
-  myTree->Branch("Zb3010_BTagWgtMUp",&nEvent.Zb3010_BTagWgtMUp,"Zb3010_BTagWgtMUp/F");
-  myTree->Branch("Zb30_BTagWgtMUp",&nEvent.Zb30_BTagWgtMUp,"Zb30_BTagWgtMUp/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtMDown",&nEvent.ZbCHS30_BTagWgtMDown,"ZbCHS30_BTagWgtMDown/F");
   myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtMDown,"ZbCHS3010_BTagWgtMDown/F");
   myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtMDown,"ZbCHS1010_BTagWgtMDown/F");
-  myTree->Branch("Zb3010_BTagWgtM",&nEvent.Zb3010_BTagWgtMDown,"Zb3010_BTagWgtMDown/F");
-  myTree->Branch("Zb30_BTagWgtM",&nEvent.Zb30_BTagWgtMDown,"Zb30_BTagWgtMDown/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtL",&nEvent.ZbCHS30_BTagWgtL,"ZbCHS30_BTagWgtL/F");
   myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtL,"ZbCHS3010_BTagWgtL/F");
   myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtL,"ZbCHS1010_BTagWgtL/F");
-  myTree->Branch("Zb3010_BTagWgtL",&nEvent.Zb3010_BTagWgtL,"Zb3010_BTagWgtL/F");
-  myTree->Branch("Zb30_BTagWgtL",&nEvent.Zb30_BTagWgtL,"Zb30_BTagWgtL/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtLUp",&nEvent.ZbCHS30_BTagWgtLUp,"ZbCHS30_BTagWgtLUp/F");
   myTree->Branch("ZbCHS3010_BTagWgtLUp",&nEvent.ZbCHS3010_BTagWgtLUp,"ZbCHS3010_BTagWgtLUp/F");
   myTree->Branch("ZbCHS1010_BTagWgtLUp",&nEvent.ZbCHS1010_BTagWgtLUp,"ZbCHS1010_BTagWgtLUp/F");
-  myTree->Branch("Zb3010_BTagWgtLUp",&nEvent.Zb3010_BTagWgtLUp,"Zb3010_BTagWgtLUp/F");
-  myTree->Branch("Zb30_BTagWgtLUp",&nEvent.Zb30_BTagWgtLUp,"Zb30_BTagWgtLUp/F");
   
-  myTree->Branch("ZbCHS30_BTagWgtLDown",&nEvent.ZbCHS30_BTagWgtLDown,"ZbCHS30_BTagWgtLDown/F");
   myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtLDown,"ZbCHS3010_BTagWgtLDown/F");
   myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtLDown,"ZbCHS1010_BTagWgtLDown/F");
-  myTree->Branch("Zb3010_BTagWgtL",&nEvent.Zb3010_BTagWgtLDown,"Zb3010_BTagWgtLDown/F");
-  myTree->Branch("Zb30_BTagWgtL",&nEvent.Zb30_BTagWgtLDown,"Zb30_BTagWgtLDown/F");
   
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
@@ -1810,23 +1426,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
   myTree->Branch("EventFlavor",&nEvent.EventFlavor,"EventFlavor/I");
   myTree->Branch("EventZToTaus",&nEvent.EventZToTaus,"EventZToTaus/O");
-    
-  myTree->Branch("Zb2010_pfJetGoodNum",&nEvent.Zb2010_pfJetGoodNum,"Zb2010_pfJetGoodNum/I");
-  myTree->Branch("Zb2010_pfJetGoodNumBtag",&nEvent.Zb2010_pfJetGoodNumBtag,"Zb2010_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb2010_bTagProbCSVBP",nEvent.Zb2010_bTagProbCSVBP,"Zb2010_bTagProbCSVBP[Zb2010_pfJetGoodNum]/F");
-  myTree->Branch("Zb2010_pfJetGoodEta",nEvent.Zb2010_pfJetGoodEta,"Zb2010_pfJetGoodEta[Zb2010_pfJetGoodNum]/F");
-  myTree->Branch("Zb2010_pfJetDphiZ",nEvent.Zb2010_pfJetDphiZ,"Zb2010_pfJetDphiZ[Zb2010_pfJetGoodNum]/F");
-  myTree->Branch("Zb2010_pfJetGoodPt",nEvent.Zb2010_pfJetGoodPt,"Zb2010_pfJetGoodPt[Zb2010_pfJetGoodNum]/F");
-  myTree->Branch("Zb2010_pfBJetDphiZ",nEvent.Zb2010_pfBJetDphiZ,"Zb2010_pfBJetDphiZ[Zb2010_pfJetGoodNum]/F");
-
-  myTree->Branch("ZbCHS30_alpha",&nEvent.ZbCHS30_alpha, "ZbCHS30_alpha/F");
-  myTree->Branch("ZbCHS30_pfJetGoodNum",&nEvent.ZbCHS30_pfJetGoodNum,"ZbCHS30_pfJetGoodNum/I");
-  myTree->Branch("ZbCHS30_pfJetGoodNumBtag",&nEvent.ZbCHS30_pfJetGoodNumBtag,"ZbCHS30_pfJetGoodNumBtag/I");
-  myTree->Branch("ZbCHS30_bTagProbCSVBP",nEvent.ZbCHS30_bTagProbCSVBP,"ZbCHS30_bTagProbCSVBP[ZbCHS30_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS30_pfJetGoodEta",nEvent.ZbCHS30_pfJetGoodEta,"ZbCHS30_pfJetGoodEta[ZbCHS30_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS30_pfJetDphiZ",nEvent.ZbCHS30_pfJetDphiZ,"ZbCHS30_pfJetDphiZ[ZbCHS30_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS30_pfJetGoodPt",nEvent.ZbCHS30_pfJetGoodPt,"ZbCHS30_pfJetGoodPt[ZbCHS30_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS30_pfBJetDphiZ",nEvent.ZbCHS30_pfBJetDphiZ,"ZbCHS30_pfBJetDphiZ[ZbCHS30_pfJetGoodNumBtag]/F");
 
   myTree->Branch("ZbCHS3010_pfJetGoodNum",&nEvent.ZbCHS3010_pfJetGoodNum,"ZbCHS3010_pfJetGoodNum/I");
   myTree->Branch("ZbCHS3010_pfJetGoodNumBtag",&nEvent.ZbCHS3010_pfJetGoodNumBtag,"ZbCHS3010_pfJetGoodNumBtag/I");
@@ -1843,106 +1442,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ZbCHS1010_pfJetDphiZ",nEvent.ZbCHS1010_pfJetDphiZ,"ZbCHS1010_pfJetDphiZ[ZbCHS1010_pfJetGoodNum]/F");
   myTree->Branch("ZbCHS1010_pfJetGoodPt",nEvent.ZbCHS1010_pfJetGoodPt,"ZbCHS1010_pfJetGoodPt[ZbCHS1010_pfJetGoodNum]/F");
   myTree->Branch("ZbCHS1010_pfBJetDphiZ",nEvent.ZbCHS1010_pfBJetDphiZ,"ZbCHS1010_pfBJetDphiZ[ZbCHS1010_pfJetGoodNumBtag]/F");
-
-  myTree->Branch("ZbMikko_pfJetGoodNum",&nEvent.ZbMikko_pfJetGoodNum,"ZbMikko_pfJetGoodNum/I");
-  myTree->Branch("ZbMikko_pfJetGoodNumBtag",&nEvent.ZbMikko_pfJetGoodNumBtag,"ZbMikko_pfJetGoodNumBtag/I");
-  myTree->Branch("ZbMikko_bTagProbCSVBP",nEvent.ZbMikko_bTagProbCSVBP,"ZbMikko_bTagProbCSVBP[ZbMikko_pfJetGoodNum]/F");
-  myTree->Branch("ZbMikko_pfJetGoodEta",nEvent.ZbMikko_pfJetGoodEta,"ZbMikko_pfJetGoodEta[ZbMikko_pfJetGoodNum]/F");
-  myTree->Branch("ZbMikko_pfJetDphiZ",nEvent.ZbMikko_pfJetDphiZ,"ZbMikko_pfJetDphiZ[ZbMikko_pfJetGoodNum]/F");
-  myTree->Branch("ZbMikko_pfJetGoodPt",nEvent.ZbMikko_pfJetGoodPt,"ZbMikko_pfJetGoodPt[ZbMikko_pfJetGoodNum]/F");
-  myTree->Branch("ZbMikko_pfBJetDphiZ",nEvent.ZbMikko_pfBJetDphiZ,"ZbMikko_pfBJetDphiZ[ZbMikko_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb3010_pfJetGoodNum",&nEvent.Zb3010_pfJetGoodNum,"Zb3010_pfJetGoodNum/I");
-  myTree->Branch("Zb3010_pfJetGoodNumBtag",&nEvent.Zb3010_pfJetGoodNumBtag,"Zb3010_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb3010_bTagProbCSVBP",nEvent.Zb3010_bTagProbCSVBP,"Zb3010_bTagProbCSVBP[Zb3010_pfJetGoodNum]/F");
-  myTree->Branch("Zb3010_pfJetGoodEta",nEvent.Zb3010_pfJetGoodEta,"Zb3010_pfJetGoodEta[Zb3010_pfJetGoodNum]/F");
-  myTree->Branch("Zb3010_pfJetDphiZ",nEvent.Zb3010_pfJetDphiZ,"Zb3010_pfJetDphiZ[Zb3010_pfJetGoodNum]/F");
-  myTree->Branch("Zb3010_pfJetGoodPt",nEvent.Zb3010_pfJetGoodPt,"Zb3010_pfJetGoodPt[Zb3010_pfJetGoodNum]/F");
-  myTree->Branch("Zb3010_pfBJetDphiZ",nEvent.Zb3010_pfBJetDphiZ,"Zb3010_pfBJetDphiZ[Zb3010_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb1510_pfJetGoodNum",&nEvent.Zb1510_pfJetGoodNum,"Zb1510_pfJetGoodNum/I");
-  myTree->Branch("Zb1510_pfJetGoodNumBtag",&nEvent.Zb1510_pfJetGoodNumBtag,"Zb1510_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb1510_bTagProbCSVBP",nEvent.Zb1510_bTagProbCSVBP,"Zb1510_bTagProbCSVBP[Zb1510_pfJetGoodNum]/F");
-  myTree->Branch("Zb1510_pfJetGoodEta",nEvent.Zb1510_pfJetGoodEta,"Zb1510_pfJetGoodEta[Zb1510_pfJetGoodNum]/F");
-  myTree->Branch("Zb1510_pfJetDphiZ",nEvent.Zb1510_pfJetDphiZ,"Zb1510_pfJetDphiZ[Zb1510_pfJetGoodNum]/F");
-  myTree->Branch("Zb1510_pfJetGoodPt",nEvent.Zb1510_pfJetGoodPt,"Zb1510_pfJetGoodPt[Zb1510_pfJetGoodNum]/F");
-  myTree->Branch("Zb1510_pfBJetDphiZ",nEvent.Zb1510_pfBJetDphiZ,"Zb1510_pfBJetDphiZ[Zb1510_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb1530_pfJetGoodNum",&nEvent.Zb1530_pfJetGoodNum,"Zb1530_pfJetGoodNum/I");
-  myTree->Branch("Zb1530_pfJetGoodNumBtag",&nEvent.Zb1530_pfJetGoodNumBtag,"Zb1530_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb1530_bTagProbCSVBP",nEvent.Zb1530_bTagProbCSVBP,"Zb1530_bTagProbCSVBP[Zb1530_pfJetGoodNum]/F");
-  myTree->Branch("Zb1530_pfJetGoodEta",nEvent.Zb1530_pfJetGoodEta,"Zb1530_pfJetGoodEta[Zb1530_pfJetGoodNum]/F");
-  myTree->Branch("Zb1530_pfJetDphiZ",nEvent.Zb1530_pfJetDphiZ,"Zb1530_pfJetDphiZ[Zb1530_pfJetGoodNum]/F");
-  myTree->Branch("Zb1530_pfJetGoodPt",nEvent.Zb1530_pfJetGoodPt,"Zb1530_pfJetGoodPt[Zb1530_pfJetGoodNum]/F");
-  myTree->Branch("Zb1530_pfBJetDphiZ",nEvent.Zb1530_pfBJetDphiZ,"Zb1530_pfBJetDphiZ[Zb1530_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb2030_pfJetGoodNum",&nEvent.Zb2030_pfJetGoodNum,"Zb2030_pfJetGoodNum/I");
-  myTree->Branch("Zb2030_pfJetGoodNumBtag",&nEvent.Zb2030_pfJetGoodNumBtag,"Zb2030_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb2030_bTagProbCSVBP",nEvent.Zb2030_bTagProbCSVBP,"Zb2030_bTagProbCSVBP[Zb2030_pfJetGoodNum]/F");
-  myTree->Branch("Zb2030_pfJetGoodEta",nEvent.Zb2030_pfJetGoodEta,"Zb2030_pfJetGoodEta[Zb2030_pfJetGoodNum]/F");
-  myTree->Branch("Zb2030_pfJetDphiZ",nEvent.Zb2030_pfJetDphiZ,"Zb2030_pfJetDphiZ[Zb2030_pfJetGoodNum]/F");
-  myTree->Branch("Zb2030_pfJetGoodPt",nEvent.Zb2030_pfJetGoodPt,"Zb2030_pfJetGoodPt[Zb2030_pfJetGoodNum]/F");
-  myTree->Branch("Zb2030_pfBJetDphiZ",nEvent.Zb2030_pfBJetDphiZ,"Zb2030_pfBJetDphiZ[Zb2030_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb20_pfJetGoodNum",&nEvent.Zb20_pfJetGoodNum,"Zb20_pfJetGoodNum/I");
-  myTree->Branch("Zb20_pfJetGoodNumBtag",&nEvent.Zb20_pfJetGoodNumBtag,"Zb20_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb20_bTagProbCSVBP",nEvent.Zb20_bTagProbCSVBP,"Zb20_bTagProbCSVBP[Zb20_pfJetGoodNum]/F");
-  myTree->Branch("Zb20_pfJetGoodEta",nEvent.Zb20_pfJetGoodEta,"Zb20_pfJetGoodEta[Zb20_pfJetGoodNum]/F");
-  myTree->Branch("Zb20_pfJetDphiZ",nEvent.Zb20_pfJetDphiZ,"Zb20_pfJetDphiZ[Zb20_pfJetGoodNum]/F");
-  myTree->Branch("Zb20_pfJetGoodPt",nEvent.Zb20_pfJetGoodPt,"Zb20_pfJetGoodPt[Zb20_pfJetGoodNum]/F");
-  myTree->Branch("Zb20_pfBJetDphiZ",nEvent.Zb20_pfBJetDphiZ,"Zb20_pfBJetDphiZ[Zb20_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb30_leading1p3_pfJetGoodNum",&nEvent.Zb30_leading1p3_pfJetGoodNum,"Zb30_leading1p3_pfJetGoodNum/I");
-  myTree->Branch("Zb30_leading1p3_pfJetGoodNumBtag",&nEvent.Zb30_leading1p3_pfJetGoodNumBtag,"Zb30_leading1p3_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb30_leading1p3_bTagProbCSVBP",nEvent.Zb30_leading1p3_bTagProbCSVBP,"Zb30_leading1p3_bTagProbCSVBP[Zb30_leading1p3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_leading1p3_pfJetGoodEta",nEvent.Zb30_leading1p3_pfJetGoodEta,"Zb30_leading1p3_pfJetGoodEta[Zb30_leading1p3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_leading1p3_pfJetDphiZ",nEvent.Zb30_leading1p3_pfJetDphiZ,"Zb30_leading1p3_pfJetDphiZ[Zb30_leading1p3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_leading1p3_pfJetGoodPt",nEvent.Zb30_leading1p3_pfJetGoodPt,"Zb30_leading1p3_pfJetGoodPt[Zb30_leading1p3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_leading1p3_pfBJetDphiZ",nEvent.Zb30_leading1p3_pfBJetDphiZ,"Zb30_leading1p3_pfBJetDphiZ[Zb30_leading1p3_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb30_p5Clean_pfJetGoodNum",&nEvent.Zb30_p5Clean_pfJetGoodNum,"Zb30_p5Clean_pfJetGoodNum/I");
-  myTree->Branch("Zb30_p5Clean_pfJetGoodNumBtag",&nEvent.Zb30_p5Clean_pfJetGoodNumBtag,"Zb30_p5Clean_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb30_p5Clean_bTagProbCSVBP",nEvent.Zb30_p5Clean_bTagProbCSVBP,"Zb30_p5Clean_bTagProbCSVBP[Zb30_p5Clean_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_p5Clean_pfJetGoodEta",nEvent.Zb30_p5Clean_pfJetGoodEta,"Zb30_p5Clean_pfJetGoodEta[Zb30_p5Clean_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_p5Clean_pfJetDphiZ",nEvent.Zb30_p5Clean_pfJetDphiZ,"Zb30_p5Clean_pfJetDphiZ[Zb30_p5Clean_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_p5Clean_pfJetGoodPt",nEvent.Zb30_p5Clean_pfJetGoodPt,"Zb30_p5Clean_pfJetGoodPt[Zb30_p5Clean_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_p5Clean_pfBJetDphiZ",nEvent.Zb30_p5Clean_pfBJetDphiZ,"Zb30_p5Clean_pfBJetDphiZ[Zb30_p5Clean_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb30_pfJetGoodNum",&nEvent.Zb30_pfJetGoodNum,"Zb30_pfJetGoodNum/I");
-  myTree->Branch("Zb30_pfJetGoodNumBtag",&nEvent.Zb30_pfJetGoodNumBtag,"Zb30_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb30_bTagProbCSVBP",nEvent.Zb30_bTagProbCSVBP,"Zb30_bTagProbCSVBP[Zb30_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_pfJetGoodEta",nEvent.Zb30_pfJetGoodEta,"Zb30_pfJetGoodEta[Zb30_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_pfJetDphiZ",nEvent.Zb30_pfJetDphiZ,"Zb30_pfJetDphiZ[Zb30_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_pfJetGoodPt",nEvent.Zb30_pfJetGoodPt,"Zb30_pfJetGoodPt[Zb30_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_pfBJetDphiZ",nEvent.Zb30_pfBJetDphiZ,"Zb30_pfBJetDphiZ[Zb30_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb30_SecEta3_pfJetGoodNum",&nEvent.Zb30_SecEta3_pfJetGoodNum,"Zb30_SecEta3_pfJetGoodNum/I");
-  myTree->Branch("Zb30_SecEta3_pfJetGoodNumBtag",&nEvent.Zb30_SecEta3_pfJetGoodNumBtag,"Zb30_SecEta3_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb30_SecEta3_bTagProbCSVBP",nEvent.Zb30_SecEta3_bTagProbCSVBP,"Zb30_SecEta3_bTagProbCSVBP[Zb30_SecEta3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta3_pfJetGoodEta",nEvent.Zb30_SecEta3_pfJetGoodEta,"Zb30_SecEta3_pfJetGoodEta[Zb30_SecEta3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta3_pfJetDphiZ",nEvent.Zb30_SecEta3_pfJetDphiZ,"Zb30_SecEta3_pfJetDphiZ[Zb30_SecEta3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta3_pfJetGoodPt",nEvent.Zb30_SecEta3_pfJetGoodPt,"Zb30_SecEta3_pfJetGoodPt[Zb30_SecEta3_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta3_pfBJetDphiZ",nEvent.Zb30_SecEta3_pfBJetDphiZ,"Zb30_SecEta3_pfBJetDphiZ[Zb30_SecEta3_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb30_SecEta5_pfJetGoodNum",&nEvent.Zb30_SecEta5_pfJetGoodNum,"Zb30_SecEta5_pfJetGoodNum/I");
-  myTree->Branch("Zb30_SecEta5_pfJetGoodNumBtag",&nEvent.Zb30_SecEta5_pfJetGoodNumBtag,"Zb30_SecEta5_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb30_SecEta5_bTagProbCSVBP",nEvent.Zb30_SecEta5_bTagProbCSVBP,"Zb30_SecEta5_bTagProbCSVBP[Zb30_SecEta5_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta5_pfJetGoodEta",nEvent.Zb30_SecEta5_pfJetGoodEta,"Zb30_SecEta5_pfJetGoodEta[Zb30_SecEta5_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta5_pfJetDphiZ",nEvent.Zb30_SecEta5_pfJetDphiZ,"Zb30_SecEta5_pfJetDphiZ[Zb30_SecEta5_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta5_pfJetGoodPt",nEvent.Zb30_SecEta5_pfJetGoodPt,"Zb30_SecEta5_pfJetGoodPt[Zb30_SecEta5_pfJetGoodNum]/F");
-  myTree->Branch("Zb30_SecEta5_pfBJetDphiZ",nEvent.Zb30_SecEta5_pfBJetDphiZ,"Zb30_SecEta5_pfBJetDphiZ[Zb30_SecEta5_pfJetGoodNum]/F");
-  
-  myTree->Branch("Zb40_pfJetGoodNum",&nEvent.Zb40_pfJetGoodNum,"Zb40_pfJetGoodNum/I");
-  myTree->Branch("Zb40_pfJetGoodNumBtag",&nEvent.Zb40_pfJetGoodNumBtag,"Zb40_pfJetGoodNumBtag/I");
-  myTree->Branch("Zb40_bTagProbCSVBP",nEvent.Zb40_bTagProbCSVBP,"Zb40_bTagProbCSVBP[Zb40_pfJetGoodNum]/F");
-  myTree->Branch("Zb40_pfJetGoodEta",nEvent.Zb40_pfJetGoodEta,"Zb40_pfJetGoodEta[Zb40_pfJetGoodNum]/F");
-  myTree->Branch("Zb40_pfJetDphiZ",nEvent.Zb40_pfJetDphiZ,"Zb40_pfJetDphiZ[Zb40_pfJetGoodNum]/F");
-  myTree->Branch("Zb40_pfJetGoodPt",nEvent.Zb40_pfJetGoodPt,"Zb40_pfJetGoodPt[Zb40_pfJetGoodNum]/F");
-  myTree->Branch("Zb40_pfBJetDphiZ",nEvent.Zb40_pfBJetDphiZ,"Zb40_pfBJetDphiZ[Zb40_pfJetGoodNum]/F");
     
-  myTree->Branch("ZbMikko__IsClean",&nEvent.ZbMikko__IsClean,"ZbMikko__IsClean/O");
-  myTree->Branch("Zb30_p5Clean_IsClean",&nEvent.Zb30_p5Clean_IsClean,"Zb30_p5Clean_IsClean/O");
-  
   myTree->Branch("MetFactor",&nEvent.fact,"MetFactor/F");
   myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
   myTree->Branch("tri_pt2",&nEvent.tri_pt2,"tri_pt2/F");
@@ -2110,25 +1610,12 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
   
     //Z+b variables
-  myTree->Branch("Zb1510_alpha",&nEvent.Zb1510_alpha,"Zb1510_alpha/F");
-  myTree->Branch("Zb1530_alpha",&nEvent.Zb1530_alpha,"Zb1530_alpha/F");
-  myTree->Branch("Zb2030_alpha",&nEvent.Zb2030_alpha,"Zb2030_alpha/F");
-  myTree->Branch("Zb2010_alpha",&nEvent.Zb2010_alpha,"Zb2010_alpha/F");
-  myTree->Branch("ZbMikko_alpha",&nEvent.ZbMikko_alpha,"ZbMikko_alpha/F");
-  myTree->Branch("Zb3010_alpha",&nEvent.Zb3010_alpha,"Zb3010_alpha/F");
   myTree->Branch("ZbCHS3010_alpha",&nEvent.ZbCHS3010_alpha,"ZbCHS3010_alpha/F");
   myTree->Branch("ZbCHS1010_alpha",&nEvent.ZbCHS1010_alpha,"ZbCHS1010_alpha/F");
   myTree->Branch("ZbCHS3010_alphaUp",&nEvent.ZbCHS3010_alphaUp,"ZbCHS3010_alphaUp/F");
   myTree->Branch("ZbCHS1010_alphaUp",&nEvent.ZbCHS1010_alphaUp,"ZbCHS1010_alphaUp/F");
   myTree->Branch("ZbCHS3010_alphaDown",&nEvent.ZbCHS3010_alphaDown,"ZbCHS3010_alphaDown/F");
   myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
-  myTree->Branch("Zb20_alpha",&nEvent.Zb20_alpha,"Zb20_alpha/F");
-  myTree->Branch("Zb30_alpha",&nEvent.Zb30_alpha,"Zb30_alpha/F");
-  myTree->Branch("Zb30_SecEta3_alpha",&nEvent.Zb30_SecEta3_alpha,"Zb30_SecEta3_alpha/F");
-  myTree->Branch("Zb30_SecEta5_alpha",&nEvent.Zb30_SecEta5_alpha,"Zb30_SecEta5_alpha/F");
-  myTree->Branch("Zb30_p5Clean_alpha",&nEvent.Zb30_p5Clean_alpha,"Zb30_p5Clean_alpha/F");
-  myTree->Branch("Zb30_leading1p3_alpha",&nEvent.Zb30_leading1p3_alpha,"Zb30_leading1p3_alpha/F");
-  myTree->Branch("Zb40_alpha",&nEvent.Zb40_alpha,"Zb40_alpha/F");
   myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
   myTree->Branch("fake_mpf",&nEvent.fake_mpf,"fake_mpf/F");
   myTree->Branch("pass_b_PU_rejection",&nEvent.pass_b_PU_rejection,"pass_b_PU_rejection/O");
@@ -2286,7 +1773,6 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
-
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
@@ -2549,7 +2035,6 @@ void JZBAnalysis::Analyze() {
       nEvent.trigger_bit |= (1<<5);
     }
 
-
   // Event filter information
   nEvent.passed_filters = passFilters( nEvent.filter_bit );
 
@@ -2727,6 +2212,7 @@ void JZBAnalysis::Analyze() {
   
   // Trileptons: the highest pt lepton that fired the trigger is our first lepton!
   nEvent.tri_MatchFound=false;
+  
   for(int ilep=0;ilep<sortedGoodLeptons.size();ilep++) {
     if(MatchTrigger(&sortedGoodLeptons[ilep])) {
       TriLepton1=ilep;
@@ -2857,8 +2343,6 @@ void JZBAnalysis::Analyze() {
   TLorentzVector zVector;
   zVector.SetPtEtaPhiE(nEvent.pt,nEvent.eta,nEvent.phi,nEvent.E);
 
-  nEvent.ZbCHS30_pfJetGoodNum=0;
-  nEvent.ZbCHS30_pfJetGoodNumBtag=0;
   nEvent.ZbCHS3010_pfJetGoodNum=0;
   nEvent.ZbCHS1010_pfJetGoodNum=0;
   nEvent.ZbCHS3010_pfJetGoodNumBtag=0;
@@ -2866,6 +2350,7 @@ void JZBAnalysis::Analyze() {
   vector<lepton> pfCHSGoodJets;
   for(int i =0 ; i<fTR->PFCHSNJets;i++) // PF jet loop
     {
+      if(i==jMax){cout<<"max Num of jets (CHS) was reached"<<endl; break;}
       float jpt = fTR->PFCHSJPt[i];
       float jeta = fTR->PFCHSJEta[i];
       float jphi = fTR->PFCHSJPhi[i];
@@ -2891,34 +2376,7 @@ void JZBAnalysis::Analyze() {
 
       if ( !(fabs(jeta)<3.0 ) ) continue;
 
-      bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
-
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-        if(nEvent.ZbCHS30_pfJetGoodNum==0 && isMC) {
-	  float Uncert;
-	  nEvent.ZbCHS30_BTagWgtT     = GetBWeight("Tight",abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
-	  nEvent.ZbCHS30_BTagWgtTUp   = nEvent.ZbCHS30_BTagWgtT+Uncert;
-	  nEvent.ZbCHS30_BTagWgtTDown = nEvent.ZbCHS30_BTagWgtT-Uncert;
-	  nEvent.ZbCHS30_BTagWgtM     = GetBWeight("Medium",abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
-	  nEvent.ZbCHS30_BTagWgtMUp   = nEvent.ZbCHS30_BTagWgtM+Uncert;
-	  nEvent.ZbCHS30_BTagWgtMDown = nEvent.ZbCHS30_BTagWgtM-Uncert;
-	  nEvent.ZbCHS30_BTagWgtL     = GetBWeight("Loose",abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
-	  nEvent.ZbCHS30_BTagWgtLUp   = nEvent.ZbCHS30_BTagWgtL+Uncert;
-	  nEvent.ZbCHS30_BTagWgtLDown = nEvent.ZbCHS30_BTagWgtL-Uncert;
-	}
-  
-        nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]=fTR->PFCHSJcombinedSecondaryVertexBJetTags[i];
-        if(nEvent.ZbCHS30_bTagProbCSVBP[nEvent.ZbCHS30_pfJetGoodNum]>0.244) {
-          nEvent.ZbCHS30_pfBJetDphiZ[nEvent.ZbCHS30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-          nEvent.ZbCHS30_pfJetGoodNumBtag++;
-        }
-        nEvent.ZbCHS30_pfJetGoodEta[nEvent.ZbCHS30_pfJetGoodNum]=jeta;
-        nEvent.ZbCHS30_pfJetDphiZ[nEvent.ZbCHS30_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-        nEvent.ZbCHS30_pfJetGoodPt[nEvent.ZbCHS30_pfJetGoodNum]=jpt;
-        nEvent.ZbCHS30_pfJetGoodNum++;
-      }
-      
-      if((nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
+      if(nEvent.ZbCHS1010_pfJetGoodNum<jMax && (nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
 	//Z+b selection with 30 GeV leading jet, 10 GeV sub-leading jet
 	if(nEvent.ZbCHS3010_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
@@ -2943,9 +2401,9 @@ void JZBAnalysis::Analyze() {
 	    nEvent.ZbCHS3010_alphaDown = 10e7;
 	  }
 	}
-	
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.244) {
+	  if(nEvent.ZbCHS3010_pfJetGoodNumBtag>nEvent.ZbCHS3010_pfJetGoodNum) nEvent.ZbCHS3010_pfJetGoodNumBtag=nEvent.ZbCHS3010_pfJetGoodNum; // workaround for nB~10573937
 	  nEvent.ZbCHS3010_pfBJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
 	  nEvent.ZbCHS3010_pfJetGoodNumBtag++;
 	}
@@ -2994,7 +2452,6 @@ void JZBAnalysis::Analyze() {
 
       
     }
-  if(nEvent.ZbCHS30_pfJetGoodNum>0) nEvent.ZbCHS30_alpha=nEvent.ZbCHS30_pfJetGoodPt[1]/nEvent.pt;
 
   nEvent.pfJetNum=0;
   nEvent.pfJetGoodNum30=0;
@@ -3043,7 +2500,6 @@ void JZBAnalysis::Analyze() {
 //      jpz*=correction;
 //      nEvent.CorrectionRatio[nEvent.pfJetNum]=correction/jesC;
 //      jesC=correction;
-      if ( !(jpt>10) ) continue;
 
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
@@ -3067,225 +2523,26 @@ void JZBAnalysis::Analyze() {
       fJECUnc->setJetEta(jeta);
       fJECUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
       
+      // Keep jets over min. pt threshold
+      if ( !(jpt>20) ) continue;
+      counters[PJ].fill("... pt>20.");
+      
       // Keep central jets
-      if ( !(fabs(jeta)<5.0 ) ) continue;
+      if ( !(fabs(jeta)<3.0 ) ) continue;
+      counters[PJ].fill("... |eta|<3.0");
       
       // Flag good jets failing ID
       if (!isJetID) { 
         nEvent.badJet = 1;
+      } else {
+        counters[PJ].fill("... pass Jet ID");
       }
-        
+      
       lepton tmpLepton;
       tmpLepton.p = aJet;
       tmpLepton.charge = 0;
       tmpLepton.index = i;
       tmpLepton.type = -1;
-      
-        
-      bool IsOutsidep5Cone = ((aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)>0.5)&&(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)>0.5));
-      
-      if((nEvent.Zb2010_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-          //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-          nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb2010_bTagProbCSVBP[nEvent.Zb2010_pfJetGoodNum]>0.244) {
-              nEvent.Zb2010_pfBJetDphiZ[nEvent.Zb2010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb2010_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb2010_pfJetGoodEta[nEvent.Zb2010_pfJetGoodNum]=jeta;
-          nEvent.Zb2010_pfJetDphiZ[nEvent.Zb2010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb2010_pfJetGoodPt[nEvent.Zb2010_pfJetGoodNum]=jpt;
-          nEvent.Zb2010_pfJetGoodNum++;
-      }
-      
-      if(( (nEvent.ZbMikko_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.ZbMikko_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<5.0))) {
-          //Full Mikko selection: 15/10, first within 1.3, second within 5.0; cleaning within 0.5,
-          nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.ZbMikko_bTagProbCSVBP[nEvent.ZbMikko_pfJetGoodNum]>0.244) {
-              nEvent.ZbMikko_pfBJetDphiZ[nEvent.ZbMikko_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.ZbMikko_pfJetGoodNumBtag++;
-          }
-          nEvent.ZbMikko_pfJetGoodEta[nEvent.ZbMikko_pfJetGoodNum]=jeta;
-          nEvent.ZbMikko_pfJetDphiZ[nEvent.ZbMikko_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.ZbMikko_pfJetGoodPt[nEvent.ZbMikko_pfJetGoodNum]=jpt;
-          nEvent.ZbMikko_pfJetGoodNum++;
-          if(!IsOutsidep5Cone) nEvent.ZbMikko__IsClean=false;
-      }
-        
-      if((nEvent.Zb3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.Zb3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-          //Z+b selection with 20 GeV leading jet, 10 GeV sub-leading jet
-          if(nEvent.Zb3010_pfJetGoodNum==0 && isMC) {
-	    float Uncert;
-	    nEvent.Zb3010_BTagWgtT     = GetBWeight("Tight",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb3010_BTagWgtTDown = nEvent.Zb3010_BTagWgtT - Uncert;
-	    nEvent.Zb3010_BTagWgtTUp   = nEvent.Zb3010_BTagWgtT + Uncert;
-	    nEvent.Zb3010_BTagWgtM     = GetBWeight("Medium",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb3010_BTagWgtMDown = nEvent.Zb3010_BTagWgtM - Uncert;
-	    nEvent.Zb3010_BTagWgtMUp   = nEvent.Zb3010_BTagWgtM + Uncert;
-	    nEvent.Zb3010_BTagWgtL     = GetBWeight("Loose",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb3010_BTagWgtLDown = nEvent.Zb3010_BTagWgtL - Uncert;
-	    nEvent.Zb3010_BTagWgtLUp   = nEvent.Zb3010_BTagWgtL + Uncert;
-	  }
-	    
-          nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb3010_bTagProbCSVBP[nEvent.Zb3010_pfJetGoodNum]>0.244) {
-              nEvent.Zb3010_pfBJetDphiZ[nEvent.Zb3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb3010_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb3010_pfJetGoodEta[nEvent.Zb3010_pfJetGoodNum]=jeta;
-          nEvent.Zb3010_pfJetDphiZ[nEvent.Zb3010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb3010_pfJetGoodPt[nEvent.Zb3010_pfJetGoodNum]=jpt;
-          nEvent.Zb3010_pfJetGoodNum++;
-      }
-      
-      if((nEvent.Zb1510_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1510_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
-          //Z+b selection with 15 GeV leading jet, 10 GeV sub-leading jet
-          nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb1510_bTagProbCSVBP[nEvent.Zb1510_pfJetGoodNum]>0.244) {
-              nEvent.Zb1510_pfBJetDphiZ[nEvent.Zb1510_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb1510_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb1510_pfJetGoodEta[nEvent.Zb1510_pfJetGoodNum]=jeta;
-          nEvent.Zb1510_pfJetDphiZ[nEvent.Zb1510_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb1510_pfJetGoodPt[nEvent.Zb1510_pfJetGoodNum]=jpt;
-          nEvent.Zb1510_pfJetGoodNum++;
-      }
-        
-      if((nEvent.Zb1530_pfJetGoodNum==0 && jpt>15 && isJetID && abs(jeta)<2.4) || (nEvent.Zb1530_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
-          //Z+b selection with 15 GeV leading jet, 30 GeV sub-leading jet
-          nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb1530_bTagProbCSVBP[nEvent.Zb1530_pfJetGoodNum]>0.244) {
-              nEvent.Zb1530_pfBJetDphiZ[nEvent.Zb1530_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb1530_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb1530_pfJetGoodEta[nEvent.Zb1530_pfJetGoodNum]=jeta;
-          nEvent.Zb1530_pfJetDphiZ[nEvent.Zb1530_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb1530_pfJetGoodPt[nEvent.Zb1530_pfJetGoodNum]=jpt;
-          nEvent.Zb1530_pfJetGoodNum++;
-      }
-      
-      if((nEvent.Zb2030_pfJetGoodNum==0 && jpt>20 && isJetID && abs(jeta)<2.4) || (nEvent.Zb2030_pfJetGoodNum>0 && jpt>30 && isJetID && abs(jeta)<2.4)) {
-          //Z+b selection with 20 GeV leading jet, 30 GeV sub-leading jet
-          nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb2030_bTagProbCSVBP[nEvent.Zb2030_pfJetGoodNum]>0.244) {
-              nEvent.Zb2030_pfBJetDphiZ[nEvent.Zb2030_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb2030_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb2030_pfJetGoodEta[nEvent.Zb2030_pfJetGoodNum]=jeta;
-          nEvent.Zb2030_pfJetDphiZ[nEvent.Zb2030_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb2030_pfJetGoodPt[nEvent.Zb2030_pfJetGoodNum]=jpt;
-          nEvent.Zb2030_pfJetGoodNum++;
-      }
-      
-      if (jpt>20 && isJetID && abs(jeta)<2.4) {
-          //Z+b selection with 20 GeV jets
-          nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb20_bTagProbCSVBP[nEvent.Zb20_pfJetGoodNum]>0.244) {
-              nEvent.Zb20_pfBJetDphiZ[nEvent.Zb20_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb20_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb20_pfJetGoodEta[nEvent.Zb20_pfJetGoodNum]=jeta;
-          nEvent.Zb20_pfJetDphiZ[nEvent.Zb20_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb20_pfJetGoodPt[nEvent.Zb20_pfJetGoodNum]=jpt;
-          nEvent.Zb20_pfJetGoodNum++;
-      }
-        
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-          //Z+b selection with 30 GeV jets
-          if(nEvent.Zb30_pfJetGoodNum==0  && isMC) {
-	    float Uncert;
-	    nEvent.Zb30_BTagWgtT     = GetBWeight("Tight",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb30_BTagWgtTDown = nEvent.Zb30_BTagWgtT - Uncert;
-	    nEvent.Zb30_BTagWgtTUp   = nEvent.Zb30_BTagWgtT + Uncert;
-	    nEvent.Zb30_BTagWgtM     = GetBWeight("Medium",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb30_BTagWgtMDown = nEvent.Zb30_BTagWgtM - Uncert;
-	    nEvent.Zb30_BTagWgtMUp   = nEvent.Zb30_BTagWgtM + Uncert;
-	    nEvent.Zb30_BTagWgtL     = GetBWeight("Loose",abs(fTR->JPartonFlavour[i]), jpt, abs(jeta),Uncert);
-	    nEvent.Zb30_BTagWgtLDown = nEvent.Zb30_BTagWgtL - Uncert;
-	    nEvent.Zb30_BTagWgtLUp   = nEvent.Zb30_BTagWgtL + Uncert;
-	  }
-          nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_bTagProbCSVBP[nEvent.Zb30_pfJetGoodNum]>0.244) {
-              nEvent.Zb30_pfBJetDphiZ[nEvent.Zb30_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb30_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb30_pfJetGoodEta[nEvent.Zb30_pfJetGoodNum]=jeta;
-          nEvent.Zb30_pfJetDphiZ[nEvent.Zb30_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb30_pfJetGoodPt[nEvent.Zb30_pfJetGoodNum]=jpt;
-          nEvent.Zb30_pfJetGoodNum++;
-      }
-        
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-          //Z+b selection with 30 GeV jets
-          nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_p5Clean_bTagProbCSVBP[nEvent.Zb30_p5Clean_pfJetGoodNum]>0.244) {
-              nEvent.Zb30_p5Clean_pfBJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb30_p5Clean_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb30_p5Clean_pfJetGoodEta[nEvent.Zb30_p5Clean_pfJetGoodNum]=jeta;
-          nEvent.Zb30_p5Clean_pfJetDphiZ[nEvent.Zb30_p5Clean_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb30_p5Clean_pfJetGoodPt[nEvent.Zb30_p5Clean_pfJetGoodNum]=jpt;
-          nEvent.Zb30_p5Clean_pfJetGoodNum++;
-          if(!IsOutsidep5Cone) nEvent.Zb30_p5Clean_IsClean=false;
-      }
-
-      if (jpt>30 && isJetID && abs(jeta)<3.0) {
-          //Z+b selection with 30 GeV jets, subleading up to |eta|<3.0 (note: checking at analysis level that leading jet is within 1.3)
-          nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_SecEta3_bTagProbCSVBP[nEvent.Zb30_SecEta3_pfJetGoodNum]>0.244) {
-              nEvent.Zb30_SecEta3_pfBJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb30_SecEta3_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb30_SecEta3_pfJetGoodEta[nEvent.Zb30_SecEta3_pfJetGoodNum]=jeta;
-          nEvent.Zb30_SecEta3_pfJetDphiZ[nEvent.Zb30_SecEta3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb30_SecEta3_pfJetGoodPt[nEvent.Zb30_SecEta3_pfJetGoodNum]=jpt;
-          nEvent.Zb30_SecEta3_pfJetGoodNum++;
-      }
-        
-      if (jpt>30 && isJetID && abs(jeta)<5.0) {
-          //Z+b selection with 30 GeV jets, subleading up to |eta|<5.0 (note: checking at analysis level that leading jet is within 1.3)
-          nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_SecEta5_bTagProbCSVBP[nEvent.Zb30_SecEta5_pfJetGoodNum]>0.244) {
-              nEvent.Zb30_SecEta5_pfBJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb30_SecEta5_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb30_SecEta5_pfJetGoodEta[nEvent.Zb30_SecEta5_pfJetGoodNum]=jeta;
-          nEvent.Zb30_SecEta5_pfJetDphiZ[nEvent.Zb30_SecEta5_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb30_SecEta5_pfJetGoodPt[nEvent.Zb30_SecEta5_pfJetGoodNum]=jpt;
-          nEvent.Zb30_SecEta5_pfJetGoodNum++;
-      }
-
-      if (jpt>30 && isJetID && abs(jeta)<2.4) {
-          //Z+b selection with 30 GeV jets, leading jet within |eta|<1.3
-          if(nEvent.Zb30_leading1p3_pfJetGoodNum==0 && abs(jeta)>2.4) continue; // leading jet must be within |eta|<1.3 - this needs to be checked at analysis level, not here.
-          nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb30_leading1p3_bTagProbCSVBP[nEvent.Zb30_leading1p3_pfJetGoodNum]>0.244) {
-              nEvent.Zb30_leading1p3_pfBJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb30_leading1p3_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb30_leading1p3_pfJetGoodEta[nEvent.Zb30_leading1p3_pfJetGoodNum]=jeta;
-          nEvent.Zb30_leading1p3_pfJetDphiZ[nEvent.Zb30_leading1p3_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb30_leading1p3_pfJetGoodPt[nEvent.Zb30_leading1p3_pfJetGoodNum]=jpt;
-          nEvent.Zb30_leading1p3_pfJetGoodNum++;
-      }
-        
-      if (jpt>40 && isJetID && abs(jeta)<2.4) {
-          //Z+b selection with 40 GeV jets
-          nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-          if(nEvent.Zb40_bTagProbCSVBP[nEvent.Zb40_pfJetGoodNum]>0.244) {
-              nEvent.Zb40_pfBJetDphiZ[nEvent.Zb40_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
-              nEvent.Zb40_pfJetGoodNumBtag++;
-          }
-          nEvent.Zb40_pfJetGoodEta[nEvent.Zb40_pfJetGoodNum]=jeta;
-          nEvent.Zb40_pfJetDphiZ[nEvent.Zb40_pfJetGoodNum]=aJet.DeltaPhi(zVector);
-          nEvent.Zb40_pfJetGoodPt[nEvent.Zb40_pfJetGoodNum]=jpt;
-          nEvent.Zb40_pfJetGoodNum++;
-      }
-      
-      if ( !(fabs(jeta)<3.0 ) ) continue;
-      counters[PJ].fill("... |eta|<3.0");
-      // Keep jets over min. pt threshold
-      if ( !(jpt>20) ) continue;
-      counters[PJ].fill("... pt>20.");
         
       if(!nEvent.badJet) counters[PJ].fill("... pass Jet ID");
 
@@ -3352,8 +2609,8 @@ void JZBAnalysis::Analyze() {
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
     }
     
-    if(nEvent.Zb2010_pfJetGoodNum>0) nEvent.Zb2010_alpha=nEvent.Zb2010_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb3010_pfJetGoodNum>0) nEvent.Zb3010_alpha=nEvent.Zb3010_pfJetGoodPt[1]/nEvent.pt;
+    
+    
     if(nEvent.ZbCHS3010_pfJetGoodNum>0) {
       nEvent.ZbCHS3010_alpha=nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
       nEvent.ZbCHS3010_alphaUp=nEvent.ZbCHS3010_alphaUp/nEvent.pt;
@@ -3364,25 +2621,9 @@ void JZBAnalysis::Analyze() {
       nEvent.ZbCHS1010_alphaUp=nEvent.ZbCHS1010_alphaUp/nEvent.pt;
       nEvent.ZbCHS1010_alphaDown=nEvent.ZbCHS1010_alphaDown/nEvent.pt;
     }
-    if(nEvent.Zb1510_pfJetGoodNum>0) nEvent.Zb1510_alpha=nEvent.Zb1510_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb1530_pfJetGoodNum>0) nEvent.Zb1530_alpha=nEvent.Zb1530_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb2030_pfJetGoodNum>0) nEvent.Zb2030_alpha=nEvent.Zb2030_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb20_pfJetGoodNum>0) nEvent.Zb20_alpha=nEvent.Zb20_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb30_pfJetGoodNum>0) nEvent.Zb30_alpha=nEvent.Zb30_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb30_p5Clean_pfJetGoodNum>0) nEvent.Zb30_p5Clean_alpha=nEvent.Zb30_p5Clean_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb30_SecEta3_pfJetGoodNum>0) nEvent.Zb30_SecEta3_alpha=nEvent.Zb30_SecEta3_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb30_SecEta5_pfJetGoodNum>0) nEvent.Zb30_SecEta5_alpha=nEvent.Zb30_SecEta5_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb30_leading1p3_pfJetGoodNum>0) nEvent.Zb30_leading1p3_alpha=nEvent.Zb30_leading1p3_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.Zb40_pfJetGoodNum>0) nEvent.Zb40_alpha=nEvent.Zb40_pfJetGoodPt[1]/nEvent.pt;
-    if(nEvent.ZbMikko_pfJetGoodNum>0) nEvent.ZbMikko_alpha=nEvent.ZbMikko_pfJetGoodPt[1]/nEvent.pt;
     nEvent.mpf=1+(type1METvector.Vect()*zVector.Vect())/(zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());
     nEvent.fake_mpf=1+((type1METvector.Vect()+( 1.0 / 1.05  -  1 )*zVector.Vect())*zVector.Vect())/(1.05*zVector.Px()*zVector.Px()+zVector.Py()*zVector.Py());//we simulate a missing correction of 10%
     
-    nEvent.pass_b_PU_rejection=true; // this needs to be fixed (i.e. the vertex loop below needs to be implemented)
-//    for(int ivtx=0;ivtx<fTR->NVrtx;ivtx++) {
-      //find vtx most compatible with our Z (not sure how, yet)
-      //for the given vertex store fTR->vrtxsumpt[ivtx], 
-//    }
     
     TLorentzVector leadingJet(0,0,0,0);
     leadingJet.SetPtEtaPhiE(nEvent.pfJetGoodPt[0], nEvent.pfJetGoodEta[0], nEvent.pfJetGoodPhi[0], nEvent.pfJetGoodE[0]);
