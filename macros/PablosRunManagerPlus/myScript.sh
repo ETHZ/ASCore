@@ -107,9 +107,9 @@ STARTDIR=`pwd`
 WORKDIR=$TOPWORKDIR/$JOBDIR
 RESULTDIR=$STARTDIR/$JOBDIR
 if test x"$SEUSERSUBDIR" = x; then
-   SERESULTDIR=$USER_SRM_HOME/$HN_NAME/$JOBDIR
+   SERESULTDIR=$USER_SRM_HOME/$HN_NAME/ProcessedTrees/$JOBDIR
 else
-   SERESULTDIR=$USER_SRM_HOME/$HN_NAME/$SEUSERSUBDIR
+   SERESULTDIR=$USER_SRM_HOME/$HN_NAME/ProcessedTrees/$SEUSERSUBDIR
 fi
 if test -e "$WORKDIR"; then
    echo "WARNING: WORKDIR ($WORKDIR) already exists! Removing it..." >&2
@@ -152,6 +152,11 @@ for f in $SOURCEFILES; do
   output=${SEOUTFILES%.*}"_"$counter.root
   echo Running $exe $ARGUMENTS -o $output $f ...
   $exe $ARGUMENTS -o $output $f 
+  exitcode=$?
+  if [[ $exitcode -gt 0 ]]; then
+    echo "Sorry, exit code was $exitcode. Your executable most likely produced a crash, not going to continue, not uploading results so you know something went wrong directly".
+    exit 1
+  fi
   if test -e $output; then rootoutfiles=$rootoutfiles" "$output; fi
   let counter++
 done
