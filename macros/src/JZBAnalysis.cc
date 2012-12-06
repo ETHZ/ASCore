@@ -328,7 +328,6 @@ public:
   //Z+b variables
   float mpf;
   float fake_mpf;
-  bool pass_b_PU_rejection;
   
   float ZbCHS3010_alpha;
   float ZbCHS3010_alphaUp;
@@ -826,7 +825,6 @@ void nanoEvent::reset()
   ZbCHS1010_alphaDown=0;
   mpf=0;
   fake_mpf=0;
-  pass_b_PU_rejection=false;
   
   ZbCHS3010_pfJetGoodNumBtag=0;
   ZbCHS3010_pfJetGoodNum=0;
@@ -1618,7 +1616,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
   myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
   myTree->Branch("fake_mpf",&nEvent.fake_mpf,"fake_mpf/F");
-  myTree->Branch("pass_b_PU_rejection",&nEvent.pass_b_PU_rejection,"pass_b_PU_rejection/O");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -2376,7 +2373,7 @@ void JZBAnalysis::Analyze() {
 
       if ( !(fabs(jeta)<3.0 ) ) continue;
 
-      if(nEvent.ZbCHS1010_pfJetGoodNum<jMax && (nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
+      if( (nEvent.ZbCHS3010_pfJetGoodNum==0 && jpt>30 && isJetID && abs(jeta)<2.4) || (nEvent.ZbCHS3010_pfJetGoodNum>0 && jpt>10 && isJetID && abs(jeta)<2.4)) {
 	//Z+b selection with 30 GeV leading jet, 10 GeV sub-leading jet
 	if(nEvent.ZbCHS3010_pfJetGoodNum==0 && isMC) {
 	  float Uncert;
@@ -2403,7 +2400,6 @@ void JZBAnalysis::Analyze() {
 	}
 	nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]=fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
 	if(nEvent.ZbCHS3010_bTagProbCSVBP[nEvent.ZbCHS3010_pfJetGoodNum]>0.244) {
-	  if(nEvent.ZbCHS3010_pfJetGoodNumBtag>nEvent.ZbCHS3010_pfJetGoodNum) nEvent.ZbCHS3010_pfJetGoodNumBtag=nEvent.ZbCHS3010_pfJetGoodNum; // workaround for nB~10573937
 	  nEvent.ZbCHS3010_pfBJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNumBtag]=aJet.DeltaPhi(zVector);
 	  nEvent.ZbCHS3010_pfJetGoodNumBtag++;
 	}
