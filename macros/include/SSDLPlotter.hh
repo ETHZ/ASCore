@@ -123,24 +123,82 @@ struct SSPrediction {
         float bkg_stat;                  
 
 	float fake;
+	float fake_mm;
+	float fake_ee;
+	float fake_em;
 	float fake_err;
+	float fake_err_mm;
+	float fake_err_ee;
+	float fake_err_em;
+	float fake_stat;
+	float fake_stat_mm;
+	float fake_stat_ee;
+	float fake_stat_em;
+
 	float sf;
+	float sf_mm;
+	float sf_ee;
+	float sf_em;
 	float sf_err;
-	float df;
+	float sf_err_mm;
+	float sf_err_ee;
+	float sf_err_em;
+	float sf_stat;
+	float sf_stat_mm;
+	float sf_stat_ee;
+	float sf_stat_em;
+
+        float df;
+	float df_mm;
+	float df_ee;
+	float df_em;
 	float df_err;
+	float df_err_mm;
+	float df_err_ee;
+	float df_err_em;
+	float df_stat;
+	float df_stat_mm;
+	float df_stat_ee;
+	float df_stat_em;
+
 	float cmid;
+	float cmid_mm;
+	float cmid_ee;
+	float cmid_em;
 	float cmid_err;
-  
+	float cmid_err_mm;
+	float cmid_err_ee;
+	float cmid_err_em;
+	float cmid_stat;
+	float cmid_stat_mm;
+	float cmid_stat_ee;
+	float cmid_stat_em;
+
 	float wz;
 	float wz_mm;
 	float wz_ee;
 	float wz_em;
 	float wz_err;
+	float wz_err_mm;
+	float wz_err_ee;
+	float wz_err_em;
+	float wz_stat;
+	float wz_stat_mm;
+	float wz_stat_ee;
+	float wz_stat_em;
+
 	float rare;
 	float rare_mm;
 	float rare_ee;
 	float rare_em;
 	float rare_err;
+	float rare_err_mm;
+	float rare_err_ee;
+	float rare_err_em;
+	float rare_stat;
+	float rare_stat_mm;
+	float rare_stat_ee;
+	float rare_stat_em;
 };
 
 
@@ -210,6 +268,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
+        void makeWZValidation(SSPrediction);
         SSPrediction makeIntPrediction(TString, int);
         // old SSPrediction makeIntPrediction(TString, gRegion);
 	void makeTTWIntPredictions();

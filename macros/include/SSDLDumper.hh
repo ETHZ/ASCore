@@ -282,7 +282,6 @@ public:
 		int   app3rdVet;
 		int   vetoTTZSel;
 		int   chargeVeto;
-		
 		Channel mm;
 		Channel em;
 		Channel ee;
@@ -363,6 +362,7 @@ public:
 	std::map<TString , int> gRegion;
 	int gNREGIONS;
 	TString gBaseRegion;
+        bool    gDoWZValidation;
 
 	class Sample{
 	public:
@@ -409,8 +409,9 @@ public:
 		NumberSet **numbers; // summary of integrated numbers
 //		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
-		IsoPlots isoplots[2]; // e and mu
-		IdPlots  idplots; // only for electrons
+	        KinPlots kinplots_wz[gNKinSels];
+	        IsoPlots isoplots[2]; // e and mu
+ 	        IdPlots  idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
 
@@ -588,7 +589,7 @@ public:
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
-	void fillKinPlots(Sample*);
+        void fillKinPlots(Sample*,int);
         void fillSyncCounters(Sample*); 
 	
 	//////////////////////////////

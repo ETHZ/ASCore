@@ -49,26 +49,20 @@ static       bool  gSmearMET     = false;
 
 static const bool gDoSystStudies = false;
 static const bool gDoSyncExercise = false;
-float gMuMaxIso     ;
-float gElMaxIso     ;
-float gMinJetPt     ;
-float gMaxJetEta    ;
-bool  gTTWZ         ;
-bool  gApplyZVeto   ;
-bool  gInvertZVeto  ;
-TString tmp_gBaseRegion;
-
-// std::vector< SSDLDumper::Region* > gRegions;
-// std::vector< SSDLDumper::Region* >::iterator regIt;
-// std::map<TString , int> gRegion;
-// int gNREGIONS;
-
+float gMuMaxIso          ;
+float gElMaxIso          ;
+float gMinJetPt          ;
+float gMaxJetEta         ;
+bool  gTTWZ              ;
+bool  gApplyZVeto        ;
+bool  gInvertZVeto       ;
+bool  tmp_gDoWZValidation;
+TString tmp_gBaseRegion  ;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
-
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.}; // fake ratios
@@ -154,14 +148,15 @@ void setVariables(char buffer[1000]){
 	if( sscanf(buffer, "%s\t%s\t%s\t%s", va, t, n, val) > 3){
 		v = va; type = t; name = n; value = val;
 		if (v != "v") {cout << "ERROR in reading variables!!" << endl; exit(1); }
-		if      (type == "bool"    && name =="gTTWZ"        ) gTTWZ        = ((value == "1" || value == "true") ? true:false);
-		else if (type == "bool"    && name =="gApplyZVeto"  ) gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
-		else if (type == "bool"    && name =="gInvertZVeto" ) gInvertZVeto = ((value == "1" || value == "true") ? true:false);
-		else if (type == "TString" && name =="gBaseRegion"  ) tmp_gBaseRegion  = value; // this is the only one which is needed in the plotter
-		else if (type == "float"   && name =="gMuMaxIso"    ) gMuMaxIso    = value.Atof();
-		else if (type == "float"   && name =="gElMaxIso"    ) gElMaxIso    = value.Atof();
-		else if (type == "float"   && name =="gMaxJetEta"   ) gMaxJetEta   = value.Atof();
-		else if (type == "float"   && name =="gMinJetPt"    ) gMinJetPt    = value.Atof();
+		if      (type == "bool"    && name =="gTTWZ"          ) gTTWZ        = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gApplyZVeto"    ) gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gInvertZVeto"   ) gInvertZVeto = ((value == "1" || value == "true") ? true:false);
+		else if (type == "TString" && name =="gBaseRegion"    ) tmp_gBaseRegion  = value; // this is the only one which is needed in the plotter
+		else if (type == "float"   && name =="gMuMaxIso"      ) gMuMaxIso    = value.Atof();
+		else if (type == "float"   && name =="gElMaxIso"      ) gElMaxIso    = value.Atof();
+		else if (type == "float"   && name =="gMaxJetEta"     ) gMaxJetEta   = value.Atof();
+		else if (type == "float"   && name =="gMinJetPt"      ) gMinJetPt    = value.Atof();
+		else if (type == "bool"    && name =="gDoWZValidation") tmp_gDoWZValidation = ((value == "1" || value == "true") ? true:false);
 		else {cout << "ERROR in reading variables!!" << endl; exit(1); }
 	}
 	else{
@@ -190,7 +185,7 @@ SSDLDumper::SSDLDumper(TString configfile){
 	cout << "Reading Configuration file " << configfile << endl;
 	int counter(0);
 
-	while( IN.getline(buffer, 600, '\n') ){
+	while( IN.getline(buffer, 700, '\n') ){
 		if (buffer[0] == '#') continue; // Skip lines commented with '#'
 		if (strlen(buffer) == 0)  continue; // Skip empty lines
 		if (buffer[0] == 'v') { //set the special variables from the config file
@@ -198,7 +193,7 @@ SSDLDumper::SSDLDumper(TString configfile){
 			continue;
 		}
 		if( sscanf(buffer, "%s\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t%d\t%d", 
-                            name, &miHT, &maHT, &miMET, &maMET, &miNj, &maNj, &miNb, &maNb, &miNbm, &maNbm, &miMu1, &miMu2, &miEl1, &miEl2, &ve3rd, &veTTZ, &veCha) > 17){
+			   name, &miHT, &maHT, &miMET, &maMET, &miNj, &maNj, &miNb, &maNb, &miNbm, &maNbm, &miMu1, &miMu2, &miEl1, &miEl2, &ve3rd, &veTTZ, &veCha) > 17){
 			SSDLDumper::Region * tmp_region  = new SSDLDumper::Region();
 			tmp_region->sname      = (TString) name;
 			tmp_region->minHT      = miHT;
@@ -241,7 +236,6 @@ SSDLDumper::SSDLDumper(TString configfile){
 
 	}
 	SSDLDumper::gNREGIONS = SSDLDumper::gRegions.size();
-	
 	IN.close();
 
 	cout << "================  GLOBAL PARAMETERS  ===================" << endl;
@@ -255,7 +249,9 @@ SSDLDumper::SSDLDumper(TString configfile){
 		gMaxJetEta   ,
 		tmp_gBaseRegion.Data()  ) << endl;
 	cout << "========================================================" << endl;
-	SSDLDumper::gBaseRegion = tmp_gBaseRegion;
+	SSDLDumper::gBaseRegion     = tmp_gBaseRegion;
+	SSDLDumper::gDoWZValidation = tmp_gDoWZValidation;
+	
 }
 
 //____________________________________________________________________________
@@ -421,7 +417,6 @@ void SSDLDumper::loopEvents(Sample *S){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-		if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		// DEBUG
 		//		if (Run!=gDEBUG_RUNNUMBER_) continue;
@@ -433,7 +428,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		// REJECT DOUBLE COUNTED EVENTS
 		/////////////////////////////////////////////
 		// double counting of fakes if (S->datamc!=0 && AvoidDoubleCountingOfFakes(S)) continue;
-			
+
 		/////////////////////////////////////////////
 		// Event modifications
 		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
@@ -507,9 +502,11 @@ void SSDLDumper::loopEvents(Sample *S){
 		if( S->datamc!=4 ) gEventWeight *= PUWeight; // no pu weight for mc with no pu, that really doesn't exist anymore in 2012, so it's fine
 
 
-		fillKinPlots(S);
+		fillKinPlots(S,gRegion[gBaseRegion]);
+		if (gDoWZValidation) fillKinPlots(S,gRegion["WZEnriched"]);
 		for(int r = 0; r < gRegion["TTbarWPresel"]; r++) fillYields(S, r);
 
+		
 		// disable for now // reset the event weight to what it should be without a region cut applied
 		// disable for now gEventWeight  = gHLTSF * 1.;
 		// disable for now if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
@@ -616,7 +613,12 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	// MuMu Channel
 	resetHypLeptons();
 	fDoCounting = false;
-	if(reg == gRegion[gBaseRegion]) fDoCounting = true;
+	
+	if(reg == gRegion[gBaseRegion])   fDoCounting  = true;
+
+	if(reg == gRegion["WZEnriched"])  gInvertZVeto = true;
+	else                              gInvertZVeto = false;
+	
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
@@ -1326,7 +1328,11 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	setRegionCuts(gRegion[gBaseRegion]);
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
-
+	// deactivate ZVeto and 3rdlepton veto
+	fC_app3rdVet  = 0;
+	fC_chargeVeto = 0;
+	gApplyZVeto   = false;
+	
 	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
 	fSETree_HLTSF    = gHLTSF;
@@ -1373,7 +1379,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2     = MuPt[ind2];
 		fSETree_eta1    = MuEta[ind1];
 		fSETree_eta2    = MuEta[ind2];
+		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1421,6 +1429,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_eta1   = MuEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1471,7 +1480,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2    = ElPt[ind2];
 		fSETree_eta1   = ElEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
+
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = ElPFIso[ind1];
@@ -1505,6 +1516,8 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 
 		resetHypLeptons();
 	}
+
+	gApplyZVeto   = true;
 	/// OS YIELDS only for data:
 	if (S->datamc == 0) {
 		fChargeSwitch = 1;
@@ -1573,24 +1586,307 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	setRegionCuts(gRegion[gBaseRegion]);
 	return;
 }
-void SSDLDumper::fillKinPlots(Sample *S){
+// OS version void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
+// OS version 	resetSigEventTree();
+// OS version 	resetHypLeptons();
+// OS version 	fDoCounting = false;
+// OS version 
+// OS version 	///////////////////////////////////////////////////
+// OS version 	// Set custom event selections here:
+// OS version 	setRegionCuts();
+// OS version 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
+// OS version 	fC_minEl1pt  = 10.;
+// OS version 
+// OS version 	fSETree_SystFlag = flag;
+// OS version 	fSETree_PUWeight = PUWeight;
+// OS version 	fSETree_HLTSF    = gHLTSF;
+// OS version 	fSETree_BtagSF1   = gBtagSF1;
+// OS version 	fSETree_BtagSF2   = gBtagSF2;
+// OS version 	fSETree_SLumi    = S->getLumi();
+// OS version 	fSETree_SName    = S->sname.Data();
+// OS version 	fSETree_SType    = getSampleType(S);
+// OS version 	fSETree_Run      = Run;
+// OS version 	fSETree_LS       = LumiSec;
+// OS version 	fSETree_Event    = Event;
+// OS version 	fSETree_MET      = getMET();
+// OS version 
+// OS version 	fSETree_NM = getNTightMuons();
+// OS version 	fSETree_NE = getNTightElectrons();
+// OS version 	
+// OS version 	if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
+// OS version 
+// OS version 		std::cout << std::endl << std::endl << "------------------------------------------------------------" << std::endl;
+// OS version 		std::cout << "  Debug log for run: " << Run << "  LS: " << LumiSec << "  Event: " << Event << std::endl;
+// OS version 
+// OS version 		std::cout << std::endl << "Here are the jets: " << std::endl;
+// OS version 		for(size_t i = 0; i < NJets; ++i) 
+// OS version 			std::cout << "Pt: " << getJetPt(i) << "  Eta: " << JetEta[i] << " TCHE: " << JetCSVBTag[i] << std::endl;
+// OS version 
+// OS version 	}
+// OS version 
+// OS version 
+// OS version 	int ind1(-1), ind2(-1);
+// OS version 	
+// OS version 	////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
+// OS version 	if(mumuSignalTrigger() && isSSLLMuEvent(ind1, ind2)){ // trigger && select loose mu/mu pair
+// OS version 		fSETree_MT2     = getMT2(ind1, ind2, Muon);
+// OS version 		fSETree_Mll     = getMll(ind1, ind2, Muon);
+// OS version 		fSETree_HT      = getHT();
+// OS version 		fSETree_NJ      = getNJets();
+// OS version 		fSETree_NbJ     = getNBTags();
+// OS version 		fSETree_NbJmed  = getNBTagsMed();
+// OS version 		fSETree_Flavor  = 0;
+// OS version 		fSETree_Charge  = MuCharge[ind1];
+// OS version 		fSETree_pT1     = MuPt[ind1];
+// OS version 		fSETree_pT2     = MuPt[ind2];
+// OS version 		fSETree_eta1    = MuEta[ind1];
+// OS version 		fSETree_eta2    = MuEta[ind2];
+// OS version 		fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 		fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 		fSETree_PFIso1  = MuPFIso[ind1];
+// OS version 		fSETree_PFIso2  = MuPFIso[ind2];
+// OS version 		if( isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 0;
+// OS version 		if( isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 1;
+// OS version 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
+// OS version 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
+// OS version 		fSigEv_Tree->Fill();
+// OS version 
+// OS version 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
+// OS version 			std::cout << " -> This is a mu-mu event." << std::endl;
+// OS version 			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+// OS version 			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+// OS version 			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+// OS version 			std::cout << "HT       :" << fSETree_HT     << std::endl;
+// OS version 			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+// OS version 			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+// OS version 			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+// OS version 			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+// OS version 			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+// OS version 			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+// OS version 			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+// OS version 			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+// OS version 			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
+// OS version 		}
+// OS version 
+// OS version 		resetHypLeptons();
+// OS version 	}
+// OS version 
+// OS version 	////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 	// EMU CHANNEL:  ///////////////////////////////////////////////////////////////////////////////////////
+// OS version 	else if(elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
+// OS version 		fSETree_MT2    = getMT2(ind1, ind2, ElMu);
+// OS version 		fSETree_Mll    = getMll(ind1, ind2, ElMu);
+// OS version 		fSETree_HT     = getHT();
+// OS version 		fSETree_NJ     = getNJets();
+// OS version 		fSETree_NbJ    = getNBTags();
+// OS version 		fSETree_NbJmed = getNBTagsMed();
+// OS version 		fSETree_Flavor = 1;
+// OS version 		fSETree_Charge = MuCharge[ind1];
+// OS version 		fSETree_pT1    = MuPt[ind1];
+// OS version 		fSETree_pT2    = ElPt[ind2];
+// OS version 		fSETree_eta1   = MuEta[ind1];
+// OS version 		fSETree_eta2   = ElEta[ind2];
+// OS version 		fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 		fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 		fSETree_PFIso1  = MuPFIso[ind1];
+// OS version 		fSETree_PFIso2  = ElPFIso[ind2];
+// OS version 		if( isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
+// OS version 		if( isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
+// OS version 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
+// OS version 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+// OS version 		fSigEv_Tree->Fill();
+// OS version 
+// OS version 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
+// OS version 			std::cout << " -> This is a mu-ele event." << std::endl;
+// OS version 			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+// OS version 			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+// OS version 			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+// OS version 			std::cout << "HT       :" << fSETree_HT     << std::endl;
+// OS version 			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+// OS version 			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+// OS version 			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+// OS version 			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+// OS version 			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+// OS version 			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+// OS version 			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+// OS version 			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+// OS version 			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
+// OS version 		}
+// OS version 
+// OS version 		resetHypLeptons();
+// OS version 	}
+// OS version 
+// OS version 	////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 	// EE CHANNEL:  ////////////////////////////////////////////////////////////////////////////////////////
+// OS version 	else if(elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
+// OS version 		fSETree_MT2    = getMT2(ind1, ind2, Elec);
+// OS version 		fSETree_Mll    = getMll(ind1, ind2, Elec);
+// OS version 		fSETree_HT     = getHT();
+// OS version 		fSETree_NJ     = getNJets();
+// OS version 		fSETree_NbJ    = getNBTags();
+// OS version 		fSETree_NbJmed = getNBTagsMed();
+// OS version 		fSETree_Flavor = 2;
+// OS version 		fSETree_Charge = ElCharge[ind1];
+// OS version 		fSETree_pT1    = ElPt[ind1];
+// OS version 		fSETree_pT2    = ElPt[ind2];
+// OS version 		fSETree_eta1   = ElEta[ind1];
+// OS version 		fSETree_eta2   = ElEta[ind2];
+// OS version 		fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 		fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 		fSETree_PFIso1  = ElPFIso[ind1];
+// OS version 		fSETree_PFIso2  = ElPFIso[ind2];
+// OS version 		if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
+// OS version 		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
+// OS version 		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
+// OS version 		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+// OS version 		fSigEv_Tree->Fill();
+// OS version 
+// OS version 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
+// OS version 			std::cout << " -> This is an ele-ele event." << std::endl;
+// OS version 			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+// OS version 			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+// OS version 			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+// OS version 			std::cout << "HT       :" << fSETree_HT     << std::endl;
+// OS version 			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+// OS version 			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+// OS version 			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+// OS version 			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+// OS version 			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+// OS version 			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+// OS version 			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+// OS version 			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+// OS version 			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
+// OS version 		}
+// OS version 
+// OS version 		resetHypLeptons();
+// OS version 	}
+// OS version 	/// OS YIELDS only for data:
+// OS version 	if (S->datamc == 0) {
+// OS version 		fChargeSwitch = 1;
+// OS version 
+// OS version 		////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		// MM CHANNEL:  OS  this is only for the OS people ////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		if (mumuSignalTrigger() && isSSLLMuEvent(ind1, ind2)){ // trigger && select loose mu/mu pair
+// OS version 				fSETree_MT2     = getMT2(ind1, ind2, Muon);
+// OS version 				fSETree_Mll     = getMll(ind1, ind2, Muon);
+// OS version 				fSETree_HT      = getHT();
+// OS version 				fSETree_NJ      = getNJets();
+// OS version 				fSETree_NbJ     = getNBTags();
+// OS version 				fSETree_NbJmed  = getNBTagsMed();
+// OS version 				fSETree_Flavor  = 3;
+// OS version 				fSETree_Charge  = MuCharge[ind1];
+// OS version 				fSETree_pT1     = MuPt[ind1];
+// OS version 				fSETree_pT2     = MuPt[ind2];
+// OS version 				fSETree_eta1    = MuEta[ind1];
+// OS version 				fSETree_eta2    = MuEta[ind2];
+// OS version 				fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 				fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 				fSETree_PFIso1  = MuPFIso[ind1];
+// OS version 				fSETree_PFIso2  = MuPFIso[ind2];
+// OS version 				if( isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 0;
+// OS version 				if( isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 1;
+// OS version 				if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
+// OS version 				if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
+// OS version 				fSigEv_Tree->Fill();
+// OS version 			resetHypLeptons();
+// OS version 			}
+// OS version 
+// OS version 		////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		// EM CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		else if (elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
+// OS version 				fSETree_MT2     = getMT2(ind1, ind2, ElMu);
+// OS version 				fSETree_Mll     = getMll(ind1, ind2, ElMu);
+// OS version 				fSETree_HT      = getHT();
+// OS version 				fSETree_NJ      = getNJets();
+// OS version 				fSETree_NbJ     = getNBTags();
+// OS version 				fSETree_NbJmed  = getNBTagsMed();
+// OS version 				fSETree_Flavor  = 4;
+// OS version 				fSETree_Charge  = MuCharge[ind1];
+// OS version 				fSETree_pT1     = MuPt[ind1];
+// OS version 				fSETree_pT2     = ElPt[ind2];
+// OS version 				fSETree_eta1    = MuEta[ind1];
+// OS version 				fSETree_eta2    = ElEta[ind2];
+// OS version 				fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 				fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 				fSETree_PFIso1  = MuPFIso[ind1];
+// OS version 				fSETree_PFIso2  = ElPFIso[ind2];
+// OS version 				if( isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
+// OS version 				if( isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
+// OS version 				if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
+// OS version 				if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+// OS version 				fSigEv_Tree->Fill();
+// OS version 			resetHypLeptons();
+// OS version 			}
+// OS version 
+// OS version 		////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		// EE CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
+// OS version 		else if (elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
+// OS version 				fSETree_MT2     = getMT2(ind1, ind2, Elec);
+// OS version 				fSETree_Mll     = getMll(ind1, ind2, Elec);
+// OS version 				fSETree_HT      = getHT();
+// OS version 				fSETree_NJ      = getNJets();
+// OS version 				fSETree_NbJ     = getNBTags();
+// OS version 				fSETree_NbJmed  = getNBTagsMed();
+// OS version 				fSETree_Flavor  = 5;
+// OS version 				fSETree_Charge  = ElCharge[ind1];
+// OS version 				fSETree_pT1     = ElPt[ind1];
+// OS version 				fSETree_pT2     = ElPt[ind2];
+// OS version 				fSETree_eta1    = ElEta[ind1];
+// OS version 				fSETree_eta2    = ElEta[ind2];
+// OS version 				fSETree_ZVeto   = passesZVeto()?1:0;
+// OS version 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+// OS version 				fSETree_ttZSel  = passesTTZSel()?1:0;
+// OS version 				fSETree_PFIso1  = ElPFIso[ind1];
+// OS version 				fSETree_PFIso2  = ElPFIso[ind2];
+// OS version 				if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
+// OS version 				if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
+// OS version 				if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
+// OS version 				if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+// OS version 				fSigEv_Tree->Fill();
+// OS version 		resetHypLeptons();
+// OS version 		}
+// OS version 		fChargeSwitch = 0;
+// OS version 	}
+// OS version 
+// OS version 	setRegionCuts();
+// OS version 	return;
+// OS version }
+void SSDLDumper::fillKinPlots(Sample *S, int reg){
 	resetHypLeptons();
 	fDoCounting = false;
-	KinPlots *KP0 = &S->kinplots[0][HighPt];
-	KinPlots *KP1 = &S->kinplots[1][HighPt];
-	KinPlots *KP2 = &S->kinplots[2][HighPt];
+	KinPlots *KP0(0); 
+	KinPlots *KP1(0); 
+	KinPlots *KP2(0); 
+	
+	if (reg == gRegion["WZEnriched"] && gDoWZValidation){
+	  KP0 = &S->kinplots_wz[0];
+	  KP1 = &S->kinplots_wz[1];
+	  KP2 = &S->kinplots_wz[2];
+	}
+	else {
+	  KP0 = &S->kinplots[0][HighPt];
+	  KP1 = &S->kinplots[1][HighPt];
+	  KP2 = &S->kinplots[2][HighPt];	  
+	}
+	cout << "[DEBUG] Initialized KP0 " << KP0 << endl;
+
 	int ind1(-1), ind2(-1);
 	int mu(-1), el(-1); // for e/mu channel, easier readability
-
-
+	
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	setRegionCuts(gRegion[gBaseRegion]);
+	setRegionCuts(reg); 
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
 	if(mumuSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 1){ // trigger && select loose mu/mu pair
 		if(MuPt[ind1] > fC_minMu1pt && MuPt[ind2] > fC_minMu2pt){ // pt cuts
-
 			// Fill histos
 			fillWithoutOF(KP0->hvar[0],  getHT(),                  gEventWeight);
 			fillWithoutOF(KP0->hvar[1],  getMET(),                 gEventWeight);
@@ -1689,13 +1985,11 @@ void SSDLDumper::fillKinPlots(Sample *S){
 		}
 		resetHypLeptons();
 	}
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// EMU CHANNEL:  ///////////////////////////////////////////////////////////////////////////////////////
 	else if(elmuSignalTrigger() && abs(isSSLLEvent(mu, el)) == 3){ // trigger && select loose e/mu pair
 		if( (MuPt[mu] > fC_minMu1pt && ElPt[el] > fC_minEl2pt) || (MuPt[mu] > fC_minMu2pt && ElPt[el] > fC_minEl1pt) ){
-			// Fill histos
-			
+		        // Fill histos
 			fillWithoutOF(KP0->hvar[0],  getHT(),              gEventWeight);
 			fillWithoutOF(KP0->hvar[1],  getMET(),             gEventWeight);
 			fillWithoutOF(KP0->hvar[2],  getNJets(),           gEventWeight);
@@ -2403,7 +2697,7 @@ void SSDLDumper::bookHistos(Sample *S){
 			S->diffyields[k].hnt11[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
 			S->diffyields[k].hnt11[j]->SetFillColor(S->color);
 			S->diffyields[k].hnt11[j]->SetXTitle(DiffPredYields::axis_label[j]);
-			S->diffyields[k].hnt11[j]->Sumw2();
+			S->diffyields[k].hnt11[j]->Sumw2(); 
 			name = Form("%s_%s_NT10_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 			S->diffyields[k].hnt10[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
 			S->diffyields[k].hnt10[j]->SetFillColor(S->color);
@@ -2472,6 +2766,18 @@ void SSDLDumper::bookHistos(Sample *S){
 			S->kinplots[k][HighPt].hvar[j]->Sumw2();
 		}
 	}
+	
+	// WZ Kinematical histos
+	for (size_t k = 0; k < gNKinSels; ++k){
+		for(size_t j = 0; j < gNKinVars; ++j){
+			TString name = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
+			S->kinplots_wz[k].hvar[j] = new TH1D(name, KinPlots::var_name[j].Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
+			S->kinplots_wz[k].hvar[j]->SetFillColor(S->color);
+			S->kinplots_wz[k].hvar[j]->SetXTitle(KinPlots::axis_label[j]);
+			S->kinplots_wz[k].hvar[j]->Sumw2();
+		}
+	}
+	
 	// id histos for electrons
 	for(size_t j = 0; j < gNSels; ++j){
 		TString hoename    = Form("%s_%s_%shoe"   , S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
@@ -2680,6 +2986,11 @@ void SSDLDumper::deleteHistos(Sample *S){
 		for(size_t j = 0; j < gNKinVars; ++j) delete S->kinplots[k][HighPt].hvar[j];
 	}
 
+	// WZ Kinematical histos
+	for(size_t k = 0; k < gNKinSels; ++k){
+		for(size_t j = 0; j < gNKinVars; ++j) delete S->kinplots_wz[k].hvar[j];
+	}
+
 	// Histos for differential yields
 	for(size_t k = 0; k < gNCHANNELS; ++k){
 		for(size_t j = 0; j < gNDiffVars; ++j){
@@ -2859,6 +3170,16 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	rdir->cd();
 	for(size_t k = 0; k < gNKinSels; ++k){
 		KinPlots *kp = &S->kinplots[k][HighPt];
+		for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
+	}
+
+
+	// WZ Kinematic histos
+	temp = S->sname + "/WZValidation/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	for(size_t k = 0; k < gNKinSels; ++k){
+		KinPlots *kp = &S->kinplots_wz[k];
 		for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
 	}
 
@@ -3086,6 +3407,18 @@ int  SSDLDumper::readHistos(TString filename){
 				kp->hvar[j]->SetFillColor(S->color);
 			}
 		}
+
+
+		// WZ Kinematic histos
+		for(size_t k = 0; k < gNKinSels; ++k){
+			KinPlots *kp = &S->kinplots_wz[k];
+			for(size_t j = 0; j < gNKinVars; ++j){
+				getname = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
+				getObjectSafe(pFile, S->sname + "/WZValidation/" + getname, kp->hvar[j]);
+				kp->hvar[j]->SetFillColor(S->color);
+			}
+		}
+
 
 		// Id histos for electrons only
 		IdPlots *idp = &S->idplots;
@@ -3884,6 +4217,9 @@ void SSDLDumper::setRegionCuts(int reg){
 	fC_app3rdVet  = gRegions[reg]->app3rdVet  ;
 	fC_vetoTTZSel = gRegions[reg]->vetoTTZSel ;
 	fC_chargeVeto = gRegions[reg]->chargeVeto ;
+
+	if(reg == gRegion["WZEnriched"])  gInvertZVeto = true;
+	else                              gInvertZVeto = false;
 }
 
 //____________________________________________________________________________
@@ -4129,52 +4465,6 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 // Checks if any combination of opposite sign, same flavor leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
 // Default for dm is 15 GeV
-
-// Check if a third lepton with OS, same flavour, is compatible with a Z candidate
-// with the hypothesis leptons
-//   if (NMus > 1){
-//     for (size_t i=0; i<NMus; ++i){
-//       if (fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
-//       if (fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
-//       if ((*this.*muonSelector)(i)){
-// 	TLorentzVector pmu;
-// 	pmu.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU); 
-// 	if (Run == 191248  && Event == 64376449 ) fOUTSTREAM << "[ZVeto] :" << (pmu+fHypLepton1.p).M() <<" , " << (pmu+fHypLepton2.p).M() << " OS?: "<< MuCharge[i]*fHypLepton1.charge <<endl;
-// 	if (Run == 190705  && Event == 496763485) fOUTSTREAM << "[ZVeto] :" << (pmu+fHypLepton1.p).M() <<" , " << (pmu+fHypLepton2.p).M() << " OS?: "<< MuCharge[i]*fHypLepton1.charge <<endl;
-// 	if (MuCharge[i] != fHypLepton1.charge && fabs((pmu+fHypLepton1.p).M() - gMZ) < dm) return false;
-// 	if (MuCharge[i] != fHypLepton2.charge && fabs((pmu+fHypLepton2.p).M() - gMZ) < dm) return false;
-//       }
-//     }
-//   }
-//   if (NEls > 1){
-//     for (size_t i=0; i<NEls; ++i){
-//       if (fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
-//       if (fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
-//       if ((*this.*eleSelector)(i)){
-// 	TLorentzVector pel;
-// 	pel.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-// 	if (ElCharge[i] != fHypLepton1.charge && fabs((pel+fHypLepton1.p).M() - gMZ) < dm) return false;
-// 	if (ElCharge[i] != fHypLepton2.charge && fabs((pel+fHypLepton2.p).M() - gMZ) < dm) return false;
-//       }
-//     }
-//   }
-  
-//   bool printRun = false;
-//   if(Event==230464005 && Run==191226) printRun = true;
-//   if(Event==128070684 && Run==191062) printRun = true;
-//   if (printRun){
-//     for (size_t i = 0; i < NMus; ++i)
-//       fOUTSTREAM << "[SYNCH]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l/#t) %1d(%1d/%1d) NEl(#l/#t) %1d(%1d/%1d) passZVeto %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
-// 					 S->sname.Data(),
-// 					 Run, 
-// 					 Event, isSSLLEvent(ind1,ind2),
-// 					 NMus, hasLooseMuons(), getNTightMuons(),
-// 					 NEls, hasLooseElectrons(), getNTightElectrons(),
-// 					 passesZVeto(),
-// 					 getHT(), getNJets(), getNBTags(),
-// 					 getMET()) << endl;
-//  		}
-
   if(NMus > 1){
     for(size_t i = 0; i < NMus-1; ++i){
       if((*this.*muonSelector)(i) == false) continue;
@@ -4216,8 +4506,8 @@ bool SSDLDumper::passesZVeto(float dm){
 	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
 	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
 	// return !passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm); //inverted Zveto
-	if (gInvertZVeto) return !passZVeto;
-	else              return  passZVeto;
+	if (gInvertZVeto)  return !passZVeto;
+	else               return  passZVeto;
 }
 bool SSDLDumper::passesChVeto(int ch){
   if (ch == 0) return true;  //DON'T apply the veto
@@ -4493,22 +4783,22 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	return true;
 }
 bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
-  if (hasLooseElectrons(el1,el2) < 2) return false;
-  if (!isTightElectron(el1))          return false;
-  if (!isTightElectron(el2))          return false;
-  if (getMET() > 30.)                 return false;
-  if (ElMT[0] > 25.)                  return false;
-  
-  TLorentzVector p1, p2;
-  p1.SetPtEtaPhiM(ElPt[el1], ElEta[el1], ElPhi[el1], gMEL);
-  p2.SetPtEtaPhiM(ElPt[el2], ElEta[el2], ElPhi[el2], gMEL);
-  double m = (p1+p2).M();
-  if(fabs(gMZ - m) > 15.)             return false;
-  
-  setHypLepton1(el1, Elec);
-  setHypLepton2(el2, Elec);
-  
-  return true;
+        if (hasLooseElectrons(el1,el2) < 2) return false;
+	if (!isTightElectron(el1))          return false;
+	if (!isTightElectron(el2))          return false;
+	if (getMET() > 30.)                 return false;
+	if (ElMT[0] > 25.)                  return false;
+      
+	TLorentzVector p1, p2;
+	p1.SetPtEtaPhiM(ElPt[el1], ElEta[el1], ElPhi[el1], gMEL);
+	p2.SetPtEtaPhiM(ElPt[el2], ElEta[el2], ElPhi[el2], gMEL);
+	double m = (p1+p2).M();
+	if(fabs(gMZ - m) > 15.)             return false;
+	
+	setHypLepton1(el1, Elec);
+	setHypLepton2(el2, Elec);
+	
+	return true;
 }
 //____________________________________________________________________________
 bool SSDLDumper::AvoidDoubleCountingOfFakes(Sample *S){
@@ -4566,7 +4856,7 @@ bool SSDLDumper::isSSLLMuEvent(int& mu1, int& mu2){
 	// Define hypothesis leptons
 	setHypLepton1(mu1, Muon);
 	setHypLepton2(mu2, Muon);
-
+	
 	if(fChargeSwitch == 0){
 		// Need to remove the Z veto in OS case, since these OS events are exactly what 
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
@@ -4627,6 +4917,7 @@ bool SSDLDumper::isSSLLElEvent(int& el1, int& el2){
 	setHypLepton1(el1, Elec);
 	setHypLepton2(el2, Elec);
 
+	
 	if(fChargeSwitch == 0){
 		// Need to remove the Z veto in OS case, since these OS events are exactly what 
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
@@ -4688,6 +4979,7 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 	// Define hypothesis leptons
 	setHypLepton1(mu, Muon);
 	setHypLepton2(el, Elec);
+
 
 	if(fChargeSwitch == 0){
 		// Need to remove the Z veto in OS case, since these OS events are exactly what 
@@ -4830,7 +5122,6 @@ bool SSDLDumper::isGoodSecMuon(int muon, float ptcut){
 	if(MuPt[muon] < ptcut) return false;
 	return true;
 }
-
 //____________________________________________________________________________
 bool SSDLDumper::isFakeMuon(int muon){
 	if(isPromptMuon(muon)) return false;
@@ -5016,13 +5307,13 @@ bool SSDLDumper::isTightElectron(int ele){
 bool SSDLDumper::isGoodPrimElectron(int ele, float ptcut){
 	if(ptcut < 0.) ptcut = fC_minEl1pt;
 	if(isLooseElectron(ele) == false) return false;
-	if(ElPt[ele] < ptcut) return false;
+	if(ElPt[ele] < ptcut)             return false;
 	return true;
 }
 bool SSDLDumper::isGoodSecElectron(int ele, float ptcut){
 	if(ptcut < 0.) ptcut = fC_minEl2pt;
 	if(isLooseElectron(ele) == false) return false;
-	if(ElPt[ele] < ptcut) return false;
+	if(ElPt[ele] < ptcut)             return false;
 	return true;
 }
 
