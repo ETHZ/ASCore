@@ -229,7 +229,7 @@ def do_stuff(config_name):
 		print '[status] creating output directory:', output_location
 		os.system('mkdir '+output_location)
 		# copy the dumper_config into the output directory for future reference and the plotter
-		os.system('cp '+dumper_config+' '+output_location)
+		os.system('cp '+dumper_config+' '+output_location+'/dumperconfig.cfg')
 	else:
 		print '[WARNING] output directory', output_location, 'already exists, this might lead to problems.'
 
