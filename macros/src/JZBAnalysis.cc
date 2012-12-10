@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.98 $";
+string sjzbversion="$Revision: 1.70.2.101 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.98 2012/12/05 16:14:49 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.101 2012/12/06 12:33:50 buchmann Exp $
 */
 
 
@@ -60,6 +60,8 @@ public:
   bool  isConv1; // Photon conversion flag
   bool  isConv2;
   float FSRjzb;
+  bool softMuon;
+  bool softMuonMC;
 
   float genFSRmll[30];
   float genFSRmllg[30];
@@ -514,6 +516,8 @@ void nanoEvent::reset()
   isConv1 = false;
   isConv2 = false;
   FSRjzb=0;
+  softMuon = false;
+  softMuonMC = false;
   
   NgenZs=0;
   NgenRecPho=0;
@@ -1167,6 +1171,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("iso2",&nEvent.iso2,"iso2/F");
   myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
   myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
+  myTree->Branch("softMuon",&nEvent.softMuon,"softMuon/O");
+  myTree->Branch("softMuonMC",&nEvent.softMuonMC,"softMuonMC/O");
 
   myTree->Branch("FSRjzb",&nEvent.FSRjzb,"FSRjzb/F");
   myTree->Branch("NgenZs",&nEvent.NgenZs,"NgenZs/I");
@@ -2217,7 +2223,9 @@ void JZBAnalysis::Analyze() {
       break;
     }
   }
-  
+ 
+
+ 
   if(!nEvent.tri_MatchFound) TriLepton1=0;
   BadTriLepton1=TriLepton1;
   
@@ -2301,7 +2309,28 @@ void JZBAnalysis::Analyze() {
 
     float lepweightErr;
     float lepweight=GetLeptonWeight(nEvent.id1,nEvent.pt1,nEvent.eta1,nEvent.id2,nEvent.pt2,nEvent.eta2,lepweightErr);
+  
+    bool softMuon = false;
+    for(int muIndex=0;muIndex<fTR->NMus;muIndex++) {
+      if(IsSoftMuon(muIndex)) {
+        softMuon = true;
+        break;
+      }
+    }
+    nEvent.softMuon = softMuon;
     
+    if (isMC) {
+      bool softMuonMC = false;
+      for(int muIndex=0;muIndex<fTR->NMus;muIndex++) {
+        if(fabs(fTR->MuGenMID[muIndex]) == 24 && fabs(fTR->MuGenGMID[muIndex]) == 5) {
+          softMuonMC = true;
+          break;
+        }
+      } 
+      nEvent.softMuonMC = softMuonMC;
+    }
+
+  
     if (isMC) {
 //      nEvent.weight=nEvent.weight*lepweight;
       nEvent.weightEffDown=nEvent.weight*(lepweight-lepweightErr);
@@ -2993,6 +3022,24 @@ const bool JZBAnalysis::IsCustomPhoton2012(const int index) {
   return true;  
 }
 
+
+const bool JZBAnalysis::IsSoftMuon(const int index) {
+
+  if ( !fTR->MuIsTrackerMuon[index] )       return false;
+  if ( !fTR->MuIsTMLSTight[index])          return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) )     return false;
+  if ( !(fTR->MuNSiLayers[index] > 5) )     return false;
+  if ( !(fabs(fTR->MuD0PV[index]) < 0.2) )  return false;
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false;
+
+  double Iso = MuPFIso(index);
+  if (!(fTR->MuPt[index] <= 20 || (fTR->MuPt[index] > 20 && Iso > 0.15)) ) return false;
+
+  return true;
+
+}
+
+
 const bool JZBAnalysis::IsCustomMu2012(const int index){
 
   // Basic muon cleaning and ID
@@ -3594,7 +3641,8 @@ void JZBAnalysis::GeneratorInfo(void) {
         //if ( fTR->GenLeptonMID[gIndex] ==23 ) gLeptons.push_back(tmpLepton); // WW study
       }         
   }
-  
+
+
   vector<lepton> gPhotons;
   for(int phoIndex=0;phoIndex<fTR->NGenPhotons;phoIndex++) {
     if( fTR->GenPhotonPt[phoIndex]>minPt && 
