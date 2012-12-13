@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.101 $";
+string sjzbversion="$Revision: 1.70.2.98 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.101 2012/12/06 12:33:50 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.98 2012/12/05 16:14:49 pablom Exp $
 */
 
 
@@ -328,6 +328,10 @@ public:
   float LSP2Mopt;
   
   //Z+b variables
+  
+  bool HasSoftLepton;
+  float SoftLeptonPt;
+  
   float mpf;
   float fake_mpf;
   
@@ -830,6 +834,10 @@ void nanoEvent::reset()
   mpf=0;
   fake_mpf=0;
   
+  HasSoftLepton=false;
+  SoftLeptonPt=0.;
+  
+  
   ZbCHS3010_pfJetGoodNumBtag=0;
   ZbCHS3010_pfJetGoodNum=0;
   ZbCHS3010_pfJetSum=0;
@@ -973,6 +981,53 @@ TH1F *weight_histo;
 
 nanoEvent nEvent;
 
+bool IsLepton(int pdgid) {
+  int tid = abs(pdgid);
+  if(tid==11||tid==13||tid==15) return true;
+  else return false;
+}
+
+bool IsBMeson(int pdgid) {
+  int MesonIDs[99]={511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,20533,535,541,10541,543,10543,20543,545,5101,5103,5201,5203,5301,5303,5401,5403,5503,10113,10213,551,10551,100551,110551,200551,210551,553,10553,20553,30553,100553,110553,120553,130553,200553,210553,220553,300553,9000553,9010553,555,10555,20555,100555,110555,120555,200555,557,100557,5122,5112,5212,5222,5114,5214,5224,5132,5232,5312,5322,5314,5324,5332,5334,5142,5242,5412,5422,5414,5424,5342,5432,5434,5442,5444,5512,5522,5514,5524,5532,5534,5542,5544,5554};
+  
+  for(int i=0;i<99;i++) {
+    if(pdgid==MesonIDs[i]) return true;
+  }
+  
+  return false;
+}
+
+void JZBAnalysis::IsParticleFromB(int index) {
+  if(index<0) return;
+  if(fTR->genInfoId[index]==23) return;
+  if(IsBMeson(fTR->genInfoId[index])) {
+    nEvent.HasSoftLepton=true;
+    return;
+  } else {
+    int motherindex=fTR->genInfoMo1[index];
+    int motherindex2=fTR->genInfoMo2[index];
+    if(motherindex>=0) IsParticleFromB(motherindex);
+    if(motherindex2>=0) IsParticleFromB(motherindex2);
+  }
+}
+
+void JZBAnalysis::HasSoftLepton() {
+  if(fTR->nGenParticles<1) return;
+  for(int i=0;i<fTR->nGenParticles;i++) {
+    int thisParticleId = fTR->genInfoId[i];
+    if(IsLepton(thisParticleId)) {
+      int motherindex=fTR->genInfoMo1[i];
+      int motherindex2=fTR->genInfoMo2[i];
+      if(motherindex>=0) IsParticleFromB(motherindex);
+      if(motherindex2>=0) IsParticleFromB(motherindex2);
+      if(nEvent.HasSoftLepton) {
+	nEvent.SoftLeptonPt=fTR->genInfoPt[i];
+	break;
+      }
+    }//end of isLepton
+  }//end of gen particle loop
+}
+
 float GetCoreResolutionScalingFactor(float jeta) {
   jeta=abs(jeta);
   if(jeta<=1.1) return 1.07;
@@ -1001,8 +1056,6 @@ int JZBAnalysis::FindGenJetIndex(float jpt, float jeta, float jphi) {
   
   return matchedindex;
 }
-    
-    
 
 float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
   //jet resolution oversmearing as described here: 
@@ -1622,6 +1675,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
   myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
   myTree->Branch("fake_mpf",&nEvent.fake_mpf,"fake_mpf/F");
+  
+  myTree->Branch("HasSoftLepton",&nEvent.HasSoftLepton,"HasSoftLepton/O");
+  myTree->Branch("SoftLeptonPt",&nEvent.SoftLeptonPt,"SoftLeptonPt/F");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -1840,14 +1896,13 @@ void JZBAnalysis::Analyze() {
 	
 
 	    
-
+	HasSoftLepton();
 	
 	
-	
-	
+	bool wecare=false;
 	for(int i=0;i<nGenParticles&&fdoGenInfo;i++) {
-	  if(fTR->genInfoStatus[i]!=3) continue;
 	  int thisParticleId = fTR->genInfoId[i];
+	  if(fTR->genInfoStatus[i]!=3) continue;
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {
 	    //dealing with a Z
 	    int motherIndex=fTR->genInfoMo1[i];
@@ -2223,9 +2278,7 @@ void JZBAnalysis::Analyze() {
       break;
     }
   }
- 
-
- 
+  
   if(!nEvent.tri_MatchFound) TriLepton1=0;
   BadTriLepton1=TriLepton1;
   
@@ -2309,28 +2362,26 @@ void JZBAnalysis::Analyze() {
 
     float lepweightErr;
     float lepweight=GetLeptonWeight(nEvent.id1,nEvent.pt1,nEvent.eta1,nEvent.id2,nEvent.pt2,nEvent.eta2,lepweightErr);
-  
+    
     bool softMuon = false;
     for(int muIndex=0;muIndex<fTR->NMus;muIndex++) {
       if(IsSoftMuon(muIndex)) {
-        softMuon = true;
-        break;
+	softMuon = true;
+	break;
       }
     }
     nEvent.softMuon = softMuon;
-    
     if (isMC) {
       bool softMuonMC = false;
       for(int muIndex=0;muIndex<fTR->NMus;muIndex++) {
-        if(fabs(fTR->MuGenMID[muIndex]) == 24 && fabs(fTR->MuGenGMID[muIndex]) == 5) {
-          softMuonMC = true;
-          break;
-        }
-      } 
+	if(fabs(fTR->MuGenMID[muIndex]) == 24 && fabs(fTR->MuGenGMID[muIndex]) == 5) {
+	  softMuonMC = true;
+	  break;
+	}
+      }
       nEvent.softMuonMC = softMuonMC;
     }
-
-  
+    
     if (isMC) {
 //      nEvent.weight=nEvent.weight*lepweight;
       nEvent.weightEffDown=nEvent.weight*(lepweight-lepweightErr);
@@ -2916,7 +2967,6 @@ void JZBAnalysis::Analyze() {
     TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
     int i1 = sortedGoodLeptons[PosLepton1].index;
     int i2 = sortedGoodLeptons[PosLepton2].index;
-    int i3,i4,i5;
 
     TLorentzVector genLep1; 
     if ( sortedGoodLeptons[PosLepton1].type )
@@ -2982,9 +3032,9 @@ const bool JZBAnalysis::IsCustomPhoton2012(const int index) {
     // see also: https://twiki.cern.ch/twiki/bin/view/CMS/ConversionTools and https://twiki.cern.ch/twiki/bin/view/CMS/EgammaPFBasedIsolation
     
     
-    return true;
-//  if(!(fTR->PhoPt[index]>10)) return false;
-//  counters[PH].fill(" ... pt > 10");
+//    return true;
+  if(!(fTR->PhoPt[index]>10)) return false;
+  counters[PH].fill(" ... pt > 10");
   
   if(!fTR->PhoPassConversionVeto[index]) return false;
   counters[PH].fill(" ... survived conversion safe electron veto");
@@ -3022,7 +3072,6 @@ const bool JZBAnalysis::IsCustomPhoton2012(const int index) {
   return true;  
 }
 
-
 const bool JZBAnalysis::IsSoftMuon(const int index) {
 
   if ( !fTR->MuIsTrackerMuon[index] )       return false;
@@ -3038,7 +3087,6 @@ const bool JZBAnalysis::IsSoftMuon(const int index) {
   return true;
 
 }
-
 
 const bool JZBAnalysis::IsCustomMu2012(const int index){
 
@@ -3564,7 +3612,7 @@ bool JZBAnalysis::ShouldPhotonBeMerged(lepton &photon, float dR) {
   
   // we we can specify all criteria we want to use.
   if(photon.p.Pt()>4) { // all other photons (>4 GeV)
-    if(dR>0.1 && dR<0.3) return true; // values determined from dedicated DY FSR study
+    if(dR>0.1 && dR<0.5) return true; // values determined from dedicated DY FSR study
   }
   
   return false;
@@ -3641,8 +3689,7 @@ void JZBAnalysis::GeneratorInfo(void) {
         //if ( fTR->GenLeptonMID[gIndex] ==23 ) gLeptons.push_back(tmpLepton); // WW study
       }         
   }
-
-
+  
   vector<lepton> gPhotons;
   for(int phoIndex=0;phoIndex<fTR->NGenPhotons;phoIndex++) {
     if( fTR->GenPhotonPt[phoIndex]>minPt && 
@@ -3955,7 +4002,7 @@ void FindDaughters(TreeReader *fTR, int nGenParticles, int iMother, TLorentzVect
       
     
 void AddGenPhoton(TreeReader *fTR, int index) {
-  if(nEvent.genPhotonsNPhotons>30) {
+  if(nEvent.genPhotonsNPhotons>=30) {
     cout << "___ TOO MANY PHOTONS, PANICKING!" << endl;
     return;
   }

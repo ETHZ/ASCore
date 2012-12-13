@@ -48,6 +48,10 @@ public:
   const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);
   const float GetMuonWeight(float eta1, float pt1, float &EffErr);
   const float GetElectronWeight(float eta1, float pt1, float &EffErr);
+  const bool IsSoftMuon(const int index);
+  void HasSoftLepton();
+  void IsParticleFromB(int);
+//  const int IsJetFromPU(float, float, float);
   int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
   void StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lepton &lepton2);
   float ElPFIso(int index);
