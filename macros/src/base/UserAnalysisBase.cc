@@ -490,10 +490,14 @@ float UserAnalysisBase::Aeff(float eta) {
 }
 
 float UserAnalysisBase::ElPFIso(int index){
-	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
+// 	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
+// 	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[index]);
+// 	double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
+// 	return iso;
+	double neutral = fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index];
 	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[index]);
-    double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
-    return iso;
+	double iso     = ( fTR->ElPfIsoChHad03[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
+	return iso;
 }
 
 float UserAnalysisBase::ElRadIso(int index){
@@ -524,7 +528,7 @@ bool UserAnalysisBase::IsLooseTau(int index){
 
 bool UserAnalysisBase::IsLooseEl(int index){
     if(!IsGoodBasicEl(index))         return false;
-    if(fTR->ElPt[index] < 10.)        return false;
+    if(fTR->ElPt[index] < 5.)        return false;
     if(fabs(fTR->ElEta[index]) > 2.4) return false;
 
     // MARC: what is this? if(!fTR->ElEcalDriven[index]) return false;
