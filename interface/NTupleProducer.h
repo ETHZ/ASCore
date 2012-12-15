@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.32 2012/08/15 12:01:43 haweber Exp $
+// $Id: NTupleProducer.h,v 1.114.2.33 2012/09/14 07:06:02 pnef Exp $
 //
 //
 
@@ -22,6 +22,7 @@
 // system include files
 #include <vector>
 #include <string>
+#include <iostream>
 
 // ROOT includes
 #include "TH1.h"
@@ -67,10 +68,26 @@
 
 #include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
 
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/CaloTopology/interface/CaloTopology.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
+#include "DataFormats/CaloRecHit/interface/CaloCluster.h"
+#include "DataFormats/CaloRecHit/interface/CaloClusterFwd.h"
+#include "Geometry/EcalAlgo/interface/EcalBarrelGeometry.h"
+#include "Geometry/EcalAlgo/interface/EcalEndcapGeometry.h"
 
 // Helpers
 #include "Math/VectorUtil.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "TGeoTube.h"
+#include "TGeoPara.h"
 
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
@@ -123,11 +140,10 @@ private:
   };
 
   typedef std::map<edm::RefToBase<reco::Jet>, unsigned int, JetRefCompare> FlavourMap;
-  
-  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
-  //   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
-  //   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
-  reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;
+
+  PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
+  reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;  
+
   int FindPFCandType(int id);
   bool isInPhiCracks(double phi, double eta);
   bool isInEtaCracks(double eta);
@@ -143,7 +159,6 @@ private:
   VertexAlgoParameters vtxAlgoParams;
   std::vector<std::string> rankVariables;
 
-  PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
   std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
 				      PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
 				      bool useMva, TMVA::Reader * tmvaReader, std::string tmvaMethod);
@@ -152,7 +167,7 @@ private:
   bool TrackCut(reco::TrackRef tk) const;
   bool ConversionsCut(const reco::Conversion &conv);
 
-  double DeltaPhi( double phi1, double phi2);
+  double GenPartonicIso_allpart(const reco::GenParticle & photon, edm::Handle <reco::GenParticleCollection> & genparticles, double dRcone);
 
   // ----------member data ---------------------------
   AdaptiveVertexFitter avFitter;
@@ -184,11 +199,13 @@ private:
   static const int gMaxNGenLept = 100;
   static const int gMaxNGenPhot = 100;
   static const int gMaxNGenJets = 100;
-  static const int gMaxNVrtx    = 45;
+  static const int gMaxNVrtx    = 50;
   static const int gMaxNPileup  = 60;
   static const int gMaxNEBhits  = 20;
   static const int gMaxNGenVtx = 60;
   static const int gMaxNGenParticles = 2000;
+  static const int gMaxNPfCand = 2000;
+  static const int gMaxNXtals = 2000;
 
   // Maximum configurable number of tags (b-tagging and PF iso)
   static const unsigned int gMaxNPfIsoTags  = 20;
@@ -197,6 +214,8 @@ private:
   static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
   static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
+  static const int gMax_vertexing_diphoton_pairs = 10;
+  static const int gMax_vertexing_vtxes = 5;
 
   edm::InputTag fMuonTag;
   std::vector<edm::InputTag> fMuonPfIsoTagsCustom;
@@ -227,6 +246,7 @@ private:
   edm::InputTag fL1TriggerTag;
   edm::InputTag fHLTTrigEventTag;
   edm::InputTag fSrcRho;
+  edm::InputTag fSrcSigma;
   edm::InputTag fSrcRhoForIso;
   edm::InputTag fpdfWeightTag;
   edm::InputTag pfphotonsProducerTag;
@@ -242,6 +262,12 @@ private:
   EGammaMvaEleEstimator* electronIDMVATrig_;
 
   MuonMVAEstimator* fMuonIsoMVA;
+
+  TMVA::Reader * perVtxReader;
+  TMVA::Reader * perEvtReader; 
+  HggVertexAnalyzer *vAna;
+  HggVertexFromConversions *vConv;
+   
 
   // Selection cuts
   float fMinMuPt;
@@ -322,6 +348,9 @@ private:
   std::auto_ptr<int>   fRMaxNVrtx;
   std::auto_ptr<int>   fRMaxNPileup;
   std::auto_ptr<int>   fRMaxNEBhits; 
+  std::auto_ptr<int>   fRMaxNConv; 
+  std::auto_ptr<int>   fRMaxNPfCand; 
+  std::auto_ptr<int>   fRMaxNXtals; 
 
   std::auto_ptr<std::vector<std::string> > fRHLTNames;  // Full HLT menu
   std::auto_ptr<std::vector<std::string> > fRL1PhysMenu;
@@ -1080,6 +1109,76 @@ private:
   std::auto_ptr<float>  fTPFSumEt;
   std::auto_ptr<float>  fTMETR12;
   std::auto_ptr<float>  fTMETR21;
+
+std::auto_ptr<float> fTSigma;
+std::auto_ptr<std::vector<float> > fTGenPhotonIsoDR03;
+std::auto_ptr<std::vector<float> > fTGenPhotonIsoDR04;
+std::auto_ptr<std::vector<float> > fTSCX;
+std::auto_ptr<std::vector<float> > fTSCY;
+std::auto_ptr<std::vector<float> > fTSCZ;
+std::auto_ptr<std::vector<int> > fTSCXtalListStart;
+std::auto_ptr<std::vector<int> > fTSCNXtals;
+std::auto_ptr<int> fTNXtals;
+std::auto_ptr<std::vector<float> > fTXtalX;
+std::auto_ptr<std::vector<float> > fTXtalY;
+std::auto_ptr<std::vector<float> > fTXtalZ;
+std::auto_ptr<std::vector<float> > fTXtalEtaWidth;
+std::auto_ptr<std::vector<float> > fTXtalPhiWidth;
+std::auto_ptr<std::vector<float> > fTXtalFront1X;
+std::auto_ptr<std::vector<float> > fTXtalFront1Y;
+std::auto_ptr<std::vector<float> > fTXtalFront1Z;
+std::auto_ptr<std::vector<float> > fTXtalFront2X;
+std::auto_ptr<std::vector<float> > fTXtalFront2Y;
+std::auto_ptr<std::vector<float> > fTXtalFront2Z;
+std::auto_ptr<std::vector<float> > fTXtalFront3X;
+std::auto_ptr<std::vector<float> > fTXtalFront3Y;
+std::auto_ptr<std::vector<float> > fTXtalFront3Z;
+std::auto_ptr<std::vector<float> > fTXtalFront4X;
+std::auto_ptr<std::vector<float> > fTXtalFront4Y;
+std::auto_ptr<std::vector<float> > fTXtalFront4Z;
+std::auto_ptr<int> fTNPfCand;
+std::auto_ptr<std::vector<int> > fTPfCandPdgId;
+std::auto_ptr<std::vector<float> > fTPfCandEta;
+std::auto_ptr<std::vector<float> > fTPfCandPhi;
+std::auto_ptr<std::vector<float> > fTPfCandEnergy;
+std::auto_ptr<std::vector<float> > fTPfCandPt;
+std::auto_ptr<std::vector<float> > fTPfCandVx;
+std::auto_ptr<std::vector<float> > fTPfCandVy;
+std::auto_ptr<std::vector<float> > fTPfCandVz;
+std::auto_ptr<std::vector<int> > fTPfCandHasHitInFirstPixelLayer;
+std::auto_ptr<std::vector<float> > fTPfCandTrackRefPx;
+std::auto_ptr<std::vector<float> > fTPfCandTrackRefPy;
+std::auto_ptr<std::vector<float> > fTPfCandTrackRefPz;
+std::auto_ptr<std::vector<int> > fTPhoMatchedPFPhotonCand;
+std::auto_ptr<std::vector<int> > fTPhoMatchedPFElectronCand;
+std::auto_ptr<std::vector<float> > fTPhoVx;
+std::auto_ptr<std::vector<float> > fTPhoVy;
+std::auto_ptr<std::vector<float> > fTPhoVz;
+std::auto_ptr<std::vector<float> > fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone01NeutralHadronIsomvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone02NeutralHadronIsomvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone03NeutralHadronIsomvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone04NeutralHadronIsomvVtx;
+std::auto_ptr<std::vector<float> > fTPhoCone01ChargedHadronIsodR02dz02dxy01;
+std::auto_ptr<std::vector<float> > fTPhoCone02ChargedHadronIsodR02dz02dxy01;
+std::auto_ptr<std::vector<float> > fTPhoCone03ChargedHadronIsodR02dz02dxy01;
+std::auto_ptr<std::vector<float> > fTPhoCone04ChargedHadronIsodR02dz02dxy01;
+std::auto_ptr<std::vector<float> > fTPhoCone03PFCombinedIso;
+std::auto_ptr<std::vector<float> > fTPhoCone04PFCombinedIso;
+std::auto_ptr<std::vector<int> > fTDiphotonsfirst;
+std::auto_ptr<std::vector<int> > fTDiphotonssecond;
+std::auto_ptr<std::vector<int> > fTVtxdiphoh2gglobe;
+std::auto_ptr<std::vector<int> > fTVtxdiphomva;
+std::auto_ptr<std::vector<int> > fTVtxdiphoproductrank;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoCharged;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoNeutral;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoPhoton;
+
+
+
 };
 
 

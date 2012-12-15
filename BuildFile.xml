@@ -40,5 +40,14 @@
 <use   name="RecoEgamma/EgammaTools"/>
 <use   name="EGamma/EGammaAnalysisTools"/>
 <use   name="Muon/MuonAnalysisTools"/>
+<use   name="Geometry/EcalAlgo"/>
+<use   name="DataFormats/EcalDetId"/>
+<use   name="DataFormats/DetId"/>
+<use   name="DataFormats/CaloRecHit"/>
+<use   name="Geometry/CaloGeometry"/>
+<use   name="DataFormats/EcalRecHit"/>
+<use   name="root"/>
+<use   name="PFIsolation/SuperClusterFootprintRemoval"/>
+<lib   name="Geom"/>
 <flags   EDM_PLUGIN="1"/>
 <flags   CXXFLAGS="-g -fno-var-tracking-assignments"/>

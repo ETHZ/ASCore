@@ -40,7 +40,7 @@ cvs co -r V00-00-10      RecoMET/METFilters
 cvs co -r V00-13-10 PhysicsTools/JetMCAlgos
 
 # ECAL
-addpkg RecoEcal/EgammaCoreTools V05-08-22
+addpkg RecoEcal/EgammaCoreTools V05-08-26
 cvs export -d tmpexportdir -rHEAD UserCode/peruzzi/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
 cvs export -d tmpexportdir -rHEAD UserCode/peruzzi/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
 mv -f tmpexportdir/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins
@@ -57,6 +57,9 @@ cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTo
 cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 cvs up -r 1.13 EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h
 cvs up -r 1.20 EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc
+
+# SC footprint removal
+cvs co -r V00-02 -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
 
 #####################################################################################################################################
 ################################################                      ###############################################################
