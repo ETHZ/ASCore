@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.14 2012/08/17 10:35:01 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.15 2012/11/26 16:07:34 peruzzi Exp $
 //
 //
 
@@ -869,6 +869,9 @@ private:
   float fT_pho_ChargedHadronIso[gMaxnphos];
   float fT_pho_NeutralHadronIso[gMaxnphos];
   float fT_pho_PhotonIso[gMaxnphos];
+  float fTPhoSCRemovalPFIsoCharged[gMaxnphos];
+  float fTPhoSCRemovalPFIsoNeutral[gMaxnphos];
+  float fTPhoSCRemovalPFIsoPhoton[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
   int fT_pho_matchedPFPhotonCand[gMaxnphos];

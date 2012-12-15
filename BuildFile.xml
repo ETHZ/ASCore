@@ -44,5 +44,6 @@
 <use name="Geometry/CaloGeometry"/>
 <use name="DataFormats/EcalRecHit"/>
 <use name="root"/>
+<use name="PFIsolation/SuperClusterFootprintRemoval"/>
 <lib name="Geom"/>
 <flags   EDM_PLUGIN="1"/>

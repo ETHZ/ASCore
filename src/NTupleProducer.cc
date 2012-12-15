@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.26 2012/11/26 16:07:29 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.27 2012/11/26 16:10:46 peruzzi Exp $
 //
 //
 
@@ -107,6 +107,7 @@ Implementation:
 #include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
 
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
@@ -1957,7 +1958,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        fTPhotisPFlowPhoton[phoqi]= photon.isPFlowPhoton();
        fTPhotisStandardPhoton[phoqi]= photon.isStandardPhoton();
 
-
+       {
+	 SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup);
+	 fTPhoSCRemovalPFIsoCharged[phoqi] = (remover.PFIsolation("charged",photon.superCluster(),-1));
+	 fTPhoSCRemovalPFIsoNeutral[phoqi] = (remover.PFIsolation("neutral",photon.superCluster()));
+	 fTPhoSCRemovalPFIsoPhoton[phoqi] = (remover.PFIsolation("photon",photon.superCluster()));
+       }
 
        if (doVertexingFlag && photon.hasConversionTracks()) { // photon conversions
 
@@ -3912,12 +3918,15 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("PhoisEEDeeGap"   ,&fTPhotisEEDeeGap   ,"PhoisEEDeeGap[NPhotons]/I");
        fEventTree->Branch("PhoisEBEEGap"   ,&fTPhotisEBEEGap   ,"PhoisEBEEGap[NPhotons]/I");
        fEventTree->Branch("PhoisPFlowPhoton"   ,&fTPhotisPFlowPhoton   ,"PhoisPFlowPhoton[NPhotons]/I");
-       fEventTree->Branch("PhoisStandardPhoton"   ,&fTPhotisStandardPhoton   ,"PhoisStandardPhoton[NPhotons]/I");
+       fEventTree->Branch("PhoisStandardPhoton"   ,&fTPhotisStandardPhoton   ,"PhoisStandardPhoton[NPhotons]/I"); 
        fEventTree->Branch("PhoMCmatchindex"   ,&fTPhotMCmatchindex   ,"PhoMCmatchindex[NPhotons]/I");
        fEventTree->Branch("PhoMCmatchexitcode"   ,&fTPhotMCmatchexitcode   ,"PhoMCmatchexitcode[NPhotons]/I");
        fEventTree->Branch("Pho_ChargedHadronIso",&fT_pho_ChargedHadronIso,"Pho_ChargedHadronIso[NPhotons]/F");
        fEventTree->Branch("Pho_NeutralHadronIso",&fT_pho_NeutralHadronIso,"Pho_NeutralHadronIso[NPhotons]/F");
        fEventTree->Branch("Pho_PhotonIso",&fT_pho_PhotonIso,"Pho_PhotonIso[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoCharged",&fTPhoSCRemovalPFIsoCharged,"PhoSCRemovalPFIsoCharged[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoNeutral",&fTPhoSCRemovalPFIsoNeutral,"PhoSCRemovalPFIsoNeutral[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoPhoton",&fTPhoSCRemovalPFIsoPhoton,"PhoSCRemovalPFIsoPhoton[NPhotons]/F");
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
@@ -4841,6 +4850,9 @@ void NTupleProducer::resetTree(){
        resetFloat( fT_pho_ChargedHadronIso, gMaxnphos);
        resetFloat( fT_pho_NeutralHadronIso, gMaxnphos);
        resetFloat( fT_pho_PhotonIso, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoCharged, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoNeutral, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoPhoton, gMaxnphos);
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
