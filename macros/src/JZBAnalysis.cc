@@ -777,6 +777,9 @@ void nanoEvent::reset()
   ZbCHS3010_LeadingJetIsPu = false;
   ZbCHS1010_LeadingJetIsPu = false;
 
+  ZbCHS3010_SubLeadingJetIsPu = false;
+  ZbCHS1010_SubLeadingJetIsPu = false;
+
   
   mGlu=0;
   mChi=0;

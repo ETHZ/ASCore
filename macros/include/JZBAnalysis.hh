@@ -51,6 +51,7 @@ public:
   const bool IsSoftMuon(const int index);
   void HasSoftLepton();
   void IsParticleFromB(int);
+  bool IsPUJet(float jpt, float jeta, float jphi);
 //  const int IsJetFromPU(float, float, float);
   int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
   void StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lepton &lepton2);
