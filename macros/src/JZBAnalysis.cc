@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.98 $";
+string sjzbversion="$Revision: 1.70.2.103 $";
 string sjzbinfo="";
 TRandom3 *r;
 
@@ -28,7 +28,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.98 2012/12/05 16:14:49 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.103 2012/12/13 16:41:01 buchmann Exp $
 */
 
 
@@ -385,8 +385,12 @@ public:
   float ZbCHS1010_BTagWgtLUp;
   float ZbCHS1010_BTagWgtLDown;
   
-
-
+  bool ZbCHS3010_LeadingJetIsPu;
+  bool ZbCHS1010_LeadingJetIsPu;
+  
+  bool ZbCHS3010_SubLeadingJetIsPu;
+  bool ZbCHS1010_SubLeadingJetIsPu;
+  
   
   float fact;
   
@@ -770,6 +774,10 @@ void nanoEvent::reset()
   ZbCHS3010_BTagWgtLDown = 1.0 ;
   ZbCHS1010_BTagWgtLDown = 1.0 ;
   
+  ZbCHS3010_LeadingJetIsPu = false;
+  ZbCHS1010_LeadingJetIsPu = false;
+
+  
   mGlu=0;
   mChi=0;
   mLSP=0;
@@ -1046,10 +1054,6 @@ int JZBAnalysis::FindGenJetIndex(float jpt, float jeta, float jphi) {
     
     if(dr>mindr) continue;
     
-    //restrict it to a factor of two between reco pt and gen pt
-    float ndpt = (fTR->GenJetPt[ijet]-jpt)/(fTR->GenJetPt[ijet]);
-    if(ndpt>2) continue;
-    
     mindr=dr;
     matchedindex=ijet;
   }
@@ -1068,6 +1072,16 @@ float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
   float c = GetCoreResolutionScalingFactor(jeta);
   return max((float)0.,genPt+c*(jpt-genPt));
 }
+
+bool JZBAnalysis::IsPUJet(float jpt, float jeta, float jphi) {
+  if(fDataType_!= "mc") return false; // if we're dealing with data we label all jets as not being PU related
+
+  int genIndex = FindGenJetIndex(jpt,jeta,jphi);
+  if(genIndex<0) return true; // no associated gen jet -> PU!
+  return false;
+}
+
+  
 
 void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
                           unsigned int start, unsigned int end) {
@@ -1434,11 +1448,18 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
 
-  myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtT,"ZbCHS3010_BTagWgtT/F");
-  myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtT,"ZbCHS1010_BTagWgtT/F");
   
-  myTree->Branch("ZbCHS3010_BTagWgtTUp",&nEvent.ZbCHS3010_BTagWgtTUp,"ZbCHS3010_BTagWgtTUp/F");
-  myTree->Branch("ZbCHS1010_BTagWgtTUp",&nEvent.ZbCHS1010_BTagWgtTUp,"ZbCHS1010_BTagWgtTUp/F");
+  myTree->Branch("ZbCHS3010_LeadingJetIsPu",&nEvent.ZbCHS3010_LeadingJetIsPu,"ZbCHS3010_LeadingJetIsPu/F");
+  myTree->Branch("ZbCHS3010_SubLeadingJetIsPu",&nEvent.ZbCHS3010_SubLeadingJetIsPu,"ZbCHS3010_SubLeadingJetIsPu/F");
+  
+  myTree->Branch("ZbCHS1010_LeadingJetIsPu",&nEvent.ZbCHS1010_LeadingJetIsPu,"ZbCHS1010_LeadingJetIsPu/F");
+  myTree->Branch("ZbCHS1010_SubLeadingJetIsPu",&nEvent.ZbCHS1010_SubLeadingJetIsPu,"ZbCHS1010_SubLeadingJetIsPu/F");
+
+  myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtT,"ZbCHS3010_BTagWgtT/O");
+  myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtT,"ZbCHS1010_BTagWgtT/O");
+  
+  myTree->Branch("ZbCHS3010_BTagWgtTUp",&nEvent.ZbCHS3010_BTagWgtTUp,"ZbCHS3010_BTagWgtTUp/O");
+  myTree->Branch("ZbCHS1010_BTagWgtTUp",&nEvent.ZbCHS1010_BTagWgtTUp,"ZbCHS1010_BTagWgtTUp/O");
   
   myTree->Branch("ZbCHS3010_BTagWgtTDown",&nEvent.ZbCHS3010_BTagWgtTDown,"ZbCHS3010_BTagWgtTDown/F");
   myTree->Branch("ZbCHS1010_BTagWgtTDown",&nEvent.ZbCHS1010_BTagWgtTDown,"ZbCHS1010_BTagWgtTDown/F");
@@ -2466,9 +2487,12 @@ void JZBAnalysis::Analyze() {
 	  nEvent.ZbCHS3010_BTagWgtL     = GetBWeight("Loose",abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
 	  nEvent.ZbCHS3010_BTagWgtLDown = nEvent.ZbCHS3010_BTagWgtL-Uncert;
 	  nEvent.ZbCHS3010_BTagWgtLUp   = nEvent.ZbCHS3010_BTagWgtL+Uncert;
+	  
+	  nEvent.ZbCHS3010_LeadingJetIsPu=IsPUJet(jpt,jeta,jphi);
 	}
-	
+
 	if(nEvent.ZbCHS3010_pfJetGoodNum==1) {
+	  nEvent.ZbCHS3010_SubLeadingJetIsPu=IsPUJet(jpt,jeta,jphi);
 	  if(smeared_jpt>0) {
 	    nEvent.ZbCHS3010_alphaUp = smeared_jpt;
 	    nEvent.ZbCHS3010_alphaDown = jpt*jpt/smeared_jpt;
@@ -2502,9 +2526,12 @@ void JZBAnalysis::Analyze() {
 	  nEvent.ZbCHS1010_BTagWgtL     = GetBWeight("Loose",abs(fTR->PFCHSJFlavour[i]), jpt, abs(jeta),Uncert);
 	  nEvent.ZbCHS1010_BTagWgtLDown = nEvent.ZbCHS1010_BTagWgtL - Uncert;
 	  nEvent.ZbCHS1010_BTagWgtLUp   = nEvent.ZbCHS1010_BTagWgtL + Uncert;
+	  
+	  nEvent.ZbCHS1010_LeadingJetIsPu=IsPUJet(jpt,jeta,jphi);
 	}
 	  
 	if(nEvent.ZbCHS1010_pfJetGoodNum==1) {
+	  nEvent.ZbCHS1010_SubLeadingJetIsPu=IsPUJet(jpt,jeta,jphi);
 	  if(smeared_jpt>0) {
 	    nEvent.ZbCHS1010_alphaUp = smeared_jpt;
 	    nEvent.ZbCHS1010_alphaDown = jpt*jpt/smeared_jpt;
