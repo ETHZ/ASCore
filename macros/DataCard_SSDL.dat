@@ -6,24 +6,24 @@
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Data
-DoubleMu1		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012A-13Jul2012-v1-AOD.root				0	0
-DoubleMu1a		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012A-recover-06Aug2012-v1.root			0	0
-DoubleMu2		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012B-13Jul2012-v4-AOD/				0	0
-DoubleMu3		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012C-24Aug2012-v1-AOD-complete.root			0	0
-DoubleMu4		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012C-PromptReco-v2-AOD-complete/			0	0
-DoubleMu5		folguera/SSDLTrees/2012/Dec14/DoubleMu-Run2012D-PromptReco-v1-2/				0	0
-DoubleEle1		folguera/SSDLTrees/2012/Dec14//DoubleElectron_Run2012A-13Jul2012-v1_AOD.root			0	1
-DoubleEle1a		folguera/SSDLTrees/2012/Dec14/DoubleElectron-Run2012A-recover-06Aug2012-v1.root			0	1
-DoubleEle2		folguera/SSDLTrees/2012/Dec14/DoubleElectron_Run2012B-13Jul2012-v1_AOD/				0	1
-DoubleEle3		folguera/SSDLTrees/2012/Dec14/DoubleElectron-Run2012C-24Aug2012-v1-AOD-complete.root		0	1
-DoubleEle4		folguera/SSDLTrees/2012/Dec14/DoubleElectron-Run2012C-PromptReco-v2-AOD-complete/		0	1
-DoubleEle5		folguera/SSDLTrees/2012/Dec14/DoubleElectron-Run2012D-PromptReco-v1-3/				0	1
-MuEG1			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012A-13Jul2012-v1.root					0	2
-MuEG1a			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012A-recover-06Aug2012-v1.root				0	2
-MuEG2			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012B-13Jul2012-v1/					0	2
-MuEG3			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012C-24Aug2012-v1-AOD-complete.root			0	2
-MuEG4			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012C-PromptReco-v2-AOD-full/				0	2
-MuEG5			folguera/SSDLTrees/2012/Dec14/MuEG-Run2012D-PromptReco-v1-2/					0	2
+DoubleMu1		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012A-13Jul2012-v1-AOD.root				0	0
+DoubleMu1a		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012A-recover-06Aug2012-v1.root			0	0
+DoubleMu2		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012B-13Jul2012-v4-AOD/				0	0
+DoubleMu3		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012C-24Aug2012-v1-AOD-complete.root			0	0
+DoubleMu4		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012C-PromptReco-v2-AOD-complete/			0	0
+DoubleMu5		folguera/SSDLTrees/2012/Dec18/DoubleMu-Run2012D-PromptReco-v1-2/				0	0
+DoubleEle1		folguera/SSDLTrees/2012/Dec18/DoubleElectron_Run2012A-13Jul2012-v1_AOD.root			0	1
+DoubleEle1a		folguera/SSDLTrees/2012/Dec18/DoubleElectron-Run2012A-recover-06Aug2012-v1.root			0	1
+DoubleEle2		folguera/SSDLTrees/2012/Dec18/DoubleElectron_Run2012B-13Jul2012-v1_AOD/				0	1
+DoubleEle3		folguera/SSDLTrees/2012/Dec18/DoubleElectron-Run2012C-24Aug2012-v1-AOD-complete.root		0	1
+DoubleEle4		folguera/SSDLTrees/2012/Dec18/DoubleElectron-Run2012C-PromptReco-v2-AOD-complete/		0	1
+DoubleEle5		folguera/SSDLTrees/2012/Dec18/DoubleElectron-Run2012D-PromptReco-v1-3/				0	1
+MuEG1			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012A-13Jul2012-v1.root					0	2
+MuEG1a			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012A-recover-06Aug2012-v1.root				0	2
+MuEG2			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012B-13Jul2012-v1/					0	2
+MuEG3			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012C-24Aug2012-v1-AOD-complete.root			0	2
+MuEG4			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012C-PromptReco-v2-AOD-full/				0	2
+MuEG5			folguera/SSDLTrees/2012/Dec18/MuEG-Run2012D-PromptReco-v1-2/					0	2
 ####################################################################################################################
 # Top and EWK
 TTJets			mdunser/SSDLTrees/2012/Nov22/MC/TT-CT10-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1/			1	-1	225.197
