@@ -57,7 +57,7 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 #options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
-options.files= 'file:////shome/mdunser/scripts/DoubleMu_Run2012D.root'
+options.files= 'file:////scratch/mdunser/files/DoubleMu_Run2012D.root'
 #options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
@@ -78,16 +78,20 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
-	process.GlobalTag.globaltag = "GR_P_V42_AN2::All" ## Global Tag for Run2012D prompt reco
-    # CMSSW_5_3
-    ## process.GlobalTag.globaltag = "FT_R_53_V6::All" # For Jul13 ReReco of 2012A+B
-    ### GLOBAL TAG FOR 2012C v1 and v2
-    #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
-    # CMSSW_5_2
-    #process.GlobalTag.globaltag = "GR_P_V39_AN1"
+	process.GlobalTag.globaltag = "FT_P_V42_AN3::All"
+
+## The following are the Global Tags for 2012 datataking. Processing with 536 is required.
+## 2012A,B   July13	   FT_53_V6_AN3:All
+## 2012A,B   Aug06 	   FT_53_V6C_AN3:All
+## 2012B     July13    FT_53_V6C_AN3:All
+## 2012Cv1   Aug24     FT53_V10A_AN3:All
+## 2012Cv2   prompt    FT_P_V42C_AN3:All
+## 2012D     prompt    FT_P_V42_AN3:All
+## see this twiki for more details:
+## https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
+
 else:
-    # CMSSW_5_2_X:
-    process.GlobalTag.globaltag = "START53_V7A::All"
+    process.GlobalTag.globaltag = "START53_V7G::All"
 
 
 ### Input/Output ###############################################################
