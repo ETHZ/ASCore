@@ -53,6 +53,11 @@ options.register ('perEvtMvaWeights',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Input weights for vertexing perEvt MVA")
+options.register ('GlobalTag',
+                  '',
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Global tag (if unspecified, use config. defaults)")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
@@ -66,6 +71,8 @@ options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be
 options.parseArguments()
 options.output='NTupleProducer_53X_'+options.runon+'.root'
 
+print options
+
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
 # to check what cff to use
@@ -76,22 +83,23 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 # try this in the future instead of a global tag. still gives some errors at the moment (apr17)
 #from Configuration.AlCa.autoCond import autoCond
 #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
-if options.runon=='data':
-#https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
-	process.GlobalTag.globaltag = "FT_P_V42_AN3::All"
-
-## The following are the Global Tags for 2012 datataking. Processing with 536 is required.
-## 2012A,B   July13	   FT_53_V6_AN3:All
-## 2012A,B   Aug06 	   FT_53_V6C_AN3:All
-## 2012B     July13    FT_53_V6C_AN3:All
-## 2012Cv1   Aug24     FT53_V10A_AN3:All
-## 2012Cv2   prompt    FT_P_V42C_AN3:All
-## 2012D     prompt    FT_P_V42_AN3:All
-## see this twiki for more details:
-## https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
-
+if options.GlobalTag!='':
+   process.GlobalTag.globaltag = options.GlobalTag
 else:
-    process.GlobalTag.globaltag = "START53_V7G::All"
+   if options.runon=='data':
+       process.GlobalTag.globaltag = "FT_P_V42_AN3::All" ## Global Tag for Run2012D prompt reco
+   # The following are the Global Tags for 2012 datataking. Processing with 536 is required.
+   # 2012A,B   July13        FT_53_V6_AN3:All
+   # 2012A,B   Aug06         FT_53_V6C_AN3:All
+   # 2012B     July13    FT_53_V6C_AN3:All
+   # 2012Cv1   Aug24     FT53_V10A_AN3:All
+   # 2012Cv2   prompt    FT_P_V42C_AN3:All
+   # 2012D     prompt    FT_P_V42_AN3:All
+   # see this twiki for more details:
+   # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
+   else:
+       # CMSSW_5_2_X:
+       process.GlobalTag.globaltag = "START53_V7G::All"
 
 
 ### Input/Output ###############################################################
