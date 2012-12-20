@@ -71,8 +71,6 @@ options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be
 options.parseArguments()
 options.output='NTupleProducer_53X_'+options.runon+'.root'
 
-print options
-
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
 # to check what cff to use
