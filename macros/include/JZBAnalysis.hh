@@ -66,6 +66,7 @@ public:
   float GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta, float &Uncert);
   float smearedJetPt(float pt, float eta, float phi);
   int FindGenJetIndex(float jpt, float jeta, float jphi);
+  bool IsThisDY(vector<string>);
   string outputFileName_; // public name of the output file name
   
 
@@ -98,6 +99,7 @@ private:
   bool fdoGenInfo;
   bool fmakeSmall;
   int fFile;
+  bool fIsDY;
 
   TFile *CSVT_CorrectionFile;
   TFile *CSVM_CorrectionFile;
