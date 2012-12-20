@@ -90,8 +90,8 @@ else:
        process.GlobalTag.globaltag = "FT_P_V42_AN3::All" ## Global Tag for Run2012D prompt reco
    # The following are the Global Tags for 2012 datataking. Processing with 536 is required.
    # 2012A,B   July13        FT_53_V6_AN3:All
-   # 2012A,B   Aug06         FT_53_V6C_AN3:All
-   # 2012B     July13    FT_53_V6C_AN3:All
+   # 2012A,B   Aug06         FT_53_V6C_AN3:All (or FT_53_V6_AN3: difference only for low PU runs)
+   # 2012B     July13    FT_53_V6C_AN3:All (or FT_53_V6_AN3: difference only for low PU runs)
    # 2012Cv1   Aug24     FT53_V10A_AN3:All
    # 2012Cv2   prompt    FT_P_V42C_AN3:All
    # 2012D     prompt    FT_P_V42_AN3:All
