@@ -65,7 +65,7 @@ analyze = cms.EDFilter('NTupleProducer',
 	sel_minelpt       = cms.double(5.0),
 	sel_maxeleta      = cms.double(2.5),
 	# Jets:
-	sel_mincorjpt     = cms.double(10.0),
+	sel_mincorjpt     = cms.double(15.0),
 	sel_minrawjpt     = cms.double(0.0),
 	sel_maxjeta       = cms.double(10.0),
 	sel_minjemfrac    = cms.double(0.0),
