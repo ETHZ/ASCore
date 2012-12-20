@@ -390,7 +390,7 @@ def join_directory(path,filelist,username) :
 		cleanpath=cleanpath[0:len(cleanpath)-2]
 	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root "
 	for item in filelist:
-		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/ntuples/"+item
+		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/ProcessedTrees/"+item+" /scratch/"+username+"/ntuples/"+item
 		commands.getstatusoutput(copycommand)
 		fusecommand=fusecommand+" /scratch/"+username+"/ntuples/"+item
 	print commands.getoutput(fusecommand)
