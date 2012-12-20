@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.33 2012/09/14 07:06:02 pnef Exp $
+// $Id: NTupleProducer.h,v 1.114.2.34 2012/12/15 18:55:22 peruzzi Exp $
 //
 //
 
@@ -581,6 +581,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTMuIsGlobalMuon;
   std::auto_ptr<std::vector<int> >  fTMuIsTrackerMuon;
   std::auto_ptr<std::vector<int> >  fTMuIsPFMuon;
+  std::auto_ptr<std::vector<int> >  fTMuIsStandaloneMuon;
   std::auto_ptr<std::vector<float> >  fTMuPx;
   std::auto_ptr<std::vector<float> >  fTMuPy;
   std::auto_ptr<std::vector<float> >  fTMuPz;

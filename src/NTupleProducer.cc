@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.39 2012/09/14 07:06:01 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.40 2012/12/15 18:55:23 peruzzi Exp $
 //
 //
 
@@ -1230,6 +1230,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIsGlobalMuon->push_back( muon.isGlobalMuon() ? 1:0 );
     fTMuIsTrackerMuon->push_back( muon.isTrackerMuon() ? 1:0 );
     fTMuIsPFMuon->push_back( muon.isPFMuon() ? 1:0);
+    fTMuIsStandaloneMuon->push_back( muon.isStandAloneMuon() ? 1:0 );
 
     // Combined methods for Global and Tracker muons:
     fTMuPx->push_back( muon.px() );
@@ -3820,6 +3821,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("MuIsGlobalMuon");
   produces<std::vector<int> >("MuIsTrackerMuon");
   produces<std::vector<int> >("MuIsPFMuon");
+  produces<std::vector<int> >("MuIsStandaloneMuon");
   produces<std::vector<float> >("MuPx");
   produces<std::vector<float> >("MuPy");
   produces<std::vector<float> >("MuPz");
@@ -4564,6 +4566,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIsGlobalMuon.reset(new std::vector<int> );
   fTMuIsTrackerMuon.reset(new std::vector<int> );
   fTMuIsPFMuon.reset(new std::vector<int> );
+  fTMuIsStandaloneMuon.reset(new std::vector<int> );
   fTMuPx.reset(new std::vector<float> );
   fTMuPy.reset(new std::vector<float> );
   fTMuPz.reset(new std::vector<float> );
@@ -5376,6 +5379,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIsGlobalMuon, "MuIsGlobalMuon");
   event.put(fTMuIsTrackerMuon, "MuIsTrackerMuon");
   event.put(fTMuIsPFMuon, "MuIsPFMuon");
+  event.put(fTMuIsStandaloneMuon, "MuIsStandaloneMuon");
   event.put(fTMuPx, "MuPx");
   event.put(fTMuPy, "MuPy");
   event.put(fTMuPz, "MuPz");
