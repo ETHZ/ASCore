@@ -44,14 +44,14 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const float gMaxJetEta  = 2.5;
-static const float gMuMaxIso   = 0.1;
-static const float gElMaxIso   = 0.1;
-static const float gMinJetPt   = 40.;
-static const bool  gApplyZVeto = true;
+static const float gMaxJetEta  = 2.4;
+static const float gMuMaxIso   = 0.05;
+static const float gElMaxIso   = 0.05;
+static const float gMinJetPt   = 20.;
+static const bool  gApplyZVeto = false;
 static bool  gSmearMET         = false;
 
-static const bool gDoSystStudies = false;
+static const bool gDoSystStudies = true;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -75,7 +75,7 @@ float SSDLDumper::Region::minEl2pt  [SSDLDumper::gNREGIONS] = {      10.,       
 int   SSDLDumper::Region::app3rdVet [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            1 ,            1 ,            0 ,              1 ,             0 ,              0 ,          0 ,            0 ,            0 ,            0 ,            0 ,            0 ,            0 ,            0 };
 int   SSDLDumper::Region::vetoTTZSel[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             0 ,              0 ,          1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 };
 
-// For latest EWKino minitrees
+// // For latest EWKino minitrees
 // TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET50", "HT0MET120", "HT0MET200", "HT0MET1203V", "HT0MET2003V", "HT0MET120JV", "HT0MET120JV3V", "TTbarWPresel", "TTbarWSelIncl", "TTbarWSel", "TTbarWSelJU", "TTbarWSelJD", "TTbarWSelJS", "TTbarWSelBU", "TTbarWSelBD", "TTbarWSelLU", "TTbarWSelLD"};
 // float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,         0.,          0.,          0.,            0.,            0.,            0.,              0.,             0.,            100.,        100.,          100.,          100.,          100.,          100.,          100.,          100.,          100.};
 // float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,      7000.,       7000.,       7000.,         7000.,         7000.,           10.,             10.,          7000.,           7000.,       7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.};
@@ -1231,6 +1231,13 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if( isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
+		if(S->datamc > 0){
+			if( isPromptMuon(ind1)&& isPromptMuon(ind2)) fSETree_PFCat = 0;
+			if( isPromptMuon(ind1)&&!isPromptMuon(ind2)) fSETree_PFCat = 1;
+			if(!isPromptMuon(ind1)&& isPromptMuon(ind2)) fSETree_PFCat = 2;
+			if(!isPromptMuon(ind1)&&!isPromptMuon(ind2)) fSETree_PFCat = 3;
+		}
+		// cout << Form("GenID = %8d|%8d : GenMID = %8d|%8d : GenGMID = %8d|%8d", MuGenID[ind1], MuGenID[ind2], MuGenMID[ind1], MuGenMID[ind2], MuGenGMID[ind1], MuGenGMID[ind2]) << endl;
 		fSigEv_Tree->Fill();
 
 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
@@ -1276,6 +1283,12 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if( isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+		if(S->datamc > 0){
+			if( isPromptMuon(ind1)&& isPromptElectron(ind2)) fSETree_PFCat = 0;
+			if( isPromptMuon(ind1)&&!isPromptElectron(ind2)) fSETree_PFCat = 1;
+			if(!isPromptMuon(ind1)&& isPromptElectron(ind2)) fSETree_PFCat = 2;
+			if(!isPromptMuon(ind1)&&!isPromptElectron(ind2)) fSETree_PFCat = 3;
+		}
 		fSigEv_Tree->Fill();
 
 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
@@ -1321,6 +1334,13 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
 		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+		if(S->datamc > 0){
+			if( isPromptElectron(ind1)&& isPromptElectron(ind2)) fSETree_PFCat = 0;
+			if( isPromptElectron(ind1)&&!isPromptElectron(ind2)) fSETree_PFCat = 1;
+			if(!isPromptElectron(ind1)&& isPromptElectron(ind2)) fSETree_PFCat = 2;
+			if(!isPromptElectron(ind1)&&!isPromptElectron(ind2)) fSETree_PFCat = 3;
+		}
+		// cout << Form("GenID = %8d|%8d : GenMID = %8d|%8d : GenGMID = %8d|%8d", ElGenID[ind1], ElGenID[ind2], ElGenMID[ind1], ElGenMID[ind2], ElGenGMID[ind1], ElGenGMID[ind2]) << endl;
 		fSigEv_Tree->Fill();
 
 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
@@ -2011,6 +2031,7 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("Flavor",      &fSETree_Flavor  , "Flavor/I");
 	fSigEv_Tree->Branch("Charge",      &fSETree_Charge  , "Charge/I");
 	fSigEv_Tree->Branch("TLCat",       &fSETree_TLCat   , "TLCat/I");
+	fSigEv_Tree->Branch("PFCat",       &fSETree_PFCat   , "PFCat/I");
 	fSigEv_Tree->Branch("Pass3rdVeto", &fSETree_3rdVeto , "Pass3rdVeto/I");
 	fSigEv_Tree->Branch("PassTTZSel",  &fSETree_ttZSel  , "PassTTZSel/I");
 	fSigEv_Tree->Branch("PassZVeto",   &fSETree_ZVeto   , "PassZVeto/I");
@@ -2043,6 +2064,7 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_Flavor   = -1;
 	fSETree_Charge   = -99;
 	fSETree_TLCat    = -1;
+	fSETree_PFCat    = -1;
 	fSETree_ZVeto    = -1;
 	fSETree_3rdVeto  = -1;
 	fSETree_ttZSel   = -1;
@@ -3965,7 +3987,7 @@ bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	setHypLepton1(mu1, Muon);
 	setHypLepton2(mu2, Muon);
 
-	if(getMET() > 20.)    return false;
+	if(getMET() > 20.) return false;
 	if(getNJets() < 2) return false;
 	return true;
 }
@@ -3995,7 +4017,7 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	setHypLepton1(el1, Elec);
 	setHypLepton2(el2, Elec);
 
-	if(getMET() > 20.)    return false;
+	if(getMET() > 20.) return false;
 	if(getNJets() < 2) return false;
 	return true;
 }
@@ -4319,6 +4341,9 @@ bool SSDLDumper::isPromptMuon(int muon){
 	// Mother is a tau from W or Z
 	if(abs(MuGenMID[muon]) == 15 && MuGenGMType[muon] == 4) return true;
 	
+	// Mother is a top
+	if(abs(MuGenMID[muon]) == 6) return true;
+	
 	return false;
 }
 bool SSDLDumper::isChargeMatchedMuon(int mu){
@@ -4469,6 +4494,9 @@ bool SSDLDumper::isFakeElectron(int ele){
 bool SSDLDumper::isPromptElectron(int ele){
 	if(isLooseElectron(ele) == false) return false;
 
+	// Matched to electron
+	if(abs(ElGenID[ele]) != 11) return false;
+
 	// Mother or Grandmother is a SM hadron:
 	if(ElGenMType[ele] > 10 || ElGenGMType[ele] > 10) return false;
 
@@ -4481,6 +4509,9 @@ bool SSDLDumper::isPromptElectron(int ele){
 
 	// Mother is a tau from W or Z
 	if(abs(ElGenMID[ele]) == 15 && ElGenGMType[ele] == 4) return true;
+	
+	// Mother is a top
+	if(abs(ElGenMID[ele]) == 6) return true;
 	
 	return false;
 }

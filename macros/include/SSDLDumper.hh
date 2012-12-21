@@ -77,7 +77,7 @@ public:
 		TTJets, TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
 		GVJets, WW, WZ, ZZ, 
-		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		TTbarW, TTbarZ, TTbarG, TTbarH, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		// Exclude LM samples from datacard and here for running on Jun20/Oct23 ttV
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
@@ -377,6 +377,7 @@ public:
 			if( (sname) == "TTbarW"    ||
 			    (sname) == "TTbarZ"    ||
 			    (sname) == "TTbarG"    ||
+			    (sname) == "TTbarH"    ||
 			    (sname) == "DPSWW"     ||
 			    (sname) == "WWZ"       ||
 			    (sname) == "WZZ"       ||
@@ -409,14 +410,15 @@ public:
 			if(sname == "TTbarW")                           return 10;
 			if(sname == "TTbarZ")                           return 11;
 			if(sname == "TTbarG")                           return 12;
-			if(sname == "W+W+" || sname == "W-W-")          return 13;
+			if(sname == "TTbarH")                           return 13;
+			if(sname == "W+W+" || sname == "W-W-")          return 14;
 			if(sname == "WWZ" ||                                     
 			   sname == "WZZ" ||                                     
 			   sname == "WWG" ||                                     
 			   sname == "ZZZ" ||                                     
-			   sname == "WWW" )                             return 14;
-			if(sname == "DPSWW")                            return 15;
-			if(sname.Contains("QCD") || sname == "MuEnr10") return 16;
+			   sname == "WWW" )                             return 15;
+			if(sname == "DPSWW")                            return 16;
+			if(sname.Contains("QCD") || sname == "MuEnr10") return 17;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
@@ -436,16 +438,17 @@ public:
 			if(proc == 10) return "$t\\bar{t}$W";
 			if(proc == 11) return "$t\\bar{t}$Z";
 			if(proc == 12) return "$t\\bar{t}\\gamma$";
-			if(proc == 13) return "W$^{\\pm}$W$^{\\pm}$";
-			if(proc == 14) return "Tri-Boson";
-			if(proc == 15) return "DPS (2$\\times$ W+jets)";
-			if(proc == 16) return "QCD";
+			if(proc == 13) return "$t\\bar{t}$H";
+			if(proc == 14) return "W$^{\\pm}$W$^{\\pm}$";
+			if(proc == 15) return "Tri-Boson";
+			if(proc == 16) return "DPS (2$\\times$ W+jets)";
+			if(proc == 17) return "QCD";
 			else {
 				cout << "SSDLDumper::Sample::getProcName() ==> ERROR: "<< proc << " has no defined process name!" << endl;
 				return "";
 			}
 		}
-		inline int getNProcs(){return 17;} // make sure this number corresponds to the number of
+		inline int getNProcs(){return 18;} // make sure this number corresponds to the number of
 		                                   // processes define in the previous method
 		TTree* getTree(){
 			file = TFile::Open(location);
@@ -733,6 +736,7 @@ public:
 	int         fSETree_Flavor; // mm(0), em(1), ee(2)
 	int         fSETree_Charge;
 	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
+	int         fSETree_PFCat; // PF category: PP(0), PF(1), FP(2), FF(3)
 	int         fSETree_ZVeto;   // passes Z veto
 	int         fSETree_3rdVeto; // passes 3rd lepton veto
 	int         fSETree_ttZSel;  // passes ttz sel
