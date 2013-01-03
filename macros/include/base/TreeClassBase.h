@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Oct 23 14:54:59 2012 by ROOT version 5.27/06b
+// Thu Jan  3 11:24:49 2013 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-15rho/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_84_1_tlU.root
+// found on file: /scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -426,6 +426,9 @@ public :
    Float_t         Pho_ChargedHadronIso[50];   //[NPhotons]
    Float_t         Pho_NeutralHadronIso[50];   //[NPhotons]
    Float_t         Pho_PhotonIso[50];   //[NPhotons]
+   Float_t         PhoSCRemovalPFIsoCharged[50];   //[NPhotons]
+   Float_t         PhoSCRemovalPFIsoNeutral[50];   //[NPhotons]
+   Float_t         PhoSCRemovalPFIsoPhoton[50];   //[NPhotons]
    Int_t           Pho_isPFPhoton[50];   //[NPhotons]
    Int_t           Pho_isPFElectron[50];   //[NPhotons]
    Int_t           PhotSCindex[50];   //[NPhotons]
@@ -1392,6 +1395,9 @@ public :
    TBranch        *b_Pho_ChargedHadronIso;   //!
    TBranch        *b_Pho_NeutralHadronIso;   //!
    TBranch        *b_Pho_PhotonIso;   //!
+   TBranch        *b_PhoSCRemovalPFIsoCharged;   //!
+   TBranch        *b_PhoSCRemovalPFIsoNeutral;   //!
+   TBranch        *b_PhoSCRemovalPFIsoPhoton;   //!
    TBranch        *b_Pho_isPFPhoton;   //!
    TBranch        *b_Pho_isPFElectron;   //!
    TBranch        *b_PhotSCindex;   //!
@@ -1968,9 +1974,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-15rho/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_84_1_tlU.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/mc/V02-06-15rho/GJet_Pt_20_doubleEMEnriched_TuneZ2_7TeV_pythia6_Fall11_PU_S6_START42_V14B_v1_AODSIM/NTupleProducer_42X_MC_84_1_tlU.root");
+         f = new TFile("/scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -2429,6 +2435,9 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Pho_ChargedHadronIso", Pho_ChargedHadronIso, &b_Pho_ChargedHadronIso);
    fChain->SetBranchAddress("Pho_NeutralHadronIso", Pho_NeutralHadronIso, &b_Pho_NeutralHadronIso);
    fChain->SetBranchAddress("Pho_PhotonIso", Pho_PhotonIso, &b_Pho_PhotonIso);
+   fChain->SetBranchAddress("PhoSCRemovalPFIsoCharged", PhoSCRemovalPFIsoCharged, &b_PhoSCRemovalPFIsoCharged);
+   fChain->SetBranchAddress("PhoSCRemovalPFIsoNeutral", PhoSCRemovalPFIsoNeutral, &b_PhoSCRemovalPFIsoNeutral);
+   fChain->SetBranchAddress("PhoSCRemovalPFIsoPhoton", PhoSCRemovalPFIsoPhoton, &b_PhoSCRemovalPFIsoPhoton);
    fChain->SetBranchAddress("Pho_isPFPhoton", Pho_isPFPhoton, &b_Pho_isPFPhoton);
    fChain->SetBranchAddress("Pho_isPFElectron", Pho_isPFElectron, &b_Pho_isPFElectron);
    fChain->SetBranchAddress("PhotSCindex", PhotSCindex, &b_PhotSCindex);
@@ -2683,39 +2692,39 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PfMu2MaxLepExc", &PfMu2MaxLepExc, &b_PfMu2MaxLepExc);
    fChain->SetBranchAddress("PfMu2NObjsTot", &PfMu2NObjsTot, &b_PfMu2NObjsTot);
    fChain->SetBranchAddress("PfMu2NObjs", &PfMu2NObjs, &b_PfMu2NObjs);
-   fChain->SetBranchAddress("PfMu2Px", &PfMu2Px, &b_PfMu2Px);
-   fChain->SetBranchAddress("PfMu2Py", &PfMu2Py, &b_PfMu2Py);
-   fChain->SetBranchAddress("PfMu2Pz", &PfMu2Pz, &b_PfMu2Pz);
-   fChain->SetBranchAddress("PfMu2Pt", &PfMu2Pt, &b_PfMu2Pt);
-   fChain->SetBranchAddress("PfMu2E", &PfMu2E, &b_PfMu2E);
-   fChain->SetBranchAddress("PfMu2Et", &PfMu2Et, &b_PfMu2Et);
-   fChain->SetBranchAddress("PfMu2Eta", &PfMu2Eta, &b_PfMu2Eta);
-   fChain->SetBranchAddress("PfMu2Phi", &PfMu2Phi, &b_PfMu2Phi);
-   fChain->SetBranchAddress("PfMu2Charge", &PfMu2Charge, &b_PfMu2Charge);
-   fChain->SetBranchAddress("PfMu2ParticleIso", &PfMu2ParticleIso, &b_PfMu2ParticleIso);
-   fChain->SetBranchAddress("PfMu2ChargedHadronIso", &PfMu2ChargedHadronIso, &b_PfMu2ChargedHadronIso);
-   fChain->SetBranchAddress("PfMu2NeutralHadronIso", &PfMu2NeutralHadronIso, &b_PfMu2NeutralHadronIso);
-   fChain->SetBranchAddress("PfMu2PhotonIso", &PfMu2PhotonIso, &b_PfMu2PhotonIso);
-   fChain->SetBranchAddress("PfMu2PtErr", &PfMu2PtErr, &b_PfMu2PtErr);
-   fChain->SetBranchAddress("PfMu2NMatches", &PfMu2NMatches, &b_PfMu2NMatches);
+   fChain->SetBranchAddress("PfMu2Px", PfMu2Px, &b_PfMu2Px);
+   fChain->SetBranchAddress("PfMu2Py", PfMu2Py, &b_PfMu2Py);
+   fChain->SetBranchAddress("PfMu2Pz", PfMu2Pz, &b_PfMu2Pz);
+   fChain->SetBranchAddress("PfMu2Pt", PfMu2Pt, &b_PfMu2Pt);
+   fChain->SetBranchAddress("PfMu2E", PfMu2E, &b_PfMu2E);
+   fChain->SetBranchAddress("PfMu2Et", PfMu2Et, &b_PfMu2Et);
+   fChain->SetBranchAddress("PfMu2Eta", PfMu2Eta, &b_PfMu2Eta);
+   fChain->SetBranchAddress("PfMu2Phi", PfMu2Phi, &b_PfMu2Phi);
+   fChain->SetBranchAddress("PfMu2Charge", PfMu2Charge, &b_PfMu2Charge);
+   fChain->SetBranchAddress("PfMu2ParticleIso", PfMu2ParticleIso, &b_PfMu2ParticleIso);
+   fChain->SetBranchAddress("PfMu2ChargedHadronIso", PfMu2ChargedHadronIso, &b_PfMu2ChargedHadronIso);
+   fChain->SetBranchAddress("PfMu2NeutralHadronIso", PfMu2NeutralHadronIso, &b_PfMu2NeutralHadronIso);
+   fChain->SetBranchAddress("PfMu2PhotonIso", PfMu2PhotonIso, &b_PfMu2PhotonIso);
+   fChain->SetBranchAddress("PfMu2PtErr", PfMu2PtErr, &b_PfMu2PtErr);
+   fChain->SetBranchAddress("PfMu2NMatches", PfMu2NMatches, &b_PfMu2NMatches);
    fChain->SetBranchAddress("PfMu3MaxLepExc", &PfMu3MaxLepExc, &b_PfMu3MaxLepExc);
    fChain->SetBranchAddress("PfMu3NObjsTot", &PfMu3NObjsTot, &b_PfMu3NObjsTot);
    fChain->SetBranchAddress("PfMu3NObjs", &PfMu3NObjs, &b_PfMu3NObjs);
-   fChain->SetBranchAddress("PfMu3Px", &PfMu3Px, &b_PfMu3Px);
-   fChain->SetBranchAddress("PfMu3Py", &PfMu3Py, &b_PfMu3Py);
-   fChain->SetBranchAddress("PfMu3Pz", &PfMu3Pz, &b_PfMu3Pz);
-   fChain->SetBranchAddress("PfMu3Pt", &PfMu3Pt, &b_PfMu3Pt);
-   fChain->SetBranchAddress("PfMu3E", &PfMu3E, &b_PfMu3E);
-   fChain->SetBranchAddress("PfMu3Et", &PfMu3Et, &b_PfMu3Et);
-   fChain->SetBranchAddress("PfMu3Eta", &PfMu3Eta, &b_PfMu3Eta);
-   fChain->SetBranchAddress("PfMu3Phi", &PfMu3Phi, &b_PfMu3Phi);
-   fChain->SetBranchAddress("PfMu3Charge", &PfMu3Charge, &b_PfMu3Charge);
-   fChain->SetBranchAddress("PfMu3ParticleIso", &PfMu3ParticleIso, &b_PfMu3ParticleIso);
-   fChain->SetBranchAddress("PfMu3ChargedHadronIso", &PfMu3ChargedHadronIso, &b_PfMu3ChargedHadronIso);
-   fChain->SetBranchAddress("PfMu3NeutralHadronIso", &PfMu3NeutralHadronIso, &b_PfMu3NeutralHadronIso);
-   fChain->SetBranchAddress("PfMu3PhotonIso", &PfMu3PhotonIso, &b_PfMu3PhotonIso);
-   fChain->SetBranchAddress("PfMu3PtErr", &PfMu3PtErr, &b_PfMu3PtErr);
-   fChain->SetBranchAddress("PfMu3NMatches", &PfMu3NMatches, &b_PfMu3NMatches);
+   fChain->SetBranchAddress("PfMu3Px", PfMu3Px, &b_PfMu3Px);
+   fChain->SetBranchAddress("PfMu3Py", PfMu3Py, &b_PfMu3Py);
+   fChain->SetBranchAddress("PfMu3Pz", PfMu3Pz, &b_PfMu3Pz);
+   fChain->SetBranchAddress("PfMu3Pt", PfMu3Pt, &b_PfMu3Pt);
+   fChain->SetBranchAddress("PfMu3E", PfMu3E, &b_PfMu3E);
+   fChain->SetBranchAddress("PfMu3Et", PfMu3Et, &b_PfMu3Et);
+   fChain->SetBranchAddress("PfMu3Eta", PfMu3Eta, &b_PfMu3Eta);
+   fChain->SetBranchAddress("PfMu3Phi", PfMu3Phi, &b_PfMu3Phi);
+   fChain->SetBranchAddress("PfMu3Charge", PfMu3Charge, &b_PfMu3Charge);
+   fChain->SetBranchAddress("PfMu3ParticleIso", PfMu3ParticleIso, &b_PfMu3ParticleIso);
+   fChain->SetBranchAddress("PfMu3ChargedHadronIso", PfMu3ChargedHadronIso, &b_PfMu3ChargedHadronIso);
+   fChain->SetBranchAddress("PfMu3NeutralHadronIso", PfMu3NeutralHadronIso, &b_PfMu3NeutralHadronIso);
+   fChain->SetBranchAddress("PfMu3PhotonIso", PfMu3PhotonIso, &b_PfMu3PhotonIso);
+   fChain->SetBranchAddress("PfMu3PtErr", PfMu3PtErr, &b_PfMu3PtErr);
+   fChain->SetBranchAddress("PfMu3NMatches", PfMu3NMatches, &b_PfMu3NMatches);
    fChain->SetBranchAddress("PfElAntiIsoMaxLepExc", &PfElAntiIsoMaxLepExc, &b_PfElAntiIsoMaxLepExc);
    fChain->SetBranchAddress("PfElAntiIsoNObjsTot", &PfElAntiIsoNObjsTot, &b_PfElAntiIsoNObjsTot);
    fChain->SetBranchAddress("PfElAntiIsoNObjs", &PfElAntiIsoNObjs, &b_PfElAntiIsoNObjs);
