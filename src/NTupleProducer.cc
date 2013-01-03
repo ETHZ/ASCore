@@ -1230,7 +1230,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIsGlobalMuon->push_back( muon.isGlobalMuon() ? 1:0 );
     fTMuIsTrackerMuon->push_back( muon.isTrackerMuon() ? 1:0 );
     fTMuIsPFMuon->push_back( muon.isPFMuon() ? 1:0);
-    fTMuIsStandaloneMuon->push_back( muon.isStandAloneMuon() ? 1:0 );
 
     // Combined methods for Global and Tracker muons:
     fTMuPx->push_back( muon.px() );
@@ -2807,6 +2806,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     }
 
+    vAna->clear();
+
   } // end vertex selection for diphoton events
 
   //       cout << "end vertex selection MVA" << endl;
@@ -3821,7 +3822,6 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("MuIsGlobalMuon");
   produces<std::vector<int> >("MuIsTrackerMuon");
   produces<std::vector<int> >("MuIsPFMuon");
-  produces<std::vector<int> >("MuIsStandaloneMuon");
   produces<std::vector<float> >("MuPx");
   produces<std::vector<float> >("MuPy");
   produces<std::vector<float> >("MuPz");
@@ -4183,11 +4183,11 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ConvChi2Probability");
   produces<std::vector<float> >("ConvEoverP");
   produces<std::vector<float> >("ConvZofPrimVtxFromTrks");
-  //     produces<int>("Ngv");
-  //     produces<std::vector<float> >("gvSumPtHi");
-  //     produces<std::vector<float> >("gvSumPtLo");
-  //     produces<std::vector<int> >("gvNTkHi");
-  //     produces<std::vector<int> >("gvNTkLo");
+  produces<int>("Ngv");
+  produces<std::vector<float> >("gvSumPtHi");
+  produces<std::vector<float> >("gvSumPtLo");
+  produces<std::vector<int> >("gvNTkHi");
+  produces<std::vector<int> >("gvNTkLo");
   produces<int>("NGoodSuperClusters");
   produces<std::vector<float> >("GoodSCEnergy");
   produces<std::vector<float> >("GoodSCEta");
@@ -4566,7 +4566,6 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIsGlobalMuon.reset(new std::vector<int> );
   fTMuIsTrackerMuon.reset(new std::vector<int> );
   fTMuIsPFMuon.reset(new std::vector<int> );
-  fTMuIsStandaloneMuon.reset(new std::vector<int> );
   fTMuPx.reset(new std::vector<float> );
   fTMuPy.reset(new std::vector<float> );
   fTMuPz.reset(new std::vector<float> );
@@ -4931,11 +4930,11 @@ void NTupleProducer::resetProducts( void ) {
   fTConvChi2Probability.reset(new std::vector<float>);
   fTConvEoverP.reset(new std::vector<float>);
   fTConvZofPrimVtxFromTrks.reset(new std::vector<float>);
-  //     fTNgv.reset(new int(0));
-  //     fTgvSumPtHi.reset(new std::vector<float>);
-  //     fTgvSumPtLo.reset(new std::vector<float>);
-  //     fTgvNTkHi.reset(new std::vector<int>);
-  //     fTgvNTkLo.reset(new std::vector<int>);
+  fTNgv.reset(new int(0));
+  fTgvSumPtHi.reset(new std::vector<float>);
+  fTgvSumPtLo.reset(new std::vector<float>);
+  fTgvNTkHi.reset(new std::vector<int>);
+  fTgvNTkLo.reset(new std::vector<int>);
   for (int i=0; i<gMaxNPhotons; i++) {
     pho_conv_vtx[i]=TVector3();
     pho_conv_refitted_momentum[i]=TVector3();
@@ -5379,7 +5378,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIsGlobalMuon, "MuIsGlobalMuon");
   event.put(fTMuIsTrackerMuon, "MuIsTrackerMuon");
   event.put(fTMuIsPFMuon, "MuIsPFMuon");
-  event.put(fTMuIsStandaloneMuon, "MuIsStandaloneMuon");
   event.put(fTMuPx, "MuPx");
   event.put(fTMuPy, "MuPy");
   event.put(fTMuPz, "MuPz");
@@ -5744,11 +5742,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTConvChi2Probability, "ConvChi2Probability");
   event.put(fTConvEoverP, "ConvEoverP");
   event.put(fTConvZofPrimVtxFromTrks, "ConvZofPrimVtxFromTrks");
-  //     event.put(fTNgv, "Ngv");
-  //     event.put(fTgvSumPtHi, "gvSumPtHi");
-  //     event.put(fTgvSumPtLo, "gvSumPtLo");
-  //     event.put(fTgvNTkHi, "gvNTkHi");
-  //     event.put(fTgvNTkLo, "gvNTkLo");
+  event.put(fTNgv, "Ngv");
+  event.put(fTgvSumPtHi, "gvSumPtHi");
+  event.put(fTgvSumPtLo, "gvSumPtLo");
+  event.put(fTgvNTkHi, "gvNTkHi");
+  event.put(fTgvNTkLo, "gvNTkLo");
   event.put(fTNGoodSuperClusters, "NGoodSuperClusters");
   event.put(fTGoodSCEnergy, "GoodSCEnergy");
   event.put(fTGoodSCEta, "GoodSCEta");

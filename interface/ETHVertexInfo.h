@@ -70,6 +70,13 @@ private:
   float * vtxy_;
   float * vtxz_;
 
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
+
+  float vtxx_array[__VTX_AUX_ARRAYS_DIM__];
+  float vtxy_array[__VTX_AUX_ARRAYS_DIM__];
+  float vtxz_array[__VTX_AUX_ARRAYS_DIM__];
+
   int ntracks_;
   float * tkpx_;
   float * tkpy_;
@@ -87,9 +94,6 @@ private:
   std::vector<std::vector<unsigned short> > vtx_std_tkind_;
   std::vector<std::vector<float> > vtx_std_tkweight_;
   int * vtx_std_ntks_;
-
-  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
-  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
   unsigned short vtx_std_tkind_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
   float vtx_std_tkweight_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
