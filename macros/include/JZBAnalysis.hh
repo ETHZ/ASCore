@@ -49,7 +49,8 @@ public:
   const float GetMuonWeight(float eta1, float pt1, float &EffErr);
   const float GetElectronWeight(float eta1, float pt1, float &EffErr);
   const bool IsSoftMuon(const int index);
-  void HasSoftLepton();
+  const float GetL5Correction(const int jindex);
+  void ContainsSoftLepton();
   void IsParticleFromB(int);
   bool IsPUJet(float jpt, float jeta, float jphi);
 //  const int IsJetFromPU(float, float, float);

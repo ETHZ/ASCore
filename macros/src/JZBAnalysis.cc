@@ -1001,13 +1001,13 @@ TH1F *weight_histo;
 
 nanoEvent nEvent;
 
-bool IsLepton(int pdgid) {
+bool IsLepton(const int pdgid) {
   int tid = abs(pdgid);
   if(tid==11||tid==13||tid==15) return true;
   else return false;
 }
 
-bool IsBMeson(int pdgid) {
+bool IsBMeson(const int pdgid) {
   int MesonIDs[99]={511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,20533,535,541,10541,543,10543,20543,545,5101,5103,5201,5203,5301,5303,5401,5403,5503,10113,10213,551,10551,100551,110551,200551,210551,553,10553,20553,30553,100553,110553,120553,130553,200553,210553,220553,300553,9000553,9010553,555,10555,20555,100555,110555,120555,200555,557,100557,5122,5112,5212,5222,5114,5214,5224,5132,5232,5312,5322,5314,5324,5332,5334,5142,5242,5412,5422,5414,5424,5342,5432,5434,5442,5444,5512,5522,5514,5524,5532,5534,5542,5544,5554};
   
   for(int i=0;i<99;i++) {
@@ -1017,7 +1017,7 @@ bool IsBMeson(int pdgid) {
   return false;
 }
 
-void JZBAnalysis::IsParticleFromB(int index) {
+void JZBAnalysis::IsParticleFromB(const int index) {
   if(index<0) return;
   if(fTR->genInfoId[index]==23) return;
   if(IsBMeson(fTR->genInfoId[index])) {
@@ -1031,7 +1031,7 @@ void JZBAnalysis::IsParticleFromB(int index) {
   }
 }
 
-void JZBAnalysis::HasSoftLepton() {
+void JZBAnalysis::ContainsSoftLepton() {
   if(fTR->nGenParticles<1) return;
   for(int i=0;i<fTR->nGenParticles;i++) {
     int thisParticleId = fTR->genInfoId[i];
@@ -1048,16 +1048,16 @@ void JZBAnalysis::HasSoftLepton() {
   }//end of gen particle loop
 }
 
-float GetCoreResolutionScalingFactor(float jeta) {
-  jeta=abs(jeta);
-  if(jeta<=1.1) return 1.07;
-  if(jeta<1.7) return 1.10;
-  if(jeta<2.3) return 1.07;
-  if(jeta<5.0) return 1.18;
+float GetCoreResolutionScalingFactor(const float jeta) {
+  float ajeta=abs(jeta);
+  if(ajeta<=1.1) return 1.07;
+  if(ajeta<1.7) return 1.10;
+  if(ajeta<2.3) return 1.07;
+  if(ajeta<5.0) return 1.18;
   return 1.0; // not defined out here - don't smear
 }
 
-int JZBAnalysis::FindGenJetIndex(float jpt, float jeta, float jphi) {
+int JZBAnalysis::FindGenJetIndex(const float jpt, const float jeta, const float jphi) {
   int matchedindex=-1;
   float mindr=999.99;
   for(int ijet=0;ijet<fTR->NGenJets;ijet++) {
@@ -1073,7 +1073,7 @@ int JZBAnalysis::FindGenJetIndex(float jpt, float jeta, float jphi) {
   return matchedindex;
 }
 
-float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
+float JZBAnalysis::smearedJetPt(const float jpt, const float jeta, const float jphi) {
   //jet resolution oversmearing as described here: 
   //https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
   if(fDataType_!= "mc") return jpt; // if we're dealing with data we don't smear!
@@ -1085,7 +1085,7 @@ float JZBAnalysis::smearedJetPt(float jpt, float jeta, float jphi) {
   return max((float)0.,genPt+c*(jpt-genPt));
 }
 
-bool JZBAnalysis::IsPUJet(float jpt, float jeta, float jphi) {
+bool JZBAnalysis::IsPUJet(const float jpt, const float jeta, const float jphi) {
   if(fDataType_!= "mc") return false; // if we're dealing with data we label all jets as not being PU related
 
   int genIndex = FindGenJetIndex(jpt,jeta,jphi);
@@ -1784,7 +1784,7 @@ const float JZBAnalysis::GetL5Correction(const int jindex) {
   return 1.0;
 }
 
-float JZBAnalysis::GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta, float &Uncert) {
+float JZBAnalysis::GetBWeight(const string WP,const int JetFlavor, const float JetPt, const float JetEta, float &Uncert) {
   Uncert=0.0;
   TH2F *CSV_EfficiencyCorrection;
   TH2F *CSV_EfficiencyCorrectionUncert;
@@ -1880,7 +1880,7 @@ const bool JZBAnalysis::passTriggers( std::vector<std::string>& triggerPaths ) {
 
 }
 
-bool is_neutrino(int code) {
+bool is_neutrino(const int code) {
   if(abs(code)==12) return true; // electron neutrino
   if(abs(code)==14) return true; // muon neutrino
   if(abs(code)==16) return true; // tau neutrino
@@ -1888,7 +1888,7 @@ bool is_neutrino(int code) {
   return false;
 }
 
-bool is_charged_lepton(int code) {
+bool is_charged_lepton(const int code) {
   if(abs(code)==11) return true; // electron
   if(abs(code)==13) return true; // muon
   if(abs(code)==15) return true; // tau
@@ -1966,14 +1966,11 @@ void JZBAnalysis::Analyze() {
 		fdoGenInfo=false;
 		nGenParticles=0;
 	}
-	
-	
-	
 
-	    
-	HasSoftLepton();
-	
-	
+
+	ContainsSoftLepton();
+
+
 	bool wecare=false;
 	for(int i=0;i<nGenParticles&&fdoGenInfo;i++) {
 	  int thisParticleId = fTR->genInfoId[i];
@@ -3264,7 +3261,6 @@ const float JZBAnalysis::GetLeptonWeight(int id1, float pt1, float eta1, int id2
    }*/
 
 }
-
 
 
 
