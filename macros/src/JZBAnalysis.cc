@@ -17,9 +17,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.106 $";
+string sjzbversion="$Revision: 1.70.2.107 $";
 string sjzbinfo="";
 TRandom3 *r;
+TF1 *L5corr_bJ;
+TF1 *L5corr_qJ;
+TF1 *L5corr_cJ;
+TF1 *L5corr_gJ;
+
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
@@ -28,7 +33,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.106 2012/12/19 13:24:50 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.107 2012/12/20 11:03:21 buchmann Exp $
 */
 
 
@@ -338,6 +343,8 @@ public:
   float ZbCHS3010_alpha;
   float ZbCHS3010_alphaUp;
   float ZbCHS3010_alphaDown;
+  float ZbCHS3010_alphaL5;
+  float ZbCHS3010_L5corr;
   
   float ZbCHS1010_alpha;
   float ZbCHS1010_alphaUp;
@@ -837,6 +844,8 @@ void nanoEvent::reset()
   
   //Z+b variables
   ZbCHS3010_alpha=0;
+  ZbCHS3010_alphaL5=0;
+  ZbCHS3010_L5corr=0;
   ZbCHS1010_alpha=0;
   ZbCHS3010_alphaUp=0;
   ZbCHS1010_alphaUp=0;
@@ -1157,6 +1166,15 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(singleElTriggerPaths, "HLT_Ele27_WP80", 0, 20);
   addPath(singleMuTriggerPaths, "HLT_IsoMu24_eta2p1", 0, 20);
 
+  
+  L5corr_bJ = new TF1("L5corr_bJ","[0]+log10((x-[3])/[4])*([1]+[2]*log10((x-[3])/[4]))",10,3650);
+  L5corr_bJ->SetParameters(1.05724,-0.031178,0.009538,6.80258,0.851021); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_bJ_AK5PFchs.txt
+  L5corr_cJ = new TF1("L5corr_cJ","[0]+log10((x-[3])/[4])*([1]+[2]*log10((x-[3])/[4]))",10,3650);
+  L5corr_cJ->SetParameters(0.854123,0.086427,-0.010176,5.72599,0.93306); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_cJ_AK5PFchs.txt
+  L5corr_qJ = new TF1("L5corr_qJ","[0]+log10((x-[3])/[4])*([1]+[2]*log10((x-[3])/[4]))",10,3650);
+  L5corr_qJ->SetParameters(0.691709,0.176237,-0.026105,4.94774,1.00526); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_qJ_AK5PFchs.txt
+  L5corr_gJ = new TF1("L5corr_gJ","[0]+log10((x-[3])/[4])*([1]+[2]*log10((x-[3])/[4]))",10,3650);
+  L5corr_gJ->SetParameters(1.08381,-0.044501,0.006947,3.00346,0.974058); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_gJ_AK5PFchs.txt
 }
 
 //________________________________________________________________________________________
@@ -1703,6 +1721,8 @@ void JZBAnalysis::Begin(TFile *f){
   
     //Z+b variables
   myTree->Branch("ZbCHS3010_alpha",&nEvent.ZbCHS3010_alpha,"ZbCHS3010_alpha/F");
+  myTree->Branch("ZbCHS3010_alphaL5",&nEvent.ZbCHS3010_alphaL5,"ZbCHS3010_alphaL5/F");
+  myTree->Branch("ZbCHS3010_L5corr",&nEvent.ZbCHS3010_L5corr,"ZbCHS3010_L5corr/F");
   myTree->Branch("ZbCHS1010_alpha",&nEvent.ZbCHS1010_alpha,"ZbCHS1010_alpha/F");
   myTree->Branch("ZbCHS3010_alphaUp",&nEvent.ZbCHS3010_alphaUp,"ZbCHS3010_alphaUp/F");
   myTree->Branch("ZbCHS1010_alphaUp",&nEvent.ZbCHS1010_alphaUp,"ZbCHS1010_alphaUp/F");
@@ -1743,6 +1763,26 @@ void JZBAnalysis::Begin(TFile *f){
 
 //------------------------------------------------------------------------------
 bool momentumComparator(lepton i, lepton j) { return (i.p.Pt()>j.p.Pt()); }
+
+const float JZBAnalysis::GetL5Correction(const int jindex) {
+  if(abs(fTR->PFCHSJFlavour[jindex])<4) {
+    //dealing with light quark
+    return L5corr_qJ->Eval(fTR->PFCHSJPt[jindex]);
+  } 
+  if(abs(fTR->PFCHSJFlavour[jindex])==4) {
+    //dealing c
+    return L5corr_cJ->Eval(fTR->PFCHSJPt[jindex]);
+  }
+  if(abs(fTR->PFCHSJFlavour[jindex])==5) {
+    //dealing with b
+    return L5corr_bJ->Eval(fTR->PFCHSJPt[jindex]);
+  }
+  if(abs(fTR->PFCHSJFlavour[jindex])==21) {
+    return L5corr_gJ->Eval(fTR->PFCHSJPt[jindex]);
+  }
+  cerr << "Not able to find any matching L5 function for flavor " << fTR->PFCHSJPt[jindex] << " in event (RLE) " << nEvent.runNum << ":" << nEvent.lumi << ":" << nEvent.eventNum << " (returning correction 1.0) " << endl;
+  return 1.0;
+}
 
 float JZBAnalysis::GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta, float &Uncert) {
   Uncert=0.0;
@@ -2526,6 +2566,8 @@ void JZBAnalysis::Analyze() {
 	nEvent.ZbCHS3010_pfJetGoodEta[nEvent.ZbCHS3010_pfJetGoodNum]=jeta;
 	nEvent.ZbCHS3010_pfJetDphiZ[nEvent.ZbCHS3010_pfJetGoodNum]=aJet.DeltaPhi(zVector);
 	nEvent.ZbCHS3010_pfJetGoodPt[nEvent.ZbCHS3010_pfJetGoodNum]=jpt;
+	nEvent.ZbCHS3010_L5corr=1.0;
+	if(isMC) nEvent.ZbCHS3010_L5corr = GetL5Correction(i);
 	nEvent.ZbCHS3010_pfJetGoodNum++;
       }
 
@@ -2732,6 +2774,7 @@ void JZBAnalysis::Analyze() {
     
     if(nEvent.ZbCHS3010_pfJetGoodNum>0) {
       nEvent.ZbCHS3010_alpha=nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
+      nEvent.ZbCHS3010_alphaL5=nEvent.ZbCHS3010_L5corr*nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
       nEvent.ZbCHS3010_alphaUp=nEvent.ZbCHS3010_alphaUp/nEvent.pt;
       nEvent.ZbCHS3010_alphaDown=nEvent.ZbCHS3010_alphaDown/nEvent.pt;
     }
