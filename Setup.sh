@@ -59,7 +59,7 @@ cvs up -r 1.13 EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h
 cvs up -r 1.20 EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc
 
 # SC footprint removal
-cvs co -r V00-02 -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
+cvs co -r V00-02b -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
 
 #####################################################################################################################################
 ################################################                      ###############################################################
