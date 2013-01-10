@@ -325,6 +325,8 @@ private:
 
   TH1F *fHNumPU;
   TH1F *fHNumPU_noweight;
+  TH1F *fHNumPUTrue;
+  TH1F *fHNumPUTrue_noweight;
   TH1F *fHNumVtx;
 
 };

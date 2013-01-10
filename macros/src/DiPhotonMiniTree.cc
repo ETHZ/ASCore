@@ -40,7 +40,7 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   float _eff_areas_EB_neutral_MC[n_templates_EB] = {8.039549e-02,8.165860e-02,8.187589e-02,8.591983e-02,9.982728e-02,1.248690e-01,1.519101e-01}; 
   float _eff_areas_EE_neutral_MC[n_templates_EE] = {1.622648e-01,1.533238e-01,1.456079e-01,1.670986e-01,2.775698e-01}; 
 
-
+  /* TO BE UPDATED (togliere return 0 da getpuenergy)
   binsdef_single_gamma_EB_eta.assign(_binsdef_single_gamma_EB_eta,_binsdef_single_gamma_EB_eta+n_templates_EB+1);
   binsdef_single_gamma_EE_eta.assign(_binsdef_single_gamma_EE_eta,_binsdef_single_gamma_EE_eta+n_templates_EE+1);
   eff_areas_EB_photon_data.assign(_eff_areas_EB_photon_data ,_eff_areas_EB_photon_data +n_templates_EB);
@@ -55,7 +55,8 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   eff_areas_EE_charged_MC.assign(_eff_areas_EE_charged_MC ,_eff_areas_EE_charged_MC +n_templates_EE);
   eff_areas_EB_neutral_MC.assign(_eff_areas_EB_neutral_MC ,_eff_areas_EB_neutral_MC +n_templates_EB);
   eff_areas_EE_neutral_MC.assign(_eff_areas_EE_neutral_MC ,_eff_areas_EE_neutral_MC +n_templates_EE);
-  
+  */
+
 }
 
 DiPhotonMiniTree::~DiPhotonMiniTree(){
@@ -310,6 +311,8 @@ void DiPhotonMiniTree::Begin(){
 
   fHNumPU = new TH1F("NumPU_rew","NumPU_rew",50,0,50);
   fHNumPU_noweight = new TH1F("NumPU_noweight","NumPU_noweight",50,0,50);
+  fHNumPUTrue = new TH1F("NumPUTrue_rew","NumPUTrue_rew",50,0,50);
+  fHNumPUTrue_noweight = new TH1F("NumPUTrue_noweight","NumPUTrue_noweight",50,0,50);
   fHNumVtx = new TH1F("NumVtx_rew","NumVtx_rew",50,0,50);
 	
 
@@ -340,8 +343,12 @@ void DiPhotonMiniTree::Analyze(){
   if (!isdata) {
     fHNumPU->Fill(fTR->PUnumInteractions,weight);
     fHNumPU_noweight->Fill(fTR->PUnumInteractions);
+    fHNumPUTrue->Fill(fTR->PUnumTrueInteractions,weight);
+    fHNumPUTrue_noweight->Fill(fTR->PUnumTrueInteractions);
   }
   fHNumVtx->Fill(fTR->NVrtx,weight);
+
+  //  return; // RUNNING FOR PU FILE
 
   event_weight = weight;
   event_weight3D = weight3D;
@@ -630,6 +637,8 @@ void DiPhotonMiniTree::End(){
   for (int i=0; i<14; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumPU_noweight->Write();
+  fHNumPUTrue->Write();
+  fHNumPUTrue_noweight->Write();
   fHNumVtx->Write();
   //  histo_PFPhotonDepositAroundImpingingTrack->Write();
 	
@@ -764,7 +773,7 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
   for (std::vector<int>::iterator it = passing.begin(); it != passing.end(); ){
       bool pass=0;
       if (fTR->PhoMCmatchexitcode[*it]==1 || fTR->PhoMCmatchexitcode[*it]==2)
-	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<10)
+	if(fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]<5)
 	  pass=1;
       if (!pass) it=passing.erase(it); else it++;
     }
@@ -824,7 +833,7 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     else if (mode=="cut_combiso_sideband"){ // selection for sideband
       //      if (combiso> && combiso<) pass=1;
     }
-    else if (combiso<10) pass=1;
+    else if (combiso<999) pass=1;
     if (!pass) it=passing.erase(it); else it++;
   }
 
@@ -854,7 +863,7 @@ std::vector<int> DiPhotonMiniTree::BackgroundSelection(TreeReader *fTR, std::vec
       pass=1;
     }
     else {
-      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>10) pass=1;
+      if (fTR->GenPhotonIsoDR04[fTR->PhoMCmatchindex[*it]]>5) pass=1;
     }
     if (!pass) it=passing.erase(it); else it++;
   }
@@ -995,7 +1004,7 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
     if (debug) if (dR<mindR) std::cout << "Found phot eta=" << fTR->PhoEta[i] << " phi=" << fTR->PhoPhi[i] << std::endl;
   }
 
-  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>10) found=true; }
+  if (mod!="nocombisocut") { if (PFIsolation(phoqi,rotation_phi,"combined")>999) found=true; }
 
   for (int i=0; i<fTR->NMus; i++){
     float mueta = fTR->MuEta[i];
@@ -1011,7 +1020,6 @@ bool DiPhotonMiniTree::FindCloseJetsAndPhotons(TreeReader *fTR, float rotation_p
 std::vector<int> DiPhotonMiniTree::GetPFCandIDedRemovals(TreeReader *fTR, int phoqi){
   std::vector<int> out;
   if (fTR->Pho_isPFPhoton[phoqi]) out.push_back(fTR->pho_matchedPFPhotonCand[phoqi]);
-  if (fTR->Pho_isPFElectron[phoqi]) out.push_back(fTR->pho_matchedPFElectronCand[phoqi]);
   return out;
 };
 
@@ -1059,7 +1067,6 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
     bool inside=false;
 
     if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
 
     for (int j=0; j<nxtals; j++){
       
@@ -1224,8 +1231,7 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
   for (int i=0; i<fTR->NPfCand; i++){
 
     if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
-
+ 
     int type = FindPFCandType(fTR->PfCandPdgId[i]);
 
     if (!(type==0 || type==1 || type==2)) continue;
@@ -1280,11 +1286,14 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
       }
 
+
       dEta = fTR->PfCandEta[i] - sceta;
       dPhi = DeltaPhiSigned(fTR->PfCandPhi[i],scphi);
       dR = sqrt(dEta*dEta+dPhi*dPhi);
       
       if (dR>0.4) continue;
+
+
 
 //      if (type==2){ 
 //	if (fTR->PhoisEB[phoqi]){
@@ -1335,6 +1344,16 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
     result+=pt;
 
   } // end pf cand loop
+
+
+  if (component=="photon" && rotation_phi==0 && result!=fTR->PhoSCRemovalPFIsoPhoton[phoqi]){
+    std::cout << std::endl;
+    std::cout << "run " << fTR->Run << std::endl;
+    std::cout << "lumi " << fTR->LumiSection << std::endl;
+    std::cout << "evt " << fTR->Event << std::endl;
+    std::cout << "photon " << phoqi << " " << result << " " << fTR->PhoSCRemovalPFIsoPhoton[phoqi] << std::endl;
+    std::cout << "eta " << fTR->SCEta[fTR->PhotSCindex[phoqi]] << std::endl;
+  }
 
   return result*scaleresult-GetPUEnergy(fTR,component,fTR->PhoisEB[phoqi]);
 
@@ -1856,6 +1875,8 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
 
 float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, float eta){
 
+  return 0; // DEBUUUUUUUUUUUUUUUUUUUUUUUUUG XXX
+
   eta=fabs(eta);
   bool isbarrel = (eta<1.4442);
 
@@ -2000,7 +2021,6 @@ bool DiPhotonMiniTree::FindImpingingTrack(TreeReader *fTR, int phoqi, int &refer
 //  for (int i=0; i<fTR->NPfCand; i++){
 //
 //    if (fTR->Pho_isPFPhoton[phoqi] && fTR->pho_matchedPFPhotonCand[phoqi]==i) continue;
-//    if (fTR->Pho_isPFElectron[phoqi] && fTR->pho_matchedPFElectronCand[phoqi]==i) continue;
 //
 //    int type = FindPFCandType(fTR->PfCandPdgId[i]);
 //    if (type!=1) continue;

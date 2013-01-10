@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Jan  3 11:24:49 2013 by ROOT version 5.27/06b
+// Thu Jan 10 14:56:54 2013 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: /scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/data/V02-06-16/Photon_Run2011A_16Jan2012_v1_AOD_part1/NTupleProducer_42X_data_232_3_TsM.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -1974,9 +1974,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/data/V02-06-16/Photon_Run2011A_16Jan2012_v1_AOD_part1/NTupleProducer_42X_data_232_3_TsM.root");
       if (!f) {
-         f = new TFile("/scratch/peruzzi/NTupleProducer_42X_MC_1_1_der.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/peruzzi/ntuples/data/V02-06-16/Photon_Run2011A_16Jan2012_v1_AOD_part1/NTupleProducer_42X_data_232_3_TsM.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -2051,11 +2051,11 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PUnumFilled", &PUnumFilled, &b_PUnumFilled);
    fChain->SetBranchAddress("PUOOTnumInteractionsEarly", &PUOOTnumInteractionsEarly, &b_PUOOTnumInteractionsEarly);
    fChain->SetBranchAddress("PUOOTnumInteractionsLate", &PUOOTnumInteractionsLate, &b_PUOOTnumInteractionsLate);
-   fChain->SetBranchAddress("PUzPositions", PUzPositions, &b_PUzPositions);
-   fChain->SetBranchAddress("PUsumPtLowPt", PUsumPtLowPt, &b_PUsumPtLowPt);
-   fChain->SetBranchAddress("PUsumPtHighPt", PUsumPtHighPt, &b_PUsumPtHighPt);
-   fChain->SetBranchAddress("PUnTrksLowPt", PUnTrksLowPt, &b_PUnTrksLowPt);
-   fChain->SetBranchAddress("PUnTrksHighPt", PUnTrksHighPt, &b_PUnTrksHighPt);
+   fChain->SetBranchAddress("PUzPositions", &PUzPositions, &b_PUzPositions);
+   fChain->SetBranchAddress("PUsumPtLowPt", &PUsumPtLowPt, &b_PUsumPtLowPt);
+   fChain->SetBranchAddress("PUsumPtHighPt", &PUsumPtHighPt, &b_PUsumPtHighPt);
+   fChain->SetBranchAddress("PUnTrksLowPt", &PUnTrksLowPt, &b_PUnTrksLowPt);
+   fChain->SetBranchAddress("PUnTrksHighPt", &PUnTrksHighPt, &b_PUnTrksHighPt);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("Sigma", &Sigma, &b_Sigma);
    fChain->SetBranchAddress("RhoPFnoPU", &RhoPFnoPU, &b_RhoPFnoPU);
@@ -2115,37 +2115,37 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("RecovRecHitFilterFlag", &RecovRecHitFilterFlag, &b_RecovRecHitFilterFlag);
    fChain->SetBranchAddress("RA2TrackingFailureFilterFlag", &RA2TrackingFailureFilterFlag, &b_RA2TrackingFailureFilterFlag);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
-   fChain->SetBranchAddress("GenLeptonID", GenLeptonID, &b_GenLeptonID);
-   fChain->SetBranchAddress("GenLeptonPt", GenLeptonPt, &b_GenLeptonPt);
-   fChain->SetBranchAddress("GenLeptonEta", GenLeptonEta, &b_GenLeptonEta);
-   fChain->SetBranchAddress("GenLeptonPhi", GenLeptonPhi, &b_GenLeptonPhi);
-   fChain->SetBranchAddress("GenLeptonMID", GenLeptonMID, &b_GenLeptonMID);
-   fChain->SetBranchAddress("GenLeptonMStatus", GenLeptonMStatus, &b_GenLeptonMStatus);
-   fChain->SetBranchAddress("GenLeptonMPt", GenLeptonMPt, &b_GenLeptonMPt);
-   fChain->SetBranchAddress("GenLeptonMEta", GenLeptonMEta, &b_GenLeptonMEta);
-   fChain->SetBranchAddress("GenLeptonMPhi", GenLeptonMPhi, &b_GenLeptonMPhi);
-   fChain->SetBranchAddress("GenLeptonGMID", GenLeptonGMID, &b_GenLeptonGMID);
-   fChain->SetBranchAddress("GenLeptonGMStatus", GenLeptonGMStatus, &b_GenLeptonGMStatus);
-   fChain->SetBranchAddress("GenLeptonGMPt", GenLeptonGMPt, &b_GenLeptonGMPt);
-   fChain->SetBranchAddress("GenLeptonGMEta", GenLeptonGMEta, &b_GenLeptonGMEta);
-   fChain->SetBranchAddress("GenLeptonGMPhi", GenLeptonGMPhi, &b_GenLeptonGMPhi);
+   fChain->SetBranchAddress("GenLeptonID", &GenLeptonID, &b_GenLeptonID);
+   fChain->SetBranchAddress("GenLeptonPt", &GenLeptonPt, &b_GenLeptonPt);
+   fChain->SetBranchAddress("GenLeptonEta", &GenLeptonEta, &b_GenLeptonEta);
+   fChain->SetBranchAddress("GenLeptonPhi", &GenLeptonPhi, &b_GenLeptonPhi);
+   fChain->SetBranchAddress("GenLeptonMID", &GenLeptonMID, &b_GenLeptonMID);
+   fChain->SetBranchAddress("GenLeptonMStatus", &GenLeptonMStatus, &b_GenLeptonMStatus);
+   fChain->SetBranchAddress("GenLeptonMPt", &GenLeptonMPt, &b_GenLeptonMPt);
+   fChain->SetBranchAddress("GenLeptonMEta", &GenLeptonMEta, &b_GenLeptonMEta);
+   fChain->SetBranchAddress("GenLeptonMPhi", &GenLeptonMPhi, &b_GenLeptonMPhi);
+   fChain->SetBranchAddress("GenLeptonGMID", &GenLeptonGMID, &b_GenLeptonGMID);
+   fChain->SetBranchAddress("GenLeptonGMStatus", &GenLeptonGMStatus, &b_GenLeptonGMStatus);
+   fChain->SetBranchAddress("GenLeptonGMPt", &GenLeptonGMPt, &b_GenLeptonGMPt);
+   fChain->SetBranchAddress("GenLeptonGMEta", &GenLeptonGMEta, &b_GenLeptonGMEta);
+   fChain->SetBranchAddress("GenLeptonGMPhi", &GenLeptonGMPhi, &b_GenLeptonGMPhi);
    fChain->SetBranchAddress("NGenPhotons", &NGenPhotons, &b_NGenPhotons);
-   fChain->SetBranchAddress("GenPhotonPt", GenPhotonPt, &b_GenPhotonPt);
-   fChain->SetBranchAddress("GenPhotonEta", GenPhotonEta, &b_GenPhotonEta);
-   fChain->SetBranchAddress("GenPhotonPhi", GenPhotonPhi, &b_GenPhotonPhi);
-   fChain->SetBranchAddress("GenPhotonPartonMindR", GenPhotonPartonMindR, &b_GenPhotonPartonMindR);
-   fChain->SetBranchAddress("GenPhotonMotherID", GenPhotonMotherID, &b_GenPhotonMotherID);
-   fChain->SetBranchAddress("GenPhotonMotherStatus", GenPhotonMotherStatus, &b_GenPhotonMotherStatus);
-   fChain->SetBranchAddress("GenPhotonIsoDR03", GenPhotonIsoDR03, &b_GenPhotonIsoDR03);
-   fChain->SetBranchAddress("GenPhotonIsoDR04", GenPhotonIsoDR04, &b_GenPhotonIsoDR04);
+   fChain->SetBranchAddress("GenPhotonPt", &GenPhotonPt, &b_GenPhotonPt);
+   fChain->SetBranchAddress("GenPhotonEta", &GenPhotonEta, &b_GenPhotonEta);
+   fChain->SetBranchAddress("GenPhotonPhi", &GenPhotonPhi, &b_GenPhotonPhi);
+   fChain->SetBranchAddress("GenPhotonPartonMindR", &GenPhotonPartonMindR, &b_GenPhotonPartonMindR);
+   fChain->SetBranchAddress("GenPhotonMotherID", &GenPhotonMotherID, &b_GenPhotonMotherID);
+   fChain->SetBranchAddress("GenPhotonMotherStatus", &GenPhotonMotherStatus, &b_GenPhotonMotherStatus);
+   fChain->SetBranchAddress("GenPhotonIsoDR03", &GenPhotonIsoDR03, &b_GenPhotonIsoDR03);
+   fChain->SetBranchAddress("GenPhotonIsoDR04", &GenPhotonIsoDR04, &b_GenPhotonIsoDR04);
    fChain->SetBranchAddress("NGenJets", &NGenJets, &b_NGenJets);
-   fChain->SetBranchAddress("GenJetPt", GenJetPt, &b_GenJetPt);
-   fChain->SetBranchAddress("GenJetEta", GenJetEta, &b_GenJetEta);
-   fChain->SetBranchAddress("GenJetPhi", GenJetPhi, &b_GenJetPhi);
-   fChain->SetBranchAddress("GenJetE", GenJetE, &b_GenJetE);
-   fChain->SetBranchAddress("GenJetEmE", GenJetEmE, &b_GenJetEmE);
-   fChain->SetBranchAddress("GenJetHadE", GenJetHadE, &b_GenJetHadE);
-   fChain->SetBranchAddress("GenJetInvE", GenJetInvE, &b_GenJetInvE);
+   fChain->SetBranchAddress("GenJetPt", &GenJetPt, &b_GenJetPt);
+   fChain->SetBranchAddress("GenJetEta", &GenJetEta, &b_GenJetEta);
+   fChain->SetBranchAddress("GenJetPhi", &GenJetPhi, &b_GenJetPhi);
+   fChain->SetBranchAddress("GenJetE", &GenJetE, &b_GenJetE);
+   fChain->SetBranchAddress("GenJetEmE", &GenJetEmE, &b_GenJetEmE);
+   fChain->SetBranchAddress("GenJetHadE", &GenJetHadE, &b_GenJetHadE);
+   fChain->SetBranchAddress("GenJetInvE", &GenJetInvE, &b_GenJetInvE);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("VrtxX", VrtxX, &b_VrtxX);
    fChain->SetBranchAddress("VrtxY", VrtxY, &b_VrtxY);
