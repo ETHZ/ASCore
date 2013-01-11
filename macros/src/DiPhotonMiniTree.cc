@@ -417,6 +417,7 @@ void DiPhotonMiniTree::Analyze(){
   for (int sel_cat=0; sel_cat<14; sel_cat++){
 
     if (sel_cat!=11 && !passtrigger) continue;
+    if (sel_cat==11) continue; // TURN OFF MUONS (ripetuto nel loop dopo)
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -497,6 +498,7 @@ void DiPhotonMiniTree::Analyze(){
   for (int sel_cat=0; sel_cat<14; sel_cat++){
 
     if (sel_cat!=11 && !passtrigger) continue;
+    if (sel_cat==11) continue; // TURN OFF MUONS (ripetuto nel loop dopo)
 
     if (isdata){ // do not run these cats on data
       if (sel_cat==1) continue;
@@ -919,7 +921,7 @@ bool DiPhotonMiniTree::StandardEventSelection(TreeReader *fTR, std::vector<int> 
   if (fTR->PhoPt[passing.at(0)]<40) return false;
   if (fTR->PhoPt[passing.at(1)]<25) return false;
   //  if (invmass0<80) return false;
-  if (dR<1.0) return false;
+  if (dR<0.45) return false;
 
   return true;
 };
@@ -1345,15 +1347,6 @@ float DiPhotonMiniTree::PFIsolation(int phoqi, float rotation_phi, TString compo
 
   } // end pf cand loop
 
-
-  if (component=="photon" && rotation_phi==0 && result!=fTR->PhoSCRemovalPFIsoPhoton[phoqi]){
-    std::cout << std::endl;
-    std::cout << "run " << fTR->Run << std::endl;
-    std::cout << "lumi " << fTR->LumiSection << std::endl;
-    std::cout << "evt " << fTR->Event << std::endl;
-    std::cout << "photon " << phoqi << " " << result << " " << fTR->PhoSCRemovalPFIsoPhoton[phoqi] << std::endl;
-    std::cout << "eta " << fTR->SCEta[fTR->PhotSCindex[phoqi]] << std::endl;
-  }
 
   return result*scaleresult-GetPUEnergy(fTR,component,fTR->PhoisEB[phoqi]);
 
