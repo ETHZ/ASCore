@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.43 2013/01/03 19:12:16 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.44 2013/01/15 16:33:46 mdunser Exp $
 //
 //
 
@@ -1412,7 +1412,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   (*fTNGoodSuperClusters)=0;
   for (edm::View<reco::Candidate>::const_iterator sc = GoodSuperClusters->begin(); sc!=GoodSuperClusters->end(); ++sc){
 
-    if (*fTNGoodSuperClusters>gMaxNSC) {
+    if (*fTNGoodSuperClusters>=gMaxNSC) {
       edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded";
       *fTGoodEvent = 1;
       break;
@@ -1432,7 +1432,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if (sc->rawEnergy()<fMinSCraw) continue;
 
-    if (*fTNSuperClusters>gMaxNSC) {
+    if (*fTNSuperClusters>=gMaxNSC) {
       edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
       *fTGoodEvent = 1; 
       break;
@@ -1518,7 +1518,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if (sc->rawEnergy()<fMinSCraw) continue;
 
-    if (*fTNSuperClusters>gMaxNSC) {
+    if (*fTNSuperClusters>=gMaxNSC) {
       edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
       *fTGoodEvent = 1; 
       break;
@@ -1934,7 +1934,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     {
       double energy = ecalrechit->energy();
       if(energy<fMinEBRechitE)continue; 
-      if((*fTNEBhits)>gMaxNEBhits)
+      if((*fTNEBhits)>=gMaxNEBhits)
         {
           edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of EB rechits exceeded"; 
           *fTGoodEvent = 1; 
