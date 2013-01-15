@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.27 2012/11/26 16:10:46 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.28 2012/12/15 18:30:08 peruzzi Exp $
 //
 //
 
@@ -1363,7 +1363,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	  if (sc->rawEnergy()<fRTMinSCraw) continue;
 
-	  if (fTnSC>gMaxnSC) {
+	  if (fTnSC>=gMaxnSC) {
 	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
 	    fTgoodevent = 1; 
 	    break;
@@ -1457,7 +1457,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	  if (sc->rawEnergy()<fRTMinSCraw) continue;
 
-	  if (fTnSC>gMaxnSC) {
+	  if (fTnSC>=gMaxnSC) {
 	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
 	    fTgoodevent = 1; 
 	    break;
@@ -1797,7 +1797,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	{
 		double energy = ecalrechit->energy();
 		if(energy<fMinebrechitE)continue; 
-		if(fTnEBhits>gMaxnEBhits)
+		if(fTnEBhits>=gMaxnEBhits)
 		{
                   edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of EB rechits exceeded"; 
                   fTgoodevent = 1; 
