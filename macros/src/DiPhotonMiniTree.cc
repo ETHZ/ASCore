@@ -25,22 +25,37 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
 
   eegeom = TGeoPara(1,1,1,0,0,0);
 
+  // 020616 no cleaning numbers
   float _binsdef_single_gamma_EB_eta[n_templates_EB+1] = {0,0.2,0.4,0.6,0.8,1,1.2,1.4442}; 
   float _binsdef_single_gamma_EE_eta[n_templates_EE+1] = {1.56,1.653,1.8,2,2.2,2.5};
-  float _eff_areas_EB_photon_data[n_templates_EB] = {2.004668e-01,2.000222e-01,2.083325e-01,2.129163e-01,2.082317e-01,1.982015e-01,1.383834e-01}; 
-  float _eff_areas_EE_photon_data[n_templates_EE] = {3.727486e-02,5.494237e-02,7.876623e-02,1.006998e-01,8.432818e-02};
-  float _eff_areas_EB_charged_data[n_templates_EB] = {2.707052e-02,2.715322e-02,2.181513e-02,2.302210e-02,2.296409e-02,2.010706e-02,2.016756e-02};
-  float _eff_areas_EE_charged_data[n_templates_EE] = {1.667700e-02,1.863876e-02,1.442144e-02,1.656359e-02,1.121806e-02}; 
-  float _eff_areas_EB_neutral_data[n_templates_EB] = {1.008816e-01,9.405549e-02,8.752698e-02,9.280508e-02,1.083173e-01,1.327634e-01,1.648043e-01}; 
-  float _eff_areas_EE_neutral_data[n_templates_EE] = {1.665812e-01,1.587098e-01,1.496094e-01,1.669686e-01,2.647152e-01}; 
-  float _eff_areas_EB_photon_MC[n_templates_EB] = {2.049085e-01,2.037967e-01,2.129352e-01,2.154778e-01,2.155464e-01,2.037776e-01,1.407869e-01};
-  float _eff_areas_EE_photon_MC[n_templates_EE] = {4.410657e-02,6.010713e-02,9.360530e-02,1.421708e-01,1.269196e-01};
-  float _eff_areas_EB_charged_MC[n_templates_EB] = {3.131846e-02,3.181332e-02,3.066015e-02,2.876652e-02,2.709936e-02,2.977523e-02,2.038828e-02};
-  float _eff_areas_EE_charged_MC[n_templates_EE] = {2.047554e-02,1.836507e-02,1.890404e-02,1.743312e-02,9.424824e-03}; 
-  float _eff_areas_EB_neutral_MC[n_templates_EB] = {8.039549e-02,8.165860e-02,8.187589e-02,8.591983e-02,9.982728e-02,1.248690e-01,1.519101e-01}; 
-  float _eff_areas_EE_neutral_MC[n_templates_EE] = {1.622648e-01,1.533238e-01,1.456079e-01,1.670986e-01,2.775698e-01}; 
+  float _eff_areas_EB_photon_data[n_templates_EB] = {2.601118e-01,2.584915e-01,2.640072e-01,2.656851e-01,2.564615e-01,2.396511e-01,1.645776e-01};
+  float _eff_areas_EE_photon_data[n_templates_EE] = {5.783452e-02,8.321881e-02,1.177009e-01,1.422445e-01,1.139434e-01}'
+  float _eff_areas_EB_charged_data[n_templates_EB] = {2.526058e-02,2.619860e-02,2.118318e-02,2.078713e-02,2.066629e-02,1.908721e-02,1.732135e-02};
+  float _eff_areas_EE_charged_data[n_templates_EE] = {1.538706e-02,1.737151e-02,1.410831e-02,1.558452e-02,1.056310e-02};
+  float _eff_areas_EB_neutral_data[n_templates_EB] = {9.534780e-02,8.826486e-02,8.199201e-02,8.729101e-02,1.018310e-01,1.244805e-01,1.542784e-01};
+  float _eff_areas_EE_neutral_data[n_templates_EE] = {1.547500e-01,1.480421e-01,1.391524e-01,1.546148e-01,2.487922e-01};
+  float _eff_areas_EB_photon_MC[n_templates_EB] = {2.728305e-01,2.747126e-01,2.742736e-01,2.689392e-01,2.642000e-01,2.430941e-01,1.701134e-01};
+  float _eff_areas_EE_photon_MC[n_templates_EE] = {5.066866e-02,8.511977e-02,1.342678e-01,1.693861e-01,1.448627e-01};
+  float _eff_areas_EB_charged_MC[n_templates_EB] = {2.333960e-02,2.682862e-02,2.747902e-02,2.494792e-02,2.206384e-02,1.864648e-02,2.470047e-02};
+  float _eff_areas_EE_charged_MC[n_templates_EE] = {2.264766e-02,1.934945e-02,1.834243e-02,2.223225e-02,8.191396e-03};
+  float _eff_areas_EB_neutral_MC[n_templates_EB] = {7.527103e-02,7.490141e-02,7.510347e-02,7.806471e-02,9.715760e-02,1.193150e-01,1.449191e-01};
+  float _eff_areas_EE_neutral_MC[n_templates_EE] = {1.507419e-01,1.383201e-01,1.489503e-01,1.460166e-01,2.548731e-01};
 
-  /* TO BE UPDATED (togliere return 0 da getpuenergy)
+//  old 020615 w/cleaning numbers
+//  float _eff_areas_EB_photon_data[n_templates_EB] = {2.004668e-01,2.000222e-01,2.083325e-01,2.129163e-01,2.082317e-01,1.982015e-01,1.383834e-01}; 
+//  float _eff_areas_EE_photon_data[n_templates_EE] = {3.727486e-02,5.494237e-02,7.876623e-02,1.006998e-01,8.432818e-02};
+//  float _eff_areas_EB_charged_data[n_templates_EB] = {2.707052e-02,2.715322e-02,2.181513e-02,2.302210e-02,2.296409e-02,2.010706e-02,2.016756e-02};
+//  float _eff_areas_EE_charged_data[n_templates_EE] = {1.667700e-02,1.863876e-02,1.442144e-02,1.656359e-02,1.121806e-02}; 
+//  float _eff_areas_EB_neutral_data[n_templates_EB] = {1.008816e-01,9.405549e-02,8.752698e-02,9.280508e-02,1.083173e-01,1.327634e-01,1.648043e-01}; 
+//  float _eff_areas_EE_neutral_data[n_templates_EE] = {1.665812e-01,1.587098e-01,1.496094e-01,1.669686e-01,2.647152e-01}; 
+//  float _eff_areas_EB_photon_MC[n_templates_EB] = {2.049085e-01,2.037967e-01,2.129352e-01,2.154778e-01,2.155464e-01,2.037776e-01,1.407869e-01};
+//  float _eff_areas_EE_photon_MC[n_templates_EE] = {4.410657e-02,6.010713e-02,9.360530e-02,1.421708e-01,1.269196e-01};
+//  float _eff_areas_EB_charged_MC[n_templates_EB] = {3.131846e-02,3.181332e-02,3.066015e-02,2.876652e-02,2.709936e-02,2.977523e-02,2.038828e-02};
+//  float _eff_areas_EE_charged_MC[n_templates_EE] = {2.047554e-02,1.836507e-02,1.890404e-02,1.743312e-02,9.424824e-03}; 
+//  float _eff_areas_EB_neutral_MC[n_templates_EB] = {8.039549e-02,8.165860e-02,8.187589e-02,8.591983e-02,9.982728e-02,1.248690e-01,1.519101e-01}; 
+//  float _eff_areas_EE_neutral_MC[n_templates_EE] = {1.622648e-01,1.533238e-01,1.456079e-01,1.670986e-01,2.775698e-01}; 
+
+
   binsdef_single_gamma_EB_eta.assign(_binsdef_single_gamma_EB_eta,_binsdef_single_gamma_EB_eta+n_templates_EB+1);
   binsdef_single_gamma_EE_eta.assign(_binsdef_single_gamma_EE_eta,_binsdef_single_gamma_EE_eta+n_templates_EE+1);
   eff_areas_EB_photon_data.assign(_eff_areas_EB_photon_data ,_eff_areas_EB_photon_data +n_templates_EB);
@@ -55,7 +70,7 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   eff_areas_EE_charged_MC.assign(_eff_areas_EE_charged_MC ,_eff_areas_EE_charged_MC +n_templates_EE);
   eff_areas_EB_neutral_MC.assign(_eff_areas_EB_neutral_MC ,_eff_areas_EB_neutral_MC +n_templates_EB);
   eff_areas_EE_neutral_MC.assign(_eff_areas_EE_neutral_MC ,_eff_areas_EE_neutral_MC +n_templates_EE);
-  */
+
 
 }
 
@@ -1867,8 +1882,6 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
 };
 
 float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, float eta){
-
-  return 0; // DEBUUUUUUUUUUUUUUUUUUUUUUUUUG XXX
 
   eta=fabs(eta);
   bool isbarrel = (eta<1.4442);
