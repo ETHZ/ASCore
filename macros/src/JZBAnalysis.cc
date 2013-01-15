@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.107 $";
+string sjzbversion="$Revision: 1.70.2.109 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -33,7 +33,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.107 2012/12/20 11:03:21 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.109 2013/01/07 12:46:24 buchmann Exp $
 */
 
 
@@ -201,7 +201,10 @@ public:
   float pfHT;
   float pfGoodHT;
   float pfTightHT;
-
+  
+  float metUncertainty;
+  float type1metUncertainty;
+  
   int pfJetGoodNum30;
   int pfJetGoodNumID;
   int pfJetGoodNump1sigma;
@@ -712,6 +715,10 @@ void nanoEvent::reset()
 
   EventFlavor=0;
   EventZToTaus=false;
+  
+  metUncertainty=0.0;
+  type1metUncertainty=0.0;
+
   
   pfJetGoodNum30=0;
   pfJetGoodNumID=0;
@@ -1424,6 +1431,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
   myTree->Branch("CorrectionRatio", nEvent.CorrectionRatio,"CorrectionRatio[pfJetNum]/F");
+
+  myTree->Branch("metUncertainty",&nEvent.metUncertainty,"metUncertainty/F");
+  myTree->Branch("type1metUncertainty",&nEvent.type1metUncertainty,"type1metUncertainty/F");
 
   myTree->Branch("pfJetGoodNum30",&nEvent.pfJetGoodNum30,"pfJetGoodNum30/I");
   myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
@@ -2621,6 +2631,11 @@ void JZBAnalysis::Analyze() {
   nEvent.pfJetGoodNum50=0;
   nEvent.pfJetGoodNum60=0;
   
+  TLorentzVector ResidualMet(pfMETpx,pfMETpy,0,0);
+  TLorentzVector VariedMet(0,0,0,0);
+  TLorentzVector Type1ResidualMet(type1METpx,type1METpy,0,0);
+  TLorentzVector Type1VariedMet(0,0,0,0);
+  
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
   for(int i =0 ; i<fTR->NJets;i++) // PF jet loop
@@ -2681,6 +2696,15 @@ void JZBAnalysis::Analyze() {
       fJECUnc->setJetEta(jeta);
       fJECUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
       
+      float unc = fJECUnc->getUncertainty(true); 
+      //removing jet from residual met
+      ResidualMet=ResidualMet+aJet;
+      Type1ResidualMet=Type1ResidualMet+aJet;
+      //adding jet to varied MET
+      float factor=(jesC+unc)/jesC;
+      VariedMet=VariedMet-factor*aJet;
+      Type1VariedMet=Type1VariedMet-factor*aJet;
+
       // Keep jets over min. pt threshold
       if ( !(jpt>20) ) continue;
       counters[PJ].fill("... pt>20.");
@@ -2704,7 +2728,6 @@ void JZBAnalysis::Analyze() {
         
       if(!nEvent.badJet) counters[PJ].fill("... pass Jet ID");
 
-      float unc = fJECUnc->getUncertainty(true); 
       nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
       nEvent.pfJetEta[nEvent.pfJetNum]   = jeta;
       nEvent.pfJetPhi[nEvent.pfJetNum]   = jphi;
@@ -2806,6 +2829,33 @@ void JZBAnalysis::Analyze() {
 
     }
 
+    
+  for(int jl=0;jl<sortedGoodLeptons.size();jl++) {
+    float factor=1.0;
+    if(sortedGoodLeptons[jl].type==0) {
+      //electrons
+      if(abs(sortedGoodLeptons[jl].p.Eta())<1.479) factor=1.006; //barrel
+      else factor=1.015; // endcap
+    } else {
+      //muons
+      factor=1.002;
+    }
+    
+    //removing lepton from residual met
+    ResidualMet=ResidualMet+sortedGoodLeptons[jl].p;
+    Type1ResidualMet=Type1ResidualMet+sortedGoodLeptons[jl].p;
+    //adding jet to varied MET
+    VariedMet=VariedMet-factor*sortedGoodLeptons[jl].p;
+    Type1VariedMet=Type1VariedMet-factor*sortedGoodLeptons[jl].p;
+  }
+  
+  ResidualMet=1.1*ResidualMet;//all the remaining stuff is assumed to be unclustered energy
+  Type1ResidualMet=1.1*Type1ResidualMet;
+  
+  //adding rest back in
+  VariedMet+=ResidualMet;
+  Type1VariedMet+=Type1ResidualMet;
+
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
   TLorentzVector s2 = sortedGoodLeptons[PosLepton2].p;
 
@@ -2819,9 +2869,11 @@ void JZBAnalysis::Analyze() {
   nEvent.met[PFMET]=fTR->PFMET;
   nEvent.met[SUMET]=fTR->SumEt;
   
-  
   nEvent.met[4] = nEvent.fact * nEvent.met[4];
 
+  nEvent.metUncertainty=abs((VariedMet.Pt()-nEvent.met[4])/nEvent.met[4]);
+  nEvent.type1metUncertainty=abs((Type1VariedMet.Pt()-nEvent.met[1])/nEvent.met[1]);
+  
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered)
   TLorentzVector FSRpfNoCutsJetVector(0,0,0,0);
