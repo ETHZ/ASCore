@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.42 2013/01/03 19:01:02 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.43 2013/01/03 19:12:16 peruzzi Exp $
 //
 //
 
@@ -41,6 +41,11 @@
 #include "CommonTools/Utils/interface/PtComparator.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
+// this is for 3d-ip testing at the moment. marc.
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "RecoVertex/GaussianSumVertexFit/interface/GsfVertexTrackCompatibilityEstimator.h"
+// done test
 
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
@@ -157,7 +162,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fElectronTag         = iConfig.getParameter<edm::InputTag>("tag_electrons");
   fElePfIsoTagsCustom  = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisosCustom");
   fElePfIsoTagsEvent   = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisosEvent");
-  fEleIdWP             = iConfig.getParameter<std::string>("tag_elidWP");
   fMuIsoDepTkTag       = iConfig.getParameter<edm::InputTag>("tag_muisodeptk");
   fMuIsoDepECTag       = iConfig.getParameter<edm::InputTag>("tag_muisodepec");
   fMuIsoDepHCTag       = iConfig.getParameter<edm::InputTag>("tag_muisodephc");
@@ -1317,9 +1321,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuEem->push_back( ECDep.candEnergy() );
     fTMuEhad->push_back( HCDep.candEnergy() );
 
+	// 3D impact parameter
+	TransientTrack mutt = theB->build( muon.innerTrack() );
+	Measurement1D muip3dpv = IPTools::absoluteImpactParameter3D(mutt, *(primVtx)).second;
+
+    fTMuD03DPV->push_back( muip3dpv.value() );
+    fTMuD03DE ->push_back( muip3dpv.error() );
+
     fTMuD0BS->push_back( -1.0*muon.innerTrack()->dxy(beamSpot.position()) );
     fTMuD0PV->push_back( -1.0*muon.innerTrack()->dxy(primVtx->position()) );
-    fTMuDzBS->push_back( muon.innerTrack()->dz(beamSpot.position()) );
     fTMuDzPV->push_back( muon.innerTrack()->dz(primVtx->position()) );
     fTMuInnerTkNChi2->push_back( muon.innerTrack()->normalizedChi2() );
     fTMuNSiLayers->push_back (muon.innerTrack()->hitPattern().trackerLayersWithMeasurement());
@@ -1348,6 +1358,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       fTMuNChi2->push_back( muon.globalTrack()->normalizedChi2() );
       fTMuNGlHits->push_back( muon.globalTrack()->hitPattern().numberOfValidHits() );
+      fTMuNGlMuHits->push_back( muon.globalTrack()->hitPattern().numberOfValidMuonHits() );
       fTMuNMuHits->push_back( muon.outerTrack()->hitPattern().numberOfValidHits() );
       fTMuNMatches->push_back( muon.numberOfMatches() );
       fTMuNMatchedStations->push_back( muon.numberOfMatchedStations() );
@@ -1358,6 +1369,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTMuDzE->push_back( 0.0 );
       fTMuNChi2->push_back( 0.0 );
       fTMuNGlHits->push_back( 0.0 );
+      fTMuNGlMuHits->push_back( 0.0 );
       fTMuNMuHits->push_back( 0.0 );
       fTMuNMatches->push_back( 0.0 );
       fTMuNMatchedStations->push_back( 0.0 );
@@ -1671,29 +1683,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     (*fTNEles) = elOrdered.size();
     eqi = 0;
 
-    // Read eID results
-    std::vector<Handle<ValueMap<float> > > eIDValueMap(9);
-    iEvent.getByLabel( "eidRobustLoose",      eIDValueMap[0]);
-    iEvent.getByLabel( "eidRobustTight",      eIDValueMap[1]);
-    iEvent.getByLabel( "eidLoose",            eIDValueMap[2]);
-    iEvent.getByLabel( "eidTight",            eIDValueMap[3]);
-    iEvent.getByLabel( fEleIdWP,              eIDValueMap[4]);
-    iEvent.getByLabel( "simpleEleId80relIso", eIDValueMap[5]);
-    iEvent.getByLabel( "simpleEleId85relIso", eIDValueMap[6]);
-    iEvent.getByLabel( "simpleEleId90relIso", eIDValueMap[7]);
-    iEvent.getByLabel( "simpleEleId95relIso", eIDValueMap[8]);
-    const ValueMap<float> &eIDmapRL         = *eIDValueMap[0];  // Robust-Loose
-    const ValueMap<float> &eIDmapRT         = *eIDValueMap[1];  // Robust-Tight
-    const ValueMap<float> &eIDmapL          = *eIDValueMap[2];  // Loose
-    const ValueMap<float> &eIDmapT          = *eIDValueMap[3];  // Tight
-    const ValueMap<float> &eIDmapsimpleWP   = *eIDValueMap[4];  // WP from config
-    const ValueMap<float> &eIDmapsimpleWP80 = *eIDValueMap[5];  // WP80
-    const ValueMap<float> &eIDmapsimpleWP85 = *eIDValueMap[6];  // WP85
-    const ValueMap<float> &eIDmapsimpleWP90 = *eIDValueMap[7];  // WP90
-    const ValueMap<float> &eIDmapsimpleWP95 = *eIDValueMap[8];  // WP95
-    eIDValueMap.clear();
-
-
     // Dump electron properties in tree variables
     for( std::vector<OrderPair>::const_iterator it = elOrdered.begin();
          it != elOrdered.end(); ++it, ++eqi ) {
@@ -1719,6 +1708,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElPtE                    ->push_back(electron.gsfTrack()->ptError());
       fTElEta                    ->push_back(electron.eta());
       fTElPhi                    ->push_back(electron.phi());
+      fTElIsEB                   ->push_back(electron.isEB());
+      fTElIsEE                   ->push_back(electron.isEE());
       fTElGsfTkPt                ->push_back(electron.gsfTrack()->pt());
       fTElGsfTkEta               ->push_back(electron.gsfTrack()->eta());
       fTElGsfTkPhi               ->push_back(electron.gsfTrack()->phi());
@@ -1737,6 +1728,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElDzE                    ->push_back(electron.gsfTrack()->dzError());
       fTElNChi2                  ->push_back(electron.gsfTrack()->normalizedChi2());
 
+      // 3D impact parameter
+      TransientTrack eltt = theB->build( electron.gsfTrack() );
+      Measurement1D elip3dpv = IPTools::absoluteImpactParameter3D(eltt, *(primVtx)).second;
+      
+      fTElD03DPV->push_back( elip3dpv.value() );
+      fTElD03DE ->push_back( elip3dpv.error() );
 
       // ctf track info:
       bool validKF= false; 
@@ -1834,17 +1831,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       // 				edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
       // 			}
 
-      // Read in Electron ID
-      fTElIDMva ->push_back(electron.mva());
-      fTElIDTight            ->push_back(eIDmapT[electronRef]  ? 1:0);
-      fTElIDLoose            ->push_back(eIDmapL[electronRef]  ? 1:0);
-      fTElIDRobustTight      ->push_back(eIDmapRT[electronRef] ? 1:0);
-      fTElIDRobustLoose      ->push_back(eIDmapRL[electronRef] ? 1:0);
-      fTElIDsimpleWPrelIso   ->push_back(eIDmapsimpleWP[electronRef]);
-      fTElIDsimpleWP95relIso ->push_back(eIDmapsimpleWP95[electronRef]);
-      fTElIDsimpleWP90relIso ->push_back(eIDmapsimpleWP90[electronRef]);
-      fTElIDsimpleWP85relIso ->push_back(eIDmapsimpleWP85[electronRef]);
-      fTElIDsimpleWP80relIso ->push_back(eIDmapsimpleWP80[electronRef]);
 
       EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
       const TransientTrackBuilder thebuilder = *(theB.product());
@@ -3867,12 +3853,15 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuEhad");
   produces<std::vector<float> >("MuD0BS");
   produces<std::vector<float> >("MuD0PV");
+  produces<std::vector<float> >("MuD03DPV");
+  produces<std::vector<float> >("MuD03DE");
   produces<std::vector<float> >("MuD0E");
   produces<std::vector<float> >("MuDzBS");
   produces<std::vector<float> >("MuDzPV");
   produces<std::vector<float> >("MuDzE");
   produces<std::vector<float> >("MuNChi2");
   produces<std::vector<int> >("MuNGlHits");
+  produces<std::vector<int> >("MuNGlMuHits");
   produces<std::vector<int> >("MuNMuHits");
   produces<std::vector<int> >("MuNTkHits");
   produces<std::vector<int> >("MuNPxHits");
@@ -3946,6 +3935,8 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElTheta");
   produces<std::vector<float> >("ElSCEta");
   produces<std::vector<float> >("ElPhi");
+  produces<std::vector<int> >("ElIsEB");
+  produces<std::vector<int> >("ElIsEE");
   produces<std::vector<float> >("ElGsfTkPt");
   produces<std::vector<float> >("ElGsfTkEta");
   produces<std::vector<float> >("ElGsfTkPhi");
@@ -3956,6 +3947,8 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElD0BS");
   produces<std::vector<float> >("ElD0PV");
   produces<std::vector<float> >("ElD0E");
+  produces<std::vector<float> >("ElD03DPV");
+  produces<std::vector<float> >("ElD03DE");
   produces<std::vector<float> >("ElDzBS");
   produces<std::vector<float> >("ElDzPV");
   produces<std::vector<float> >("ElDzE");
@@ -3993,15 +3986,6 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElIDMva");
   produces<std::vector<float> >("ElIDMVATrig");
   produces<std::vector<float> >("ElIDMVANoTrig");
-  produces<std::vector<int> >("ElIDTight");
-  produces<std::vector<int> >("ElIDLoose");
-  produces<std::vector<int> >("ElIDRobustTight");
-  produces<std::vector<int> >("ElIDRobustLoose");
-  produces<std::vector<int> >("ElIDsimpleWPrelIso");
-  produces<std::vector<int> >("ElIDsimpleWP80relIso");
-  produces<std::vector<int> >("ElIDsimpleWP85relIso");
-  produces<std::vector<int> >("ElIDsimpleWP90relIso");
-  produces<std::vector<int> >("ElIDsimpleWP95relIso");
   produces<std::vector<int> >("ElInGap");
   produces<std::vector<int> >("ElEcalDriven");
   produces<std::vector<int> >("ElTrackerDriven");
@@ -4609,6 +4593,8 @@ void NTupleProducer::resetProducts( void ) {
   fTMuEhad.reset(new std::vector<float> );
   fTMuD0BS.reset(new std::vector<float> );
   fTMuD0PV.reset(new std::vector<float> );
+  fTMuD03DPV.reset(new std::vector<float> );
+  fTMuD03DE.reset(new std::vector<float> );
   fTMuDzBS.reset(new std::vector<float> );
   fTMuDzPV.reset(new std::vector<float> );
   fTMuTkPtE.reset(new std::vector<float> );
@@ -4619,6 +4605,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuDzE.reset(new std::vector<float> );
   fTMuNChi2.reset(new std::vector<float> );
   fTMuNGlHits.reset(new std::vector<int> );
+  fTMuNGlMuHits.reset(new std::vector<int> );
   fTMuNMuHits.reset(new std::vector<int> );
   fTMuNTkHits.reset(new std::vector<int> );
   fTMuNPxHits.reset(new std::vector<int> );
@@ -4692,6 +4679,8 @@ void NTupleProducer::resetProducts( void ) {
   fTElTheta.reset(new std::vector<float> );
   fTElSCEta.reset(new std::vector<float> );
   fTElPhi.reset(new std::vector<float> );
+  fTElIsEB.reset(new std::vector<int> );
+  fTElIsEE.reset(new std::vector<int> );
   fTElGsfTkPt.reset(new std::vector<float> );
   fTElGsfTkEta.reset(new std::vector<float> );
   fTElGsfTkPhi.reset(new std::vector<float> );
@@ -4702,6 +4691,8 @@ void NTupleProducer::resetProducts( void ) {
   fTElD0BS.reset(new std::vector<float> );
   fTElD0PV.reset(new std::vector<float> );
   fTElD0E.reset(new std::vector<float> );
+  fTElD03DPV.reset(new std::vector<float> );
+  fTElD03DE.reset(new std::vector<float> );
   fTElDzBS.reset(new std::vector<float> );
   fTElDzPV.reset(new std::vector<float> );
   fTElDzE.reset(new std::vector<float> );
@@ -4739,17 +4730,8 @@ void NTupleProducer::resetProducts( void ) {
   fTElClosestCtfTrackPhi.reset(new std::vector<float> );
   fTElClosestCtfTrackCharge.reset(new std::vector<int> );
   fTElIDMva.reset(new std::vector<float> );
-  fTElIDTight.reset(new std::vector<int> );
-  fTElIDLoose.reset(new std::vector<int> );
-  fTElIDRobustTight.reset(new std::vector<int> );
-  fTElIDRobustLoose.reset(new std::vector<int> );
-  fTElIDsimpleWPrelIso.reset(new std::vector<int> );
-  fTElIDsimpleWP80relIso.reset(new std::vector<int> );
   fTElIDMVATrig.reset(new std::vector<float> );
   fTElIDMVANoTrig.reset(new std::vector<float> );
-  fTElIDsimpleWP85relIso.reset(new std::vector<int> );
-  fTElIDsimpleWP90relIso.reset(new std::vector<int> );
-  fTElIDsimpleWP95relIso.reset(new std::vector<int> );
   fTElInGap.reset(new std::vector<int> );
   fTElEcalDriven.reset(new std::vector<int> );
   fTElTrackerDriven.reset(new std::vector<int> );
@@ -5426,12 +5408,15 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuEhad, "MuEhad");
   event.put(fTMuD0BS, "MuD0BS");
   event.put(fTMuD0PV, "MuD0PV");
+  event.put(fTMuD03DPV, "MuD03DPV");
+  event.put(fTMuD03DE, "MuD03DE");
   event.put(fTMuD0E, "MuD0E");
   event.put(fTMuDzBS, "MuDzBS");
   event.put(fTMuDzPV, "MuDzPV");
   event.put(fTMuDzE, "MuDzE");
   event.put(fTMuNChi2, "MuNChi2");
   event.put(fTMuNGlHits, "MuNGlHits");
+  event.put(fTMuNGlMuHits, "MuNGlMuHits");
   event.put(fTMuNMuHits, "MuNMuHits");
   event.put(fTMuNTkHits, "MuNTkHits");
   event.put(fTMuNPxHits, "MuNPxHits");
@@ -5505,6 +5490,8 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElTheta, "ElTheta");
   event.put(fTElSCEta, "ElSCEta");
   event.put(fTElPhi, "ElPhi");
+  event.put(fTElIsEB, "ElIsEB");
+  event.put(fTElIsEE, "ElIsEE");
   event.put(fTElGsfTkPt, "ElGsfTkPt");
   event.put(fTElGsfTkEta, "ElGsfTkEta");
   event.put(fTElGsfTkPhi, "ElGsfTkPhi");
@@ -5515,6 +5502,8 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElD0BS, "ElD0BS");
   event.put(fTElD0PV, "ElD0PV");
   event.put(fTElD0E, "ElD0E");
+  event.put(fTElD03DPV, "ElD03DPV");
+  event.put(fTElD03DE, "ElD03DE");
   event.put(fTElDzBS, "ElDzBS");
   event.put(fTElDzPV, "ElDzPV");
   event.put(fTElDzE, "ElDzE");
@@ -5552,15 +5541,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElClosestCtfTrackPhi, "ElClosestCtfTrackPhi");
   event.put(fTElClosestCtfTrackCharge, "ElClosestCtfTrackCharge");
   event.put(fTElIDMva, "ElIDMva");
-  event.put(fTElIDTight, "ElIDTight");
-  event.put(fTElIDLoose, "ElIDLoose");
-  event.put(fTElIDRobustTight, "ElIDRobustTight");
-  event.put(fTElIDRobustLoose, "ElIDRobustLoose");
-  event.put(fTElIDsimpleWPrelIso, "ElIDsimpleWPrelIso");
-  event.put(fTElIDsimpleWP80relIso, "ElIDsimpleWP80relIso");
-  event.put(fTElIDsimpleWP85relIso, "ElIDsimpleWP85relIso");
-  event.put(fTElIDsimpleWP90relIso, "ElIDsimpleWP90relIso");
-  event.put(fTElIDsimpleWP95relIso, "ElIDsimpleWP95relIso");
   event.put(fTElIDMVATrig, "ElIDMVATrig");
   event.put(fTElIDMVANoTrig, "ElIDMVANoTrig");
   event.put(fTElInGap, "ElInGap");

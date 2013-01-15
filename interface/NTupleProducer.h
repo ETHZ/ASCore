@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.34 2012/12/15 18:55:22 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.114.2.35 2012/12/20 16:43:02 buchmann Exp $
 //
 //
 
@@ -625,6 +625,8 @@ private:
   // Impact parameters
   std::auto_ptr<std::vector<float> >  fTMuD0BS;
   std::auto_ptr<std::vector<float> >  fTMuD0PV;
+  std::auto_ptr<std::vector<float> >  fTMuD03DPV;
+  std::auto_ptr<std::vector<float> >  fTMuD03DE;
   std::auto_ptr<std::vector<float> >  fTMuD0E;
   std::auto_ptr<std::vector<float> >  fTMuDzBS;
   std::auto_ptr<std::vector<float> >  fTMuDzPV;
@@ -632,6 +634,7 @@ private:
   // Mu ID variables
   std::auto_ptr<std::vector<float> >  fTMuNChi2;
   std::auto_ptr<std::vector<int> >  fTMuNGlHits;
+  std::auto_ptr<std::vector<int> >  fTMuNGlMuHits;
   std::auto_ptr<std::vector<int> >  fTMuNMuHits;
   std::auto_ptr<std::vector<int> >  fTMuNTkHits;
   std::auto_ptr<std::vector<int> >  fTMuNPxHits;
@@ -700,6 +703,8 @@ private:
   std::auto_ptr<std::vector<float> >  fTElTheta;
   std::auto_ptr<std::vector<float> >  fTElSCEta;
   std::auto_ptr<std::vector<float> >  fTElPhi;
+  std::auto_ptr<std::vector<int> >    fTElIsEB;
+  std::auto_ptr<std::vector<int> >    fTElIsEE;
   std::auto_ptr<std::vector<float> >  fTElGsfTkPt;
   std::auto_ptr<std::vector<float> >  fTElGsfTkEta;
   std::auto_ptr<std::vector<float> >  fTElGsfTkPhi;
@@ -711,6 +716,8 @@ private:
   std::auto_ptr<std::vector<float> >  fTElD0BS;
   std::auto_ptr<std::vector<float> >  fTElD0PV;
   std::auto_ptr<std::vector<float> >  fTElD0E;
+  std::auto_ptr<std::vector<float> >  fTElD03DPV;
+  std::auto_ptr<std::vector<float> >  fTElD03DE;
   std::auto_ptr<std::vector<float> >  fTElDzBS;
   std::auto_ptr<std::vector<float> >  fTElDzPV;
   std::auto_ptr<std::vector<float> >  fTElDzE;
@@ -745,15 +752,6 @@ private:
   std::auto_ptr<std::vector<float> >  fTElIDMva;
   std::auto_ptr<std::vector<float> >  fTElIDMVATrig;
   std::auto_ptr<std::vector<float> >  fTElIDMVANoTrig;
-  std::auto_ptr<std::vector<int> >  fTElIDTight;
-  std::auto_ptr<std::vector<int> >  fTElIDLoose;
-  std::auto_ptr<std::vector<int> >  fTElIDRobustTight;
-  std::auto_ptr<std::vector<int> >  fTElIDRobustLoose;
-  std::auto_ptr<std::vector<int> >  fTElIDsimpleWPrelIso;
-  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP80relIso;
-  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP85relIso;
-  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP90relIso;
-  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP95relIso;
   std::auto_ptr<std::vector<int> >  fTElInGap; // seed crystal next to a gap
   std::auto_ptr<std::vector<int> >  fTElEcalDriven;
   std::auto_ptr<std::vector<int> >  fTElTrackerDriven;

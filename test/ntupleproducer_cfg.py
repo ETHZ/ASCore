@@ -126,9 +126,6 @@ if options.doVertexing==True:
     if options.perEvtMvaWeights=='':
         raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perEvtMvaWeights)')
     
-### Electron ID ##############################################################
-process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
-
 ### Jet/MET Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
 # Charged hadron subtraction (put that first, it loads many other things)

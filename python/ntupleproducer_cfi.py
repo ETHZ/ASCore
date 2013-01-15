@@ -14,7 +14,6 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_electrons    = cms.InputTag('gsfElectrons'),
         tag_elepfisosCustom = cms.VInputTag(''), # No defaults: set in _cfg.py
         tag_elepfisosEvent  = cms.VInputTag(''), # No defaults: set in _cfg.py
-	tag_elidWP       = cms.string('simpleEleId90relIso'),
 	tag_jets         = cms.InputTag('ak5PFJets'),
 	jetCorrs         = cms.string('ak5PFL1FastL2L3'),
 	tag_btags        = cms.VInputTag(''), # No defaults: set in _cfg.py
