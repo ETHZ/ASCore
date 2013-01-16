@@ -25,11 +25,11 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
 
   eegeom = TGeoPara(1,1,1,0,0,0);
 
-  // 020616 no cleaning numbers
+  // 020616 no cleaning numbers (superseded: should be updated with new ones after removing pf ch iso from presel) XXX
   float _binsdef_single_gamma_EB_eta[n_templates_EB+1] = {0,0.2,0.4,0.6,0.8,1,1.2,1.4442}; 
   float _binsdef_single_gamma_EE_eta[n_templates_EE+1] = {1.56,1.653,1.8,2,2.2,2.5};
   float _eff_areas_EB_photon_data[n_templates_EB] = {2.601118e-01,2.584915e-01,2.640072e-01,2.656851e-01,2.564615e-01,2.396511e-01,1.645776e-01};
-  float _eff_areas_EE_photon_data[n_templates_EE] = {5.783452e-02,8.321881e-02,1.177009e-01,1.422445e-01,1.139434e-01}'
+  float _eff_areas_EE_photon_data[n_templates_EE] = {5.783452e-02,8.321881e-02,1.177009e-01,1.422445e-01,1.139434e-01};
   float _eff_areas_EB_charged_data[n_templates_EB] = {2.526058e-02,2.619860e-02,2.118318e-02,2.078713e-02,2.066629e-02,1.908721e-02,1.732135e-02};
   float _eff_areas_EE_charged_data[n_templates_EE] = {1.538706e-02,1.737151e-02,1.410831e-02,1.558452e-02,1.056310e-02};
   float _eff_areas_EB_neutral_data[n_templates_EB] = {9.534780e-02,8.826486e-02,8.199201e-02,8.729101e-02,1.018310e-01,1.244805e-01,1.542784e-01};
@@ -308,18 +308,18 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("pholead_photonpfcanddphis",&pholead_photonpfcanddphis,"pholead_photonpfcanddphis[pholead_Npfcandphotonincone]/F");
   OutputTree[i]->Branch("pholead_chargedpfcanddphis",&pholead_chargedpfcanddphis,"pholead_chargedpfcanddphis[pholead_Npfcandchargedincone]/F");
   OutputTree[i]->Branch("pholead_neutralpfcanddphis",&pholead_neutralpfcanddphis,"pholead_neutralpfcanddphis[pholead_Npfcandneutralincone]/F");
-  OutputTree[i]->Branch("photrail_photonpfcandenergies",&photrail_photonpfcandenergies,"photrail_photonpfcandenergies[pholead_Npfcandphotonincone]/F");
-  OutputTree[i]->Branch("photrail_chargedpfcandenergies",&photrail_chargedpfcandenergies,"photrail_chargedpfcandenergies[pholead_Npfcandchargedincone]/F");
-  OutputTree[i]->Branch("photrail_neutralpfcandenergies",&photrail_neutralpfcandenergies,"photrail_neutralpfcandenergies[pholead_Npfcandneutralincone]/F");
-  OutputTree[i]->Branch("photrail_photonpfcandets",&photrail_photonpfcandets,"photrail_photonpfcandets[pholead_Npfcandphotonincone]/F");
-  OutputTree[i]->Branch("photrail_chargedpfcandets",&photrail_chargedpfcandets,"photrail_chargedpfcandets[pholead_Npfcandchargedincone]/F");
-  OutputTree[i]->Branch("photrail_neutralpfcandets",&photrail_neutralpfcandets,"photrail_neutralpfcandets[pholead_Npfcandneutralincone]/F");
-  OutputTree[i]->Branch("photrail_photonpfcanddetas",&photrail_photonpfcanddetas,"photrail_photonpfcanddetas[pholead_Npfcandphotonincone]/F");
-  OutputTree[i]->Branch("photrail_chargedpfcanddetas",&photrail_chargedpfcanddetas,"photrail_chargedpfcanddetas[pholead_Npfcandchargedincone]/F");
-  OutputTree[i]->Branch("photrail_neutralpfcanddetas",&photrail_neutralpfcanddetas,"photrail_neutralpfcanddetas[pholead_Npfcandneutralincone]/F");
-  OutputTree[i]->Branch("photrail_photonpfcanddphis",&photrail_photonpfcanddphis,"photrail_photonpfcanddphis[pholead_Npfcandphotonincone]/F");
-  OutputTree[i]->Branch("photrail_chargedpfcanddphis",&photrail_chargedpfcanddphis,"photrail_chargedpfcanddphis[pholead_Npfcandchargedincone]/F");
-  OutputTree[i]->Branch("photrail_neutralpfcanddphis",&photrail_neutralpfcanddphis,"photrail_neutralpfcanddphis[pholead_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcandenergies",&photrail_photonpfcandenergies,"photrail_photonpfcandenergies[photrail_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcandenergies",&photrail_chargedpfcandenergies,"photrail_chargedpfcandenergies[photrail_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcandenergies",&photrail_neutralpfcandenergies,"photrail_neutralpfcandenergies[photrail_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcandets",&photrail_photonpfcandets,"photrail_photonpfcandets[photrail_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcandets",&photrail_chargedpfcandets,"photrail_chargedpfcandets[photrail_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcandets",&photrail_neutralpfcandets,"photrail_neutralpfcandets[photrail_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcanddetas",&photrail_photonpfcanddetas,"photrail_photonpfcanddetas[photrail_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcanddetas",&photrail_chargedpfcanddetas,"photrail_chargedpfcanddetas[photrail_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcanddetas",&photrail_neutralpfcanddetas,"photrail_neutralpfcanddetas[photrail_Npfcandneutralincone]/F");
+  OutputTree[i]->Branch("photrail_photonpfcanddphis",&photrail_photonpfcanddphis,"photrail_photonpfcanddphis[photrail_Npfcandphotonincone]/F");
+  OutputTree[i]->Branch("photrail_chargedpfcanddphis",&photrail_chargedpfcanddphis,"photrail_chargedpfcanddphis[photrail_Npfcandchargedincone]/F");
+  OutputTree[i]->Branch("photrail_neutralpfcanddphis",&photrail_neutralpfcanddphis,"photrail_neutralpfcanddphis[photrail_Npfcandneutralincone]/F");
 
   }
 
@@ -342,7 +342,7 @@ void DiPhotonMiniTree::Analyze(){
 
   //     cout << "Analyze this event" << endl;
 
-
+  if (fTR->NSuperClusters==101) return;
 
     //    cout << "A" << endl;
 
@@ -402,9 +402,10 @@ void DiPhotonMiniTree::Analyze(){
   // sc area and scale factor calculation for isolation
   {
     float const conearea = TMath::Pi()*0.4*0.4;
+    //    std::cout << "nsc " << fTR->NSuperClusters << std::endl;
     for (int i=0; i<100; i++){
       if (i<fTR->NSuperClusters){
-	scarea[i] = CalculateSCArea(fTR,i);
+	scarea[i] = CalculateSCArea(fTR,i); 
 	scareaSF[i] = conearea/(conearea-scarea[i]);
 	if (scareaSF[i]<0) std::cout << "SC area larger than isolation cone!!!" << std::endl;
       }
@@ -743,12 +744,13 @@ std::vector<int> DiPhotonMiniTree::PhotonPreSelection(TreeReader *fTR, std::vect
     if (!pass) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // isolation cuts (filter)
-    float r9=fTR->SCR9[fTR->PhotSCindex[*it]];
-    bool pass=0;
-    if(fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[*it]<4) pass=1;
-    if (!pass) it=passing.erase(it); else it++;
-  }
+//  XXX EM ENRICHMENT PRESELECTION NOT APPLIED
+//  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // isolation cuts (filter)
+//    float r9=fTR->SCR9[fTR->PhotSCindex[*it]];
+//    bool pass=0;
+//    if(fTR->pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[*it]<4) pass=1;
+//    if (!pass) it=passing.erase(it); else it++;
+//  }
 
   return passing;
 
@@ -1066,7 +1068,7 @@ std::vector<int> DiPhotonMiniTree::GetPFCandWithFootprintRemoval(TreeReader *fTR
 
   bool isbarrel = fTR->PhoisEB[phoqi];
   int nxtals = fTR->SCNXtals[scindex];
-  
+
   std::vector<int> result;
 
   for (int i=0; i<fTR->NPfCand; i++){
@@ -1875,6 +1877,7 @@ void DiPhotonMiniTree::ResetVars(){
 };
 
 float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
+  //  std::cout << "call scarea " << scindex << " " << fTR->SCNXtals[scindex] << std::endl; // DEBUUUUG
   if (scindex>=fTR->NSuperClusters) return -999;
   float area=0;
   for (int i=0; i<fTR->SCNXtals[scindex]; i++) area+=fTR->SCxtalEtaWidth[scindex][i]*fTR->SCxtalPhiWidth[scindex][i];
