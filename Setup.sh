@@ -16,7 +16,7 @@ cd $CMSSW_BASE/src/
 # Pat: from SWGuidePATRecipes
 # tags from SWGuidePATReleaseNotes V08-09-11-00
 addpkg DataFormats/PatCandidates   V06-05-06-03
-addpkg PhysicsTools/PatAlgos       V08-09-42
+addpkg PhysicsTools/PatAlgos       V08-09-47
 addpkg CommonTools/ParticleFlow    V00-03-16
 
 # revert back to the tag we proposed originally and is in the official recipe:
@@ -25,16 +25,25 @@ addpkg RecoParticleFlow/PFProducer V15-02-06
 # Type1MET
 addpkg JetMETCorrections/Type1MET  V04-06-09
 addpkg PhysicsTools/PatUtils V03-09-26
-addpkg CommonTools/RecoUtils V00-00-12
+addpkg CommonTools/RecoUtils V00-00-13
+cvs co -r  V00-02-15 DataFormats/StdDictionaries
 
 # Updated Tau discriminators (not including advanced MVA isolation: breaks CHS postfix)
-cvs co -r V01-04-17 RecoTauTag/RecoTau       
-cvs co -r V01-04-03 RecoTauTag/Configuration 
+cvs co -r V01-04-23 RecoTauTag/RecoTau       
+cvs co -r V01-04-10 RecoTauTag/Configuration 
 cvs co -r V00-04-01 CondFormats/EgammaObjects
+#needed at the moment for AgainstMuonXXX2 --> will be in PhysicsTools/PatAlgos       V08-09-51
+cvs up -r 1.31.6.4 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cfi.py
+cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
-#  MET Filters
-cvs co -r V00-00-08      RecoMET/METAnalyzers                             
-cvs co -r V00-00-10      RecoMET/METFilters
+#  MET Filters (including tracking POG filters)
+cvs co -r V00-00-08      RecoMET/METAnalyzers
+cvs co -r V00-00-13      RecoMET/METFilters
+cvs co -r V00-03-23      CommonTools/RecoAlgos
+cvs co -r V01-00-11-01   DPGAnalysis/Skims
+cvs co -r V00-11-17      DPGAnalysis/SiStripTools
+cvs co -r V00-00-08      DataFormats/TrackerCommon
+cvs co -r V01-09-05      RecoLocalTracker/SubCollectionProducers
 
 # Parton Flavour
 cvs co -r V00-13-10 PhysicsTools/JetMCAlgos
@@ -68,5 +77,6 @@ cvs co -r V00-02c -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/P
 #####################################################################################################################################
 
 echo "Everything has been set up. You can compile now (scramv1 b -j2) or modify the recipe to your likings"
+echo "Maybe you need to do a 'scramv1 b clean' first due to new DataFormats/StdDictionaries"
 
 exit 0

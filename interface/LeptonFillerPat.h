@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5.2.7 2012/05/21 18:11:41 paktinat Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.8 2012/05/24 12:21:46 paktinat Exp $
 //
 //
 
@@ -124,18 +124,32 @@ private:
   std::auto_ptr<std::vector<float> >  fTLooseCombinedIsoDBSumPtCorr;
   std::auto_ptr<std::vector<float> >  fTTightCombinedIsoDBSumPtCorr;
   std::auto_ptr<std::vector<float> >  fTMediumCombinedIsoDBSumPtCorr;
+  std::auto_ptr<std::vector<float> >  fTLooseCombinedIsoDBSumPtCorr3Hits;//new
+  std::auto_ptr<std::vector<float> >  fTTightCombinedIsoDBSumPtCorr3Hits;//new
+  std::auto_ptr<std::vector<float> >  fTMediumCombinedIsoDBSumPtCorr3Hits;//new
   std::auto_ptr<std::vector<float> >  fTLooseElectronRejection;
   std::auto_ptr<std::vector<float> >  fTTightElectronRejection;
   std::auto_ptr<std::vector<float> >  fTMediumElectronRejection;  
   std::auto_ptr<std::vector<float> >  fTElectronMVARejection;
+  std::auto_ptr<std::vector<float> >  fTLooseElectronMVA3Rejection;//new
+  std::auto_ptr<std::vector<float> >  fTMediumElectronMVA3Rejection;//new
+  std::auto_ptr<std::vector<float> >  fTTightElectronMVA3Rejection;//new
+  std::auto_ptr<std::vector<float> >  fTVTightElectronMVA3Rejection;//new
   std::auto_ptr<std::vector<float> >  fTLooseMuonRejection;
   std::auto_ptr<std::vector<float> >  fTMediumMuonRejection;
   std::auto_ptr<std::vector<float> >  fTTightMuonRejection;
+  std::auto_ptr<std::vector<float> >  fTLooseMuon2Rejection;//new
+  std::auto_ptr<std::vector<float> >  fTMediumMuon2Rejection;//new
+  std::auto_ptr<std::vector<float> >  fTTightMuon2Rejection;//new
   //new 2012 ID's
   std::auto_ptr<std::vector<float> >  fTIsolationMVAraw;
   std::auto_ptr<std::vector<float> >  fTLooseIsolationMVA;
   std::auto_ptr<std::vector<float> >  fTMediumIsolationMVA;
   std::auto_ptr<std::vector<float> >  fTTightIsolationMVA;
+  std::auto_ptr<std::vector<float> >  fTIsolationMVA2raw;//new
+  std::auto_ptr<std::vector<float> >  fTLooseIsolationMVA2;//new
+  std::auto_ptr<std::vector<float> >  fTMediumIsolationMVA2;//new
+  std::auto_ptr<std::vector<float> >  fTTightIsolationMVA2;//new
 
   std::auto_ptr<std::vector<int> >    fTID80;
   std::auto_ptr<std::vector<int> >    fTID85;
@@ -300,17 +314,31 @@ const std::vector<filler::PPair> LeptonFillerPat<LeptonType>::declareProducts(vo
     addProduct("LooseCombinedIsoDBSumPtCorr",  typeid(*fTLooseCombinedIsoDBSumPtCorr));
     addProduct("TightCombinedIsoDBSumPtCorr",  typeid(*fTTightCombinedIsoDBSumPtCorr));
     addProduct("MediumCombinedIsoDBSumPtCorr", typeid(*fTMediumCombinedIsoDBSumPtCorr));
+    addProduct("LooseCombinedIsoDBSumPtCorr3Hits",  typeid(*fTLooseCombinedIsoDBSumPtCorr3Hits));
+    addProduct("TightCombinedIsoDBSumPtCorr3Hits",  typeid(*fTTightCombinedIsoDBSumPtCorr3Hits));
+    addProduct("MediumCombinedIsoDBSumPtCorr3Hits", typeid(*fTMediumCombinedIsoDBSumPtCorr3Hits));
     addProduct("IsolationMVAraw", typeid(*fTIsolationMVAraw));
     addProduct("LooseIsolationMVA", typeid(*fTLooseIsolationMVA));
     addProduct("MediumIsolationMVA", typeid(*fTMediumIsolationMVA));
     addProduct("TightIsolationMVA", typeid(*fTTightIsolationMVA));
+    addProduct("IsolationMVA2raw", typeid(*fTIsolationMVA2raw));
+    addProduct("LooseIsolationMVA2", typeid(*fTLooseIsolationMVA2));
+    addProduct("MediumIsolationMVA2", typeid(*fTMediumIsolationMVA2));
+    addProduct("TightIsolationMVA2", typeid(*fTTightIsolationMVA2));
     addProduct("LooseElectronRejection", typeid(*fTLooseElectronRejection));
     addProduct("TightElectronRejection", typeid(*fTTightElectronRejection));
     addProduct("MediumElectronRejection",typeid(*fTMediumElectronRejection));
     addProduct("ElectronMVARejection",typeid(*fTElectronMVARejection));
+    addProduct("LooseElectronMVA3Rejection",typeid(*fTLooseElectronMVA3Rejection));
+    addProduct("MediumElectronMVA3Rejection",typeid(*fTMediumElectronMVA3Rejection));
+    addProduct("TightElectronMVA3Rejection",typeid(*fTTightElectronMVA3Rejection));
+    addProduct("VTightElectronMVA3Rejection",typeid(*fTVTightElectronMVA3Rejection));
     addProduct("LooseMuonRejection", typeid(*fTLooseMuonRejection));
     addProduct("MediumMuonRejection", typeid(*fTMediumMuonRejection));
     addProduct("TightMuonRejection", typeid(*fTTightMuonRejection));
+    addProduct("LooseMuon2Rejection", typeid(*fTLooseMuon2Rejection));
+    addProduct("MediumMuon2Rejection", typeid(*fTMediumMuon2Rejection));
+    addProduct("TightMuon2Rejection", typeid(*fTTightMuon2Rejection));
   }else if(fType == El){
     addProduct("ID95", typeid(*fTID95));
     addProduct("ID90", typeid(*fTID90));
@@ -388,17 +416,31 @@ void LeptonFillerPat<LeptonType>::putProducts(edm::Event& e) {
     e.put(fTLooseCombinedIsoDBSumPtCorr,fullName("LooseCombinedIsoDBSumPtCorr"));
     e.put(fTTightCombinedIsoDBSumPtCorr,fullName("TightCombinedIsoDBSumPtCorr"));
     e.put(fTMediumCombinedIsoDBSumPtCorr,fullName("MediumCombinedIsoDBSumPtCorr"));
+    e.put(fTLooseCombinedIsoDBSumPtCorr3Hits,fullName("LooseCombinedIsoDBSumPtCorr3Hits"));
+    e.put(fTTightCombinedIsoDBSumPtCorr3Hits,fullName("TightCombinedIsoDBSumPtCorr3Hits"));
+    e.put(fTMediumCombinedIsoDBSumPtCorr3Hits,fullName("MediumCombinedIsoDBSumPtCorr3Hits"));
     e.put(fTIsolationMVAraw,fullName("IsolationMVAraw"));
     e.put(fTLooseIsolationMVA,fullName("LooseIsolationMVA"));
     e.put(fTMediumIsolationMVA,fullName("MediumIsolationMVA"));
     e.put(fTTightIsolationMVA,fullName("TightIsolationMVA"));
+    e.put(fTIsolationMVA2raw,fullName("IsolationMVA2raw"));
+    e.put(fTLooseIsolationMVA2,fullName("LooseIsolationMVA2"));
+    e.put(fTMediumIsolationMVA2,fullName("MediumIsolationMVA2"));
+    e.put(fTTightIsolationMVA2,fullName("TightIsolationMVA2"));
     e.put(fTLooseElectronRejection,fullName("LooseElectronRejection"));
     e.put(fTTightElectronRejection,fullName("TightElectronRejection"));
     e.put(fTMediumElectronRejection,fullName("MediumElectronRejection"));
     e.put(fTElectronMVARejection, fullName("ElectronMVARejection"));
+    e.put(fTLooseElectronMVA3Rejection, fullName("LooseElectronMVA3Rejection"));
+    e.put(fTMediumElectronMVA3Rejection, fullName("MediumElectronMVA3Rejection"));
+    e.put(fTTightElectronMVA3Rejection, fullName("TightElectronMVA3Rejection"));
+    e.put(fTVTightElectronMVA3Rejection, fullName("VTightElectronMVA3Rejection"));
     e.put(fTLooseMuonRejection,fullName("LooseMuonRejection"));
     e.put(fTMediumMuonRejection,fullName("MediumMuonRejection"));
     e.put(fTTightMuonRejection,fullName("TightMuonRejection"));
+    e.put(fTLooseMuon2Rejection,fullName("LooseMuon2Rejection"));
+    e.put(fTMediumMuon2Rejection,fullName("MediumMuon2Rejection"));
+    e.put(fTTightMuon2Rejection,fullName("TightMuon2Rejection"));
   }else if(fType == El){
     e.put(fTID95,fullName("ID95"));
     e.put(fTID90,fullName("ID90"));
@@ -475,17 +517,31 @@ void LeptonFillerPat<LeptonType>::resetProducts(void) {
     fTLooseCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
     fTTightCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
     fTMediumCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
+    fTLooseCombinedIsoDBSumPtCorr3Hits.reset(new std::vector<float>);
+    fTTightCombinedIsoDBSumPtCorr3Hits.reset(new std::vector<float>);
+    fTMediumCombinedIsoDBSumPtCorr3Hits.reset(new std::vector<float>);
     fTIsolationMVAraw.reset(new std::vector<float>);
     fTLooseIsolationMVA.reset(new std::vector<float>);
     fTMediumIsolationMVA.reset(new std::vector<float>);
     fTTightIsolationMVA.reset(new std::vector<float>);
+    fTIsolationMVA2raw.reset(new std::vector<float>);
+    fTLooseIsolationMVA2.reset(new std::vector<float>);
+    fTMediumIsolationMVA2.reset(new std::vector<float>);
+    fTTightIsolationMVA2.reset(new std::vector<float>);
     fTLooseElectronRejection.reset(new std::vector<float>);
     fTTightElectronRejection.reset(new std::vector<float>);
     fTMediumElectronRejection.reset(new std::vector<float>);
     fTElectronMVARejection.reset(new std::vector<float>);
+    fTLooseElectronMVA3Rejection.reset(new std::vector<float>);
+    fTMediumElectronMVA3Rejection.reset(new std::vector<float>);
+    fTTightElectronMVA3Rejection.reset(new std::vector<float>);
+    fTVTightElectronMVA3Rejection.reset(new std::vector<float>);
     fTLooseMuonRejection.reset(new std::vector<float>);
     fTMediumMuonRejection.reset(new std::vector<float>);
     fTTightMuonRejection.reset(new std::vector<float>);
+    fTLooseMuon2Rejection.reset(new std::vector<float>);
+    fTMediumMuon2Rejection.reset(new std::vector<float>);
+    fTTightMuon2Rejection.reset(new std::vector<float>);
   }else if(fType == El){
     fTID95.reset(new std::vector<int>);
     fTID90.reset(new std::vector<int>);
@@ -546,19 +602,33 @@ void LeptonFillerPat<pat::Tau>::getSpecific(const pat::Tau& lepton){
   fTLooseCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byLooseCombinedIsolationDBSumPtCorr") );
   fTTightCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byTightCombinedIsolationDBSumPtCorr") );
   fTMediumCombinedIsoDBSumPtCorr->push_back( lepton.tauID("byMediumCombinedIsolationDBSumPtCorr") );
+  fTLooseCombinedIsoDBSumPtCorr3Hits ->push_back( lepton.tauID("byLooseCombinedIsolationDBSumPtCorr3Hits") );
+  fTTightCombinedIsoDBSumPtCorr3Hits ->push_back( lepton.tauID("byTightCombinedIsolationDBSumPtCorr3Hits") );
+  fTMediumCombinedIsoDBSumPtCorr3Hits->push_back( lepton.tauID("byMediumCombinedIsolationDBSumPtCorr3Hits") );
   fTIsolationMVAraw->push_back( lepton.tauID("byIsolationMVAraw") );
   fTLooseIsolationMVA->push_back( lepton.tauID("byLooseIsolationMVA") );
   fTMediumIsolationMVA->push_back( lepton.tauID("byMediumIsolationMVA") );
   fTTightIsolationMVA->push_back( lepton.tauID("byTightIsolationMVA") );
+  fTIsolationMVA2raw->push_back( lepton.tauID("byIsolationMVA2raw") );
+  fTLooseIsolationMVA2->push_back( lepton.tauID("byLooseIsolationMVA2") );
+  fTMediumIsolationMVA2->push_back( lepton.tauID("byMediumIsolationMVA2") );
+  fTTightIsolationMVA2->push_back( lepton.tauID("byTightIsolationMVA2") );
 
   fTLooseElectronRejection ->push_back( lepton.tauID("againstElectronLoose") );
   fTTightElectronRejection ->push_back( lepton.tauID("againstElectronTight") );
   fTMediumElectronRejection->push_back( lepton.tauID("againstElectronMedium") );
   fTElectronMVARejection->push_back( lepton.tauID("againstElectronMVA") );
+  fTLooseElectronMVA3Rejection->push_back( lepton.tauID("againstElectronLooseMVA3") );
+  fTMediumElectronMVA3Rejection->push_back( lepton.tauID("againstElectronMediumMVA3") );
+  fTTightElectronMVA3Rejection->push_back( lepton.tauID("againstElectronTightMVA3") );
+  fTVTightElectronMVA3Rejection->push_back( lepton.tauID("againstElectronVTightMVA3") );
 
   fTLooseMuonRejection->push_back( lepton.tauID("againstMuonLoose") );
   fTMediumMuonRejection->push_back( lepton.tauID("againstMuonMedium") );
   fTTightMuonRejection->push_back( lepton.tauID("againstMuonTight") );
+  fTLooseMuon2Rejection->push_back( lepton.tauID("againstMuonLoose2") );
+  fTMediumMuon2Rejection->push_back( lepton.tauID("againstMuonMedium2") );
+  fTTightMuon2Rejection->push_back( lepton.tauID("againstMuonTight2") );
   return;
 }
 

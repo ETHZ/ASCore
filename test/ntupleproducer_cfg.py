@@ -208,6 +208,14 @@ process.trackingFailureFilter.taggingMode = True
 process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
 process.ecalLaserCorrFilter.taggingMode = True
 
+## The tracking POG filters __________________________________________________||
+process.load('RecoMET.METFilters.trackingPOGFilters_cff')
+process.manystripclus53X.taggedMode = cms.untracked.bool(True)
+process.manystripclus53X.forcedValue = cms.untracked.bool(False)
+process.toomanystripclus53X.taggedMode = cms.untracked.bool(True)
+process.toomanystripclus53X.forcedValue = cms.untracked.bool(False)
+process.logErrorTooManyClusters.taggedMode = cms.untracked.bool(True)
+process.logErrorTooManyClusters.forcedValue = cms.untracked.bool(False)
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
@@ -482,6 +490,7 @@ process.analyze.tag_elepfisosCustom  = ['electronPFIsoChHad03'    , 'electronPFI
 
 ####################################################################################
 ### Tau ID
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
 from PhysicsTools.PatAlgos.patSequences_cff import tauIsoDepositPFCandidates,tauIsoDepositPFChargedHadrons,tauIsoDepositPFNeutralHadrons,tauIsoDepositPFGammas,patTaus
 process.tauIsoDepositPFCandidates = tauIsoDepositPFCandidates.clone()
 process.tauIsoDepositPFChargedHadrons = tauIsoDepositPFChargedHadrons.clone()
@@ -515,10 +524,9 @@ process.patTaus.tauIDSources = cms.PSet(
     byMediumCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr"),
     byTightCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"),
     #new 2012 ID's
-    byIsolationMVAraw  = cms.InputTag("hpsPFTauDiscriminationByIsolationMVAraw"),
-    byLooseIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByLooseIsolationMVA"),
-    byMediumIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationMVA"),
-    byTightIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByTightIsolationMVA"),
+    byLooseCombinedIsolationDBSumPtCorr3Hits = cms.InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr3Hits"),
+    byMediumCombinedIsolationDBSumPtCorr3Hits = cms.InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr3Hits"),
+    byTightCombinedIsolationDBSumPtCorr3Hits = cms.InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr3Hits"),
     )
 #Only an obvious and loose selection
 process.selectedNewTaus = cms.EDFilter("PATTauSelector",
@@ -587,6 +595,7 @@ process.p = cms.Path(
 	+ process.trackingFailureFilter                      # tagging mode
 	+ process.eeBadScFilter                              # tagging mode
         + process.ecalLaserCorrFilter                        # tagging mode
+	+ process.trkPOGFilters                              # tagging mode
 #	+ process.dump  
 	# end cleaning 
 	+ process.pfIsolationAllSequence
@@ -598,13 +607,15 @@ process.p = cms.Path(
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
         + process.phoIsoSequence
-        + process.PFTau
+	+ process.recoTauClassicHPSSequence
+	+ process.PFTau
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
         + process.sc_sequence
  	+ process.analyze
        	)
    )
+   
 
 process.out.outputCommands = ['drop *', 
                               'keep *_analyze_*_'+process.name_(),
@@ -613,7 +624,10 @@ process.out.outputCommands = ['drop *',
 			      'keep *_hcalLaserEventFilter_*_'+process.name_(),
 			      'keep *_trackingFailureFilter_*_'+process.name_(),
 			      'keep *_eeBadScFilter_*_'+process.name_(),
-			      'keep *_ecalLaserCorrFilter_*_'+process.name_()
+			      'keep *_ecalLaserCorrFilter_*_'+process.name_(),
+			      'keep *_manystripclus53X_*_'+process.name_(),
+			      'keep *_toomanystripclus53X_*_'+process.name_(),
+			      'keep *_logErrorTooManyClusters_*_'+process.name_()
 			      ] 
 
 
