@@ -594,7 +594,6 @@ process.p = cms.Path(
 	+ process.newBtaggingSequence
 	+ process.newPFBtaggingSequence
        	+ process.mygenjets
-       	+ process.simpleEleIdSequence
        	+ process.metCorSequence
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
