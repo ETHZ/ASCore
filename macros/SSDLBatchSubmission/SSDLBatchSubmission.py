@@ -61,6 +61,7 @@ def mk_dir_string(line):
 		files.append(dcap_path+file.split()[1])
 	strings = []
 	for file in files:
+		if not '.root' in file: continue
 		indiv_dir = line.split()[0]+'_'+file.split('/')[-1].replace('.root','')
 		strings.append(mk_single_string(line, file, indiv_dir))
 	print '[status] found', len(strings), 'files for directory', line.split()[0]
@@ -77,7 +78,6 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 	string = dumper_location + ' -v 1 -p '+dumper_config+' '
 	if not full_location:
 		string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+ line.split()[1]
-		#string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+ line.split()[1]
 	else:
 		string+=' -i '+ full_location
 	string+= ' -n '+line.split()[0]
@@ -295,10 +295,11 @@ def do_stuff(config_name):
 				tmpScript.writelines(line)
 		tmpScript.close()
 		#os.system('qsub -q all.q  -N job_'+str(ind)+' '+tmpScript_name)
-		print commit
+		## print commit ## this would print the ./RunSSDLDumper-command. good for debugging
 		if not dryrun:
 			#os.system('qsub -q all.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
-			os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
+			##os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
+			os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name+' > /dev/null')
 			jobnames.append('ssdl_'+str(ind))
 	print '[status] submitted', len(commit_strings), 'jobs'
 
@@ -311,7 +312,7 @@ def do_stuff(config_name):
 		## if not time_elapsed%60:
 		## 	print_status(time_elapsed, jobnames)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
-
+	
 	if not dryrun:
 		if check_commands():
 			merge_and_clean()
