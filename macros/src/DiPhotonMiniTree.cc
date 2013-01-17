@@ -832,17 +832,17 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<
     if (!pass) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-    bool pass=1;
-    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-    float phi=fTR->SCPhi[fTR->PhotSCindex[*it]];
-    for (int i=0; i<fTR->NMus; i++){
-      float mueta = fTR->MuEta[i];
-      float muphi = fTR->MuPhi[i];
-      if (Util::GetDeltaR(mueta,eta,muphi,phi)<0.4) pass=0;
-    }
-    if (!pass) it=passing.erase(it); else it++;
-  }
+//  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+//    bool pass=1;
+//    float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+//    float phi=fTR->SCPhi[fTR->PhotSCindex[*it]];
+//    for (int i=0; i<fTR->NMus; i++){
+//      float mueta = fTR->MuEta[i];
+//      float muphi = fTR->MuPhi[i];
+//      if (Util::GetDeltaR(mueta,eta,muphi,phi)<0.4) pass=0;
+//    }
+//    if (!pass) it=passing.erase(it); else it++;
+//  }
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     bool pass=0;
@@ -1885,6 +1885,7 @@ float DiPhotonMiniTree::CalculateSCArea(TreeReader *fTR, int scindex){
 };
 
 float DiPhotonMiniTree::GetPUEnergy(TreeReader *fTR, TString mode, float eta){
+  return 0; /// XXX
 
   eta=fabs(eta);
   bool isbarrel = (eta<1.4442);
