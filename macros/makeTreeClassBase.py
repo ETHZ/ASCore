@@ -4,7 +4,16 @@
 # 
 # This should be called within the macros/ directory, giving
 # a rootfile containing the desired version of the Ntuples as
-# an argument
+# an argument.
+# 
+# A second optional argument can be given to reduce the number
+# of branches. This argument is the name of a text file containing
+# the desired branches (one branch per line), as produced by the
+# getBranches.pl script. Only branches that are in this list are
+# then added to the output (only the branches that are already
+# in the rootfile are added).
+# 
+# The outputs are the TreeClassBase header and implementation files.
 #______________________________________________________________
 
 
@@ -12,13 +21,15 @@ import sys, subprocess, os,re
 from datetime import datetime
 #from ROOT import TTree, TFile, gDirectory
 
-usage = "Usage: makeTreeClassBase.py filename.root"
+usage = "Usage: makeTreeClassBase.py filename.root [list]"
 
 if len(sys.argv) < 2:
     print usage
     exit(1)
 
 FILENAME = sys.argv[1]
+INCLIST = ''
+if len(sys.argv)>2: INCLIST = sys.argv[2]
 CLASSNAME = 'TreeClassBase'
 HEADERNAME = CLASSNAME + '.hh'
 SOURCENAME = CLASSNAME + '.cc'
@@ -132,19 +143,30 @@ def processHeader(rBranches,eBranches):
     
     
 #______________________________________________________________
-def getBranches(file,tree):
+def getBranches(file,tree,include=''):
     cmd = ['edmFileUtil','-P','-t',tree,file]
     run = subprocess.Popen(cmd,stdout=subprocess.PIPE)
     output = run.communicate()[0]
     if run.returncode:
         print >>sys.stderr,"*** Error while parsing file:",output
         return []
+
+    # If list of branches to include is provided, check against it
+    docheck = (len(include)>0)
+    if docheck:
+        list = open(include).read().splitlines()
+
     branches = dict()
     pattern  = re.compile(r".*?(\w+)_(\S+)_(\S*)_NTupleProducer.*")
     for line in output.split('\n'):
         m  = re.match(pattern,line)
         if m:
-            branches[(m.group(3),m.group(2))] = m.group(1)
+            type = m.group(1)
+            module = m.group(2)
+            branch = m.group(3)
+            if docheck and (list.count(branch)==0 and list.count(module)==0): continue
+            branches[(branch,module)] = type
+
 	
     return branches
 
@@ -153,7 +175,7 @@ if __name__=='__main__':
 
     print 'Processing input file...'
     runBranches = getBranches(FILENAME,'Runs')
-    eventBranches = getBranches(FILENAME,'Events')
+    eventBranches = getBranches(FILENAME,'Events',INCLIST)
     print '  -> Found',len(runBranches),'run branches',
     print 'and',len(eventBranches),'event branches'
 
