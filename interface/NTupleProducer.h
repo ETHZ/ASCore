@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.35 2012/12/20 16:43:02 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114.2.36 2013/01/15 16:33:50 mdunser Exp $
 //
 //
 
@@ -760,6 +760,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTElEoPout;
   std::auto_ptr<std::vector<float> >  fTElIoEmIoP;
   std::auto_ptr<std::vector<float> >  fTElHcalOverEcal;
+  std::auto_ptr<std::vector<float> >  fTElHcalOverEcalBc;
   std::auto_ptr<std::vector<float> >  fTElE1x5;                       // 5x5 arround seed                                     
   std::auto_ptr<std::vector<float> >  fTElE5x5;                       // 5x5 arround seed                                     
   std::auto_ptr<std::vector<float> >  fTElE2x5Max;                    // 2x5 arround seed                                     
@@ -839,6 +840,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoHoverE;
   std::auto_ptr<std::vector<float> >  fTPhoH1overE;
   std::auto_ptr<std::vector<float> >  fTPhoH2overE;
+  std::auto_ptr<std::vector<float> >  fTPhoHoverE2012;
   std::auto_ptr<std::vector<float> >  fTPhoSigmaIetaIeta;
   std::auto_ptr<std::vector<float> >  fTPhoSCRawEnergy;
   std::auto_ptr<std::vector<float> >  fTPhoSCEtaWidth;

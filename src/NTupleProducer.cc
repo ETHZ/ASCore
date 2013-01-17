@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.44 2013/01/15 16:33:46 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.45 2013/01/15 17:28:45 peruzzi Exp $
 //
 //
 
@@ -1793,6 +1793,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElBasicClustersSize         ->push_back(electron.basicClustersSize());
       fTElfbrem                     ->push_back(electron.fbrem());
       fTElHcalOverEcal              ->push_back(electron.hcalOverEcal());
+      fTElHcalOverEcalBc            ->push_back(electron.hcalOverEcalBc());
       fTElE1x5                      ->push_back(electron.e1x5());
       fTElE5x5                      ->push_back(electron.e5x5());
       fTElE2x5Max                   ->push_back(electron.e2x5Max());
@@ -2037,6 +2038,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoHoverE          ->push_back(photon.hadronicOverEm());
     fTPhoH1overE         ->push_back(photon.hadronicDepth1OverEm());
     fTPhoH2overE         ->push_back(photon.hadronicDepth2OverEm());
+    fTPhoHoverE2012      ->push_back(photon.hadTowOverEm());
     fTPhoSigmaIetaIeta   ->push_back(photon.sigmaIetaIeta());
     fTPhoSigmaEtaEta     ->push_back(photon.sigmaEtaEta());
     fTPhoVx             ->push_back(photon.vx());
@@ -3992,6 +3994,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("ElBasicClustersSize");
   produces<std::vector<float> >("Elfbrem");
   produces<std::vector<float> >("ElHcalOverEcal");
+  produces<std::vector<float> >("ElHcalOverEcalBc");
   produces<std::vector<float> >("ElE1x5");
   produces<std::vector<float> >("ElE5x5");
   produces<std::vector<float> >("ElE2x5Max");
@@ -4067,6 +4070,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PhoHoverE");
   produces<std::vector<float> >("PhoH1overE");
   produces<std::vector<float> >("PhoH2overE");
+  produces<std::vector<float> >("PhoHoverE2012");
   produces<std::vector<float> >("PhoSigmaIetaIeta");
   produces<std::vector<float> >("PhoSCRawEnergy");
   produces<std::vector<float> >("PhoSCEtaWidth");
@@ -4738,6 +4742,7 @@ void NTupleProducer::resetProducts( void ) {
   fTElBasicClustersSize.reset(new std::vector<int> );
   fTElfbrem.reset(new std::vector<float> );
   fTElHcalOverEcal.reset(new std::vector<float> );
+  fTElHcalOverEcalBc.reset(new std::vector<float> );
   fTElE1x5.reset(new std::vector<float> );
   fTElE5x5.reset(new std::vector<float> );
   fTElE2x5Max.reset(new std::vector<float> );
@@ -4815,6 +4820,7 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoHoverE.reset(new std::vector<float> );
   fTPhoH1overE.reset(new std::vector<float> );
   fTPhoH2overE.reset(new std::vector<float> );
+  fTPhoHoverE2012.reset(new std::vector<float> );
   fTPhoSigmaIetaIeta.reset(new std::vector<float> );
   fTPhoSCRawEnergy.reset(new std::vector<float> );
   fTPhoSCEtaWidth.reset(new std::vector<float> );
@@ -5549,6 +5555,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElBasicClustersSize, "ElBasicClustersSize");
   event.put(fTElfbrem, "Elfbrem");
   event.put(fTElHcalOverEcal, "ElHcalOverEcal");
+  event.put(fTElHcalOverEcalBc, "ElHcalOverEcalBc");
   event.put(fTElE1x5, "ElE1x5");
   event.put(fTElE5x5, "ElE5x5");
   event.put(fTElE2x5Max, "ElE2x5Max");
@@ -5626,6 +5633,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoHoverE, "PhoHoverE");
   event.put(fTPhoH1overE, "PhoH1overE");
   event.put(fTPhoH2overE, "PhoH2overE");
+  event.put(fTPhoHoverE2012, "PhoHoverE2012");
   event.put(fTPhoSigmaIetaIeta, "PhoSigmaIetaIeta");
   event.put(fTPhoSCRawEnergy, "PhoSCRawEnergy");
   event.put(fTPhoSCEtaWidth, "PhoSCEtaWidth");
