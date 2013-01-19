@@ -456,7 +456,7 @@ void DiPhotonMiniTree::Analyze(){
       }
       passing = PhotonPreSelection(fTR,passing);
     }
-
+    
     // comment this block for the noselection running
     if (sel_cat!=7 && sel_cat!=11) { // only presel cat7 
 
@@ -474,7 +474,7 @@ void DiPhotonMiniTree::Analyze(){
 //      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
       
     }
-
+    
 
     if (sel_cat==0 || sel_cat==3 || sel_cat==5 || sel_cat==13){ // diphoton cats
       pass[sel_cat] = StandardEventSelection(fTR,passing);
@@ -678,7 +678,8 @@ std::vector<int> DiPhotonMiniTree::ApplyPixelVeto(TreeReader *fTR, vector<int> p
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // Pixel veto (conversion safe)
     int wantpixelseed;
     if (forelectron) wantpixelseed=1; else wantpixelseed=0; 
-    if (fTR->PhoPassConvSafeElectronVeto[*it]==wantpixelseed) it=passing.erase(it); else it++;
+    if (fTR->PhoHasPixSeed[*it]!=wantpixelseed) it=passing.erase(it); else it++;
+    //    if (fTR->PhoPassConvSafeElectronVeto[*it]==wantpixelseed) it=passing.erase(it); else it++;
   }
 
   return passing;
