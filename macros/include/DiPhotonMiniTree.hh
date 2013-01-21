@@ -161,7 +161,9 @@ private:
 
   int impinging_track_pfcand[100];
 
-  TTree* OutputTree[14];
+  TString treename[18];
+  bool is2d[18];
+  TTree* OutputTree[18];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
@@ -174,7 +176,7 @@ private:
   Int_t event_PUOOTnumInteractionsEarly;
   Int_t event_PUOOTnumInteractionsLate;
   Int_t event_nRecVtx;
-  Int_t event_pass12whoisrcone;
+  Int_t event_pass12whoissiglike;
   
   Int_t event_CSCTightHaloID;
   Int_t event_NMuons;

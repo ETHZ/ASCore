@@ -26,6 +26,7 @@ DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t
   eegeom = TGeoPara(1,1,1,0,0,0);
 
   // 020616 no cleaning numbers (superseded: should be updated with new ones after removing pf ch iso from presel) XXX
+  // EA SET TO ZERO HARDCODED BELOW, these values are ignored;
   float _binsdef_single_gamma_EB_eta[n_templates_EB+1] = {0,0.2,0.4,0.6,0.8,1,1.2,1.4442}; 
   float _binsdef_single_gamma_EE_eta[n_templates_EE+1] = {1.56,1.653,1.8,2,2.2,2.5};
   float _eff_areas_EB_photon_data[n_templates_EB] = {2.601118e-01,2.584915e-01,2.640072e-01,2.656851e-01,2.564615e-01,2.396511e-01,1.645776e-01};
@@ -85,25 +86,31 @@ void DiPhotonMiniTree::Begin(){
 
   fOutputFile->cd();
 
-  OutputTree[0] = new TTree("Tree_standard_sel","Tree_standard_sel");
-  OutputTree[1] = new TTree("Tree_signal_template","Tree_signal_template");
-  OutputTree[2] = new TTree("Tree_background_template","Tree_background_template");
-  OutputTree[3] = new TTree("Tree_DY_sel","Tree_DY_sel");
-  OutputTree[4] = new TTree("Tree_randomcone_signal_template","Tree_randomcone_signal_template");
-  OutputTree[5] = new TTree("Tree_doublerandomcone_sel", "Tree_doublerandomcone_sel");
-  OutputTree[6] = new TTree("Tree_DYnocombisowithinvmasscut_sel","Tree_DYnocombisowithinvmasscut_sel");
-  OutputTree[7] = new TTree("Tree_onlypreselection","Tree_onlypreselection");
-  OutputTree[8] = new TTree("Tree_sieiesideband_sel","Tree_sieiesideband_sel");
-  OutputTree[9] = new TTree("Tree_nocombisocut_sel","Tree_nocombisocut_sel");
-  OutputTree[10] = new TTree("Tree_randomcone_nocombisocut","Tree_randomcone_nocombisocut");
-  OutputTree[11] = new TTree("Tree_muoncone","Tree_muoncone");
-  OutputTree[12] = new TTree("Tree_randomconesideband_sel","Tree_randomconesideband_sel");
-  OutputTree[13] = new TTree("Tree_doublesieiesideband_sel","Tree_doublesieiesideband_sel");
+  treename[0] = TString("Tree_2Dstandard_selection");
+  treename[1] = TString("Tree_1Drandomcone_template");
+  treename[2] = TString("Tree_1Dsideband_template");
+  treename[3] = TString("Tree_2DZee_pixelvetoreversed_selection");
+  treename[4] = TString("Tree_1Dpreselection");
+  treename[5] = TString("Tree_1Dselection");
+  treename[6] = TString("Tree_2Drandomcone_template");
+  treename[7] = TString("Tree_2Drandomconesideband_template");
+  treename[8] = TString("Tree_2Dsideband_template");
+  treename[9] = TString("Tree_2Dstandard_preselection");
+  treename[10] = TString("Tree_2DZmumu_selection");
+  treename[11] = TString("Tree_1Dsignal_template");
+  treename[12] = TString("Tree_1Dbackground_template");
+  treename[13] = TString("Tree_2Dtruesigsig_template");
+  treename[14] = TString("Tree_2Dtruesigbkg_template");
+  treename[15] = TString("Tree_2Dtruebkgbkg_template");
+  treename[16] = TString("Tree_2Drconeplusgenfake_template");
+  treename[17] = TString("Tree_2Dgenpromptplussideband_template");
 
+  for (int i=0; i<18; i++){
+    OutputTree[i] = new TTree(treename[i].Data(),treename[i].Data());
+    is2d[i] = (treename[i].First("2")>-1);
+  }
 
-  //  histo_PFPhotonDepositAroundImpingingTrack = new TH1F("PFPhotonDepositAroundImpingingTrack","PFPhotonDepositAroundImpingingTrack",50,0,0.2);
-
-  for (int i=0; i<14; i++){
+  for (int i=0; i<18; i++){
 
   OutputTree[i]->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
   OutputTree[i]->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
@@ -116,7 +123,7 @@ void DiPhotonMiniTree::Begin(){
   OutputTree[i]->Branch("event_PUOOTnumInteractionsEarly",&event_PUOOTnumInteractionsEarly,"event_PUOOTnumInteractionsEarly/I");
   OutputTree[i]->Branch("event_PUOOTnumInteractionsLate",&event_PUOOTnumInteractionsLate,"event_PUOOTnumInteractionsLate/I");
   OutputTree[i]->Branch("event_nRecVtx",&event_nRecVtx,"event_nRecVtx/I");
-  OutputTree[i]->Branch("event_pass12whoisrcone",&event_pass12whoisrcone,"event_pass12whoisrcone/I");
+  OutputTree[i]->Branch("event_pass12whoissiglike",&event_pass12whoissiglike,"event_pass12whoissiglike/I");
 
   OutputTree[i]->Branch("event_CSCTightHaloID",&event_CSCTightHaloID,"event_CSCTightHaloID/I");
   OutputTree[i]->Branch("event_NMuons",&event_NMuons,"event_NMuons/I");
@@ -340,11 +347,11 @@ void DiPhotonMiniTree::Begin(){
 
 void DiPhotonMiniTree::Analyze(){
 
-  //     cout << "Analyze this event" << endl;
+  //  cout << "Analyze this event" << endl;
 
   if (fTR->NSuperClusters==101) return;
 
-    //    cout << "A" << endl;
+  //  cout << "A" << endl;
 
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
@@ -418,33 +425,28 @@ void DiPhotonMiniTree::Analyze(){
 
   //  cout << "C" << endl;
 
-  // 0 = standard selection for data and MC
-  // 1 = signal template generation from MC
-  // 2 = background template generation from MC
-  // 3 = DY selection (standard with reversed pixel veto)
 
   bool passtrigger = TriggerSelection();
 
-  std::vector<int> passing_selection[14];
+  std::vector<int> passing_selection[18];
 
-  bool pass[14];
-  int pass12_whoisrcone;
+  bool pass[18];
+  int pass12_whoissiglike;
 
-  for (int sel_cat=0; sel_cat<14; sel_cat++){
+  for (int sel_cat=0; sel_cat<18; sel_cat++){
 
-    if (sel_cat!=11 && !passtrigger) continue;
-    if (sel_cat==11) continue; // TURN OFF MUONS (ripetuto nel loop dopo)
+    if (sel_cat!=10 && !passtrigger) continue; // no trigger for Zmumu selection
 
-    if (isdata){ // do not run these cats on data
-      if (sel_cat==1) continue;
-      if (sel_cat==2) continue;
+    if (isdata){
+      if (sel_cat>=11) continue;
+      if (fTR->CSCTightHaloID) continue;
     }
 
     pass[sel_cat]=false;
 
     std::vector<int> passing;
 
-    if (sel_cat==11){
+    if (sel_cat==10){
       for (int i=0; i<fTR->NMus; i++){
         passing.push_back(i);
       }
@@ -456,93 +458,162 @@ void DiPhotonMiniTree::Analyze(){
       }
       passing = PhotonPreSelection(fTR,passing);
     }
-    
-    // comment this block for the noselection running
-    if (sel_cat!=7 && sel_cat!=11) { // only presel cat7 
 
-      if (sel_cat==3 || sel_cat==6) passing = ApplyPixelVeto(fTR,passing,1); // DY cat3 and DY no combiso with mass cut for eff area cat6
-      else passing = ApplyPixelVeto(fTR,passing,0);
+    if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1); // for DY pixel veto reverse
+    else passing = ApplyPixelVeto(fTR,passing,0);
 
-      if (sel_cat==8 || sel_cat==13) passing = PhotonSelection(fTR,passing,"invert_sieie_cut"); // sieie sideband cat8
-      else if (sel_cat==9) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // no comb iso selection
-      else if (sel_cat==6) passing = PhotonSelection(fTR,passing,"no_combiso_cut"); // DY no combiso with mass cut for eff area cat6 
-      else if (sel_cat==5 || sel_cat==12) passing=passing;
-      else passing=PhotonSelection(fTR,passing);
-
-//      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
-//      else passing = ImpingingTrackSelection(fTR,passing,true); // (inverted selection) veto impinging tracks
-//      if (sel_cat==5) passing = ImpingingTrackSelection(fTR,passing,false); // select impinging tracks with removal from combiso
-      
-    }
-    
-
-    if (sel_cat==0 || sel_cat==3 || sel_cat==5 || sel_cat==13){ // diphoton cats
+    if (sel_cat==0){
+      passing = PhotonSelection(fTR,passing);
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
-    else if (sel_cat==12){
+    else if (sel_cat==1){
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+    else if (sel_cat==2){
+      passing = PhotonSelection(fTR,passing,"invert_sieie_cut");
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+    else if (sel_cat==3){
+      passing = PhotonSelection(fTR,passing); // revert pixel veto already done
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==4){
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+    else if (sel_cat==5){
+      passing = PhotonSelection(fTR,passing);
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+    else if (sel_cat==6){
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==7){
       std::vector<int> passing_bkg = PhotonSelection(fTR,passing,"invert_sieie_cut");
       std::vector<int> newpassing;
       if (passing_bkg.size()>=1 && passing.size()>=2){
 	int fondo = passing_bkg[0];
-	int forcone;
-	if (passing[0]!=fondo) forcone = passing[0]; else forcone = passing[1];
-	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoisrcone=1;}
-	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoisrcone=0;}
+	int forcone = (passing[0]!=fondo) ? forcone = passing[0] : forcone = passing[1];
+	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoissiglike=1;}
+	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoissiglike=0;}
       }
       passing=newpassing;
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
-    else if (sel_cat!=11) { // photon-by-photon cats
-      if (sel_cat==1) passing = SignalSelection(fTR,passing);
-      if (sel_cat==2) passing = BackgroundSelection(fTR,passing);
-      if (!isdata) if (sel_cat==8) passing = BackgroundSelection(fTR,passing); // sieie sideband template only from the fakes (only in MC!)
-      if (!isdata) if (sel_cat==14) passing = BackgroundSelection(fTR,passing); // sieie sideband template only from the fakes (only in MC!)
-      //      if (!isdata) if (sel_cat==4) passing = SignalSelection(fTR,passing); // uncomment to make random cone only from true photons (only in MC!) 
-      if (sel_cat==6) passing = DiPhotonInvariantMassCutSelection(fTR,passing); // for DY without comb iso cut 
+    else if (sel_cat==8){
+      passing = PhotonSelection(fTR,passing,"invert_sieie_cut");
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==9){
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==10){
+      pass[sel_cat] = DiMuonFromZSelection(fTR,passing);
+    }
+    else if (sel_cat==11){
+      passing = SignalSelection(fTR,passing);
+      passing = PhotonSelection(fTR,passing);
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
-    else {
-      pass[sel_cat] = DiMuonFromZSelection(fTR,passing);
+    else if (sel_cat==12){
+      passing = BackgroundSelection(fTR,passing);
+      passing = PhotonSelection(fTR,passing);
+      pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
+    }
+    else if (sel_cat==13){
+      passing = SignalSelection(fTR,passing);
+      passing = PhotonSelection(fTR,passing);
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==14){
+      passing = PhotonSelection(fTR,passing);
+      std::vector<int> passing_sig = SignalSelection(fTR,passing);
+      std::vector<int> passing_bkg = BackgroundSelection(fTR,passing);
+      std::vector<int> newpassing;
+      if (passing_bkg.size()>=1 && passing_sig.size()>=1){
+	int fondo = passing_bkg[0];
+	int prompt = passing_sig[0];
+	if (fTR->PhoPt[fondo] > fTR->PhoPt[prompt]) {newpassing.push_back(fondo); newpassing.push_back(prompt); pass12_whoissiglike=1;}
+	else {newpassing.push_back(prompt); newpassing.push_back(fondo); pass12_whoissiglike=0;}
+      }
+      passing=newpassing;
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==15){
+      passing = BackgroundSelection(fTR,passing);
+      passing = PhotonSelection(fTR,passing);
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==16){
+      std::vector<int> passing_bkg = BackgroundSelection(fTR,passing);
+      passing_bkg = PhotonSelection(fTR,passing_bkg);
+      std::vector<int> newpassing;
+      if (passing_bkg.size()>=1 && passing.size()>=2){
+	int fondo = passing_bkg[0];
+	int forcone = (passing[0]!=fondo) ? forcone = passing[0] : forcone = passing[1];
+	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoissiglike=1;}
+	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoissiglike=0;}
+      }
+      passing=newpassing;
+      pass[sel_cat] = StandardEventSelection(fTR,passing);
+    }
+    else if (sel_cat==17){
+      std::vector<int> passing_sig = SignalSelection(fTR,passing);
+      passing_sig = PhotonSelection(fTR,passing_sig);
+      std::vector<int> passing_bkg = PhotonSelection(fTR,passing,"invert_sieie_cut");
+      std::vector<int> newpassing;
+      if (passing_bkg.size()>=1 && passing_sig.size()>=1){
+	int fondo = passing_bkg[0];
+	int prompt = passing_sig[0];
+	if (fTR->PhoPt[fondo] > fTR->PhoPt[prompt]) {newpassing.push_back(fondo); newpassing.push_back(prompt); pass12_whoissiglike=1;}
+	else {newpassing.push_back(prompt); newpassing.push_back(fondo); pass12_whoissiglike=0;}
+      }
+      passing=newpassing;
+      pass[sel_cat] = StandardEventSelection(fTR,passing);      
     }
 
     passing_selection[sel_cat] = passing;
 
   }
 
+
+
   //  cout << "D" << endl;
 
-  for (int sel_cat=0; sel_cat<14; sel_cat++){
+  for (int sel_cat=0; sel_cat<18; sel_cat++){
 
-    if (sel_cat!=11 && !passtrigger) continue;
-    if (sel_cat==11) continue; // TURN OFF MUONS (ripetuto nel loop dopo)
+    if (sel_cat!=10 && !passtrigger) continue; // no trigger for Zmumu selection
 
-    if (isdata){ // do not run these cats on data
-      if (sel_cat==1) continue;
-      if (sel_cat==2) continue;
+    if (isdata){
+      if (sel_cat>=11) continue;
+      if (fTR->CSCTightHaloID) continue;
     }
 
     if (!pass[sel_cat]) continue;
 
     std::vector<int> passing = passing_selection[sel_cat];
+    int minsize = (is2d[sel_cat]) ? 2 : 1;
 
-    int minsize=999;
-    if (sel_cat==0 || sel_cat==3 || sel_cat==5 || sel_cat==6 || sel_cat==11 || sel_cat==12 || sel_cat==13) minsize=2;
-    else minsize=1;
-
-    if (!(passing_selection[sel_cat].size()>=minsize)){
+    if (passing_selection[sel_cat].size()<minsize){
       std::cout << "Error!!!" << std::endl;
       continue;
     }
 
-    if (sel_cat==0 || sel_cat==3 || sel_cat==5 || sel_cat==12 || sel_cat==13){
+    if (sel_cat==10){
+      for (int i=0; i<passing.size(); i++){
+	ResetVars();
+	FillMuonInfo(passing.at(i));
+	OutputTree[sel_cat]->Fill();
+      }
+    }
+    else if (is2d[sel_cat]){
       ResetVars();
       FillLead(passing.at(0));
       FillTrail(passing.at(1));
       bool dofill=true;
 
-      if (sel_cat==12) event_pass12whoisrcone=pass12_whoisrcone;
+      if (sel_cat==7 || sel_cat==14 || sel_cat==16 || sel_cat==17) event_pass12whoissiglike=pass12_whoissiglike;
 
-      if (sel_cat==5 || (sel_cat==12 && pass12_whoisrcone==0)) {
+      if (sel_cat==6 || ((sel_cat==7 || sel_cat==16) && pass12_whoissiglike==0)) {
 	  isolations_struct rcone_isos;
 	  rcone_isos = RandomConeIsolation(fTR,passing.at(0),"");
 	  pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
@@ -566,7 +637,7 @@ void DiPhotonMiniTree::Analyze(){
 	  for (int i=0; i<pholead_Npfcandneutralincone && i<global_size_pfcandarrays; i++) pholead_neutralpfcanddphis[i] = rcone_isos.neutralcanddphis.at(i);
 	  if (rcone_isos.photon==-999 || rcone_isos.neutral==-999 || rcone_isos.charged==-999) dofill=false;
 	}
-      if (sel_cat==5 || (sel_cat==12 && pass12_whoisrcone==1)) {
+      if (sel_cat==6 || ((sel_cat==7 || sel_cat==16) && pass12_whoissiglike==1)) {
 	  isolations_struct rcone_isos;
 	  rcone_isos = RandomConeIsolation(fTR,passing.at(1),"");
 	  photrail_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
@@ -600,16 +671,16 @@ void DiPhotonMiniTree::Analyze(){
       if (dofill) OutputTree[sel_cat]->Fill();
     }
 
-    if (sel_cat==1 || sel_cat==2 || sel_cat==4 || sel_cat==6 || sel_cat==7 || sel_cat==8 || sel_cat==9 || sel_cat==10){
+    else if (!is2d[sel_cat]){
+
       for (int i=0; i<passing.size(); i++){
       ResetVars();
       FillLead(passing.at(i));
       bool dofill = true;
 
-      if (sel_cat==4 || sel_cat==10) {
+      if (sel_cat==1) {
 	isolations_struct rcone_isos;
-	if (sel_cat==4) rcone_isos = RandomConeIsolation(fTR,passing.at(i),"");
-	if (sel_cat==10) rcone_isos = RandomConeIsolation(fTR,passing.at(i),"nocombisocut");
+	rcone_isos = RandomConeIsolation(fTR,passing.at(i),"");
 	pholead_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx = rcone_isos.photon;
 	pholead_pho_Cone04NeutralHadronIso_mvVtx = rcone_isos.neutral;
 	pholead_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01 = rcone_isos.charged;
@@ -634,25 +705,17 @@ void DiPhotonMiniTree::Analyze(){
 
       if (dofill) OutputTree[sel_cat]->Fill();
       }
-    }
 
-    if (sel_cat==11){
-      for (int i=0; i<passing.size(); i++){
-	ResetVars();
-	FillMuonInfo(passing.at(i));
-	OutputTree[sel_cat]->Fill();
-      }
     }
- 
-  //  cout << "E" << endl;
 
   }
+ 
 
 };
 
 void DiPhotonMiniTree::End(){
   fOutputFile->cd();
-  for (int i=0; i<14; i++) OutputTree[i]->Write();	
+  for (int i=0; i<18; i++) OutputTree[i]->Write();	
   fHNumPU->Write();
   fHNumPU_noweight->Write();
   fHNumPUTrue->Write();
@@ -804,7 +867,7 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
 
 std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<int> passing, TString mode){
 
-  if (mode!="" && mode!="invert_sieie_cut" && mode!="no_combiso_cut" && mode!="cut_combiso_sideband"){
+  if (mode!="" && mode!="invert_sieie_cut"){
     std::cout << "Error" << std::endl;
     return std::vector<int>();
   }
@@ -1572,6 +1635,7 @@ void DiPhotonMiniTree::FillLead(int index){
 };
 
 float DiPhotonMiniTree::SieieRescale(float sieie, bool isbarrel){
+  if (isdata) return sieie; // rescale sieie only in MC
   return isbarrel ? 0.87*sieie+0.0011 : 0.99*sieie;
 };
 
@@ -1699,7 +1763,7 @@ void DiPhotonMiniTree::FillMuonInfo(int index){
 
 void DiPhotonMiniTree::ResetVars(){
 
-  event_pass12whoisrcone = -999;
+  event_pass12whoissiglike = -999;
   dipho_mgg_photon = -999;
   dipho_mgg_newCorr = -999;
   dipho_mgg_newCorrLocal = -999;
