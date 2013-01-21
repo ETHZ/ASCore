@@ -65,13 +65,13 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.}; // fake ratios
-double SSDLDumper::gMuPPtbins[gNMuPPtbins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
+double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 35., 40., 50., 60.}; // fake ratios
+double SSDLDumper::gMuPPtbins[gNMuPPtbins+1] = {20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
 double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 
 // Electron Binning //////////////////////////////////////////////////////////////
-double SSDLDumper::gElFPtBins[gNElFPtBins+1]   = {10., 15., 20., 25., 30., 40., 50., 60., 70., 80., 100.}; // fake ratios
-double SSDLDumper::gElPPtbins[gNElPPtbins+1]   = {10., 15., 20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
+double SSDLDumper::gElFPtBins[gNElFPtBins+1]   = {20., 25., 30., 40., 50., 60., 70., 80., 100.}; // fake ratios
+double SSDLDumper::gElPPtbins[gNElPPtbins+1]   = {20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
 double SSDLDumper::gElEtabins[gNElEtabins+1]   = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 double SSDLDumper::gElCMIdbins[gNElCMIdbins+1] = {0., 1.479, 2.5};
 //////////////////////////////////////////////////////////////////////////////////
@@ -417,6 +417,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+		if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		// DEBUG
 		//		if (Run!=gDEBUG_RUNNUMBER_) continue;
@@ -671,16 +672,40 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	// filling histos for ttbar only ratios. this is a fairly random place to do this, but ok...
 	if(S->sname == "TTJets"){
 		for (int i =0 ; i < NMus; ++i) {
-			if( isLooseMuon(i) && !isPromptMuon(i) ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isTightMuon(i) && !isPromptMuon(i) ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isLooseMuon(i) &&  isPromptMuon(i) ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isTightMuon(i) &&  isPromptMuon(i) ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isLooseMuon(i) &&  IsSignalMuon[i] ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) &&  IsSignalMuon[i] ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
 		}
 		for (int i =0 ; i < NEls; ++i) {
-			if( isLooseElectron(i) && !isPromptElectron(i) ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isTightElectron(i) && !isPromptElectron(i) ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isLooseElectron(i) &&  isPromptElectron(i) ) S->region[reg][HighPt].ee.pnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isTightElectron(i) &&  isPromptElectron(i) ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if ( abs(ElGenID[i])  == 13 ) continue;
+			if ( abs(ElGenID[i]) == 0  ) continue;
+			if ( abs(ElGenMID[i]) == 13 ) continue;
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isLooseElectron(i) &&  IsSignalElectron[i] ) S->region[reg][HighPt].ee.pnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) &&  IsSignalElectron[i] ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+		}
+	}
+	// end filling the ttbar ratio histograms
+	
+	// filling histos for with gen ID of fake leptons
+	if (isSigSupMuEvent() && getNBTagsMed() > 0) {
+		for (int i = 0 ; i < NMus; ++i) {
+			if (getClosestJetDPhi(i, Muon) < 2.0) continue;
+//			if (getClosestJetDR(i, Muon) < 0.5) continue;
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+		}
+	}
+	int elec1(-1), elec2(-1);
+	if (isSigSupElEvent()) {
+		for (int i = 0 ; i < NEls; ++i) {
+			if ( abs(ElGenID[i])  == 13 ) continue;
+			if ( abs(ElGenMID[i]) == 13 ) continue;
+//			if (getClosestJetDR(i, Elec) < 0.5) continue;
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
 		}
 	}
 	// end filling the ttbar ratio histograms
@@ -889,6 +914,24 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 			}
+			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt10_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt10_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt10_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt10_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+			}
+			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt01_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt01_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt01_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt01_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+			}
+			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt00_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt00_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt00_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt00_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+			}
 		}
 		resetHypLeptons();
 	}
@@ -900,6 +943,18 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				if( isBarrelElectron(el)) S->region[reg][HighPt].em.nt20_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 				if(!isBarrelElectron(el)) S->region[reg][HighPt].em.nt20_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+			}
+			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
+				if( isBarrelElectron(el)) S->region[reg][HighPt].em.nt10_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(!isBarrelElectron(el)) S->region[reg][HighPt].em.nt10_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+			}
+			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
+				if( isBarrelElectron(el)) S->region[reg][HighPt].em.nt01_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(!isBarrelElectron(el)) S->region[reg][HighPt].em.nt01_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+			}
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
+				if( isBarrelElectron(el)) S->region[reg][HighPt].em.nt00_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(!isBarrelElectron(el)) S->region[reg][HighPt].em.nt00_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -2697,7 +2752,7 @@ void SSDLDumper::bookHistos(Sample *S){
 			S->diffyields[k].hnt11[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
 			S->diffyields[k].hnt11[j]->SetFillColor(S->color);
 			S->diffyields[k].hnt11[j]->SetXTitle(DiffPredYields::axis_label[j]);
-			S->diffyields[k].hnt11[j]->Sumw2(); 
+			S->diffyields[k].hnt11[j]->Sumw2();
 			name = Form("%s_%s_NT10_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 			S->diffyields[k].hnt10[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
 			S->diffyields[k].hnt10[j]->SetFillColor(S->color);
@@ -2919,15 +2974,36 @@ void SSDLDumper::bookHistos(Sample *S){
 				C->nt2pp_cm_pt = new TH2D(rootname + "_NT2PP_CM_pt", "NT2PP_CM_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pp_cm_pt->Sumw2();					
 			}
 
-				// OS Yields
+			// OS Yields
 			if(c == Elec){
 				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_BB_pt ->Sumw2();
-            C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
-            C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
+				C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
+				C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
+				
+				C->nt10_OS_BB_pt = new TH2D(rootname + "_NT10_OS_BB_pt",  "NT10_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_OS_BB_pt ->Sumw2();
+				C->nt10_OS_EE_pt = new TH2D(rootname + "_NT10_OS_EE_pt",  "NT10_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_OS_EE_pt ->Sumw2();
+				C->nt10_OS_EB_pt = new TH2D(rootname + "_NT10_OS_EB_pt",  "NT10_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_OS_EB_pt ->Sumw2();
+				
+				C->nt01_OS_BB_pt = new TH2D(rootname + "_NT01_OS_BB_pt",  "NT01_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt01_OS_BB_pt ->Sumw2();
+				C->nt01_OS_EE_pt = new TH2D(rootname + "_NT01_OS_EE_pt",  "NT01_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt01_OS_EE_pt ->Sumw2();
+				C->nt01_OS_EB_pt = new TH2D(rootname + "_NT01_OS_EB_pt",  "NT01_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt01_OS_EB_pt ->Sumw2();
+				
+				C->nt00_OS_BB_pt = new TH2D(rootname + "_NT00_OS_BB_pt",  "NT00_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt00_OS_BB_pt ->Sumw2();
+				C->nt00_OS_EE_pt = new TH2D(rootname + "_NT00_OS_EE_pt",  "NT00_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt00_OS_EE_pt ->Sumw2();
+				C->nt00_OS_EB_pt = new TH2D(rootname + "_NT00_OS_EB_pt",  "NT00_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt00_OS_EB_pt ->Sumw2();
 			}
 			if(c == ElMu){
 				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_BB_pt ->Sumw2();
-            C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
+				C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
+				
+				C->nt10_OS_BB_pt = new TH2D(rootname + "_NT10_OS_BB_pt",  "NT10_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt10_OS_BB_pt ->Sumw2();
+				C->nt10_OS_EE_pt = new TH2D(rootname + "_NT10_OS_EE_pt",  "NT10_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt10_OS_EE_pt ->Sumw2();
+				
+				C->nt01_OS_BB_pt = new TH2D(rootname + "_NT01_OS_BB_pt",  "NT01_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt01_OS_BB_pt ->Sumw2();
+				C->nt01_OS_EE_pt = new TH2D(rootname + "_NT01_OS_EE_pt",  "NT01_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt01_OS_EE_pt ->Sumw2();
+				
+				C->nt00_OS_BB_pt = new TH2D(rootname + "_NT00_OS_BB_pt",  "NT00_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt00_OS_BB_pt ->Sumw2();
+				C->nt00_OS_EE_pt = new TH2D(rootname + "_NT00_OS_EE_pt",  "NT00_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt00_OS_EE_pt ->Sumw2();
 			}
 
 			// Ratios
@@ -2942,6 +3018,12 @@ void SSDLDumper::bookHistos(Sample *S){
 				C->fnloose_ttbar  = new TH2D(rootname + "_fNLoose_ttbar",  "fNLoose_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose_ttbar ->Sumw2();
 				C->pntight_ttbar  = new TH2D(rootname + "_pNTight_ttbar",  "pNTight_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight_ttbar ->Sumw2();
 				C->pnloose_ttbar  = new TH2D(rootname + "_pNLoose_ttbar",  "pNLoose_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose_ttbar ->Sumw2();
+				
+				// gen ID
+				C->fntight_genID  = new TH1D(rootname + "_fNTight_genID",  "fNTight_genID",  1001, -0.5, 1000.5); C->fntight_genID ->Sumw2();
+				C->fnloose_genID  = new TH1D(rootname + "_fNLoose_genID",  "fNLoose_genID",  1001, -0.5, 1000.5); C->fnloose_genID ->Sumw2();
+				C->pntight_genID  = new TH1D(rootname + "_pNTight_genID",  "pNTight_genID",  1001, -0.5, 1000.5); C->pntight_genID ->Sumw2();
+				C->pnloose_genID  = new TH1D(rootname + "_pNLoose_genID",  "pNLoose_genID",  1001, -0.5, 1000.5); C->pnloose_genID ->Sumw2();
 				
 				C->fratio_pt  = new TEfficiency(rootname + "_fRatio_pt",  "fRatio_pt",  getNFPtBins(c), getFPtBins(c));
 				C->fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
@@ -3085,10 +3167,31 @@ void SSDLDumper::deleteHistos(Sample *S){
 				delete C->nt20_OS_BB_pt;
 				delete C->nt20_OS_EE_pt;
 				delete C->nt20_OS_EB_pt;
+				
+				delete C->nt10_OS_BB_pt;
+				delete C->nt10_OS_EE_pt;
+				delete C->nt10_OS_EB_pt;
+				
+				delete C->nt01_OS_BB_pt;
+				delete C->nt01_OS_EE_pt;
+				delete C->nt01_OS_EB_pt;
+				
+				delete C->nt00_OS_BB_pt;
+				delete C->nt00_OS_EE_pt;
+				delete C->nt00_OS_EB_pt;
 			}
 			if(c == ElMu){
 				delete C->nt20_OS_BB_pt;
 				delete C->nt20_OS_EE_pt;
+				
+				delete C->nt10_OS_BB_pt;
+				delete C->nt10_OS_EE_pt;
+				
+				delete C->nt01_OS_BB_pt;
+				delete C->nt01_OS_EE_pt;
+				
+				delete C->nt00_OS_BB_pt;
+				delete C->nt00_OS_EE_pt;
 			}
 
 			// Ratios
@@ -3103,6 +3206,12 @@ void SSDLDumper::deleteHistos(Sample *S){
 				delete C->fnloose_ttbar;
 				delete C->pntight_ttbar;
 				delete C->pnloose_ttbar;
+				
+				// gen ID
+				delete C->fntight_genID;
+				delete C->fnloose_genID;
+				delete C->pntight_genID;
+				delete C->pnloose_genID;
 				
 				delete C->fratio_pt;
 				delete C->pratio_pt;
@@ -3248,7 +3357,18 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 			if(ch == Elec || ch == ElMu){
 				C->nt20_OS_BB_pt->Write(C->nt20_OS_BB_pt->GetName(), TObject::kWriteDelete);
 				C->nt20_OS_EE_pt->Write(C->nt20_OS_EE_pt->GetName(), TObject::kWriteDelete);
-				if(ch == Elec) C->nt20_OS_EB_pt->Write(C->nt20_OS_EB_pt->GetName(), TObject::kWriteDelete);					
+				C->nt10_OS_BB_pt->Write(C->nt10_OS_BB_pt->GetName(), TObject::kWriteDelete);
+				C->nt10_OS_EE_pt->Write(C->nt10_OS_EE_pt->GetName(), TObject::kWriteDelete);
+				C->nt01_OS_BB_pt->Write(C->nt01_OS_BB_pt->GetName(), TObject::kWriteDelete);
+				C->nt01_OS_EE_pt->Write(C->nt01_OS_EE_pt->GetName(), TObject::kWriteDelete);
+				C->nt00_OS_BB_pt->Write(C->nt00_OS_BB_pt->GetName(), TObject::kWriteDelete);
+				C->nt00_OS_EE_pt->Write(C->nt00_OS_EE_pt->GetName(), TObject::kWriteDelete);
+				if(ch == Elec) {
+					C->nt20_OS_EB_pt->Write(C->nt20_OS_EB_pt->GetName(), TObject::kWriteDelete);
+					C->nt10_OS_EB_pt->Write(C->nt10_OS_EB_pt->GetName(), TObject::kWriteDelete);
+					C->nt01_OS_EB_pt->Write(C->nt01_OS_EB_pt->GetName(), TObject::kWriteDelete);
+					C->nt00_OS_EB_pt->Write(C->nt00_OS_EB_pt->GetName(), TObject::kWriteDelete);
+				}
 			}
 		
 			if(S->datamc > 0){
@@ -3280,6 +3400,12 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 				C->fnloose_ttbar    ->Write(C->fnloose_ttbar    ->GetName(), TObject::kWriteDelete);
 				C->pntight_ttbar    ->Write(C->pntight_ttbar    ->GetName(), TObject::kWriteDelete);
 				C->pnloose_ttbar    ->Write(C->pnloose_ttbar    ->GetName(), TObject::kWriteDelete);
+				
+				// gen ID
+				C->fntight_genID    ->Write(C->fntight_genID    ->GetName(), TObject::kWriteDelete);
+				C->fnloose_genID    ->Write(C->fnloose_genID    ->GetName(), TObject::kWriteDelete);
+				C->pntight_genID    ->Write(C->pntight_genID    ->GetName(), TObject::kWriteDelete);
+				C->pnloose_genID    ->Write(C->pnloose_genID    ->GetName(), TObject::kWriteDelete);
 
 				C->fratio_pt ->Write(C->fratio_pt ->GetName(), TObject::kWriteDelete);
 				C->pratio_pt ->Write(C->pratio_pt ->GetName(), TObject::kWriteDelete);
@@ -3519,7 +3645,18 @@ int  SSDLDumper::readHistos(TString filename){
 					if(ch == Elec || ch == ElMu){
 						getObjectSafe(pFile, root + "_NT20_OS_BB_pt", C->nt20_OS_BB_pt);
 						getObjectSafe(pFile, root + "_NT20_OS_EE_pt", C->nt20_OS_EE_pt);
-						if(ch == Elec) getObjectSafe(pFile, root + "_NT20_OS_EB_pt", C->nt20_OS_EB_pt);
+						getObjectSafe(pFile, root + "_NT10_OS_BB_pt", C->nt10_OS_BB_pt);
+						getObjectSafe(pFile, root + "_NT10_OS_EE_pt", C->nt10_OS_EE_pt);
+						getObjectSafe(pFile, root + "_NT01_OS_BB_pt", C->nt01_OS_BB_pt);
+						getObjectSafe(pFile, root + "_NT01_OS_EE_pt", C->nt01_OS_EE_pt);
+						getObjectSafe(pFile, root + "_NT00_OS_BB_pt", C->nt00_OS_BB_pt);
+						getObjectSafe(pFile, root + "_NT00_OS_EE_pt", C->nt00_OS_EE_pt);
+						if(ch == Elec) {
+							getObjectSafe(pFile, root + "_NT20_OS_EB_pt", C->nt20_OS_EB_pt);
+							getObjectSafe(pFile, root + "_NT10_OS_EB_pt", C->nt10_OS_EB_pt);
+							getObjectSafe(pFile, root + "_NT01_OS_EB_pt", C->nt01_OS_EB_pt);
+							getObjectSafe(pFile, root + "_NT00_OS_EB_pt", C->nt00_OS_EB_pt);
+						}
 					}
 
 					if(ch != ElMu){
@@ -3533,6 +3670,12 @@ int  SSDLDumper::readHistos(TString filename){
 						getObjectSafe(pFile, root + "_fNLoose_ttbar", C->fnloose_ttbar);
 						getObjectSafe(pFile, root + "_pNTight_ttbar", C->pntight_ttbar);
 						getObjectSafe(pFile, root + "_pNLoose_ttbar", C->pnloose_ttbar);
+						
+						// gen ID
+						getObjectSafe(pFile, root + "_fNTight_genID", C->fntight_genID);
+						getObjectSafe(pFile, root + "_fNLoose_genID", C->fnloose_genID);
+						getObjectSafe(pFile, root + "_pNTight_genID", C->pntight_genID);
+						getObjectSafe(pFile, root + "_pNLoose_genID", C->pnloose_genID);
 
 						getObjectSafe(pFile, root + "_fRatio_pt",  C->fratio_pt);
 						getObjectSafe(pFile, root + "_pRatio_pt",  C->pratio_pt);
@@ -4094,6 +4237,13 @@ float SSDLDumper::getClosestJetDR(int ind, gChannel chan){
 	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
 	int jind = getClosestJet(ind, chan);
 	if(jind > -1) return Util::GetDeltaR(lepeta, JetEta[jind], lepphi, JetPhi[jind]);
+	return -1;
+}
+float SSDLDumper::getClosestJetDPhi(int ind, gChannel chan){
+	// Get delta phi to the closest jet
+	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
+	int jind = getClosestJet(ind, chan);
+	if(jind > -1) return fabs(lepphi - JetPhi[jind]);
 	return -1;
 }
 float SSDLDumper::getSecondClosestJetDR(int ind, gChannel chan){

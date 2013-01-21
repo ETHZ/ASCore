@@ -18,11 +18,11 @@ class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuFPtBins = 8;
-	static const int gNMuPPtbins = 12;
+	static const int gNMuFPtBins = 6;
+	static const int gNMuPPtbins = 10;
 	static const int gNMuEtabins = 5;
-	static const int gNElFPtBins = 10;
-	static const int gNElPPtbins = 12;
+	static const int gNElFPtBins = 8;
+	static const int gNElPPtbins = 10;
 	static const int gNElEtabins = 5;
         static const int gNElCMIdbins = 2;
 
@@ -79,7 +79,7 @@ public:
 	enum gSample {
 		sample_begin,
 		// data samples
-		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
+		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 ,
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
 		// fake samples
@@ -194,6 +194,12 @@ public:
 		TH2D *pntight_ttbar; // pt vs eta
 		TH2D *pnloose_ttbar;
 		
+		// gen ID
+		TH1D *fntight_genID;
+		TH1D *fnloose_genID;
+		TH1D *pntight_genID;
+		TH1D *pnloose_genID;
+		
 		TEfficiency *fratio_pt;
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
@@ -231,6 +237,15 @@ public:
 		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
 		TH2D *nt20_OS_EE_pt; // BB = barrel/barrel, EE = endcap/endcap
 		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
+		TH2D *nt10_OS_BB_pt;
+		TH2D *nt10_OS_EE_pt;
+		TH2D *nt10_OS_EB_pt;
+		TH2D *nt01_OS_BB_pt;
+		TH2D *nt01_OS_EE_pt;
+		TH2D *nt01_OS_EB_pt;
+		TH2D *nt00_OS_BB_pt;
+		TH2D *nt00_OS_EE_pt;
+		TH2D *nt00_OS_EB_pt;
 	};
 	
 	// old struct Region{
@@ -589,7 +604,7 @@ public:
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
-        void fillKinPlots(Sample*,int);
+        void fillKinPlots(Sample*, int);
         void fillSyncCounters(Sample*); 
 	
 	//////////////////////////////
@@ -656,6 +671,7 @@ public:
 	virtual int   getClosestJet(int, gChannel);
 	virtual float getClosestJetPt(int, gChannel);
 	virtual float getClosestJetDR(int, gChannel);
+	virtual float getClosestJetDPhi(int, gChannel);
 	virtual float getSecondClosestJetDR(int, gChannel);
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
