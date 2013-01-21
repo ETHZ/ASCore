@@ -34,7 +34,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 static const bool gEWKino = true;
-static const bool gRunSMSscan = true;
+static const bool gRunSMSscan = false;
 static const bool gRatiosFromTTbar = false;
 
 static const float gMMU = 0.1057;
@@ -97,8 +97,8 @@ void SSDLPlotter::init(TString filename){
 	// Luminosity
 	// fLumiNorm = 3950.; // HPA ICHEP dataset
 //	fLumiNorm = 9185.6; //HCP analysis
-//	fLumiNorm = 9100.;	// ttV 2012 analysis
-	fLumiNorm = 12210.;
+	fLumiNorm = 9100.;	// ttV 2012 analysis
+//	fLumiNorm = 12210.;
 
 	// Cuts:
 	fC_minMu1pt = 20.;
@@ -124,7 +124,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(SingleTbar_tW);
 	fMCBG.push_back(SingleT_s);
 	fMCBG.push_back(SingleTbar_s);
-	//	fMCBG.push_back(WJets);
+	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
 	// MARC fMCBG.push_back(GJets40);
 	fMCBG.push_back(GJets200);
@@ -171,7 +171,6 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(WJets);
 	fMCBGNoQCDNoGJets.push_back(DYJets);
 	fMCBGNoQCDNoGJets.push_back(WW);
-
 	fMCBGNoQCDNoGJets.push_back(WZ);
 	fMCBGNoQCDNoGJets.push_back(ZZ);
 	fMCBGNoQCDNoGJets.push_back(DPSWW);
@@ -201,6 +200,10 @@ void SSDLPlotter::init(TString filename){
 	fClosureSamples.push_back(WJets);
 	
 	fTTJets.push_back(TTJets);
+	
+	fWJets.push_back(WJets);
+	
+	fDYJets.push_back(DYJets);
 	
 	fMCBGMuEnr.push_back(TTJets);
 	fMCBGMuEnr.push_back(SingleT_t);
@@ -233,7 +236,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WWW);
 	fMCBGMuEnr.push_back(ZZZ);
 	fMCBGMuEnr.push_back(QCDMuEnr15);
-
+	
 	fMCBGEMEnr.push_back(TTJets);
 	fMCBGEMEnr.push_back(SingleT_t);
 	fMCBGEMEnr.push_back(SingleTbar_t);
@@ -269,6 +272,14 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(QCDEM80);
 	fMCBGEMEnr.push_back(QCDEM170);
 	fMCBGEMEnr.push_back(QCDEM250);
+	
+	fMuEnr.push_back(QCDMuEnr15);
+	
+	fEMEnr.push_back(QCDEM20);
+	fEMEnr.push_back(QCDEM30);
+	fEMEnr.push_back(QCDEM80);
+	fEMEnr.push_back(QCDEM170);
+	fEMEnr.push_back(QCDEM250);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
 
@@ -362,12 +373,17 @@ void SSDLPlotter::doAnalysis(){
 
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
-	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
+	fillRatios(fMCBGMuEnr, fMCBG, 1);
 	storeWeightedPred(gRegion[gBaseRegion]);
 	
 	
 	// ------------------- the following is for testing and closure things
 	// fill fake ratios to run closure tests
+//	fillRatios(fMuData, fEGData, 0);
+//	fillRatios(fMuEnr, fEMEnr, fDYJets, fDYJets, 1);
+//	fillRatios(fMuData, fEGData, 0);
+//	fillRatios(fMuEnr, fEMEnr, fMCBGMuEnr, fMCBGEMEnr, 0);
+//	fillRatios(fMuEnr, fEMEnr, fMCBGMuEnr, fMCBGEMEnr, 1);
 //	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 0);
 //	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 //	fillRatios(fMuData, fEGData, 0);
@@ -408,24 +424,26 @@ void SSDLPlotter::doAnalysis(){
 	// // makeNTightLoosePlots(Elec);
 	// 
 	makeFRvsPtPlots(Muon, SigSup);
- 	makeFRvsPtPlots(Elec, SigSup);
- 	makeFRvsPtPlots(Muon, ZDecay);
- 	makeFRvsPtPlots(Elec, ZDecay);
- 	makeFRvsEtaPlots(Muon);
- 	makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
+//	makeAllClosureTests();
+	makeAllClosureTestsTTW();
 	makeAllIntPredictions();
 
-	makeDiffPrediction();
-	//	makeTTWDiffPredictions();
-	//	makeTTWIntPredictions();
+//	makeDiffPrediction();
+	makeTTWDiffPredictions();
+	makeTTWIntPredictions();
 	printAllYieldTables();
-
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	makePredictionSignalEvents(175., 8000., 0., 7000., 3, 1, 1, 35., 35., true);
+//	makePredictionSignalEvents(175., 8000., 0., 7000., 3, 1, 1, 35., 35., true);
 	// makeRelIsoTTSigPlots();
+	
+	makeFakeGenIDTables();
 }
 
 //____________________________________________________________________________
@@ -1855,7 +1873,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 	}
 
 	for(size_t i = 0; i < gNSels; ++i){
-	        hiso_qcd [i]->SetFillColor(kYellow-4);
+		hiso_qcd [i]->SetFillColor(kYellow-4);
 		hiso_db  [i]->SetFillColor(kSpring-9);
 		hiso_ewk [i]->SetFillColor(kGreen +1);
 		hiso_ttj [i]->SetFillColor(kAzure-5);
@@ -4713,42 +4731,48 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
-	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc;
+	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc, *h_ptratio_qcd;
 	TH2D *h_dummy2;
 
 	TH2D *h2d_ntight, *h2d_nloose;
 
 	if(fp == SigSup){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNFPtBins(chan), getFPtBins(chan));
-		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));		
+		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));
+		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNFPtBins(chan), getFPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
 	if(fp == ZDecay){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPPtBins(chan), getPPtBins(chan));
-		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));		
+		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));
+		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNPPtBins(chan), getPPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
+	vector<int> qcdsamples;
 
 	if(chan == Muon){
 		datasamples = fMuData;
 //		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
 //		mcsamples	= fTTJets;
+		qcdsamples	= fMuEnr;
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
 //		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
 //		mcsamples	= fTTJets;
+		qcdsamples	= fEMEnr;
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
+	calculateRatio(qcdsamples,  chan, fp, h_dummy2, h_ptratio_qcd,   h_dummy1);
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, fp, 0);
@@ -4768,12 +4792,14 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	//////////////
 
-	float maximum = 0.8;
+	float maximum = 0.4;
 	if(fp == ZDecay) maximum = 1.1;
 	h_ptratio_data->SetMaximum(maximum);
 	h_ptratio_mc  ->SetMaximum(maximum);
+	h_ptratio_qcd  ->SetMaximum(maximum);
 	h_ptratio_data->SetMinimum(0.0);
 	h_ptratio_mc  ->SetMinimum(0.0);
+	h_ptratio_qcd ->SetMinimum(0.0);
 
 	if(chan == Muon) h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
 	if(chan == Elec) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
@@ -4794,6 +4820,14 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_mc  ->SetLineColor(kRed);
 	h_ptratio_mc  ->SetFillColor(kRed);
 	h_ptratio_mc  ->GetXaxis()->SetRangeUser(0.,50.);
+	
+	h_ptratio_qcd  ->SetMarkerColor(kBlue);
+	h_ptratio_qcd  ->SetMarkerStyle(23);
+	h_ptratio_qcd  ->SetMarkerSize(1.5);
+	h_ptratio_qcd  ->SetLineWidth(2);
+	h_ptratio_qcd  ->SetLineColor(kBlue);
+	h_ptratio_qcd  ->SetFillColor(kBlue);
+	h_ptratio_qcd  ->GetXaxis()->SetRangeUser(0.,50.);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -4805,6 +4839,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
 	leg->AddEntry(h_ptratio_data, "Data",       "p");
 	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
+	leg->AddEntry(h_ptratio_qcd,  "QCD",        "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -4814,6 +4849,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	c_temp->cd();
 	// MARC h_ptratio_mc->DrawCopy("axis");
 	h_ptratio_mc->DrawCopy("PE 0");
+	h_ptratio_qcd->Draw("PE 0 same");
 	// MARC eff_mc->Draw("P same");
 	// MARC h_ptratio_data->Draw("PE X0 same");
 	eff_data->Draw("PZ 0 same");
@@ -4834,7 +4870,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	
 	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	delete h_ptratio_mc, h_ptratio_data;
+	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
@@ -5169,6 +5205,91 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	fOutputSubDir = "";
 }
 
+void SSDLPlotter::makeFakeGenIDTables(){
+	TString outputdir = Util::MakeOutputDir(fOutputDir + "FakeGenIDTables");
+// 	for(size_t i = 0; i < gNREGIONS; ++i){
+	TString outputnameMu = outputdir + "MuFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + ".txt";
+	TString outputnameEl = outputdir + "ElFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + ".txt";
+// 		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, i);
+	
+	
+	makeFakeGenIDTable(fMuEnr, Muon, SigSup, outputnameMu);
+	makeFakeGenIDTable(fEMEnr, Elec, SigSup, outputnameEl);
+	
+//	makeFakeGenIDTable(fTTJets, Muon, SigSup, outputnameMu);
+//	makeFakeGenIDTable(fTTJets, Elec, SigSup, outputnameEl);
+	
+//	makeFakeGenIDTable(fMCBG, Muon, SigSup, outputnameMu);
+//	makeFakeGenIDTable(fMCBG, Elec, SigSup, outputnameEl);
+}
+
+void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwitch fp, TString filename){
+	ofstream OUT(filename.Data(), ios::trunc);
+	TH1D* h_temp_loose  = new TH1D("h_temp_loose",  "h_temp_loose",  1001, -0.5, 1000.5);
+	TH1D* h_temp_tight  = new TH1D("h_temp_tight",  "h_temp_tight",  1001, -0.5, 1000.5);
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+		Sample *S = fSamples[index];
+		Channel *C;
+		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+		if(fp == SigSup){
+			OUT << "\n\n\n";
+			if(chan == Muon) OUT << "muon fake ratio contributions in " << S->sname << " (" << S->ngen << " gen events)" << endl;
+			if(chan == Elec) OUT << "electron fake ratio contributions in " << S->sname << " (" << S->ngen << " gen events)" << endl;
+			OUT << endl;
+			OUT << "=============================================" << endl;
+			OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
+			OUT << "---------------------------------------------" << endl;
+			for (int i = 0; i < C->fnloose_genID->GetNbinsX(); i++){
+				if (C->fnloose_genID->GetBinContent(i) > 0) {
+					
+					OUT << setw(6) << i-1 << " & " << setw(9) << C->fntight_genID->GetBinContent(i) << " & " << setw(9) << C->fnloose_genID->GetBinContent(i) << " & " << setw(9) << setprecision(4) << C->fntight_genID->GetBinContent(i)/C->fnloose_genID->GetBinContent(i) << " \\\\" << endl;
+					
+					
+					
+				}
+			}
+			OUT << "---------------------------------------------" << endl;
+			OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_genID->Integral() << " & " << setw(9) << C->fnloose_genID->Integral() << " & " << setw(9) << setprecision(4) << C->fntight_genID->Integral()/C->fnloose_genID->Integral() << " \\\\" << endl;
+			//		OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_genID->GetEntries() << " & " << setw(9) << C->fnloose_genID->GetEntries() << " & " << setw(9) << setprecision(4) << C->fntight_genID->GetEntries()/C->fnloose_genID->GetEntries() << " \\\\" << endl;
+			OUT << "=============================================" << endl;
+			h_temp_loose->Add(C->fnloose_genID);
+			h_temp_tight->Add(C->fntight_genID);
+		}
+		
+		
+	}
+	OUT << "\n\n\n";
+	OUT << "=============================================" << endl;
+	OUT << "=============================================" << endl;
+	if(fp == SigSup){
+		OUT << "\n\n\n";
+		if(chan == Muon) OUT << "muon fake ratio contributions in total" << endl;
+		if(chan == Elec) OUT << "electron fake ratio contributions in total" << endl;
+		OUT << endl;
+		OUT << "=============================================" << endl;
+		OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
+		OUT << "---------------------------------------------" << endl;
+		for (int i = 0; i < h_temp_loose->GetNbinsX(); i++){
+			if (h_temp_loose->GetBinContent(i) > 0) {
+				
+				OUT << setw(6) << i-1 << " & " << setw(9) << h_temp_tight->GetBinContent(i) << " & " << setw(9) << h_temp_loose->GetBinContent(i) << " & " << setw(9) << setprecision(4) << h_temp_tight->GetBinContent(i)/h_temp_loose->GetBinContent(i) << " \\\\" << endl;
+				
+				
+				
+			}
+		}
+		OUT << "---------------------------------------------" << endl;
+		OUT << setw(6) << "Total " << " & " << setw(9) << h_temp_tight->Integral() << " & " << setw(9) << h_temp_loose->Integral() << " & " << setw(9) << setprecision(4) << h_temp_tight->Integral()/h_temp_loose->Integral() << " \\\\" << endl;
+		//		OUT << setw(6) << "Total " << " & " << setw(9) << h_temp_tight->GetEntries() << " & " << setw(9) << h_temp_loose->GetEntries() << " & " << setw(9) << setprecision(4) << h_temp_tight->GetEntries()/h_temp_loose->GetEntries() << " \\\\" << endl;
+		OUT << "=============================================" << endl;
+	}
+	
+	OUT.close();
+}
+
 void SSDLPlotter::makePRLPlot1(){
 	FakeRatios *FR = new FakeRatios();
 	const int nchans = 8;
@@ -5483,6 +5604,28 @@ void SSDLPlotter::fillRatios(vector<int> musamples, vector<int> elsamples, int d
 		fH2D_MupRatio_MC = fillRatio(  Muon, musamples, ZDecay, false);
 		fH2D_ElfRatio_MC = fillRatio(  Elec, elsamples, SigSup, false);
 		fH2D_ElpRatio_MC = fillRatio(  Elec, elsamples, ZDecay, false);
+	}
+}
+void SSDLPlotter::fillRatios(vector<int> frmusamples, vector<int> frelsamples, vector<int> prmusamples, vector<int> prelsamples, int datamc){
+	if(datamc == 0){
+		fH1D_MufRatio = fillRatioPt(Muon, frmusamples, SigSup, false);
+		fH1D_MupRatio = fillRatioPt(Muon, prmusamples, ZDecay, false);
+		fH1D_ElfRatio = fillRatioPt(Elec, frelsamples, SigSup, false);
+		fH1D_ElpRatio = fillRatioPt(Elec, prelsamples, ZDecay, false);
+		fH2D_MufRatio = fillRatio(  Muon, frmusamples, SigSup, false);
+		fH2D_MupRatio = fillRatio(  Muon, prmusamples, ZDecay, false);
+		fH2D_ElfRatio = fillRatio(  Elec, frelsamples, SigSup, false);
+		fH2D_ElpRatio = fillRatio(  Elec, prelsamples, ZDecay, false);
+	}
+	if(datamc == 1){
+		fH1D_MufRatio_MC = fillRatioPt(Muon, frmusamples, SigSup, false);
+		fH1D_MupRatio_MC = fillRatioPt(Muon, prmusamples, ZDecay, false);
+		fH1D_ElfRatio_MC = fillRatioPt(Elec, frelsamples, SigSup, false);
+		fH1D_ElpRatio_MC = fillRatioPt(Elec, prelsamples, ZDecay, false);
+		fH2D_MufRatio_MC = fillRatio(  Muon, frmusamples, SigSup, false);
+		fH2D_MupRatio_MC = fillRatio(  Muon, prmusamples, ZDecay, false);
+		fH2D_ElfRatio_MC = fillRatio(  Elec, frelsamples, SigSup, false);
+		fH2D_ElpRatio_MC = fillRatio(  Elec, prelsamples, ZDecay, false);
 	}
 }
 TH1D* SSDLPlotter::fillRatioPt(gChannel chan, int sample, gFPSwitch fp, bool output){
@@ -12426,10 +12569,20 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
 // 	calculateRatio(fTTJets, Elec, SigSup, ef, ef_e);
 // 	calculateRatio(fTTJets, Elec, ZDecay, ep, ep_e);
 	
-	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+//	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+// 	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
+// 	calculateRatio(fMCBGEMEnr, Elec, SigSup, ef, ef_e);
+// 	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
+	
+	calculateRatio(fMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
  	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
- 	calculateRatio(fMCBGEMEnr, Elec, SigSup, ef, ef_e);
+ 	calculateRatio(fEMEnr, Elec, SigSup, ef, ef_e);
  	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
+	
+//	calculateRatio(fMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+// 	calculateRatio(fDYJets, Muon, ZDecay, mp, mp_e);
+// 	calculateRatio(fEMEnr, Elec, SigSup, ef, ef_e);
+// 	calculateRatio(fDYJets, Elec, ZDecay, ep, ep_e);
 	
 //	calculateRatio(fMCBG, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
 // 	calculateRatio(fMCBG, Muon, ZDecay, mp, mp_e);
@@ -12465,9 +12618,18 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
 	
  	// OS yields
  	vector<float> ntt_os_BB_ee, ntt_os_EE_ee, ntt_os_EB_ee;
+ 	vector<float> ntl_os_BB_ee, ntl_os_EE_ee, ntl_os_EB_ee;
+ 	vector<float> nlt_os_BB_ee, nlt_os_EE_ee, nlt_os_EB_ee;
+	vector<float> nll_os_BB_ee, nll_os_EE_ee, nll_os_EB_ee;
  	vector<float> ntt_os_BB_em, ntt_os_EE_em;
+ 	vector<float> ntl_os_BB_em, ntl_os_EE_em;
+ 	vector<float> nlt_os_BB_em, nlt_os_EE_em;
+ 	vector<float> nll_os_BB_em, nll_os_EE_em;
  	// Squared stat. errors
  	vector<float> ntt_os_BB_ee_e1, ntt_os_EE_ee_e1, ntt_os_EB_ee_e1, ntt_os_BB_em_e1, ntt_os_EE_em_e1;
+ 	vector<float> ntl_os_BB_ee_e1, ntl_os_EE_ee_e1, ntl_os_EB_ee_e1, ntl_os_BB_em_e1, ntl_os_EE_em_e1;
+ 	vector<float> nlt_os_BB_ee_e1, nlt_os_EE_ee_e1, nlt_os_EB_ee_e1, nlt_os_BB_em_e1, nlt_os_EE_em_e1;
+ 	vector<float> nll_os_BB_ee_e1, nll_os_EE_ee_e1, nll_os_EB_ee_e1, nll_os_BB_em_e1, nll_os_EE_em_e1;
 	
  	// Charge misid
 	vector<float> npp_tt_cm_ee, npp_cm_ee;
@@ -12532,6 +12694,24 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  		ntt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
  		ntt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
  		ntt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
+		
+		ntl_os_BB_em.push_back(S->region[reg][HighPt].em.nt10_OS_BB_pt->GetEntries());
+		ntl_os_EE_em.push_back(S->region[reg][HighPt].em.nt10_OS_EE_pt->GetEntries());
+		ntl_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt10_OS_BB_pt->GetEntries());
+		ntl_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt10_OS_EE_pt->GetEntries());
+		ntl_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt10_OS_EB_pt->GetEntries());
+		
+		nlt_os_BB_em.push_back(S->region[reg][HighPt].em.nt01_OS_BB_pt->GetEntries());
+		nlt_os_EE_em.push_back(S->region[reg][HighPt].em.nt01_OS_EE_pt->GetEntries());
+		nlt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt01_OS_BB_pt->GetEntries());
+		nlt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt01_OS_EE_pt->GetEntries());
+		nlt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt01_OS_EB_pt->GetEntries());
+		
+		nll_os_BB_em.push_back(S->region[reg][HighPt].em.nt00_OS_BB_pt->GetEntries());
+		nll_os_EE_em.push_back(S->region[reg][HighPt].em.nt00_OS_EE_pt->GetEntries());
+		nll_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt00_OS_BB_pt->GetEntries());
+		nll_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt00_OS_EE_pt->GetEntries());
+		nll_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt00_OS_EB_pt->GetEntries());
  		
  		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()));
  		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()));
@@ -12539,26 +12719,99 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()));
  		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()));
  		
+ 		ntl_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt10_OS_BB_pt->GetEntries()));
+ 		ntl_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt10_OS_EE_pt->GetEntries()));
+ 		ntl_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt10_OS_BB_pt->GetEntries()));
+ 		ntl_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt10_OS_EE_pt->GetEntries()));
+ 		ntl_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt10_OS_EB_pt->GetEntries()));
+ 		
+ 		nlt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt01_OS_BB_pt->GetEntries()));
+ 		nlt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt01_OS_EE_pt->GetEntries()));
+ 		nlt_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt01_OS_BB_pt->GetEntries()));
+ 		nlt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt01_OS_EE_pt->GetEntries()));
+ 		nlt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt01_OS_EB_pt->GetEntries()));
+ 		
+ 		nll_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt00_OS_BB_pt->GetEntries()));
+ 		nll_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt00_OS_EE_pt->GetEntries()));
+ 		nll_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt00_OS_BB_pt->GetEntries()));
+ 		nll_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt00_OS_EE_pt->GetEntries()));
+ 		nll_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt00_OS_EB_pt->GetEntries()));
+ 		
  		npp_tt_cm_ee.push_back(scale*S->region[reg][HighPt].ee.nt2pp_cm_pt->GetEntries());
  		npp_cm_ee   .push_back(scale*S->region[reg][HighPt].ee.npp_cm_pt->GetEntries());
  		npp_tt_cm_em.push_back(scale*S->region[reg][HighPt].em.nt2pp_cm_pt->GetEntries());
  		npp_cm_em   .push_back(scale*S->region[reg][HighPt].em.npp_cm_pt->GetEntries());
 		
 		// LUKAS test
-		nt20_mm.push_back(S->region[reg][HighPt].mm.nt20_pt->GetEntries());
-		nt10_mm.push_back(S->region[reg][HighPt].mm.nt10_pt->GetEntries());
-		nt00_mm.push_back(S->region[reg][HighPt].mm.nt00_pt->GetEntries());
-		nt20_ee.push_back(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
-		nt10_ee.push_back(S->region[reg][HighPt].ee.nt10_pt->GetEntries());
-		nt00_ee.push_back(S->region[reg][HighPt].ee.nt00_pt->GetEntries());
-		nt20_em.push_back(S->region[reg][HighPt].em.nt20_pt->GetEntries());
-		nt10_em.push_back(S->region[reg][HighPt].em.nt10_pt->GetEntries());
-		nt00_em.push_back(S->region[reg][HighPt].em.nt00_pt->GetEntries());
+//		nt20_mm.push_back(S->region[reg][HighPt].mm.nt20_pt->GetEntries());
+//		nt10_mm.push_back(S->region[reg][HighPt].mm.nt10_pt->GetEntries());
+//		nt00_mm.push_back(S->region[reg][HighPt].mm.nt00_pt->GetEntries());
+//		nt20_ee.push_back(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
+//		nt10_ee.push_back(S->region[reg][HighPt].ee.nt10_pt->GetEntries());
+//		nt00_ee.push_back(S->region[reg][HighPt].ee.nt00_pt->GetEntries());
+//		nt20_em.push_back(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+//		nt10_em.push_back(S->region[reg][HighPt].em.nt10_pt->GetEntries());
+//		nt00_em.push_back(S->region[reg][HighPt].em.nt00_pt->GetEntries());
  	}
 	
  	///////////////////////////////////////////////////////////////////////////////////
  	// PREDICTIONS ////////////////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
+ 	
+ 	// Charge MisID Predictions
+ 	// Abbreviations
+	float fbb(0.),fee(0.),feb(0.);
+	float fbbE(0.),feeE(0.),febE(0.);
+ 	
+	calculateChMisIdProb(fMCBG, BB, fbb, fbbE);
+	calculateChMisIdProb(fMCBG, EB, feb, febE);
+	calculateChMisIdProb(fMCBG, EE, fee, feeE);
+	
+ 	vector<float> ntt_cm_ee, ntt_cm_em;
+ 	vector<float> ntl_cm_ee, ntl_cm_em;
+ 	vector<float> nlt_cm_ee, nlt_cm_em;
+ 	vector<float> nll_cm_ee, nll_cm_em;
+ 	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
+ 	vector<float> ntl_cm_ee_e1, ntl_cm_em_e1;
+ 	vector<float> nlt_cm_ee_e1, nlt_cm_em_e1;
+ 	vector<float> nll_cm_ee_e1, nll_cm_em_e1;
+ 	for(size_t i = 0; i < nsamples; ++i){
+ 		Sample *S = fSamples[samples[i]];
+		//tight-tight
+ 		ntt_cm_ee.push_back(2*fbb*ntt_os_BB_ee[i] + 2*fee*ntt_os_EE_ee[i] + 2*feb*ntt_os_EB_ee[i]);
+ 		ntt_cm_ee_e1.push_back((4*fbb*fbb* S->getError(ntt_os_BB_ee[i])) + (4*fee*fee*S->getError(ntt_os_EE_ee[i])) + 4*feb*feb*S->getError(ntt_os_EB_ee[i])
+							   + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbbE*fbbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
+		
+ 		ntt_cm_em.push_back(  fbb*ntt_os_BB_em[i] +   fee*ntt_os_EE_em[i]);
+ 		ntt_cm_em_e1.push_back(fbb*fbb*S->getError(ntt_os_BB_em[i]) + fee*fee*S->getError(ntt_os_EE_em[i])
+							   + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbbE*fbbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feeE*feeE);
+		//tight-loose
+ 		ntl_cm_ee.push_back(2*fbb*ntl_os_BB_ee[i] + 2*fee*ntl_os_EE_ee[i] + 2*feb*ntl_os_EB_ee[i]);
+ 		ntl_cm_ee_e1.push_back((4*fbb*fbb* S->getError(ntl_os_BB_ee[i])) + (4*fee*fee*S->getError(ntl_os_EE_ee[i])) + 4*feb*feb*S->getError(ntl_os_EB_ee[i])
+							   + (4*ntl_os_BB_ee[i]*ntl_os_BB_ee[i]*fbbE*fbbE) + (4*ntl_os_EE_ee[i]*ntl_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*ntl_os_EB_ee[i]*ntl_os_EB_ee[i]);
+		
+ 		ntl_cm_em.push_back(  fbb*ntl_os_BB_em[i] +   fee*ntl_os_EE_em[i]);
+ 		ntl_cm_em_e1.push_back(fbb*fbb*S->getError(ntl_os_BB_em[i]) + fee*fee*S->getError(ntl_os_EE_em[i])
+							   + ntl_os_BB_em[i]*ntl_os_BB_em[i] * fbbE*fbbE + ntl_os_EE_em[i]*ntl_os_EE_em[i] * feeE*feeE);
+		//loose-tight
+ 		nlt_cm_ee.push_back(2*fbb*nlt_os_BB_ee[i] + 2*fee*nlt_os_EE_ee[i] + 2*feb*nlt_os_EB_ee[i]);
+ 		nlt_cm_ee_e1.push_back((4*fbb*fbb* S->getError(nlt_os_BB_ee[i])) + (4*fee*fee*S->getError(nlt_os_EE_ee[i])) + 4*feb*feb*S->getError(nlt_os_EB_ee[i])
+							   + (4*nlt_os_BB_ee[i]*nlt_os_BB_ee[i]*fbbE*fbbE) + (4*nlt_os_EE_ee[i]*nlt_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*nlt_os_EB_ee[i]*nlt_os_EB_ee[i]);
+		
+ 		nlt_cm_em.push_back(  fbb*nlt_os_BB_em[i] +   fee*nlt_os_EE_em[i]);
+ 		nlt_cm_em_e1.push_back(fbb*fbb*S->getError(nlt_os_BB_em[i]) + fee*fee*S->getError(nlt_os_EE_em[i])
+							   + nlt_os_BB_em[i]*nlt_os_BB_em[i] * fbbE*fbbE + nlt_os_EE_em[i]*nlt_os_EE_em[i] * feeE*feeE);
+		//loose-loose
+ 		nll_cm_ee.push_back(2*fbb*nll_os_BB_ee[i] + 2*fee*nll_os_EE_ee[i] + 2*feb*nll_os_EB_ee[i]);
+ 		nll_cm_ee_e1.push_back((4*fbb*fbb* S->getError(nll_os_BB_ee[i])) + (4*fee*fee*S->getError(nll_os_EE_ee[i])) + 4*feb*feb*S->getError(nll_os_EB_ee[i])
+							   + (4*nll_os_BB_ee[i]*nll_os_BB_ee[i]*fbbE*fbbE) + (4*nll_os_EE_ee[i]*nll_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*nll_os_EB_ee[i]*nll_os_EB_ee[i]);
+		
+ 		nll_cm_em.push_back(  fbb*nll_os_BB_em[i] +   fee*nll_os_EE_em[i]);
+ 		nll_cm_em_e1.push_back(fbb*fbb*S->getError(nll_os_BB_em[i]) + fee*fee*S->getError(nll_os_EE_em[i])
+							   + nll_os_BB_em[i]*nll_os_BB_em[i] * fbbE*fbbE + nll_os_EE_em[i]*nll_os_EE_em[i] * feeE*feeE);
+ 	}
+	
+	// Fake Predictions
  	FakeRatios *FR = new FakeRatios();
  	FR->setIsMC(true);
  	FR->setNToyMCs(100);
@@ -12582,6 +12835,11 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  		FR->setMMNtl(ntt_mm[i], ntl_mm[i], nll_mm[i]);
  		FR->setEENtl(ntt_ee[i], ntl_ee[i], nll_ee[i]);
  		FR->setEMNtl(ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i]);
+		
+		// subtract charge misID before predicting fakes (works only for flat ratios)
+// 		FR->setMMNtl(ntt_mm[i]                , ntl_mm[i]                                           , nll_mm[i]                );
+// 		FR->setEENtl(ntt_ee[i] - ntt_cm_ee[i] , ntl_ee[i] - ntl_cm_ee[i] - nlt_cm_ee[i]             , nll_ee[i] - nll_cm_ee[i] );
+// 		FR->setEMNtl(ntt_em[i] - ntt_cm_em[i] , ntl_em[i] - ntl_cm_em[i] , nlt_em[i] - nlt_cm_em[i] , nll_em[i] - nll_cm_em[i] );
 		
  		Sample *S = fSamples[samples[i]];
  		FR->setNGen(S->ngen);
@@ -12641,28 +12899,6 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
 // 		nff_pred_em_e1.push_back(FR->getEMNffEStat());
 // 		nF_pred_em_e1 .push_back(FR->getEMTotEStat());
  	}
- 	
- 	// Charge MisID Predictions
- 	// Abbreviations
-	float fbb(0.),fee(0.),feb(0.);
-	float fbbE(0.),feeE(0.),febE(0.);
- 	
-	calculateChMisIdProb(fMCBG, BB, fbb, fbbE);
-	calculateChMisIdProb(fMCBG, EB, feb, febE);
-	calculateChMisIdProb(fMCBG, EE, fee, feeE);
-	
- 	vector<float> ntt_cm_ee, ntt_cm_em;
- 	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
- 	for(size_t i = 0; i < nsamples; ++i){
- 		Sample *S = fSamples[samples[i]];
- 		ntt_cm_ee.push_back(2*fbb*ntt_os_BB_ee[i] + 2*fee*ntt_os_EE_ee[i] + 2*feb*ntt_os_EB_ee[i]);
- 		ntt_cm_ee_e1.push_back((4*fbb*fbb* S->getError(ntt_os_BB_ee[i])) + (4*fee*fee*S->getError(ntt_os_EE_ee[i])) + 4*feb*feb*S->getError(ntt_os_EB_ee[i])
-							   + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbbE*fbbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feeE*feeE) + 4*febE*febE*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
-		
- 		ntt_cm_em.push_back(  fbb*ntt_os_BB_em[i] +   fee*ntt_os_EE_em[i]);
- 		ntt_cm_em_e1.push_back(fbb*fbb*S->getError(ntt_os_BB_em[i]) + fee*fee*S->getError(ntt_os_EE_em[i])
-							   + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbbE*fbbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feeE*feeE);
- 	}
 	
  	// Sums
  	float ntt_sum_mm(0.), ntl_sum_mm(0.), nll_sum_mm(0.);
@@ -12681,9 +12917,19 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
 	
  	float ntt_cm_sum_ee(0.), ntt_cm_sum_em(0.);
  	float ntt_cm_sum_ee_e1(0.), ntt_cm_sum_em_e1(0.);
+	float ntl_cm_sum_ee(0.), ntl_cm_sum_em(0.);
+ 	float ntl_cm_sum_ee_e1(0.), ntl_cm_sum_em_e1(0.);
+	float nlt_cm_sum_ee(0.), nlt_cm_sum_em(0.);
+ 	float nlt_cm_sum_ee_e1(0.), nlt_cm_sum_em_e1(0.);
+	float nll_cm_sum_ee(0.), nll_cm_sum_em(0.);
+ 	float nll_cm_sum_ee_e1(0.), nll_cm_sum_em_e1(0.);
 	
  	float npp_cm_sum_ee(0.),    npp_cm_sum_em(0.);
  	float npp_tt_cm_sum_ee(0.), npp_tt_cm_sum_em(0.);
+	
+	float npp_tt_sum_mm(0.), npf_tt_sum_mm(0.), nff_tt_sum_mm(0.);
+	float npp_tt_sum_em(0.), npf_tt_sum_em(0.), nfp_tt_sum_em(0.), nff_tt_sum_em(0.);
+	float npp_tt_sum_ee(0.), npf_tt_sum_ee(0.), nff_tt_sum_ee(0.);
 	
  	///////////////////////////////////////////
  	// Rare SM
@@ -12768,9 +13014,24 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  		
  		ntt_cm_sum_ee    += scales[i] * ntt_cm_ee[i];
  		ntt_cm_sum_em    += scales[i] * ntt_cm_em[i];
+		ntl_cm_sum_ee    += scales[i] * ntl_cm_ee[i];
+ 		ntl_cm_sum_em    += scales[i] * ntl_cm_em[i];
+		nlt_cm_sum_ee    += scales[i] * nlt_cm_ee[i];
+ 		nlt_cm_sum_em    += scales[i] * nlt_cm_em[i];
+		nll_cm_sum_ee    += scales[i] * nll_cm_ee[i];
+ 		nll_cm_sum_em    += scales[i] * nll_cm_em[i];
 		
  		ntt_cm_sum_ee_e1 += scales[i]*scales[i] * ntt_cm_ee_e1[i];
  		ntt_cm_sum_em_e1 += scales[i]*scales[i] * ntt_cm_em_e1[i];
+		
+ 		ntl_cm_sum_ee_e1 += scales[i]*scales[i] * ntl_cm_ee_e1[i];
+ 		ntl_cm_sum_em_e1 += scales[i]*scales[i] * ntl_cm_em_e1[i];
+		
+ 		nlt_cm_sum_ee_e1 += scales[i]*scales[i] * nlt_cm_ee_e1[i];
+ 		nlt_cm_sum_em_e1 += scales[i]*scales[i] * nlt_cm_em_e1[i];
+		
+ 		nll_cm_sum_ee_e1 += scales[i]*scales[i] * nll_cm_ee_e1[i];
+ 		nll_cm_sum_em_e1 += scales[i]*scales[i] * nll_cm_em_e1[i];
 		
  		npp_cm_sum_ee    += scales[i] * npp_cm_ee[i];
  		npp_cm_sum_em    += scales[i] * npp_cm_em[i];
@@ -12780,6 +13041,17 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  		ntt_sum_mm_e1    += scales[i]*scales[i] * ntt_mm_e1[i];
  		ntt_sum_em_e1    += scales[i]*scales[i] * ntt_em_e1[i];
  		ntt_sum_ee_e1    += scales[i]*scales[i] * ntt_ee_e1[i];
+		
+		npp_tt_sum_mm	+= scales[i] * npp_tt_mm[i];
+		npf_tt_sum_mm	+= scales[i] * npf_tt_mm[i] + scales[i] * nfp_tt_mm[i];
+		nff_tt_sum_mm	+= scales[i] * nff_tt_mm[i];
+		npp_tt_sum_em	+= scales[i] * npp_tt_em[i];
+		npf_tt_sum_em	+= scales[i] * npf_tt_em[i];
+		nfp_tt_sum_em	+= scales[i] * nfp_tt_em[i];
+		nff_tt_sum_em	+= scales[i] * nff_tt_em[i];
+		npp_tt_sum_ee	+= scales[i] * npp_tt_ee[i];
+		npf_tt_sum_ee	+= scales[i] * npf_tt_ee[i] + scales[i] * nfp_tt_ee[i];
+		nff_tt_sum_ee	+= scales[i] * nff_tt_ee[i];
  	}
 	
 	
@@ -12877,54 +13149,30 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
  	for(size_t i = 0; i < nsamples; ++i){
  		OUT << setw(16) << names[i] << " || ";
-// 		OUT << setw(7)  << Form("%6.3f", nt20_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt10_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt00_mm[i]) << " || ";
-// 		OUT << setw(7)  << Form("%6.3f", nt20_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt10_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt00_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt20_mm[i]) << " || ";
-// 		OUT << setw(7)  << Form("%6.3f", nt10_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt00_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", nt20_mm[i]) << " || ";
-		
-		
-		
-		OUT << setw(7)  << Form("%6.3f", npp_tt_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", npf_tt_mm[i]+nfp_tt_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", nff_tt_mm[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", npp_tt_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", npf_tt_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", nfp_tt_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", nff_tt_em[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", npp_tt_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", npf_tt_ee[i]+nfp_tt_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", nff_tt_ee[i]) << " || ";
-		
-// 		OUT << setw(7)  << Form("%6.3f", mp*mp*scales[i]*npp_mm[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", mp*mf*scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", mf*mf*scales[i]*nff_mm[i]) << " || ";
-// 		OUT << setw(7)  << Form("%6.3f", mp*ep*scales[i]*npp_em[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", mp*ef*scales[i]*npf_em[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
-// 		OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
-// 		OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_tt_mm[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*(npf_tt_mm[i]+nfp_tt_mm[i])) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_tt_mm[i]) << " || ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_tt_em[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*npf_tt_em[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_tt_em[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_tt_em[i]) << " || ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_tt_ee[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*(npf_tt_ee[i]+nfp_tt_ee[i])) << " | ";
+		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_tt_ee[i]) << " || ";
  		OUT << endl;
  	}
  	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
- 	OUT << setw(16) << "Npf Sum"  << " || ";
- 	OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
- 	OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
- 	OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
- 	OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
- 	OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
+ 	OUT << setw(16) << "Sum"  << " || ";
+	OUT << setw(7) << Form("%6.3f", npp_tt_sum_mm) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", npf_tt_sum_mm) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nff_tt_sum_mm) << " || ";
+ 	OUT << setw(7) << Form("%6.3f", npp_tt_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", npf_tt_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nfp_tt_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nff_tt_sum_em) << " || ";
+ 	OUT << setw(7) << Form("%6.3f", npp_tt_sum_ee) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", npf_tt_sum_ee) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nff_tt_sum_ee) << " || ";
  	OUT << endl;
  	OUT << "==========================================================================================================================" << endl;
  	OUT << endl;
@@ -12978,6 +13226,37 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
  	OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
  	OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_ee, npp_tt_cm_sum_ee) << endl;
  	OUT << "=========================================================" << endl;
+ 	OUT << endl;
+	
+	OUT << "===========================================================================================" << endl;
+ 	OUT << "                 ||                   E/Mu                ||             E/E             ||" << endl;
+ 	OUT << "    CHARGE MISID ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
+ 	OUT << "-------------------------------------------------------------------------------------------" << endl;
+ 	for(size_t i = 0; i < nsamples; ++i){
+ 		OUT << setw(16) << names[i] << " || ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_cm_em[i]) << " | ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_cm_em[i]) << " | ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*nlt_cm_em[i]) << " | ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_cm_em[i]) << " || ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_cm_ee[i]) << " | ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*(ntl_cm_ee[i]+nlt_cm_ee[i])) << " | ";
+ 		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_cm_ee[i]) << " || ";
+ 		OUT << endl;
+ 	}
+ 	OUT << "-------------------------------------------------------------------------------------------" << endl;
+ 	OUT << setw(16) << "Sum"  << " || ";
+ 	OUT << setw(7) << Form("%6.3f", ntt_cm_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", ntl_cm_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nlt_cm_sum_em) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nll_cm_sum_em) << " || ";
+ 	OUT << setw(7) << Form("%6.3f", ntt_cm_sum_ee) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", ntl_cm_sum_ee+nlt_cm_sum_ee) << " | ";
+ 	OUT << setw(7) << Form("%6.3f", nll_cm_sum_ee) << " || ";
+ 	OUT << endl;
+// 	OUT << setw(16) << "Channels sum"  << " || ";
+// 	OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
+//				ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
+ 	OUT << "===========================================================================================" << endl;
  	OUT << endl;
 	
  	OUT << "===================================================================================================" << endl;
