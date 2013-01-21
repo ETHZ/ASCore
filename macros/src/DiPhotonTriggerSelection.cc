@@ -12,14 +12,24 @@ if (isdata){
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v");
     nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_v");
   }
-  else if (run>=161216 && run<=165208){
+  else if (run>=161216 && run<=165633){
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v");
     nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
     nametriggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v");
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v");
   }
-  else if (run>=165970 && run<=173198){
+  else if (run>=165970 && run<=166967){
+    nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v");
+    nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon26_R9Id_Photon18_R9Id_v");
+    nametriggers.push_back("HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_CaloId_IsoVL_Photon22_R9Id_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v");
+    nametriggers.push_back("HLT_Photon36_R9Id_Photon22_R9Id_v");
+  }
+  else if (run>=167039 && run<=173198){
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
     nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v");
     nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
@@ -51,7 +61,7 @@ if (isdata){
 
 if (!isdata){
 
-  // MC triggers from DiPhotonJets madgraph Summer11
+  // MC triggers from DiPhotonJets madgraph Fall11
 nametriggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v");
 nametriggers.push_back("HLT_Photon26_Photon18_v");
 nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_v");
@@ -66,19 +76,19 @@ nametriggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v");
  }
 
 for (vector<string>::const_iterator it=nametriggers.begin(); it!=nametriggers.end(); it++){
-  for (int j=1;j<10;j++) {
+  for (int j=1;j<50;j++) {
     TString a((*it));
     a+=j;
     triggers.push_back(a.Data());
   }
  }
 
-  for (vector<string>::const_iterator it=triggers.begin(); it!=triggers.end(); it++){
-    if ( GetHLTPrescale(*it)>1) {
-      cout << "warning: using prescaled trigger!!! " << *it << " " << GetHLTPrescale(*it) << " in run " << fTR->Run << endl;
-    }
-    if ( GetHLTResult(*it) )        return true;
+for (vector<string>::const_iterator it=triggers.begin(); it!=triggers.end(); it++){
+  if ( GetHLTPrescale(*it)>1) {
+    cout << "warning: using prescaled trigger!!! " << *it << " " << GetHLTPrescale(*it) << " in run " << fTR->Run << endl;
   }
+  if ( GetHLTResult(*it) )        return true;
+ }
 
  return false;
 
