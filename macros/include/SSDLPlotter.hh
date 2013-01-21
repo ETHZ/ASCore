@@ -254,6 +254,8 @@ public:
 	void makeRatioPlots(gChannel);
 	void make2DRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
+	void makeFakeGenIDTables();
+	void makeFakeGenIDTable(vector<int>, gChannel, gFPSwitch, TString);
 
 	void makeOriginPlots(int);
 	// old void makeOriginPlots(gRegion);
@@ -300,6 +302,7 @@ public:
 	// Fake ratios
 	// Calculate from pre stored numbers, with fixed selections:
 	void fillRatios(vector<int>, vector<int>, int = 0);
+	void fillRatios(vector<int>, vector<int>, vector<int>, vector<int>, int = 0);
 	TH1D* fillRatioPt(gChannel, int, gFPSwitch, bool = false);
 	TH1D* fillRatioPt(gChannel, vector<int>, gFPSwitch, bool = false);
 	TH2D* fillRatio(gChannel, int, gFPSwitch, bool = false);
@@ -397,6 +400,10 @@ public:
 	vector<int> fLowPtData;   // All lepton cross HT triggered data
 	vector<int> fClosureSamples;
 	vector<int> fTTJets;
+	vector<int> fWJets;
+	vector<int> fMuEnr;
+	vector<int> fEMEnr;
+	vector<int> fDYJets;
 
 	TLatex *fLatex;
 	
