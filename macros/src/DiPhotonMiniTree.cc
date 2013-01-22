@@ -459,8 +459,6 @@ void DiPhotonMiniTree::Analyze(){
       passing = PhotonPreSelection(fTR,passing);
     }
 
-    if (sel_cat==3) passing = ApplyPixelVeto(fTR,passing,1); // for DY pixel veto reverse
-    else passing = ApplyPixelVeto(fTR,passing,0);
 
     if (sel_cat==0){
       passing = PhotonSelection(fTR,passing);
@@ -474,7 +472,7 @@ void DiPhotonMiniTree::Analyze(){
       pass[sel_cat] = SinglePhotonEventSelection(fTR,passing);
     }
     else if (sel_cat==3){
-      passing = PhotonSelection(fTR,passing); // revert pixel veto already done
+      passing = PhotonSelection(fTR,passing,"revert_pixel_veto"); // revert pixel veto already done
       pass[sel_cat] = StandardEventSelection(fTR,passing);
     }
     else if (sel_cat==4){
@@ -867,10 +865,14 @@ std::vector<int> DiPhotonMiniTree::GenLevelIsolationCut(TreeReader *fTR, std::ve
 
 std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, std::vector<int> passing, TString mode){
 
-  if (mode!="" && mode!="invert_sieie_cut"){
+  if (mode!="" && mode!="invert_sieie_cut" && mode!="revert_pixel_veto"){
     std::cout << "Error" << std::endl;
     return std::vector<int>();
   }
+
+  if (mode=="revert_pixel_veto") passing = ApplyPixelVeto(fTR,passing,1); // for DY pixel veto reverse
+  else passing = ApplyPixelVeto(fTR,passing,0);
+
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){ // HoverE cut
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
