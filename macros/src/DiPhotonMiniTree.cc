@@ -372,6 +372,18 @@ void DiPhotonMiniTree::Analyze(){
 
   //  return; // RUNNING FOR PU FILE
 
+
+  // FILTERS
+  // scraping veto done at ntuplizer level
+  if (!PassPrimaryVertexFilter()) return;
+  if (!fTR->HBHENoiseFlagIso) return;
+  //  if (fTR->CSCTightHaloID) return;
+  //  if (!fTR->EcalDeadTPFilterFlag) return;
+  //  if (!fTR->RA2TrackingFailureFilterFlag) return;
+
+
+
+
   event_weight = weight;
   event_weight3D = weight3D;
   event_rho = fTR->Rho;
@@ -439,7 +451,6 @@ void DiPhotonMiniTree::Analyze(){
 
     if (isdata){
       if (sel_cat>=11) continue;
-      if (fTR->CSCTightHaloID) continue;
     }
 
     pass[sel_cat]=false;
@@ -583,7 +594,6 @@ void DiPhotonMiniTree::Analyze(){
 
     if (isdata){
       if (sel_cat>=11) continue;
-      if (fTR->CSCTightHaloID) continue;
     }
 
     if (!pass[sel_cat]) continue;
@@ -2275,4 +2285,11 @@ float DiPhotonMiniTree::DeltaPhiSigned(float phi1, float phi2){
   while (result > pi) result -= 2*pi;
   while (result <= -pi) result += 2*pi;
   return result;
+};
+
+bool DiPhotonMiniTree::PassPrimaryVertexFilter(){
+  for (int i=0; i<fTR->NVrtx; i++){
+    if (fTR->VrtxNdof[i]>4 && fabs(fTR->VrtxZ[i])<=24 && TVector3(fTR->VrtxX[i],fTR->VrtxY[i],fTR->VrtxZ[i]).Perp()<=2) return true;
+  }
+  return false;
 };
