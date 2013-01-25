@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.46 2013/01/17 08:32:54 haweber Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.47 2013/01/25 08:35:54 fronga Exp $
 //
 //
 
@@ -3295,11 +3295,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
     }
     if ( rawJetP4.pt() < 3 ) continue; // Discard very low momentum jets (beware: JECs can be higher than 200%...)
-    fTJMetCorrEta ->push_back( rawJetP4.eta() );
-    fTJMetCorrPt  ->push_back( rawJetP4.pt() );
-    fTJMetCorrPhi ->push_back( rawJetP4.phi() );
-    fTJMetCorrEMF ->push_back( rawJet->chargedEmEnergyFraction() + rawJet->neutralEmEnergyFraction() );
-    fTJMetCorrArea->push_back( rawJet->jetArea() );
+    fTJMetCorrNoMuPt ->push_back( rawJetP4.pt() );
+    fTJMetCorrPhi    ->push_back( rawJetP4.phi() );
+    fTJMetCorrRawEta ->push_back( rawJet->eta() ); // Official tool uses original jet for corrections...
+    fTJMetCorrRawPt  ->push_back( rawJet->pt() );
+    fTJMetCorrEMF    ->push_back( rawJet->chargedEmEnergyFraction() + rawJet->neutralEmEnergyFraction() );
+    fTJMetCorrArea   ->push_back( rawJet->jetArea() );
   }
 
 
@@ -4275,9 +4276,10 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("JVtxEzx");
   produces<std::vector<float> >("JVtxNChi2");
   produces<std::vector<int> >("JGenJetIndex");
-  produces<std::vector<float> >("JMetCorrEta"); 
+  produces<std::vector<float> >("JMetCorrRawEta"); 
   produces<std::vector<float> >("JMetCorrPhi");  
-  produces<std::vector<float> >("JMetCorrPt");  
+  produces<std::vector<float> >("JMetCorrNoMuPt");  
+  produces<std::vector<float> >("JMetCorrRawPt");  
   produces<std::vector<float> >("JMetCorrEMF"); 
   produces<std::vector<float> >("JMetCorrArea");
   produces<int>("NTracks");
@@ -5039,9 +5041,10 @@ void NTupleProducer::resetProducts( void ) {
   fTJVtxEzx.reset(new std::vector<float> );
   fTJVtxNChi2.reset(new std::vector<float> );
   fTJGenJetIndex.reset(new std::vector<int> );
-  fTJMetCorrEta.reset(new std::vector<float> );
+  fTJMetCorrRawEta.reset(new std::vector<float> );
   fTJMetCorrPhi.reset(new std::vector<float> );
-  fTJMetCorrPt.reset(new std::vector<float> );
+  fTJMetCorrNoMuPt.reset(new std::vector<float> );
+  fTJMetCorrRawPt.reset(new std::vector<float> );
   fTJMetCorrEMF.reset(new std::vector<float> );
   fTJMetCorrArea.reset(new std::vector<float> );
   fTNTracks.reset(new int(0));
@@ -5847,8 +5850,9 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTJVtxEzx, "JVtxEzx");
   event.put(fTJVtxNChi2, "JVtxNChi2");
   event.put(fTJGenJetIndex, "JGenJetIndex");
-  event.put(fTJMetCorrEta, "JMetCorrEta"); 
-  event.put(fTJMetCorrPt,  "JMetCorrPt");  
+  event.put(fTJMetCorrRawEta, "JMetCorrRawEta"); 
+  event.put(fTJMetCorrNoMuPt,  "JMetCorrNoMuPt");  
+  event.put(fTJMetCorrRawPt,  "JMetCorrRawPt");  
   event.put(fTJMetCorrPhi,  "JMetCorrPhi");  
   event.put(fTJMetCorrEMF, "JMetCorrEMF"); 
   event.put(fTJMetCorrArea,"JMetCorrArea");

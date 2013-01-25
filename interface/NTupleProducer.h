@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.37 2013/01/17 08:32:55 haweber Exp $
+// $Id: NTupleProducer.h,v 1.114.2.38 2013/01/25 08:35:53 fronga Exp $
 //
 //
 
@@ -1045,9 +1045,10 @@ private:
   std::auto_ptr<std::vector<int> >  fTJGenJetIndex;
 
   //- Jets for MET corrections:
-  std::auto_ptr<std::vector<float> >  fTJMetCorrEta;
+  std::auto_ptr<std::vector<float> >  fTJMetCorrRawEta;
   std::auto_ptr<std::vector<float> >  fTJMetCorrPhi;
-  std::auto_ptr<std::vector<float> >  fTJMetCorrPt;
+  std::auto_ptr<std::vector<float> >  fTJMetCorrNoMuPt;
+  std::auto_ptr<std::vector<float> >  fTJMetCorrRawPt;
   std::auto_ptr<std::vector<float> >  fTJMetCorrEMF;
   std::auto_ptr<std::vector<float> >  fTJMetCorrArea;
 
