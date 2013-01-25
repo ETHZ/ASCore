@@ -18,6 +18,8 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
+#include "helper/OnTheFlyMet.hh"
+
 class UserAnalysisBase{
 public:
     UserAnalysisBase(TreeReader *tr = 0, bool isData=1);
@@ -40,6 +42,9 @@ public:
     virtual int GetHLTBit(string);
     virtual bool GetHLTResult(string);
     virtual int GetHLTPrescale(string);
+
+	OnTheFlyCorrections * fMetCorrector;
+    virtual std::pair<float , float > GetOnTheFlyCorrections();
 
     // PileUp reweighting;
     virtual void  SetPileUpSrc(string, string = "");
@@ -77,6 +82,7 @@ public:
     virtual bool IsLooseMu(int);
     virtual bool IsLooseNoTightMu(int);
 	virtual float MuPFIso(int);
+	virtual float MuPFIso04(int);
 	virtual float MuRadIso(int);
 
     // Electron Selectors
