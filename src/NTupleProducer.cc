@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.45 2013/01/15 17:28:45 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.46 2013/01/17 08:32:54 haweber Exp $
 //
 //
 
@@ -3281,6 +3281,27 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     *fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
   }
 
+  // Information to be able to apply MET corrections on-the-fly
+  // Need to store Pt, Eta, EMfraction and Area of raw Jet, after muon subtraction
+  // See JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
+  for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit, ++iraw) {
+    const PFJet* rawJet = static_cast<const PFJet*>( &((*Jit)) );
+    reco::Candidate::LorentzVector rawJetP4 = rawJet->p4();
+    std::vector<reco::PFCandidatePtr> cands = rawJet->getPFConstituents();
+    for ( std::vector<reco::PFCandidatePtr>::const_iterator cand = cands.begin();cand != cands.end(); ++cand ) {
+      if ( (*cand)->muonRef().isNonnull() && 
+           ((*cand)->muonRef()->isGlobalMuon() || (*cand)->muonRef()->isStandAloneMuon() ) ) { // Loose muon selection
+        rawJetP4 -= (*cand)->p4();
+      }
+    }
+    if ( rawJetP4.pt() < 3 ) continue; // Discard very low momentum jets (beware: JECs can be higher than 200%...)
+    fTJMetCorrEta ->push_back( rawJetP4.eta() );
+    fTJMetCorrPt  ->push_back( rawJetP4.pt() );
+    fTJMetCorrPhi ->push_back( rawJetP4.phi() );
+    fTJMetCorrEMF ->push_back( rawJet->chargedEmEnergyFraction() + rawJet->neutralEmEnergyFraction() );
+    fTJMetCorrArea->push_back( rawJet->jetArea() );
+  }
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // Special stuff for Model Scans ///////////////////////////////////////////////
@@ -4254,6 +4275,11 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("JVtxEzx");
   produces<std::vector<float> >("JVtxNChi2");
   produces<std::vector<int> >("JGenJetIndex");
+  produces<std::vector<float> >("JMetCorrEta"); 
+  produces<std::vector<float> >("JMetCorrPhi");  
+  produces<std::vector<float> >("JMetCorrPt");  
+  produces<std::vector<float> >("JMetCorrEMF"); 
+  produces<std::vector<float> >("JMetCorrArea");
   produces<int>("NTracks");
   produces<int>("NTracksTot");
   produces<std::vector<int> >("TrkGood");
@@ -5013,6 +5039,11 @@ void NTupleProducer::resetProducts( void ) {
   fTJVtxEzx.reset(new std::vector<float> );
   fTJVtxNChi2.reset(new std::vector<float> );
   fTJGenJetIndex.reset(new std::vector<int> );
+  fTJMetCorrEta.reset(new std::vector<float> );
+  fTJMetCorrPhi.reset(new std::vector<float> );
+  fTJMetCorrPt.reset(new std::vector<float> );
+  fTJMetCorrEMF.reset(new std::vector<float> );
+  fTJMetCorrArea.reset(new std::vector<float> );
   fTNTracks.reset(new int(0));
   fTNTracksTot.reset(new int(0));
   fTTrkGood.reset(new std::vector<int> );
@@ -5816,6 +5847,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTJVtxEzx, "JVtxEzx");
   event.put(fTJVtxNChi2, "JVtxNChi2");
   event.put(fTJGenJetIndex, "JGenJetIndex");
+  event.put(fTJMetCorrEta, "JMetCorrEta"); 
+  event.put(fTJMetCorrPt,  "JMetCorrPt");  
+  event.put(fTJMetCorrPhi,  "JMetCorrPhi");  
+  event.put(fTJMetCorrEMF, "JMetCorrEMF"); 
+  event.put(fTJMetCorrArea,"JMetCorrArea");
   event.put(fTNTracks, "NTracks");
   event.put(fTNTracksTot, "NTracksTot");
   event.put(fTTrkGood, "TrkGood");
