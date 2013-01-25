@@ -14,7 +14,8 @@ class OnTheFlyCorrections {
 		FactorizedJetCorrector *fJetCorrector;
 		// FactorizedJetCorrector(OnTheFlyCorrections::fJetCorPar) *fJetCorrector;
 
-		std::pair< float, float > getCorrections( float pt, float eta, float phi, float emf, float rho, float area, std::string level = "" );
+  std::pair< float, float > getCorrections( float rawpt, float raweta, float rawnomupt, 
+                                            float phi, float emf, float rho, float area, std::string level = "" );
 
 		float getPx(float pt, float phi){ return pt*cos(phi); };
 		float getPy(float pt, float phi){ return pt*sin(phi); };

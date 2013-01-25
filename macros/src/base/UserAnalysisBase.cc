@@ -45,6 +45,7 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr, bool isData){
     delete L3JetPar; 
     delete ResJetPar; 
 
+    fMetCorrector = new OnTheFlyCorrections("FT_P_V42_AN3", isData);
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
@@ -54,6 +55,21 @@ UserAnalysisBase::~UserAnalysisBase(){
     delete fJetCorrector;
     delete fJECUnc;
 
+}
+std::pair<float ,float> UserAnalysisBase::GetOnTheFlyCorrections(){
+  float corrMetx = fTR->PFMETpx;
+  float corrMety = fTR->PFMETpy;
+  for (int ind = 0; ind<fTR->JMetCorrRawEta.size(); ++ind) {
+
+    std::pair <float, float> corr = fMetCorrector->getCorrections(fTR->JMetCorrRawPt[ind],fTR->JMetCorrRawEta[ind],fTR->JMetCorrNoMuPt[ind],
+                                                                  fTR->JMetCorrPhi[ind],fTR->JMetCorrEMF[ind],fTR->Rho, fTR->JMetCorrArea[ind]);
+    corrMetx += corr.first ;
+    corrMety += corr.second;
+  }
+  float newmet    = sqrt(corrMetx*corrMetx + corrMety*corrMety);
+  float newmetphi = atan2(corrMety, corrMetx);
+  return make_pair(newmet, newmetphi);
+  
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
@@ -341,6 +357,12 @@ float UserAnalysisBase::MuPFIso(int index){
   return iso;
 }
 
+float UserAnalysisBase::MuPFIso04(int index){
+  double neutral = (fTR->MuPfIsoR04NeHad[index] + fTR->MuPfIsoR04Photon[index] - 0.5*fTR->MuPfIsoR04SumPUPt[index] );
+  float iso = ( fTR->MuPfIsoR04ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
+  return iso;
+}
+
 float UserAnalysisBase::MuRadIso(int index){
 	return (fTR->MumuonRadPFIsoChHad03[index] + fTR->MumuonRadPFIsoNHad03[index] + fTR->MumuonRadPFIsoPhoton03[index]) / fTR->MuPt[index] ;
 }
@@ -490,13 +512,9 @@ float UserAnalysisBase::Aeff(float eta) {
 }
 
 float UserAnalysisBase::ElPFIso(int index){
-// 	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
-// 	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[index]);
-// 	double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
-// 	return iso;
-	double neutral = fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index];
+	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
 	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElSCEta[index]);
-	double iso     = ( fTR->ElPfIsoChHad03[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
+	double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
 	return iso;
 }
 
