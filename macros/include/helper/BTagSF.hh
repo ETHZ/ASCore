@@ -1,15 +1,23 @@
 #include <vector>
 #include <iostream>
+#include <map>
+#include "TF1.h"
+#include "TString.h"
+
 
 class BTagSF {
 	public:
 		BTagSF ();
 		~BTagSF(){};
 		
-		double efficiency (float flavor, double pt, int unc, int lightUnc);
-		double scalefactor(float flavor, double pt, int unc, int lightUnc);
+		double efficiency (float pt, float eta, int flavor, TString meanminmax, int lightUnc = 0);
+		double scalefactor(float pt, float eta, int flavor, TString meanminmax);
+		void getSFLightFunction(float jeteta, TString meanminmax);
 		bool   applySF(bool& isBTagged, float SF, float eff, float random);
-		bool   modifyBTagsWithSF(bool& is_tagged, int flavor, int pt, float random, int flag); // just to have it in a similar format as before
+		bool   modifyBTagsWithSF(bool& is_tagged, float pt, float eta, int flavor, TString meanminmax, float random); // just to have it in a similar format as before
+
+		TF1 * fLightSF;
+		std::map< TString, float> fMeanminmax;
 		
 };
 
