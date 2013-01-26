@@ -377,7 +377,7 @@ void DiPhotonMiniTree::Analyze(){
   // scraping veto done at ntuplizer level
   if (!PassPrimaryVertexFilter()) return;
   if (!fTR->HBHENoiseFlagIso) return;
-  //  if (fTR->CSCTightHaloID) return;
+  if (fTR->CSCTightHaloID) return;
   //  if (!fTR->EcalDeadTPFilterFlag) return;
   //  if (!fTR->RA2TrackingFailureFilterFlag) return;
 
@@ -1036,6 +1036,7 @@ bool DiPhotonMiniTree::DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &p
 };
 
 bool DiPhotonMiniTree::TriggerSelection(){
+  //  if (!isdata) return true; // trigger sel off in MC
 #include "DiPhotonTriggerSelection.cc"
 };
 
