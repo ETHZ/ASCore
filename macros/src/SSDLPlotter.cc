@@ -83,7 +83,7 @@ void SSDLPlotter::init(TString filename){
 	// Util::SetStyle();
 	gStyle->SetOptStat(0);
 	gStyle->SetPadTickY(1);
-	gStyle->SetPadTickX(1);	
+	gStyle->SetPadTickX(1);
 
 	readDatacard(filename);
 
@@ -99,7 +99,7 @@ void SSDLPlotter::init(TString filename){
 
 	resetHypLeptons();
 	initCutNames();
-	
+
 	// Luminosity
 	// fLumiNorm = 2096.; // Pre 2011B
 	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
@@ -118,7 +118,7 @@ void SSDLPlotter::init(TString filename){
 	fC_maxHT    = 7000.;
 	fC_maxMet   = 7000.;
 	fC_minNjets = 2;
-	
+
 	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 20.;
 
@@ -146,6 +146,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(TTbarZ);
 	fMCBG.push_back(TTbarG);
 	// fMCBG.push_back(TTbarH);
+	fMCBG.push_back(TBZ);
 	fMCBG.push_back(WpWp);
 	fMCBG.push_back(WmWm);
 	fMCBG.push_back(WWZ);
@@ -167,6 +168,19 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(QCD1400);
 	fMCBG.push_back(QCD1800);
 
+	fMCRareSM_TTV.push_back(ZZ);
+	fMCRareSM_TTV.push_back(GVJets);
+	fMCRareSM_TTV.push_back(DPSWW);
+	fMCRareSM_TTV.push_back(TTbarG);
+	fMCRareSM_TTV.push_back(TBZ);
+	fMCRareSM_TTV.push_back(WpWp);
+	fMCRareSM_TTV.push_back(WmWm);
+	fMCRareSM_TTV.push_back(WWZ);
+	fMCRareSM_TTV.push_back(WZZ);
+	fMCRareSM_TTV.push_back(WWG);
+	fMCRareSM_TTV.push_back(WWW);
+	fMCRareSM_TTV.push_back(ZZZ);
+
 	fMCBGNoQCDNoGJets.push_back(TTJets);
 	fMCBGNoQCDNoGJets.push_back(TJets_t);
 	fMCBGNoQCDNoGJets.push_back(TbarJets_t);
@@ -184,6 +198,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(TTbarW);
 	fMCBGNoQCDNoGJets.push_back(TTbarZ);
 	fMCBGNoQCDNoGJets.push_back(TTbarG);
+	fMCBGNoQCDNoGJets.push_back(TBZ);
 	fMCBGNoQCDNoGJets.push_back(WpWp);
 	fMCBGNoQCDNoGJets.push_back(WmWm);
 	fMCBGNoQCDNoGJets.push_back(WWZ);
@@ -217,6 +232,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(TTbarW);
 	fMCBGMuEnr.push_back(TTbarZ);
 	fMCBGMuEnr.push_back(TTbarG);
+	fMCBGMuEnr.push_back(TBZ);
 	fMCBGMuEnr.push_back(WpWp);
 	fMCBGMuEnr.push_back(WmWm);
 	fMCBGMuEnr.push_back(WWZ);
@@ -236,6 +252,7 @@ void SSDLPlotter::init(TString filename){
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
+	fMCRareSM.push_back(TBZ);
 	fMCRareSM.push_back(WpWp);
 	fMCRareSM.push_back(WmWm);
 	fMCRareSM.push_back(WWZ);
@@ -292,13 +309,13 @@ void SSDLPlotter::init(TString filename){
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// return;
-	
+
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData,    fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBG,   1);
 
-	// makePileUpPlots(true); // loops on all data!
-	
+	// makePileUpPlots(false); // loops on all data!
+
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// makeOriginPlots(Baseline);
 	// printOrigins(Baseline);
@@ -319,7 +336,7 @@ void SSDLPlotter::doAnalysis(){
 	// make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
-	
+
 	// makeFRvsPtPlots(Muon, SigSup);
 	// makeFRvsPtPlots(Elec, SigSup);
 	// makeFRvsPtPlots(Muon, ZDecay);
@@ -330,18 +347,18 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsNVPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
-	
-	storeWeightedPred();
+
+	// storeWeightedPred();
 
 	// makeAllIntPredictions();
 	// makeAllClosureTests();
 	// makeDiffPrediction();
 
-	makeTTWIntPredictions();
+	// makeTTWIntPredictions();
 	// makeTTWDiffPredictions();
 
 	// printAllYieldTables();
-	
+
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 20.);
 	// makeRelIsoTTSigPlots();
@@ -349,7 +366,7 @@ void SSDLPlotter::doAnalysis(){
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0., 7000., 200., 7000., 20., 10.); // MET 200 region , no HT cut
 
-	// makeM3Plot();
+	makeM3Plot();
 }
 
 //____________________________________________________________________________
@@ -358,27 +375,27 @@ void SSDLPlotter::sandBox(){
 	FR->setIsMC(true);
 	FR->setNToyMCs(100);
 	FR->setAddESyst(0.0);
-	
+
 	FR->setNGen(59574249);
-	
+
 	FR->setMFRatio(0.085, 5.8e-05);
 	FR->setMPRatio(0.930, 0.0016);
 	FR->setEFRatio(0.190, 0.00011);
 	FR->setEPRatio(0.900, 0.0022);
 
-	// TTJets || 196 | 4600 | 768 || 367 | 905 | 3972 | 676 || 179 | 741 | 109 || 
+	// TTJets || 196 | 4600 | 768 || 367 | 905 | 3972 | 676 || 179 | 741 | 109 ||
 	FR->setMMNtl(196, 4600, 768);
 	FR->setEMNtl(367, 905, 3972, 676);
 	FR->setEENtl(179, 741, 109);
 
-	
+
 	cout << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 	FR->getMMNpp(), FR->getMMNppEStat(), FR->getMMNpf(), FR->getMMNpfEStat(), FR->getMMNff(), FR->getMMNffEStat()) << endl;
 	cout << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
 	FR->getEMNpp(), FR->getEMNppEStat(), FR->getEMNpf(), FR->getEMNpfEStat(), FR->getEMNfp(), FR->getEMNfpEStat(), FR->getEMNff(), FR->getEMNffEStat()) << endl;
 	cout << Form("  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 	FR->getEENpp(), FR->getEENppEStat(), FR->getEENpf(), FR->getEENpfEStat(), FR->getEENff(), FR->getEENffEStat()) << endl;
-	
+
 	delete FR;
 }
 void SSDLPlotter::plotWeightedHT(){
@@ -392,13 +409,13 @@ void SSDLPlotter::plotWeightedHT(){
 
 	TH1D *normalHT   = new TH1D("normalHT"   , "normalHT"   , 25 , 0. , 200.);
 	TH1D *weightedHT = new TH1D("weightedHT" , "weightedHT" , 25 , 0. , 200.);
-	
+
 	normalHT->Sumw2();
 	weightedHT->Sumw2();
-	
+
 //	for(size_t i = 0; i < samples.size(); ++i){
 //		Sample *S = fSamples[samples[i]];
-		
+
 		//TTree *tree = S->getTree();
 		//tree->ResetBranchAddresses();
 		//Init(tree);
@@ -418,7 +435,7 @@ void SSDLPlotter::plotWeightedHT(){
 	res_   -> cd();
 	normalHT->Write();
 	weightedHT->Write();
-	
+
 	//printObject(normalHT  , "normalHT"  , "LEX");
 	//printObject(weightedHT, "weightedHT", "LEX");
 }
@@ -442,34 +459,34 @@ void SSDLPlotter::makePileUpPlots(bool write){
 	}
 	else{
 		vector<gSample> samples;
-		// samples.push_back(DoubleMu1);
-		// samples.push_back(DoubleMu2);
-		// samples.push_back(DoubleMu3);
-		// samples.push_back(DoubleMu4);
+		samples.push_back(DoubleMu1);
+		samples.push_back(DoubleMu2);
+		samples.push_back(DoubleMu3);
+		samples.push_back(DoubleMu4);
 		samples.push_back(DoubleMu5);
-		// samples.push_back(MuEG1);
-		// samples.push_back(MuEG2);
-		// samples.push_back(MuEG3);
-		// samples.push_back(MuEG4);
+		samples.push_back(MuEG1);
+		samples.push_back(MuEG2);
+		samples.push_back(MuEG3);
+		samples.push_back(MuEG4);
 		samples.push_back(MuEG5);
-		// samples.push_back(DoubleEle1);
-		// samples.push_back(DoubleEle2);
-		// samples.push_back(DoubleEle3);
-		// samples.push_back(DoubleEle4);
+		samples.push_back(DoubleEle1);
+		samples.push_back(DoubleEle2);
+		samples.push_back(DoubleEle3);
+		samples.push_back(DoubleEle4);
 		samples.push_back(DoubleEle5);
 
-		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		sel_nvertices = new TH1D("sel_nvertices", "sel_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		del_nvertices = new TH1D("del_nvertices", "del_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mue_nvertices = new TH1D("mue_nvertices", "mue_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		sel_nvertices = new TH1D("sel_nvertices", "sel_nvertices", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		del_nvertices = new TH1D("del_nvertices", "del_nvertices", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		mue_nvertices = new TH1D("mue_nvertices", "mue_nvertices", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
 
-		mu_ntight = new TH1D("mu_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mu_nloose = new TH1D("mu_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mu_ratio  = new TH1D("mu_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_ntight = new TH1D("el_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_nloose = new TH1D("el_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_ratio  = new TH1D("el_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		mu_ntight = new TH1D("mu_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		mu_nloose = new TH1D("mu_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		mu_ratio  = new TH1D("mu_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		el_ntight = new TH1D("el_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		el_nloose = new TH1D("el_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::bins[3]);
+		el_ratio  = new TH1D("el_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::bins[3]);
 
 		mu_ntight    ->Sumw2();
 		mu_nloose    ->Sumw2();
@@ -516,13 +533,16 @@ void SSDLPlotter::makePileUpPlots(bool write){
 		del_nvertices->GetYaxis()->SetTitleOffset(1.2);
 		mue_nvertices->GetYaxis()->SetTitleOffset(1.2);
 
+		fC_maxMet_Control = 20.;
+		fC_maxMt_Control  = 20.;
+
 		for(size_t i = 0; i < samples.size(); ++i){
 			Sample *S = fSamples[samples[i]];
 			fSample = S; // necessary for triggers to work properly
 			fCurrentSample = samples[i];
 			resetHypLeptons();
 			fDoCounting = false;
-		
+
 			TTree *tree = S->getTree();
 			tree->ResetBranchAddresses();
 			Init(tree);
@@ -537,7 +557,7 @@ void SSDLPlotter::makePileUpPlots(bool write){
 					smu_nvertices->Fill(NVrtx);
 					if(isSigSupMuEvent()){
 						if(isTightMuon(0)) mu_ntight->Fill(NVrtx);
-						if(isLooseMuon(0)) mu_nloose->Fill(NVrtx);					
+						if(isLooseMuon(0)) mu_nloose->Fill(NVrtx);
 					}
 				}
 				resetHypLeptons();
@@ -551,7 +571,7 @@ void SSDLPlotter::makePileUpPlots(bool write){
 			}
 			S->cleanUp();
 		}
-	
+
 		mu_ratio->Divide(mu_ntight, mu_nloose, 1., 1., "B");
 		mu_ratio->GetYaxis()->SetRangeUser(0., 0.4);
 		el_ratio->Divide(el_ntight, el_nloose, 1., 1., "B");
@@ -582,24 +602,30 @@ void SSDLPlotter::makePileUpPlots(bool write){
 	mue_nvertices->GetYaxis()->SetTitleOffset(1.3);
 
 	// Color_t colors[6] = {1, 1, 1, 1, 1, 1};
-	Color_t colors[5] = {31, 41, 51, 61, 81};
+	Color_t colors[5] = {4, 2, 61, 92, 51};
 	// Color_t colors[6] = {1, 12, 39, 38, 32, 30};//, 29};
-	Style_t styles[6] = {24, 25, 26, 27, 32, 30};//, 29};
+	// Style_t styles[6] = {24, 25, 26, 27, 32, 30};//, 29};
+	Style_t styles[6] = {1, 2, 3, 4, 5, 6};//, 29};
 
 	// dmu_nvertices->SetMarkerStyle(styles[0]);
 	// smu_nvertices->SetMarkerStyle(styles[1]);
 	// del_nvertices->SetMarkerStyle(styles[2]);
 	// sel_nvertices->SetMarkerStyle(styles[3]);
 	// mue_nvertices->SetMarkerStyle(styles[4]);
+	dmu_nvertices->SetLineStyle(styles[2]);
+	smu_nvertices->SetLineStyle(styles[0]);
+	del_nvertices->SetLineStyle(styles[3]);
+	sel_nvertices->SetLineStyle(styles[1]);
+	mue_nvertices->SetLineStyle(styles[4]);
 	// dmu_nvertices->SetMarkerColor(colors[0]);
 	// smu_nvertices->SetMarkerColor(colors[1]);
 	// del_nvertices->SetMarkerColor(colors[2]);
 	// sel_nvertices->SetMarkerColor(colors[3]);
 	// mue_nvertices->SetMarkerColor(colors[4]);
-	dmu_nvertices->SetLineColor(colors[0]);
-	smu_nvertices->SetLineColor(colors[1]);
-	del_nvertices->SetLineColor(colors[2]);
-	sel_nvertices->SetLineColor(colors[3]);
+	smu_nvertices->SetLineColor(colors[0]);
+	sel_nvertices->SetLineColor(colors[1]);
+	dmu_nvertices->SetLineColor(colors[2]);
+	del_nvertices->SetLineColor(colors[3]);
 	mue_nvertices->SetLineColor(colors[4]);
 	// dmu_nvertices->SetMarkerSize(1.5);
 	// smu_nvertices->SetMarkerSize(1.5);
@@ -643,17 +669,17 @@ void SSDLPlotter::makePileUpPlots(bool write){
 	// printObject(mue_nvertices, "NVertices_MuE", "L");
 
 	// TLegend *leg = new TLegend(0.35,0.15,0.70,0.40);
-	TLegend *leg = new TLegend(0.50,0.60,0.88,0.88);
-	leg->AddEntry(dmu_nvertices, Form("DoubleMu Trig., Mean = %4.2f", dmu_nvertices->GetMean()),  "l");
-	leg->AddEntry(smu_nvertices, Form("SingleMu Trig., Mean = %4.2f", smu_nvertices->GetMean()),  "l");
-	leg->AddEntry(del_nvertices, Form("DoubleEle Trig., Mean = %4.2f", del_nvertices->GetMean()), "l");
-	leg->AddEntry(sel_nvertices, Form("SingleEle Trig., Mean = %4.2f", sel_nvertices->GetMean()), "l");
-	leg->AddEntry(mue_nvertices, Form("MuEle Trig., Mean = %4.2f", mue_nvertices->GetMean()),   "l");
+	TLegend *leg = new TLegend(0.45,0.60,0.88,0.88);
+	leg->AddEntry(smu_nvertices, Form("SingleMu Triggers, Mean = %4.1f", smu_nvertices->GetMean()),  "l");
+	leg->AddEntry(sel_nvertices, Form("SingleEle Triggers, Mean = %4.1f", sel_nvertices->GetMean()), "l");
+	leg->AddEntry(dmu_nvertices, Form("DoubleMu Triggers, Mean = %4.1f", dmu_nvertices->GetMean()),  "l");
+	leg->AddEntry(del_nvertices, Form("DoubleEle Triggers, Mean = %4.1f", del_nvertices->GetMean()), "l");
+	leg->AddEntry(mue_nvertices, Form("MuEle Triggers, Mean = %4.1f", mue_nvertices->GetMean()),   "l");
 	leg->AddEntry(mu_ratio, Form("TL Ratio (Muons)"), "p");
 	leg->AddEntry(el_ratio, Form("TL Ratio (Electrons)"),  "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
-	// leg->SetTextSize(0.03);
+	leg->SetTextSize(0.03);
 	leg->SetBorderSize(0);
 
 	TCanvas *c_temp = new TCanvas("C_temp", "HT vs MET in Data vs MC", 0, 0, 800, 600);
@@ -670,10 +696,11 @@ void SSDLPlotter::makePileUpPlots(bool write){
 	axis->SetLabelFont(42);
 	axis->SetTitleFont(42);
 	axis->SetTitleOffset(1.2);
+	axis->SetLabelSize(smu_nvertices->GetYaxis()->GetLabelSize());
 	axis->SetTitle("TL Ratio");
 	axis->Draw();
 	leg->Draw();
-	drawTopLine();
+	drawTopLine(0.55);
 	// fLatex->DrawLatex(0.10,0.92, fSamples[sample]->name);
 	// Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "PileUp", fOutputDir + fOutputSubDir);
@@ -970,7 +997,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 		ttbar_tree->GetEntry(jentry);
 		//Long64_t ientry = LoadTree(jentry);
 		//if (ientry < 0) break;
-		
+
 		int muind1(-1), muind2(-1);
 		if(hasLooseMuons(muind1, muind2) > 0) {
 			// Common event selections
@@ -1030,7 +1057,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 		signal_tree->GetEntry(jentry);
 		//Long64_t ientry = LoadTree(jentry);
 		//if (ientry < 0) break;
-		
+
 		int muind1(-1), muind2(-1);
 		if(hasLooseMuons(muind1, muind2) > 0) {
 			// Common event selections
@@ -1071,7 +1098,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	fSamples[sigsam]->cleanUp();
 	cout << endl;
 	////////////////////////////////////////////////////
-	
+
 	//--------------------------------------------------------------------------------------
 	// Format and calculate muon histos
 	hiso_ttbar->SetXTitle("rel Iso muons");
@@ -1081,14 +1108,14 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	hiso_ttbar->SetMarkerStyle(20);
 	hiso_ttbar->SetMarkerColor(kBlue-3);
 	hiso_ttbar->SetMarkerSize(1.15);
-		
+
 	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
 	hiso_signal->SetLineWidth(2);
 	//hiso_signal->SetLineColor(kBlue);
 	hiso_signal->SetMarkerStyle(21);
 	hiso_signal->SetMarkerColor(kRed+1);
 	hiso_signal->SetMarkerSize(1.15);
-		
+
 	//double max1 = hiso_mc_s[i]->GetMaximum();
 	//double max2 = hiso_data[i]->GetMaximum();
 	//double max = max1>max2?max1:max2;
@@ -1101,10 +1128,10 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	float ratio_signal = hiso_signal ->Integral(bin0, bin015) / hiso_signal ->Integral(bin0, bin1);
 	float ratio_ttbar  = hiso_ttbar  ->Integral(bin0, bin015) / hiso_ttbar  ->Integral(bin0, bin1);
 
-	
+
 	hiso_signal ->Scale(1/hiso_signal->Integral());
 	hiso_ttbar  ->Scale(1/hiso_ttbar ->Integral());
-	
+
 
 	TCanvas *c_temp = new TCanvas("MuIso" , "Muon Isolation in TTJets and Signal", 0, 0, 800, 600);
 	c_temp->cd();
@@ -1126,7 +1153,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", ratio_signal));
 	lat->SetTextColor(kBlue-3);
 	lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-	
+
 
 	Util::PrintPDF(c_temp, "MuIso" , fOutputDir + fOutputSubDir);
 
@@ -1146,7 +1173,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	el_hiso_signal->SetMarkerStyle(21);
 	el_hiso_signal->SetMarkerColor(kRed+1);
 	el_hiso_signal->SetMarkerSize(1.15);
-		
+
 	//double max1 = el_hiso_mc_s[i]->GetMaximum();
 	//double max2 = el_hiso_data[i]->GetMaximum();
 	//double max = max1>max2?max1:max2;
@@ -1160,10 +1187,10 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	float el_ratio_signal = el_hiso_signal ->Integral(el_bin0, el_bin015) / el_hiso_signal ->Integral(el_bin0, el_bin1);
 	float el_ratio_ttbar  = el_hiso_ttbar  ->Integral(el_bin0, el_bin015) / el_hiso_ttbar  ->Integral(el_bin0, el_bin1);
 
-	
+
 	el_hiso_signal ->Scale(1/el_hiso_signal->Integral());
 	el_hiso_ttbar  ->Scale(1/el_hiso_ttbar ->Integral());
-	
+
 
 	TCanvas *el_temp = new TCanvas("ElIso" , "Electron Isolation in TTJets and Signal", 0, 0, 800, 600);
 	el_temp->cd();
@@ -1184,7 +1211,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	el_lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", el_ratio_signal));
 	el_lat->SetTextColor(kBlue-3);
 	el_lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", el_ratio_ttbar));
-	
+
 
 	// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(el_temp, "ElIso" , fOutputDir + fOutputSubDir);
@@ -1317,7 +1344,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 	}
 
 	if(dottbar){
-		
+
 		////////////////////////////////////////////////////
 		// Fill ttbar histos
 		// Sample loop
@@ -1336,7 +1363,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			Long64_t ientry = LoadTree(jentry);
 			if (ientry < 0) break;
 			nb = fChain->GetEntry(jentry);   nbytes += nb;
-		
+
 			int muind1(-1), muind2(-1);
 			if(hasLooseMuons(muind1, muind2) < 1) continue;
 
@@ -1386,7 +1413,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// 	int fakemu = muind1;
 			// 	if(isPromptMuon(muind1) &&  isPromptMuon(muind2)) continue;
 			// 	if(isPromptMuon(muind1) && !isPromptMuon(muind2)) fakemu = muind2;
-			// 	
+			//
 			// 	hiso_ttbar[1]->Fill(MuIso[fakemu]);
 			// 	for(size_t k = 0; k < gNMuFPtBins; ++k){
 			// 		if(MuPt[fakemu] < gMuFPtBins[k]) continue;
@@ -1405,7 +1432,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		cout << endl;
 	}
 	////////////////////////////////////////////////////
-	
+
 	// Create plots
 	vector<int> mcsamples = fMCBGMuEnr;
 	// vector<int> datasamples = fJMData;
@@ -1419,14 +1446,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_data[i]->SetMarkerStyle(8);
 		hiso_data[i]->SetMarkerColor(kBlack);
 		hiso_data[i]->SetMarkerSize(1.2);
-		
+
 		hiso_ttbar[i]->SetXTitle(convertVarName("MuIso[0]"));
 		hiso_ttbar[i]->SetLineWidth(3);
 		hiso_ttbar[i]->SetLineColor(kRed);
 		hiso_ttbar[i]->SetMarkerStyle(23);
 		hiso_ttbar[i]->SetMarkerColor(kRed);
 		hiso_ttbar[i]->SetMarkerSize(1.3);
-		
+
 		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_data_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
 			hiso_data_pt[i][k]->SetLineWidth(3);
@@ -1504,7 +1531,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		intscale = hiso_data[i]->Integral() / intscale;
 		for(size_t j = 0; j < gNMuFPtBins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
 		for(size_t j = 0; j < gNNVrtxBins; ++j) intscale_nv[j] = hiso_data_nv[i][j]->Integral() / intscale_nv[j];
-		
+
 		for(size_t j = 0; j < mcsamples.size(); ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			S->isoplots[0].hiso[i]->Scale(intscale);
@@ -1514,9 +1541,9 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		if(dottbar){
 			hiso_ttbar[i]->Scale(hiso_data[i]->Integral() / hiso_ttbar[i]->Integral());
 			for(int k = 0; k < gNMuFPtBins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
-			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());			
+			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());
 		}
-		
+
 
 		// Fill MC stacks
 		for(size_t j = 0; j < mcsamples.size();   ++j){
@@ -1546,13 +1573,17 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			}
 
 		}
+		float binsize = 1./float(IsoPlots::nbins[i]);
 		hiso_mc_s[i]->Add(hiso_qcd[i]);
 		hiso_mc_s[i]->Add(hiso_db[i]);
 		hiso_mc_s[i]->Add(hiso_ewk[i]);
 		hiso_mc_s[i]->Add(hiso_rare[i]);
 		hiso_mc_s[i]->Add(hiso_ttj[i]);
 		hiso_mc_s[i]->Draw("goff");
-		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		hiso_mc_s[i]->GetXaxis()->SetTitle("Relative Isolation (I_{ rel.})");
+		hiso_mc_s[i]->GetXaxis()->SetTitleOffset(1.1);
+		hiso_mc_s[i]->GetYaxis()->SetTitleOffset(1.25);
+		hiso_mc_s[i]->GetYaxis()->SetTitle(Form("Events / %4.2f", binsize));
 
 		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
@@ -1561,7 +1592,10 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_mc_pt_s[i][k]->Add(hiso_rare_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_ttj_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Draw("goff");
-			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle("Relative Isolation (I_{ rel.})");
+			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitleOffset(1.1);
+			hiso_mc_pt_s[i][k]->GetYaxis()->SetTitleOffset(1.25);
+			hiso_mc_pt_s[i][k]->GetYaxis()->SetTitle(Form("Events / %4.2f", binsize));
 		}
 
 		for(int k = 0; k < gNNVrtxBins; ++k){
@@ -1571,7 +1605,10 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_mc_nv_s[i][k]->Add(hiso_rare_nv[i][k]);
 			hiso_mc_nv_s[i][k]->Add(hiso_ttj_nv[i][k]);
 			hiso_mc_nv_s[i][k]->Draw("goff");
-			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle("Relative Isolation (I_{ rel.})");
+			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitleOffset(1.1);
+			hiso_mc_nv_s[i][k]->GetYaxis()->SetTitleOffset(1.25);
+			hiso_mc_nv_s[i][k]->GetYaxis()->SetTitle(Form("Events / %4.2f", binsize));
 		}
 		// Fill MC stacks
 		//for(size_t j = 0; j < mcsamples.size();   ++j){
@@ -1605,6 +1642,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
 		printf("bin 0: %3.0i bin015: %3.0i bin1: %3.0i \n", bin0, bin015, bin1);
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
+		cout << "Data ratio " << i << " = " << hiso_data[i] ->Integral(bin0, bin015) << "/" << hiso_data[i] ->Integral(bin0, bin1) << "  =  " << ratio_data << endl;
 		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
 		float ratio_ttbar(0.);
 		if(dottbar) ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
@@ -1630,13 +1668,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		if(dottbar) hiso_ttbar[i]->DrawCopy("PE X0 same");
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
-		lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
-		lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
+		drawTopLine(0.55, 1.0, 0.17);
+		// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+		lat->DrawLatex(0.72,0.82, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
+		lat->DrawLatex(0.72,0.77, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 		lat->SetTextColor(kRed);
 		if(dottbar) lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 		lat->SetTextColor(kBlack);
-		
+
 
 		// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
 		Util::PrintPDF(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
@@ -1950,7 +1989,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_ttbar[i]->SetMarkerStyle(23);
 		hiso_ttbar[i]->SetMarkerColor(kRed);
 		hiso_ttbar[i]->SetMarkerSize(1.3);
-		
+
 		for(int k = 0; k < gNElFPtBins; ++k){
 			hiso_data_pt[i][k]->SetXTitle(convertVarName("ElRelIso[0]"));
 			hiso_data_pt[i][k]->SetLineWidth(3);
@@ -2028,9 +2067,9 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		intscale = hiso_data[i]->Integral() / intscale;
 		for(size_t j = 0; j < gNElFPtBins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
 		for(size_t j = 0; j < gNNVrtxBins; ++j) intscale_nv[j] = hiso_data_nv[i][j]->Integral() / intscale_nv[j];
-		
+
 		for(size_t j = 0; j < mcsamples.size();   ++j){
-			Sample *S = fSamples[mcsamples[j]];			
+			Sample *S = fSamples[mcsamples[j]];
 			S->isoplots[1].hiso[i]->Scale(intscale);
 			for(int k = 0; k < gNElFPtBins; ++k){
 				S->isoplots[1].hiso_pt[i][k]->Scale(intscale_pt[k]);
@@ -2042,7 +2081,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		if(dottbar){
 			hiso_ttbar[i]->Scale(hiso_data[i]->Integral() / hiso_ttbar[i]->Integral());
 			for(int k = 0; k < gNElFPtBins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
-			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());			
+			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());
 		}
 
 		// Fill MC stacks
@@ -2102,7 +2141,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		}
 		//// Fill MC stacks
 		//for(size_t j = 0; j < mcsamples.size();   ++j){
-		//	Sample *S = fSamples[mcsamples[j]];			
+		//	Sample *S = fSamples[mcsamples[j]];
 		//	hiso_mc  [i]->Add(S->isoplots[1].hiso[i]);
 		//	hiso_mc_s[i]->Add(S->isoplots[1].hiso[i]);
 		//	hiso_mc_s[i]->Draw("goff");
@@ -2177,7 +2216,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 
 			hiso_mc_pt_s[i][k]->SetMaximum(1.2*max);
 			hiso_data_pt[i][k]->SetMaximum(1.2*max);
-						
+
 			ratio_data = hiso_data_pt[i][k]  ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin06);
 			ratio_mc   = hiso_mc_pt[i][k]    ->Integral(bin0, bin015) / hiso_mc_pt[i][k]   ->Integral(bin0, bin06);
 			ratio_ttbar = 0.;
@@ -2224,7 +2263,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 
 			hiso_mc_nv_s[i][k]->SetMaximum(1.2*max);
 			hiso_data_nv[i][k]->SetMaximum(1.2*max);
-						
+
 			ratio_data = hiso_data_nv[i][k]  ->Integral(bin0, bin015) / hiso_data_nv[i][k] ->Integral(bin0, bin06);
 			ratio_mc   = hiso_mc_nv[i][k]    ->Integral(bin0, bin015) / hiso_mc_nv[i][k]   ->Integral(bin0, bin06);
 			ratio_ttbar = 0.;
@@ -2273,7 +2312,7 @@ void SSDLPlotter::makeElIdPlots(){
 
 	vector<int> mcsamples = fMCBG;
 	vector<int> datasamples = fEGData;
-	
+
 	TH1D    *data [4] [gNSels];
 	TH1D    *qcd  [4] [gNSels];
 	TH1D    *ttj  [4] [gNSels];
@@ -2296,22 +2335,22 @@ void SSDLPlotter::makeElIdPlots(){
 	for (int k =0 ; k<4 ; k++){
 		TString varName;
 		switch (k) {
-			case 0: 
+			case 0:
 				varName = "ElHoverE";
 				axismin[k] = 0.;
 				axismax[k] = 0.15;
 				break ;
-			case 1: 
+			case 1:
 				varName = "ElSigmaIetaIeta";
 				axismin[k] = 0.;
 				axismax[k] = 0.035;
 				break ;
-			case 2: 
+			case 2:
 				varName = "ElDEta";
 				axismin[k] = -0.01;
 				axismax[k] =  0.01;
 				break ;
-			case 3: 
+			case 3:
 				varName = "ElDPhi";
 				axismin[k] = -0.15;
 				axismax[k] =  0.15;
@@ -2383,9 +2422,9 @@ void SSDLPlotter::makeElIdPlots(){
 				}
 			}
 			intscale[k] = data[k][i]->Integral() / intscale[k];
-			
+
 			for(size_t j = 0; j < mcsamples.size();   ++j){
-				Sample *S = fSamples[mcsamples[j]];			
+				Sample *S = fSamples[mcsamples[j]];
 				switch (k) {
 					case 0: S -> idplots.hhoe[i]    -> Scale(intscale[k]); break;
 					case 1: S -> idplots.hsiesie[i] -> Scale(intscale[k]); break;
@@ -2396,7 +2435,7 @@ void SSDLPlotter::makeElIdPlots(){
 
 			// Fill MC stacks
 			for(size_t j = 0; j < mcsamples.size();   ++j){
-				Sample *S = fSamples[mcsamples[j]];			
+				Sample *S = fSamples[mcsamples[j]];
 				TString s_name = S->sname;
 				TH1D * histo;
 				switch (k) {
@@ -2467,7 +2506,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 		char cmd[100];
 	    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
 	    system(cmd);
-		
+
 		TH1D    *hvar_data[gNKinVars];
 
 		TH1D    *hvar_qcd  [gNKinVars];
@@ -2547,7 +2586,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			// 	intscale += S->kinplots[s][HighPt].hvar[i]->Integral();
 			// }
 			// intscale = hvar_data[i]->Integral() / intscale;
-			// 
+			//
 			// for(size_t j = 0; j < mcsamples.size();   ++j){
 			// 	Sample *S = fSamples[mcsamples[j]];
 			// 	S->kinplots[s][HighPt].hvar[i]->Scale(intscale);
@@ -2613,13 +2652,13 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 				hvar_mc_s[i]->SetMaximum(1.5*max);
 				hvar_data[i]->SetMaximum(1.5*max);
 				hvar_mc_s[i]->SetMinimum(0.);
-				hvar_data[i]->SetMinimum(0.);				
+				hvar_data[i]->SetMinimum(0.);
 			}
-			
+
 			// Ratio plot:
 			float border = 0.3;
 			float scale = (1-border)/border;
-						
+
 			hvar_rat[i]->SetXTitle(hvar_data[i]->GetXaxis()->GetTitle());
 			hvar_rat[i]->SetYTitle("");
 			hvar_rat[i]->GetXaxis()->SetTitleSize(scale * 0.04);
@@ -2641,7 +2680,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			hvar_rat[i]->SetMarkerColor(kGray+1);
 
 			hvar_rat[i]->Divide(hvar_data[i], hvar_tot[i]);
-			
+
 			// Canvas
 			TCanvas *c_temp = new TCanvas("C_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data vs MC", 0, 0, 600, 600);
 			c_temp->cd();
@@ -2675,7 +2714,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			gr_obs->SetLineWidth(2);
 			gr_obs->SetLineColor(kBlack);
 			gr_obs->SetFillColor(kBlack);
-			
+
 			p_plot->cd();
 			if(loglin) p_plot->SetLogy(1);
 
@@ -2689,7 +2728,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			leg->AddEntry(hvar_ewk[i],  "Single boson", "f");
 			leg->AddEntry(hvar_ttj[i],  "Top",       "f");
 			leg->AddEntry(hvar_rat[i],  "Ratio",     "f");
-	
+
 			leg->SetFillStyle(0);
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
@@ -2699,7 +2738,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			// hvar_data[i]->DrawCopy("PE X0 same");
 			gr_obs->Draw("P same");
 			leg->Draw();
-			
+
 			drawTopLine();
 			// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 			// lat->DrawLatex(0.11,0.92, selname[s]);
@@ -2719,19 +2758,19 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 
 			// Util::PrintNoEPS(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
 			Util::PrintPDF(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
-			
+
 			// Undo scaling
 			for(size_t j = 0; j < gNSAMPLES; ++j){
 				float lumiscale = fLumiNorm / fSamples[j]->getLumi();
 				if(fSamples[j]->datamc == 0) continue;
 				fSamples[j]->kinplots[s][HighPt].hvar[i]->Scale(1./lumiscale);
 			}
-			
+
 			delete FR, gr_obs;
 			delete c_temp;
 			delete leg;
 		}
-	}	
+	}
 }
 void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, vector<int> emsamples, gHiLoSwitch hilo){
 	if(readSigGraphs(fOutputFileName) != 0) return;
@@ -2741,7 +2780,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
-	
+
 	const float htmax = 1300.;
 	const float metmax = 250.;
 
@@ -2867,7 +2906,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	boxborder3->SetLineColor(14);
 
 	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
-	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
+	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.);
 	TLine *sig2x = new TLine(200., 120., 200.,  metmax);      // met 120 ht 200
 	TLine *sig2y = new TLine(200., 120., htmax, 120.);
 	TLine *sig3x = new TLine(450.,  50., 450.,  metmax);      // met 50  ht 450
@@ -2924,7 +2963,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     gmetvsht_da_mm_ex2->Draw("P");
     gmetvsht_da_ee_ex2->Draw("P");
     gmetvsht_da_em_ex2->Draw("P");
-	
+
 	lowhtbox ->Draw();
 	lowmetbox->Draw();
 	boxborder1->Draw();
@@ -2981,10 +3020,10 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
-	
+
 	const float htmax = 1500.;
 	const float metmax = 250.;
-	
+
 	Color_t col_mm = kBlack;
 	Color_t col_ee = kRed;
 	Color_t col_em = kBlue;
@@ -3185,7 +3224,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	boxborder3->SetLineColor(14);
 
 	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
-	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
+	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.);
 	TLine *sig2x = new TLine(200., 120., 200.,  metmax);      // met 120 ht 200
 	TLine *sig2y = new TLine(200., 120., htmax, 120.);
 	TLine *sig3x = new TLine(450.,  50., 450.,  metmax);      // met 50  ht 450
@@ -3227,7 +3266,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	regleg->SetTextFont(42);
 	regleg->SetTextSize(0.03);
 	regleg->SetBorderSize(0);
-	
+
 
 	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
 	c_temp->cd();
@@ -3256,18 +3295,18 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	gmetvsht_da_ee->Draw("P");
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
-	
+
 	gmetvsht_da_ee_lowpt->Draw("P");
 	gmetvsht_da_em_lowpt->Draw("P");
 	gmetvsht_da_mm_lowpt->Draw("P");
-	
+
 	gmetvsht_da_mt->Draw("P");
 	gmetvsht_da_et->Draw("P");
-	
+
 	gmetvsht_da_ee_lowmet->Draw("P");
 	gmetvsht_da_em_lowmet->Draw("P");
 	gmetvsht_da_mm_lowmet->Draw("P");
-	
+
 	leg->Draw();
 	leg2->Draw();
 	regleg->Draw();
@@ -3298,11 +3337,11 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
-	
+
 	const float htmax = 1500.;
 	const float metmax = 350.;
 	const float metmin = 120.;
-	
+
 	Color_t col_mm = kBlack;
 	Color_t col_ee = kRed;
 	Color_t col_em = kBlue;
@@ -3486,11 +3525,11 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	// Graphs
 	gmetvsht_da_ee->Draw("P");
 	gmetvsht_da_mm->Draw("P");
-	
+
 	gmetvsht_da_mt->Draw("P");
 	gmetvsht_da_et->Draw("P");
 	gmetvsht_da_em->Draw("P");
-	
+
 	leg->Draw();
 	leg2->Draw();
 	// regleg->Draw();
@@ -3527,7 +3566,7 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
-	
+
 	const float htmax = 1100.;
 	const float metmax = 300.;
 
@@ -3659,7 +3698,7 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	// Graphs
 	gmetvsht_da_mt->Draw("P");
 	gmetvsht_da_et->Draw("P");
-	
+
 	leg->Draw();
 	regleg->Draw();
 	drawTopLine();
@@ -3692,7 +3731,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	TString pfname = "Non-prompt ";
 	if(fp == ZDecay) pfname = "Prompt ";
-	
+
 	TString name;
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
@@ -3709,7 +3748,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	}
 	if(fp == ZDecay){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data",   getNPPtBins(chan), getPPtBins(chan)); h_ptratio_data->Sumw2();
-		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",     getNPPtBins(chan), getPPtBins(chan)); h_ptratio_mc  ->Sumw2();		
+		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",     getNPPtBins(chan), getPPtBins(chan)); h_ptratio_mc  ->Sumw2();
 		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD MC", getNPPtBins(chan), getPPtBins(chan)); h_ptratio_qcd ->Sumw2();
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
@@ -3785,7 +3824,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_data->SetLineWidth(2);
 	h_ptratio_data->SetLineColor(kBlack);
 	h_ptratio_data->SetFillColor(kBlack);
-	
+
 	h_ptratio_mc  ->SetMarkerColor(kRed);
 	h_ptratio_mc  ->SetMarkerStyle(23);
 	h_ptratio_mc  ->SetMarkerSize(1.5);
@@ -3804,7 +3843,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
-	
+
 	TLegend *leg;
 	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
 	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
@@ -3832,7 +3871,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	TString fpname = "F";
 	if(fp == ZDecay) fpname = "P";
-	
+
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
 	delete h_ptratio_mc, h_ptratio_data;
 	delete c_temp, lat, leg;
@@ -3846,14 +3885,14 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 
 	TString pfname = "Non-prompt ";
 	if(fp == ZDecay) pfname = "Prompt ";
-	
+
 	TString name;
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
 	TH1D *h_dummy1, *h_dummy3, *h_nvratio_data, *h_nvratio_mc;
 	TH2D *h_dummy2;
-	
+
 	TH1D *ratio_dtmc = new TH1D("Ratio_DtMC", "Ratio of Data/MC", 9, 0., 18.); ratio_dtmc->Sumw2();
 
 	if(fp == SigSup){
@@ -3907,7 +3946,7 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 	// Ratio plot:
 	float border = 0.3;
 	float scale = (1-border)/border;
-				
+
 	ratio_dtmc->SetXTitle("N_{Vertices}");
 	ratio_dtmc->SetYTitle("");
 	ratio_dtmc->GetXaxis()->SetTitleSize(scale * 0.04);
@@ -3945,7 +3984,7 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 	h_nvratio_data->SetLineWidth(2);
 	h_nvratio_data->SetLineColor(kBlack);
 	h_nvratio_data->SetFillColor(kBlack);
-	
+
 	h_nvratio_mc->SetMarkerColor(kRed);
 	h_nvratio_mc->SetMarkerStyle(23);
 	h_nvratio_mc->SetMarkerSize(1.5);
@@ -3962,7 +4001,7 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
-	
+
 	TLegend *leg;
 	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
 	if(fp == ZDecay) leg = new TLegend(0.15,0.05,0.35,0.23);
@@ -4013,10 +4052,10 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 	drawTopLine();
 
 	c_temp->Update();
-	
+
 	TString fpname = "F";
 	if(fp == ZDecay) fpname = "P";
-	
+
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_NV", fOutputDir + fOutputSubDir);
 	delete h_nvratio_mc, h_nvratio_data;
 	delete c_temp, lat, leg;
@@ -4073,14 +4112,14 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	if(chan == Elec) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
 	h_etaratio_mc->GetYaxis()->SetTitleOffset(1.2);
 	h_etaratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
-	
+
 	h_etaratio_data->SetMarkerColor(kBlack);
 	h_etaratio_data->SetMarkerStyle(20);
 	h_etaratio_data->SetMarkerSize(1.5);
 	h_etaratio_data->SetLineWidth(2);
 	h_etaratio_data->SetLineColor(kBlack);
 	h_etaratio_data->SetFillColor(kBlack);
-	
+
 	h_etaratio_mc  ->SetMarkerColor(kRed);
 	h_etaratio_mc  ->SetMarkerStyle(23);
 	h_etaratio_mc  ->SetMarkerSize(1.5);
@@ -4101,7 +4140,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
-	
+
 	TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 	leg->AddEntry(h_etaratio_data, "Data",       "p");
 	leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
@@ -4122,7 +4161,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	//     lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
 	//     lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 7 TeV");
 	//     lat.DrawLatex(0.83, 0.88, name);
-	
+
 	h_etaratio_mc->DrawCopy("PE X0");
 	// h_etaratio_data->Draw("PE X0 same");
 	eff_data->Draw("PZ 0 same");
@@ -4159,7 +4198,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 	}
 
 	// Customization
-	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "p_{T}(Closest Jet) (GeV)", "p_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "p_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "p_{T}(Closest Jet) (GeV)", "p_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
 
 	for(size_t i = 0; i < gNRatioVars; ++i){
 		TH1D *h_ratio_data = getFRatio(datasamples, chan, i);
@@ -4167,9 +4206,9 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		h_ratio_data->SetName(Form("FRatio_%s_data", FRatioPlots::var_name[i].Data()));
 		h_ratio_mc  ->SetName(Form("FRatio_%s_mc",   FRatioPlots::var_name[i].Data()));
 
-		float max = 0.2;
+		float max = 0.4;
 		if(i==8) max = 1.0;
-		if(chan==Elec) max = 0.5;
+		if(chan==Elec) max = 0.7;
 		h_ratio_data->SetMaximum(max);
 		h_ratio_mc  ->SetMaximum(max);
 		h_ratio_data->SetMinimum(0.0);
@@ -4196,11 +4235,24 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		h_ratio_mc  ->SetLineColor(kRed);
 		h_ratio_mc  ->SetFillColor(kRed);
 
+		// Axis labels
+		// h_ratio_mc->Draw("goff");
+		// h_ratio_data->Draw("goff");
+		bool intlabel = false;
+		if(i == 0 || i == 6) intlabel = true;
+		if(intlabel){
+			for(size_t j = 1; j <= h_ratio_mc->GetNbinsX(); ++j) h_ratio_mc->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
+			h_ratio_mc->GetXaxis()->SetLabelSize(0.055);
+			// h_ratio_data->GetXaxis()->SetTitleSize(0.045);
+			// h_ratio_data->GetXaxis()->SetTitleOffset(1.07);
+		}
+
+
 		TLatex *lat = new TLatex();
 		lat->SetNDC(kTRUE);
 		lat->SetTextColor(kBlack);
 		lat->SetTextSize(0.04);
-	
+
 		TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 		leg->AddEntry(h_ratio_data, "Data",         "p");
 		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
@@ -4215,13 +4267,16 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		h_ratio_mc  ->DrawCopy("PE X0");
 		h_ratio_data->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		lat->DrawLatex(0.11,0.92, name);
-		double ymean(0.), yrms(0.);
-		getWeightedYMeanRMS(h_ratio_data, ymean, yrms);
-		lat->SetTextSize(0.03);
-		lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
-	
+		// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		// lat->DrawLatex(0.11,0.92, name);
+		// double ymean(0.), yrms(0.);
+		// getWeightedYMeanRMS(h_ratio_data, ymean, yrms);
+		// lat->SetTextSize(0.03);
+		// lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.62,0.83, "Non-prompt " + name);
+		drawTopLine(0.55);
+
 		// Util::PrintNoEPS(c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
 		Util::PrintPDF(  c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir);
 		delete c_temp, leg, lat;
@@ -4282,17 +4337,17 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 		THStack *hsntight = new THStack(Form("NTight_%s", FRatioPlots::var_name[i].Data()), "Stack of tight");
 		THStack *hsnloose = new THStack(Form("NLoose_%s", FRatioPlots::var_name[i].Data()), "Stack of loose");
 
-		TH1D *hntight_qcd  = new TH1D("NTight_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hntight_ttj  = new TH1D("NTight_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hntight_ewk  = new TH1D("NTight_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hntight_rare = new TH1D("NTight_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hntight_db   = new TH1D("NTight_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hntight_qcd  = new TH1D("NTight_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hntight_ttj  = new TH1D("NTight_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hntight_ewk  = new TH1D("NTight_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hntight_rare = new TH1D("NTight_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hntight_db   = new TH1D("NTight_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
 
-		TH1D *hnloose_qcd  = new TH1D("NLoose_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hnloose_ttj  = new TH1D("NLoose_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hnloose_ewk  = new TH1D("NLoose_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hnloose_rare = new TH1D("NLoose_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
-		TH1D *hnloose_db   = new TH1D("NLoose_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::xmin[i], FRatioPlots::xmax[i]);
+		TH1D *hnloose_qcd  = new TH1D("NLoose_QCD_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hnloose_ttj  = new TH1D("NLoose_TTjets_"  + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hnloose_ewk  = new TH1D("NLoose_EWK_"     + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hnloose_rare = new TH1D("NLoose_Rare_"    + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
+		TH1D *hnloose_db   = new TH1D("NLoose_DB_"      + FRatioPlots::var_name[i], FRatioPlots::var_name[i], FRatioPlots::nbins[i], FRatioPlots::bins[i]);
 
 		hntight_qcd ->SetFillColor(kYellow-4);
 		hntight_db  ->SetFillColor(kSpring-9);
@@ -4376,7 +4431,7 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 		leg->Draw();
 
 		Util::PrintPDF(c_tight, Form("NTight_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir);
-		Util::PrintPDF(c_loose, Form("NLoose_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir);	
+		Util::PrintPDF(c_loose, Form("NLoose_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir);
 		delete hsntight, hsnloose, c_tight, c_loose, leg;
 	}
 
@@ -4485,7 +4540,7 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	leg->Draw();
 
 	Util::PrintPDF(c_tight, "NTight_Pt", fOutputDir + fOutputSubDir);
-	Util::PrintPDF(c_loose, "NLoose_Pt", fOutputDir + fOutputSubDir);	
+	Util::PrintPDF(c_loose, "NLoose_Pt", fOutputDir + fOutputSubDir);
 	delete hsntight, hsnloose, c_tight, c_loose, leg;
 	fOutputSubDir = "";
 }
@@ -4520,21 +4575,21 @@ void SSDLPlotter::makePRLPlot1(){
 	TH1D    *h_pred_mc  = new TH1D("h_pred_mc",    "Predicted WW/WZ/ZZ",        nchans, 0., (double)nchans);
 	TH1D    *h_pred_tot = new TH1D("h_pred_tot",   "Total Prediction",          nchans, 0., (double)nchans);
 	THStack *hs_pred    = new THStack("hs_predicted", "Predicted number of events");
-	
+
 	const double p_df [nchans] = { 0.1, 0.5, 0.1, 0.8, 0.2, 0.1, 0.0, 0.0};
 	const double p_sf [nchans] = {14.4, 15., 8.4, 7.7, 4.4, 2.2, 1.1, 4.0};
 	const double p_cm [nchans] = { 0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0.0, 0.3};
 	const double p_mc [nchans] = { 5.8, 5.1, 4.8, 3.0, 2.9, 1.5, 1.4, 4.0};
 	const double p_E  [nchans] = { 9.0, 10., 6.4, 6.0, 4.6, 2.7, 2.3, 0.6};
 	const double n_obs[nchans] = {19. , 20., 17., 11., 8. , 3. , 2. , 5. };
-	
+
 	h_obs->SetMarkerColor(kBlack);
 	h_obs->SetMarkerStyle(20);
 	h_obs->SetMarkerSize(2.5);
 	h_obs->SetLineWidth(2);
 	h_obs->SetLineColor(kBlack);
 	h_obs->SetFillColor(kBlack);
-	
+
 	h_pred_sf->SetLineWidth(1);
 	h_pred_df->SetLineWidth(1);
 	h_pred_cm->SetLineWidth(1);
@@ -4556,7 +4611,7 @@ void SSDLPlotter::makePRLPlot1(){
 	h_pred_tot  ->SetLineWidth(1);
 	h_pred_tot  ->SetFillColor(12);
 	h_pred_tot  ->SetFillStyle(3005);
-	
+
 	// Add numbers:
 	for(size_t i = 0; i < nchans; ++i){
 		h_obs     ->SetBinContent(i+1, n_obs[i]);
@@ -4576,7 +4631,7 @@ void SSDLPlotter::makePRLPlot1(){
 	gr_obs->SetLineWidth(2);
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
-	
+
 	h_pred_tot->Add(h_pred_sf);
 	h_pred_tot->Add(h_pred_df);
 	h_pred_tot->Add(h_pred_cm);
@@ -4596,7 +4651,7 @@ void SSDLPlotter::makePRLPlot1(){
 	h_pred_mc ->SetMaximum(max);
 	h_pred_tot->SetMaximum(max);
 	hs_pred   ->SetMaximum(max);
-	
+
 	hs_pred->Draw("goff");
 	hs_pred->GetYaxis()->SetTitle("Events");
 	hs_pred->GetYaxis()->SetTitleOffset(1.1);
@@ -4607,7 +4662,7 @@ void SSDLPlotter::makePRLPlot1(){
 	// hs_pred->GetXaxis()->SetLabelSize(0.05);
 	// hs_pred->GetXaxis()->LabelsOption("v");
 	for(size_t i = 0; i < nchans; ++i) hs_pred->GetXaxis()->SetBinLabel(i+1, "");
-	
+
 	TLegend *leg = new TLegend(0.58,0.66,0.93,0.89);
 	// TLegend *leg = new TLegend(0.27,0.65,0.62,0.88);
 	// TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
@@ -4622,7 +4677,7 @@ void SSDLPlotter::makePRLPlot1(){
 	// leg->SetFillColor(kWhite);
 	// leg->SetTextSize(0.05);
 	leg->SetBorderSize(0);
-	
+
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->cd();
 	c_temp->SetBottomMargin(0.2);
@@ -4665,7 +4720,7 @@ void SSDLPlotter::makePRLPlot1(){
 	// lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.03);
-	
+
 	float shift = 0.38;
 	float split = 0.17;
 	lat->SetTextAngle(90);
@@ -4695,14 +4750,14 @@ void SSDLPlotter::makePRLPlot1(){
 	// lat->DrawLatex(7.0 - shift,  6.0, "High p_{T} (e/#mu)");
 	// lat->DrawLatex(8.0 - shift, 12.0, "e#tau/#mu#tau/#tau#tau");
 	drawTopLine();
-	
+
 	gPad->RedrawAxis();
 	fOutputSubDir = "PRL";
 	Util::PrintPDF(c_temp, "ObsPred_MultiChan", fOutputDir + fOutputSubDir);
-	delete c_temp;	
+	delete c_temp;
 	delete h_obs, h_pred_sf, h_pred_df, h_pred_cm, h_pred_mc, h_pred_tot, hs_pred;
 	delete gr_obs;
-	delete FR;	
+	delete FR;
 }
 void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 	fOutputSubDir = "IsoVsMETPlots/";
@@ -4717,7 +4772,7 @@ void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 	// Color_t colors[nmetbins] = {52, 63, 74, 85, 96};
 	Style_t styles[nmetbins] = {20, 21, 22, 23, 34, 33, 29};
 	TH1F* hiso[nmetbins];
-	
+
 	TTree *tree = fSamples[sample]->getTree();
 	for(int i = 0; i < nmetbins; ++i){
 		TString name = Form("h%d",i+1);
@@ -4731,7 +4786,7 @@ void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 		hiso[i]->SetFillStyle(0);
 		hiso[i]->SetXTitle("RelIso(#mu)");
 	}
-		
+
 	tree->ResetBranchAddresses();
 	Init(tree);
 	fSample = fSamples[sample];
@@ -4816,7 +4871,7 @@ TH1D* SSDLPlotter::fillRatioPt(gChannel chan, vector<int> samples, gFPSwitch fp,
 	TString longname[2] = {"Muons", "Electrons"};
 	int muelswitch = 0;
 	if(chan == Elec) muelswitch = 1;
-	
+
 	TH2D *h_2d;
 	TH1D *h_pt, *h_eta;
 	if(fp == SigSup){
@@ -5062,7 +5117,7 @@ TEfficiency *SSDLPlotter::getMergedEfficiency(vector<int> samples, gChannel chan
 		if(fp == ZDecay && var == 0) tempeff = new TEfficiency(*C->pratio_pt);
 		if(fp == ZDecay && var == 1) tempeff = new TEfficiency(*C->pratio_eta);
 		if(fp == ZDecay && var == 2) tempeff = new TEfficiency(*C->pratio_nv);
-		
+
 		eff->Add(*tempeff);
 		delete tempeff;
 	}
@@ -5142,9 +5197,9 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, bool output){
 	gStyle->SetOptStat(0);
 
-	TH1D *ntight = new TH1D("h_NTight",  "NTight",  FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
-	TH1D *nloose = new TH1D("h_NLoose",  "NLoose",  FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
-	TH1D *ratio  = new TH1D("h_TLRatio", "TLRatio", FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
+	TH1D *ntight = new TH1D("h_NTight",  "NTight",  FRatioPlots::nbins[ratiovar], FRatioPlots::bins[ratiovar]);
+	TH1D *nloose = new TH1D("h_NLoose",  "NLoose",  FRatioPlots::nbins[ratiovar], FRatioPlots::bins[ratiovar]);
+	TH1D *ratio  = new TH1D("h_TLRatio", "TLRatio", FRatioPlots::nbins[ratiovar], FRatioPlots::bins[ratiovar]);
 	ntight->Sumw2(); nloose->Sumw2(); ratio->Sumw2();
 
 	for(size_t i = 0; i < samples.size(); ++i){
@@ -5159,7 +5214,7 @@ TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, b
 		ntight->Add(RP->ntight[ratiovar], scale);
 		nloose->Add(RP->nloose[ratiovar], scale);
 	}
-	
+
 	ratio->Divide(ntight, nloose, 1., 1., "B");
 
 	delete ntight, nloose;
@@ -5173,7 +5228,7 @@ void SSDLPlotter::ratioWithBinomErrors(float ntight, float nloose, float &ratio,
 }
 void SSDLPlotter::ratioWithPoissErrors(float ntight, float nloose, float &ratio, float &error){
 	ratio = ntight/nloose;
-	error = TMath::Sqrt( ntight*ntight*(nloose+ntight)/(nloose*nloose*nloose) ); // Poissonian	
+	error = TMath::Sqrt( ntight*ntight*(nloose+ntight)/(nloose*nloose*nloose) ); // Poissonian
 }
 void SSDLPlotter::ratioWithAsymmCPErrors(int passed, int total, float &ratio, float &upper, float &lower){
 	TEfficiency *eff = new TEfficiency("TempEfficiency", "TempEfficiency", 1, 0., 1.);
@@ -5201,7 +5256,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 	// access a chararray containing the date with asctime(timeinfo)
-	
+
 	TString tablefilename = outputdir + "Table2.tex";
 	TString notetable     = outputdir + "NoteTable.tex";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
@@ -5209,7 +5264,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
 	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
 	fOUTSTREAM << endl;
-	
+
 	fOUTSTREAM3.open(notetable.Data(), ios::trunc);
 	fOUTSTREAM3 << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	fOUTSTREAM3 << Form("%%%% Generated on: %s ", asctime(timeinfo)) << endl;
@@ -5241,7 +5296,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 	// access a chararray containing the date with asctime(timeinfo)
-	
+
 	TString tablefilename = outputdir + "Table2.tex";
 	TString notetable     = outputdir + "NoteTable.tex";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
@@ -5249,7 +5304,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
 	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
 	fOUTSTREAM << endl;
-	
+
 	fOUTSTREAM3.open(notetable.Data(), ios::trunc);
 	fOUTSTREAM3 << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	fOUTSTREAM3 << Form("%%%% Generated on: %s ", asctime(timeinfo)) << endl;
@@ -5267,18 +5322,18 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	ttwregions.push_back(TTbarWSelBD);
 	ttwregions.push_back(TTbarWSelLU);
 	ttwregions.push_back(TTbarWSelLD);
-	
+
 	vector<TTWZPrediction> ttwzpreds;
 	for(size_t i = 0; i < ttwregions.size(); ++i){
 		gRegion reg = gRegion(ttwregions[i]);
 		TString outputname = outputdir + "DataPred_" + Region::sname[reg] + ".txt";
 		ttwzpreds.push_back(makeIntPredictionTTW(outputname, reg));
 	}
-	
-	////////////////////////////////////////////////////
-	// Skip systematics and datacard stuff
-	return;
-	
+
+	// ////////////////////////////////////////////////////
+	// // Skip systematics and datacard stuff
+	// return;
+
 	const int inm = 2;
 	const int iju = 3;
 	const int ijd = 4;
@@ -5287,11 +5342,11 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	const int ibd = 7;
 	const int ilu = 8;
 	const int ild = 9;
-	
+
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
 	fOUTSTREAM3.close();
-	
+
 	////////////////////////////////////////////////////
 	// Datacards and systematics
 	TString datacard;
@@ -5300,7 +5355,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	const float match_syst_dn = 0.997558;
 	const float scale_syst_up = 1.02302;
 	const float scale_syst_dn = 0.965962;
-	
+
 	datacard = outputdir + "datacard_ssdl.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5428,7 +5483,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
+
 	datacard = outputdir + "datacard_ssdl_mm.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5489,7 +5544,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
+
 	datacard = outputdir + "datacard_ssdl_em.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5550,7 +5605,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
+
 	datacard = outputdir + "datacard_ssdl_ee.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5611,7 +5666,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
+
 	datacard = outputdir + "datacard_ssdl_3channels.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5725,15 +5780,15 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
 	              pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst) << endl;
 	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
-	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, 
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn,
 	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
-	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, 
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn,
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
-	
+
+
 	datacard = outputdir + "datacard_ssdl_3channels_ttW.txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
 	fOUTSTREAM <<      "#=========================================================================================" << endl;
@@ -5864,14 +5919,14 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	fOUTSTREAM << Form("pu       lnN\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t-\t\t-\t\t%5.3f\t\t%5.3f",
 	              pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst, pu_syst) << endl;
 	fOUTSTREAM << Form("matching lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
-	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, 
+	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn,
 	              match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
-	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, 
+	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn,
 	              scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
-	
+
 	// Produce systematics plots
 	TH1D *h_ttwz_nom = new TH1D("h_ttwz",    "Nominal ttWZ",         4, 0., 4.);
 	TH1D *h_ttwz_ju  = new TH1D("h_ttwz_ju", "ttWZ jets up",         4, 0., 4.);
@@ -5906,12 +5961,12 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	histos.push_back(h_bg_bd);
 	histos.push_back(h_bg_lu);
 	histos.push_back(h_bg_ld);
-	
+
 	h_ttwz_nom->SetBinContent(1, ttwzpreds[inm].ttwz_ee);
 	h_ttwz_nom->SetBinContent(2, ttwzpreds[inm].ttwz_mm);
 	h_ttwz_nom->SetBinContent(3, ttwzpreds[inm].ttwz_em);
 	h_ttwz_nom->SetBinContent(4, ttwzpreds[inm].ttwz);
-	
+
 	h_ttwz_ju ->SetBinContent(1, ttwzpreds[iju].ttwz_ee);
 	h_ttwz_ju ->SetBinContent(2, ttwzpreds[iju].ttwz_mm);
 	h_ttwz_ju ->SetBinContent(3, ttwzpreds[iju].ttwz_em);
@@ -5920,12 +5975,12 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_ttwz_jd ->SetBinContent(2, ttwzpreds[ijd].ttwz_mm);
 	h_ttwz_jd ->SetBinContent(3, ttwzpreds[ijd].ttwz_em);
 	h_ttwz_jd ->SetBinContent(4, ttwzpreds[ijd].ttwz);
-	
+
 	h_ttwz_js ->SetBinContent(1, ttwzpreds[ijs].ttwz_ee);
 	h_ttwz_js ->SetBinContent(2, ttwzpreds[ijs].ttwz_mm);
 	h_ttwz_js ->SetBinContent(3, ttwzpreds[ijs].ttwz_em);
 	h_ttwz_js ->SetBinContent(4, ttwzpreds[ijs].ttwz);
-	
+
 	h_ttwz_bu ->SetBinContent(1, ttwzpreds[ibu].ttwz_ee);
 	h_ttwz_bu ->SetBinContent(2, ttwzpreds[ibu].ttwz_mm);
 	h_ttwz_bu ->SetBinContent(3, ttwzpreds[ibu].ttwz_em);
@@ -5934,7 +5989,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_ttwz_bd ->SetBinContent(2, ttwzpreds[ibd].ttwz_mm);
 	h_ttwz_bd ->SetBinContent(3, ttwzpreds[ibd].ttwz_em);
 	h_ttwz_bd ->SetBinContent(4, ttwzpreds[ibd].ttwz);
-	
+
 	h_ttwz_lu ->SetBinContent(1, ttwzpreds[ilu].ttwz_ee);
 	h_ttwz_lu ->SetBinContent(2, ttwzpreds[ilu].ttwz_mm);
 	h_ttwz_lu ->SetBinContent(3, ttwzpreds[ilu].ttwz_em);
@@ -5943,12 +5998,12 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_ttwz_ld ->SetBinContent(2, ttwzpreds[ild].ttwz_mm);
 	h_ttwz_ld ->SetBinContent(3, ttwzpreds[ild].ttwz_em);
 	h_ttwz_ld ->SetBinContent(4, ttwzpreds[ild].ttwz);
-	
+
 	h_bg_nom->SetBinContent(1, ttwzpreds[inm].wz_ee+ttwzpreds[inm].rare_ee);
 	h_bg_nom->SetBinContent(2, ttwzpreds[inm].wz_mm+ttwzpreds[inm].rare_mm);
 	h_bg_nom->SetBinContent(3, ttwzpreds[inm].wz_em+ttwzpreds[inm].rare_em);
 	h_bg_nom->SetBinContent(4, ttwzpreds[inm].wz   +ttwzpreds[inm].rare   );
-	
+
 	h_bg_ju ->SetBinContent(1, ttwzpreds[iju].wz_ee+ttwzpreds[iju].rare_ee);
 	h_bg_ju ->SetBinContent(2, ttwzpreds[iju].wz_mm+ttwzpreds[iju].rare_mm);
 	h_bg_ju ->SetBinContent(3, ttwzpreds[iju].wz_em+ttwzpreds[iju].rare_em);
@@ -5957,12 +6012,12 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_bg_jd ->SetBinContent(2, ttwzpreds[ijd].wz_mm+ttwzpreds[ijd].rare_mm);
 	h_bg_jd ->SetBinContent(3, ttwzpreds[ijd].wz_em+ttwzpreds[ijd].rare_em);
 	h_bg_jd ->SetBinContent(4, ttwzpreds[ijd].wz   +ttwzpreds[ijd].rare   );
-	
+
 	h_bg_js ->SetBinContent(1, ttwzpreds[ijs].wz_ee+ttwzpreds[ijs].rare_ee);
 	h_bg_js ->SetBinContent(2, ttwzpreds[ijs].wz_mm+ttwzpreds[ijs].rare_mm);
 	h_bg_js ->SetBinContent(3, ttwzpreds[ijs].wz_em+ttwzpreds[ijs].rare_em);
 	h_bg_js ->SetBinContent(4, ttwzpreds[ijs].wz   +ttwzpreds[ijs].rare   );
-	
+
 	h_bg_bu ->SetBinContent(1, ttwzpreds[ibu].wz_ee+ttwzpreds[ibu].rare_ee);
 	h_bg_bu ->SetBinContent(2, ttwzpreds[ibu].wz_mm+ttwzpreds[ibu].rare_mm);
 	h_bg_bu ->SetBinContent(3, ttwzpreds[ibu].wz_em+ttwzpreds[ibu].rare_em);
@@ -5971,7 +6026,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_bg_bd ->SetBinContent(2, ttwzpreds[ibd].wz_mm+ttwzpreds[ibd].rare_mm);
 	h_bg_bd ->SetBinContent(3, ttwzpreds[ibd].wz_em+ttwzpreds[ibd].rare_em);
 	h_bg_bd ->SetBinContent(4, ttwzpreds[ibd].wz   +ttwzpreds[ibd].rare   );
-	
+
 	h_bg_lu ->SetBinContent(1, ttwzpreds[ilu].wz_ee+ttwzpreds[ilu].rare_ee);
 	h_bg_lu ->SetBinContent(2, ttwzpreds[ilu].wz_mm+ttwzpreds[ilu].rare_mm);
 	h_bg_lu ->SetBinContent(3, ttwzpreds[ilu].wz_em+ttwzpreds[ilu].rare_em);
@@ -5980,7 +6035,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_bg_ld ->SetBinContent(2, ttwzpreds[ild].wz_mm+ttwzpreds[ild].rare_mm);
 	h_bg_ld ->SetBinContent(3, ttwzpreds[ild].wz_em+ttwzpreds[ild].rare_em);
 	h_bg_ld ->SetBinContent(4, ttwzpreds[ild].wz   +ttwzpreds[ild].rare   );
-	
+
 	h_ttwz_nom->SetLineColor(kBlack);
 	h_bg_nom  ->SetLineColor(kBlack);
 
@@ -5992,14 +6047,14 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	h_bg_ju  ->SetLineColor(kGreen+1);
 	h_bg_bu  ->SetLineColor(kGreen+1);
 	h_bg_lu  ->SetLineColor(kGreen+1);
-	
+
 	h_ttwz_jd->SetLineColor(kRed-3);
 	h_ttwz_bd->SetLineColor(kRed-3);
 	h_ttwz_ld->SetLineColor(kRed-3);
 	h_bg_jd  ->SetLineColor(kRed-3);
 	h_bg_bd  ->SetLineColor(kRed-3);
 	h_bg_ld  ->SetLineColor(kRed-3);
-	
+
 	int cnt = 0;
 	for(vector<TH1D*>::iterator it = histos.begin(); it < histos.end(); ++it){
 		(*it)->GetXaxis()->SetBinLabel(1, "ee");
@@ -6017,7 +6072,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 		(*it)->SetFillStyle(0);
 		cnt++;
 	}
-	
+
 	makeSystPlot("Syst_Sig_JES",  "JES",          h_ttwz_nom, h_ttwz_ju, h_ttwz_jd);
 	makeSystPlot("Syst_Sig_bTag", "b Tag",        h_ttwz_nom, h_ttwz_bu, h_ttwz_bd);
 	makeSystPlot("Syst_Sig_Lept", "Lepton Scale", h_ttwz_nom, h_ttwz_lu, h_ttwz_ld);
@@ -6026,7 +6081,7 @@ void SSDLPlotter::makeTTWIntPredictions(){
 	makeSystPlot("Syst_Bg_bTag",  "b Tag",        h_bg_nom, h_bg_bu, h_bg_bd);
 	makeSystPlot("Syst_Bg_Lept",  "Lepton Scale", h_bg_nom, h_bg_lu, h_bg_ld);
 	makeSystPlot("Syst_Bg_JER",   "JER",          h_bg_nom, h_bg_js);
-	
+
 }
 void SSDLPlotter::makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus){
 	TCanvas *c_temp = new TCanvas("c_temp", "C", 800, 800);
@@ -6040,12 +6095,12 @@ void SSDLPlotter::makeSystPlot(TString outputname, TString label, TH1D *nom, TH1
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.03);
 	leg->SetBorderSize(0);
-	
+
 	plus ->DrawCopy("hist");
 	if(minus!=NULL) minus->DrawCopy("hist same");
 	nom  ->DrawCopy("hist same");
 	leg  ->Draw();
-	
+
 	drawTopLineSim(0.50, 1.0, 0.11);
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, outputname, fOutputDir + fOutputSubDir);
@@ -6061,10 +6116,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	vector<int> musamples;
 	vector<int> elsamples;
 	vector<int> emusamples;
-	
+
 	const float RareESyst  = 0.5;
 	const float RareESyst2 = RareESyst*RareESyst;
-	
+
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
@@ -6113,10 +6168,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		nt2_mm  += S->numbers[reg][Muon].nt2;
 		nt10_mm += S->numbers[reg][Muon].nt10;
 		nt0_mm  += S->numbers[reg][Muon].nt0;
-		
+
 		npp_mm += S->numbers[reg][Muon].npp;
 		npf_mm += S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp;
-		nff_mm += S->numbers[reg][Muon].nff;			
+		nff_mm += S->numbers[reg][Muon].nff;
 	}
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
@@ -6142,7 +6197,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		npp_ee += S->numbers[reg][Elec].npp;
 		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp;
 		nff_ee += S->numbers[reg][Elec].nff;
-		
+
 		nt2_ee_BB_os += S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
 		nt2_ee_EE_os += S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
 		nt2_ee_EB_os += S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
@@ -6189,7 +6244,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-	}	
+	}
 	OUT << "\\hline" << endl;
 	OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", "MC sum",
 	nt2sum_mm ,	nt10sum_mm,	nt0sum_mm ,
@@ -6219,11 +6274,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-	}	
+	}
 	OUT << "\\hline" << endl;
 	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
 	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
-	OUT << "\\hline" << endl;	
+	OUT << "\\hline" << endl;
 	OUT << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6255,22 +6310,22 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 	npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
-	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
+	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee,
 	npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
 	OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 	npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
-	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
+	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee,
 	npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
 	nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
 	OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 	nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
-	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
+	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee,
 	nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
-	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
+	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee,
 	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " (Value ± E_stat ± E_syst) " << endl;
@@ -6282,7 +6337,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	///////////////////////////////////////////////////////////////////////////////////
 	float nt2_ee_chmid(0.), nt2_ee_chmid_e1(0.), nt2_ee_chmid_e2(0.);
 	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
-	
+
 	// Abbreviations
 	float fb  = gEChMisIDB;
 	float fbE = gEChMisIDB_E;
@@ -6321,7 +6376,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
-		
+
 		mc_os_em_bb_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries();
 		mc_os_em_ee_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries();
 		mc_os_ee_bb_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries();
@@ -6335,7 +6390,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries() << " | ";
 		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries() << " || ";
 		OUT << endl;
-	}	
+	}
 	OUT << "-----------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "MC sum" << " || ";
 	OUT << setw(7) << Form("%5.1f", mc_os_em_bb_sum ) << " | ";
@@ -6394,7 +6449,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 		Sample *S = fSamples[mcbkg[i]];
 		float scale = fLumiNorm/S->getLumi();
 
-		
+
 		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
 		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
 		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
@@ -6418,7 +6473,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	
+
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
@@ -6469,7 +6524,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
-		
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6509,8 +6564,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << endl;
-	
-	
+
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6547,7 +6602,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	fOUTSTREAM << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
 	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
 	fOUTSTREAM << endl;
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6576,7 +6631,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	float tot_et = 1.71; float err_et = 1.12;
 	float tot_mt = 2.02; float err_mt = 0.59;
 	float tot_tt = 0.00; float err_tt = 0.007;
-	
+
 	// TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  6, 0., 6.);
 	// TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes",     6, 0., 6.);
 	// TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes",     6, 0., 6.);
@@ -6585,14 +6640,14 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted WZ",               6, 0., 6.);
 	// TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction",           6, 0., 6.);
 	// THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
-	
+
 	h_obs->SetMarkerColor(kBlack);
 	h_obs->SetMarkerStyle(20);
 	h_obs->SetMarkerSize(2.0);
 	h_obs->SetLineWidth(2);
 	h_obs->SetLineColor(kBlack);
 	h_obs->SetFillColor(kBlack);
-	
+
 	h_pred_sfake->SetLineWidth(1);
 	h_pred_dfake->SetLineWidth(1);
 	h_pred_chmid->SetLineWidth(1);
@@ -6614,7 +6669,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// h_pred_tot  ->SetFillStyle(3013);
 	h_pred_tot  ->SetFillColor(12);
 	h_pred_tot  ->SetFillStyle(3005);
-	
+
 	// Add numbers:
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
@@ -6631,7 +6686,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	gr_obs->SetLineWidth(2);
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
-	
+
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
@@ -6642,11 +6697,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// h_pred_sfake->SetBinContent(4, fake_et);
 	// h_pred_sfake->SetBinContent(5, fake_mt);
 	// h_pred_sfake->SetBinContent(6, fake_tt);
-	
+
 	h_pred_dfake->SetBinContent(1, nff_ee);
 	h_pred_dfake->SetBinContent(2, nff_mm);
 	h_pred_dfake->SetBinContent(3, nff_em);
-	
+
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
@@ -6654,7 +6709,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// h_pred_chmid->SetBinContent(4, cm_et);
 	// h_pred_chmid->SetBinContent(5, cm_mt);
 	// h_pred_chmid->SetBinContent(6, cm_tt);
-	
+
 	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
 	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
 	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
@@ -6665,7 +6720,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// h_pred_mc->SetBinContent(4, irr_et);
 	// h_pred_mc->SetBinContent(5, irr_mt);
 	// h_pred_mc->SetBinContent(6, irr_tt);
-	
+
 	h_pred_ttw->SetBinContent(1, wz_nt2_ee);
 	h_pred_ttw->SetBinContent(2, wz_nt2_mm);
 	h_pred_ttw->SetBinContent(3, wz_nt2_em);
@@ -6686,22 +6741,22 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	// h_pred_tot->SetBinError(4, err_et);
 	// h_pred_tot->SetBinError(5, err_mt);
 	// h_pred_tot->SetBinError(6, err_tt);
-	
+
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_dfake);
 	hs_pred->Add(h_pred_chmid);
 	hs_pred->Add(h_pred_mc);
 	hs_pred->Add(h_pred_ttw);
-	
+
 	// double max = h_obs->Integral();
 	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
 	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
-	
+
 	// if(reg == Baseline)    max = 125.;
 	if(reg == HT0MET2003V || reg == HT0MET200) max = 6.;
 	// if(reg == TTbarWSel3) max = 8.;
 	// if(reg == TTbarWSel1) max = 12.;
-	
+
 	h_obs       ->SetMaximum(max>1?max+1:1.);
 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
 	h_pred_dfake->SetMaximum(max>1?max+1:1.);
@@ -6710,7 +6765,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
 	hs_pred     ->SetMaximum(max>1?max+1:1.);
-	
+
 	hs_pred->Draw("goff");
 	hs_pred->GetYaxis()->SetTitle("Events");
 	hs_pred->GetYaxis()->SetTitleSize(0.04);
@@ -6727,7 +6782,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	hs_pred->GetXaxis()->SetLabelSize(0.09);
 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
 	hs_pred->GetXaxis()->SetLabelFont(42);
-	
+
 	TLegend *leg = new TLegend(0.15,0.65,0.65,0.88);
 	// TLegend *leg = new TLegend(0.15,0.56,0.65,0.88);
 	leg->AddEntry(h_obs,        "Data","p");
@@ -6742,7 +6797,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.03);
 	leg->SetBorderSize(0);
-	
+
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->cd();
 
@@ -6750,16 +6805,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	h_pred_tot->DrawCopy("0 E2 same");
 	gr_obs->Draw("P same");
 	leg->Draw();
-	
+
 	drawRegionSel(reg);
 	// drawTopLineNoPrelim(0.5, 1., 0.11);
 	drawTopLine(0.47, 1., 0.11);
-	
+
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 	// tau
 	// Util::PrintPDF(c_temp,   "ObsPred_Tau_" + Region::sname[reg], fOutputDir + fOutputSubDir);
-	delete c_temp;	
+	delete c_temp;
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_tot, hs_pred;
 	delete gr_obs;
 	delete FR;
@@ -6775,10 +6830,10 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	vector<int> musamples;
 	vector<int> elsamples;
 	vector<int> emusamples;
-	
+
 	const float RareESyst  = 0.5;
 	const float RareESyst2 = RareESyst*RareESyst;
-	
+
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
@@ -6827,10 +6882,10 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 		nt2_mm  += S->numbers[reg][Muon].nt2;
 		nt10_mm += S->numbers[reg][Muon].nt10;
 		nt0_mm  += S->numbers[reg][Muon].nt0;
-		
+
 		npp_mm += S->numbers[reg][Muon].npp;
 		npf_mm += S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp;
-		nff_mm += S->numbers[reg][Muon].nff;			
+		nff_mm += S->numbers[reg][Muon].nff;
 	}
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
@@ -6856,7 +6911,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 		npp_ee += S->numbers[reg][Elec].npp;
 		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp;
 		nff_ee += S->numbers[reg][Elec].nff;
-		
+
 		nt2_ee_BB_os += S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
 		nt2_ee_EE_os += S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
 		nt2_ee_EB_os += S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
@@ -6902,7 +6957,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-	}	
+	}
 	OUT << "\\hline" << endl;
 	OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", "MC sum",
 	nt2sum_mm ,	nt10sum_mm,	nt0sum_mm ,
@@ -6932,11 +6987,11 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-	}	
+	}
 	OUT << "\\hline" << endl;
 	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
 	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
-	OUT << "\\hline" << endl;	
+	OUT << "\\hline" << endl;
 	OUT << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6980,22 +7035,22 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	OUT << "------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Npp             |" << Form(" %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f |",
 	npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
-	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
+	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee,
 	npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
 	OUT << " Npf             |" << Form(" %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f |",
 	npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
-	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
+	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee,
 	npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
 	OUT << " Nfp             |" << Form("    -                    |    -                    | %5.1f +- %5.1f +- %5.1f |",
 	nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
 	OUT << " Nff             |" << Form(" %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f |",
 	nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
-	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
+	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee,
 	nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Total Fakes     |" << Form(" %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f | %5.1f +- %5.1f +- %5.1f |",
 	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
-	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
+	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee,
 	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------------" << endl;
 	OUT << " (Value +- E_stat +- E_syst) " << endl;
@@ -7007,7 +7062,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	///////////////////////////////////////////////////////////////////////////////////
 	float nt2_ee_chmid(0.), nt2_ee_chmid_e1(0.), nt2_ee_chmid_e2(0.);
 	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
-	
+
 	// Abbreviations
 	float fb  = gEChMisIDB;
 	float fbE = gEChMisIDB_E;
@@ -7046,7 +7101,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
-		
+
 		mc_os_em_bb_sum += scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->Integral(0, getNFPtBins(Elec)+1);
 		mc_os_em_ee_sum += scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->Integral(0, getNFPtBins(Elec)+1);
 		mc_os_ee_bb_sum += scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->Integral(0, getNFPtBins(Elec)+1);
@@ -7060,7 +7115,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 		OUT << setw(7)  << setprecision(4) << scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->Integral(0, getNFPtBins(Elec)+1) << " | ";
 		OUT << setw(7)  << setprecision(4) << scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->Integral(0, getNFPtBins(Elec)+1) << " || ";
 		OUT << endl;
-	}	
+	}
 	OUT << "-----------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "MC sum" << " || ";
 	OUT << setw(7) << Form("%5.1f", mc_os_em_bb_sum ) << " | ";
@@ -7101,21 +7156,8 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
 	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
 
-	vector<int> mcbkg;
-	// mcbkg.push_back(WZ);
-	mcbkg.push_back(ZZ);
-	mcbkg.push_back(GVJets);
-	mcbkg.push_back(DPSWW);
-	mcbkg.push_back(TTbarG);
-	mcbkg.push_back(WpWp);
-	mcbkg.push_back(WmWm);
-	mcbkg.push_back(WWZ);
-	mcbkg.push_back(WZZ);
-	mcbkg.push_back(WWG);
-	mcbkg.push_back(WWW);
-	mcbkg.push_back(ZZZ);
-	for(size_t i = 0; i < mcbkg.size(); ++i){
-		Sample *S = fSamples[mcbkg[i]];
+	for(size_t i = 0; i < fMCRareSM_TTV.size(); ++i){
+		Sample *S = fSamples[fMCRareSM_TTV[i]];
 		float scale = fLumiNorm/S->getLumi();
 
 		float temp_nt2_mm = scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
@@ -7141,7 +7183,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	
+
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
@@ -7158,7 +7200,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	wz_nt2_em, sqrt(wz_nt2_em_e1),
 	wz_nt2_ee, sqrt(wz_nt2_ee_e1));
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	
+
 
 	///////////////////////////////////////////
 	// ttX production
@@ -7184,7 +7226,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1),
 	ttw_nt2_em, sqrt(ttw_nt2_em_e1),
 	ttw_nt2_ee, sqrt(ttw_nt2_ee_e1));
-	
+
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttZ Prod.",
 	ttz_nt2_mm, sqrt(ttz_nt2_mm_e1),
 	ttz_nt2_em, sqrt(ttz_nt2_em_e1),
@@ -7213,7 +7255,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	OUT << "        predicted: ";
 	float tot_pred        = nF + nt2_rare_mc_mm + wz_nt2_mm + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee;
 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_ee_e1;
-	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee); 
+	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee);
 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
@@ -7277,8 +7319,8 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	ttz_nt2_em, sqrt(ttz_nt2_em_e1 + RareESyst2*ttz_nt2_em*ttz_nt2_em));
 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << endl;
-	
-	
+
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR AN TABLE  /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -7342,11 +7384,11 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1),
 	ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em, sqrt(ttz_tot_err2)); // + RareESyst2*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)));
 	fOUTSTREAM << endl;
-	
+
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR DATACARD  //////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////	
+	///////////////////////////////////////////////////////////////////////////////////
 	TTWZPrediction pred;
 	pred.obs      = nt2_mm+nt2_em+nt2_ee;
 	pred.obs_mm   = nt2_mm;
@@ -7402,7 +7444,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	pred.rare_err_mm = sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm);
 	pred.rare_err_ee = sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee);
 	pred.rare_err_em = sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em);
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -7415,14 +7457,14 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz",      "Predicted ttZ",              3, 0., 3.);
 	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",      "Total Prediction",           3, 0., 3.);
 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
-	
+
 	h_obs->SetMarkerColor(kBlack);
 	h_obs->SetMarkerStyle(20);
 	h_obs->SetMarkerSize(2);
 	h_obs->SetLineWidth(2);
 	h_obs->SetLineColor(kBlack);
 	h_obs->SetFillColor(kBlack);
-	
+
 	h_pred_sfake->SetLineWidth(1);
 	h_pred_chmid->SetLineWidth(1);
 	h_pred_wz   ->SetLineWidth(1);
@@ -7447,7 +7489,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	// h_pred_tot  ->SetFillStyle(3013);
 	h_pred_tot  ->SetFillColor(12);
 	h_pred_tot  ->SetFillStyle(3005);
-	
+
 	// Add numbers:
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
@@ -7462,27 +7504,27 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
 
-	
+
 	h_pred_sfake->SetBinContent(1, npf_ee + nff_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm + nff_mm);
 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em + nff_em);
 	// h_pred_sfake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em + nff_ee+nff_mm+nff_em);
-	
+
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
 	// h_pred_chmid->SetBinContent(4, nt2_ee_chmid+nt2_em_chmid);
-	
+
 	h_pred_wz   ->SetBinContent(1, wz_nt2_ee);
 	h_pred_wz   ->SetBinContent(2, wz_nt2_mm);
 	h_pred_wz   ->SetBinContent(3, wz_nt2_em);
 	// h_pred_wz   ->SetBinContent(4, wz_nt2_ee + wz_nt2_mm + wz_nt2_em);
-	
+
 	h_pred_mc   ->SetBinContent(1, nt2_rare_mc_ee);
 	h_pred_mc   ->SetBinContent(2, nt2_rare_mc_mm);
 	h_pred_mc   ->SetBinContent(3, nt2_rare_mc_em);
 	// h_pred_mc   ->SetBinContent(4, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em);
-	
+
 	h_pred_ttw  ->SetBinContent(1, ttw_nt2_ee);
 	h_pred_ttw  ->SetBinContent(2, ttw_nt2_mm);
 	h_pred_ttw  ->SetBinContent(3, ttw_nt2_em);
@@ -7492,7 +7534,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	h_pred_ttz  ->SetBinContent(2, ttz_nt2_mm);
 	h_pred_ttz  ->SetBinContent(3, ttz_nt2_em);
 	// h_pred_ttz  ->SetBinContent(4, ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em);
-	
+
 	h_pred_tot->Add(h_pred_sfake);
 	h_pred_tot->Add(h_pred_chmid);
 	h_pred_tot->Add(h_pred_wz);
@@ -7503,19 +7545,20 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	h_pred_tot->SetBinError(2, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2));
 	h_pred_tot->SetBinError(3, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
 	// h_pred_tot->SetBinError(4, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	
+
 	hs_pred->Add(h_pred_mc);
 	hs_pred->Add(h_pred_wz);
 	hs_pred->Add(h_pred_chmid);
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_ttw);
 	hs_pred->Add(h_pred_ttz);
-	
+
 	float max = 1.5*h_pred_tot->GetBinContent(3);
 	// float max = 1.5*h_pred_tot->GetBinContent(4);
-	
+
 	if(reg != TTbarWPresel) max = 20.; // was 23.
-	
+	if(reg == TTbarWPresel) max = 160.;
+
 	h_obs       ->SetMaximum(max>1?max+1:1.);
 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
 	h_pred_chmid->SetMaximum(max>1?max+1:1.);
@@ -7525,7 +7568,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
 	hs_pred     ->SetMaximum(max>1?max+1:1.);
-	
+
 	hs_pred->Draw("goff");
 	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
 	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
@@ -7539,7 +7582,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	hs_pred->GetYaxis()->SetTitle("Events");
 	hs_pred->GetYaxis()->SetTitleOffset(1.25);
 	hs_pred->GetYaxis()->SetTitleSize(0.045);
-	
+
 	TLegend *leg = new TLegend(0.16,0.43,0.48,0.85);
 	leg->AddEntry(h_obs,        "Data","p");
 	leg->AddEntry(h_pred_ttz,   "t#bar{t} + Z","f");
@@ -7552,7 +7595,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.038);
 	leg->SetBorderSize(0);
-	
+
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin  (0.12);
 	c_temp->SetRightMargin (0.04);
@@ -7566,22 +7609,22 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	h_pred_tot->DrawCopy("hist same");
 	gr_obs->Draw("P same");
 	leg->Draw();
-	
+
 	// drawRegionSel(reg);
 	// drawTopLine(0.49, 1.0, 0.13); // with 4.98
 	// drawTopLine(0.52, 1.0, 0.13); // with 5.0
 	drawTopLine(0.49, 1.0, 0.13); // with 5.0
-	
+
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
-		
-	delete c_temp;	
+
+	delete c_temp;
 	delete h_obs, h_pred_sfake, h_pred_chmid, h_pred_mc, h_pred_wz, h_pred_ttw, h_pred_ttz, h_pred_tot, hs_pred;
 	delete gr_obs;
 	delete FR;
-	
+
 	return pred;
 }
 
@@ -7598,7 +7641,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	const float RareESyst  = 0.5;
 	const float RareESyst2 = RareESyst*RareESyst;
-	
+
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
@@ -7658,7 +7701,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	TFile *pFile = TFile::Open(fOutputFileName);
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
-	
+
 	string *sname = 0;
 	int flag;
 	int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
@@ -7709,9 +7752,9 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
-		
+
 		if( flag != systflag ) continue;
-		
+
 		if ( mll < 8.) continue;
 		if ( HT  < minHT  || HT  > maxHT)  continue;
 		if ( MET < minMET || MET > maxMET) continue;
@@ -7756,7 +7799,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 				npp = FR->getWpp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
 				npf = FR->getWpf(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
 				nfp = FR->getWfp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
-				nff = FR->getWff(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);			
+				nff = FR->getWff(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
 
 				if (Flavor == 0) {      // MUMU
 					npp_mm += npp;
@@ -7818,7 +7861,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 				rareMapEE_npass[*sname] ++;
 			}
 		} // end rare mc events
-		
+
 	}
 	float nt2_rare_mc_mm_e1 = sqrt(nt2_rare_mc_mm_e2);
 	float nt2_rare_mc_em_e1 = sqrt(nt2_rare_mc_em_e2);
@@ -7872,7 +7915,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	///////////////////////////////////////////////////////////////////////////////////
 	float nt2_ee_chmid(0.), nt2_ee_chmid_e1(0.), nt2_ee_chmid_e2(0.);
 	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
-	
+
 	// Abbreviations
 	float fb  = gEChMisIDB;
 	float fbE = gEChMisIDB_E;
@@ -7988,7 +8031,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		}
 
 
-		OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||", (it->first).c_str(), 
+		OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||", (it->first).c_str(),
 		       MM_yiel, MM_stat, RareESyst*(MM_yiel),
 		       EM_yiel, EM_stat, RareESyst*(EM_yiel),
 		       EE_yiel, EE_stat, RareESyst*(EE_yiel)) << endl;
@@ -8053,15 +8096,15 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
 	OUT << "==============================================================================================" << endl;
 	OUT << "        predicted: ";
-	float tot_pred        = nF + nt2_rare_mc_mm + nt2_wz_mc_mm + 
-	                        nt2_em_chmid + nt2_rare_mc_em + nt2_wz_mc_em + 
+	float tot_pred        = nF + nt2_rare_mc_mm + nt2_wz_mc_mm +
+	                        nt2_em_chmid + nt2_rare_mc_em + nt2_wz_mc_em +
 	                        nt2_ee_chmid + nt2_rare_mc_ee + nt2_wz_mc_ee ;
-	float comb_tot_stat2  = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e2 + nt2_wz_mc_mm_e2 + 
-	                        nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e2 + nt2_wz_mc_em_e2 + 
+	float comb_tot_stat2  = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e2 + nt2_wz_mc_mm_e2 +
+	                        nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e2 + nt2_wz_mc_em_e2 +
 	                        nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e2 + nt2_wz_mc_ee_e2;
-	float comb_tot_syst2  = nF*nF*FakeESyst2 + 
-	                        RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + 
-	                        WZESyst2  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee)  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee) + 
+	float comb_tot_syst2  = nF*nF*FakeESyst2 +
+	                        RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) +
+	                        WZESyst2  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee)  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee) +
 	                        nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_stat2)) << " ± ";
@@ -8077,7 +8120,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -8140,8 +8183,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	gr_obs->SetLineWidth(2);
 	gr_obs->SetLineColor(kBlack);
 	gr_obs->SetFillColor(kBlack);
-	
-	
+
+
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
@@ -8199,7 +8242,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	hs_pred->Add(h_pred_ttw);
 	hs_pred->Add(h_pred_ttz);
 
-	
+
 	// double max = h_obs->Integral();
 	double max(0.);
 	if (ttw) {
@@ -8257,12 +8300,12 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->cd();
-	
+
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
 	gr_obs->Draw("P same");
 	leg->Draw();
-	
+
 	lat->SetTextSize(0.03);
 
 	if (maxHT < 19.) lat->DrawLatex(0.45,0.85, "N_{Jets} = 0");
@@ -8275,11 +8318,11 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	if (minNbjetsL != 0) lat->DrawLatex(0.45,0.75, Form("N_{b-Jets} #geq %.0d", minNbjetsL));
 
 	drawTopLine(0.66);
-	
+
 	gPad->RedrawAxis();
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f", minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2) , fOutputDir + fOutputSubDir);
-	delete c_temp;	
+	delete c_temp;
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
 	delete gr_obs;
 	delete FR;
@@ -8418,12 +8461,12 @@ void SSDLPlotter::makeDiffPrediction(){
 			nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[j]);
 			nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[j]);
 		}
-		
+
 		nt11->Add(nt11_mm);
 		nt11->Add(nt11_ee);
 		nt11->Add(nt11_em);
 
-		
+
 		///////////////////////////////////////////////////////////////////////////////////
 		// Errors /////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
@@ -8438,11 +8481,11 @@ void SSDLPlotter::makeDiffPrediction(){
 		// MC Predictions /////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
 		// TH1D *nt11_mc = new TH1D(Form("NT11_MC_%s", varname.Data()), varname, nbins, bins); nt11_mc->Sumw2();
-		// 
+		//
 		// TH1D *nt11_mm_mc = new TH1D(Form("NT11_MM_MC_%s", varname.Data()), varname, nbins, bins); nt11_mm_mc->Sumw2();
 		// TH1D *nt11_ee_mc = new TH1D(Form("NT11_EE_MC_%s", varname.Data()), varname, nbins, bins); nt11_ee_mc->Sumw2();
 		// TH1D *nt11_em_mc = new TH1D(Form("NT11_EM_MC_%s", varname.Data()), varname, nbins, bins); nt11_em_mc->Sumw2();
-		// 
+		//
 		// for(size_t i = 0; i < fMCBG.size(); ++i){
 		// 	Sample *S = fSamples[fMCBG[i]];
 		// 	float scale = fLumiNorm / S->getLumi();
@@ -8450,7 +8493,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// 	nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
 		// 	nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
 		// }
-		// 
+		//
 		// nt11_mc->Add(nt11_mm_mc);
 		// nt11_mc->Add(nt11_ee_mc);
 		// nt11_mc->Add(nt11_em_mc);
@@ -8554,7 +8597,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_wz->Add(nt11_mm_wz);
 		// nt11_wz->Add(nt11_ee_wz);
 		// nt11_wz->Add(nt11_em_wz);
-		// 
+		//
 		// totbg   ->Add(nt11_wz);
 		// totbg_mm->Add(nt11_mm_wz);
 		// totbg_em->Add(nt11_em_wz);
@@ -8618,7 +8661,7 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setMMNtl(nt11_mm->GetBinContent(i+1), nt10_mm->GetBinContent(i+1) + nt01_mm->GetBinContent(i+1), nt00_mm->GetBinContent(i+1));
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
-			
+
 			///////////////////////////////////////////////////////
 			// Flat ratios:
 			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
@@ -8628,12 +8671,12 @@ void SSDLPlotter::makeDiffPrediction(){
 			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
 			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
 			///////////////////////////////////////////////////////
-			
+
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
 			float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
 			float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
-			
+
 			// Errors (add total errors of fakes)
 			float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
 			float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
@@ -8653,10 +8696,10 @@ void SSDLPlotter::makeDiffPrediction(){
 			totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
 			totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
 			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
-			
+
 			delete FR;
 		}
-		
+
 		nt11_sf->Add(nt11_mm_sf);
 		nt11_sf->Add(nt11_ee_sf);
 		nt11_sf->Add(nt11_em_sf);
@@ -8697,7 +8740,7 @@ void SSDLPlotter::makeDiffPrediction(){
 			float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
 			float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
 			float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
-			
+
 			// Errors
 			FakeRatios *FR = new FakeRatios();
 
@@ -8709,7 +8752,7 @@ void SSDLPlotter::makeDiffPrediction(){
 			nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
 			float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
 			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
-			
+
 			float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
 			float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
 			float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
@@ -8835,7 +8878,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_em_ss->SetFillColor(31);
 		nt11_em_wz->SetLineColor(29);
 		nt11_em_wz->SetFillColor(29);
-		
+
 		nt11_sig   ->SetLineWidth(2);
 		nt11_mm_sig->SetLineWidth(2);
 		nt11_em_sig->SetLineWidth(2);
@@ -8845,12 +8888,12 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_mm_sig->SetLineColor(kBlue);
 		nt11_em_sig->SetLineColor(kBlue);
 		nt11_ee_sig->SetLineColor(kBlue);
-		
+
 		nt11_sig   ->SetFillStyle(0);
 		nt11_mm_sig->SetFillStyle(0);
 		nt11_em_sig->SetFillStyle(0);
 		nt11_ee_sig->SetFillStyle(0);
-		
+
 		totbg   ->SetLineWidth(1);
 		totbg_mm->SetLineWidth(1);
 		totbg_em->SetLineWidth(1);
@@ -8897,13 +8940,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_ee_ss = normHistBW(nt11_ee_ss, binwidthscale[j]);
 		// nt11_ee_wz = normHistBW(nt11_ee_wz, binwidthscale[j]);
 		nt11_ee_cm = normHistBW(nt11_ee_cm, binwidthscale[j]);
-		
+
 		nt11_em_sf = normHistBW(nt11_em_sf, binwidthscale[j]);
 		// nt11_em_df = normHistBW(nt11_em_df, binwidthscale[j]);
 		nt11_em_ss = normHistBW(nt11_em_ss, binwidthscale[j]);
 		// nt11_em_wz = normHistBW(nt11_em_wz, binwidthscale[j]);
 		nt11_em_cm = normHistBW(nt11_em_cm, binwidthscale[j]);
-		
+
 		totbg      = normHistBW(totbg,    binwidthscale[j]);
 		totbg_mm   = normHistBW(totbg_mm, binwidthscale[j]);
 		totbg_em   = normHistBW(totbg_em, binwidthscale[j]);
@@ -8919,7 +8962,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
 		THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
 		THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
-		
+
 		nt11_tot->Add(nt11_sf);
 		// nt11_tot->Add(nt11_df);
 		nt11_tot->Add(nt11_ss);
@@ -9003,7 +9046,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
 		nt11_em_wz ->SetMaximum(max_em>1?max_em+1:1.);
 		nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
-		
+
 		FakeRatios *FR = new FakeRatios();
 		TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(nt11);
 		gr_obs->SetMarkerColor(kBlack);
@@ -9012,7 +9055,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		gr_obs->SetLineWidth(2);
 		gr_obs->SetLineColor(kBlack);
 		gr_obs->SetFillColor(kBlack);
-		
+
 		fOutputSubDir = "DiffPredictionPlots/";
 		/////////////////////////////////////////////////////////////////
 		TLegend *leg = new TLegend(0.60,0.65,0.90,0.88);
@@ -9027,7 +9070,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
-		
+
 		TH2D *h2_axes    = new TH2D("h2_axes",    "H2", nbins, bins, 10, 0.1, max);
 		TH2D *h2_axes_ee = new TH2D("h2_axes_ee", "H2", nbins, bins, 10, 0.1, max_ee);
 		TH2D *h2_axes_em = new TH2D("h2_axes_em", "H2", nbins, bins, 10, 0.1, max_em);
@@ -9040,11 +9083,11 @@ void SSDLPlotter::makeDiffPrediction(){
 		h2_axes_em->GetYaxis()->SetTitle(ytitle);
 		h2_axes_mm->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		h2_axes_mm->GetYaxis()->SetTitle(ytitle);
-		
+
 		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
 		c_temp->cd();
 		gPad->SetLogy();
-			
+
 		h2_axes->Draw();
 		nt11_tot->Draw("hist same");
 		// nt11_error->DrawCopy("X0 E1 same");
@@ -9056,7 +9099,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
 		drawDiffCuts(j);
 		drawTopLine();
-		
+
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
 		gPad->SetLogy(0);
@@ -9089,12 +9132,12 @@ void SSDLPlotter::makeDiffPrediction(){
 		gr_obs_mm->SetLineWidth(2);
 		gr_obs_mm->SetLineColor(kBlack);
 		gr_obs_mm->SetFillColor(kBlack);
-		
+
 		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
 		c_temp->cd();
 		gPad->SetLogy();
 
-		h2_axes_mm->Draw();		
+		h2_axes_mm->Draw();
 		nt11_mm_tot->Draw("hist same");
 		// nt11_error->DrawCopy("X0 E1 same");
 		// nt11_mm->DrawCopy("PE X0 same");
@@ -9106,7 +9149,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		lat->DrawLatex(0.55,0.92, "#mu#mu");
 		drawDiffCuts(j);
 		drawTopLine();
-		
+
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -9131,7 +9174,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_ee->SetFillStyle(0);
 		leg_ee->SetTextFont(42);
 		leg_ee->SetBorderSize(0);
-		
+
 		TGraphAsymmErrors* gr_obs_ee = FR->getGraphPoissonErrors(nt11_ee);
 		gr_obs_ee->SetMarkerColor(kBlack);
 		gr_obs_ee->SetMarkerStyle(20);
@@ -9139,12 +9182,12 @@ void SSDLPlotter::makeDiffPrediction(){
 		gr_obs_ee->SetLineWidth(2);
 		gr_obs_ee->SetLineColor(kBlack);
 		gr_obs_ee->SetFillColor(kBlack);
-		
+
 		c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
 		c_temp->cd();
 		gPad->SetLogy();
-		
-		h2_axes_ee->Draw();		
+
+		h2_axes_ee->Draw();
 		nt11_ee_tot->Draw("hist same");
 		// nt11_error->DrawCopy("X0 E1 same");
 		// nt11_ee->DrawCopy("PE X0 same");
@@ -9156,7 +9199,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		lat->DrawLatex(0.55,0.92, "ee");
 		drawDiffCuts(j);
 		drawTopLine();
-		
+
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -9181,7 +9224,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_em->SetFillStyle(0);
 		leg_em->SetTextFont(42);
 		leg_em->SetBorderSize(0);
-		
+
 		TGraphAsymmErrors* gr_obs_em = FR->getGraphPoissonErrors(nt11_em);
 		gr_obs_em->SetMarkerColor(kBlack);
 		gr_obs_em->SetMarkerStyle(20);
@@ -9189,12 +9232,12 @@ void SSDLPlotter::makeDiffPrediction(){
 		gr_obs_em->SetLineWidth(2);
 		gr_obs_em->SetLineColor(kBlack);
 		gr_obs_em->SetFillColor(kBlack);
-		
+
 		c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
 		c_temp->cd();
 		gPad->SetLogy();
-		
-		h2_axes_em->Draw();		
+
+		h2_axes_em->Draw();
 		nt11_em_tot->Draw("hist same");
 		totbg_em->DrawCopy("0 E2 same");
 		// nt11_em->DrawCopy("PE X0 same");
@@ -9205,7 +9248,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		lat->DrawLatex(0.55,0.92, "e#mu");
 		drawDiffCuts(j);
 		drawTopLine();
-		
+
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -9333,12 +9376,12 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[varbin]);
 		nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[varbin]);
 	}
-	
+
 	nt11->Add(nt11_mm);
 	nt11->Add(nt11_ee);
 	nt11->Add(nt11_em);
 
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	// Errors /////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -9359,22 +9402,8 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	TH1D *nt11_ee_ss = new TH1D(Form("NT11_EE_SS_%s", varname.Data()), varname, nbins, bins); nt11_ee_ss->Sumw2();
 	TH1D *nt11_em_ss = new TH1D(Form("NT11_EM_SS_%s", varname.Data()), varname, nbins, bins); nt11_em_ss->Sumw2();
 
-	vector<int> raremc;
-	// raremc.push_back(WZ);
-	raremc.push_back(ZZ);
-	raremc.push_back(GVJets);
-	raremc.push_back(DPSWW);
-	raremc.push_back(TTbarG);
-	raremc.push_back(WpWp);
-	raremc.push_back(WmWm);
-	raremc.push_back(WWZ);
-	raremc.push_back(WZZ);
-	raremc.push_back(WWG);
-	raremc.push_back(WWW);
-	raremc.push_back(ZZZ);
-	
-	for(size_t i = 0; i < raremc.size(); ++i){
-		Sample *S = fSamples[raremc[i]];
+	for(size_t i = 0; i < fMCRareSM_TTV.size(); ++i){
+		Sample *S = fSamples[fMCRareSM_TTV[i]];
 		float scale = fLumiNorm / S->getLumi();
 		nt11_mm_ss->Add(S->diffyields[Muon].hnt11[varbin], scale);
 		nt11_ee_ss->Add(S->diffyields[Elec].hnt11[varbin], scale);
@@ -9615,12 +9644,12 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		FR->setMMNtl(nt11_mm->GetBinContent(i+1), nt10_mm->GetBinContent(i+1) + nt01_mm->GetBinContent(i+1), nt00_mm->GetBinContent(i+1));
 		FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 		FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
-		
+
 		float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1);
 		float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1);
 		float em_tot_fakes = nt11_em_sf->GetBinContent(i+1);
 		float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
-		
+
 		// Errors (add total errors of fakes)
 		float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
 		float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
@@ -9640,10 +9669,10 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
 		totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
 		totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
-		
+
 		delete FR;
 	}
-	
+
 	nt11_sf->Add(nt11_mm_sf);
 	nt11_sf->Add(nt11_ee_sf);
 	nt11_sf->Add(nt11_em_sf);
@@ -9673,7 +9702,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
 		float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
 		float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
-		
+
 		// Errors
 		FakeRatios *FR = new FakeRatios();
 
@@ -9685,7 +9714,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 		nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
 		float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
 		float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
-		
+
 		float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
 		float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
 		float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
@@ -9734,7 +9763,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Color_t col_rare = 38;
 	Color_t col_ttw  = 44;
 	Color_t col_ttz  = 42;
-	
+
 	nt11->SetMarkerColor(kBlack);
 	nt11->SetMarkerStyle(20);
 	nt11->SetMarkerSize(2.0);
@@ -9809,7 +9838,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_em_wz ->SetFillColor(col_wz);
 	nt11_em_ttw->SetFillColor(col_ttw);
 	nt11_em_ttz->SetFillColor(col_ttz);
-	
+
 	totbg   ->SetLineWidth(3);
 	totbg_mm->SetLineWidth(3);
 	totbg_em->SetLineWidth(3);
@@ -9858,14 +9887,14 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_ee_ttw = normHistBW(nt11_ee_ttw, binwidthscale[varbin]);
 	nt11_ee_ttz = normHistBW(nt11_ee_ttz, binwidthscale[varbin]);
 	nt11_ee_cm  = normHistBW(nt11_ee_cm, binwidthscale[varbin]);
-	
+
 	nt11_em_sf  = normHistBW(nt11_em_sf, binwidthscale[varbin]);
 	nt11_em_ss  = normHistBW(nt11_em_ss, binwidthscale[varbin]);
 	nt11_em_ttw = normHistBW(nt11_em_ttw, binwidthscale[varbin]);
 	nt11_em_ttz = normHistBW(nt11_em_ttz, binwidthscale[varbin]);
 	nt11_em_wz  = normHistBW(nt11_em_wz, binwidthscale[varbin]);
 	nt11_em_cm  = normHistBW(nt11_em_cm, binwidthscale[varbin]);
-	
+
 	totbg      = normHistBW(totbg,    binwidthscale[varbin]);
 	totbg_mm   = normHistBW(totbg_mm, binwidthscale[varbin]);
 	totbg_em   = normHistBW(totbg_em, binwidthscale[varbin]);
@@ -9881,7 +9910,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
 	THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
 	THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
-	
+
 	nt11_tot->Add(nt11_ss);
 	nt11_tot->Add(nt11_wz);
 	nt11_tot->Add(nt11_cm);
@@ -10025,7 +10054,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_em_ttw->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_ttz->SetMaximum(max_em>1?max_em+1:1.);
 	nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
-	
+
 	fOutputSubDir = "DiffPredictionPlots/";
 	/////////////////////////////////////////////////////////////////
 	TLegend *leg = new TLegend(0.60,0.43,0.90,0.85);
@@ -10056,7 +10085,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
-	
+
 	nt11_tot->Draw("hist");
 	totbg   ->DrawCopy("0 E2 same");
 	totbg   ->SetFillStyle(0);
@@ -10065,7 +10094,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	leg->Draw();
 	drawDiffCuts(varbin);
 	drawTopLine(0.49, 1.0, 0.13);
-	
+
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
 	gPad->SetLogy(0);
@@ -10080,7 +10109,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 
 	fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
 	/////////////////////////////////////////////////////////////////
-	
+
 	TGraphAsymmErrors* gr_obs_mm = FR->getGraphPoissonErrors(nt11_mm);
 	gr_obs_mm->SetMarkerColor(kBlack);
 	gr_obs_mm->SetMarkerStyle(20);
@@ -10088,7 +10117,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_mm->SetLineWidth(2);
 	gr_obs_mm->SetLineColor(kBlack);
 	gr_obs_mm->SetFillColor(kBlack);
-	
+
 	c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
 	c_temp->SetRightMargin(0.04);
@@ -10105,7 +10134,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	lat->DrawLatex(0.55,0.92, "#mu#mu");
 	drawDiffCuts(varbin);
 	drawTopLine(0.39, 1.0, 0.13);
-	
+
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -10119,7 +10148,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 	/////////////////////////////////////////////////////////////////
-	
+
 	TGraphAsymmErrors* gr_obs_ee = FR->getGraphPoissonErrors(nt11_ee);
 	gr_obs_ee->SetMarkerColor(kBlack);
 	gr_obs_ee->SetMarkerStyle(20);
@@ -10127,13 +10156,13 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_ee->SetLineWidth(2);
 	gr_obs_ee->SetLineColor(kBlack);
 	gr_obs_ee->SetFillColor(kBlack);
-	
+
 	c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
 	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
-	
+
 	nt11_ee_tot->Draw("hist");
 	totbg_ee   ->DrawCopy("0 E2 same");
 	totbg_ee   ->SetFillStyle(0);
@@ -10144,7 +10173,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	lat->DrawLatex(0.55,0.92, "ee");
 	drawDiffCuts(varbin);
 	drawTopLine(0.49, 1.0, 0.13);
-	
+
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -10158,7 +10187,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 	/////////////////////////////////////////////////////////////////
-	
+
 	TGraphAsymmErrors* gr_obs_em = FR->getGraphPoissonErrors(nt11_em);
 	gr_obs_em->SetMarkerColor(kBlack);
 	gr_obs_em->SetMarkerStyle(20);
@@ -10166,13 +10195,13 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	gr_obs_em->SetLineWidth(2);
 	gr_obs_em->SetLineColor(kBlack);
 	gr_obs_em->SetFillColor(kBlack);
-	
+
 	c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->SetLeftMargin(0.12);
 	c_temp->SetRightMargin(0.04);
 	c_temp->cd();
 	gPad->SetLogy();
-	
+
 	nt11_em_tot->Draw("hist");
 	totbg_em   ->DrawCopy("0 E2 same");
 	totbg_em   ->SetFillStyle(0);
@@ -10183,7 +10212,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	lat->DrawLatex(0.55,0.92, "e#mu");
 	drawDiffCuts(varbin);
 	drawTopLine(0.49, 1.0, 0.13);
-	
+
 	gPad->RedrawAxis();
 	Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
 
@@ -10253,7 +10282,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	vector<float> ntt_mm, ntl_mm, nll_mm;
 	vector<float> ntt_ee, ntl_ee, nll_ee;
 	vector<float> ntt_em, ntl_em, nlt_em, nll_em;
-	
+
 	vector<float> ntt_mm_e1, ntt_ee_e1, ntt_em_e1; // squared stat. errors
 
 	vector<float> npp_mm, npf_mm, nfp_mm, nff_mm;
@@ -10327,19 +10356,19 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		npf_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pf_pt->GetEntries());
 		nfp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2fp_pt->GetEntries());
 		nff_tt_ee.push_back(S->region[reg][HighPt].ee.nt2ff_pt->GetEntries());
-		
+
 		ntt_os_BB_em.push_back(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
 		ntt_os_EE_em.push_back(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
 		ntt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
 		ntt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
 		ntt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
-		
+
 		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()));
 		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()));
 		ntt_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()));
 		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()));
 		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()));
-		
+
 		npp_tt_cm_ee.push_back(scale*S->region[reg][HighPt].ee.nt2pp_cm_pt->GetEntries());
 		npp_cm_ee   .push_back(scale*S->region[reg][HighPt].ee.npp_cm_pt->GetEntries());
 		npp_tt_cm_em.push_back(scale*S->region[reg][HighPt].em.nt2pp_cm_pt->GetEntries());
@@ -10358,7 +10387,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	FR->setEFRatio(ef, ef_e);
 	FR->setMPRatio(mp, mp_e);
 	FR->setEPRatio(ep, ep_e);
-	
+
 	vector<float> npp_pred_mm,    npf_pred_mm,    nff_pred_mm;
 	vector<float> npp_pred_mm_e1, npf_pred_mm_e1, nff_pred_mm_e1;
 	vector<float> npp_pred_ee,    npf_pred_ee,    nff_pred_ee;
@@ -10387,17 +10416,17 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		npf_pred_em.push_back(S->numbers[reg][ElMu].npf);
 		nfp_pred_em.push_back(S->numbers[reg][ElMu].nfp);
 		nff_pred_em.push_back(S->numbers[reg][ElMu].nff);
-		
+
 		npp_pred_mm_e1.push_back(FR->getMMNppEStat());
 		npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
 		nff_pred_mm_e1.push_back(FR->getMMNffEStat());
 		nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
-		
+
 		npp_pred_ee_e1.push_back(FR->getEENppEStat());
 		npf_pred_ee_e1.push_back(FR->getEENpfEStat());
 		nff_pred_ee_e1.push_back(FR->getEENffEStat());
 		nF_pred_ee_e1 .push_back(FR->getEETotEStat());
-		
+
 		npp_pred_em_e1.push_back(FR->getEMNppEStat());
 		npf_pred_em_e1.push_back(FR->getEMNpfEStat());
 		nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
@@ -10412,7 +10441,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		// nff_pred_mm   .push_back(FR->getMMNff());
 		// nff_pred_mm_e1.push_back(FR->getMMNffEStat());
 		// nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
-		// 
+		//
 		// npp_pred_ee   .push_back(FR->getEENpp());
 		// npp_pred_ee_e1.push_back(FR->getEENppEStat());
 		// npf_pred_ee   .push_back(FR->getEENpf());
@@ -10420,7 +10449,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		// nff_pred_ee   .push_back(FR->getEENff());
 		// nff_pred_ee_e1.push_back(FR->getEENffEStat());
 		// nF_pred_ee_e1 .push_back(FR->getEETotEStat());
-		// 
+		//
 		// npp_pred_em   .push_back(FR->getEMNpp());
 		// npp_pred_em_e1.push_back(FR->getEMNppEStat());
 		// npf_pred_em   .push_back(FR->getEMNpf());
@@ -10431,14 +10460,14 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		// nff_pred_em_e1.push_back(FR->getEMNffEStat());
 		// nF_pred_em_e1 .push_back(FR->getEMTotEStat());
 	}
-	
+
 	// Charge MisID Predictions
 	// Abbreviations
 	float fb  = gEChMisIDB;
 	float fbE = gEChMisIDB_E;
 	float fe  = gEChMisIDE;
 	float feE = gEChMisIDE_E;
-	
+
 	vector<float> ntt_cm_ee, ntt_cm_em;
 	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
 	for(size_t i = 0; i < nsamples; ++i){
@@ -10448,7 +10477,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		    + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbE*fbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feE*feE) + (fbE*fbE+feE*feE)*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
 
 		ntt_cm_em.push_back(  fb*ntt_os_BB_em[i] +   fe*ntt_os_EE_em[i]);
-		ntt_cm_em_e1.push_back(fb*fb*S->getError(ntt_os_BB_em[i]) + fe*fe*S->getError(ntt_os_EE_em[i]) 
+		ntt_cm_em_e1.push_back(fb*fb*S->getError(ntt_os_BB_em[i]) + fe*fe*S->getError(ntt_os_EE_em[i])
 		    + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbE*fbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feE*feE);
 	}
 
@@ -10553,7 +10582,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		nfp_pred_sum_em_e1 += scales[i]*scales[i] * nfp_pred_em_e1[i]*nfp_pred_em_e1[i];
 		nff_pred_sum_em_e1 += scales[i]*scales[i] * nff_pred_em_e1[i]*nff_pred_em_e1[i];
 		nF_pred_sum_em_e1  += scales[i]*scales[i] * nF_pred_em_e1[i]*nF_pred_em_e1[i];
-		
+
 		ntt_cm_sum_ee    += scales[i] * ntt_cm_ee[i];
 		ntt_cm_sum_em    += scales[i] * ntt_cm_em[i];
 
@@ -10564,7 +10593,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		npp_cm_sum_em    += scales[i] * npp_cm_em[i];
 		npp_tt_cm_sum_ee += scales[i] * npp_tt_cm_ee[i];
 		npp_tt_cm_sum_em += scales[i] * npp_tt_cm_em[i];
-		
+
 		ntt_sum_mm_e1    += scales[i]*scales[i] * ntt_mm_e1[i];
 		ntt_sum_em_e1    += scales[i]*scales[i] * ntt_em_e1[i];
 		ntt_sum_ee_e1    += scales[i]*scales[i] * ntt_ee_e1[i];
@@ -10602,7 +10631,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_ee[i]) << " | ";
 		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_ee[i]) << " || ";
 		OUT << endl;
-	}	
+	}
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Sum"  << " || ";
 	OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " | ";
@@ -10726,7 +10755,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	OUT << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
-	
+
 	OUT << "=========================================================" << endl;
 	OUT << "                 ||       E/Mu      ||       E/E       ||" << endl;
 	OUT << "    CHARGE MISID ||  Pred  |  Truth ||  Pred  |  Truth ||" << endl;
@@ -10736,7 +10765,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_em[i], scales[i]*npp_tt_cm_em[i]);
 		OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_ee[i], scales[i]*npp_tt_cm_ee[i]);
 		OUT << endl;
-	}	
+	}
 	OUT << "---------------------------------------------------------" << endl;
 	OUT << setw(16) << "Sum"  << " || ";
 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
@@ -10811,7 +10840,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	sqrt((nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1)*pow(ntt_sum_ee/tot_bg_ee,2) + ntt_rare_ee_e1*(pow((ntt_sum_ee-tot_bg_ee)/tot_bg_ee,2)) + ntt_sum_ee_e1 - ntt_rare_ee_e1)/tot_bg_ee,
 
 	(tot_bg-ntt_sum)/tot_bg,
-	sqrt((fakesum_e1+ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)*pow(ntt_sum/tot_bg,2) + (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)*(pow((ntt_sum-tot_bg)/tot_bg,2)) + ntt_sum_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1))/tot_bg	
+	sqrt((fakesum_e1+ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)*pow(ntt_sum/tot_bg,2) + (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)*(pow((ntt_sum-tot_bg)/tot_bg,2)) + ntt_sum_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1))/tot_bg
 	) << endl;
 OUT << "===================================================================================================" << endl;
 	OUT << endl;
@@ -10874,7 +10903,7 @@ OUT << "========================================================================
 	// OUT << endl;
 	// OUT << "==========================================================================================================================" << endl;
 	// OUT << Form("     Comb. Fakes || %6.3f |              ||",
-	// npf_pred_sum_mm+nff_pred_sum_mm + 
+	// npf_pred_sum_mm+nff_pred_sum_mm +
 	// npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em +
 	// npf_pred_sum_ee+nff_pred_sum_ee) << endl;
 	// OUT << Form("    Comb. Ch-MID || %6.3f |              ||", ntt_cm_sum_em+ntt_cm_sum_ee) << endl;
@@ -10900,7 +10929,7 @@ OUT << "========================================================================
 	// }
 	// OUT << "===========================================================================================================================================" << endl;
 	// OUT << endl;
-	// 
+	//
 	// OUT << "==========================================================================================================================" << endl;
 	// OUT << "  PREDICTIONS (in tt window)" << endl;
 	// OUT << "--------------------------------------------------------------" << endl;
@@ -10924,7 +10953,7 @@ OUT << "========================================================================
 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
 	// OUT << "==========================================================================================================================" << endl;
 	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-	
+
 	OUT.close();
 	delete FR;
 }
@@ -10978,13 +11007,13 @@ void SSDLPlotter::makeTTbarClosure(){
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
 		int ind1(-1), ind2(-1);
-		
+
 		// MuMu
 		fCurrentChannel = Muon;
 		if(isSSLLMuEvent(ind1, ind2)){
 			if(isPromptMuon(ind1)){
 				if( isTightMuon(ind2)){
-					nt_mm++;	
+					nt_mm++;
 					if( isPromptMuon(ind2)) np_mm++;
 					if(!isPromptMuon(ind2)) nf_mm++;
 				}
@@ -10996,11 +11025,11 @@ void SSDLPlotter::makeTTbarClosure(){
 					if( isPromptMuon(ind1)) np_mm++;
 					if(!isPromptMuon(ind1)) nf_mm++;
 				}
-				if(!isTightMuon(ind1))  nl_mm++;				
-			}			
+				if(!isTightMuon(ind1))  nl_mm++;
+			}
 		}
-		
-		
+
+
 		// EE
 		fCurrentChannel = Elec;
 		if(isSSLLElEvent(ind1, ind2)){
@@ -11018,10 +11047,10 @@ void SSDLPlotter::makeTTbarClosure(){
 					if( isPromptElectron(ind1)) np_ee++;
 					if(!isPromptElectron(ind1)) nf_ee++;
 				}
-				if(!isTightElectron(ind1))  nl_ee++;				
-			}			
+				if(!isTightElectron(ind1))  nl_ee++;
+			}
 		}
-		
+
 		// EMu
 		fCurrentChannel = ElMu;
 		if(isSSLLElMuEvent(ind1, ind2)){
@@ -11031,8 +11060,8 @@ void SSDLPlotter::makeTTbarClosure(){
 					if( isPromptMuon(ind1)) np_em++;
 					if(!isPromptMuon(ind1)) nf_em++;
 				}
-				if(!isTightMuon(ind1))  nl_em++;				
-			}			
+				if(!isTightMuon(ind1))  nl_em++;
+			}
 			else if(isPromptMuon(ind1)){
 				if( isTightElectron(ind2)){
 					nt_me++;
@@ -11050,8 +11079,8 @@ void SSDLPlotter::makeTTbarClosure(){
 	nt_mm*=scale; nl_mm*=scale; np_mm*=scale; nf_mm*=scale;
 	nt_em*=scale; nl_em*=scale; np_em*=scale; nf_em*=scale;
 	nt_me*=scale; nl_me*=scale; np_me*=scale; nf_me*=scale;
-	nt_ee*=scale; nl_ee*=scale; np_ee*=scale; nf_ee*=scale;	
-	
+	nt_ee*=scale; nl_ee*=scale; np_ee*=scale; nf_ee*=scale;
+
 	///////////////////////////////////////////////////////////////////////////////////
 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -11119,7 +11148,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	vector<double> EE_Nev   = fEEFPRatios->NevtPass(vpt, veta);
 	vector<double> EE_Estat = fEEFPRatios->NevtPassErrStat();
 	vector<double> EE_Esyst = fEEFPRatios->NevtPassErrSyst();
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -11180,7 +11209,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	OUT << setw(7)  << numbForm(EE_Nev[1]) << " || ";
 	OUT << endl;
 	OUT << "---------------------------------------------------------------------------------------------------" << endl;
-	
+
 	OUT.close();
 	delete fMMFPRatios;
 	delete fEMFPRatios;
@@ -11219,19 +11248,19 @@ void SSDLPlotter::storeWeightedPred(){
 	sigtree->SetBranchAddress("NJ",         &njets);
 	sigtree->SetBranchAddress("NbJ",        &nbjets);
 	sigtree->SetBranchAddress("NbJmed",     &nbjetsmed);
-	
+
 	FakeRatios *FR = new FakeRatios();
 
 	float npp(0.), npf(0.), nfp(0.), nff(0.);
 	float f1(0.), f2(0.), p1(0.), p2(0.);
-	
+
 
 	TFile* file_opt;
 	TTree* tree_opt;
       float eventWeight;
 
 	if( fDO_OPT ) {
-   
+
 		system( "mkdir -p OPT_ttW" );
 		std::string outputdir_str(fOutputDir);
 		outputdir_str.erase(outputdir_str.end()-1); //get rid of last slash
@@ -11252,7 +11281,7 @@ void SSDLPlotter::storeWeightedPred(){
 
 	}
 
-	
+
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		if( flav > 2 ) continue; // OS events
@@ -11261,7 +11290,7 @@ void SSDLPlotter::storeWeightedPred(){
 		Sample *S = fSampleMap[TString(*sname)];
 
 		int datamc = S->datamc;
-		
+
 		gChannel chan = gChannel(flav);
 		f1 = getFRatio(chan, pT1, eta1, S->datamc);
 		f2 = getFRatio(chan, pT2, eta2, S->datamc);
@@ -11273,12 +11302,12 @@ void SSDLPlotter::storeWeightedPred(){
 			p1 = getPRatio(Muon, pT1, S->datamc);
 			p2 = getPRatio(Elec, pT2, S->datamc);
 		}
-				
+
 		// Get the weights (don't depend on event selection)
 		npp = FR->getWpp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
 		npf = FR->getWpf(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
 		nfp = FR->getWfp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
-		nff = FR->getWff(FakeRatios::gTLCat(cat), f1, f2, p1, p2);			
+		nff = FR->getWff(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
 
 		// Store them in the right places for the different purposes
 		// Integrated predictions:
@@ -11292,7 +11321,7 @@ void SSDLPlotter::storeWeightedPred(){
 			if(r == TTbarWSelBD && flag != 5) continue;
 			if(r == TTbarWSelLU && flag != 6) continue;
 			if(r == TTbarWSelLD && flag != 7) continue;
-			
+
 			// Event Selection:
 			if(HT     < Region::minHT    [r] || HT  > Region::maxHT [r]) continue;
 			if(MET    < Region::minMet   [r] || MET > Region::maxMet[r]) continue;
@@ -11308,12 +11337,12 @@ void SSDLPlotter::storeWeightedPred(){
 			S->numbers[r][chan].nfp += puweight * nfp;
 			S->numbers[r][chan].nff += puweight * nff;
 		}
-		
+
 		// Differential predictions
 		if(flag != 0) continue;
 		float maxpt = TMath::Max(pT1, pT2);
 		float minpt = TMath::Min(pT1, pT2);
-		
+
 		if(MET > 30. && maxpt > 20. && minpt > 10.){
 			fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
 			fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
@@ -11323,7 +11352,7 @@ void SSDLPlotter::storeWeightedPred(){
 
 		// Check pt cuts of TTbarWPresel:
 		bool passespt = passesPtCuts(pT1, pT2, TTbarWPresel, chan);
-		
+
 		if(HT        >= Region::minHT    [TTbarWPresel] &&
            HT        <  Region::maxHT    [TTbarWPresel] &&
            MET       >= Region::minMet   [TTbarWPresel] &&
@@ -11336,7 +11365,7 @@ void SSDLPlotter::storeWeightedPred(){
 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
 			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
-			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);			
+			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);
 
 			if(njets >= Region::minNjets [TTbarWPresel]){
 				fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
@@ -11399,7 +11428,8 @@ void SSDLPlotter::storeWeightedPred(){
 void SSDLPlotter::makeM3Plot(){
 	TFile *pFile = TFile::Open(fOutputFileName);
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
-
+	fOutputSubDir = "SigSelPlots";
+	
 	string *sname = 0;
 	int flag;
 	int   stype, flav, cat, njets, nbjets, nbjetsmed;
@@ -11428,11 +11458,32 @@ void SSDLPlotter::makeM3Plot(){
 	sigtree->SetBranchAddress("NbJ",        &nbjets);
 	sigtree->SetBranchAddress("NbJmed",     &nbjetsmed);
 	sigtree->SetBranchAddress("PassTTZSel", &PassTTZSel);
-	
-	TH1D *h_m3_data = new TH1D("m3_data", "M3_data", 17, 0., 680.);
-	TH1D *h_m3_sig  = new TH1D("m3_sig",  "M3_sig",  17, 0., 680.);
-	TH1D *h_m3_bg   = new TH1D("m3_bg",   "M3_bg",   17, 0., 680.);
-	
+
+	const int nvars = 5;
+	TH1D *h_data[nvars];
+	TH1D *h_sig[nvars];
+	TH1D *h_bg[nvars];
+
+	h_data[0] = new TH1D("m3_data", "M3_data", 17, 0., 680.);
+	h_sig [0] = new TH1D("m3_sig",  "M3_sig",  17, 0., 680.);
+	h_bg  [0] = new TH1D("m3_bg",   "M3_bg",   17, 0., 680.);
+    
+	h_data[1] = new TH1D("HT_data", "HT_data", 15, 100., 700.);
+	h_sig [1] = new TH1D("HT_sig",  "HT_sig",  15, 100., 700.);
+	h_bg  [1] = new TH1D("HT_bg",   "HT_bg",   15, 100., 700.);
+    
+	h_data[2] = new TH1D("pt1_data", "pt1_data", 15, 55., 205.);
+	h_sig [2] = new TH1D("pt1_sig",  "pt1_sig",  15, 55., 205.);
+	h_bg  [2] = new TH1D("pt1_bg",   "pt1_bg",   15, 55., 205.);
+    
+	h_data[4] = new TH1D("pt2_data", "pt2_data", 17, 30., 200.);
+	h_sig [4] = new TH1D("pt2_sig",  "pt2_sig",  17, 30., 200.);
+	h_bg  [4] = new TH1D("pt2_bg",   "pt2_bg",   17, 30., 200.);
+    
+	h_data[3] = new TH1D("nbj_data", "nbj_data", 3, 1., 4.);
+	h_sig [3] = new TH1D("nbj_sig",  "nbj_sig",  3, 1., 4.);
+	h_bg  [3] = new TH1D("nbj_bg",   "nbj_bg",   3, 1., 4.);
+
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		if( flav > 2 ) continue; // OS events
@@ -11440,85 +11491,124 @@ void SSDLPlotter::makeM3Plot(){
 		Sample *S = fSampleMap[TString(*sname)];
 
 		int datamc = S->datamc;
-		
+
 		gChannel chan = gChannel(flav);
-		
+
 		if(PassTTZSel) continue;
 		if(cat != 0) continue;
-		
+
 		// Preselection
 		if(njets  < 3) continue;
 		if(pT1 < 20 || pT2 < 20) continue;
 		
-		if(S->getProc() == 10 || S->getProc() == 11) fillWithoutOF(h_m3_sig, M3, puweight);
-		else if(datamc != 0)                         fillWithoutOF(h_m3_bg,  M3, puweight);
+		float weight = 1.0;
+		weight *= puweight;
+		weight *= fLumiNorm / S->getLumi();			
 		
+		if(S->getProc() == 10 || S->getProc() == 11){
+			fillWithoutOF(h_sig[0], M3,        weight);
+			fillWithoutOF(h_sig[1], HT,        weight);
+			fillWithoutOF(h_sig[2], pT1,       weight);
+			fillWithoutOF(h_sig[4], pT2,       weight);
+			fillWithoutOF(h_sig[3], nbjetsmed, weight);
+		}
+		else if(datamc > 0){
+		// else if(S->getProc() == 1 || S->getProc() == 7 || S->getProc() == 15){ // ttbar + WZ
+			fillWithoutOF(h_bg[0], M3,        weight);
+			fillWithoutOF(h_bg[1], HT,        weight);
+			fillWithoutOF(h_bg[2], pT1,       weight);
+			fillWithoutOF(h_bg[4], pT2,       weight);
+			fillWithoutOF(h_bg[3], nbjetsmed, weight);
+		}
+
 		// Signal Selection:
 		if(HT     < 100)  continue;
 		if(nbjets < 1)    continue;
 		if(nbjetsmed < 1) continue;
 		if(passesPtCuts(pT1, pT2, TTbarWSel, chan) == false) continue;
 
-		if(stype < 3) fillWithoutOF(h_m3_data,  M3);
+		if(stype < 3){
+			fillWithoutOF(h_data[0], M3);
+			fillWithoutOF(h_data[1], HT);
+			fillWithoutOF(h_data[2], pT1);
+			fillWithoutOF(h_data[4], pT2);
+			fillWithoutOF(h_data[3], nbjetsmed);
+		}
 	}
-	
+
 	Color_t col_sig = kRed;
 	Color_t col_bg  = kBlue;
-	h_m3_sig->SetLineWidth(2);
-	h_m3_bg ->SetLineWidth(2);
-
-	h_m3_sig->SetLineColor(col_sig);
-	h_m3_bg ->SetLineColor(col_bg);
-	h_m3_sig->SetFillColor(col_sig);
-	h_m3_bg ->SetFillColor(col_bg);
-	h_m3_sig->SetFillStyle(3004);
-	h_m3_bg ->SetFillStyle(3005);
-
-	h_m3_data->SetMaximum(h_m3_data->GetMaximum() * 2);
-	h_m3_sig ->SetMaximum(h_m3_data->GetMaximum() * 2);
-	h_m3_bg  ->SetMaximum(h_m3_data->GetMaximum() * 2);
 	
-	h_m3_data->SetXTitle("M3 [GeV]");
-	h_m3_data->SetYTitle("Events / 40 GeV");
-
-	h_m3_sig->Scale(h_m3_data->Integral()/h_m3_sig->Integral());
-	h_m3_bg->Scale( h_m3_data->Integral()/h_m3_bg->Integral());
+	TString name[nvars]   = {"M3", "HT", "PT1", "NbJ", "PT2"};
+	TString xtitle[nvars] = {"M3 [GeV]", "HT [GeV]", "Leading Lepton p_{T} [GeV]", "b-Jet Multiplicity (medium)", "Subleading Lepton p_{T} [GeV]"};
+	float binwidth[nvars] = {40., 40., 10., 1., 10.};
 	
 	FakeRatios *FR = new FakeRatios();
-	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(h_m3_data);
-	gr_obs->SetMarkerColor(kBlack);
-	gr_obs->SetMarkerStyle(20);
-	gr_obs->SetMarkerSize(1.4);
-	gr_obs->SetLineWidth(2);
-	gr_obs->SetLineColor(kBlack);
-	gr_obs->SetFillColor(kBlack);
-	
-	TLegend *leg = new TLegend(0.55,0.67,0.88,0.85);
-	leg->AddEntry(gr_obs,   "Data","p");
-	leg->AddEntry(h_m3_sig, "t#bar{t} + W/Z","f");
-	leg->AddEntry(h_m3_bg,  "Background","f");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetTextSize(0.038);
-	leg->SetBorderSize(0);
-	
-	TCanvas *c_temp = new TCanvas("M3_Plot", "Data vs. MC", 0, 0, 600, 600);
-	c_temp->SetLeftMargin(0.12);
-	c_temp->SetRightMargin(0.04);
-	c_temp->cd();
-	
-	h_m3_data ->Draw("axis");
-	h_m3_bg   ->DrawCopy("hist same");
-	h_m3_sig  ->DrawCopy("hist same");
-	gr_obs ->Draw("P same");
-	leg->Draw();
-	drawTopLine(0.49, 1.0, 0.13);
-	
-	gPad->RedrawAxis();
-	Util::PrintPDF(c_temp, "M3_data_vs_sig_bg", fOutputDir + fOutputSubDir);
-	
-	delete leg;
-	delete h_m3_data, h_m3_sig, h_m3_bg;
+	for(size_t i = 0; i < nvars; ++i){
+		h_sig[i]->SetLineWidth(2);
+		h_bg [i]->SetLineWidth(2);
+		h_sig[i]->SetLineColor(col_sig);
+		h_bg [i]->SetLineColor(col_bg);
+		h_sig[i]->SetFillColor(col_sig);
+		h_bg [i]->SetFillColor(col_bg);
+		h_sig[i]->SetFillStyle(3004);
+		h_bg [i]->SetFillStyle(3005);
+
+		float max = h_data[i]->GetMaximum();
+		h_data[i]->SetMaximum(max * 3);
+		h_sig [i]->SetMaximum(max * 3);
+		h_bg  [i]->SetMaximum(max * 3);
+		if(i==3){
+			h_data[i]->SetMaximum(max * 2);
+			h_sig [i]->SetMaximum(max * 2);
+			h_bg  [i]->SetMaximum(max * 2);
+		}
+
+		h_data[i]->SetXTitle(xtitle[i].Data());
+		h_data[i]->SetYTitle(Form("Events / %2.0f GeV", binwidth[i]));
+		if(i==3) h_data[i]->SetYTitle("Events");
+		if(i==3) for(size_t j = 1; j <= h_data[i]->GetNbinsX(); ++j) h_data[i]->GetXaxis()->SetBinLabel(j, Form("%d", j));
+		if(i==3) h_data[i]->GetXaxis()->SetLabelSize(0.055);
+
+		h_sig[i]->Scale(h_data[i]->Integral()/h_sig[i]->Integral());
+		h_bg [i]->Scale(h_data[i]->Integral()/h_bg [i]->Integral());
+		
+		TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(h_data[i]);
+		gr_obs->SetMarkerColor(kBlack);
+		gr_obs->SetMarkerStyle(20);
+		gr_obs->SetMarkerSize(1.4);
+		gr_obs->SetLineWidth(2);
+		gr_obs->SetLineColor(kBlack);
+		gr_obs->SetFillColor(kBlack);
+
+		TLegend *leg = new TLegend(0.55,0.67,0.88,0.85);
+		leg->AddEntry(gr_obs,   "Data","p");
+		leg->AddEntry(h_sig[i], "t#bar{t}+W / t#bar{t}+Z","f");
+		leg->AddEntry(h_bg[i],  "Background","f");
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetTextSize(0.038);
+		leg->SetBorderSize(0);
+
+		TCanvas *c_temp = new TCanvas("Plot", "Data vs. MC", 0, 0, 600, 600);
+		c_temp->SetLeftMargin(0.12);
+		c_temp->SetRightMargin(0.04);
+		c_temp->cd();
+
+		h_data[i]->Draw("axis");
+		h_bg  [i]->DrawCopy("hist same");
+		h_sig [i]->DrawCopy("hist same");
+		gr_obs ->Draw("P same");
+		leg->Draw();
+		drawTopLine(0.49, 1.0, 0.13);
+
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, Form("%s_data_vs_sig_bg",name[i].Data()), fOutputDir + fOutputSubDir);
+
+		delete leg;
+		delete h_data[i], h_sig[i], h_bg[i];
+		delete c_temp;
+	}
 	delete FR;
 }
 
@@ -11528,7 +11618,7 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 
 	const float mu_flatout = 35.;
 	const float el_flatout = 40.;
-	
+
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MufRatio;
 		if(datamc > 0) histo = fH1D_MufRatio_MC;
@@ -11563,7 +11653,7 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 	// if(chan == Elec) return 0.224;
 	const float mu_flatout = 35.;
 	const float el_flatout = 40.;
-	
+
 	eta = fabs(eta); // make sure we take the absolute value
 
 	if(chan == Muon){
@@ -11598,7 +11688,7 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 float SSDLPlotter::getPRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.941; // flat ratios
 	// if(chan == Elec) return 0.922;
-	
+
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MupRatio;
 		if(datamc > 0) histo = fH1D_MupRatio_MC;
@@ -11642,7 +11732,7 @@ void SSDLPlotter::printYields(gChannel chan, float lumiscale){
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt10 << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt01 << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt0  << " |";
-		cout << setw(8)  << setprecision(3) << scale*numbers.nsst << " |"; 
+		cout << setw(8)  << setprecision(3) << scale*numbers.nsst << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nssl << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nzt  << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nzl  << " |";
@@ -11681,14 +11771,14 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 		nt10[ElMu]    += S->numbers[Baseline][ElMu].nt10;
 		nt01[ElMu]    += S->numbers[Baseline][ElMu].nt01;
 		nt00[ElMu]    += S->numbers[Baseline][ElMu].nt0;
-	}		
+	}
 
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
 		nt20[Elec]    += S->numbers[Baseline][Elec].nt2;
 		nt10[Elec]    += S->numbers[Baseline][Elec].nt10;
 		nt00[Elec]    += S->numbers[Baseline][Elec].nt0;
-	}		
+	}
 
 	// for(size_t i = 0; i < musamples.size(); ++i){
 	// 	int index = musamples[i];
@@ -11699,7 +11789,7 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 	// 	nt2_mumu_e2  += mumu->numbers.nt2;
 	// 	nt10_mumu_e2 += mumu->numbers.nt10;
 	// 	nt0_mumu_e2  += mumu->numbers.nt0;
-	// }		
+	// }
 	// for(size_t i = 0; i < emusamples.size(); ++i){
 	// 	int index = emusamples[i];
 	// 	Channel *emu = fSamples[index]->em;
@@ -11711,7 +11801,7 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 	// 	nt10_emu_e2 += emu->numbers.nt10;
 	// 	nt01_emu_e2 += emu->numbers.nt01;
 	// 	nt0_emu_e2  += emu->numbers.nt0;
-	// }		
+	// }
 	// for(size_t i = 0; i < elsamples.size(); ++i){
 	// 	int index = elsamples[i];
 	// 	Channel *ee = fSamples[index]->ee;
@@ -11813,7 +11903,7 @@ void SSDLPlotter::printAllYieldTables(){
 		TString outputname = outputdir + "YieldTable_" + Region::sname[i] + ".txt";
 		printMCYieldTable(outputname, gRegion(i));
 	}
-	
+
 }
 void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
@@ -11839,7 +11929,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	float ntt_sum_ee(0.), ntl_sum_ee(0.), nll_sum_ee(0.);
 	float ntt_sum_mm_e2(0.), ntt_sum_em_e2(0.), ntt_sum_ee_e2(0.);
 	float ntt_sum(0.), ntl_sum(0.), nlt_sum(0.), nll_sum(0.);
-	
+
 	for(size_t i = 0; i < nprocs; ++i){ // reset everything
 		ntt_mm[i] = 0.; ntl_mm[i] = 0.; nll_mm[i] = 0.;
 		ntt_em[i] = 0.; ntl_em[i] = 0.; nlt_em[i] = 0.; nll_em[i] = 0.;
@@ -11855,7 +11945,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		float scale = fLumiNorm / S->getLumi();
 		int proc = S->getProc();
 		if(proc == 0 || proc >= nprocs) continue; // safety
-		
+
 		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
 		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
 		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
@@ -11888,7 +11978,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		ntt_sum_ee += ntt_ee_temp;
 		ntl_sum_ee += ntl_ee_temp;
 		nll_sum_ee += nll_ee_temp;
-		
+
 		if(proc == 5 || proc == 16) continue; // fuck QCD and g+jets for the errors
 		// Careful, I assume now that they will always have 0 events in tight-tight,
 		// otherwise my yield table won't be self consistent anymore
@@ -11917,7 +12007,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		nt10[ElMu] += S->numbers[reg][ElMu].nt10;
 		nt01[ElMu] += S->numbers[reg][ElMu].nt01;
 		nt00[ElMu] += S->numbers[reg][ElMu].nt0;
-	}		
+	}
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
 		nt20[Elec] += S->numbers[reg][Elec].nt2;
@@ -11962,7 +12052,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-	}	
+	}
 
 	OUT << "\\hline" << endl;
 	OUT << Form("%24s & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d \\\\",
@@ -11978,7 +12068,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	OUT << "------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << "  Process                |  Mu/Mu              |  E/Mu               |  E/E                |  Tot                |" << endl;
 	OUT << "------------------------------------------------------------------------------------------------------------------" << endl;
-	
+
 	for(size_t i = 1; i < nprocs; ++i){ // skip data
 		if(i == 5 || i == 16) continue; // fuck QCD and g+jets
 		OUT << Form("%24s & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f \\\\",
@@ -11990,7 +12080,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	OUT << Form("%24s & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f \\\\",
 	"Sum", ntt_sum_mm, sqrt(ntt_sum_mm_e2), ntt_sum_em, sqrt(ntt_sum_em_e2), ntt_sum_ee, sqrt(ntt_sum_ee_e2),
 	       ntt_sum_mm+ntt_sum_em+ntt_sum_ee, sqrt(ntt_sum_mm_e2+ntt_sum_em_e2+ntt_sum_ee_e2)) << endl;
-	
+
 	OUT << "\\hline \\hline" << endl;
 	OUT << Form("%24s & %6d          & %6d          & %6d          & %6d          \\\\",
 	"Data", nt20[Muon], nt20[ElMu], nt20[Elec], nt20[Muon]+nt20[ElMu]+nt20[Elec]) << endl;
@@ -12028,27 +12118,27 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, gRegion reg){
 	sigtree->SetBranchAddress("MT2",      &MT2);
 	sigtree->SetBranchAddress("NJ",       &njets);
 	sigtree->SetBranchAddress("NbJ",      &nbjets);
-	
+
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		Sample *S = fSampleMap[TString(*sname)];
 		int datamc = S->datamc;
-		
+
 		if(flag != 0)              continue; // Only choose nominal
 		if(stype > 2)              continue; // 0,1,2 are DoubleMu, DoubleEle, MuEG
 		if(cat != 0)               continue; // tight-tight selection
 		if(gChannel(flav) != chan) continue; // channel selection
-		
+
 		// Region selections
 		if(HT     < Region::minHT    [reg] || HT  > Region::maxHT [reg]) continue;
 		if(MET    < Region::minMet   [reg] || MET > Region::maxMet[reg]) continue;
 		if(njets  < Region::minNjets [reg]) continue;
 		if(nbjets < Region::minNbjets[reg]) continue;
-		
+
 		ht.push_back(HT);
 		met.push_back(MET);
 	}
-	
+
 	const int nsig = ht.size();
 	float ht_a [nsig];
 	float met_a[nsig];
@@ -12056,18 +12146,18 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, gRegion reg){
 		ht_a[i] = ht[i];
 		met_a[i] = met[i];
 	}
-	
+
 	Color_t color[3] = {kBlack, kBlue, kRed};
 	Size_t size = 1.5;
 	Style_t style[3] = {8, 23, 21};
-	
+
 	TGraph *sigevents = new TGraph(nsig, ht_a, met_a);
 	sigevents->SetName(Form("%s_%s_SigEvents", Region::sname[reg].Data(), channame.Data()));
-	
+
 	sigevents->SetMarkerColor(color[chan]);
 	sigevents->SetMarkerStyle(style[chan]);
 	sigevents->SetMarkerSize(size);
-	
+
 	return sigevents;
 }
 TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, float METmin, float METmax, int veto3){
@@ -12093,26 +12183,26 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, f
 	sigtree->SetBranchAddress("Pass3rdVeto", &veto);
 	sigtree->SetBranchAddress("HT",          &HT);
 	sigtree->SetBranchAddress("MET",         &MET);
-	
+
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		Sample *S = fSampleMap[TString(*sname)];
 		int datamc = S->datamc;
-		
+
 		if(flag != 0)              continue; // Only choose nominal
 		if(stype > 2)              continue; // 0,1,2 are DoubleMu, DoubleEle, MuEG
 		if(cat != 0)               continue; // tight-tight selection
 		if(gChannel(flav) != chan) continue; // channel selection
 		if(veto3 && !veto)         continue; // veto 3rd lepton
-		
+
 		// Region selections
 		if(HT  < HTmin  || HT  > HTmax ) continue;
 		if(MET < METmin || MET > METmax) continue;
-		
+
 		ht.push_back(HT);
 		met.push_back(MET);
 	}
-	
+
 	const int nsig = ht.size();
 	float ht_a [nsig];
 	float met_a[nsig];
@@ -12120,18 +12210,18 @@ TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, float HTmin, float HTmax, f
 		ht_a[i] = ht[i];
 		met_a[i] = met[i];
 	}
-	
+
 	Color_t color[3] = {kBlack, kBlue, kRed};
 	Size_t size = 1.5;
 	Style_t style[3] = {8, 23, 21};
-	
+
 	TGraph *sigevents = new TGraph(nsig, ht_a, met_a);
 	sigevents->SetName(Form("HT%4.0f-%4.0f_MET%4.0f-%4.0f_%s_SigEvents", HTmin, HTmax, METmin, METmax, channame.Data()));
-	
+
 	sigevents->SetMarkerColor(color[chan]);
 	sigevents->SetMarkerStyle(style[chan]);
 	sigevents->SetMarkerSize(size);
-	
+
 	return sigevents;
 }
 
@@ -12215,12 +12305,12 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
 			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
 		}
-		
+
 		horigin_tt[i]->GetXaxis()->LabelsOption("v");
 		horigin_tt[i]->GetYaxis()->LabelsOption("d");
 		horigin_mc[i]->GetXaxis()->LabelsOption("v");
 		horigin_mc[i]->GetYaxis()->LabelsOption("d");
-		
+
 		TCanvas *c_temp = new TCanvas("Origin" + SSDLDumper::gChanLabel[i], "Origin plot in region " + SSDLDumper::Region::sname[reg], 0, 0, 600, 600);
 		c_temp->cd();
 		gPad->SetRightMargin(0.05);
@@ -12426,7 +12516,7 @@ void SSDLPlotter::printMuOriginHeader(TString name){
 	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
 	fOUTSTREAM << "    " << name;
 	fOUTSTREAM << "            | Fakes   | W       | Z       | tau     | ud had. | s hadr. | c hadr. | b hadr. | strings | unid    |" << endl;
-	fOUTSTREAM << "=========================================================================================================================" << endl;	
+	fOUTSTREAM << "=========================================================================================================================" << endl;
 }
 void SSDLPlotter::printElOriginHeader(TString name){
 	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -12514,7 +12604,7 @@ void SSDLPlotter::print2MuOriginsFromSample(Sample *S, int toggle, gRegion reg, 
 	histo = histo2d->ProjectionY();
 	histo->Scale(100./histo->Integral());
 	for(size_t i = 1; i <= 9; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
 }
 void SSDLPlotter::print2ElOriginsFromSample(Sample *S, int toggle, gRegion reg, gHiLoSwitch hilo){
 	if(S->datamc == 0) return;
@@ -12542,7 +12632,7 @@ void SSDLPlotter::print2ElOriginsFromSample(Sample *S, int toggle, gRegion reg, 
 	histo = histo2d->ProjectionY();
 	histo->Scale(100./histo->Integral());
 	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
 }
 void SSDLPlotter::printEMuOriginsFromSample(Sample *S, int toggle, gRegion reg, gHiLoSwitch hilo){
 	if(S->datamc == 0) return;
@@ -12570,7 +12660,7 @@ void SSDLPlotter::printEMuOriginsFromSample(Sample *S, int toggle, gRegion reg, 
 	histo = histo2d->ProjectionY();
 	histo->Scale(100./histo->Integral());
 	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
 }
 
 void SSDLPlotter::printOriginSummary(vector<int> samples, int toggle, gChannel chan, gRegion reg, gHiLoSwitch hilo){
@@ -12639,7 +12729,7 @@ void SSDLPlotter::printOriginSummary2L(vector<int> samples, int toggle, gChannel
 	if(chan == Muon)     fOUTSTREAM << "               mu2  |";
 	if(chan == ElMu)      fOUTSTREAM << "               ele  |";
 	if(chan == Elec) fOUTSTREAM << "               el2  |";
-	if(chan == ElMu) ncols = 11;	
+	if(chan == ElMu) ncols = 11;
 	for(size_t i = 1; i <= ncols; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum2->GetBinContent(i)) << " |";
 	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum2->GetBinContent(15)) << " |" << endl;
 	delete histosum1;
@@ -12781,7 +12871,7 @@ void SSDLPlotter::msugraLOxsecs(TFile * results){
 	ifstream IN("msugraSSDL/xsec_lo.txt");
 	results->cd();
 	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
-	
+
 	char buffer[1000];
 	while( IN.getline(buffer, 1000, '\n') ){
 	  if (buffer[0] == '#') continue; // Skip lines commented with '#'
@@ -12797,7 +12887,7 @@ void SSDLPlotter::msugraLOxsecs(TFile * results){
 void SSDLPlotter::msugraNLOxsecs(TFile * results) {
 	results->cd();
 	TH2D * nlo_xsec   = new TH2D("nlo_xsec", "nlo_xsec", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
-	
+
 	ifstream IN("msugraSSDL/xsec_nlo.txt");
 	char buffer[1000];
 	while( IN.getline(buffer, 1000, '\n') ){
@@ -12830,7 +12920,7 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	fC_minMet   = 120.;
 	fC_maxMet   = 7000.;
 	fC_minNjets = 0;
-	
+
 	TString htString;
 	TString htTitleString;
 
@@ -12846,7 +12936,7 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 		htString = Form("HT%3.0f", fC_maxHT);
 		htTitleString = Form("H_{T} > %3.0f GeV", fC_maxHT);
 	}
-	
+
 	TFile * res_ = new TFile(Form("msugraSSDL/mSugraresults_"+htString+"_MET%3.0f_PT%2.0f_%2.0f"+lepString+specialString+".root", fC_minMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
 
 	bool verbose = false;
@@ -12875,14 +12965,14 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	for (int i = 0; i < 10; i++) {
 		kCounts[i] = (TH2D *) file_->Get(Form("msugra_count_process%i", i+1));
 	}
-	
+
 	ifstream IN("msugraSSDL/xsec_nlo.txt");
 	TH2D *nlo_[10];
 	char buffer[1000];
 	for (int i = 0 ; i< 10; i++){
 		nlo_[i]  = new TH2D(Form("nlo_%i", i), Form("nlo_%i", i), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 	}
-	
+
 	while( IN.getline(buffer, 1000, '\n') ){
 	  if (buffer[0] == '#') continue; // Skip lines commented with '#'
 	  float p[10];
@@ -13022,7 +13112,7 @@ void SSDLPlotter::scanSMS( const char * filestring, float minHT, float maxHT, fl
 	fC_maxHT    = maxHT;
 	fC_maxMet   = maxMET;
 	fC_minNjets = 0;
-	
+
 	TString htString;
 	TString htTitleString;
 

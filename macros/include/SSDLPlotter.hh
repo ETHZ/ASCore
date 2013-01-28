@@ -278,6 +278,8 @@ public:
 	vector<int> fHighPtData;  // All high pt triggered data
 	vector<int> fLowPtData;   // All lepton cross HT triggered data
 
+	vector<int> fMCRareSM_TTV;   // All lepton cross HT triggered data
+
 	TLatex *fLatex;
 	
 	float fLumiNorm;      // Normalize everything to this luminosity

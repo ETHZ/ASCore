@@ -24,7 +24,7 @@ public:
 	static const int gNElFPtBins = 10;
 	static const int gNElPPtbins = 12;
 	static const int gNElEtabins = 5;
-	
+
 	static const int gNNVrtxBins = 9;
 
 	static double gNVrtxBins[gNNVrtxBins+1];
@@ -57,8 +57,28 @@ public:
 	static double gDiffNBJBins [gNDiffNBJBins+1];
 	static double gDiffNBJMBins[gNDiffNBJMBins+1];
 
+	static const int gNFRatioNJBins      = 5;
+	static const int gNFRatioHTBins      = 10;
+	static const int gNFRatioMaxJPtBins  = 9;
+	static const int gNFRatioClosJPtBins = 9;
+	static const int gNFRatioAwayJPtBins = 9;
+	static const int gNFRatioNVertices   = 9;
+	static const int gNFRatioNBJets      = 3;
+	static const int gNFRatioMETBins     = 9;
+	static const int gNFRatioMTBins      = 10;
+
+	static float gFRatioNJBins     [gNFRatioNJBins+1];
+	static float gFRatioHTBins     [gNFRatioHTBins+1];
+	static float gFRatioMaxJPtBins [gNFRatioMaxJPtBins+1];
+	static float gFRatioClosJPtBins[gNFRatioClosJPtBins+1];
+	static float gFRatioAwayJPtBins[gNFRatioAwayJPtBins+1];
+	static float gFRatioNVertices  [gNFRatioNVertices+1];
+	static float gFRatioNBJets     [gNFRatioNBJets+1];
+	static float gFRatioMETBins    [gNFRatioMETBins+1];
+	static float gFRatioMTBins     [gNFRatioMTBins+1];
+
 	static const int gM0bins  = 150  ; // these values
-	static const int gM0min   = 0    ; // are 
+	static const int gM0min   = 0    ; // are
 	static const int gM0max   = 3000 ; // the same
 	static const int gM12bins = 50   ; // as in
 	static const int gM12min  = 0    ; // SSDLAnalysis
@@ -76,10 +96,10 @@ public:
 		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
 		TTJets, TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
-		GVJets, WW, WZ, ZZ, 
-		TTbarW, TTbarZ, TTbarG, TTbarH, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		GVJets, WW, WZ, ZZ,
+		TTbarW, TTbarZ, TTbarG, TTbarH, TBZ, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		// Exclude LM samples from datacard and here for running on Jun20/Oct23 ttV
-		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
+		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13,
 		QCDMuEnr10,
 		QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		QCD1000, QCD1400, QCD1800,
@@ -135,7 +155,7 @@ public:
 		int type; // -1(unknown), 0(mu), 1(ele)
 		int index;
 	};
-	
+
 	struct NumberSet{
 		long nsst;
 		long nssl;
@@ -146,18 +166,18 @@ public:
 		long nt10;
 		long nt01;
 		long nt0;
-		
+
 		float npp; // sum of event by event weights
 		float npf;
 		float nfp;
 		float nff;
-		
+
 		float tt_avweight;
 		float tl_avweight;
 		float lt_avweight;
 		float ll_avweight;
 	};
-	
+
 	struct Channel{ // MM/EE/EM
 		TH2D *nt20_pt; // pt1 vs pt2
 		TH2D *nt10_pt;
@@ -169,7 +189,7 @@ public:
 		TH2D *nt00_eta;
 
 		TH2D *fntight; // pt vs eta
-		TH2D *fnloose; 
+		TH2D *fnloose;
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
 
@@ -177,7 +197,7 @@ public:
 		TH1D *fnloose_nv;
 		TH1D *pntight_nv;
 		TH1D *pnloose_nv;
-		
+
 		TEfficiency *fratio_pt;
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
@@ -214,7 +234,7 @@ public:
 		TH2D *nt20_OS_EE_pt; // BB = barrel/barrel, EE = endcap/endcap
 		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
 	};
-	
+
 	struct Region{
 		static TString sname[gNREGIONS];
 		// Two different pt cuts
@@ -233,23 +253,25 @@ public:
 		static int   minNbjmed [gNREGIONS];
 		static int   app3rdVet [gNREGIONS];
 		static int   vetoTTZSel[gNREGIONS];
-		
+
 		Channel mm;
 		Channel em;
 		Channel ee;
 	};
-	
+
 	// static const int gNRatioVars = 8;
 	static const int gNRatioVars = 9;
 	struct FRatioPlots{
 		static TString var_name[gNRatioVars];
+		static TString axis_label[gNRatioVars];
 		static int nbins[gNRatioVars];
-		static float xmin[gNRatioVars];
-		static float xmax[gNRatioVars];
+		// static float xmin[gNRatioVars]; // obsolete?
+		// static float xmax[gNRatioVars]; // obsolete?
+		static float* bins[gNRatioVars];
 		TH1D *ntight[gNRatioVars];
 		TH1D *nloose[gNRatioVars];
 	};
-	
+
 	static const int gNKinVars = 13;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
@@ -259,7 +281,7 @@ public:
 		static float xmax[gNKinVars];
 		TH1D *hvar[gNKinVars];
 	};
-	
+
 	static const int gNSels = 2;
 	struct IsoPlots{
 		static TString sel_name[gNSels];
@@ -279,7 +301,7 @@ public:
 		//TH1D *hid_pt[gNSels][gNMuFPtBins];
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
-	
+
 	static const int gNDiffVars = 10;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
@@ -301,7 +323,7 @@ public:
 		TH1D *hnt2_os_EB[gNDiffVars];
 		TH1D *hnt2_os_EE[gNDiffVars];
 	};
-	
+
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
@@ -320,7 +342,7 @@ public:
 			color    = col;
 		};
 		~Sample(){};
-		
+
 		TString name;
 		TString sname;
 		TString location;
@@ -378,6 +400,7 @@ public:
 			    (sname) == "TTbarZ"    ||
 			    (sname) == "TTbarG"    ||
 			    (sname) == "TTbarH"    ||
+			    (sname) == "TBZ"       ||
 			    (sname) == "DPSWW"     ||
 			    (sname) == "WWZ"       ||
 			    (sname) == "WZZ"       ||
@@ -403,22 +426,23 @@ public:
 			if(sname == "WJets" )                           return 3;
 			if(sname.Contains("DYJets"))                    return 4;
 			if(sname.Contains("GJets"))                     return 5;
-			if(sname.Contains("WWTo2L2Nu"))                 return 6; 
-			if(sname.Contains("WZTo3LNu"))                  return 7; 
-			if(sname.Contains("ZZTo4L"))                    return 8; 
-			if(sname.Contains("GVJets"))                    return 9; 
+			if(sname.Contains("WWTo2L2Nu"))                 return 6;
+			if(sname.Contains("WZTo3LNu"))                  return 7;
+			if(sname.Contains("ZZTo4L"))                    return 8;
+			if(sname.Contains("GVJets"))                    return 9;
 			if(sname == "TTbarW")                           return 10;
 			if(sname == "TTbarZ")                           return 11;
 			if(sname == "TTbarG")                           return 12;
 			if(sname == "TTbarH")                           return 13;
-			if(sname == "W+W+" || sname == "W-W-")          return 14;
-			if(sname == "WWZ" ||                                     
-			   sname == "WZZ" ||                                     
-			   sname == "WWG" ||                                     
-			   sname == "ZZZ" ||                                     
-			   sname == "WWW" )                             return 15;
-			if(sname == "DPSWW")                            return 16;
-			if(sname.Contains("QCD") || sname == "MuEnr10") return 17;
+			if(sname == "TBZ")                              return 14;
+			if(sname == "W+W+" || sname == "W-W-")          return 15;
+			if(sname == "WWZ" ||
+			   sname == "WZZ" ||
+			   sname == "WWG" ||
+			   sname == "ZZZ" ||
+			   sname == "WWW" )                             return 16;
+			if(sname == "DPSWW")                            return 17;
+			if(sname.Contains("QCD") || sname == "MuEnr10") return 18;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
@@ -439,16 +463,17 @@ public:
 			if(proc == 11) return "$t\\bar{t}$Z";
 			if(proc == 12) return "$t\\bar{t}\\gamma$";
 			if(proc == 13) return "$t\\bar{t}$H";
-			if(proc == 14) return "W$^{\\pm}$W$^{\\pm}$";
-			if(proc == 15) return "Tri-Boson";
-			if(proc == 16) return "DPS (2$\\times$ W+jets)";
-			if(proc == 17) return "QCD";
+			if(proc == 14) return "$tb$Z";
+			if(proc == 15) return "W$^{\\pm}$W$^{\\pm}$";
+			if(proc == 16) return "Tri-Boson";
+			if(proc == 17) return "DPS (2$\\times$ W+jets)";
+			if(proc == 18) return "QCD";
 			else {
 				cout << "SSDLDumper::Sample::getProcName() ==> ERROR: "<< proc << " has no defined process name!" << endl;
 				return "";
 			}
 		}
-		inline int getNProcs(){return 18;} // make sure this number corresponds to the number of
+		inline int getNProcs(){return 19;} // make sure this number corresponds to the number of
 		                                   // processes define in the previous method
 		TTree* getTree(){
 			file = TFile::Open(location);
@@ -467,13 +492,13 @@ public:
 			}
 			return (TH1F*)file->Get("EventCount");
 		}
-		
+
 		void cleanUp(){
 			tree = NULL;
 			file->Close();
 		}
 	};
-	
+
 	SSDLDumper();
 	virtual ~SSDLDumper();
 
@@ -485,16 +510,16 @@ public:
 
 	virtual void loop();              // loop on all samples if several
 	virtual void loopEvents(Sample*); // perform loop on single sample
-	
+
 	void storeNumbers(Sample*, gChannel, gRegion);
-	
+
 	// Cutflow
 	void initCutNames();
 	void initCounters();
 	void fillCutFlowHistos(Sample*);
 	void printCutFlow(gChannel, gSample, gSample);
 	void printCutFlows(TString);
-	
+
 	//////////////////////////////
 	// Fillers
 	void fillSigEventTree(Sample*, int);
@@ -508,7 +533,7 @@ public:
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
 	void fillKinPlots(Sample*);
-	
+
 	//////////////////////////////
 	// I/O
 	void bookSigEvTree();
@@ -521,7 +546,7 @@ public:
 	void writeSigGraphs(Sample*, gChannel, TFile*);
 	int readHistos(TString);
 	int readSigGraphs(TString);
-	
+
 	void bookRatioHistos();
 
 	// Geninfo stuff:
@@ -531,7 +556,7 @@ public:
 	TString elBinToLabel(int);
 	void labelOriginAxis(TAxis*, gChannel);
 	void label2OriginAxes(TAxis*, TAxis*, gChannel);
-	
+
 	// Trigger selections:
 	virtual bool  singleMuTrigger();
 	virtual float singleMuPrescale();
@@ -549,7 +574,7 @@ public:
 	virtual bool doubleMuHTTrigger();
 	virtual bool doubleElHTTrigger();
 	virtual bool eMuHTTrigger();
-	
+
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
@@ -576,10 +601,10 @@ public:
 	virtual float getSecondClosestJetDR(int, gChannel);
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
-	
+
 	virtual int getNTightMuons(float ptcut=0.);
 	virtual int getNTightElectrons(float ptcut=0.);
-	
+
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
 	virtual int isSSEvent(int&, bool(SSDLDumper::*)(int), int&, bool(SSDLDumper::*)(int));
@@ -594,7 +619,7 @@ public:
 	virtual int hasLooseElectrons(int&, int&);
 	virtual int hasLooseElectrons();
 	virtual bool passesJet50Cut();
-	
+
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
 	virtual bool passesZVeto(bool(SSDLDumper::*)(int), bool(SSDLDumper::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
@@ -622,7 +647,7 @@ public:
 
 	virtual bool passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan);
 	virtual bool passesSel(float HT, float MET, int njets, int nbjets, int nbjetsmed, float pT1, float pT2, gRegion reg, gChannel chan);
-	
+
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
 	virtual bool isGoodMuonFor3rdLepVeto(int);
@@ -653,7 +678,7 @@ public:
 
 	virtual bool isGoodJet(int, float = 20.);
 	virtual float getJERScale(int);
-	
+
 
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_MuEG(           float pt, float eta, const std::string& runPeriod="" );
@@ -683,7 +708,7 @@ public:
 	float fC_maxMt_Control;
 	int   fC_app3rdVet; // 3rd lepton veto
 	int   fC_vetoTTZSel; // ttZ veto
-	
+
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
 	void setHypLepton2(int, gChannel);
@@ -691,18 +716,18 @@ public:
 	lepton fHypLepton1;
 	lepton fHypLepton2;
 	lepton fHypLepton3;
-	
+
 	void setRegionCuts(gRegion reg = Baseline);
-	
+
 	const int     getNFPtBins(gChannel); // fake ratios
 	const double *getFPtBins (gChannel);
 	const int     getNPPtBins (gChannel); // prompt ratios
 	const double *getPPtBins  (gChannel);
 	const int     getNEtaBins(gChannel);
 	const double *getEtaBins (gChannel);
-	
+
 	const double *getDiffPredBins(int);
-	
+
 	Monitor fCounters[gNSAMPLES][3];
 	vector<string> fMMCutNames;
 	vector<string> fEMCutNames;
@@ -721,7 +746,7 @@ public:
 	vector<Sample*> fMCSamples;
 	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
 	// map<TString, gSample> fSampleMap;	// Mapping of sample number to name
-	
+
 	TTree *fSigEv_Tree;
 	int         fSETree_SystFlag; // 0 nominal, 1 jets up, 2 jets dn, 3 jets smeared, 4 btag up, 5 btag dn, 6 lep up, 7 lep dn
 	float       fSETree_PUWeight;
@@ -761,21 +786,21 @@ public:
 	vector<float> fSigEv_HI_EE_MET;
 	vector<float> fSigEv_HI_EM_HT;
 	vector<float> fSigEv_HI_EM_MET;
-	
+
 	vector<float> fSaved_Tags;
-	
+
 	TFile *fStorageFile;
 	TString fOutputFileName;
 	Sample *fSample;
-	
+
 	BTagSFUtil *fBTagSFUtil;
 	TRandom3 *fRand3;
-	
+
 	bool isTChiSlepSnu;
 
 	private:
-	
-	Monitor fCounter[3];	
+
+	Monitor fCounter[3];
 };
 
 #endif

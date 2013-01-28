@@ -136,10 +136,7 @@ double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100.,
 double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.};
 double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
 double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
-
 double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
-
-//////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"};
 int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
 double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
@@ -155,14 +152,34 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
                                                                           "b-Jet Multiplicity (medium)"};
 
 //////////////////////////////////////////////////////////////////////////////////
+float  SSDLDumper::gFRatioNJBins     [gNFRatioNJBins+1]      = { 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
+float  SSDLDumper::gFRatioHTBins     [gNFRatioHTBins+1]      = {50., 75., 100., 125., 150., 175., 200., 250., 300., 400., 500.};
+float  SSDLDumper::gFRatioMaxJPtBins [gNFRatioMaxJPtBins+1]  = {50., 60., 70., 80., 90., 100., 125., 150., 200., 300.};
+float  SSDLDumper::gFRatioClosJPtBins[gNFRatioClosJPtBins+1] = {50., 60., 70., 80., 90., 100., 125., 150., 200., 300.};
+float  SSDLDumper::gFRatioAwayJPtBins[gNFRatioAwayJPtBins+1] = {50., 60., 70., 80., 90., 100., 125., 150., 200., 300.};
+float  SSDLDumper::gFRatioNVertices  [gNFRatioNVertices+1]   = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18};
+float  SSDLDumper::gFRatioNBJets     [gNFRatioNBJets+1]      = {0, 1, 2, 3};
+float  SSDLDumper::gFRatioMETBins    [gNFRatioMETBins+1]     = { 0.,  5., 10., 15., 20., 25., 30., 35., 40., 50.};
+float  SSDLDumper::gFRatioMTBins     [gNFRatioMTBins+1]      = { 0., 10., 20., 30., 40., 50., 60., 70., 80., 90., 100.};
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
-int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  ,       3 ,   10 ,   10 };
-float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. ,       0.,    0.,    0.};
-float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. ,       3.,   50.,  100.};
+// int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  ,       3 ,   10 ,   10 };
+// float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. ,       0.,    0.,    0.}; // obsolete?
+// float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. ,       3.,   50.,  100.}; // obsolete?
+int     SSDLDumper::FRatioPlots::nbins     [SSDLDumper::gNRatioVars] = {gNFRatioNJBins, gNFRatioHTBins, gNFRatioMaxJPtBins, gNFRatioNVertices, gNFRatioClosJPtBins, gNFRatioAwayJPtBins, gNFRatioNBJets, gNFRatioMETBins, gNFRatioMTBins};
+float*  SSDLDumper::FRatioPlots::bins      [SSDLDumper::gNRatioVars] = { gFRatioNJBins,  gFRatioHTBins,  gFRatioMaxJPtBins,  gFRatioNVertices,  gFRatioClosJPtBins,  gFRatioAwayJPtBins,  gFRatioNBJets,  gFRatioMETBins,  gFRatioMTBins};
+TString SSDLDumper::FRatioPlots::axis_label[SSDLDumper::gNRatioVars] = {"Jet Multiplicity",
+                                                                        "H_{T} (GeV)",
+                                                                        "Maximum Jet p_{T} (GeV)",
+                                                                        "N_{Vertices}",
+                                                                        "Closest Jet p_{T} (GeV)",
+                                                                        "Away Jet p_{T} (GeV)",
+                                                                        "b-Jet Multiplicity",
+                                                                        "Particle Flow ME_{T} (GeV)",
+																		"m_{T}(lepton, ME_{T}) (GeV)"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::IsoPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
-int     SSDLDumper::IsoPlots::nbins[SSDLDumper::gNSels]    = {12, 12};
+int     SSDLDumper::IsoPlots::nbins[SSDLDumper::gNSels]    = {20, 20};
 TString SSDLDumper::IdPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
 int     SSDLDumper::IdPlots::nbins[SSDLDumper::gNSels]    = {20, 20};
 
@@ -2262,14 +2279,14 @@ void SSDLDumper::bookHistos(Sample *S){
 		// Ratio histos
 		for(size_t j = 0; j < gNRatioVars; ++j){
 			TString name = Form("%s_%s_ntight_%s", S->sname.Data(), gEMULabel[l].Data(), FRatioPlots::var_name[j].Data());
-			S->ratioplots[l].ntight[j] = new TH1D(name, "ntight", FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			S->ratioplots[l].ntight[j] = new TH1D(name, "ntight", FRatioPlots::nbins[j], FRatioPlots::bins[j]);
 			S->ratioplots[l].ntight[j]->SetFillColor(S->color);
-			S->ratioplots[l].ntight[j]->SetXTitle(FRatioPlots::var_name[j]);
+			S->ratioplots[l].ntight[j]->SetXTitle(FRatioPlots::axis_label[j]);
 			S->ratioplots[l].ntight[j]->Sumw2();
 			name = Form("%s_%s_nloose_%s", S->sname.Data(), gEMULabel[l].Data(), FRatioPlots::var_name[j].Data());
-			S->ratioplots[l].nloose[j] = new TH1D(name, "nloose", FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			S->ratioplots[l].nloose[j] = new TH1D(name, "nloose", FRatioPlots::nbins[j], FRatioPlots::bins[j]);
 			S->ratioplots[l].nloose[j]->SetFillColor(S->color);
-			S->ratioplots[l].nloose[j]->SetXTitle(FRatioPlots::var_name[j]);
+			S->ratioplots[l].nloose[j]->SetXTitle(FRatioPlots::axis_label[j]);
 			S->ratioplots[l].nloose[j]->Sumw2();
 		}
 	}
