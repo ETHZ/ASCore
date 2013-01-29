@@ -61,17 +61,17 @@ if (isdata){
 
 if (!isdata){
 
-  // MC triggers from DiPhotonJets madgraph Fall11
-nametriggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v");
-nametriggers.push_back("HLT_Photon26_Photon18_v");
-nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_v");
-nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_IsoVL_v");
-nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v");
-nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v");
-nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
-nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
-nametriggers.push_back("HLT_Photon32_CaloIdL_Photon26_CaloIdL_v");
-nametriggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v");
+  // MC triggers from DiPhotonJets madgraph Fall11 (TURNED OFF ALSO IN DIPHOTONMINITREE.CC
+//nametriggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v");
+//nametriggers.push_back("HLT_Photon26_Photon18_v");
+//nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_v");
+//nametriggers.push_back("HLT_Photon26_IsoVL_Photon18_IsoVL_v");
+//nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v");
+//nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v");
+//nametriggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v");
+//nametriggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v");
+//nametriggers.push_back("HLT_Photon32_CaloIdL_Photon26_CaloIdL_v");
+//nametriggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v");
 
  }
 

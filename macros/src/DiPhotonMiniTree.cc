@@ -1036,7 +1036,7 @@ bool DiPhotonMiniTree::DiMuonFromZSelection(TreeReader *fTR, std::vector<int> &p
 };
 
 bool DiPhotonMiniTree::TriggerSelection(){
-  //  if (!isdata) return true; // trigger sel off in MC
+  if (!isdata) return true; // trigger sel off in MC
 #include "DiPhotonTriggerSelection.cc"
 };
 
