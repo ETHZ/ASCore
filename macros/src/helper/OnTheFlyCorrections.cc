@@ -1,4 +1,4 @@
-#include "helper/OnTheFlyMet.hh"
+#include "helper/OnTheFlyCorrections.hh"
 #include <math.h>
 
 using namespace std;
@@ -51,26 +51,29 @@ float OnTheFlyCorrections::getJetCorrectedPt(float pt, float corr, float eta, fl
 
 }
 
-std::pair< float, float > OnTheFlyCorrections::getCorrections(float pt, float eta, float phi, float emf, float rho, float area) {
+std::pair< float, float > 
+OnTheFlyCorrections::getCorrections(float rawpt, float raweta, float rawnomupt, float phi, float emf, float rho, float area, string level) {
+  
+  std::pair< float, float > corr(0., 0.); // pair with zeroes that gets returned if jet fails a cut
+  if (emf > 0.9)       return corr;       // skip jets with EMF > 0.9
 
-	std::pair< float, float > corr(0., 0.); // pair with zeroes that gets returned if jet fails a cut
-	if (emf > 0.9)       return corr;       // skip jets with EMF > 0.9
-	if (fabs(eta) > 9.9) return corr;       // skip jets above eta 9.9
-	fJetCorrector->setJetEta(eta);
-	fJetCorrector->setRho(rho);
-	fJetCorrector->setJetA(area);
-	fJetCorrector->setJetPt(pt);      // the jets we have in the collection are raw already
+  fJetCorrector->setJetEta(raweta);
+  fJetCorrector->setRho(rho);
+  fJetCorrector->setJetA(area);
+  fJetCorrector->setJetPt(rawpt);      // the jets we have in the collection are raw already
+  
+  std::vector< float > corrections = fJetCorrector->getSubCorrections();
+  
 
-	std::vector< float > corrections = fJetCorrector->getSubCorrections();
+  float l1corrpt   = rawnomupt*corrections.front(); // l1fastjet corrections were pushed pack first
+  float fullcorrpt = rawnomupt*corrections.back();  // full corrections are the last in the vector
 
-	float l1corrpt   = pt*corrections.front(); // l1fastjet corrections were pushed pack first
-	float fullcorrpt = pt*corrections.back();  // full corrections are the last in the vector
-	if (fullcorrpt < 10.)     return corr;        // skip all jets that have corrected pt below 10 GeV
+  if (fullcorrpt < 10.)     return corr;        // skip all jets that have corrected pt below 10 GeV
 
-	// the corretions for the MET are the difference between l1fastjet and the full corrections on the jet!
-
-	corr.first  = getPx(l1corrpt - fullcorrpt, phi); // fill the px of the correction in the pair.first
-	corr.second = getPy(l1corrpt - fullcorrpt, phi); // and the py in the pair.second
-
-	return corr;
+  // the corretions for the MET are the difference between l1fastjet and the full corrections on the jet!
+  
+  corr.first  = getPx(l1corrpt - fullcorrpt, phi); // fill the px of the correction in the pair.first
+  corr.second = getPy(l1corrpt - fullcorrpt, phi); // and the py in the pair.second
+  
+  return corr;
 }
