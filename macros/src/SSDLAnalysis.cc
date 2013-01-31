@@ -221,8 +221,10 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
 	fAnalysisTree->Branch("MuDetIso"      ,&fTmudetiso,       "MuDetIso[NMus]/F");
 	fAnalysisTree->Branch("MuPFIso"       ,&fTmupfiso,        "MuPFIso[NMus]/F");
+	fAnalysisTree->Branch("MuPFIso04"     ,&fTmupfiso04,      "MuPFIso04[NMus]/F");
 	fAnalysisTree->Branch("MuPFChIso"     ,&fTmupfchiso,      "MuPFChIso[NMus]/F");
 	fAnalysisTree->Branch("MuPFNeIso"     ,&fTmupfneiso,      "MuPFNeIso[NMus]/F");
+	fAnalysisTree->Branch("MuPFNeIsoUnc"  ,&fTmupfneisounc,   "MuPFNeIsoUnc[NMus]/F");
 	fAnalysisTree->Branch("MuRadIso"      ,&fTmuradiso,       "MuRadIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
@@ -291,19 +293,20 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi,    "pfMETPhi/F");
 	fAnalysisTree->Branch("pfMETType1",       &fTpfMETType1,     "pfMETType1/F");
 	fAnalysisTree->Branch("pfMETType1Phi",    &fTpfMETType1phi,  "pfMETType1Phi/F");
-	fAnalysisTree->Branch("NJets",         &fTnqjets,      "NJets/I");
-	fAnalysisTree->Branch("JetPt",         &fTJetpt,       "JetPt[NJets]/F");
-	fAnalysisTree->Branch("JetEta",        &fTJeteta,      "JetEta[NJets]/F");
-	fAnalysisTree->Branch("JetPhi",        &fTJetphi,      "JetPhi[NJets]/F");
-	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,   "JetEnergy[NJets]/F");
-	fAnalysisTree->Branch("JetCSVBTag",    &fTJetbtag1,    "JetCSVBTag[NJets]/F");
-	fAnalysisTree->Branch("JetProbBTag",   &fTJetbtag2,    "JetProbBTag[NJets]/F");
-	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
-	fAnalysisTree->Branch("JetJEC",        &fTJetJEC,      "JetJEC[NJets]/F");
-	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
-	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,   "JetGenPt[NJets]/F");
-	fAnalysisTree->Branch("JetGenEta",     &fTJetGeneta,   "JetGenEta[NJets]/F");
-	fAnalysisTree->Branch("JetGenPhi",     &fTJetGenphi,   "JetGenPhi[NJets]/F");
+	fAnalysisTree->Branch("NJets",         &fTnqjets,        "NJets/I");
+	fAnalysisTree->Branch("JetPt",         &fTJetpt,         "JetPt[NJets]/F");
+	fAnalysisTree->Branch("JetEta",        &fTJeteta,        "JetEta[NJets]/F");
+	fAnalysisTree->Branch("JetPhi",        &fTJetphi,        "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetEnergy",     &fTJetenergy,     "JetEnergy[NJets]/F");
+	fAnalysisTree->Branch("JetCSVBTag",    &fTJetbtag1,      "JetCSVBTag[NJets]/F");
+	fAnalysisTree->Branch("JetProbBTag",   &fTJetbtag2,      "JetProbBTag[NJets]/F");
+	fAnalysisTree->Branch("JetArea",       &fTJetArea,       "JetArea[NJets]/F");
+	fAnalysisTree->Branch("JetJEC",        &fTJetJEC,        "JetJEC[NJets]/F");
+	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID,   "JetPartonID[NJets]/I");
+	fAnalysisTree->Branch("JetPartonFlav", &fTJetPartonFlav, "JetPartonFlav[NJets]/I");
+	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,     "JetGenPt[NJets]/F");
+	fAnalysisTree->Branch("JetGenEta",     &fTJetGeneta,     "JetGenEta[NJets]/F");
+	fAnalysisTree->Branch("JetGenPhi",     &fTJetGenphi,     "JetGenPhi[NJets]/F");
 }
 
 void SSDLAnalysis::BookEffTree(){
@@ -436,6 +439,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetArea    [ind] = fTR->JArea[jetindex];
 		fTJetJEC     [ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex])/fTR->JEcorr[jetindex];
 		fTJetPartonID[ind] = JetPartonMatch(jetindex);
+		fTJetPartonFlav[ind] = fTR->JPartonFlavour[jetindex];
 		int genjetind = GenJetMatch(jetindex);
 		if(genjetind > -1){
 			fTJetGenpt [ind] = fTR->GenJetPt [genjetind];
@@ -455,6 +459,12 @@ void SSDLAnalysis::FillAnalysisTree(){
 	fTpfMETphi  = fTR->PFMETphi;
 	fTpfMETType1   = fTR->PFType1MET;
 	fTpfMETType1phi  = fTR->PFType1METphi;
+	std::pair<float, float> newmet = GetOnTheFlyCorrections();
+	// cout << "        leading jet pt, eta from event: " << fTR->JPt[0] << " , " << fTR->JEta[0] << endl;
+	// cout << "JChargedMuEnergyFrac[0]: " << fTR->JChargedMuEnergyFrac[0] << endl;
+	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "---------------------------------" << endl;
+	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from event with phi: " << fTpfMETType1 << " " << fTpfMETType1phi << endl;
+	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from marc  with phi: " << newmet.first << " " << newmet.second   << endl;
 
 	// PU correction
 	fTrho   = fTR->Rho;
@@ -470,9 +480,11 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuphi   [i] = fTR->MuPhi     [index];
 		fTmucharge[i] = fTR->MuCharge  [index];
 		fTmupfiso [i] = MuPFIso(index);
+		fTmupfiso04 [i] = MuPFIso04(index);
 		fTmudetiso[i] = fTR->MuRelIso03[index];
 		fTmupfchiso[i] = fTR->MuPfIsoR03ChHad[index] / fTR->MuPt[index];
 		fTmupfneiso[i] = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] ) / fTR->MuPt[index];
+		fTmupfneisounc[i] = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index]) / fTR->MuPt[index];
 		fTmuradiso[i] = MuRadIso(index);
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
@@ -672,9 +684,11 @@ void SSDLAnalysis::ResetTree(){
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
 		fTmupfiso       [i] = -999.99;
+		fTmupfiso04     [i] = -999.99;
 		fTmudetiso      [i] = -999.99;
 		fTmupfchiso     [i] = -999.99;
 		fTmupfneiso     [i] = -999.99;
+		fTmupfneisounc  [i] = -999.99;
 		fTmuradiso      [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
@@ -757,6 +771,7 @@ void SSDLAnalysis::ResetTree(){
 		fTJetArea[i]      = -999.99;
 		fTJetJEC[i]       = -999.99;
 		fTJetPartonID[i]  = -999;
+		fTJetPartonFlav[i]  = -999;
 		fTJetGenpt [i]    = -999.99;
 		fTJetGeneta[i]    = -999.99;
 		fTJetGenphi[i]    = -999.99;

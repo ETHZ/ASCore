@@ -24,6 +24,7 @@
 #include "helper/Monitor.hh"
 #include "helper/PUWeight.h"
 
+
 using namespace std;
 
 class SSDLAnalysis : public UserAnalysisBase{
@@ -140,6 +141,7 @@ private:
 	float fTJetArea[fMaxNjets];
 	float fTJetJEC[fMaxNjets];
 	int   fTJetPartonID[fMaxNjets];
+	int   fTJetPartonFlav[fMaxNjets];
 	float fTJetGenpt [fMaxNjets];
 	float fTJetGeneta[fMaxNjets];
 	float fTJetGenphi[fMaxNjets];
@@ -157,8 +159,10 @@ private:
 	float fTmuphi         [fMaxNmus];
 	float fTmudetiso      [fMaxNmus];
 	float fTmupfiso       [fMaxNmus];
+	float fTmupfiso04     [fMaxNmus];
 	float fTmupfchiso     [fMaxNmus];
 	float fTmupfneiso     [fMaxNmus];
+	float fTmupfneisounc  [fMaxNmus];
 	float fTmuradiso      [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
 	float fTmud0          [fMaxNmus];
