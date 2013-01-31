@@ -384,14 +384,14 @@ void SSDLDumper::loopEvents(Sample *S){
 		fDoCounting = false;
 
 		// Disable for EWKino:
-		// if( S->datamc!=0 ) {
-		// 	int ind1(-1), ind2(-1);
-		// 	fDoCounting = false;
-		// 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getMuMuHLTSF(           MuPt[ind1], MuEta[ind1], "Run2011").val * getMuMuHLTSF(MuPt[ind2], MuEta[ind2], "Run2011").val;
-		// 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
-		// 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
-		// 	fDoCounting = true;
-		// }
+		if( S->datamc!=0 ) {
+			int ind1(-1), ind2(-1);
+			fDoCounting = false;
+			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getMuMuHLTSF(           MuPt[ind1], MuEta[ind1], "Run2011").val * getMuMuHLTSF(MuPt[ind2], MuEta[ind2], "Run2011").val;
+			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
+			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
+			fDoCounting = true;
+		}
 
 		gEventWeight = gHLTSF * gBtagSF;
 		if( S->datamc!=4 ) gEventWeight *= PUWeight; //no pu weight for mc with no pu
