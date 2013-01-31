@@ -690,7 +690,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	// end filling the ttbar ratio histograms
 	
 	// filling histos for with gen ID of fake leptons
-	if (isSigSupMuEvent() && getNBTagsMed() > 0) {
+	if (isSigSupMuEvent() > -1 && getNBTagsMed() > 0) {
 		for (int i = 0 ; i < NMus; ++i) {
 			if (getClosestJetDPhi(i, Muon) < 2.0) continue;
 //			if (getClosestJetDR(i, Muon) < 0.5) continue;
@@ -699,7 +699,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 	}
 	int elec1(-1), elec2(-1);
-	if (isSigSupElEvent()) {
+	if (isSigSupElEvent() > -1) {
 		for (int i = 0 ; i < NEls; ++i) {
 			if ( abs(ElGenID[i])  == 13 ) continue;
 			if ( abs(ElGenMID[i]) == 13 ) continue;
@@ -710,19 +710,20 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	}
 	// end filling the ttbar ratio histograms
 
-	if(singleMuTrigger() && isSigSupMuEvent()){
-		if( isTightMuon(0) ){
-			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+	int dummy = isSigSupMuEvent();
+	if(singleMuTrigger() && isSigSupMuEvent() > -1){
+		if( isTightMuon(dummy) ){
+			S->region[reg][HighPt].mm.fntight->Fill(MuPt[dummy], fabs(MuEta[dummy]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
-		if( isLooseMuon(0) ){
-			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(0), MuPt[0]);
-			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(0), fabs(MuEta[0]));
+		if( isLooseMuon(dummy) ){
+			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(dummy), MuPt[dummy]);
+			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(dummy), fabs(MuEta[dummy]));
 			// marc S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
 			// marc S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
 
-			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[dummy], fabs(MuEta[dummy]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
@@ -804,19 +805,20 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-	if(singleElTrigger() && isSigSupElEvent()){
-		if( isTightElectron(0) ){
-			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+	dummy = isSigSupElEvent();
+	if(singleElTrigger() && isSigSupElEvent() > -1){
+		if( isTightElectron(dummy) ){
+			S->region[reg][HighPt].ee.fntight->Fill(ElPt[dummy], fabs(ElEta[dummy]), gEventWeight);
 			// marc S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
-		if( isLooseElectron(0) ){
-			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(0), ElPt[0]);
-			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(0), fabs(ElEta[0]));
+		if( isLooseElectron(dummy) ){
+			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(dummy), ElPt[dummy]);
+			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(dummy), fabs(ElEta[dummy]));
 			// marc S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
 			// marc S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
 
-			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[dummy], fabs(ElEta[dummy]), gEventWeight);
 			// marc S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
@@ -1285,8 +1287,9 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 
 	fCurrentChannel = Muon;
 	if(singleMuTrigger()){
-		if(isSigSupMuEvent()){
-			if( isTightMuon(0) ){
+		int dummy = isSigSupMuEvent();
+		if(isSigSupMuEvent() > -1){
+			if( isTightMuon(dummy) ){
 				RP0->ntight[0]->Fill(getNJets(),               gEventWeight);
 				RP0->ntight[1]->Fill(getHT(),                  gEventWeight);
 				RP0->ntight[2]->Fill(getMaxJPt(),              gEventWeight);
@@ -1295,7 +1298,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    gEventWeight);
 				RP0->ntight[6]->Fill(getNBTags(),              gEventWeight);
 			}
-			if( isLooseMuon(0) ){
+			if( isLooseMuon(dummy) ){
 				RP0->nloose[0]->Fill(getNJets(),               gEventWeight);
 				RP0->nloose[1]->Fill(getHT(),                  gEventWeight);
 				RP0->nloose[2]->Fill(getMaxJPt(),              gEventWeight);
@@ -1306,21 +1309,23 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 			}
 		}
 		fC_maxMet_Control = 1000.;
-		if(isSigSupMuEvent()){
-			if( isTightMuon(0) ){
+		dummy = isSigSupMuEvent();
+		if(isSigSupMuEvent() > -1){
+			if( isTightMuon(dummy) ){
 				RP0->ntight[7]->Fill(getMET(),                    gEventWeight);
 			}
-			if( isLooseMuon(0) ){
+			if( isLooseMuon(dummy) ){
 				RP0->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
-		if(isSigSupMuEvent()){
-			if( isTightMuon(0) ){
+		dummy = isSigSupMuEvent();
+		if(isSigSupMuEvent() > -1){
+			if( isTightMuon(dummy) ){
 				RP0->ntight[8]->Fill(MuMT[0],                  gEventWeight);
 			}
-			if( isLooseMuon(0) ){
+			if( isLooseMuon(dummy) ){
 				RP0->nloose[8]->Fill(MuMT[0],                  gEventWeight);
 			}
 		}		
@@ -1329,8 +1334,9 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
 	setRegionCuts(gRegion[gBaseRegion]);
 	if(singleElTrigger()){
-		if(isSigSupElEvent()){
-			if( isTightElectron(0) ){
+		int dummy = isSigSupElEvent();
+		if(isSigSupElEvent() > -1){
+			if( isTightElectron(dummy) ){
 				RP1->ntight[0]->Fill(getNJets(),                   gEventWeight);
 				RP1->ntight[1]->Fill(getHT(),                      gEventWeight);
 				RP1->ntight[2]->Fill(getMaxJPt(),                  gEventWeight);
@@ -1339,7 +1345,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP1->ntight[5]->Fill(getAwayJetPt(0, Elec),    gEventWeight);
 				RP1->ntight[6]->Fill(getNBTags(),                  gEventWeight);
 			}
-			if( isLooseElectron(0) ){
+			if( isLooseElectron(dummy) ){
 				RP1->nloose[0]->Fill(getNJets(),                   gEventWeight);
 				RP1->nloose[1]->Fill(getHT(),                      gEventWeight);
 				RP1->nloose[2]->Fill(getMaxJPt(),                  gEventWeight);
@@ -1350,21 +1356,23 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 			}
 		}
 		fC_maxMet_Control = 1000.;
-		if(isSigSupElEvent()){
-			if( isTightElectron(0) ){
+		dummy = isSigSupElEvent();
+		if(isSigSupElEvent() > -1){
+			if( isTightElectron(dummy) ){
 				RP1->ntight[7]->Fill(getMET(),                    gEventWeight);
 			}
-			if( isLooseElectron(0) ){
+			if( isLooseElectron(dummy) ){
 				RP1->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
-		if(isSigSupElEvent()){
-			if( isTightElectron(0) ){
+		dummy = isSigSupElEvent();
+		if(isSigSupElEvent() > -1){
+			if( isTightElectron(dummy) ){
 				RP1->ntight[8]->Fill(ElMT[0],                  gEventWeight);
 			}
-			if( isLooseElectron(0) ){
+			if( isLooseElectron(dummy) ){
 				RP1->nloose[8]->Fill(ElMT[0],                  gEventWeight);
 			}
 		}		
@@ -1403,6 +1411,8 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 
 	fSETree_NM = getNTightMuons();
 	fSETree_NE = getNTightElectrons();
+
+//	fChargeSwitch = 1;
 	
 	if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 
@@ -1638,6 +1648,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		}
 		fChargeSwitch = 0;
 	}
+//	fChargeSwitch = 0;
 	setRegionCuts(gRegion[gBaseRegion]);
 	return;
 }
@@ -2132,7 +2143,7 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 
 		////////////////////////////////////////////////////
 		// SIGNAL SUPPRESSED SELECTION
-		if(isSigSupMuEvent()){
+		if(isSigSupMuEvent() > -1){
 			IP0->hiso[1]->Fill(MuPFIso[muind1], scale);
 			for(size_t k = 0; k < gNMuFPtBins; ++k){
 				if(MuPt[muind1] < gMuFPtBins[k]) continue;
@@ -2197,7 +2208,7 @@ void SSDLDumper::fillElIdPlots(Sample *S){
 
 		////////////////////////////////////////////////////
 		// SIGNAL SUPPRESSED SELECTION
-		if(isSigSupElEvent()){
+		if(isSigSupElEvent() > -1){
 			IdP->hhoe   [1]->Fill(ElHoverE[elind1], scale);
 			IdP->hsiesie[1]->Fill(ElSigmaIetaIeta[elind1], scale);
 			IdP->hdeta  [1]->Fill(ElDEta[elind1], scale);
@@ -2263,7 +2274,7 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 
 		////////////////////////////////////////////////////
 		// SIGNAL SUPPRESSED SELECTION
-		if(isSigSupElEvent()){
+		if(isSigSupElEvent() > -1){
 			IP->hiso[1]->Fill(ElPFIso[elind1], scale);
 			for(size_t k = 0; k < gNElFPtBins; ++k){
 				if(ElPt[elind1] < gElFPtBins[k]) continue;
@@ -4870,16 +4881,21 @@ bool SSDLDumper::isGoodRun(Sample *S){
 }
 
 //____________________________________________________________________________
-bool SSDLDumper::isSigSupMuEvent(){
+int SSDLDumper::isSigSupMuEvent(){
 	int mu1(-1), mu2(-1);
-	if(hasLooseMuons(mu1, mu2) < 1) return false;
+	if(hasLooseMuons(mu1, mu2) < 1) return -1;
 	setHypLepton1(mu1, Muon);
-	if(!passesJet50Cut())  return false;
-	if(getNJets() < 1)     return false;
-	if(getMT(mu1,Muon) > fC_maxMt_Control)  return false;
-	if(getMET() > fC_maxMet_Control)   return false;
-	if(NMus > 1)                    return false;
-	return true;
+	if(!passesJet50Cut())  return -1;
+	if(getNJets() < 1)     return -1;
+	if(getMT(mu1,Muon) > fC_maxMt_Control)  return -1;
+	if(getMET() > fC_maxMet_Control)   return -1;
+	int nmus(0);
+	for (int i=0; i< NMus; ++i){
+		if (isLooseMuon(i)) nmus++;
+	}
+	//if(NMus > 1)                    return false;
+	if (nmus>1) return -1;
+	return mu1;
 }
 bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	if(hasLooseMuons(mu1, mu2) < 2)  return false;
@@ -4901,17 +4917,22 @@ bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	if(getNJets() < 2) return false;
 	return true;
 }
-bool SSDLDumper::isSigSupElEvent(){
+int SSDLDumper::isSigSupElEvent(){
 	int el1(-1), el2(-1);
-	if(hasLooseElectrons(el1, el2) < 1) return false;
+	if(hasLooseElectrons(el1, el2) < 1) return -1;
 	setHypLepton1(el1, Elec);
-	if(!passesJet50Cut())          return false;
-	if(getNJets() < 1)             return false;
+	if(!passesJet50Cut())          return -1;
+	if(getNJets() < 1)             return -1;
 	//	if(ElMT[0] > fC_maxMt_Control) return false;
-	if(getMT(el1,Elec) > fC_maxMt_Control) return false;
-	if(getMET() > fC_maxMet_Control)  return false;
-	if(NEls > 1)                   return false;
-	return true;
+	if(getMT(el1,Elec) > fC_maxMt_Control) return -1;
+	if(getMET() > fC_maxMet_Control)  return -1;
+	int nels(0);
+	for (int i = 0; i < NEls; i++) {
+		if (isLooseElectron(i)) nels++;
+	}
+	if (nels < 1) return -1;
+//	if(NEls > 1)                   return false;
+	return el1;
 }
 bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	if(hasLooseElectrons(el1, el2) < 2)  return false;

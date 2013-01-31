@@ -79,11 +79,11 @@ public:
 	enum gSample {
 		sample_begin,
 		// data samples
-		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 ,
-		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
-		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
+		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 , DoubleMu5 , DoubleMu5a ,
+		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5, DoubleEle5a,
+		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     , MuEG5     , MuEG5a     ,
 		// fake samples
-		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
+		TTJets, TTJets_scaleup, TTJets_scaledown, TTJets_matchingup, TTJets_matchingdown, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
 		GJets200, GJets400, WW,
@@ -459,7 +459,7 @@ public:
 			    (sname) == "EMEnr20"    ||
 			    (sname) == "EMEnr30"    ) return 1;
 			if( (sname.Contains("SingleT")) ||
-			    (sname)  =="TTJets"  ) return 2;
+			    (sname.Contains("TTJets"))  ) return 2;
 			if( (sname.Contains("DYJets")) ||
 			    (sname.Contains("GJets"))  ||
 			    (sname) == "WJets" )   return 3;
@@ -514,6 +514,10 @@ public:
 			   sname == "EMEnr20"    ||
 			   sname == "EMEnr30")                          return 17;
 			if(sname == "TbZ")                              return 18;
+			if(sname == "TTJets_matchingdown")				return 19;
+			if(sname == "TTJets_matchingup")				return 20;
+			if(sname == "TTJets_scaledown")					return 21;
+			if(sname == "TTJets_scaleup")					return 22;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
@@ -537,6 +541,10 @@ public:
 			if(proc == 14) return "Tri-Boson";
 			if(proc == 15) return "DPS (2$\\times$ W+jets)";
 			if(proc == 16) return "QCD";
+			if(proc == 19) return "$t\\bar{t}$matchingdown";
+			if(proc == 20) return "$t\\bar{t}$matchingup";
+			if(proc == 21) return "$t\\bar{t}$scaledown";
+			if(proc == 22) return "$t\\bar{t}$scaleup";
 			else {
 				cout << "SSDLDumper::Sample::getProcName() ==> ERROR: "<< proc << " has no defined process name!" << endl;
 				return "";
@@ -705,10 +713,10 @@ public:
 	virtual bool passesTauVeto();
 	virtual bool passesTTZSel();
 
-	virtual bool isSigSupMuEvent();
+	virtual int isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
 
-	virtual bool isSigSupElEvent();
+	virtual int isSigSupElEvent();
 	virtual bool isZElElEvent(int&, int&);
 	virtual bool isZElElChMisIdEvent(int&, int&);
 
