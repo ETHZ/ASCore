@@ -498,10 +498,11 @@ void DiPhotonMiniTree::Analyze(){
     }
     else if (sel_cat==7){
       std::vector<int> passing_bkg = PhotonSelection(fTR,passing,"invert_sieie_cut");
+      std::vector<int> passing_sel = PhotonSelection(fTR,passing);
       std::vector<int> newpassing;
-      if (passing_bkg.size()>=1 && passing.size()>=2){
+      if (passing_bkg.size()>=1 && passing_sel.size()>=1){
 	int fondo = passing_bkg[0];
-	int forcone = (passing[0]!=fondo) ? forcone = passing[0] : forcone = passing[1];
+	int forcone = passing_sel[0];
 	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoissiglike=1;}
 	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoissiglike=0;}
       }
@@ -555,10 +556,12 @@ void DiPhotonMiniTree::Analyze(){
     else if (sel_cat==16){
       std::vector<int> passing_bkg = BackgroundSelection(fTR,passing);
       passing_bkg = PhotonSelection(fTR,passing_bkg);
+      std::vector<int> passing_sig = SignalSelection(fTR,passing);
+      passing_sig = PhotonSelection(fTR,passing_sig);
       std::vector<int> newpassing;
-      if (passing_bkg.size()>=1 && passing.size()>=2){
+      if (passing_bkg.size()>=1 && passing_sig.size()>=1){
 	int fondo = passing_bkg[0];
-	int forcone = (passing[0]!=fondo) ? forcone = passing[0] : forcone = passing[1];
+	int forcone = passing_sig[0];
 	if (fTR->PhoPt[fondo] > fTR->PhoPt[forcone]) {newpassing.push_back(fondo); newpassing.push_back(forcone); pass12_whoissiglike=1;}
 	else {newpassing.push_back(forcone); newpassing.push_back(fondo); pass12_whoissiglike=0;}
       }
