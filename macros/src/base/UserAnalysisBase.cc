@@ -318,6 +318,8 @@ bool UserAnalysisBase::IsMostBasicMu(int index){
     if(MuPFIso(index) > 1.0) return false;
     if((fTR->MuIsGlobalMuon[index] == 0 && fTR->MuIsTrackerMuon[index] == 0 ))  return false;
     if(fTR->MuIsPFMuon[index] == 0) return false;
+	if(fTR->MuPt[index] < 5.) return false;
+	if(fabs(fTR->MuEta[index]) > 2.4) return false;
     return true;
 }
 
