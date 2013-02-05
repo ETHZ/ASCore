@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.109 $";
+string sjzbversion="$Revision: 1.70.2.110 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -33,7 +33,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.109 2013/01/07 12:46:24 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.110 2013/01/15 16:45:36 buchmann Exp $
 */
 
 
@@ -230,6 +230,8 @@ public:
   int pfJetGoodNumBtag40;
   int pfJetGoodNumBtag30_Tight;
   int pfJetGoodNumBtag40_Tight;
+  int pfJetGoodNumBtag30_Loose;
+  int pfJetGoodNumBtag40_Loose;
   int pfJetGoodNumIDBtag;
   float pfJetGoodPtBtag[jMax];
   float pfJetGoodEtaBtag[jMax];
@@ -726,6 +728,8 @@ void nanoEvent::reset()
   pfJetGoodNumBtag40=0;
   pfJetGoodNumBtag30_Tight=0;
   pfJetGoodNumBtag40_Tight=0;
+  pfJetGoodNumBtag30_Loose=0;
+  pfJetGoodNumBtag40_Loose=0;
   pfJetGoodNumIDBtag=0;
   pfJetGoodNump1sigma=0;
   pfJetGoodNumn1sigma=0;
@@ -1254,6 +1258,7 @@ void JZBAnalysis::Begin(TFile *f){
   time (&rawtime );
   *timestamp=ctime(&rawtime);
   
+  f->cd();
   myInfo->Fill();
   myInfo->Write();
 
@@ -1443,6 +1448,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNumBtag40",&nEvent.pfJetGoodNumBtag40,"pfJetGoodNumBtag40/I");
   myTree->Branch("pfJetGoodNumBtag30_Tight",&nEvent.pfJetGoodNumBtag30_Tight,"pfJetGoodNumBtag30_Tight/I");
   myTree->Branch("pfJetGoodNumBtag40_Tight",&nEvent.pfJetGoodNumBtag40_Tight,"pfJetGoodNumBtag40_Tight/I");
+  myTree->Branch("pfJetGoodNumBtag30_Loose",&nEvent.pfJetGoodNumBtag30_Loose,"pfJetGoodNumBtag30_Loose/I");
+  myTree->Branch("pfJetGoodNumBtag40_Loose",&nEvent.pfJetGoodNumBtag40_Loose,"pfJetGoodNumBtag40_Loose/I");
   myTree->Branch("pfJetGoodNumIDBtag",&nEvent.pfJetGoodNumIDBtag,"pfJetGoodNumIDBtag/I");
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
   myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
@@ -2174,7 +2181,7 @@ void JZBAnalysis::Analyze() {
       nEvent.passed_triggers=1;
       nEvent.trigger_bit |= (1<<5);
     }
-
+    
   // Event filter information
   nEvent.passed_filters = passFilters( nEvent.filter_bit );
 
@@ -2627,6 +2634,8 @@ void JZBAnalysis::Analyze() {
   nEvent.pfJetGoodNumBtag40=0;
   nEvent.pfJetGoodNumBtag30_Tight=0;
   nEvent.pfJetGoodNumBtag40_Tight=0;
+  nEvent.pfJetGoodNumBtag30_Loose=0;
+  nEvent.pfJetGoodNumBtag40_Loose=0;
   nEvent.pfJetGoodNum40=0;
   nEvent.pfJetGoodNum50=0;
   nEvent.pfJetGoodNum60=0;
@@ -2784,6 +2793,8 @@ void JZBAnalysis::Analyze() {
       if ( jpt>30. && fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.679 && isJetID && abs(jeta)<2.4)  nEvent.pfJetGoodNumBtag30++;
       if ( jpt>30. && fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.898 && isJetID && abs(jeta)<2.4)  nEvent.pfJetGoodNumBtag30_Tight++;
       if ( jpt>40. && fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.898 && isJetID && abs(jeta)<2.4)  nEvent.pfJetGoodNumBtag40_Tight++;
+      if ( jpt>30. && fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.244 && isJetID && abs(jeta)<2.4)  nEvent.pfJetGoodNumBtag30_Loose++;
+      if ( jpt>40. && fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.244 && isJetID && abs(jeta)<2.4)  nEvent.pfJetGoodNumBtag40_Loose++;
       
       if ( jpt>30. )  nEvent.pfJetGoodNum30++;
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
@@ -4270,7 +4281,6 @@ bool JZBAnalysis::MatchTrigger(lepton *a) {
       }
     }
   }
-
   return false;
 
 }
