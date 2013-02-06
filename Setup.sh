@@ -44,6 +44,7 @@ cvs co -r V01-00-11-01   DPGAnalysis/Skims
 cvs co -r V00-11-17      DPGAnalysis/SiStripTools
 cvs co -r V00-00-08      DataFormats/TrackerCommon
 cvs co -r V01-09-05      RecoLocalTracker/SubCollectionProducers
+cvs co -r V01-02-10      EventFilter/HcalRawToDigi
 
 # Parton Flavour
 cvs co -r V00-13-10 PhysicsTools/JetMCAlgos

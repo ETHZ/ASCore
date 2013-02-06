@@ -62,7 +62,9 @@ options.register ('GlobalTag',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 #options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
-options.files= 'file:////scratch/mdunser/files/DoubleMu_Run2012D.root'
+#options.files= 'file:////scratch/mdunser/files/DoubleMu_Run2012D.root'
+#options.files= 'file:////shome/casal/files/trackingPOGevents.root'
+options.files= 'file:////shome/casal/files/hcalLaserEvents.root'
 #options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
@@ -190,6 +192,9 @@ process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
 process.hcalLaserEventFilter.vetoByRunEventNumber=False
 process.hcalLaserEventFilter.vetoByHBHEOccupancy=True
 process.hcalLaserEventFilter.taggingMode=True
+
+# new recommendation: https://twiki.cern.ch/twiki/bin/view/CMS/PdmVKnowFeatures#HCAL_laser_events_in_prompt_2012
+process.load("EventFilter.HcalRawToDigi.hcallasereventfilter2012_cfi")
 
 ## The ECAL dead cell trigger primitive filter _______________________________||
 process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
@@ -584,6 +589,7 @@ process.p = cms.Path(
         process.AK5PFbyRef *
         process.AK5PFbyValAlgo *
         process.goodVertices * # Filter
+        process.hcallasereventfilter2012 * # Filter
         (
          (process.photonPartonMatch
 #	*process.printGenParticles*process.printPhotons*process.printPartons
