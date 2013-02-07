@@ -26,10 +26,17 @@ struct SSDLPrediction {
 	float bg_em_err;
 	float bg_ee_err;
 
+	float s_ttwz;
+	float s_ttwz_mm;
+	float s_ttwz_em;
+	float s_ttwz_ee;
+
+	float s_ttw;
 	float s_ttw_mm;
 	float s_ttw_em;
 	float s_ttw_ee;
 
+	float s_ttz;
 	float s_ttz_mm;
 	float s_ttz_em;
 	float s_ttz_ee;
@@ -49,6 +56,7 @@ struct SSDLPrediction {
 	int obs_mm;
 	int obs_em;
 	int obs_ee;
+	int obs;
 
 };
 
@@ -250,6 +258,7 @@ public:
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
+	void makeFRvsNVPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
 	void makeRatioPlots(gChannel);
 	void make2DRatioPlots(gChannel);
@@ -278,7 +287,8 @@ public:
 	// old TTWZPrediction makeIntPredictionTTW(TString, gRegion);
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
 
-	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
+	void makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., int chVeto = 0, bool ttw    =false, int flag=0);
+	TTWZPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., int chVeto = 0, bool ttw=false, int flag=0);
 	void makeDiffPrediction();
 	void makeTTWDiffPredictions();
 	void makeDiffPredictionTTW(int);
@@ -310,6 +320,7 @@ public:
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
         
@@ -319,6 +330,7 @@ public:
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
 	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void getPassedTotalTTbar(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 

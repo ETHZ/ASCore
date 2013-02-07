@@ -8,8 +8,11 @@
 
 #include "helper/AnaClass.hh"
 #include "helper/Monitor.hh"
-#include "helper/BTagSFUtil/BTagSFUtil.h"
+//#include "helper/BTagSFUtil/BTagSFUtil.h"
+#include "helper/BTagSF.hh"
+#include "helper/GoodRunList.h"
 
+#include "TRandom3.h"
 #include "TLorentzVector.h"
 
 using namespace std;
@@ -60,7 +63,7 @@ public:
 	static double gDiffNBJMBins[gNDiffNBJMBins+1];
 
 	static const int gM0bins  = 150  ; // these values
-	static const int gM0min   = 0    ; // are 
+	static const int gM0min   = 0    ; // are
 	static const int gM0max   = 3000 ; // the same
 	static const int gM12bins = 50   ; // as in
 	static const int gM12min  = 0    ; // SSDLAnalysis
@@ -83,7 +86,7 @@ public:
 		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5, DoubleEle5a,
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     , MuEG5     , MuEG5a     ,
 		// fake samples
-		TTJets, TTJets_scaleup, TTJets_scaledown, TTJets_matchingup, TTJets_matchingdown, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
+		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
 		GJets200, GJets400, WW,
@@ -184,10 +187,15 @@ public:
 		TH2D *nt00_eta;
 
 		TH2D *fntight; // pt vs eta
-		TH2D *fnloose; 
+		TH2D *fnloose;
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
-		
+
+		TH1D *fntight_nv; // nvertices
+		TH1D *fnloose_nv;
+		TH1D *pntight_nv;
+		TH1D *pnloose_nv;
+
 		// duplicate for only ttbar use
 		TH2D *fntight_ttbar; // pt vs eta
 		TH2D *fnloose_ttbar; 
@@ -204,10 +212,11 @@ public:
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
 		TEfficiency *pratio_eta;
-	        
-         	// Charged miss-id calculation
-                TH2D *ospairs;
-                TH2D *sspairs;
+		TEfficiency *fratio_nv;
+		TEfficiency *pratio_nv;
+		// Charged miss-id calculation
+		TH2D *ospairs;
+		TH2D *sspairs;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -231,7 +240,7 @@ public:
 		TH1D *zt_origin;
 		TH1D *zl_origin;
 
-	        // OS Yields
+        // OS Yields
 		// Only filled for electrons
 		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
 		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
@@ -248,33 +257,6 @@ public:
 		TH2D *nt00_OS_EB_pt;
 	};
 	
-	// old struct Region{
-	// old 	static TString sname[gNREGIONS];
-	// old 	// Two different pt cuts
-	// old 	static float minMu1pt[gNREGIONS];
-	// old 	static float minMu2pt[gNREGIONS];
-	// old 	static float minEl1pt[gNREGIONS];
-	// old 	static float minEl2pt[gNREGIONS];
-	// old 	// Custom selections for every region
-	// old 	static float minHT     [gNREGIONS];
-	// old 	static float maxHT     [gNREGIONS];
-	// old 	static float minMet    [gNREGIONS];
-	// old 	static float maxMet    [gNREGIONS];
-	// old 	static float minJetPt  [gNREGIONS];
-	// old 	static int   minNjets  [gNREGIONS];
-	// old 	static int   maxNjets  [gNREGIONS];
-	// old 	static int   minNbjets [gNREGIONS];
-	// old 	static int   maxNbjets [gNREGIONS];
-	// old 	static int   minNbjmed [gNREGIONS];
-	// old 	static int   maxNbjmed [gNREGIONS];
-	// old 	static int   app3rdVet [gNREGIONS];
-	// old 	static int   vetoTTZSel[gNREGIONS];
-	// old 	static int   chargeVeto[gNREGIONS];
-	// old 	
-	// old 	Channel mm;
-	// old 	Channel em;
-	// old 	Channel ee;
-	// old };
 	struct Region{
 		TString sname;
 		// Two different pt cuts
@@ -366,7 +348,7 @@ public:
 		TH1D *hnt2_os_EB[gNDiffVars];
 		TH1D *hnt2_os_EE[gNDiffVars];
 	};
-	
+
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
@@ -377,7 +359,10 @@ public:
 	std::map<TString , int> gRegion;
 	int gNREGIONS;
 	TString gBaseRegion;
-        bool    gDoWZValidation;
+	std::map<TString , int> gSystematics;
+	std::map<TString , int>::const_iterator gsystIt;
+	bool gApplyZVeto;
+    bool    gDoWZValidation;
 
 	class Sample{
 	public:
@@ -588,6 +573,8 @@ public:
 	virtual void loop();              // loop on all samples if several
 	virtual void loopEvents(Sample*); // perform loop on single sample
 	
+        /////////////////////////
+        bool IsInJSON();
 	// old void storeNumbers(Sample*, gChannel, gRegion);
 	void storeNumbers(Sample*, gChannel, int);
 	
@@ -702,16 +689,19 @@ public:
 	virtual int hasLooseElectrons();
 	virtual bool passesJet50Cut();
 	
-	virtual bool passesHTCut(float, float = 7000.);
-	virtual bool passesMETCut(float = -1., float = 7000.);
+	virtual bool passesHTCut(float, float = 8000.);
+	virtual bool passesMETCut(float = -1., float = 8000.);
 	virtual bool passesZVeto(bool(SSDLDumper::*)(int), bool(SSDLDumper::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
-        virtual bool passesChVeto(int = 1);
+	virtual bool passesZVetoNew(int l1, int l2, int toggle, float dm = 15.);
+	virtual bool passesGammaStarVeto(int l1, int l2, int toggle, float mass = 12.);
+	virtual bool passesChVeto(int = 1);
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
 	virtual bool passes3rdLepVeto();
 	virtual bool passesTauVeto();
 	virtual bool passesTTZSel();
+        //virtual bool passesGammaStarVeto();
 
 	virtual int isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
@@ -737,6 +727,7 @@ public:
 	
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
+	virtual bool isGoodMuonForGammaStarVeto(int);  
 	virtual bool isGoodMuonFor3rdLepVeto(int);
 	virtual bool isGoodMuonForTTZ(int, float = 20.);
 	virtual bool isLooseMuon(int);
@@ -750,6 +741,7 @@ public:
 
 	virtual bool isGoodElectron(int, float = -1.);
 	virtual bool isGoodEleForZVeto(int);
+	virtual bool isGoodEleForGammaStarVeto(int);  
 	virtual bool isGoodEleFor3rdLepVeto(int);
 	virtual bool isGoodEleForTTZ(int, float = 20.);
 	virtual bool isGoodEleForChMId(int, float = 20.);
@@ -805,6 +797,7 @@ public:
 	int   fC_app3rdVet; // 3rd lepton veto
 	int   fC_vetoTTZSel; // ttZ veto
         int   fC_chargeVeto;
+        int   fC_GStarVeto;
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
 	void setHypLepton2(int, gChannel);
@@ -833,7 +826,7 @@ public:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
-	ofstream fOUTSTREAM, fOUTSTREAM2, fOUTSTREAM3;
+	ofstream fOUTSTREAM, fOUTSTREAM2, fOUTSTREAM3, fOUTSTREAM4;
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
@@ -897,9 +890,15 @@ public:
 	TString fOutputFileName;
 	Sample *fSample;
 	
-	BTagSFUtil *fBTagSFUtil;
+	// BTagSFUtil *fBTagSFUtil;
+	BTagSF *fBTagSF;
+        GoodRunList *fGoodRunList;
 	TRandom3 *fRand3;
-	
+
+        Int_t fCurRun;
+        Int_t fCurLumi;
+        bool skipLumi;
+        bool skipRun;
 	bool isTChiSlepSnu;
 	private:
 	

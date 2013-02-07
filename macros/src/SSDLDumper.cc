@@ -18,9 +18,11 @@
 #include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
 
-#include "mcbtagSFuncert.h" // claudios btag scales
-
-#include "helper/BTagSFUtil/BTagSFUtil.h"
+//#include "mcbtagSFuncert.h" // claudios btag scales
+//
+//#include "helper/BTagSFUtil/BTagSFUtil.h"
+// #include "helper/BTagSF.hh"
+// #include "helper/GoodRunList.h"
 
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
@@ -44,25 +46,35 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
+
 static const bool  gApplyTauVeto = true;
 static       bool  gSmearMET     = false;
 
-static const bool gDoSystStudies = false;
+bool gDoSystStudies;
 static const bool gDoSyncExercise = false;
-float gMuMaxIso          ;
-float gElMaxIso          ;
-float gMinJetPt          ;
-float gMaxJetEta         ;
-bool  gTTWZ              ;
-bool  gApplyZVeto        ;
-bool  gInvertZVeto       ;
-bool  tmp_gDoWZValidation;
+float gMuMaxIso     ;
+float gElMaxIso     ;
+float gMinJetPt     ;
+float gMaxJetEta    ;
+bool  gTTWZ         ;
+//bool  gApplyZVeto   ;
+bool  gInvertZVeto  ;
+bool  tmp_gApplyZVeto;
+bool  gApplyGStarVeto    ;
 TString tmp_gBaseRegion  ;
+TString gJSONfile        ;
+bool  tmp_gDoWZValidation;
+
+// std::vector< SSDLDumper::Region* > gRegions;
+// std::vector< SSDLDumper::Region* >::iterator regIt;
+// std::map<TString , int> gRegion;
+// int gNREGIONS;
+
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
-static const float gMZ  = 91.2;
+static const float gMZ  = 91.;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 35., 40., 50., 60.}; // fake ratios
@@ -148,15 +160,17 @@ void setVariables(char buffer[1000]){
 	if( sscanf(buffer, "%s\t%s\t%s\t%s", va, t, n, val) > 3){
 		v = va; type = t; name = n; value = val;
 		if (v != "v") {cout << "ERROR in reading variables!!" << endl; exit(1); }
-		if      (type == "bool"    && name =="gTTWZ"          ) gTTWZ        = ((value == "1" || value == "true") ? true:false);
-		else if (type == "bool"    && name =="gApplyZVeto"    ) gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
-		else if (type == "bool"    && name =="gInvertZVeto"   ) gInvertZVeto = ((value == "1" || value == "true") ? true:false);
-		else if (type == "TString" && name =="gBaseRegion"    ) tmp_gBaseRegion  = value; // this is the only one which is needed in the plotter
-		else if (type == "float"   && name =="gMuMaxIso"      ) gMuMaxIso    = value.Atof();
-		else if (type == "float"   && name =="gElMaxIso"      ) gElMaxIso    = value.Atof();
-		else if (type == "float"   && name =="gMaxJetEta"     ) gMaxJetEta   = value.Atof();
-		else if (type == "float"   && name =="gMinJetPt"      ) gMinJetPt    = value.Atof();
-		else if (type == "bool"    && name =="gDoWZValidation") tmp_gDoWZValidation = ((value == "1" || value == "true") ? true:false);
+		if      (type == "bool"    && name =="gDoSystStudies" ) gDoSystStudies   = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gTTWZ"          ) gTTWZ            = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gInvertZVeto"   ) gInvertZVeto        = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gApplyGStarVeto") gApplyGStarVeto     = ((value == "1" || value == "true") ? true:false);
+		else if (type == "TString" && name =="gBaseRegion"    ) tmp_gBaseRegion     = value; // this and the next are the only ones used in the plotter
+		else if (type == "TString" && name =="gJSONfile"      ) gJSONfile           = value;
+		else if (type == "bool"    && name =="gApplyZVeto"   ) tmp_gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
+		else if (type == "float"   && name =="gMuMaxIso"     ) gMuMaxIso        = value.Atof();
+		else if (type == "float"   && name =="gElMaxIso"     ) gElMaxIso        = value.Atof();
+		else if (type == "float"   && name =="gMaxJetEta"    ) gMaxJetEta       = value.Atof();
+		else if (type == "float"   && name =="gMinJetPt"     ) gMinJetPt        = value.Atof();
 		else {cout << "ERROR in reading variables!!" << endl; exit(1); }
 	}
 	else{
@@ -178,7 +192,7 @@ SSDLDumper::SSDLDumper(TString configfile){
 	// TString name;
 	float miMu1, miMu2, miEl1, miEl2;
 	float miHT, maHT, miMET, maMET, miJetPt  ;
-	int   miNj, maNj, miNb, maNb, miNbm, maNbm, ve3rd, veTTZ, veCha;
+	int   miNj, maNj, miNb, maNb, miNbm, maNbm, ve3rd, veTTZ, veCha, veGStar;
 
 	char name[100];
 	cout << "====================================" << endl;
@@ -194,6 +208,7 @@ SSDLDumper::SSDLDumper(TString configfile){
 		}
 		if( sscanf(buffer, "%s\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t%d\t%d", 
 			   name, &miHT, &maHT, &miMET, &maMET, &miNj, &maNj, &miNb, &maNb, &miNbm, &maNbm, &miMu1, &miMu2, &miEl1, &miEl2, &ve3rd, &veTTZ, &veCha) > 17){
+               //             name, &miHT, &maHT, &miMET, &maMET, &miNj, &maNj, &miNb, &maNb, &miNbm, &maNbm, &miMu1, &miMu2, &miEl1, &miEl2, &ve3rd, &veTTZ, &veCha) > 17){
 			SSDLDumper::Region * tmp_region  = new SSDLDumper::Region();
 			tmp_region->sname      = (TString) name;
 			tmp_region->minHT      = miHT;
@@ -213,19 +228,24 @@ SSDLDumper::SSDLDumper(TString configfile){
 			tmp_region->app3rdVet  = ve3rd;
 			tmp_region->vetoTTZSel = veTTZ;
 			tmp_region->chargeVeto = veCha;
+			//			tmp_region->GStarVeto  = veGStar;
 			SSDLDumper::gRegion[name] = counter;
 			counter++;
 
 
 			SSDLDumper::gRegions.push_back(tmp_region);
-			cout << "----------------  LOADING REGION  ------------------------------" << endl;
-				cout << Form("%13s/%3.0f/%4.0f/%3.0f/%3.0f",
+			if(fVerbose > 0) {
+				cout << "----------------  LOADING REGION  ------------------------------" << endl;
+				cout << Form("%13s/%3.0f/%4.0f/%3.0f/%3.0f/%3.0f/%3.0f",
 				tmp_region->sname.Data()       ,
 				tmp_region->minHT       ,
 				tmp_region->maxHT       ,
 				tmp_region->minMet      ,
-				tmp_region->maxMet  ) << endl;
-			cout << "--------------------------------------------------------" << endl;
+				tmp_region->maxMet      ,
+				tmp_region->minMu1pt    ,
+				tmp_region->minMu2pt  ) << endl;
+				cout << "--------------------------------------------------------" << endl;
+			}
 			//delete tmp_region;
 		}
 		else{
@@ -249,9 +269,20 @@ SSDLDumper::SSDLDumper(TString configfile){
 		gMaxJetEta   ,
 		tmp_gBaseRegion.Data()  ) << endl;
 	cout << "========================================================" << endl;
-	SSDLDumper::gBaseRegion     = tmp_gBaseRegion;
+	SSDLDumper::gBaseRegion = tmp_gBaseRegion;
+	SSDLDumper::gApplyZVeto = tmp_gApplyZVeto;
 	SSDLDumper::gDoWZValidation = tmp_gDoWZValidation;
-	
+
+	// initializing all the systematics here out of a lack of other places
+	gSystematics["Normal"]   = 0;
+	gSystematics["JetUp"]    = 1;
+	gSystematics["JetDown"]  = 2;
+	gSystematics["JetSmear"] = 3;
+	gSystematics["BUp"]      = 4;
+	gSystematics["BDown"]    = 5;
+	gSystematics["LepUp"]    = 6;
+	gSystematics["LepDown"]  = 7;
+
 }
 
 //____________________________________________________________________________
@@ -287,14 +318,15 @@ void SSDLDumper::init(){
 	Util::SetStyle();
 	fDoCounting = false;  // Disable counters by default
 
-	fBTagSFUtil = new BTagSFUtil("CSV", 28);
+	// fBTagSFUtil = new BTagSFUtil("CSV", 28);
+	fBTagSF = new BTagSF();
 	fRand3 = new TRandom3(0);
 
 	resetHypLeptons();
 	initCutNames();
 	
-	setRegionCuts(gRegion[gBaseRegion]); // no argument = reset to baseline
-	
+	setRegionCuts(gRegion[gBaseRegion]); // no argument = reset to gBaseRegion
+
  	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 20.;
 
@@ -376,11 +408,24 @@ const double *SSDLDumper::getEtaBins (gChannel chan){
 }
 //____________________________________________________________________________
 void SSDLDumper::loop(){
+        /////////////////////// 
+        //READ JSON FILE
+        /////////////////////// 
+        fGoodRunList = new GoodRunList(gJSONfile);
+	//////////////////////
 	for(size_t i = 0; i < fSamples.size(); ++i){
 		fSample = fSamples[i]; // TODO: Clean this up, call the triggers with an argument
 		fOutputFileName = fOutputDir + fSample->sname + "_Yields.root";
+		
+		fCurLumi = -1;
+		fCurRun  = -1;
+		skipRun  = false;
+		skipLumi = false;
+		
 		loopEvents(fSample);
 	}
+
+	delete fGoodRunList;
 }
 void SSDLDumper::loopEvents(Sample *S){
 	fDoCounting = true;
@@ -397,7 +442,7 @@ void SSDLDumper::loopEvents(Sample *S){
 	TTree *tree = S->getTree();
 	S->evcount->Add(S->getEvCount());	
 	//cout << "MARC: evcount: " << S->getEvCount()->GetEntries() << endl;
-	S->ngen = S->getEvCount()->GetEntries();
+	// MARC nov 29 S->ngen = S->getEvCount()->GetEntries();
 	
 	// Stuff to execute for each sample BEFORE looping on the events
 	initCounters();
@@ -417,7 +462,13 @@ void SSDLDumper::loopEvents(Sample *S){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-		if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
+		
+		/////////////////////////////////////////////
+		//   APPLY JSON
+		/////////////////////////////////////////////
+		if (S->datamc == 0 && !IsInJSON()) continue;
+		
+		// if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		// DEBUG
 		//		if (Run!=gDEBUG_RUNNUMBER_) continue;
@@ -505,7 +556,11 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		fillKinPlots(S,gRegion[gBaseRegion]);
 		if (gDoWZValidation) fillKinPlots(S,gRegion["WZEnriched"]);
-		for(int r = 0; r < gRegion["TTbarWPresel"]; r++) fillYields(S, r);
+		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = true;
+			fillYields(S, gRegion[(*regIt)->sname]);
+			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = false;
+		}
 
 		
 		// disable for now // reset the event weight to what it should be without a region cut applied
@@ -514,11 +569,11 @@ void SSDLDumper::loopEvents(Sample *S){
 		// disable for now 	gEventWeight *= PUWeight; // PU weight is always 1. for data, so no problem here
 		// disable for now }
 
-		fillYields(S, gRegion["TTbarWPresel"]);
+		// fillYields(S, gRegion["TTbarWPresel"]);
 
-		fDoCounting = true;
-		fillYields(S, gRegion["TTbarWSel"]);
-		fDoCounting = false;
+		// fDoCounting = true;
+		// fillYields(S, gRegion["TTbarWSel"]);
+		// fDoCounting = false;
 
 		fillSigEventTree(S, 0);
 		fillDiffYields(S);
@@ -534,57 +589,57 @@ void SSDLDumper::loopEvents(Sample *S){
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
 
- 		// Jet pts scaled down
- 		smearJetPts(S, 1);
- 		fillYields(S, gRegion["TTbarWSelJU"]);
- 		fillSigEventTree(S, 1);
+		// Jet pts scaled down
+		smearJetPts(S, 1);
+ 		// fillYields(S, gRegion["TTbarWSelJU"]);
+		fillSigEventTree(S, gSystematics["JetUp"]);
 
- 		// Jet pts scaled down
- 		fChain->GetEntry(jentry); // reset tree vars
+		// Jet pts scaled down
+		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
- 		smearJetPts(S, 2);
- 		fillYields(S, gRegion["TTbarWSelJD"]);
- 		fillSigEventTree(S, 2);
+		smearJetPts(S, 2);
+ 		// fillYields(S, gRegion["TTbarWSelJD"]);
+		fillSigEventTree(S, gSystematics["JetDown"]);
 
- 		// Jet pts smeared
- 		fChain->GetEntry(jentry); // reset tree vars
+		// Jet pts smeared
+		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
- 		smearJetPts(S, 3);
- 		fillYields(S, gRegion["TTbarWSelJS"]);
- 		fillSigEventTree(S, 3);
+		smearJetPts(S, 3);
+ 		// fillYields(S, gRegion["TTbarWSelJS"]);
+		fillSigEventTree(S, gSystematics["JetSmear"]);
 
- 		// Btags scaled up
- 		fChain->GetEntry(jentry); // reset tree vars
- 		scaleBTags(S, 1);
- 		fillYields(S, gRegion["TTbarWSelBU"]);
- 		fillSigEventTree(S, 4);
+		// Btags scaled up
+		fChain->GetEntry(jentry); // reset tree vars
+		scaleBTags(S, 1);
+ 		// fillYields(S, gRegion["TTbarWSelBU"]);
+		fillSigEventTree(S, gSystematics["BUp"]);
 
- 		// Btags scaled down
- 		fChain->GetEntry(jentry); // reset tree vars
- 		scaleBTags(S, 2);
- 		fillYields(S, gRegion["TTbarWSelBD"]);
- 		fillSigEventTree(S, 5);
-		
- 		// Lepton pts scaled up
- 		fChain->GetEntry(jentry); // reset tree vars
+		// Btags scaled down
+		fChain->GetEntry(jentry); // reset tree vars
+		scaleBTags(S, 2);
+ 		// fillYields(S, gRegion["TTbarWSelBD"]);
+		fillSigEventTree(S, gSystematics["BDown"]);
+
+		// Lepton pts scaled up
+		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
- 		scaleLeptons(S, 1);
- 		fillYields(S, gRegion["TTbarWSelLU"]);
- 		fillSigEventTree(S, 6);
+		scaleLeptons(S, 1);
+ 		// fillYields(S, gRegion["TTbarWSelLU"]);
+		fillSigEventTree(S, gSystematics["LepUp"]);
 
- 		// Lepton pts scaled down
- 		fChain->GetEntry(jentry); // reset tree vars
+		// Lepton pts scaled down
+		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags();
- 		scaleLeptons(S, 2);
- 		fillYields(S, gRegion["TTbarWSelLD"]);
- 		fillSigEventTree(S, 7);
+		scaleLeptons(S, 2);
+ 		// fillYields(S, gRegion["TTbarWSelLD"]);
+		fillSigEventTree(S, gSystematics["LepDown"]);
 	}
 
 	// Stuff to execute for each sample AFTER looping on the events
 	fillCutFlowHistos(S);
-	printCutFlow(Muon);
-	printCutFlow(Elec);
-	printCutFlow(ElMu);
+	// marc printCutFlow(Muon);
+	// marc printCutFlow(Elec);
+	// marc printCutFlow(ElMu);
 	
 	writeHistos(S, pFile);
 	writeSigGraphs(S, Muon, pFile);
@@ -601,6 +656,30 @@ void SSDLDumper::loopEvents(Sample *S){
 
 	if(S->datamc == 0) fOUTSTREAM.close();
 	fDoCounting = false;
+}
+//____________________________________________________________________________
+bool SSDLDumper::IsInJSON(){
+        if (!fGoodRunList->IsInitialized()) {
+	        cout << "[ERROR]: GoodRunList is not initialized " << endl;
+		return false;
+	}
+	
+	// Run processing
+	if( fCurRun != Run ) { // new run
+ 	        fCurRun = Run;
+		skipRun = false;
+		if ( fGoodRunList->CheckRun(Run) == false ) skipRun = true;
+	}
+	
+	// Check if new lumi is in JSON file
+	if( fCurLumi != LumiSec ) { // new lumisection
+	        fCurLumi = LumiSec;
+		skipLumi = false;
+		if ( fGoodRunList->CheckRunLumi(Run,LumiSec) == false ) skipLumi = true;
+	}
+	if(skipRun || skipLumi) return false;
+
+	return true;
 }
 
 //____________________________________________________________________________
@@ -710,20 +789,23 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	}
 	// end filling the ttbar ratio histograms
 
-	int dummy = isSigSupMuEvent();
+	int looseMuInd = isSigSupMuEvent();
 	if(singleMuTrigger() && isSigSupMuEvent() > -1){
-		if( isTightMuon(dummy) ){
-			S->region[reg][HighPt].mm.fntight->Fill(MuPt[dummy], fabs(MuEta[dummy]), gEventWeight);
+		if( isTightMuon(looseMuInd) ){
+			S->region[reg][HighPt].mm.fntight->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			S->region[reg][HighPt].mm.fntight_nv->Fill(NVrtx,                   gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
-		if( isLooseMuon(dummy) ){
-			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(dummy), MuPt[dummy]);
-			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(dummy), fabs(MuEta[dummy]));
+		if( isLooseMuon(looseMuInd) ){
+			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(looseMuInd), MuPt[looseMuInd]);
+			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(looseMuInd), fabs(MuEta[looseMuInd]));
+			S->region[reg][HighPt].mm.fratio_nv ->Fill(isTightMuon(looseMuInd), NVrtx);
 			// marc S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
 			// marc S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
 
-			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[dummy], fabs(MuEta[dummy]), gEventWeight);
+			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
+			S->region[reg][HighPt].mm.fnloose_nv->Fill(NVrtx,                   gEventWeight);
 			// marc S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
@@ -731,15 +813,18 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
 		if( isTightMuon(mu2) ){
 			S->region[reg][HighPt].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			S->region[reg][HighPt].mm.pntight_nv->Fill(NVrtx,                    gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(mu2) ){
 			S->region[reg][HighPt].mm.pratio_pt ->Fill(isTightMuon(mu2), MuPt[mu2]);
 			S->region[reg][HighPt].mm.pratio_eta->Fill(isTightMuon(mu2), fabs(MuEta[mu2]));
+			S->region[reg][HighPt].mm.pratio_nv ->Fill(isTightMuon(mu2), NVrtx);
 			// S->region[reg][HighPt].mm.pratio_pt ->FillWeighted(isTightMuon(mu2), gEventWeight, MuPt[mu2]);
 			// S->region[reg][HighPt].mm.pratio_eta->FillWeighted(isTightMuon(mu2), gEventWeight, fabs(MuEta[mu2]));
 
 			S->region[reg][HighPt].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			S->region[reg][HighPt].mm.pnloose_nv->Fill(NVrtx,                       gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 	}
@@ -805,20 +890,23 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-	dummy = isSigSupElEvent();
+	int looseElInd = isSigSupElEvent();
 	if(singleElTrigger() && isSigSupElEvent() > -1){
-		if( isTightElectron(dummy) ){
-			S->region[reg][HighPt].ee.fntight->Fill(ElPt[dummy], fabs(ElEta[dummy]), gEventWeight);
+		if( isTightElectron(looseElInd) ){
+			S->region[reg][HighPt].ee.fntight->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
+			S->region[reg][HighPt].ee.fntight_nv->Fill(NVrtx,                   gEventWeight);
 			// marc S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
-		if( isLooseElectron(dummy) ){
-			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(dummy), ElPt[dummy]);
-			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(dummy), fabs(ElEta[dummy]));
+		if( isLooseElectron(looseElInd) ){
+			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(looseElInd), ElPt[looseElInd]);
+			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(looseElInd), fabs(ElEta[looseElInd]));
+			S->region[reg][HighPt].ee.fratio_nv ->Fill(isTightElectron(looseElInd), NVrtx);
 			// marc S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
 			// marc S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
 
-			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[dummy], fabs(ElEta[dummy]), gEventWeight);
+			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
+			S->region[reg][HighPt].ee.fnloose_nv->Fill(NVrtx,                   gEventWeight);
 			// marc S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
@@ -827,15 +915,18 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	if(doubleElTrigger() && isZElElEvent(el1, el2)){
 		if( isTightElectron(el2) ){
 			S->region[reg][HighPt].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			S->region[reg][HighPt].ee.pntight_nv->Fill(NVrtx,                       gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(el2) ){
 			S->region[reg][HighPt].ee.pratio_pt ->Fill(isTightElectron(el2), ElPt[el2]);
 			S->region[reg][HighPt].ee.pratio_eta->Fill(isTightElectron(el2), fabs(ElEta[el2]));
+			S->region[reg][HighPt].ee.pratio_nv ->Fill(isTightElectron(el2), NVrtx);
 			// S->region[reg][HighPt].ee.pratio_pt ->FillWeighted(isTightElectron(el2), gEventWeight, ElPt[el2]);
 			// S->region[reg][HighPt].ee.pratio_eta->FillWeighted(isTightElectron(el2), gEventWeight, fabs(ElEta[el2]));
 
 			S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			S->region[reg][HighPt].ee.pnloose_nv->Fill(NVrtx,                       gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 	}
@@ -1287,9 +1378,9 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 
 	fCurrentChannel = Muon;
 	if(singleMuTrigger()){
-		int dummy = isSigSupMuEvent();
+		int looseMuInd = isSigSupMuEvent();
 		if(isSigSupMuEvent() > -1){
-			if( isTightMuon(dummy) ){
+			if( isTightMuon(looseMuInd) ){
 				RP0->ntight[0]->Fill(getNJets(),               gEventWeight);
 				RP0->ntight[1]->Fill(getHT(),                  gEventWeight);
 				RP0->ntight[2]->Fill(getMaxJPt(),              gEventWeight);
@@ -1298,7 +1389,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    gEventWeight);
 				RP0->ntight[6]->Fill(getNBTags(),              gEventWeight);
 			}
-			if( isLooseMuon(dummy) ){
+			if( isLooseMuon(looseMuInd) ){
 				RP0->nloose[0]->Fill(getNJets(),               gEventWeight);
 				RP0->nloose[1]->Fill(getHT(),                  gEventWeight);
 				RP0->nloose[2]->Fill(getMaxJPt(),              gEventWeight);
@@ -1309,23 +1400,23 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 			}
 		}
 		fC_maxMet_Control = 1000.;
-		dummy = isSigSupMuEvent();
+		looseMuInd = isSigSupMuEvent();
 		if(isSigSupMuEvent() > -1){
-			if( isTightMuon(dummy) ){
+			if( isTightMuon(looseMuInd) ){
 				RP0->ntight[7]->Fill(getMET(),                    gEventWeight);
 			}
-			if( isLooseMuon(dummy) ){
+			if( isLooseMuon(looseMuInd) ){
 				RP0->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
-		dummy = isSigSupMuEvent();
+		looseMuInd = isSigSupMuEvent();
 		if(isSigSupMuEvent() > -1){
-			if( isTightMuon(dummy) ){
+			if( isTightMuon(looseMuInd) ){
 				RP0->ntight[8]->Fill(MuMT[0],                  gEventWeight);
 			}
-			if( isLooseMuon(dummy) ){
+			if( isLooseMuon(looseMuInd) ){
 				RP0->nloose[8]->Fill(MuMT[0],                  gEventWeight);
 			}
 		}		
@@ -1334,9 +1425,9 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
 	setRegionCuts(gRegion[gBaseRegion]);
 	if(singleElTrigger()){
-		int dummy = isSigSupElEvent();
+		int looseElInd = isSigSupElEvent();
 		if(isSigSupElEvent() > -1){
-			if( isTightElectron(dummy) ){
+			if( isTightElectron(looseElInd) ){
 				RP1->ntight[0]->Fill(getNJets(),                   gEventWeight);
 				RP1->ntight[1]->Fill(getHT(),                      gEventWeight);
 				RP1->ntight[2]->Fill(getMaxJPt(),                  gEventWeight);
@@ -1345,7 +1436,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP1->ntight[5]->Fill(getAwayJetPt(0, Elec),    gEventWeight);
 				RP1->ntight[6]->Fill(getNBTags(),                  gEventWeight);
 			}
-			if( isLooseElectron(dummy) ){
+			if( isLooseElectron(looseElInd) ){
 				RP1->nloose[0]->Fill(getNJets(),                   gEventWeight);
 				RP1->nloose[1]->Fill(getHT(),                      gEventWeight);
 				RP1->nloose[2]->Fill(getMaxJPt(),                  gEventWeight);
@@ -1356,23 +1447,23 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 			}
 		}
 		fC_maxMet_Control = 1000.;
-		dummy = isSigSupElEvent();
+		looseElInd = isSigSupElEvent();
 		if(isSigSupElEvent() > -1){
-			if( isTightElectron(dummy) ){
+			if( isTightElectron(looseElInd) ){
 				RP1->ntight[7]->Fill(getMET(),                    gEventWeight);
 			}
-			if( isLooseElectron(dummy) ){
+			if( isLooseElectron(looseElInd) ){
 				RP1->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
-		dummy = isSigSupElEvent();
+		looseElInd = isSigSupElEvent();
 		if(isSigSupElEvent() > -1){
-			if( isTightElectron(dummy) ){
+			if( isTightElectron(looseElInd) ){
 				RP1->ntight[8]->Fill(ElMT[0],                  gEventWeight);
 			}
-			if( isLooseElectron(dummy) ){
+			if( isLooseElectron(looseElInd) ){
 				RP1->nloose[8]->Fill(ElMT[0],                  gEventWeight);
 			}
 		}		
@@ -1391,11 +1482,12 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	setRegionCuts(gRegion[gBaseRegion]);
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
-	// deactivate ZVeto and 3rdlepton veto
+	fC_minNjets  = 0;
+	fC_minMet    = 0.;
 	fC_app3rdVet  = 0;
 	fC_chargeVeto = 0;
-	gApplyZVeto   = false;
-	
+	// gApplyZVeto   = false;
+
 	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
 	fSETree_HLTSF    = gHLTSF;
@@ -1444,9 +1536,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2     = MuPt[ind2];
 		fSETree_eta1    = MuEta[ind1];
 		fSETree_eta2    = MuEta[ind2];
-		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1494,7 +1584,6 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_eta1   = MuEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1547,7 +1636,6 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_eta2   = ElEta[ind2];
 
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = ElPFIso[ind1];
@@ -1605,6 +1693,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 				fSETree_eta1    = MuEta[ind1];
 				fSETree_eta2    = ElEta[ind2];
 				fSETree_ZVeto   = passesZVeto()?1:0;
+				//fSETree_ZVeto   = passesZVetoNew(ind1, ind2, 1)?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 				fSETree_ttZSel  = passesTTZSel()?1:0;
 				fSETree_PFIso1  = MuPFIso[ind1];
@@ -1634,6 +1723,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 				fSETree_eta1    = ElEta[ind1];
 				fSETree_eta2    = ElEta[ind2];
 				fSETree_ZVeto   = passesZVeto()?1:0;
+				//fSETree_ZVeto   = passesZVetoNew(ind1, ind2, 2)?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 				fSETree_ttZSel  = passesTTZSel()?1:0;
 				fSETree_PFIso1  = ElPFIso[ind1];
@@ -1940,7 +2030,7 @@ void SSDLDumper::fillKinPlots(Sample *S, int reg){
 	  KP1 = &S->kinplots[1][HighPt];
 	  KP2 = &S->kinplots[2][HighPt];	  
 	}
-	cout << "[DEBUG] Initialized KP0 " << KP0 << endl;
+	// cout << "[DEBUG] Initialized KP0 " << KP0 << endl;
 
 	int ind1(-1), ind2(-1);
 	int mu(-1), el(-1); // for e/mu channel, easier readability
@@ -3023,7 +3113,11 @@ void SSDLDumper::bookHistos(Sample *S){
 				C->fnloose  = new TH2D(rootname + "_fNLoose",  "fNLoose",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose ->Sumw2();
 				C->pntight  = new TH2D(rootname + "_pNTight",  "pNTight",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight ->Sumw2();
 				C->pnloose  = new TH2D(rootname + "_pNLoose",  "pNLoose",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose ->Sumw2();
-				
+
+				C->fntight_nv  = new TH1D(rootname + "_fNTight_nv",  "fNTight_nv", 18, 0., 36.); C->fntight_nv ->Sumw2();
+				C->fnloose_nv  = new TH1D(rootname + "_fNLoose_nv",  "fNLoose_nv", 18, 0., 36.); C->fnloose_nv ->Sumw2();
+				C->pntight_nv  = new TH1D(rootname + "_pNTight_nv",  "pNTight_nv", 18, 0., 36.); C->pntight_nv ->Sumw2();
+				C->pnloose_nv  = new TH1D(rootname + "_pNLoose_nv",  "pNLoose_nv", 18, 0., 36.); C->pnloose_nv ->Sumw2();
 				// duplicate for only ttbar ratios
 				C->fntight_ttbar  = new TH2D(rootname + "_fNTight_ttbar",  "fNTight_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fntight_ttbar ->Sumw2();
 				C->fnloose_ttbar  = new TH2D(rootname + "_fNLoose_ttbar",  "fNLoose_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose_ttbar ->Sumw2();
@@ -3040,6 +3134,8 @@ void SSDLDumper::bookHistos(Sample *S){
 				C->fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
 				C->pratio_pt  = new TEfficiency(rootname + "_pRatio_pt",  "pRatio_pt",  getNPPtBins(c), getPPtBins(c));
 				C->pratio_eta = new TEfficiency(rootname + "_pRatio_eta", "pRatio_eta", getNEtaBins(c), getEtaBins(c));
+				C->fratio_nv  = new TEfficiency(rootname + "_fRatio_nv",  "fRatio_nv",  18, 0., 36.);
+				C->pratio_nv  = new TEfficiency(rootname + "_pRatio_nv",  "pRatio_nv",  18, 0., 36.);
 
 				// C->fratio_pt ->SetUseWeightedEvents();
 				// C->fratio_eta->SetUseWeightedEvents();
@@ -3211,7 +3307,13 @@ void SSDLDumper::deleteHistos(Sample *S){
 				delete C->fnloose;
 				delete C->pntight;
 				delete C->pnloose;
+				delete C->fntight_nv;
+				delete C->fnloose_nv;
+				delete C->pntight_nv;
+				delete C->pnloose_nv;
 				
+				delete C->fratio_nv;
+				delete C->pratio_nv;
 				// duplicate for ttbar only ratios
 				delete C->fntight_ttbar;
 				delete C->fnloose_ttbar;
@@ -3405,6 +3507,10 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 				C->fnloose    ->Write(C->fnloose    ->GetName(), TObject::kWriteDelete);
 				C->pntight    ->Write(C->pntight    ->GetName(), TObject::kWriteDelete);
 				C->pnloose    ->Write(C->pnloose    ->GetName(), TObject::kWriteDelete);
+				C->fntight_nv ->Write(C->fntight_nv ->GetName(), TObject::kWriteDelete);
+				C->fnloose_nv ->Write(C->fnloose_nv ->GetName(), TObject::kWriteDelete);
+				C->pntight_nv ->Write(C->pntight_nv ->GetName(), TObject::kWriteDelete);
+				C->pnloose_nv ->Write(C->pnloose_nv ->GetName(), TObject::kWriteDelete);
 
 				// duplicate for ttbar only ratios
 				C->fntight_ttbar    ->Write(C->fntight_ttbar    ->GetName(), TObject::kWriteDelete);
@@ -3422,6 +3528,8 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 				C->pratio_pt ->Write(C->pratio_pt ->GetName(), TObject::kWriteDelete);
 				C->fratio_eta->Write(C->fratio_eta->GetName(), TObject::kWriteDelete);
 				C->pratio_eta->Write(C->pratio_eta->GetName(), TObject::kWriteDelete);
+				C->fratio_nv ->Write(C->fratio_nv ->GetName(), TObject::kWriteDelete);
+				C->pratio_nv ->Write(C->pratio_nv ->GetName(), TObject::kWriteDelete);
 
 				if(S->datamc > 0){
 					C->sst_origin ->Write(C->sst_origin ->GetName(), TObject::kWriteDelete);
@@ -3676,6 +3784,10 @@ int  SSDLDumper::readHistos(TString filename){
 						getObjectSafe(pFile, root + "_pNTight", C->pntight);
 						getObjectSafe(pFile, root + "_pNLoose", C->pnloose);
 
+						getObjectSafe(pFile, root + "_fNTight_nv", C->fntight_nv);
+						getObjectSafe(pFile, root + "_fNLoose_nv", C->fnloose_nv);
+						getObjectSafe(pFile, root + "_pNTight_nv", C->pntight_nv);
+						getObjectSafe(pFile, root + "_pNLoose_nv", C->pnloose_nv);
 						// duplicate for ttbar only ratios
 						getObjectSafe(pFile, root + "_fNTight_ttbar", C->fntight_ttbar);
 						getObjectSafe(pFile, root + "_fNLoose_ttbar", C->fnloose_ttbar);
@@ -3692,6 +3804,8 @@ int  SSDLDumper::readHistos(TString filename){
 						getObjectSafe(pFile, root + "_pRatio_pt",  C->pratio_pt);
 						getObjectSafe(pFile, root + "_fRatio_eta", C->fratio_eta);
 						getObjectSafe(pFile, root + "_pRatio_eta", C->pratio_eta);
+						getObjectSafe(pFile, root + "_fRatio_nv", C->fratio_nv);
+						getObjectSafe(pFile, root + "_pRatio_nv", C->pratio_nv);
 
 						if(S->datamc > 0){
 							getObjectSafe(pFile, root + "_fTOrigin", C->sst_origin);
@@ -3780,7 +3894,7 @@ int SSDLDumper::elIndexToBin(int ind){
 		if(id == 22)                               return 2;  // gamma
 		if(type == 11 || type == 12 || type == 13 ||
 		   type == 18 || type == 19)               return 3;  // Hadr. fake
-		return 15;                                            // uid
+		return 12;                                            // uid
 	}
 	if(mtype == 1)                                 return 4;  // W/Z skipped in madgraph event (WGstar/TTV samples)
 	if(mid == 24)                                  return 4;  // W
@@ -3935,25 +4049,43 @@ bool SSDLDumper::eMuTrigger(){
 // Helper functions:
 //____________________________________________________________________________
 void SSDLDumper::scaleBTags(Sample *S, int flag){
+	// for now supports only CSVM b-tagger. can be extended if need be
 	if(S->datamc == 0) return; // don't smear data
 	for(size_t i = 0; i < NJets; ++i){
-		// if(isGoodJet(i) == false) continue;
+		if(isGoodJet(i) == false) continue;
 		bool is_tagged_lse = JetCSVBTag[i] > 0.244;
 		bool is_tagged_med = JetCSVBTag[i] > 0.679;
-		int pdgid = 0;
-		if(JetPartonID[i] == 0 || JetPartonID[i] == -2) pdgid = -999;
-		else if(JetPartonID[i] == -1)                   pdgid = 0;
-		else pdgid = JetPartonID[i];
-		
+		float random = fRand3->Uniform(0,1);
 		string meanminmax = "mean";
 		if(flag == 1) meanminmax = "max";
 		if(flag == 2) meanminmax = "min";
-		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], pdgid, meanminmax);
-		if(!is_tagged_lse && !is_tagged_med) JetCSVBTag[i] = 0.1; // not tagged
-		if( is_tagged_lse && !is_tagged_med) JetCSVBTag[i] = 0.5; // loose tagged
-		if( is_tagged_lse &&  is_tagged_med) JetCSVBTag[i] = 1.0; // medium tagged
+
+		bool newTag = fBTagSF->modifyBTagsWithSF(is_tagged_med, JetPt[i], JetEta[i], JetPartonID[i], meanminmax, random); // WARNING: change this to partonflavor once the minitrees are ready!!!
+		if(!newTag) JetCSVBTag[i] = 0.1; // not tagged
+		if( newTag) JetCSVBTag[i] = 1.0; // tagged
 	}
 }
+
+// void SSDLDumper::scaleBTags(Sample *S, int flag){
+// 	if(S->datamc == 0) return; // don't smear data
+// 	for(size_t i = 0; i < NJets; ++i){
+// 		// if(isGoodJet(i) == false) continue;
+// 		bool is_tagged_lse = JetCSVBTag[i] > 0.244;
+// 		bool is_tagged_med = JetCSVBTag[i] > 0.679;
+// 		int pdgid = 0;
+// 		if(JetPartonID[i] == 0 || JetPartonID[i] == -2) pdgid = -999;
+// 		else if(JetPartonID[i] == -1)                   pdgid = 0;
+// 		else pdgid = JetPartonID[i];
+// 		
+// 		string meanminmax = "mean";
+// 		if(flag == 1) meanminmax = "max";
+// 		if(flag == 2) meanminmax = "min";
+// 		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], pdgid, meanminmax);
+// 		if(!is_tagged_lse && !is_tagged_med) JetCSVBTag[i] = 0.1; // not tagged
+// 		if( is_tagged_lse && !is_tagged_med) JetCSVBTag[i] = 0.5; // loose tagged
+// 		if( is_tagged_lse &&  is_tagged_med) JetCSVBTag[i] = 1.0; // medium tagged
+// 	}
+// }
 void SSDLDumper::saveBTags(){
 	// Saves the current tagger values for all jets in a vector
 	fSaved_Tags.clear();
@@ -4073,8 +4205,8 @@ float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-  	//return pfMETType1;
-	return pfMET;
+  	return pfMETType1;
+	//return pfMET;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
@@ -4622,6 +4754,113 @@ bool SSDLDumper::passesHTCut(float min, float max){
 bool SSDLDumper::passesMETCut(float min, float max){
 	return (getMET() >= min && getMET() < max);
 }
+bool SSDLDumper::passesZVetoNew(int l1, int l2, int toggle, float dm){
+	if (toggle == 0 && NMus > 2){
+		TLorentzVector pmu1, pmu2, pmu3;
+		pmu1.SetPtEtaPhiM(MuPt[l1], MuEta[l1], MuPhi[l1], gMMU);
+		pmu2.SetPtEtaPhiM(MuPt[l2], MuEta[l2], MuPhi[l2], gMMU);
+		// third muon
+		for(size_t i = 0; i < NMus; ++i){
+			if (i == l1 || i == l2) continue;
+			if(isGoodMuonForZVeto(i) == false) continue;
+			if(MuCharge[i] == MuCharge[l1]) continue;
+			pmu3.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			if( ( fabs((pmu1+pmu3).M()) - gMZ ) < dm) return false;
+			if( ( fabs((pmu2+pmu3).M()) - gMZ ) < dm) return false;
+		  }
+	}
+
+	if (toggle == 1 && (NMus > 1 || NEls > 1) ){
+		TLorentzVector pmu1, pel1, pl3;
+		pmu1.SetPtEtaPhiM(MuPt[l1], MuEta[l1], MuPhi[l1], gMMU);
+		pel1.SetPtEtaPhiM(ElPt[l2], ElEta[l2], ElPhi[l2], gMEL);
+		// third lepton
+		for(size_t i = 0; i < NMus; ++i){
+			if (i == l1) continue;
+			if(isGoodMuonForZVeto(i) == false) continue;
+			if(MuCharge[i] == MuCharge[l1]) continue;
+			pl3.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			if( ( fabs((pmu1+pl3).M()) - gMZ ) < dm) return false;
+		  }
+		for(size_t i = 0; i < NEls; ++i){
+			if (i == l2) continue;
+			if(isGoodEleForZVeto(i) == false) continue;
+			if(ElCharge[i] == ElCharge[l2]) continue;
+			pl3.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			if( ( fabs((pel1+pl3).M()) - gMZ )  < dm) return false;
+		  }
+	}
+
+	if (toggle == 2 && NEls > 2){
+		TLorentzVector pel1, pel2, pel3;
+		pel1.SetPtEtaPhiM(ElPt[l1], ElEta[l1], ElPhi[l1], gMEL);
+		pel2.SetPtEtaPhiM(ElPt[l2], ElEta[l2], ElPhi[l2], gMEL);
+		// third electron
+		for(size_t i = 0; i < NEls; ++i){
+			if (i == l1 || i == l2) continue;
+			if(isGoodEleForZVeto(i) == false) continue;
+			if(ElCharge[i] == ElCharge[l1]) continue;
+			pel3.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			if( ( fabs((pel1+pel3).M()) - gMZ ) < dm) return false;
+			if( ( fabs((pel2+pel3).M()) - gMZ ) < dm) return false;
+		  }
+	}
+	if (gInvertZVeto) return false;
+	return true;
+}
+bool SSDLDumper::passesGammaStarVeto(int l1, int l2, int toggle, float mass){
+	if (toggle == 0 && NMus > 2){
+		TLorentzVector pmu1, pmu2, pmu3;
+		pmu1.SetPtEtaPhiM(MuPt[l1], MuEta[l1], MuPhi[l1], gMMU);
+		pmu2.SetPtEtaPhiM(MuPt[l2], MuEta[l2], MuPhi[l2], gMMU);
+		// third muon
+		for(size_t i = 0; i < NMus; ++i){
+			if (i == l1 || i == l2) continue;
+			if(isGoodMuonForGammaStarVeto(i) == false) continue;
+			if(MuCharge[i] == MuCharge[l1]) continue;
+			pmu3.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			if( (pmu1+pmu3).M() < mass) return false;
+			if( (pmu2+pmu3).M() < mass) return false;
+		  }
+	}
+
+	if (toggle == 1 && (NMus > 1 || NEls > 1) ){
+		TLorentzVector pmu1, pel1, pl3;
+		pmu1.SetPtEtaPhiM(MuPt[l1], MuEta[l1], MuPhi[l1], gMMU);
+		pel1.SetPtEtaPhiM(ElPt[l2], ElEta[l2], ElPhi[l2], gMEL);
+		// third lepton
+		for(size_t i = 0; i < NMus; ++i){
+			if (i == l1) continue;
+			if(isGoodMuonForGammaStarVeto(i) == false) continue;
+			if(MuCharge[i] == MuCharge[l1]) continue;
+			pl3.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			if((pmu1+pl3).M()  < mass) return false;
+		  }
+		for(size_t i = 0; i < NEls; ++i){
+			if (i == l2) continue;
+			if(isGoodEleForGammaStarVeto(i) == false) continue;
+			if(ElCharge[i] == ElCharge[l2]) continue;
+			pl3.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			if((pel1+pl3).M()  < mass) return false;
+		  }
+	}
+
+	if (toggle == 2 && NEls > 2){
+		TLorentzVector pel1, pel2, pel3;
+		pel1.SetPtEtaPhiM(ElPt[l1], ElEta[l1], ElPhi[l1], gMEL);
+		pel2.SetPtEtaPhiM(ElPt[l2], ElEta[l2], ElPhi[l2], gMEL);
+		// third electron
+		for(size_t i = 0; i < NEls; ++i){
+			if (i == l1 || i == l2) continue;
+			if(isGoodEleForGammaStarVeto(i) == false) continue;
+			if(ElCharge[i] == ElCharge[l1]) continue;
+			pel3.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			if( (pel1+pel3).M() < mass) return false;
+			if( (pel2+pel3).M() < mass) return false;
+		  }
+	}
+	return true;
+}
 bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDumper::*eleSelector)(int), float dm){
 // Checks if any combination of opposite sign, same flavor leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
@@ -4869,7 +5108,57 @@ bool SSDLDumper::passesTTZSel(){
 	lepton fHypLepton2 = lepton(orig_hyplep2.p, orig_hyplep2.charge, orig_hyplep2.type, orig_hyplep2.index);
 	return pass;
 }
-
+// old gstar bool SSDLDumper::passesGammaStarVeto(){
+// old gstar   // Return false if there is an additional loose muon within DR=0.2 of an OS hypothesis muon if M(mm) < 10 GeV.
+// old gstar   //
+// old gstar   if(NMus > 1){
+// old gstar     for(size_t i = 0; i < NMus; ++i){
+// old gstar       if(fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
+// old gstar       if(fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
+// old gstar       if(isGoodMuonForGammaStarVeto(i) == false)          continue;
+// old gstar       
+// old gstar       if(MuCharge[i] != fHypLepton1.charge && fHypLepton1.type == 0) { 
+// old gstar 	TLorentzVector pmu;
+// old gstar 	pmu.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+// old gstar 	float mll = (pmu+fHypLepton1.p).M();
+// old gstar 	float dr  = Util::GetDeltaR(fHypLepton1.p.Eta(), pmu.Eta(), fHypLepton1.p.Phi(), pmu.Phi());
+// old gstar 	if(mll < 10. && dr < 0.2) return false;
+// old gstar       }
+// old gstar       if(MuCharge[i] != fHypLepton2.charge && fHypLepton2.type == 0) { 
+// old gstar 	TLorentzVector pmu;
+// old gstar 	pmu.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+// old gstar 	float mll = (pmu+fHypLepton2.p).M();
+// old gstar 	float dr  = Util::GetDeltaR(fHypLepton2.p.Eta(), pmu.Eta(), fHypLepton2.p.Phi(), pmu.Phi());
+// old gstar 	if(mll < 10. && dr < 0.2) return false;
+// old gstar       }
+// old gstar     }
+// old gstar   }
+// old gstar        
+// old gstar   if(NEls > 1){
+// old gstar     for(size_t i = 0; i < NEls; ++i){
+// old gstar       if(fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
+// old gstar       if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
+// old gstar       if(isGoodEleForGammaStarVeto(i) == false)           continue;
+// old gstar       
+// old gstar       if(ElCharge[i] != fHypLepton1.charge && fHypLepton1.type == 1) { 
+// old gstar 	TLorentzVector pel;
+// old gstar 	pel.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+// old gstar 	float mll = (pel+fHypLepton1.p).M();
+// old gstar 	float dr  = Util::GetDeltaR(fHypLepton1.p.Eta(), pel.Eta(), fHypLepton1.p.Phi(), pel.Phi());
+// old gstar 	if(mll < 10. && dr < 0.2) return false;
+// old gstar       }
+// old gstar       if(ElCharge[i] != fHypLepton2.charge && fHypLepton2.type == 1) { 
+// old gstar 	TLorentzVector pel;
+// old gstar 	pel.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+// old gstar 	float mll = (pel+fHypLepton2.p).M();
+// old gstar 	float dr  = Util::GetDeltaR(fHypLepton2.p.Eta(), pel.Eta(), fHypLepton2.p.Phi(), pel.Phi());
+// old gstar 	if(mll < 10. && dr < 0.2) return false;
+// old gstar       }
+// old gstar     }
+// old gstar   }
+// old gstar   
+// old gstar   return true;
+// old gstar }
 //____________________________________________________________________________
 bool SSDLDumper::isGoodRun(Sample *S){
 	// Select runs such that JetB and MultiJet datasets are mutually exclusive
@@ -4893,7 +5182,7 @@ int SSDLDumper::isSigSupMuEvent(){
 	for (int i=0; i< NMus; ++i){
 		if (isLooseMuon(i)) nmus++;
 	}
-	//if(NMus > 1)                    return false;
+	// if(NMus > 1)                    return false;
 	if (nmus>1) return -1;
 	return mu1;
 }
@@ -4930,8 +5219,8 @@ int SSDLDumper::isSigSupElEvent(){
 	for (int i = 0; i < NEls; i++) {
 		if (isLooseElectron(i)) nels++;
 	}
-	if (nels < 1) return -1;
-//	if(NEls > 1)                   return false;
+	if (nels > 1) return -1;
+	//if(NEls > 1)                   return false;
 	return el1;
 }
 bool SSDLDumper::isZElElEvent(int &el1, int &el2){
@@ -4954,12 +5243,12 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	return true;
 }
 bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
-        if (hasLooseElectrons(el1,el2) < 2) return false;
+	if (hasLooseElectrons(el1,el2) < 2) return false;
 	if (!isTightElectron(el1))          return false;
 	if (!isTightElectron(el2))          return false;
 	if (getMET() > 30.)                 return false;
 	if (ElMT[0] > 25.)                  return false;
-      
+	
 	TLorentzVector p1, p2;
 	p1.SetPtEtaPhiM(ElPt[el1], ElEta[el1], ElPhi[el1], gMEL);
 	p2.SetPtEtaPhiM(ElPt[el2], ElEta[el2], ElPhi[el2], gMEL);
@@ -5033,10 +5322,12 @@ bool SSDLDumper::isSSLLMuEvent(int& mu1, int& mu2){
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
 		// misidd as SS events
 		if(!passesZVeto()) return false; // no Zs in event
+		//if(!passesZVetoNew(mu1, mu2, 0)) return false; // no Zs in event
 		if(fDoCounting) fCounter[Muon].fill(fMMCutNames[6]);
 	}
 	
 	if(!passesMllEventVeto(mu1, mu2, 1, 8.)) return false; // no low mass OSSF pairs
+	if(!passesGammaStarVeto(mu1, mu2, 0)) return false; // reject GStar
 	if(fDoCounting) fCounter[Muon].fill(fMMCutNames[7]);
 
 
@@ -5094,10 +5385,12 @@ bool SSDLDumper::isSSLLElEvent(int& el1, int& el2){
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
 		// misidd as SS events
 		if(!passesZVeto()) return false; // no Zs in event
+		//if(!passesZVetoNew(el1, el2, 2)) return false; // no Zs in event
 		if(fDoCounting) fCounter[Elec].fill(fEECutNames[6]);
 	}
 
-	if(!passesMllEventVeto(el1, el2, 2, 8.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(el1, el2, 2, 8.))      return false; // no low mass OSSF pairs
+	if(!passesGammaStarVeto(el1, el2, 2)) return false; // reject GStar
 	if(fDoCounting) fCounter[Elec].fill(fEECutNames[7]);
 
 
@@ -5157,9 +5450,11 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
 		// misidd as SS events
 		if(!passesZVeto()) return false;
+		//if(!passesZVetoNew(mu, el, 1)) return false;
 		if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[7]);
 	}
 
+	if(!passesGammaStarVeto(mu, el, 1)) return false; // reject GStar
 
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
 	if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[8]);
@@ -5236,6 +5531,15 @@ bool SSDLDumper::isGoodMuonForZVeto(int muon){
 	if (MuPFIso[muon] > 0.2) return false;
 	return true;
 }
+bool SSDLDumper::isGoodMuonForGammaStarVeto(int muon){
+        // Method for selecting very loose muons to reject gamma* bkg.
+        if(muon >= NMus) return false; // Sanity check
+	
+	if(MuPt[muon] <  5.) return false;
+       	
+	if (MuPFIso[muon] > 0.2) return false;
+	return true;
+}
 bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
 	if(isGoodMuon(muon, 10.) == false)  return false;
 	if(MuPassesTightID[muon] != 1) return false;
@@ -5255,25 +5559,26 @@ bool SSDLDumper::isLooseMuon(int muon){
 	// Veto dep cuts previously in SSDLAnalysis presel
 	if(MuEMVetoEt[muon]  > 4.0)      return false;
 	if(MuHadVetoEt[muon] > 6.0)      return false;
-	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
+	// no longer in 2013 if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
 	
 	// require to pass tight ID:
 	if(MuPassesTightID[muon] != 1) return false;
 
 	// passes ISOLATION
 	if (gTTWZ) {
-		if(MuDetIso[muon] > 1.00) return false; // using detector isolation for ttWZ as requested by f.p.
+		if(MuPFIso[muon] > 1.00) return false; // using detector isolation for ttWZ as requested by f.p.
 	}
 	else {
 		if(MuPFIso[muon] > 1.00) return false;
 	}
+	// diable for normal running if (MuD0[muon] > 0.005) return false; // this is for testing only!!!
 	return true;
 }
 bool SSDLDumper::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false; // again
 	if(isLooseMuon(muon) == false) return false;
 	if (gTTWZ) {
-		if(MuDetIso[muon] > gMuMaxIso) return false; // using detector isolation for ttWZ as requested by f.p.
+		if(MuPFIso[muon] > gMuMaxIso) return false; // using detector isolation for ttWZ as requested by f.p.
 	}
 	else {
 		if(MuPFIso[muon] > gMuMaxIso) return false;
@@ -5338,7 +5643,7 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 
 	// Reject electrons closer than 0.1 in DR to tight muons
 	for(size_t i = 0; i < NMus; ++i){
-		// MARC why is this here? if(!isLooseMuon(i)) continue;
+		if(!isLooseMuon(i)) continue;
 		if(!isTightMuon(i)) continue;
 		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
 		return false;
@@ -5354,6 +5659,14 @@ bool SSDLDumper::isGoodEleForZVeto(int ele){
 	// Apply IsoCUT
 	if(ElPFIso[ele] > 0.2) return false;
 	return true;	
+}
+bool SSDLDumper::isGoodEleForGammaStarVeto(int ele){
+        // Method for selecting very loose muons to reject gamma* bkg.
+        if(ele >= NEls) return false; // Sanity check
+	if(ElPt[ele] <  5.) return false;
+       	
+	if(ElPFIso[ele] > 0.2) return false;
+	return true;
 }
 bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 	// Don't care about charge consistency or trigger efficiency
@@ -5432,13 +5745,13 @@ bool SSDLDumper::isLooseElectron(int ele){
 	if(ElChIsCons[ele] != 1) return false;
 	
 	// Additional cuts for CaloIsoVL and TrkIsoVL
-	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
-	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+	// temporary if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	// temporary if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	// temporary if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
 	
 	// ISO AND ID FOR TT+W
 	if (gTTWZ) {
-		if(ElDetIso[ele] > 0.6) return false; // using detector isolation for ttWZ as requested by f.p.
+		if(ElPFIso[ele] > 0.6) return false; // using detector isolation for ttWZ as requested by f.p.
 		if(ElIsGoodTriggerEl[ele] != 1) return false; // trigger ID cuts
 	}
 	// ISO AND ID FOR SUSY
@@ -5446,6 +5759,7 @@ bool SSDLDumper::isLooseElectron(int ele){
 		if(ElPFIso[ele] > 0.6) return false;
 		if(ElIsGoodTriggerEl[ele] != 1) return false; // trigger ID cuts
 	}
+	// disable for normal running if (ElD0[ele] > 0.01) return false; // this is for testing!!!!
 
 	// JUST FOR FUTURE REFERENCE, THOSE ARE THE VALUES FOR MVA-ID WE USED
 	// loose MVA-ID values 	if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.949) return false;
@@ -5459,7 +5773,7 @@ bool SSDLDumper::isTightElectron(int ele){
 
 	// ISO AND ID FOR TT+W
 	if (gTTWZ) {
-		if(ElDetIso[ele] > gElMaxIso) return false; // using detector isolation for ttWZ as requested by f.p.
+		if(ElPFIso[ele] > gElMaxIso) return false; // using detector isolation for ttWZ as requested by f.p.
 		if(ElIsGoodElId_MediumWP[ele] != 1) return false; // using cut based ID again
 	}
 	// ISO AND ID FOR SUSY
@@ -5559,6 +5873,7 @@ bool SSDLDumper::isGoodTau(int tau){
 //____________________________________________________________________________
 bool SSDLDumper::isGoodJet(int jet, float pt){
 	if(jet >= NJets) return false; // Sanity check
+	// JET - LEPTON CLEANING PARAMETER!! should switch to 0.5!!!
 	float minDR = 0.4;
 
 	if(getJetPt(jet) < gMinJetPt) return false;
