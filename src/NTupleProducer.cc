@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.47 2013/01/25 08:35:54 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.48 2013/01/25 16:38:57 fronga Exp $
 //
 //
 
@@ -2988,9 +2988,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
 
 
-    // start computation of betaStar variable (pileUp ID)
+    // start computation of betaStar variable (pileUp ID) -- adding also beta variable, which cuts on the dz rather than the vertex association (marc feb5 2013)
     float sumTrkPt = 0.;
     float sumTrkPtBetaStar = 0.;
+    float sumTrkPtSq = 0.;
+    float sumTrkPtBetaSq = 0.;
 
     // Jet-track association: get associated tracks
     const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -2998,6 +3000,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     for( TrackRefVector::iterator i_trk = tracks.begin(); i_trk != tracks.end(); ++i_trk )  { 
 
+      // calculate first beta, then move on to beta*
+      sumTrkPtSq += (*i_trk)->pt()*(*i_trk)->pt();
       AssociatedTracks.push_back( i_trk->get() );
 
       if ( vertices->size() == 0) continue;
@@ -3013,6 +3017,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           // check if the tracks match
           if (trkRef == (*i_trk)) {
             isFirstVtx=true; 
+            // for the beta calculation. if the track is associated to the PV, cut on 0.5 cm of dz
+            if ((*i_trk)->dz((*vertices)[0].position()) < 0.5) sumTrkPtBetaSq += (*i_trk)->pt()*(*i_trk)->pt();
             break;
           }
         }
@@ -3041,9 +3047,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     
     float betaStar = -999.;
+    float beta = -999.;
     if (sumTrkPt > 0.) 
       betaStar = sumTrkPtBetaStar/sumTrkPt;
     fTJBetaStar->push_back( betaStar ); 
+    if (sumTrkPtSq > 0.) beta = sumTrkPtBetaSq/sumTrkPtSq; fTJBeta->push_back( beta ); 
 
 			
     // Below save the momenta of the three leading tracks associated to the jet
@@ -4256,6 +4264,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int>   >("JPartonFlavour");
   produces<std::vector<float> >("JMass");
   produces<std::vector<float> >("JBetaStar");
+  produces<std::vector<float> >("JBeta");
   produces<std::vector<float> >("Jtrk1px");
   produces<std::vector<float> >("Jtrk1py");
   produces<std::vector<float> >("Jtrk1pz");
@@ -5021,6 +5030,7 @@ void NTupleProducer::resetProducts( void ) {
   fTJPartonFlavour.reset(new std::vector<int> );
   fTJMass.reset(new std::vector<float> );
   fTJBetaStar.reset(new std::vector<float> );
+  fTJBeta.reset(new std::vector<float> );
   fTJtrk1px.reset(new std::vector<float> );
   fTJtrk1py.reset(new std::vector<float> );
   fTJtrk1pz.reset(new std::vector<float> );
@@ -5830,6 +5840,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTJPartonFlavour, "JPartonFlavour");
   event.put(fTJMass, "JMass");
   event.put(fTJBetaStar, "JBetaStar");
+  event.put(fTJBeta, "JBeta");
   event.put(fTJtrk1px, "Jtrk1px");
   event.put(fTJtrk1py, "Jtrk1py");
   event.put(fTJtrk1pz, "Jtrk1pz");
