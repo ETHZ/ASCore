@@ -72,6 +72,8 @@ elif (USERNAME == "fronga"):
    userNickName = "Frederic"
 elif (USERNAME == "mdunser"):
    userNickName = "Marc"
+elif (USERNAME == "mmasciov"):
+   userNickName = "Super Mario"
 elif (USERNAME == "peruzzi"):
    userNickName = "Marco"
 else:
