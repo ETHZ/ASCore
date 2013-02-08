@@ -37,6 +37,11 @@ topSamples = [
 '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',
 ]
 
+## QCD
+qcdSamples = [
+''
+]
+
 f = open('multicrab.cfg', 'w')
 
 
@@ -111,6 +116,21 @@ for sample in topSamples:
 	f.write('CMSSW.datasetpath='+sample+'\n')
 	f.write('CMSSW.number_of_jobs = 300\n')
 	f.write('\n')
-	
+
+f.write('''
+
+#######################
+##### QCD  SAMPLES ####
+#######################
+
+'''
+)
+
+for sample in qcdSamples:
+        f.write('['+sample.lstrip('/').rstrip('/AODSIM').replace('/','-')+']\n')
+        f.write('CMSSW.datasetpath='+sample+'\n')
+        f.write('CMSSW.number_of_jobs = 300\n')
+        f.write('\n')
+
 
 f.close()
