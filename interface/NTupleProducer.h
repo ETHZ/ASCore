@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.39 2013/01/25 16:38:56 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.40 2013/02/07 13:47:33 mdunser Exp $
 //
 //
 
@@ -1022,6 +1022,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTJMass;
   std::auto_ptr<std::vector<float> >  fTJBetaStar;
   std::auto_ptr<std::vector<float> >  fTJBeta;
+  std::auto_ptr<std::vector<float> >  fTJBetaSq;
   std::auto_ptr<std::vector<float> >  fTJtrk1px;
   std::auto_ptr<std::vector<float> >  fTJtrk1py;
   std::auto_ptr<std::vector<float> >  fTJtrk1pz;

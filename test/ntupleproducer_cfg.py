@@ -64,7 +64,7 @@ options.register ('GlobalTag',
 #options.files= 'file://///shome/pablom/tmp/newCode/CMSSW_5_2_5_patch1/src/DiLeptonAnalysis/NTupleProducer/A8922572-9D84-E111-88B9-003048F024FE.root'
 #options.files= 'file:////scratch/mdunser/files/DoubleMu_Run2012D.root'
 #options.files= 'file:////shome/casal/files/trackingPOGevents.root'
-options.files= 'file:////shome/casal/files/hcalLaserEvents.root'
+options.files= 'file:////scratch/mdunser/files/pickevents.root'
 #options.files= 'file:////shome/mdunser/files/JetHT_Run2012C_v1.root'
 #options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
 
