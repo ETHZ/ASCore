@@ -105,7 +105,8 @@ double BTagSF::scalefactor(float jetpt, float jeteta, int flavor, TString meanmi
 	// LIGHT JETS
 	else {
 		getSFLightFunction(jeteta, meanminmax);
-		float SFlight = fLightSF->Eval(800., 0., 0.);
+		if (fLightSF == NULL ) cout << Form("jetpt: %5.2f jeteta: %3.2f jetflavor: %d ", jetpt, jeteta, flavor) << endl;
+		float SFlight = fLightSF->Eval(jetpt, 0., 0.);
 		delete fLightSF;
 		return SFlight; // return only the central value for now. should adapt for jets > 800 GeV etc.
 	}
@@ -128,6 +129,8 @@ bool BTagSF::applySF(bool& isBTagged, float Btag_SF, float Btag_eff, float rando
 }
 
 bool BTagSF::modifyBTagsWithSF(bool& is_tagged, float pt, float eta, int flavor, TString meanminmax, float random) {
+	if (eta < -2.399 ) eta = -2.399;
+	if (eta >  2.399 ) eta =  2.399;
 	double btageff = efficiency (pt, eta, flavor, meanminmax);
 	double btagSF  = scalefactor(pt, eta, flavor, meanminmax);
 	return applySF(is_tagged, btagSF, btageff, random);                       ///--->> Apply scale factor
