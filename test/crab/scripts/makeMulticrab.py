@@ -116,9 +116,9 @@ def writeDatasets(slist, name, njobs=1000):
 	)
 
 	for sample in slist:
-		f.write('['+sample.lstrip('/').rstrip('/AODSIM').replace('/','-')+']\n')
-		f.write('CMSSW.datasetpath='+sample+'\n')
-		f.write('CMSSW.number_of_jobs = 1200\n')
+		f.write('# ['+sample.lstrip('/').rstrip('/AODSIM').replace('/','-')+']\n')
+		f.write('# CMSSW.datasetpath='+sample+'\n')
+		f.write('# CMSSW.number_of_jobs = 1200\n')
 		f.write('\n')
 
 
