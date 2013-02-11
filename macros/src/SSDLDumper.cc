@@ -5178,12 +5178,12 @@ int SSDLDumper::isSigSupMuEvent(){
 	if(getNJets() < 1)     return -1;
 	if(getMT(mu1,Muon) > fC_maxMt_Control)  return -1;
 	if(getMET() > fC_maxMet_Control)   return -1;
-	// int nmus(0);
-	// for (int i=0; i< NMus; ++i){
-	// 	if (isLooseMuon(i)) nmus++;
-	// }
-	// if (nmus>1) return -1;
-	if(NMus > 1)                    return -1;
+	int nmus(0);
+	for (int i=0; i< NMus; ++i){
+		if (isLooseMuon(i)) nmus++;
+	}
+	// if(NMus > 1)                    return false;
+	if (nmus>1) return -1;
 	return mu1;
 }
 bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
@@ -5215,12 +5215,12 @@ int SSDLDumper::isSigSupElEvent(){
 	//	if(ElMT[0] > fC_maxMt_Control) return false;
 	if(getMT(el1,Elec) > fC_maxMt_Control) return -1;
 	if(getMET() > fC_maxMet_Control)  return -1;
-	// int nels(0);
-	// for (int i = 0; i < NEls; i++) {
-	// 	if (isLooseElectron(i)) nels++;
-	// }
-	// if (nels > 1) return -1;
-	if(NEls > 1)                   return -1;
+	int nels(0);
+	for (int i = 0; i < NEls; i++) {
+		if (isLooseElectron(i)) nels++;
+	}
+	if (nels > 1) return -1;
+	//if(NEls > 1)                   return false;
 	return el1;
 }
 bool SSDLDumper::isZElElEvent(int &el1, int &el2){
