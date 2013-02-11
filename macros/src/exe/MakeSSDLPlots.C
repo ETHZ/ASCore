@@ -76,11 +76,13 @@ int main(int argc, char* argv[]) {
 	if (cfg) tA = new SSDLPlotter(configfile);
 	else tA = new SSDLPlotter(outputdir+"/dumperconfig.cfg");
 	tA->setOutputDir(outputdir);
+	tA->setOutputFile("SSDLHistos.root");
 	tA->setVerbose(verbose);
 	tA->init(datacard);
-	tA->doAnalysis();
 	if (region != "")	
 	  tA->doSMSscans(region);
+	else 
+	  tA->doAnalysis();
 
 	delete tA;
 	return 0;

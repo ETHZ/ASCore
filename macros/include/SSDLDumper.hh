@@ -8,7 +8,6 @@
 
 #include "helper/AnaClass.hh"
 #include "helper/Monitor.hh"
-//#include "helper/BTagSFUtil/BTagSFUtil.h"
 #include "helper/BTagSF.hh"
 #include "helper/GoodRunList.h"
 
@@ -51,6 +50,8 @@ public:
 	static const int gNDiffPT2Bins  = 8;
 	static const int gNDiffNBJBins  = 4;
 	static const int gNDiffNBJMBins = 3;
+        static const int gNDiffDPhiBins = 9;
+        static const int gNDiffMllBins  = 9;
 
 	static double gDiffHTBins  [gNDiffHTBins+1];
 	static double gDiffMETBins [gNDiffMETBins+1];
@@ -61,9 +62,11 @@ public:
 	static double gDiffPT2Bins [gNDiffPT2Bins+1];
 	static double gDiffNBJBins [gNDiffNBJBins+1];
 	static double gDiffNBJMBins[gNDiffNBJMBins+1];
+        static double gDiffDPhiBins[gNDiffDPhiBins+1];
+        static double gDiffMllBins [gNDiffMllBins+1];
 
 	static const int gM0bins  = 150  ; // these values
-	static const int gM0min   = 0    ; // are
+	static const int gM0min   = 0    ; // are 
 	static const int gM0max   = 3000 ; // the same
 	static const int gM12bins = 50   ; // as in
 	static const int gM12min  = 0    ; // SSDLAnalysis
@@ -89,9 +92,9 @@ public:
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
-		GJets200, GJets400, WW,
+		GJets200, GJets400, 
 		// start of the rares
-		WZ,ZZ,
+		WW, WZ,ZZ,
 		TTbarH, TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
@@ -187,15 +190,10 @@ public:
 		TH2D *nt00_eta;
 
 		TH2D *fntight; // pt vs eta
-		TH2D *fnloose;
+		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
-
-		TH1D *fntight_nv; // nvertices
-		TH1D *fnloose_nv;
-		TH1D *pntight_nv;
-		TH1D *pnloose_nv;
-
+		
 		// duplicate for only ttbar use
 		TH2D *fntight_ttbar; // pt vs eta
 		TH2D *fnloose_ttbar; 
@@ -212,11 +210,15 @@ public:
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
 		TEfficiency *pratio_eta;
-		TEfficiency *fratio_nv;
-		TEfficiency *pratio_nv;
-		// Charged miss-id calculation
-		TH2D *ospairs;
-		TH2D *sspairs;
+	        
+         	// Charged miss-id calculation
+                TH2D *ospairs;
+                TH2D *sspairs;
+	        	     
+                // Charged miss-id calculation
+	        TEfficiency *chmid_BB_pt;
+	        TEfficiency *chmid_EE_pt;
+    	        TEfficiency *chmid_BE_pt;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -240,7 +242,9 @@ public:
 		TH1D *zt_origin;
 		TH1D *zl_origin;
 
-        // OS Yields
+                TH1D *ossfpairs;
+
+	        // OS Yields
 		// Only filled for electrons
 		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
 		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
@@ -313,7 +317,15 @@ public:
 		TH1D *hiso_pt[gNSels][gNMuFPtBins];
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
-
+        
+	struct PuPlots{
+		TH1D *hdtrig;
+	        TH1D *hstrig;
+	        TH1D *hssdl;
+	        TH1D *hntight;
+	        TH1D *hnloose;
+	};
+  
 	struct IdPlots{
 		static TString sel_name[gNSels];
 		static int nbins[gNSels];
@@ -327,7 +339,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 10;
+	static const int gNDiffVars = 12;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -348,7 +360,7 @@ public:
 		TH1D *hnt2_os_EB[gNDiffVars];
 		TH1D *hnt2_os_EE[gNDiffVars];
 	};
-
+	
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
@@ -362,7 +374,7 @@ public:
 	std::map<TString , int> gSystematics;
 	std::map<TString , int>::const_iterator gsystIt;
 	bool gApplyZVeto;
-    bool    gDoWZValidation;
+        bool    gDoWZValidation;
 
 	class Sample{
 	public:
@@ -376,11 +388,11 @@ public:
 			color    = col;
 			numbers = new NumberSet*[nregions];
 			region  = new Region   *[nregions];
-            for ( size_t i = 0; i<nregions; ++i ) region[i]  = new Region   [2];
-            for ( size_t i = 0; i<nregions; ++i ) numbers[i] = new NumberSet[gNCHANNELS];
-            //region[0] = new Region[gNREGIONS*gNCHANNELS];
-            file = NULL;
-            tree = NULL;
+			for ( size_t i = 0; i<nregions; ++i ) region[i]  = new Region   [2];
+			for ( size_t i = 0; i<nregions; ++i ) numbers[i] = new NumberSet[gNCHANNELS];
+			//region[0] = new Region[gNREGIONS*gNCHANNELS];
+			file = NULL;
+			tree = NULL;
 		};
 		~Sample(){
 			delete[] region[0];
@@ -413,6 +425,7 @@ public:
 	        IsoPlots isoplots[2]; // e and mu
  	        IdPlots  idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
+	        PuPlots  puplots[2];
 		TGraph *sigevents[gNCHANNELS][2];
 
 		float getLumi(){
@@ -519,13 +532,15 @@ public:
 			if(proc ==  7) return "WZ";
 			if(proc ==  8) return "ZZ";
 			if(proc ==  9) return "V$\\gamma$+jets";
-			if(proc == 10) return "$t\\bar{t}$W";
-			if(proc == 11) return "$t\\bar{t}$Z";
-			if(proc == 12) return "$t\\bar{t}\\gamma$";
-			if(proc == 13) return "W$^{\\pm}$W$^{\\pm}$";
-			if(proc == 14) return "Tri-Boson";
-			if(proc == 15) return "DPS (2$\\times$ W+jets)";
-			if(proc == 16) return "QCD";
+			if(proc == 10) return "$t\\bar{t}$H";
+			if(proc == 11) return "$t\\bar{t}$W";
+			if(proc == 12) return "$t\\bar{t}$Z";
+			if(proc == 13) return "$t\\bar{t}\\gamma$";
+			if(proc == 14) return "W$^{\\pm}$W$^{\\pm}$";
+			if(proc == 15) return "Tri-Boson";
+			if(proc == 16) return "DPS (2$\\times$ W+jets)";
+			if(proc == 17) return "QCD";
+			if(proc == 18) return "TbZ";
 			if(proc == 19) return "$t\\bar{t}$matchingdown";
 			if(proc == 20) return "$t\\bar{t}$matchingup";
 			if(proc == 21) return "$t\\bar{t}$scaledown";
@@ -598,6 +613,7 @@ public:
 	void fillRatioPlots(Sample*);
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
+	void fillPileUpPlots(Sample*);
 	void fillElIdPlots (Sample*);
         void fillKinPlots(Sample*, int);
         void fillSyncCounters(Sample*); 
@@ -663,6 +679,7 @@ public:
 	virtual float getMT(int, gChannel);
 	virtual float getMT2(int, int, gChannel);
 	virtual float getMll(int, int, gChannel);
+        virtual float getDPhi(int, int, gChannel);
 	virtual int   getClosestJet(int, gChannel);
 	virtual float getClosestJetPt(int, gChannel);
 	virtual float getClosestJetDR(int, gChannel);
@@ -826,7 +843,7 @@ public:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
-	ofstream fOUTSTREAM, fOUTSTREAM2, fOUTSTREAM3, fOUTSTREAM4;
+	ofstream fOUTSTREAM, fOUTSTREAM2, fOUTSTREAM3;
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
@@ -890,7 +907,7 @@ public:
 	TString fOutputFileName;
 	Sample *fSample;
 	
-	// BTagSFUtil *fBTagSFUtil;
+  //	BTagSFUtil *fBTagSFUtil;
 	BTagSF *fBTagSF;
         GoodRunList *fGoodRunList;
 	TRandom3 *fRand3;

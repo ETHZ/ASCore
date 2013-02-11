@@ -257,6 +257,7 @@ public:
 	void makeMETvsHTPlot0HT();
 	void makeMETvsHTPlotTau();
 	
+        void makeChMidvsPtPlots();
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsNVPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
@@ -270,8 +271,8 @@ public:
 	// old void makeOriginPlots(gRegion);
 	
 	void makeIsoVsMETPlot(gSample);
-	void makePileUpPlots(bool write = true);
-	
+        void makePileUpPlots(bool RunPeriod=false);
+        void makeOSSFEfficiency();
 	void makePRLPlot1();
 	
 	void makeNT012Plots(vector<int>, gChannel, int region = 0, gHiLoSwitch = HighPt);
