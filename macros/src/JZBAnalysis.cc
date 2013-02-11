@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.110 $";
+string sjzbversion="$Revision: 1.70.2.111 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -33,7 +33,7 @@ bool DoFSRStudies=false;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.110 2013/01/15 16:45:36 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.111 2013/02/05 17:58:28 buchmann Exp $
 */
 
 
@@ -3881,6 +3881,10 @@ void JZBAnalysis::GeneratorInfo(void) {
   //FR: Deactivate Z matching
   size_t i1 = 0, i2 = 1;
 
+   for(; i2<sortedGLeptons.size();i2++) {
+     if(sortedGLeptons[i1].charge*sortedGLeptons[i2].charge<0) break;
+   }
+   
 //   // Select the two highest-pt leptons compatible with a Z
 //   size_t i1 = 0, i2 = 0;
 //   if ( sortedGLeptons.size()>1 ) {
@@ -3903,7 +3907,7 @@ void JZBAnalysis::GeneratorInfo(void) {
       nEvent.genEta1    = sortedGLeptons[i1].p.Eta();
       nEvent.genMID1gen = fTR->GenLeptonMID[sortedGLeptons[i1].index];
       nEvent.genGMID1gen = fTR->GenLeptonGMID[sortedGLeptons[i1].index];
-      if(sortedGLeptons.size()>1)
+      if(i2<sortedGLeptons.size())
         {
           TLorentzVector genZvector = sortedGLeptons[i1].p + sortedGLeptons[i2].p;
 	  TLorentzVector genZvectorPrime;
