@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.49 2013/02/07 13:47:31 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.50 2013/02/08 15:41:24 mdunser Exp $
 //
 //
 
@@ -937,7 +937,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       for(reco::GenParticleCollection::const_iterator part = gpH->begin(); 
           part!= gpH->end(); ++part){   
-        if (part->pt()==0) continue;
+        if (!(part->pt()>0.)) continue;
         if( part->status() == 1 && part->charge() != 0 && fabs(part->eta())<2.5 &&
             ( fabs(part->vx()-this_gv_pos.X())<1.e-5 && fabs(part->vy()-this_gv_pos.Y())<1.e-5 && fabs(part->vz()-this_gv_pos.Z())<1.e-5 ) )  {
 	
@@ -2419,7 +2419,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		   good=true;
 		 }
 	       }
-	       if (good && ecalpfhit.Perp()!=0 && photon_scposition.Perp()!=0){
+	       if (good && ecalpfhit.Perp()>0 && photon_scposition.Perp()>0){
 		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
 	       }
 	     }
@@ -3220,7 +3220,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTSumEt = 0.; *fTECALSumEt = 0.; *fTHCALSumEt = 0.;
   for(CaloTowerCollection::const_iterator itow = calotowers->begin();
       itow!=calotowers->end(); ++itow ){
-    if(itow->energy() == 0.) continue; // Check against zero energy towers
+    if(!(itow->energy()>0.)) continue; // Check against zero energy towers
     *fTSumEt += itow->et();
     *fTECALSumEt += itow->emEt();
     *fTHCALSumEt += itow->hadEt();
