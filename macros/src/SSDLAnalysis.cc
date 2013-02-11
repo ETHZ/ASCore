@@ -462,9 +462,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 	std::pair<float, float> newmet = GetOnTheFlyCorrections();
 	// cout << "        leading jet pt, eta from event: " << fTR->JPt[0] << " , " << fTR->JEta[0] << endl;
 	// cout << "JChargedMuEnergyFrac[0]: " << fTR->JChargedMuEnergyFrac[0] << endl;
-	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "---------------------------------" << endl;
-	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from event with phi: " << fTpfMETType1 << " " << fTpfMETType1phi << endl;
-	if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from marc  with phi: " << newmet.first << " " << newmet.second   << endl;
+	// if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "---------------------------------" << endl;
+	// if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from event with phi: " << fTpfMETType1 << " " << fTpfMETType1phi << endl;
+	// if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "Type1MET from marc  with phi: " << newmet.first << " " << newmet.second   << endl;
 
 	// PU correction
 	fTrho   = fTR->Rho;
