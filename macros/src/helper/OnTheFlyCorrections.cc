@@ -4,10 +4,11 @@
 using namespace std;
 
 OnTheFlyCorrections::OnTheFlyCorrections(string gt, bool isdata){
-	JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("src/helper/JetCorrectionFiles/"+gt+"_L2L3Residual_AK5PF.txt");
-	JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("src/helper/JetCorrectionFiles/"+gt+"_L3Absolute_AK5PF.txt");
-	JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("src/helper/JetCorrectionFiles/"+gt+"_L2Relative_AK5PF.txt");
-	JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("src/helper/JetCorrectionFiles/"+gt+"_L1FastJet_AK5PF.txt");
+	std::string path="/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros";
+	JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(path+"/src/helper/JetCorrectionFiles/"+gt+"_L2L3Residual_AK5PF.txt");
+	JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(path+"/src/helper/JetCorrectionFiles/"+gt+"_L3Absolute_AK5PF.txt");
+	JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(path+"/src/helper/JetCorrectionFiles/"+gt+"_L2Relative_AK5PF.txt");
+	JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(path+"/src/helper/JetCorrectionFiles/"+gt+"_L1FastJet_AK5PF.txt");
 	fJetCorPar.push_back(*L1JetPar);
 	fJetCorPar.push_back(*L2JetPar);
 	fJetCorPar.push_back(*L3JetPar);
