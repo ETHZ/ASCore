@@ -319,6 +319,14 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 
+	struct PuPlots{
+		TH1D *hdtrig;
+	        TH1D *hstrig;
+	        TH1D *hssdl;
+	        TH1D *hntight;
+	        TH1D *hnloose;
+	};
+
 	struct IdPlots{
 		static TString sel_name[gNSels];
 		static int nbins[gNSels];
@@ -418,6 +426,7 @@ public:
 	        IsoPlots isoplots[2]; // e and mu
  	        IdPlots  idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
+	        PuPlots  puplots[2];
 		TGraph *sigevents[gNCHANNELS][2];
 
 		float getLumi(){
@@ -606,6 +615,7 @@ public:
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
+	void fillPileUpPlots(Sample*);
         void fillKinPlots(Sample*, int);
         void fillSyncCounters(Sample*); 
 	

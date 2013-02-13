@@ -63,6 +63,7 @@ bool  gApplyGStarVeto    ;
 TString tmp_gBaseRegion  ;
 TString gJSONfile        ;
 bool  tmp_gDoWZValidation;
+bool  gMETType1          ;
 
 // std::vector< SSDLDumper::Region* > gRegions;
 // std::vector< SSDLDumper::Region* >::iterator regIt;
@@ -159,18 +160,20 @@ void setVariables(char buffer[1000]){
 	if( sscanf(buffer, "%s\t%s\t%s\t%s", va, t, n, val) > 3){
 		v = va; type = t; name = n; value = val;
 		if (v != "v") {cout << "ERROR in reading variables!!" << endl; exit(1); }
-		if      (type == "bool"    && name =="gDoSystStudies" ) gDoSystStudies   = ((value == "1" || value == "true") ? true:false);
-		else if (type == "bool"    && name =="gTTWZ"          ) gTTWZ            = ((value == "1" || value == "true") ? true:false);
+		if      (type == "bool"    && name =="gDoSystStudies" ) gDoSystStudies      = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gTTWZ"          ) gTTWZ               = ((value == "1" || value == "true") ? true:false);
 		else if (type == "bool"    && name =="gInvertZVeto"   ) gInvertZVeto        = ((value == "1" || value == "true") ? true:false);
 		else if (type == "bool"    && name =="gApplyGStarVeto") gApplyGStarVeto     = ((value == "1" || value == "true") ? true:false);
 		else if (type == "TString" && name =="gBaseRegion"    ) tmp_gBaseRegion     = value; // this and the next are the only ones used in the plotter
 		else if (type == "TString" && name =="gJSONfile"      ) gJSONfile           = value;
-		else if (type == "bool"    && name =="gApplyZVeto"   ) tmp_gApplyZVeto  = ((value == "1" || value == "true") ? true:false);
-		else if (type == "float"   && name =="gMuMaxIso"     ) gMuMaxIso        = value.Atof();
-		else if (type == "float"   && name =="gElMaxIso"     ) gElMaxIso        = value.Atof();
-		else if (type == "float"   && name =="gMaxJetEta"    ) gMaxJetEta       = value.Atof();
-		else if (type == "float"   && name =="gMinJetPt"     ) gMinJetPt        = value.Atof();
-		else {cout << "ERROR in reading variables!!" << endl; exit(1); }
+		else if (type == "bool"    && name =="gApplyZVeto"    ) tmp_gApplyZVeto     = ((value == "1" || value == "true") ? true:false);
+		else if (type == "float"   && name =="gMuMaxIso"      ) gMuMaxIso           = value.Atof();
+		else if (type == "float"   && name =="gElMaxIso"      ) gElMaxIso           = value.Atof();
+		else if (type == "float"   && name =="gMaxJetEta"     ) gMaxJetEta          = value.Atof();
+		else if (type == "float"   && name =="gMinJetPt"      ) gMinJetPt           = value.Atof();
+		else if (type == "bool"    && name =="gDoWZValidation") tmp_gDoWZValidation = ((value == "1" || value == "true") ? true:false);
+		else if (type == "bool"    && name =="gMETType1"      ) gMETType1           = ((value == "1" || value == "true") ? true:false);
+		else {cout << name <<" ERROR in reading variables!!" << endl; exit(1); }
 	}
 	else{
 		cout << " SSDLDumper::setVariables ==> Wrong configfile format for special variables. Have a look in the dumperconfig.cfg for more info. Aborting..." << endl;
@@ -531,6 +534,8 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
 		
+
+		fillPileUpPlots(S);
 		//		fillSyncCounters(S);
 		/////////////////////////////////////////////
 		// Systematic studies
@@ -1447,14 +1452,14 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	setRegionCuts(gRegion[gBaseRegion]);
+	setRegionCuts(gRegion["Baseline"]);
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
 	fC_minNjets  = 0;
 	fC_minMet    = 0.;
 	fC_app3rdVet  = 0;
 	fC_chargeVeto = 0;
-	// gApplyZVeto   = false;
+	gApplyZVeto   = false;
 
 	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
@@ -1504,7 +1509,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2     = MuPt[ind2];
 		fSETree_eta1    = MuEta[ind1];
 		fSETree_eta2    = MuEta[ind2];
+		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1551,7 +1558,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2    = ElPt[ind2];
 		fSETree_eta1   = MuEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
+		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1602,8 +1611,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2    = ElPt[ind2];
 		fSETree_eta1   = ElEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
-
+		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
+		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = ElPFIso[ind1];
@@ -2351,6 +2361,49 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 	setRegionCuts(gRegion[gBaseRegion]);
 	return;
 }
+void SSDLDumper::fillPileUpPlots(Sample *S){
+   
+        setRegionCuts(gRegion["Baseline"]);
+  	PuPlots *pu0 = &S->puplots[0]; // mu
+  	PuPlots *pu1 = &S->puplots[1]; // el
+
+	//////////////////////////////////////////////////////////////////
+	resetHypLeptons();
+	fCurrentChannel = Muon;
+	int mu1(-1), mu2(-1);
+	if (mumuSignalTrigger()) {
+	        pu0->hdtrig->Fill(NVrtx);
+	        if (isSSLLMuEvent(mu1, mu2)){
+		        pu0->hssdl->Fill(NVrtx);
+		}
+	}
+        if(singleMuTrigger()){
+	        pu0->hstrig->Fill(NVrtx);
+		if(isSigSupMuEvent()){
+		  if(isTightMuon(0)) pu0->hntight->Fill(NVrtx);
+		  if(isLooseMuon(0)) pu0->hnloose->Fill(NVrtx);
+		}
+	}
+	
+	resetHypLeptons();
+	fCurrentChannel = Elec;
+	int el1(-1), el2(-1);
+	if (elelSignalTrigger()) {
+	        pu1->hdtrig->Fill(NVrtx);
+	        if (isSSLLElEvent(el1, el2)){
+		        pu1->hssdl->Fill(NVrtx);
+		}
+	}
+	resetHypLeptons();
+        if(singleElTrigger()){
+	        pu1->hstrig->Fill(NVrtx);
+		if(isSigSupElEvent()){
+		  if(isTightElectron(0)) pu1->hntight->Fill(NVrtx);
+		  if(isLooseElectron(0)) pu1->hnloose->Fill(NVrtx);
+		}
+	}
+	resetHypLeptons();
+}
 void SSDLDumper::fillSyncCounters(Sample *S){
   resetHypLeptons();
   if (!gDoSyncExercise) return;
@@ -2981,6 +3034,38 @@ void SSDLDumper::bookHistos(Sample *S){
 	}
 
 
+	// pile-up plots
+	for (size_t l = 0; l < 2; ++l){
+	       TString name = Form("%s_%s_dtrig", S->sname.Data(), gEMULabel[l].Data());
+	       S->puplots[l].hdtrig = new TH1D(name, "dtrigger", 50, 0.5, 49.5);
+	       S->puplots[l].hdtrig->SetFillColor(S->color);
+	       S->puplots[l].hdtrig->SetXTitle("NVtx");
+	       S->puplots[l].hdtrig->Sumw2();
+
+	       name = Form("%s_%s_strig", S->sname.Data(), gEMULabel[l].Data());
+	       S->puplots[l].hstrig = new TH1D(name, "strigger", 50, 0.5, 49.5);
+	       S->puplots[l].hstrig->SetFillColor(S->color);
+	       S->puplots[l].hstrig->SetXTitle("NVtx");
+	       S->puplots[l].hstrig->Sumw2();
+	       
+	       name = Form("%s_%s_ssdl", S->sname.Data(), gEMULabel[l].Data());
+	       S->puplots[l].hssdl = new TH1D(name, "ssdl", 50, 0.5, 49.5);
+	       S->puplots[l].hssdl->SetFillColor(S->color);
+	       S->puplots[l].hssdl->SetXTitle("NVtx");
+	       S->puplots[l].hssdl->Sumw2();
+	       		       
+	       name = Form("%s_%s_ntight", S->sname.Data(), gEMULabel[l].Data());
+	       S->puplots[l].hntight = new TH1D(name, "ntight", 50, 0.5, 49.5);
+	       S->puplots[l].hntight->SetFillColor(S->color);
+	       S->puplots[l].hntight->SetXTitle("NVtx");
+	       S->puplots[l].hntight->Sumw2();
+
+	       name = Form("%s_%s_nloose", S->sname.Data(), gEMULabel[l].Data());
+	       S->puplots[l].hnloose = new TH1D(name, "nloose", 50, 0.5, 49.5);
+	       S->puplots[l].hnloose->SetFillColor(S->color);
+	       S->puplots[l].hnloose->SetXTitle("NVtx");
+	       S->puplots[l].hnloose->Sumw2();
+	}
 	for(size_t l = 0; l < 2; ++l){
 		// Ratio histos
 		for(size_t j = 0; j < gNRatioVars; ++j){
@@ -3198,6 +3283,14 @@ void SSDLDumper::deleteHistos(Sample *S){
 			delete S->ratioplots[l].ntight[j];
 			delete S->ratioplots[l].nloose[j];
 		}
+
+		// Pileup histos
+		delete S->puplots[l].hdtrig;
+		delete S->puplots[l].hstrig;
+		delete S->puplots[l].hssdl;
+		delete S->puplots[l].hntight;
+		delete S->puplots[l].hnloose;
+
 	}
 
 	for(regIt = gRegions.begin(); regIt != gRegions.end() ; regIt++){
@@ -3407,6 +3500,19 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 			for(int k = 0; k < gNMuFPtBins; ++k) ip->hiso_pt[j][k]->Write(ip->hiso_pt[j][k]->GetName(), TObject::kWriteDelete);
 			for(int k = 0; k < gNNVrtxBins; ++k) ip->hiso_nv[j][k]->Write(ip->hiso_nv[j][k]->GetName(), TObject::kWriteDelete);
 		}
+	}
+
+	// Pile-up histos
+	temp = S->sname + "/PuPlots/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	for(size_t l = 0; l < 2; ++l){
+		PuPlots *pu = &S->puplots[l];
+		pu->hdtrig ->Write(pu->hdtrig ->GetName(), TObject::kWriteDelete);
+		pu->hstrig ->Write(pu->hstrig ->GetName(), TObject::kWriteDelete);
+		pu->hssdl  ->Write(pu->hssdl  ->GetName(), TObject::kWriteDelete);
+		pu->hntight->Write(pu->hntight->GetName(), TObject::kWriteDelete);
+		pu->hnloose->Write(pu->hnloose->GetName(), TObject::kWriteDelete);
 	}
 
 	// Ratio histos
@@ -3701,6 +3807,20 @@ int  SSDLDumper::readHistos(TString filename){
 				getname = Form("%s_%s_nloose_%s", S->sname.Data(), gEMULabel[lep].Data(), FRatioPlots::var_name[j].Data());
 				getObjectSafe(pFile, S->sname + "/FRatioPlots/" + getname, rp->nloose[j]);
 			}
+
+			// Pile-up plots
+			PuPlots *pu = &S->puplots[lep];
+			getname = Form("%s_%s_dtrig", S->sname.Data(), gEMULabel[lep].Data());
+			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hdtrig);
+			getname = Form("%s_%s_strig", S->sname.Data(), gEMULabel[lep].Data());
+			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hstrig);
+			getname = Form("%s_%s_ssdl", S->sname.Data(), gEMULabel[lep].Data());
+			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hssdl);
+			getname = Form("%s_%s_ntight", S->sname.Data(), gEMULabel[lep].Data());
+			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hntight);
+			getname = Form("%s_%s_nloose", S->sname.Data(), gEMULabel[lep].Data());
+			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hnloose);
+
 		}
 
 		// Yields
@@ -4190,15 +4310,20 @@ float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-  	return pfMETType1;
-	//return pfMET;
+        float met = pfMET;
+        if (gMETType1)  met = pfMETType1;
+	else            met = pfMET;
+
+	return met;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-  	float phi = pfMETType1Phi;
-	// float phi = pfMETPhi;
-  	return phi;
+  	// float phi = pfMETType1Phi;
+	float phi = pfMETPhi;
+        if (gMETType1)  phi = pfMETType1Phi;
+	else            phi = pfMETPhi;
+
 }
 float SSDLDumper::getM3(){
 	// Return M3

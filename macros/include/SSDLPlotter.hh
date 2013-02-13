@@ -272,7 +272,8 @@ public:
 	
 	void makeIsoVsMETPlot(gSample);
         void makePileUpPlots(bool RunPeriod=false);
-        void makeOSSFEfficiency();
+  //        void makeOSSFEfficiency();
+  //        void makePileUpPlots(bool write = true);
 	void makePRLPlot1();
 	
 	void makeNT012Plots(vector<int>, gChannel, int region = 0, gHiLoSwitch = HighPt);

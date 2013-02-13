@@ -99,7 +99,7 @@ void SSDLPlotter::init(TString filename){
 	//	fLumiNorm = 9185.6; //HCP analysis
 	//	fLumiNorm = 9100.;	// ttV 2012 analysis
 	fLumiNorm = 19466.;   // Moriond 2013 dataset 
-	
+
 	// Cuts:
 	fC_minMu1pt = 20.;
 	fC_minMu2pt = 20.;
@@ -385,13 +385,12 @@ void SSDLPlotter::doAnalysis(){
         // return;
        
   //	if (gRunSMSscan) return; //DO NOT RUN THE ANALYSIS IF RUNNING THE SCAN
-        
-  
         if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 	storeWeightedPred(gRegion[gBaseRegion]);
-	
+
+
 //SANTI	makeOSSFEfficiency();
 //SANTI	// ------------------- the following is for testing and closure things
 	// fill fake ratios to run closure tests
@@ -1034,587 +1033,515 @@ void SSDLPlotter::plotWeightedHT(){
 }
 
 //____________________________________________________________________________
-//SANTIvoid SSDLPlotter::makeOSSFEfficiency(){
-//SANTI        fOutputSubDir = "OSSF/";
-//SANTI	
-//SANTI	//Take numbers for RUN period
-//SANTI	vector<int> musamples = fMuData;
-//SANTI	vector<int> elsamples = fEGData;
-//SANTI	
-//SANTI	float ossf_mu_RunA(0.),ossf_el_RunA(0.);
-//SANTI	float ossf_mu_RunB(0.),ossf_el_RunB(0.);
-//SANTI	float ossf_mu_RunC(0.),ossf_el_RunC(0.);	
-//SANTI	float ossf_mu_RunD(0.),ossf_el_RunD(0.);
-//SANTI	
-//SANTI	for (size_t i=0; i<musamples.size(); i++){
-//SANTI	     Sample *S = fSamples[musamples[i]];
-//SANTI	     Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
-//SANTI
-//SANTI	     TH1D *ossfpairstmp = C->ossfpairs;
-//SANTI	     if (musamples[i] == DoubleMu1 || musamples[i] == DoubleMu1a)
-//SANTI	       ossf_mu_RunA += ossfpairstmp->GetEntries();
-//SANTI	     if (musamples[i] == DoubleMu2)
-//SANTI	       ossf_mu_RunB += ossfpairstmp->GetEntries();
-//SANTI	     if (musamples[i] == DoubleMu3 || musamples[i] == DoubleMu4)
-//SANTI	       ossf_mu_RunC += ossfpairstmp->GetEntries();
-//SANTI	     if (musamples[i] == DoubleMu5 || musamples[i] == DoubleMu5a)
-//SANTI	       ossf_mu_RunD += ossfpairstmp->GetEntries();
-//SANTI	}
-//SANTI
-//SANTI	for (size_t i=0; i<elsamples.size(); i++){
-//SANTI	     Sample *S = fSamples[elsamples[i]];
-//SANTI	     Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
-//SANTI
-//SANTI	     TH1D *ossfpairstmp = C->ossfpairs;
-//SANTI	     if (elsamples[i] == DoubleEle1 || elsamples[i] == DoubleEle1a)
-//SANTI	       ossf_el_RunA += ossfpairstmp->GetEntries();
-//SANTI	     if (elsamples[i] == DoubleEle2)
-//SANTI	       ossf_el_RunB += ossfpairstmp->GetEntries();
-//SANTI	     if (elsamples[i] == DoubleEle3 || elsamples[i] == DoubleEle4)
-//SANTI	       ossf_el_RunC += ossfpairstmp->GetEntries();
-//SANTI	     if (elsamples[i] == DoubleEle5 || elsamples[i] == DoubleEle5a)
-//SANTI	       ossf_el_RunD += ossfpairstmp->GetEntries();
-//SANTI	}
-//SANTI	
-//SANTI	// NOW PRINT THE OUTPUT:
-//SANTI	TString outputdir = Util::MakeOutputDir(fOutputDir + fOutputSubDir);
-//SANTI	TString outputname = outputdir + "OSSF_Efficiency.txt";
-//SANTI	
-//SANTI	float Lumi_A = 0.89*1000; ///fLumiNorm;
-//SANTI	float Lumi_B = 4.40*1000; ///fLumiNorm;
-//SANTI	float Lumi_C = 6.90*1000; ///fLumiNorm;
-//SANTI	float Lumi_D = 7.27*1000; ///fLumiNorm;
-//SANTI
-//SANTI	ofstream OUT(outputname.Data(), ios::trunc);
-//SANTI	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-//SANTI	OUT << " Output for Zee efficiency study                                             " << endl;
-//SANTI	OUT << "  scaling MC to " << fLumiNorm << " /pb                                      " << endl;
-//SANTI	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-//SANTI	
-//SANTI	OUT << " Number of Zee events |    RunA   |    RunB   |    RunC   |   RunD   |" << endl;
-//SANTI	OUT << Form(" Absolut              |  %5.0f |  %5.0f |  %5.0f |  %5.0f |",
-//SANTI		    ossf_el_RunA, ossf_el_RunB, ossf_el_RunC, ossf_el_RunD) << endl;
-//SANTI	OUT << Form(" Scaled to Lumi       |  %5.2f |  %5.2f |  %5.2f |  %5.2f |",
-//SANTI		    ossf_el_RunA/Lumi_A, ossf_el_RunB/Lumi_B, ossf_el_RunC/Lumi_C, ossf_el_RunD/Lumi_D)<<endl;
-//SANTI	OUT << "----------------------------------------------------------------------" << endl;
-//SANTI	OUT << " Number of Zee events |    RunA   |    RunB   |    RunC   |   RunD   |" << endl;
-//SANTI	OUT << Form(" Absolut              |  %5.0f |  %5.0f |  %5.0f |  %5.0f |",
-//SANTI		    ossf_mu_RunA, ossf_mu_RunB, ossf_mu_RunC, ossf_mu_RunD) << endl;
-//SANTI	OUT << Form(" Scaled to Lumi       |  %5.2f |  %5.2f |  %5.2f |  %5.2f |",
-//SANTI		    ossf_mu_RunA/Lumi_A, ossf_mu_RunB/Lumi_B, ossf_mu_RunC/Lumi_C, ossf_mu_RunD/Lumi_D)<<endl;
-//SANTI	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-//SANTI	
-//SANTI	  
-//SANTI}
-void SSDLPlotter::makePileUpPlots(bool write){
+//SANTI  void SSDLPlotter::makePileUpPlots(bool write){
+//SANTI  	fOutputSubDir = "PileUp/";
+//SANTI  
+//SANTI  	TH1D *smu_nvertices, *dmu_nvertices, *sel_nvertices, *del_nvertices, *mue_nvertices;
+//SANTI  	TH1D *mu_ntight, *mu_nloose, *mu_ratio, *el_ntight, *el_nloose, *el_ratio;
+//SANTI  
+//SANTI  	if(!write){
+//SANTI  		TFile *file = TFile::Open(fOutputDir + fOutputSubDir + "histos.root");
+//SANTI  		smu_nvertices = (TH1D*)file->Get("smu_nvertices");
+//SANTI  		dmu_nvertices = (TH1D*)file->Get("dmu_nvertices");
+//SANTI  		sel_nvertices = (TH1D*)file->Get("sel_nvertices");
+//SANTI  		del_nvertices = (TH1D*)file->Get("del_nvertices");
+//SANTI  		mue_nvertices = (TH1D*)file->Get("mue_nvertices");
+//SANTI  		mu_ratio      = (TH1D*)file->Get("mu_ratio");
+//SANTI  		el_ratio      = (TH1D*)file->Get("el_ratio");
+//SANTI  	}
+//SANTI  	else{
+//SANTI  		vector<gSample> samples;
+//SANTI  		samples.push_back(DoubleMu1);
+//SANTI  		// samples.push_back(DoubleMu2);
+//SANTI  		// samples.push_back(DoubleMu3);
+//SANTI  		// samples.push_back(DoubleMu4);
+//SANTI  		// samples.push_back(DoubleMu5);
+//SANTI  		samples.push_back(MuEG1);
+//SANTI  		// samples.push_back(MuEG2);
+//SANTI  		// samples.push_back(MuEG3);
+//SANTI  		// samples.push_back(MuEG4);
+//SANTI  		// samples.push_back(MuEG5);
+//SANTI  		samples.push_back(DoubleEle1);
+//SANTI  		// samples.push_back(DoubleEle2);
+//SANTI  		// samples.push_back(DoubleEle3);
+//SANTI  		// samples.push_back(DoubleEle4);
+//SANTI  		// samples.push_back(DoubleEle5);
+//SANTI  
+//SANTI  		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		sel_nvertices = new TH1D("sel_nvertices", "sel_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		del_nvertices = new TH1D("del_nvertices", "del_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		mue_nvertices = new TH1D("mue_nvertices", "mue_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  
+//SANTI  		mu_ntight = new TH1D("mu_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		mu_nloose = new TH1D("mu_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		mu_ratio  = new TH1D("mu_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		el_ntight = new TH1D("el_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		el_nloose = new TH1D("el_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  		el_ratio  = new TH1D("el_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+//SANTI  
+//SANTI  		mu_ntight    ->Sumw2();
+//SANTI  		mu_nloose    ->Sumw2();
+//SANTI  		mu_ratio     ->Sumw2();
+//SANTI  		el_ntight    ->Sumw2();
+//SANTI  		el_nloose    ->Sumw2();
+//SANTI  		el_ratio     ->Sumw2();
+//SANTI  		smu_nvertices->Sumw2();
+//SANTI  		dmu_nvertices->Sumw2();
+//SANTI  		sel_nvertices->Sumw2();
+//SANTI  		del_nvertices->Sumw2();
+//SANTI  		mue_nvertices->Sumw2();
+//SANTI  		mu_ntight    ->SetXTitle("N_{Vertices}");
+//SANTI  		mu_nloose    ->SetXTitle("N_{Vertices}");
+//SANTI  		mu_ratio     ->SetXTitle("N_{Vertices}");
+//SANTI  		el_ntight    ->SetXTitle("N_{Vertices}");
+//SANTI  		el_nloose    ->SetXTitle("N_{Vertices}");
+//SANTI  		el_ratio     ->SetXTitle("N_{Vertices}");
+//SANTI  		smu_nvertices->SetXTitle("N_{Vertices}");
+//SANTI  		dmu_nvertices->SetXTitle("N_{Vertices}");
+//SANTI  		sel_nvertices->SetXTitle("N_{Vertices}");
+//SANTI  		del_nvertices->SetXTitle("N_{Vertices}");
+//SANTI  		mue_nvertices->SetXTitle("N_{Vertices}");
+//SANTI  		mu_ntight    ->SetYTitle("N_{Events}");
+//SANTI  		mu_nloose    ->SetYTitle("N_{Events}");
+//SANTI  		mu_ratio     ->SetYTitle("N_{Events}");
+//SANTI  		el_ntight    ->SetYTitle("N_{Events}");
+//SANTI  		el_nloose    ->SetYTitle("N_{Events}");
+//SANTI  		el_ratio     ->SetYTitle("N_{Events}");
+//SANTI  		smu_nvertices->SetYTitle("N_{Events}");
+//SANTI  		dmu_nvertices->SetYTitle("N_{Events}");
+//SANTI  		sel_nvertices->SetYTitle("N_{Events}");
+//SANTI  		del_nvertices->SetYTitle("N_{Events}");
+//SANTI  		mue_nvertices->SetYTitle("N_{Events}");
+//SANTI  		mu_ntight    ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		mu_nloose    ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		mu_ratio     ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		el_ntight    ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		el_nloose    ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		el_ratio     ->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		smu_nvertices->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		dmu_nvertices->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		sel_nvertices->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		del_nvertices->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  		mue_nvertices->GetYaxis()->SetTitleOffset(1.2);
+//SANTI  
+//SANTI  		for(size_t i = 0; i < samples.size(); ++i){
+//SANTI  			Sample *S = fSamples[samples[i]];
+//SANTI  			fSample = S; // necessary for triggers to work properly
+//SANTI  			fCurrentSample = samples[i];
+//SANTI  			resetHypLeptons();
+//SANTI  			fDoCounting = false;
+//SANTI  		
+//SANTI  			TTree *tree = S->getTree();
+//SANTI  			tree->ResetBranchAddresses();
+//SANTI  			Init(tree);
+//SANTI  			for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
+//SANTI  				tree->GetEntry(jentry);
+//SANTI  				printProgress(jentry, tree->GetEntriesFast(), S->sname);
+//SANTI  
+//SANTI  				if(mumuSignalTrigger()) dmu_nvertices->Fill(NVrtx);
+//SANTI  				if(elelSignalTrigger()) del_nvertices->Fill(NVrtx);
+//SANTI  				if(elmuSignalTrigger()) mue_nvertices->Fill(NVrtx);
+//SANTI  				if(singleMuTrigger()){
+//SANTI  					smu_nvertices->Fill(NVrtx);
+//SANTI  					if(isSigSupMuEvent()){
+//SANTI  						if(isTightMuon(0)) mu_ntight->Fill(NVrtx);
+//SANTI  						if(isLooseMuon(0)) mu_nloose->Fill(NVrtx);					
+//SANTI  					}
+//SANTI  				}
+//SANTI  				resetHypLeptons();
+//SANTI  				if(singleElTrigger()){
+//SANTI  					sel_nvertices->Fill(NVrtx);
+//SANTI  				 	if(isSigSupElEvent()){
+//SANTI  						if(isTightElectron(0)) el_ntight->Fill(NVrtx);
+//SANTI  						if(isLooseElectron(0)) el_nloose->Fill(NVrtx);
+//SANTI  					}
+//SANTI  				}
+//SANTI  			}
+//SANTI  			S->cleanUp();
+//SANTI  		}
+//SANTI  	
+//SANTI  		mu_ratio->Divide(mu_ntight, mu_nloose, 1., 1., "B");
+//SANTI  		mu_ratio->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  		el_ratio->Divide(el_ntight, el_nloose, 1., 1., "B");
+//SANTI  		el_ratio->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  
+//SANTI  		dmu_nvertices->Scale(1./dmu_nvertices->Integral());
+//SANTI  		smu_nvertices->Scale(1./smu_nvertices->Integral());
+//SANTI  		del_nvertices->Scale(1./del_nvertices->Integral());
+//SANTI  		sel_nvertices->Scale(1./sel_nvertices->Integral());
+//SANTI  		mue_nvertices->Scale(1./mue_nvertices->Integral());
+//SANTI  
+//SANTI  	}
+//SANTI  
+//SANTI  	mu_ratio     ->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	el_ratio     ->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	smu_nvertices->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	dmu_nvertices->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	sel_nvertices->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	del_nvertices->SetYTitle("N_{Events} (Normalized)");
+//SANTI  	mue_nvertices->SetYTitle("N_{Events} (Normalized)");
+//SANTI  
+//SANTI  	mu_ratio     ->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	el_ratio     ->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	smu_nvertices->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	dmu_nvertices->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	sel_nvertices->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	del_nvertices->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  	mue_nvertices->GetYaxis()->SetTitleOffset(1.3);
+//SANTI  
+//SANTI  	// Color_t colors[6] = {1, 1, 1, 1, 1, 1};
+//SANTI  	Color_t colors[5] = {31, 41, 51, 61, 81};
+//SANTI  	// Color_t colors[6] = {1, 12, 39, 38, 32, 30};//, 29};
+//SANTI  	Style_t styles[6] = {24, 25, 26, 27, 32, 30};//, 29};
+//SANTI  
+//SANTI  	// dmu_nvertices->SetMarkerStyle(styles[0]);
+//SANTI  	// smu_nvertices->SetMarkerStyle(styles[1]);
+//SANTI  	// del_nvertices->SetMarkerStyle(styles[2]);
+//SANTI  	// sel_nvertices->SetMarkerStyle(styles[3]);
+//SANTI  	// mue_nvertices->SetMarkerStyle(styles[4]);
+//SANTI  	// dmu_nvertices->SetMarkerColor(colors[0]);
+//SANTI  	// smu_nvertices->SetMarkerColor(colors[1]);
+//SANTI  	// del_nvertices->SetMarkerColor(colors[2]);
+//SANTI  	// sel_nvertices->SetMarkerColor(colors[3]);
+//SANTI  	// mue_nvertices->SetMarkerColor(colors[4]);
+//SANTI  	dmu_nvertices->SetLineColor(colors[0]);
+//SANTI  	smu_nvertices->SetLineColor(colors[1]);
+//SANTI  	del_nvertices->SetLineColor(colors[2]);
+//SANTI  	sel_nvertices->SetLineColor(colors[3]);
+//SANTI  	mue_nvertices->SetLineColor(colors[4]);
+//SANTI  	// dmu_nvertices->SetMarkerSize(1.5);
+//SANTI  	// smu_nvertices->SetMarkerSize(1.5);
+//SANTI  	// del_nvertices->SetMarkerSize(1.5);
+//SANTI  	// sel_nvertices->SetMarkerSize(1.5);
+//SANTI  	// mue_nvertices->SetMarkerSize(1.5);
+//SANTI  	dmu_nvertices->SetLineWidth(2);
+//SANTI  	smu_nvertices->SetLineWidth(2);
+//SANTI  	del_nvertices->SetLineWidth(2);
+//SANTI  	sel_nvertices->SetLineWidth(2);
+//SANTI  	mue_nvertices->SetLineWidth(2);
+//SANTI  	dmu_nvertices->SetFillStyle(0);
+//SANTI  	smu_nvertices->SetFillStyle(0);
+//SANTI  	del_nvertices->SetFillStyle(0);
+//SANTI  	sel_nvertices->SetFillStyle(0);
+//SANTI  	mue_nvertices->SetFillStyle(0);
+//SANTI  
+//SANTI  	dmu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  	smu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  	del_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  	sel_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  	mue_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+//SANTI  
+//SANTI  	mu_ratio->SetMarkerStyle(20);
+//SANTI  	mu_ratio->SetMarkerColor(kBlue);
+//SANTI  	mu_ratio->SetLineColor(kBlue);
+//SANTI  	mu_ratio->SetMarkerSize(1.8);
+//SANTI  	mu_ratio->SetLineWidth(2);
+//SANTI  	el_ratio->SetMarkerStyle(21);
+//SANTI  	el_ratio->SetMarkerColor(kRed);
+//SANTI  	el_ratio->SetLineColor(kRed);
+//SANTI  	el_ratio->SetMarkerSize(1.8);
+//SANTI  	el_ratio->SetLineWidth(2);
+//SANTI  
+//SANTI  	// printObject(mu_ratio, "MuRatio", "PEX");
+//SANTI  	// printObject(el_ratio, "ElRatio", "PEX");
+//SANTI  	// printObject(dmu_nvertices, "NVertices_DMu", "L");
+//SANTI  	// printObject(smu_nvertices, "NVertices_SMu", "L");
+//SANTI  	// printObject(del_nvertices, "NVertices_DEl", "L");
+//SANTI  	// printObject(sel_nvertices, "NVertices_SEl", "L");
+//SANTI  	// printObject(mue_nvertices, "NVertices_MuE", "L");
+//SANTI  
+//SANTI  	// TLegend *leg = new TLegend(0.35,0.15,0.70,0.40);
+//SANTI  	TLegend *leg = new TLegend(0.50,0.60,0.88,0.88);
+//SANTI  	leg->AddEntry(dmu_nvertices, Form("DoubleMu Trig., Mean = %4.2f", dmu_nvertices->GetMean()),  "l");
+//SANTI  	leg->AddEntry(smu_nvertices, Form("SingleMu Trig., Mean = %4.2f", smu_nvertices->GetMean()),  "l");
+//SANTI  	leg->AddEntry(del_nvertices, Form("DoubleEle Trig., Mean = %4.2f", del_nvertices->GetMean()), "l");
+//SANTI  	leg->AddEntry(sel_nvertices, Form("SingleEle Trig., Mean = %4.2f", sel_nvertices->GetMean()), "l");
+//SANTI  	leg->AddEntry(mue_nvertices, Form("MuEle Trig., Mean = %4.2f", mue_nvertices->GetMean()),   "l");
+//SANTI  	leg->AddEntry(mu_ratio, Form("TL Ratio (Muons)"), "p");
+//SANTI  	leg->AddEntry(el_ratio, Form("TL Ratio (Electrons)"),  "p");
+//SANTI  	leg->SetFillStyle(0);
+//SANTI  	leg->SetTextFont(42);
+//SANTI  	// leg->SetTextSize(0.03);
+//SANTI  	leg->SetBorderSize(0);
+//SANTI  
+//SANTI  	TCanvas *c_temp = new TCanvas("C_temp", "HT vs MET in Data vs MC", 0, 0, 800, 600);
+//SANTI  	c_temp->cd();
+//SANTI  	dmu_nvertices->Draw("axis");
+//SANTI  	dmu_nvertices->DrawCopy("hist L same");
+//SANTI  	smu_nvertices->DrawCopy("hist L same");
+//SANTI  	del_nvertices->DrawCopy("hist L same");
+//SANTI  	sel_nvertices->DrawCopy("hist L same");
+//SANTI  	mue_nvertices->DrawCopy("hist L same");
+//SANTI  	mu_ratio->DrawCopy("PE X0 same");
+//SANTI  	el_ratio->DrawCopy("PE X0 same");
+//SANTI  	TGaxis *axis = new TGaxis(18, 0, 18, 0.4, 0, 0.4, 510, "+L");
+//SANTI  	axis->SetLabelFont(42);
+//SANTI  	axis->SetTitleFont(42);
+//SANTI  	axis->SetTitleOffset(1.2);
+//SANTI  	axis->SetTitle("TL Ratio");
+//SANTI  	axis->Draw();
+//SANTI  	leg->Draw();
+//SANTI  	drawTopLine();
+//SANTI  	// fLatex->DrawLatex(0.10,0.92, fSamples[sample]->name);
+//SANTI  	// Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
+//SANTI  	Util::PrintPDF(   c_temp, "PileUp", fOutputDir + fOutputSubDir);
+//SANTI  
+//SANTI  	if(write){
+//SANTI  		TFile *file = new TFile(fOutputDir + fOutputSubDir + "histos.root", "RECREATE");
+//SANTI  		mu_ratio->Write(mu_ratio->GetName(), TObject::kWriteDelete);
+//SANTI  		el_ratio->Write(el_ratio->GetName(), TObject::kWriteDelete);
+//SANTI  		dmu_nvertices->Write(dmu_nvertices->GetName(), TObject::kWriteDelete);
+//SANTI  		smu_nvertices->Write(smu_nvertices->GetName(), TObject::kWriteDelete);
+//SANTI  		del_nvertices->Write(del_nvertices->GetName(), TObject::kWriteDelete);
+//SANTI  		sel_nvertices->Write(sel_nvertices->GetName(), TObject::kWriteDelete);
+//SANTI  		mue_nvertices->Write(mue_nvertices->GetName(), TObject::kWriteDelete);
+//SANTI  		file->Close();
+//SANTI  	}
+//SANTI  
+//SANTI  	// Cleanup
+//SANTI  	delete leg, c_temp;
+//SANTI  	if(write) delete mu_ntight, mu_nloose, el_ntight, el_nloose, mu_ratio, el_ratio;
+//SANTI  	else delete mu_ratio, el_ratio;
+//SANTI  	delete dmu_nvertices, smu_nvertices, del_nvertices, sel_nvertices, mue_nvertices;
+//SANTI  	fOutputSubDir = "";
+//SANTI  }
+void SSDLPlotter::makePileUpPlots(bool RunPeriod){
 	fOutputSubDir = "PileUp/";
-
-	TH1D *smu_nvertices, *dmu_nvertices, *sel_nvertices, *del_nvertices, *mue_nvertices;
-	TH1D *mu_ntight, *mu_nloose, *mu_ratio, *el_ntight, *el_nloose, *el_ratio;
-
-	if(!write){
-		TFile *file = TFile::Open(fOutputDir + fOutputSubDir + "histos.root");
-		smu_nvertices = (TH1D*)file->Get("smu_nvertices");
-		dmu_nvertices = (TH1D*)file->Get("dmu_nvertices");
-		sel_nvertices = (TH1D*)file->Get("sel_nvertices");
-		del_nvertices = (TH1D*)file->Get("del_nvertices");
-		mue_nvertices = (TH1D*)file->Get("mue_nvertices");
-		mu_ratio      = (TH1D*)file->Get("mu_ratio");
-		el_ratio      = (TH1D*)file->Get("el_ratio");
-	}
-	else{
-		vector<gSample> samples;
-		samples.push_back(DoubleMu1);
-		// samples.push_back(DoubleMu2);
-		// samples.push_back(DoubleMu3);
-		// samples.push_back(DoubleMu4);
-		// samples.push_back(DoubleMu5);
-		samples.push_back(MuEG1);
-		// samples.push_back(MuEG2);
-		// samples.push_back(MuEG3);
-		// samples.push_back(MuEG4);
-		// samples.push_back(MuEG5);
-		samples.push_back(DoubleEle1);
-		// samples.push_back(DoubleEle2);
-		// samples.push_back(DoubleEle3);
-		// samples.push_back(DoubleEle4);
-		// samples.push_back(DoubleEle5);
-
-		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		sel_nvertices = new TH1D("sel_nvertices", "sel_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		del_nvertices = new TH1D("del_nvertices", "del_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mue_nvertices = new TH1D("mue_nvertices", "mue_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-
-		mu_ntight = new TH1D("mu_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mu_nloose = new TH1D("mu_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		mu_ratio  = new TH1D("mu_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_ntight = new TH1D("el_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_nloose = new TH1D("el_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-		el_ratio  = new TH1D("el_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
-
-		mu_ntight    ->Sumw2();
-		mu_nloose    ->Sumw2();
-		mu_ratio     ->Sumw2();
-		el_ntight    ->Sumw2();
-		el_nloose    ->Sumw2();
-		el_ratio     ->Sumw2();
-		smu_nvertices->Sumw2();
-		dmu_nvertices->Sumw2();
-		sel_nvertices->Sumw2();
-		del_nvertices->Sumw2();
-		mue_nvertices->Sumw2();
-		mu_ntight    ->SetXTitle("N_{Vertices}");
-		mu_nloose    ->SetXTitle("N_{Vertices}");
-		mu_ratio     ->SetXTitle("N_{Vertices}");
-		el_ntight    ->SetXTitle("N_{Vertices}");
-		el_nloose    ->SetXTitle("N_{Vertices}");
-		el_ratio     ->SetXTitle("N_{Vertices}");
-		smu_nvertices->SetXTitle("N_{Vertices}");
-		dmu_nvertices->SetXTitle("N_{Vertices}");
-		sel_nvertices->SetXTitle("N_{Vertices}");
-		del_nvertices->SetXTitle("N_{Vertices}");
-		mue_nvertices->SetXTitle("N_{Vertices}");
-		mu_ntight    ->SetYTitle("N_{Events}");
-		mu_nloose    ->SetYTitle("N_{Events}");
-		mu_ratio     ->SetYTitle("N_{Events}");
-		el_ntight    ->SetYTitle("N_{Events}");
-		el_nloose    ->SetYTitle("N_{Events}");
-		el_ratio     ->SetYTitle("N_{Events}");
-		smu_nvertices->SetYTitle("N_{Events}");
-		dmu_nvertices->SetYTitle("N_{Events}");
-		sel_nvertices->SetYTitle("N_{Events}");
-		del_nvertices->SetYTitle("N_{Events}");
-		mue_nvertices->SetYTitle("N_{Events}");
-		mu_ntight    ->GetYaxis()->SetTitleOffset(1.2);
-		mu_nloose    ->GetYaxis()->SetTitleOffset(1.2);
-		mu_ratio     ->GetYaxis()->SetTitleOffset(1.2);
-		el_ntight    ->GetYaxis()->SetTitleOffset(1.2);
-		el_nloose    ->GetYaxis()->SetTitleOffset(1.2);
-		el_ratio     ->GetYaxis()->SetTitleOffset(1.2);
-		smu_nvertices->GetYaxis()->SetTitleOffset(1.2);
-		dmu_nvertices->GetYaxis()->SetTitleOffset(1.2);
-		sel_nvertices->GetYaxis()->SetTitleOffset(1.2);
-		del_nvertices->GetYaxis()->SetTitleOffset(1.2);
-		mue_nvertices->GetYaxis()->SetTitleOffset(1.2);
-
-		for(size_t i = 0; i < samples.size(); ++i){
-			Sample *S = fSamples[samples[i]];
-			fSample = S; // necessary for triggers to work properly
-			fCurrentSample = samples[i];
-			resetHypLeptons();
-			fDoCounting = false;
-		
-			TTree *tree = S->getTree();
-			tree->ResetBranchAddresses();
-			Init(tree);
-			for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
-				tree->GetEntry(jentry);
-				printProgress(jentry, tree->GetEntriesFast(), S->sname);
-
-				if(mumuSignalTrigger()) dmu_nvertices->Fill(NVrtx);
-				if(elelSignalTrigger()) del_nvertices->Fill(NVrtx);
-				if(elmuSignalTrigger()) mue_nvertices->Fill(NVrtx);
-				if(singleMuTrigger()){
-					smu_nvertices->Fill(NVrtx);
-					if(isSigSupMuEvent()){
-						if(isTightMuon(0)) mu_ntight->Fill(NVrtx);
-						if(isLooseMuon(0)) mu_nloose->Fill(NVrtx);					
-					}
-				}
-				resetHypLeptons();
-				if(singleElTrigger()){
-					sel_nvertices->Fill(NVrtx);
-				 	if(isSigSupElEvent()){
-						if(isTightElectron(0)) el_ntight->Fill(NVrtx);
-						if(isLooseElectron(0)) el_nloose->Fill(NVrtx);
-					}
-				}
-			}
-			S->cleanUp();
-		}
 	
-		mu_ratio->Divide(mu_ntight, mu_nloose, 1., 1., "B");
-		mu_ratio->GetYaxis()->SetRangeUser(0., 0.4);
-		el_ratio->Divide(el_ntight, el_nloose, 1., 1., "B");
-		el_ratio->GetYaxis()->SetRangeUser(0., 0.4);
+	if (RunPeriod) return;
+	
+	TH1D *hel_dtrig, *hel_strig, *hel_ssdl, *hel_ntight, *hel_nloose; 
+	TH1D *hmu_dtrig, *hmu_strig, *hmu_ssdl, *hmu_ntight, *hmu_nloose; 
+	TH1D *h_ratio;
+	
+	hel_dtrig  = new TH1D("hel_dtrig" , "DoubleTrigger_Elec", 50, 0.5, 49.5);
+	hel_strig  = new TH1D("hel_strig" , "SingleTrigger_Elec", 50, 0.5, 49.5);
+	hel_ssdl   = new TH1D("hel_ssdl"  , "SSLLEvent_Elec"    , 50, 0.5, 49.5);
+	hel_ntight = new TH1D("hel_ntight", "SigSupTight_Elec"  , 50, 0.5, 49.5);
+	hel_nloose = new TH1D("hel_nloose", "SigSupLoose_Elec"  , 50, 0.5, 49.5);
 
-		dmu_nvertices->Scale(1./dmu_nvertices->Integral());
-		smu_nvertices->Scale(1./smu_nvertices->Integral());
-		del_nvertices->Scale(1./del_nvertices->Integral());
-		sel_nvertices->Scale(1./sel_nvertices->Integral());
-		mue_nvertices->Scale(1./mue_nvertices->Integral());
+	hmu_dtrig  = new TH1D("hmu_dtrig" , "DoubleTrigger_Muon", 50, 0.5, 49.5);
+	hmu_strig  = new TH1D("hmu_strig" , "SingleTrigger_Muon", 50, 0.5, 49.5);
+	hmu_ssdl   = new TH1D("hmu_ssdl"  , "SSLLEvent_Muon"    , 50, 0.5, 49.5);
+	hmu_ntight = new TH1D("hmu_ntight", "SigSupTight_Muon"  , 50, 0.5, 49.5);
+	hmu_nloose = new TH1D("hmu_nloose", "SigSupLoose_Muon"  , 50, 0.5, 49.5);
+	
+	h_ratio    = new TH1D("h_ratio"   , "Ratio"             , 50, 0.5, 49.5);
+	
+	hel_dtrig ->Sumw2();    
+	hel_strig ->Sumw2();	
+	hel_ssdl  ->Sumw2();	
+	hel_ntight->Sumw2();	
+	hel_nloose->Sumw2();	
+				
+	hmu_dtrig ->Sumw2();	
+	hmu_strig ->Sumw2();	
+	hmu_ssdl  ->Sumw2();	
+	hmu_ntight->Sumw2();	
+	hmu_nloose->Sumw2();	
+	
+	h_ratio   ->Sumw2();
+	
+	hel_dtrig ->SetYTitle("N_{Events}");    hel_dtrig ->GetXaxis()->SetTitleOffset(1.2);
+	hel_strig ->SetYTitle("N_{Events}");	hel_strig ->GetXaxis()->SetTitleOffset(1.2);
+	hel_ssdl  ->SetYTitle("N_{Events}");	hel_ssdl  ->GetXaxis()->SetTitleOffset(1.2);
+	hel_ntight->SetYTitle("N_{Events}");	hel_ntight->GetXaxis()->SetTitleOffset(1.2);
+	hel_nloose->SetYTitle("N_{Events}");	hel_nloose->GetXaxis()->SetTitleOffset(1.2);
 
+	hmu_dtrig ->SetYTitle("N_{Events}");	hmu_dtrig ->GetXaxis()->SetTitleOffset(1.2);
+	hmu_strig ->SetYTitle("N_{Events}");	hmu_strig ->GetXaxis()->SetTitleOffset(1.2);
+	hmu_ssdl  ->SetYTitle("N_{Events}");	hmu_ssdl  ->GetXaxis()->SetTitleOffset(1.2);
+	hmu_ntight->SetYTitle("N_{Events}");	hmu_ntight->GetXaxis()->SetTitleOffset(1.2);
+	hmu_nloose->SetYTitle("N_{Events}");	hmu_nloose->GetXaxis()->SetTitleOffset(1.2);
+	
+	for(size_t j = 1; j <= hmu_dtrig ->GetNbinsX(); ++j)   hmu_dtrig ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hmu_strig ->GetNbinsX(); ++j)   hmu_strig ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hmu_ssdl  ->GetNbinsX(); ++j)   hmu_ssdl  ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hmu_ntight->GetNbinsX(); ++j)   hmu_ntight->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hmu_nloose->GetNbinsX(); ++j)   hmu_nloose->GetXaxis()->SetBinLabel(j, "");
+
+	for(size_t j = 1; j <= hel_dtrig ->GetNbinsX(); ++j)   hel_dtrig ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hel_strig ->GetNbinsX(); ++j)   hel_strig ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hel_ssdl  ->GetNbinsX(); ++j)   hel_ssdl  ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hel_ntight->GetNbinsX(); ++j)   hel_ntight->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= hel_nloose->GetNbinsX(); ++j)   hel_nloose->GetXaxis()->SetBinLabel(j, "");
+
+	// Fill Plots
+	vector<int> musamples = fMuData;
+	vector<int> elsamples = fEGData;
+	for (size_t j=0; j<musamples.size(); j++){
+		Sample *S = fSamples[j];
+		hmu_dtrig ->Add(S->puplots[0].hdtrig );
+		hmu_strig ->Add(S->puplots[0].hstrig );
+		hmu_ssdl  ->Add(S->puplots[0].hssdl  );
+		hmu_ntight->Add(S->puplots[0].hntight);
+		hmu_nloose->Add(S->puplots[0].hnloose);
 	}
 
-	mu_ratio     ->SetYTitle("N_{Events} (Normalized)");
-	el_ratio     ->SetYTitle("N_{Events} (Normalized)");
-	smu_nvertices->SetYTitle("N_{Events} (Normalized)");
-	dmu_nvertices->SetYTitle("N_{Events} (Normalized)");
-	sel_nvertices->SetYTitle("N_{Events} (Normalized)");
-	del_nvertices->SetYTitle("N_{Events} (Normalized)");
-	mue_nvertices->SetYTitle("N_{Events} (Normalized)");
+	for (size_t j=0; j<elsamples.size(); j++){
+		Sample *S = fSamples[j];
+		hel_dtrig ->Add(S->puplots[1].hdtrig );
+		hel_strig ->Add(S->puplots[1].hstrig );
+		hel_ssdl  ->Add(S->puplots[1].hssdl  );
+		hel_ntight->Add(S->puplots[1].hntight);
+		hel_nloose->Add(S->puplots[1].hnloose);
+	}
+	
+	hmu_dtrig ->Scale(1./std::max(1.0,(double)hmu_dtrig ->Integral()));
+	hmu_strig ->Scale(1./std::max(1.0,(double)hmu_strig ->Integral()));
+	hmu_ssdl  ->Scale(1./std::max(1.0,(double)hmu_ssdl  ->Integral()));
+	hmu_ntight->Scale(1./std::max(1.0,(double)hmu_ntight->Integral()));
+	hmu_nloose->Scale(1./std::max(1.0,(double)hmu_nloose->Integral()));
 
-	mu_ratio     ->GetYaxis()->SetTitleOffset(1.3);
-	el_ratio     ->GetYaxis()->SetTitleOffset(1.3);
-	smu_nvertices->GetYaxis()->SetTitleOffset(1.3);
-	dmu_nvertices->GetYaxis()->SetTitleOffset(1.3);
-	sel_nvertices->GetYaxis()->SetTitleOffset(1.3);
-	del_nvertices->GetYaxis()->SetTitleOffset(1.3);
-	mue_nvertices->GetYaxis()->SetTitleOffset(1.3);
+	hel_dtrig ->Scale(1./std::max(1.0,(double)hel_dtrig ->Integral()));
+	hel_strig ->Scale(1./std::max(1.0,(double)hel_strig ->Integral()));
+	hel_ssdl  ->Scale(1./std::max(1.0,(double)hel_ssdl  ->Integral()));
+	hel_ntight->Scale(1./std::max(1.0,(double)hel_ntight->Integral()));
+	hel_nloose->Scale(1./std::max(1.0,(double)hel_nloose->Integral()));
 
-	// Color_t colors[6] = {1, 1, 1, 1, 1, 1};
-	Color_t colors[5] = {31, 41, 51, 61, 81};
-	// Color_t colors[6] = {1, 12, 39, 38, 32, 30};//, 29};
-	Style_t styles[6] = {24, 25, 26, 27, 32, 30};//, 29};
+	// Now make the plots prettier
+	hel_dtrig ->SetMarkerColor(kRed+1 );  hel_dtrig ->SetLineColor(kRed+1 );
+	hel_strig ->SetMarkerColor(kBlue-4);  hel_strig ->SetLineColor(kBlue-4);
+	hel_ssdl  ->SetMarkerColor(kRed+1 );  hel_ssdl  ->SetLineColor(kRed+1 );
+	hel_nloose->SetMarkerColor(kBlue-4);  hel_nloose->SetLineColor(kBlue-4);
 
-	// dmu_nvertices->SetMarkerStyle(styles[0]);
-	// smu_nvertices->SetMarkerStyle(styles[1]);
-	// del_nvertices->SetMarkerStyle(styles[2]);
-	// sel_nvertices->SetMarkerStyle(styles[3]);
-	// mue_nvertices->SetMarkerStyle(styles[4]);
-	// dmu_nvertices->SetMarkerColor(colors[0]);
-	// smu_nvertices->SetMarkerColor(colors[1]);
-	// del_nvertices->SetMarkerColor(colors[2]);
-	// sel_nvertices->SetMarkerColor(colors[3]);
-	// mue_nvertices->SetMarkerColor(colors[4]);
-	dmu_nvertices->SetLineColor(colors[0]);
-	smu_nvertices->SetLineColor(colors[1]);
-	del_nvertices->SetLineColor(colors[2]);
-	sel_nvertices->SetLineColor(colors[3]);
-	mue_nvertices->SetLineColor(colors[4]);
-	// dmu_nvertices->SetMarkerSize(1.5);
-	// smu_nvertices->SetMarkerSize(1.5);
-	// del_nvertices->SetMarkerSize(1.5);
-	// sel_nvertices->SetMarkerSize(1.5);
-	// mue_nvertices->SetMarkerSize(1.5);
-	dmu_nvertices->SetLineWidth(2);
-	smu_nvertices->SetLineWidth(2);
-	del_nvertices->SetLineWidth(2);
-	sel_nvertices->SetLineWidth(2);
-	mue_nvertices->SetLineWidth(2);
-	dmu_nvertices->SetFillStyle(0);
-	smu_nvertices->SetFillStyle(0);
-	del_nvertices->SetFillStyle(0);
-	sel_nvertices->SetFillStyle(0);
-	mue_nvertices->SetFillStyle(0);
+	hmu_dtrig ->SetMarkerColor(kRed+1 );  hmu_dtrig ->SetLineColor(kRed+1 );
+	hmu_strig ->SetMarkerColor(kBlue-4);  hmu_strig ->SetLineColor(kBlue-4);
+	hmu_ssdl  ->SetMarkerColor(kRed+1 );  hmu_ssdl  ->SetLineColor(kRed+1 );
+	hmu_nloose->SetMarkerColor(kBlue-4);  hmu_nloose->SetLineColor(kBlue-4);
 
-	dmu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
-	smu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
-	del_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
-	sel_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
-	mue_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+	// Plot everything
+	float border = 0.3;
+	float scale = (1-border)/border;
+	TString title = "N_{Vertices}";
+	h_ratio->SetXTitle(title);
+	h_ratio->SetYTitle("");
+	h_ratio->GetXaxis()->SetTitleSize(scale * 0.04);
+	h_ratio->GetXaxis()->SetLabelSize(scale * hmu_dtrig->GetXaxis()->GetLabelSize());
+	h_ratio->GetYaxis()->SetLabelSize(scale * hmu_dtrig->GetYaxis()->GetLabelSize());
+	h_ratio->GetXaxis()->SetTickLength(scale * hmu_dtrig->GetXaxis()->GetTickLength());
+	h_ratio->GetYaxis()->SetTickLength(hmu_dtrig->GetYaxis()->GetTickLength());
+	
+	h_ratio->SetFillStyle(1001);
+	h_ratio->SetLineWidth(1);
+	h_ratio->SetFillColor(  kGray+1);
+	h_ratio->SetLineColor(  kGray+1);
+	h_ratio->SetMarkerColor(kGray+1);
 
-	mu_ratio->SetMarkerStyle(20);
-	mu_ratio->SetMarkerColor(kBlue);
-	mu_ratio->SetLineColor(kBlue);
-	mu_ratio->SetMarkerSize(1.8);
-	mu_ratio->SetLineWidth(2);
-	el_ratio->SetMarkerStyle(21);
-	el_ratio->SetMarkerColor(kRed);
-	el_ratio->SetLineColor(kRed);
-	el_ratio->SetMarkerSize(1.8);
-	el_ratio->SetLineWidth(2);
-
-	// printObject(mu_ratio, "MuRatio", "PEX");
-	// printObject(el_ratio, "ElRatio", "PEX");
-	// printObject(dmu_nvertices, "NVertices_DMu", "L");
-	// printObject(smu_nvertices, "NVertices_SMu", "L");
-	// printObject(del_nvertices, "NVertices_DEl", "L");
-	// printObject(sel_nvertices, "NVertices_SEl", "L");
-	// printObject(mue_nvertices, "NVertices_MuE", "L");
-
-	// TLegend *leg = new TLegend(0.35,0.15,0.70,0.40);
-	TLegend *leg = new TLegend(0.50,0.60,0.88,0.88);
-	leg->AddEntry(dmu_nvertices, Form("DoubleMu Trig., Mean = %4.2f", dmu_nvertices->GetMean()),  "l");
-	leg->AddEntry(smu_nvertices, Form("SingleMu Trig., Mean = %4.2f", smu_nvertices->GetMean()),  "l");
-	leg->AddEntry(del_nvertices, Form("DoubleEle Trig., Mean = %4.2f", del_nvertices->GetMean()), "l");
-	leg->AddEntry(sel_nvertices, Form("SingleEle Trig., Mean = %4.2f", sel_nvertices->GetMean()), "l");
-	leg->AddEntry(mue_nvertices, Form("MuEle Trig., Mean = %4.2f", mue_nvertices->GetMean()),   "l");
-	leg->AddEntry(mu_ratio, Form("TL Ratio (Muons)"), "p");
-	leg->AddEntry(el_ratio, Form("TL Ratio (Electrons)"),  "p");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	// leg->SetTextSize(0.03);
-	leg->SetBorderSize(0);
-
-	TCanvas *c_temp = new TCanvas("C_temp", "HT vs MET in Data vs MC", 0, 0, 800, 600);
+	TCanvas *c_temp = new TCanvas("C_temp", "Pile-up", 0, 0, 800, 600);
 	c_temp->cd();
-	dmu_nvertices->Draw("axis");
-	dmu_nvertices->DrawCopy("hist L same");
-	smu_nvertices->DrawCopy("hist L same");
-	del_nvertices->DrawCopy("hist L same");
-	sel_nvertices->DrawCopy("hist L same");
-	mue_nvertices->DrawCopy("hist L same");
-	mu_ratio->DrawCopy("PE X0 same");
-	el_ratio->DrawCopy("PE X0 same");
-	TGaxis *axis = new TGaxis(18, 0, 18, 0.4, 0, 0.4, 510, "+L");
-	axis->SetLabelFont(42);
-	axis->SetTitleFont(42);
-	axis->SetTitleOffset(1.2);
-	axis->SetTitle("TL Ratio");
-	axis->Draw();
-	leg->Draw();
 	drawTopLine();
-	// fLatex->DrawLatex(0.10,0.92, fSamples[sample]->name);
-	// Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, "PileUp", fOutputDir + fOutputSubDir);
 
-	if(write){
-		TFile *file = new TFile(fOutputDir + fOutputSubDir + "histos.root", "RECREATE");
-		mu_ratio->Write(mu_ratio->GetName(), TObject::kWriteDelete);
-		el_ratio->Write(el_ratio->GetName(), TObject::kWriteDelete);
-		dmu_nvertices->Write(dmu_nvertices->GetName(), TObject::kWriteDelete);
-		smu_nvertices->Write(smu_nvertices->GetName(), TObject::kWriteDelete);
-		del_nvertices->Write(del_nvertices->GetName(), TObject::kWriteDelete);
-		sel_nvertices->Write(sel_nvertices->GetName(), TObject::kWriteDelete);
-		mue_nvertices->Write(mue_nvertices->GetName(), TObject::kWriteDelete);
-		file->Close();
-	}
+	TPad *p_plot  = new TPad("plotpad",  "Pad containing the plot", 0.00, border, 1.00, 1.00, 0, 0);
+	p_plot->SetBottomMargin(0.015);
+	p_plot->Draw();
+	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio", 0.00, 0.00, 1.00, border, 0, 0);
+	p_ratio->SetTopMargin(0.025);
+	p_ratio->SetBottomMargin(0.35);
+	p_ratio->Draw();
+	
+	p_ratio->cd();
+	h_ratio->Divide(hel_dtrig,hel_strig);
+	h_ratio->SetMaximum(1.99);
+	h_ratio->SetMinimum(0.0);
+	h_ratio->DrawCopy("P E2");
+	TLine *l3 = new TLine(0.5, 1.00, 49.5, 1.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+	gPad->RedrawAxis();
+
+	// electrons
+	TLegend *leg1 = new TLegend(0.50,0.60,0.88,0.88);
+	leg1->AddEntry(hel_dtrig, Form("DoubleEl Trig., Mean = %4.2f", hel_dtrig->GetMean()), "l");
+	leg1->AddEntry(hel_strig, Form("SingleEl Trig., Mean = %4.2f", hel_strig->GetMean()), "l");
+	leg1->SetFillStyle(0);
+	leg1->SetTextFont(42);
+	leg1->SetBorderSize(0);
+	
+	p_plot->cd();
+	hel_dtrig->DrawCopy("P");
+	hel_strig->DrawCopy("P SAME");
+	leg1->Draw();
+	gPad->RedrawAxis();
+	Util::PrintPDF(   c_temp, "NVrtx_Trigger_Elec", fOutputDir + fOutputSubDir);
+	
+	//  muons
+	TLegend *leg2 = new TLegend(0.50,0.60,0.88,0.88);
+	leg2->AddEntry(hmu_dtrig, Form("DoubleMu Trig., Mean = %4.2f", hmu_dtrig->GetMean()), "l");
+	leg2->AddEntry(hmu_strig, Form("SingleMu Trig., Mean = %4.2f", hmu_strig->GetMean()), "l");
+	leg2->SetFillStyle(0);
+	leg2->SetTextFont(42);
+	leg2->SetBorderSize(0);
+	
+	p_plot->cd();
+	hmu_dtrig->DrawCopy("P");
+	hmu_strig->DrawCopy("P SAME");
+	leg2->Draw();
+	
+	p_ratio->cd();
+	h_ratio->Divide(hmu_dtrig,hmu_strig);
+	h_ratio->SetMaximum(1.99);
+	h_ratio->SetMinimum(0.0);
+	h_ratio->DrawCopy("E2 ");
+	l3->Draw();
+	gPad->RedrawAxis();
+	Util::PrintPDF(   c_temp, "NVrtx_Trigger_Muon", fOutputDir + fOutputSubDir);
+
+
+	// electrons
+	TLegend *leg3 = new TLegend(0.50,0.60,0.88,0.88);
+	leg3->AddEntry(hel_ssdl  , Form("SSDL El Event.  , Mean = %4.2f", hel_ssdl->GetMean()), "l");
+	leg3->AddEntry(hel_nloose, Form("SigSup El Event., Mean = %4.2f", hel_nloose->GetMean()), "l");
+	leg3->SetFillStyle(0);
+	leg3->SetTextFont(42);
+	leg3->SetBorderSize(0);
+	
+	p_plot->cd();
+	hel_ssdl->DrawCopy("P");
+	hel_nloose->DrawCopy("P SAME");
+	leg3->Draw();
+	gPad->RedrawAxis();
+
+	p_ratio->cd();
+	h_ratio->Divide(hel_ssdl,hel_nloose);
+	h_ratio->SetMaximum(1.99);
+	h_ratio->SetMinimum(0.0);
+	h_ratio->DrawCopy("E2 ");
+	l3->Draw();
+	gPad->RedrawAxis();
+	Util::PrintPDF(   c_temp, "NVrtx_SSDLvsSigSup_Elec", fOutputDir + fOutputSubDir);
+	
+	//  muons
+	TLegend *leg4 = new TLegend(0.50,0.60,0.88,0.88);
+	leg4->AddEntry(hmu_ssdl  , Form("SSDL Mu Event.  , Mean = %4.2f", hmu_ssdl->GetMean()), "l");
+	leg4->AddEntry(hmu_nloose, Form("SigSup Mu Event., Mean = %4.2f", hmu_nloose->GetMean()), "l");
+	leg4->SetFillStyle(0);
+	leg4->SetTextFont(42);
+	leg4->SetBorderSize(0);
+	
+	p_plot->cd();
+	hmu_ssdl->DrawCopy("P");
+	hmu_nloose->DrawCopy("P SAME");
+	leg4->Draw();
+	
+	p_ratio->cd();
+	h_ratio->Divide(hmu_ssdl,hmu_nloose);
+	h_ratio->SetMaximum(1.99);
+	h_ratio->SetMinimum(0.0);
+	h_ratio->DrawCopy("E2 ");
+	l3->Draw();
+	gPad->RedrawAxis();
+	Util::PrintPDF(   c_temp, "NVrtx_SSDLvsSigSup_Muon", fOutputDir + fOutputSubDir);
+     
+
 
 	// Cleanup
-	delete leg, c_temp;
-	if(write) delete mu_ntight, mu_nloose, el_ntight, el_nloose, mu_ratio, el_ratio;
-	else delete mu_ratio, el_ratio;
-	delete dmu_nvertices, smu_nvertices, del_nvertices, sel_nvertices, mue_nvertices;
-	fOutputSubDir = "";
+	delete leg1,leg2;
+	delete p_plot, p_ratio;
+	delete c_temp;
 }
-//SANTIvoid SSDLPlotter::makePileUpPlots(bool RunPeriod){
-//SANTI	fOutputSubDir = "PileUp/";
-//SANTI	
-//SANTI	if (RunPeriod) return;
-//SANTI	
-//SANTI	TH1D *hel_dtrig, *hel_strig, *hel_ssdl, *hel_ntight, *hel_nloose; 
-//SANTI	TH1D *hmu_dtrig, *hmu_strig, *hmu_ssdl, *hmu_ntight, *hmu_nloose; 
-//SANTI	TH1D *h_ratio;
-//SANTI	
-//SANTI	hel_dtrig  = new TH1D("hel_dtrig" , "DoubleTrigger_Elec", 50, 0.5, 49.5);
-//SANTI	hel_strig  = new TH1D("hel_strig" , "SingleTrigger_Elec", 50, 0.5, 49.5);
-//SANTI	hel_ssdl   = new TH1D("hel_ssdl"  , "SSLLEvent_Elec"    , 50, 0.5, 49.5);
-//SANTI	hel_ntight = new TH1D("hel_ntight", "SigSupTight_Elec"  , 50, 0.5, 49.5);
-//SANTI	hel_nloose = new TH1D("hel_nloose", "SigSupLoose_Elec"  , 50, 0.5, 49.5);
-//SANTI
-//SANTI	hmu_dtrig  = new TH1D("hmu_dtrig" , "DoubleTrigger_Muon", 50, 0.5, 49.5);
-//SANTI	hmu_strig  = new TH1D("hmu_strig" , "SingleTrigger_Muon", 50, 0.5, 49.5);
-//SANTI	hmu_ssdl   = new TH1D("hmu_ssdl"  , "SSLLEvent_Muon"    , 50, 0.5, 49.5);
-//SANTI	hmu_ntight = new TH1D("hmu_ntight", "SigSupTight_Muon"  , 50, 0.5, 49.5);
-//SANTI	hmu_nloose = new TH1D("hmu_nloose", "SigSupLoose_Muon"  , 50, 0.5, 49.5);
-//SANTI	
-//SANTI	h_ratio    = new TH1D("h_ratio"   , "Ratio"             , 50, 0.5, 49.5);
-//SANTI	
-//SANTI	hel_dtrig ->Sumw2();    
-//SANTI	hel_strig ->Sumw2();	
-//SANTI	hel_ssdl  ->Sumw2();	
-//SANTI	hel_ntight->Sumw2();	
-//SANTI	hel_nloose->Sumw2();	
-//SANTI				
-//SANTI	hmu_dtrig ->Sumw2();	
-//SANTI	hmu_strig ->Sumw2();	
-//SANTI	hmu_ssdl  ->Sumw2();	
-//SANTI	hmu_ntight->Sumw2();	
-//SANTI	hmu_nloose->Sumw2();	
-//SANTI	
-//SANTI	h_ratio   ->Sumw2();
-//SANTI	
-//SANTI	hel_dtrig ->SetYTitle("N_{Events}");    hel_dtrig ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hel_strig ->SetYTitle("N_{Events}");	hel_strig ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hel_ssdl  ->SetYTitle("N_{Events}");	hel_ssdl  ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hel_ntight->SetYTitle("N_{Events}");	hel_ntight->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hel_nloose->SetYTitle("N_{Events}");	hel_nloose->GetXaxis()->SetTitleOffset(1.2);
-//SANTI
-//SANTI	hmu_dtrig ->SetYTitle("N_{Events}");	hmu_dtrig ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hmu_strig ->SetYTitle("N_{Events}");	hmu_strig ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hmu_ssdl  ->SetYTitle("N_{Events}");	hmu_ssdl  ->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hmu_ntight->SetYTitle("N_{Events}");	hmu_ntight->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	hmu_nloose->SetYTitle("N_{Events}");	hmu_nloose->GetXaxis()->SetTitleOffset(1.2);
-//SANTI	
-//SANTI	for(size_t j = 1; j <= hmu_dtrig ->GetNbinsX(); ++j)   hmu_dtrig ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hmu_strig ->GetNbinsX(); ++j)   hmu_strig ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hmu_ssdl  ->GetNbinsX(); ++j)   hmu_ssdl  ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hmu_ntight->GetNbinsX(); ++j)   hmu_ntight->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hmu_nloose->GetNbinsX(); ++j)   hmu_nloose->GetXaxis()->SetBinLabel(j, "");
-//SANTI
-//SANTI	for(size_t j = 1; j <= hel_dtrig ->GetNbinsX(); ++j)   hel_dtrig ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hel_strig ->GetNbinsX(); ++j)   hel_strig ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hel_ssdl  ->GetNbinsX(); ++j)   hel_ssdl  ->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hel_ntight->GetNbinsX(); ++j)   hel_ntight->GetXaxis()->SetBinLabel(j, "");
-//SANTI	for(size_t j = 1; j <= hel_nloose->GetNbinsX(); ++j)   hel_nloose->GetXaxis()->SetBinLabel(j, "");
-//SANTI
-//SANTI	// Fill Plots
-//SANTI	vector<int> musamples = fMuData;
-//SANTI	vector<int> elsamples = fEGData;
-//SANTI	for (size_t j=0; j<musamples.size(); j++){
-//SANTI		Sample *S = fSamples[j];
-//SANTI		hmu_dtrig ->Add(S->puplots[0].hdtrig );
-//SANTI		hmu_strig ->Add(S->puplots[0].hstrig );
-//SANTI		hmu_ssdl  ->Add(S->puplots[0].hssdl  );
-//SANTI		hmu_ntight->Add(S->puplots[0].hntight);
-//SANTI		hmu_nloose->Add(S->puplots[0].hnloose);
-//SANTI	}
-//SANTI
-//SANTI	for (size_t j=0; j<elsamples.size(); j++){
-//SANTI		Sample *S = fSamples[j];
-//SANTI		hel_dtrig ->Add(S->puplots[1].hdtrig );
-//SANTI		hel_strig ->Add(S->puplots[1].hstrig );
-//SANTI		hel_ssdl  ->Add(S->puplots[1].hssdl  );
-//SANTI		hel_ntight->Add(S->puplots[1].hntight);
-//SANTI		hel_nloose->Add(S->puplots[1].hnloose);
-//SANTI	}
-//SANTI	
-//SANTI	hmu_dtrig ->Scale(1./std::max(1.0,(double)hmu_dtrig ->Integral()));
-//SANTI	hmu_strig ->Scale(1./std::max(1.0,(double)hmu_strig ->Integral()));
-//SANTI	hmu_ssdl  ->Scale(1./std::max(1.0,(double)hmu_ssdl  ->Integral()));
-//SANTI	hmu_ntight->Scale(1./std::max(1.0,(double)hmu_ntight->Integral()));
-//SANTI	hmu_nloose->Scale(1./std::max(1.0,(double)hmu_nloose->Integral()));
-//SANTI
-//SANTI	hel_dtrig ->Scale(1./std::max(1.0,(double)hel_dtrig ->Integral()));
-//SANTI	hel_strig ->Scale(1./std::max(1.0,(double)hel_strig ->Integral()));
-//SANTI	hel_ssdl  ->Scale(1./std::max(1.0,(double)hel_ssdl  ->Integral()));
-//SANTI	hel_ntight->Scale(1./std::max(1.0,(double)hel_ntight->Integral()));
-//SANTI	hel_nloose->Scale(1./std::max(1.0,(double)hel_nloose->Integral()));
-//SANTI
-//SANTI	// Now make the plots prettier
-//SANTI	hel_dtrig ->SetMarkerColor(kRed+1 );  hel_dtrig ->SetLineColor(kRed+1 );
-//SANTI	hel_strig ->SetMarkerColor(kBlue-4);  hel_strig ->SetLineColor(kBlue-4);
-//SANTI	hel_ssdl  ->SetMarkerColor(kRed+1 );  hel_ssdl  ->SetLineColor(kRed+1 );
-//SANTI	hel_nloose->SetMarkerColor(kBlue-4);  hel_nloose->SetLineColor(kBlue-4);
-//SANTI
-//SANTI	hmu_dtrig ->SetMarkerColor(kRed+1 );  hmu_dtrig ->SetLineColor(kRed+1 );
-//SANTI	hmu_strig ->SetMarkerColor(kBlue-4);  hmu_strig ->SetLineColor(kBlue-4);
-//SANTI	hmu_ssdl  ->SetMarkerColor(kRed+1 );  hmu_ssdl  ->SetLineColor(kRed+1 );
-//SANTI	hmu_nloose->SetMarkerColor(kBlue-4);  hmu_nloose->SetLineColor(kBlue-4);
-//SANTI
-//SANTI	// Plot everything
-//SANTI	float border = 0.3;
-//SANTI	float scale = (1-border)/border;
-//SANTI	TString title = "N_{Vertices}";
-//SANTI	h_ratio->SetXTitle(title);
-//SANTI	h_ratio->SetYTitle("");
-//SANTI	h_ratio->GetXaxis()->SetTitleSize(scale * 0.04);
-//SANTI	h_ratio->GetXaxis()->SetLabelSize(scale * hmu_dtrig->GetXaxis()->GetLabelSize());
-//SANTI	h_ratio->GetYaxis()->SetLabelSize(scale * hmu_dtrig->GetYaxis()->GetLabelSize());
-//SANTI	h_ratio->GetXaxis()->SetTickLength(scale * hmu_dtrig->GetXaxis()->GetTickLength());
-//SANTI	h_ratio->GetYaxis()->SetTickLength(hmu_dtrig->GetYaxis()->GetTickLength());
-//SANTI	
-//SANTI	h_ratio->SetFillStyle(1001);
-//SANTI	h_ratio->SetLineWidth(1);
-//SANTI	h_ratio->SetFillColor(  kGray+1);
-//SANTI	h_ratio->SetLineColor(  kGray+1);
-//SANTI	h_ratio->SetMarkerColor(kGray+1);
-//SANTI
-//SANTI	TCanvas *c_temp = new TCanvas("C_temp", "Pile-up", 0, 0, 800, 600);
-//SANTI	c_temp->cd();
-//SANTI	drawTopLine();
-//SANTI
-//SANTI	TPad *p_plot  = new TPad("plotpad",  "Pad containing the plot", 0.00, border, 1.00, 1.00, 0, 0);
-//SANTI	p_plot->SetBottomMargin(0.015);
-//SANTI	p_plot->Draw();
-//SANTI	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio", 0.00, 0.00, 1.00, border, 0, 0);
-//SANTI	p_ratio->SetTopMargin(0.025);
-//SANTI	p_ratio->SetBottomMargin(0.35);
-//SANTI	p_ratio->Draw();
-//SANTI	
-//SANTI	p_ratio->cd();
-//SANTI	h_ratio->Divide(hel_dtrig,hel_strig);
-//SANTI	h_ratio->SetMaximum(1.99);
-//SANTI	h_ratio->SetMinimum(0.0);
-//SANTI	h_ratio->DrawCopy("P E2");
-//SANTI	TLine *l3 = new TLine(0.5, 1.00, 49.5, 1.00);
-//SANTI	l3->SetLineWidth(2);
-//SANTI	l3->SetLineStyle(7);
-//SANTI	l3->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI
-//SANTI	// electrons
-//SANTI	TLegend *leg1 = new TLegend(0.50,0.60,0.88,0.88);
-//SANTI	leg1->AddEntry(hel_dtrig, Form("DoubleEl Trig., Mean = %4.2f", hel_dtrig->GetMean()), "l");
-//SANTI	leg1->AddEntry(hel_strig, Form("SingleEl Trig., Mean = %4.2f", hel_strig->GetMean()), "l");
-//SANTI	leg1->SetFillStyle(0);
-//SANTI	leg1->SetTextFont(42);
-//SANTI	leg1->SetBorderSize(0);
-//SANTI	
-//SANTI	p_plot->cd();
-//SANTI	hel_dtrig->DrawCopy("P");
-//SANTI	hel_strig->DrawCopy("P SAME");
-//SANTI	leg1->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI	Util::PrintPDF(   c_temp, "NVrtx_Trigger_Elec", fOutputDir + fOutputSubDir);
-//SANTI	
-//SANTI	//  muons
-//SANTI	TLegend *leg2 = new TLegend(0.50,0.60,0.88,0.88);
-//SANTI	leg2->AddEntry(hmu_dtrig, Form("DoubleMu Trig., Mean = %4.2f", hmu_dtrig->GetMean()), "l");
-//SANTI	leg2->AddEntry(hmu_strig, Form("SingleMu Trig., Mean = %4.2f", hmu_strig->GetMean()), "l");
-//SANTI	leg2->SetFillStyle(0);
-//SANTI	leg2->SetTextFont(42);
-//SANTI	leg2->SetBorderSize(0);
-//SANTI	
-//SANTI	p_plot->cd();
-//SANTI	hmu_dtrig->DrawCopy("P");
-//SANTI	hmu_strig->DrawCopy("P SAME");
-//SANTI	leg2->Draw();
-//SANTI	
-//SANTI	p_ratio->cd();
-//SANTI	h_ratio->Divide(hmu_dtrig,hmu_strig);
-//SANTI	h_ratio->SetMaximum(1.99);
-//SANTI	h_ratio->SetMinimum(0.0);
-//SANTI	h_ratio->DrawCopy("E2 ");
-//SANTI	l3->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI	Util::PrintPDF(   c_temp, "NVrtx_Trigger_Muon", fOutputDir + fOutputSubDir);
-//SANTI
-//SANTI
-//SANTI	// electrons
-//SANTI	TLegend *leg3 = new TLegend(0.50,0.60,0.88,0.88);
-//SANTI	leg3->AddEntry(hel_ssdl  , Form("SSDL El Event.  , Mean = %4.2f", hel_ssdl->GetMean()), "l");
-//SANTI	leg3->AddEntry(hel_nloose, Form("SigSup El Event., Mean = %4.2f", hel_nloose->GetMean()), "l");
-//SANTI	leg3->SetFillStyle(0);
-//SANTI	leg3->SetTextFont(42);
-//SANTI	leg3->SetBorderSize(0);
-//SANTI	
-//SANTI	p_plot->cd();
-//SANTI	hel_ssdl->DrawCopy("P");
-//SANTI	hel_nloose->DrawCopy("P SAME");
-//SANTI	leg3->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI
-//SANTI	p_ratio->cd();
-//SANTI	h_ratio->Divide(hel_ssdl,hel_nloose);
-//SANTI	h_ratio->SetMaximum(1.99);
-//SANTI	h_ratio->SetMinimum(0.0);
-//SANTI	h_ratio->DrawCopy("E2 ");
-//SANTI	l3->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI	Util::PrintPDF(   c_temp, "NVrtx_SSDLvsSigSup_Elec", fOutputDir + fOutputSubDir);
-//SANTI	
-//SANTI	//  muons
-//SANTI	TLegend *leg4 = new TLegend(0.50,0.60,0.88,0.88);
-//SANTI	leg4->AddEntry(hmu_ssdl  , Form("SSDL Mu Event.  , Mean = %4.2f", hmu_ssdl->GetMean()), "l");
-//SANTI	leg4->AddEntry(hmu_nloose, Form("SigSup Mu Event., Mean = %4.2f", hmu_nloose->GetMean()), "l");
-//SANTI	leg4->SetFillStyle(0);
-//SANTI	leg4->SetTextFont(42);
-//SANTI	leg4->SetBorderSize(0);
-//SANTI	
-//SANTI	p_plot->cd();
-//SANTI	hmu_ssdl->DrawCopy("P");
-//SANTI	hmu_nloose->DrawCopy("P SAME");
-//SANTI	leg4->Draw();
-//SANTI	
-//SANTI	p_ratio->cd();
-//SANTI	h_ratio->Divide(hmu_ssdl,hmu_nloose);
-//SANTI	h_ratio->SetMaximum(1.99);
-//SANTI	h_ratio->SetMinimum(0.0);
-//SANTI	h_ratio->DrawCopy("E2 ");
-//SANTI	l3->Draw();
-//SANTI	gPad->RedrawAxis();
-//SANTI	Util::PrintPDF(   c_temp, "NVrtx_SSDLvsSigSup_Muon", fOutputDir + fOutputSubDir);
-//SANTI     
-//SANTI
-//SANTI
-//SANTI	// Cleanup
-//SANTI	delete leg1,leg2;
-//SANTI	delete p_plot, p_ratio;
-//SANTI	delete c_temp;
-//SANTI}
 
 //____________________________________________________________________________
 void SSDLPlotter::makeNT012Plots(vector<int> mcsamples, gChannel chan, int reg, gHiLoSwitch hilo){
@@ -5258,20 +5185,20 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 	}
 
 	/// all the values are in absolut terms... convert it to % 
-	syst_BB_max_weighted  = syst_BB_max_weighted  / fbb;	
-	syst_BB_max_abs       = syst_BB_max_abs       / fbb;
-	syst_BB_mean_weighted = syst_BB_mean_weighted / fbb;
-	syst_BB_mean_abs      = syst_BB_mean_abs      / fbb;
+	syst_BB_max_weighted  = syst_BB_max_weighted  / fbb * 100;	
+	syst_BB_max_abs       = syst_BB_max_abs       / fbb * 100;
+	syst_BB_mean_weighted = syst_BB_mean_weighted / fbb * 100;
+	syst_BB_mean_abs      = syst_BB_mean_abs      / fbb * 100;
 
-	syst_BE_max_weighted  = syst_BE_max_weighted  / fbb;	
-	syst_BE_max_abs       = syst_BE_max_abs       / fbb;
-	syst_BE_mean_weighted = syst_BE_mean_weighted / fbb;
-	syst_BE_mean_abs      = syst_BE_mean_abs      / fbb;
-	
-	syst_EE_max_weighted  = syst_EE_max_weighted  / fee;
-	syst_EE_max_abs       = syst_EE_max_abs       / fee;
-	syst_EE_mean_weighted = syst_EE_mean_weighted / fee;
-	syst_EE_mean_abs      = syst_EE_mean_abs      / fee;
+	syst_BE_max_weighted  = syst_BE_max_weighted  / feb * 100;	
+	syst_BE_max_abs       = syst_BE_max_abs       / feb * 100;
+	syst_BE_mean_weighted = syst_BE_mean_weighted / feb * 100;
+	syst_BE_mean_abs      = syst_BE_mean_abs      / feb * 100;
+
+	syst_EE_max_weighted  = syst_EE_max_weighted  / fee * 100;
+	syst_EE_max_abs       = syst_EE_max_abs       / fee * 100;
+	syst_EE_mean_weighted = syst_EE_mean_weighted / fee * 100;
+	syst_EE_mean_abs      = syst_EE_mean_abs      / fee * 100;
 
 	syst_max_weighted   = (syst_BB_max_weighted  + syst_BE_max_weighted  + syst_EE_max_weighted )/3.;
 	syst_max_abs        = (syst_BB_max_abs       + syst_BE_max_abs       + syst_EE_max_abs      )/3.;
@@ -14425,8 +14352,8 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	xsec = (pred.obs - (pred.rare + pred.cmid + fakes))/(eff * fLumiNorm);
 	OUT << "The WZ->3l3N cross-section is: " << xsec << " ± " << syst2*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
 	OUT << "-------------------------------------------------------------" << endl;
-	OUT << "The theoretical xsec is"  << endl;
-																					   
+
+	fOutputSubDir = "IntPredictions/";
 }
 void SSDLPlotter::makeAllClosureTestsTTW(){
  	TString outputdir = Util::MakeOutputDir(fOutputDir + "MCClosureTTWZ");
