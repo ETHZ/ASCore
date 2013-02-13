@@ -64,7 +64,9 @@ def mk_dir_string(line):
 		if not '.root' in file: continue
 		indiv_dir = line.split()[0]+'_'+file.split('/')[-1].replace('.root','')
 		strings.append(mk_single_string(line, file, indiv_dir))
-	print '[status] found', len(strings), 'files for directory', line.split()[0]
+	nfiles = len(strings)
+	if (nfiles > 0 ) :print '[status] found', len(strings), 'files for directory', line.split()[0]
+	else: print '[!!WARNING!!] found', len(strings), 'files for directory', line.split()[0]
 	return strings
 		#ind = files.index(file)
 		#if not ind%nof:
