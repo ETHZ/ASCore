@@ -62,7 +62,7 @@ void SSDLAnalyzer::Loop(){
 				skipLumi = false;
 				if ( CheckRunLumi() == false ) skipLumi = true;
 			}
-			if(skipRun || skipLumi) continue;
+			// disable lumi checking in SSDLAnalysis if(skipRun || skipLumi) continue;
 			fSSDLAnalysis->Analyze();
 	}
 	cout << endl;

@@ -18,9 +18,7 @@
 #include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
 
-//#include "mcbtagSFuncert.h" // claudios btag scales
-//
-//#include "helper/BTagSFUtil/BTagSFUtil.h"
+// #include "helper/BTagSFUtil/BTagSFUtil.h"
 // #include "helper/BTagSF.hh"
 // #include "helper/GoodRunList.h"
 
@@ -262,7 +260,7 @@ SSDLDumper::SSDLDumper(TString configfile){
 	cout << "================  GLOBAL PARAMETERS  ===================" << endl;
 	cout << Form("gTTWZ = %d\ngApplyZVeto = %d\ngInvertZVeto = %d\ngMuMaxIso = %3.2f\ngElMaxIso = %3.2f\ngMinJetPt = %3.2f\ngMaxJetEta = %3.2f\ngBaseRegion = %s",
 		gTTWZ       ,
-		gApplyZVeto ,
+		tmp_gApplyZVeto ,
 		gInvertZVeto,
 		gMuMaxIso   ,
 		gElMaxIso   ,
@@ -507,49 +505,6 @@ void SSDLDumper::loopEvents(Sample *S){
 		gBtagSF2 = 1.;
 
 		fDoCounting = false;
-		// disable for now if( S->datamc!=0 ) {
-		// disable for now 	int ind1(-1), ind2(-1);
-		// disable for now 	fDoCounting = false;
-		// disable for now 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
-		// disable for now 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
-		// disable for now 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
-		// disable for now 	fDoCounting = true;
-		// disable for now }
-
-		// disable for now // marcs try on the b-tag scale factors:
-		// disable for now if( S->datamc!=0 ) {
-		// disable for now 	bool isFastsim = false;
-		// disable for now 	int ind1(-1), ind2(-1);
-		// disable for now 	fDoCounting = false;
-		// disable for now 	float myweight1(1.), myweight2(1.);
-		// disable for now 	std::vector< int > btags = getNBTagsMedIndices();
-		// disable for now 	int nbtags = btags.size();
-		// disable for now 	if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
-		// disable for now 		if (fVerbose > 2 && nbtags > 1) {
-		// disable for now 			cout << "There are " << nbtags << " btags in this event!" << endl;
-		// disable for now 			cout << "jet pt of 0th btagged-jet: " << getJetPt(btags[0]) << endl;
-		// disable for now 			cout << "      index and tagger value: " << btags[0] << "  " << JetCSVBTag[btags[0]] << endl;
-		// disable for now 			cout << "jet pt of 1th btagged-jet: " << getJetPt(btags[1]) << endl;
-		// disable for now 			cout << "      index and tagger value: " << btags[1] << "  " << JetCSVBTag[btags[1]] << endl;
-		// disable for now 			cout << endl;
-		// disable for now 		}
-		// disable for now 		if (nbtags == 2) {
-		// disable for now 			myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]), isFastsim);
-		// disable for now 		}
-		// disable for now 		if (nbtags == 3) {
-		// disable for now 			myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
-		// disable for now 			myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), isFastsim);
-		// disable for now 		}
-		// disable for now 		if (nbtags  > 3) {
-		// disable for now 			myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
-		// disable for now 			myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]), isFastsim );
-		// disable for now 		}
-		// disable for now 	}
-		// disable for now 	gBtagSF1 = myweight1;
-		// disable for now 	gBtagSF2 = myweight2;
-		// disable for now 	fDoCounting = true;
-		// disable for now }
-		
 		
 		gEventWeight  = gHLTSF * gBtagSF;
 		if( S->datamc!=4 ) gEventWeight *= PUWeight; // no pu weight for mc with no pu, that really doesn't exist anymore in 2012, so it's fine
@@ -562,13 +517,6 @@ void SSDLDumper::loopEvents(Sample *S){
 			fillYields(S, gRegion[(*regIt)->sname]);
 			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = false;
 		}
-
-		
-		// disable for now // reset the event weight to what it should be without a region cut applied
-		// disable for now gEventWeight  = gHLTSF * 1.;
-		// disable for now if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
-		// disable for now 	gEventWeight *= PUWeight; // PU weight is always 1. for data, so no problem here
-		// disable for now }
 
 		// fillYields(S, gRegion["TTbarWPresel"]);
 
@@ -4248,8 +4196,8 @@ float SSDLDumper::getMET(){
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-  	// float phi = pfMETType1Phi;
-	float phi = pfMETPhi;
+  	float phi = pfMETType1Phi;
+	// float phi = pfMETPhi;
   	return phi;
 }
 float SSDLDumper::getM3(){

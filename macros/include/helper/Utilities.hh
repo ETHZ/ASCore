@@ -221,6 +221,19 @@ namespace Util {
 	}
 
 	//__________________________________________________________________________
+	inline void PrintROOT(TCanvas *cin, TString name, TString dir){
+		// Prints a ROOT TCanvas Object to a .png file
+		//  name is the bare output filename, e.g. "fit_4_8",
+		//  dir is the output directory (inside the overall output dir.)
+		// Create sub directories if needed
+		dir = MakeOutputDir(dir);
+
+		dir += name;
+		dir += ".root";
+		cin->Print(dir,"root");
+	}
+
+	//__________________________________________________________________________
 	inline void PrintPDF(TCanvas *cin, TString name, TString dir){
 		// Prints a ROOT TCanvas Object to a .png file
 		//  name is the bare output filename, e.g. "fit_4_8",

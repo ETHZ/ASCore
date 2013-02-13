@@ -8399,7 +8399,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_mm + wz_nt2_em + wz_nt2_ee;
  	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_ee_e1;
  	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee)*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee);
- 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
+ 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels? because they're 100% correlated
  	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
  	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
  	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
@@ -8414,18 +8414,19 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	//  OUTPUT FOR COMBINATION TOOL  //////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
  	fOUTSTREAM4 << "'"+gRegions[reg]->sname +"':{"<< endl;
- 	fOUTSTREAM4 << Form("'f': %6.2f, 'fstat': %6.2f, 'fsyst':  %6.2f,\n",
+ 	fOUTSTREAM4 << Form("'f': %6.2f, 'fstat': %6.2f, 'fsyst':  %6.2f,",
  	nff_em + nff_mm + nff_ee + npf_em + nfp_em + npf_mm + npf_ee ,// sum of double and single fakes
 	sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + FR->getTotSingleEStat()*FR->getTotSingleEStat()),// stat error on the fakes
 	0.5*(nff_em + nff_mm + nff_ee + npf_em + nfp_em + npf_mm + npf_ee)) << endl;
- 	fOUTSTREAM4 << Form("'c': %6.2f, 'cstat': %6.2f, 'csyst':  %6.2f,\n",
+ 	fOUTSTREAM4 << Form("'c': %6.2f, 'cstat': %6.2f, 'csyst':  %6.2f,",
  	nt2_ee_chmid + nt2_em_chmid, // flips
 	sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1), //stat error on flips
 	sqrt(nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e2*nt2_em_chmid_e2)) << endl;//syst error on flips
- 	fOUTSTREAM4 << Form("'r': %6.2f, 'rstat': %6.2f, 'rsyst':  %6.2f,\n",
+ 	fOUTSTREAM4 << Form("'r': %6.2f, 'rstat': %6.2f, 'rsyst':  %6.2f,",
  	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em + wz_nt2_mm + wz_nt2_em + wz_nt2_ee,                          // rares
 	sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1), // stat error on rare
 	sqrt(RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em) + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee))) << endl; //syst error on rares
+ 	fOUTSTREAM4 << Form("'o': %4.0f", nt2_mm+nt2_em+nt2_ee) << endl; // observed
  	fOUTSTREAM4 << "}," << endl;
 
  	///////////////////////////////////////////////////////////////////////////////////
