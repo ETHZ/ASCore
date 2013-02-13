@@ -52,7 +52,8 @@ def mk_dir_string(line):
 	path = line.split()[1]
 	if not path[-1] == '/':
 		path += '/'
-	print '[status] searching for all files for split up jobs, at', line.split()[0]
+	task = line.split()[0]
+	##print '[status] searching for all files for split up jobs, at', task
 	raw_files = commands.getoutput('srmls '+srm_path+path)
 	raw_file_list = raw_files.split('\n')
 	for file in raw_file_list:
@@ -65,8 +66,11 @@ def mk_dir_string(line):
 		indiv_dir = line.split()[0]+'_'+file.split('/')[-1].replace('.root','')
 		strings.append(mk_single_string(line, file, indiv_dir))
 	nfiles = len(strings)
-	if (nfiles > 0 ) :print '[status] found', len(strings), 'files for directory', line.split()[0]
-	else: print '[!!WARNING!!] found', len(strings), 'files for directory', line.split()[0]
+	if (nfiles > 0 ) : 
+		print '[status] at task', task, ': found', nfiles, 'files'
+		print '----------------'
+	else:
+		print '[!!WARNING!!] at task', task, ': found', nfiles, 'files. CHECK YOUR DATACARD!'
 	return strings
 		#ind = files.index(file)
 		#if not ind%nof:
