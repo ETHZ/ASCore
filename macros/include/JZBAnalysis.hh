@@ -54,15 +54,12 @@ public:
   void IsParticleFromB(int);
   bool IsPUJet(float jpt, float jeta, float jphi);
 //  const int IsJetFromPU(float, float, float);
-  int DoFSRRecovery(TLorentzVector &tmpVector,vector<lepton> &photons);
-  void StoreAllPhotons(vector<lepton> &photons, lepton &lepton1, lepton &lepton2);
   float ElPFIso(int index);
   float MuPFIso(int index);
   float PhoPFIso(int index);
   bool DecaysToTaus(bool, TreeReader*);
   bool MatchTrigger(lepton *);
   int DetermineFlavor(bool, TreeReader*);
-  bool ShouldPhotonBeMerged(lepton &photon, float dR);
   int ExtractFileNumber(string fileName);
   float GetBWeight(string WP,int JetFlavor, float JetPt, float JetEta, float &Uncert);
   float smearedJetPt(float pt, float eta, float phi);
