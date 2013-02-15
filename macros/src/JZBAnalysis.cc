@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.111 $";
+string sjzbversion="$Revision: 1.70.2.112 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -28,12 +28,12 @@ TF1 *L5corr_gJ;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
-bool DoExperimentalFSRRecovery = false;
-bool DoFSRStudies=false;
+bool DoExperimentalFSRRecovery = true;
+bool DoFSRStudies=true;
 bool VerboseModeForStudies=false;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.111 2013/02/05 17:58:28 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.112 2013/02/11 13:27:22 buchmann Exp $
 */
 
 
@@ -58,6 +58,7 @@ public:
   bool is_data;
   int NRecoveredPhotons;
 
+  float l1l2dR;
   float pt1; // leading leptons
   float pt2;
   float iso1;
@@ -505,6 +506,16 @@ public:
   float pgentri_dR23;
   float pgentri_WZB;
   float pgentri_JWZB;
+  
+  float dRmerged;
+  int merged;
+  float mergedPt;
+  float mergedEta;
+  float mergedPhoHCalIso2012ConeDR03;
+  float mergedPhoSigmaIetaIeta;
+  float mergedpfchargedhadiso;
+  float mergedpfneutralhadiso;
+  float mergedpfphotoniso;
 
 };
 
@@ -529,6 +540,7 @@ void nanoEvent::reset()
 
   process=0;
 
+  l1l2dR=-99.9;
   pt1=0;
   pt2=0;
   iso1=0;
@@ -1003,6 +1015,16 @@ void nanoEvent::reset()
   pgentri_WZB=0;
   pgentri_JWZB=0;
 
+  dRmerged=0.;
+  merged=0;
+  mergedPt=0;
+  mergedEta=0;
+  mergedPhoHCalIso2012ConeDR03=0;
+  mergedPhoSigmaIetaIeta=0;
+  mergedpfchargedhadiso=0;
+  mergedpfneutralhadiso=0;
+  mergedpfphotoniso=0;
+  
 }
 
 
@@ -1278,6 +1300,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("E",&nEvent.E,"E/F");
   myTree->Branch("pt1",&nEvent.pt1,"pt1/F");
   myTree->Branch("pt2",&nEvent.pt2,"pt2/F");
+  myTree->Branch("l1l2dR",&nEvent.l1l2dR,"l1l2dR/F");
   myTree->Branch("iso1",&nEvent.iso1,"iso1/F");
   myTree->Branch("iso2",&nEvent.iso2,"iso2/F");
   myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
@@ -1750,6 +1773,19 @@ void JZBAnalysis::Begin(TFile *f){
   
   myTree->Branch("HasSoftLepton",&nEvent.HasSoftLepton,"HasSoftLepton/O");
   myTree->Branch("SoftLeptonPt",&nEvent.SoftLeptonPt,"SoftLeptonPt/F");
+  
+  myTree->Branch("dRmerged",&nEvent.dRmerged,"dRmerged/F");
+  myTree->Branch("merged",&nEvent.merged,"merged/I");
+  myTree->Branch("mergedPt",&nEvent.mergedPt,"mergedPt/F");
+  myTree->Branch("mergedEta",&nEvent.mergedEta,"mergedEta/F");
+  myTree->Branch("mergedPhoHCalIso2012ConeDR03",&nEvent.mergedPhoHCalIso2012ConeDR03,"mergedPhoHCalIso2012ConeDR03/F");
+  myTree->Branch("mergedPhoSigmaIetaIeta",&nEvent.mergedPhoSigmaIetaIeta,"mergedPhoSigmaIetaIeta/F");
+  myTree->Branch("mergedpfchargedhadiso",&nEvent.mergedpfchargedhadiso,"mergedpfchargedhadiso/F");
+  myTree->Branch("mergedpfneutralhadiso",&nEvent.mergedpfneutralhadiso,"mergedpfneutralhadiso/F");
+  myTree->Branch("mergedpfphotoniso",&nEvent.mergedpfphotoniso,"mergedpfphotoniso/F");
+
+
+  
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -2435,6 +2471,8 @@ void JZBAnalysis::Analyze() {
     nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
     nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
 //    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
+    
+    nEvent.l1l2dR=sortedGoodLeptons[PosLepton1].p.DeltaR(sortedGoodLeptons[PosLepton2].p);
     
     nEvent.minc=sortedGoodLeptons[PosLepton2].p.Pt()+sortedGoodLeptons[PosLepton1].p.Pt();
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
@@ -3757,7 +3795,36 @@ bool JZBAnalysis::ShouldPhotonBeMerged(lepton &photon, float dR) {
   
   // we we can specify all criteria we want to use.
   if(photon.p.Pt()>4) { // all other photons (>4 GeV)
-    if(dR>0.1 && dR<0.5) return true; // values determined from dedicated DY FSR study
+    if(dR>0.15 && dR<0.6) {
+      nEvent.dRmerged=dR;
+      nEvent.merged++;
+      
+      int index=photon.index;
+      
+      nEvent.mergedPt=fTR->PhoPt[index];
+      
+      float eta=fTR->PhoEta[index];
+      float pfchargedhadiso = max(fTR->PhoNewIsoPFCharged[index]-IndividualEffArea(eta,"chargedhad")*fTR->RhoForIso,(float)0.0)/fTR->PhoPt[index];
+      float pfneutralhadiso = max(fTR->PhoNewIsoPFNeutral[index]-IndividualEffArea(eta,"neutralhad")*fTR->RhoForIso,(float)0.0)/fTR->PhoPt[index];
+      float pfphotoniso     = max(fTR->PhoNewIsoPFPhoton[index]-IndividualEffArea(eta,"photon")*fTR->RhoForIso,(float)0.0)/fTR->PhoPt[index];
+      
+      //CURRENT PHOTON ID: LOOSE
+      nEvent.mergedEta=eta;
+      if( fabs(eta) < 1.479 ){ // Barrel
+	nEvent.mergedPhoHCalIso2012ConeDR03 = fTR->PhoHCalIso2012ConeDR03[index]/0.06;
+	nEvent.mergedPhoSigmaIetaIeta=fTR->PhoSigmaIetaIeta[index]/0.011;
+	nEvent.mergedpfchargedhadiso=pfchargedhadiso/0.06;
+	nEvent.mergedpfneutralhadiso=pfneutralhadiso/0.16;
+	nEvent.mergedpfphotoniso=pfphotoniso/0.08;
+      } else {
+	nEvent.mergedPhoHCalIso2012ConeDR03 = fTR->PhoHCalIso2012ConeDR03[index]/0.05;
+	nEvent.mergedPhoSigmaIetaIeta=fTR->PhoSigmaIetaIeta[index]/0.034;
+	nEvent.mergedpfchargedhadiso=pfchargedhadiso/0.05;
+	nEvent.mergedpfneutralhadiso=pfneutralhadiso/0.10;
+	nEvent.mergedpfphotoniso=pfphotoniso/0.12;
+      }
+      return true;
+    }
   }
   
   return false;
