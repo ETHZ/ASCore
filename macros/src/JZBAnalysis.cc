@@ -121,6 +121,9 @@ public:
   float dphipft1Met2;
   float dphipfRecoilMet1;
   float dphipfRecoilMet2;
+  
+  float pfMET;
+  float t1pfMET;
 
   bool ElCInfoIsGsfCtfCons;
   bool ElCInfoIsGsfCtfScPixCons;
@@ -1309,6 +1312,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("leptonPairId",nEvent.leptonPairId,"leptonPairId[leptonPairNum]/I");
 
   myTree->Branch("met",nEvent.met,Form("met[%d]/F",int(mettype_max)));
+  myTree->Branch("pfMET",&nEvent.pfMET,"pfMET/F");
+  myTree->Branch("t1pfMET",&nEvent.t1pfMET,"t1pfMET/F");
   myTree->Branch("metPhi",nEvent.metPhi,Form("metPhi[%d]/F",int(mettype_max)));
   myTree->Branch("dphiMetLep",nEvent.dphiMetLep,Form("dphiMetLep[%d]/F",int(mettype_max)));
   myTree->Branch("dphiMetJet",nEvent.dphiMetJet,Form("dphiMetJet[%d]/F",int(mettype_max)));
@@ -2741,6 +2746,8 @@ void JZBAnalysis::Analyze() {
   nEvent.met[SUMET]=fTR->SumEt;
   
   nEvent.met[4] = nEvent.fact * nEvent.met[4];
+  nEvent.pfMET  = nEvent.met[4];
+  nEvent.t1pfMET= nEvent.fact * fTR->PFType1MET;
 
   nEvent.metUncertainty=abs((VariedMet.Pt()-nEvent.met[4])/nEvent.met[4]);
   nEvent.type1metUncertainty=abs((Type1VariedMet.Pt()-nEvent.met[1])/nEvent.met[1]);
