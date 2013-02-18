@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.112 $";
+string sjzbversion="$Revision: 1.70.2.115 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -30,7 +30,7 @@ float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.112 2013/02/11 13:27:22 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.115 2013/02/15 14:45:07 buchmann Exp $
 */
 
 
@@ -46,14 +46,12 @@ public:
   void reset();
 
   float mll; // di-lepton system
-  float mllg; // di-lepton system
   float minc;
   float pt;
   float phi;
   float eta;
   float E;
   bool is_data;
-  int NRecoveredPhotons;
 
   float l1l2dR;
   float pt1; // leading leptons
@@ -88,11 +86,9 @@ public:
   float genMET;
   float genZPt;    // True Z Pt
   float genMll;
-  float genMllg;
   float genRecoil;
   float genJZB;
   int   genNjets;
-  int   genNjetsTwoSix;
   int   genNleptons;
   float genRecoilSel;
   float genPt1Sel; // Selected leptons
@@ -487,7 +483,6 @@ void nanoEvent::reset()
 {
 
   mll=0; // di-lepton system
-  mllg=0;
   minc=0;
   pt=0;
   phi=0;
@@ -533,11 +528,9 @@ void nanoEvent::reset()
   genMET=0;
   genZPt=0;
   genMll=0;
-  genMllg=0;
   genRecoil=0;
   genJZB = 0;
   genNjets = 0;
-  genNjetsTwoSix = 0;
   genNleptons = 0;
   genPt1Sel=0;
   genPt2Sel=0;
@@ -1214,10 +1207,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("NTupleNumber",&fFile,"NTupleNumber/I");
   myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
-  myTree->Branch("NRecoveredPhotons",&nEvent.NRecoveredPhotons,"NRecoveredPhotons/O");
   myTree->Branch("mll",&nEvent.mll,"mll/F");
   myTree->Branch("minc",&nEvent.minc,"minc/F");
-  myTree->Branch("mllg",&nEvent.mllg,"mllg/F");
   myTree->Branch("pt",&nEvent.pt,"pt/F");
   myTree->Branch("phi",&nEvent.phi,"phi/F");
   myTree->Branch("eta",&nEvent.eta,"eta/F");
@@ -1255,11 +1246,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("genMET",&nEvent.genMET,"genMET/F");
   myTree->Branch("genZPt",&nEvent.genZPt,"genZPt/F");
   myTree->Branch("genMll",&nEvent.genMll,"genMll/F");
-  myTree->Branch("genMllg",&nEvent.genMllg,"genMllg/F");
   myTree->Branch("genRecoil",&nEvent.genRecoil,"genRecoil/F");
   myTree->Branch("genJZB",&nEvent.genJZB,"genJZB/F");
   myTree->Branch("genNjets",&nEvent.genNjets,"genNjets/I");
-  myTree->Branch("genNjetsTwoSix",&nEvent.genNjetsTwoSix,"genNjetsTwoSix/I");
   myTree->Branch("genNleptons",&nEvent.genNleptons,"genNleptons/I");
   myTree->Branch("genPt1Sel",&nEvent.genPt1Sel,"genPt1Sel/F");
   myTree->Branch("genPt2Sel",&nEvent.genPt2Sel,"genPt2Sel/F");
@@ -3551,7 +3540,6 @@ void JZBAnalysis::GeneratorInfo(void) {
     TLorentzVector gJet;
     gJet.SetPtEtaPhiE(fTR->GenJetPt[jIndex],fTR->GenJetEta[jIndex],fTR->GenJetPhi[jIndex],fTR->GenJetE[jIndex]);
     sumOfGenJets+=gJet;
-    ++nEvent.genNjetsTwoSix;
   }
 
 
