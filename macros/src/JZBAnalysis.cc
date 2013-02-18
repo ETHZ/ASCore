@@ -253,10 +253,6 @@ public:
   float mGMSBGlu;
   float mGMSBChi;
   float mGMSBLSP;
-  float M0;
-  float A0;
-  float M12;
-  float signMu;
   
   
   //gen information
@@ -730,10 +726,6 @@ void nanoEvent::reset()
   mGMSBGlu=0;
   mGMSBChi=0;
   mGMSBLSP=0;
-  A0=0;
-  M0=0;
-  M12=0;
-  signMu=0;
   
   // gen info
   nZ=0;
@@ -1429,10 +1421,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
   myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
   myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
-  myTree->Branch("M0",&nEvent.M0,"M0/F");
-  myTree->Branch("A0",&nEvent.A0,"A0/F");
-  myTree->Branch("M12",&nEvent.M12,"M12/F");
-  myTree->Branch("signMu",&nEvent.signMu,"signMu/F");
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
   myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
@@ -1824,10 +1812,6 @@ void JZBAnalysis::Analyze() {
         nEvent.mGMSBLSP=fTR->MassGlu; // explanation: order in NTuple is wrong for GMSB
         nEvent.xSMS=fTR->xSMS;
         nEvent.xbarSMS=fTR->xbarSMS;
-        nEvent.A0=fTR->A0;
-        nEvent.M0=fTR->M0;
-        nEvent.signMu=fTR->signMu;
-        nEvent.M12=fTR->M12;
         nEvent.NPdfs=fTR->NPdfs;
         for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i];
 	nEvent.pdfWsum=fTR->pdfWsum; 
