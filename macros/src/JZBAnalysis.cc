@@ -397,8 +397,6 @@ public:
   float tri_dR12;
   float tri_dR13;
   float tri_dR23;
-  float tri_WZB;
-  float tri_JWZB;
   int tri_index1;
   int tri_index2;
   int tri_index3;
@@ -439,8 +437,6 @@ public:
   float gentri_dR12;
   float gentri_dR13;
   float gentri_dR23;
-  float gentri_WZB;
-  float gentri_JWZB;
   bool gentri_GoodZMatch;
   bool gentri_GoodWMatch;
   
@@ -463,8 +459,6 @@ public:
   float pgentri_dR12;
   float pgentri_dR13;
   float pgentri_dR23;
-  float pgentri_WZB;
-  float pgentri_JWZB;
   
   float dRmerged;
   int merged;
@@ -870,8 +864,6 @@ void nanoEvent::reset()
   tri_dR12=0;
   tri_dR13=0;
   tri_dR23=0;
-  tri_WZB=0;
-  tri_JWZB=0;
   
   gentri_pt1=0;
   gentri_pt2=0;
@@ -897,8 +889,6 @@ void nanoEvent::reset()
   gentri_dR12=0;
   gentri_dR13=0;
   gentri_dR23=0;
-  gentri_WZB=0;
-  gentri_JWZB=0;
   
   gentri_badmll=0;
   gentri_badsubmll=0;
@@ -929,8 +919,6 @@ void nanoEvent::reset()
   pgentri_dR12=0;
   pgentri_dR13=0;
   pgentri_dR23=0;
-  pgentri_WZB=0;
-  pgentri_JWZB=0;
 
   dRmerged=0.;
   merged=0;
@@ -1524,9 +1512,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("tri_dR13",&nEvent.tri_dR13,"tri_dR13/F");
   myTree->Branch("tri_dR23",&nEvent.tri_dR23,"tri_dR23/F");
 
-  myTree->Branch("tri_WZB",&nEvent.tri_WZB,"tri_WZB/F");
-  myTree->Branch("tri_JWZB",&nEvent.tri_JWZB,"tri_JWZB/F");
-  
   myTree->Branch("gentri_eta1",&nEvent.gentri_eta1,"gentri_eta1/F");
   myTree->Branch("gentri_eta",&nEvent.gentri_eta2,"gentri_eta2/F");
   myTree->Branch("gentri_eta3",&nEvent.gentri_eta3,"gentri_eta3/F");  
@@ -1552,9 +1537,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("gentri_dR13",&nEvent.gentri_dR13,"gentri_dR13/F");
   myTree->Branch("gentri_dR23",&nEvent.gentri_dR23,"gentri_dR23/F");
 
-  myTree->Branch("gentri_WZB",&nEvent.gentri_WZB,"gentri_WZB/F");
-  myTree->Branch("gentri_JWZB",&nEvent.gentri_JWZB,"gentri_JWZB/F");
-  
   myTree->Branch("gentri_GoodZMatch",&nEvent.gentri_GoodZMatch,"gentri_GoodZMatch/O");
   myTree->Branch("gentri_GoodWMatch",&nEvent.gentri_GoodWMatch,"gentri_GoodWMatch/O");
   
@@ -1580,11 +1562,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pgentri_dR12",&nEvent.pgentri_dR12,"pgentri_dR12/F");
   myTree->Branch("pgentri_dR13",&nEvent.pgentri_dR13,"pgentri_dR13/F");
   myTree->Branch("pgentri_dR23",&nEvent.pgentri_dR23,"pgentri_dR23/F");
-
-  myTree->Branch("pgentri_WZB",&nEvent.pgentri_WZB,"pgentri_WZB/F");
-  myTree->Branch("pgentri_JWZB",&nEvent.pgentri_JWZB,"pgentri_JWZB/F");
-  
-  
 
   
   //generator information
@@ -2914,7 +2891,6 @@ void JZBAnalysis::Analyze() {
       if(nEvent.tri_genMID1==23 && nEvent.tri_genMID1 ==23) nEvent.tri_GoodZMatch=true;
       if(abs(nEvent.tri_genMID3)==24 ) nEvent.tri_GoodWMatch=true;
     }
-      
 
     nEvent.tri_dR12 = lp1.DeltaR(lp2);
     nEvent.tri_dR13 = lp1.DeltaR(lp3); 
@@ -2924,10 +2900,6 @@ void JZBAnalysis::Analyze() {
     nEvent.tri_eta2 = lp2.Eta();
     nEvent.tri_eta3 = lp3.Eta();
     
-    
-    nEvent.tri_WZB  = (lp1+lp2).Pt() - (lp3+pfMETvector).Pt();  // Z.Pt() - W.Pt()
-    nEvent.tri_JWZB = sumOfPFJets.Pt() - (lp1 + lp2 + lp3 + pfMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
-
   }
   nEvent.dphiZpfMet = (s1+s2).DeltaPhi(pfMETvector);
   nEvent.dphiZs1 = (s1+s2).DeltaPhi(s1);
@@ -3699,10 +3671,6 @@ void JZBAnalysis::GeneratorInfo(void) {
 	  nEvent.gentri_eta2 = lp2.Eta();
 	  nEvent.gentri_eta3 = lp3.Eta();
 	  
-	  nEvent.gentri_WZB  = (lp1+lp2).Pt() - (lp3+GenMETvector).Pt();  // Z.Pt() - W.Pt()
-//	  nEvent.gentri_JWZB = sumOfGenJets.Pt() - (lp1 + lp2 + lp3 + GenMETvector).Pt(); // Jets.pt() - (Z+W).Pt()
-	  nEvent.gentri_JWZB = (lp3 + GenMETvector + sumOfGenJets).Pt() - (lp1 + lp2).Pt(); // Jets.pt() - (Z+W).Pt()
-	  
 	} // end of three or more usable leptons
 	  // ** and now the pure generator one (i.e. no combinatorial errors!) -- only for WZ otherwise this is pointless!
 	  
@@ -3758,14 +3726,8 @@ void JZBAnalysis::GeneratorInfo(void) {
 	  nEvent.pgentri_eta2 = lp2.Eta();
 	  nEvent.pgentri_eta3 = lp3.Eta();
 	  
-	  nEvent.pgentri_WZB  = (lp1+lp2).Pt() - (lp3+GenMETvector).Pt();  // Z.Pt() - W.Pt()
-	  nEvent.pgentri_JWZB = (lp3 + GenMETvector + sumOfGenJets).Pt() - (lp1 + lp2).Pt(); // Jets.pt() - (Z+W).Pt()
-	  
 	} // end of Z/W pure gen info
-
-	
-	  
-	}//end of if tehre are three or more gleptons
+      }//end of if there are three or more gleptons
     }//end of if there are any gleptons
 }
      
