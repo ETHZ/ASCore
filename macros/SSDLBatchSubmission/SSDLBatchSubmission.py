@@ -208,7 +208,6 @@ def check_on_jobs(jobnames, time_elapsed):
 	return cnt
 
 def getRegions(dumperConfig):
-	print dumperConfig
 	f=open(dumperConfig, 'r')
 	lines = f.readlines()
 	regs = []
