@@ -169,11 +169,14 @@ def merge_and_clean():
 	for dir in special_dirs:
 		print '[status] at special dir:', dir
 		dir_cat = 'cat '
+		dir_cat_reg = 'cat '
 		isdata=False
 		for ls in os.listdir(output_location):
 			if os.path.isdir(output_location+ls) and ls.startswith(dir+'_output'):
 				if os.path.isfile(output_location+ls+'/'+dir+'_SignalEvents.txt'):
 					dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
+					for reg in regions:
+						os.system('cat '+output_location+ls+'/'+dir+'_SignalEvents_'+reg+'.txt >> '+output_location+dir+'_SignalEvents_'+reg+'.txt ')
 					isdata=True
 		dir_hadd = 'hadd -f '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root > /dev/null'
 		dir_cat+=' >& '+output_location+dir+'_SignalEvents.txt '
@@ -204,11 +207,25 @@ def check_on_jobs(jobnames, time_elapsed):
 		print '[status]', cnt, ' jobs still running after', n_min, 'minutes...'
 	return cnt
 
+def getRegions(dumperConfig):
+	print dumperConfig
+	f=open(dumperConfig, 'r')
+	lines = f.readlines()
+	regs = []
+	for line in lines:
+		if line[0] == '#': continue
+		if line[0] == 'v': continue
+		if len(line) == 0: continue
+		if line == '\n': continue
+		print line
+		regs.append(line.split()[0])
+	return regs
+
 def do_stuff(config_name):
 	print '[status] starting script...'
 
 	global srm_path, dcap_path, dumper_location, dumper_config, output_location, user, noj, release_dir, output_node
-	global special_dirs
+	global special_dirs, regions
 	special_dirs = []
 	
 	print '[status] reading config...'
@@ -222,6 +239,7 @@ def do_stuff(config_name):
 	batch_script    = info_dict['batch_script']
 	user            = info_dict['user']
 	release_dir     = info_dict['release_dir']
+	regions = getRegions(dumper_config)
 
 	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/'
 	dcap_path = 'dcap://t3se01.psi.ch:22125/'
@@ -321,6 +339,7 @@ def do_stuff(config_name):
 	
 	if not dryrun:
 		if check_commands():
+			pass
 			merge_and_clean()
 		else:
 			clean()
