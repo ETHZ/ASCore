@@ -48,7 +48,7 @@ using namespace std;
 static const bool  gApplyTauVeto = true;
 static       bool  gSmearMET     = false;
 
-bool HTMETCUT = true;
+bool ttbarSigSup = true;
 bool gDoSystStudies;
 static const bool gDoSyncExercise = false;
 float gMuMaxIso     ;
@@ -434,6 +434,12 @@ void SSDLDumper::loopEvents(Sample *S){
 	if(S->datamc == 0){
 		TString eventfilename  = fOutputDir + S->sname + "_SignalEvents.txt";
 		fOUTSTREAM.open(eventfilename.Data(), ios::trunc);		
+
+		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
+			(*regIt)->regionOutstream.open(allRegionSigEvents.Data(), ios::trunc);		
+			//outStreamMap[(*regIt)->sname] = (*regIt)->regionOutstream;
+		}
 	}
 
 	TFile *pFile = new TFile(fOutputFileName, "RECREATE");
@@ -516,6 +522,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillKinPlots(S,gRegion[gBaseRegion]);
 		if (gDoWZValidation) fillKinPlots(S,gRegion["WZEnriched"]);
 		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
 			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = true;
 			fillYields(S, gRegion[(*regIt)->sname]);
 			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = false;
@@ -608,7 +615,13 @@ void SSDLDumper::loopEvents(Sample *S){
 	pFile->Write();
 	pFile->Close();
 
-	if(S->datamc == 0) fOUTSTREAM.close();
+	if(S->datamc == 0){
+		 fOUTSTREAM.close();
+		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+			//outStreamMap[(*regIt)->sname].close();
+			(*regIt)->regionOutstream.close();
+		}
+	}
 	fDoCounting = false;
 }
 //____________________________________________________________________________
@@ -664,8 +677,11 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[17]); // ... both muons pass tight cut
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc == 0 && reg == gRegion[gBaseRegion]){
-				  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+				if(S->datamc == 0 ){
+				  gRegions[reg]->regionOutstream << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+					if(reg == gRegion[gBaseRegion]){
+					  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+					}
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][HighPt].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
@@ -797,8 +813,11 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[17]); // " ... both electrons pass tight cut
 				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
 				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc == 0 && reg == gRegion[gBaseRegion] && HighPt == HighPt){
-					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+				if(S->datamc == 0 ){
+					gRegions[reg]->regionOutstream << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+					if(reg == gRegion[gBaseRegion]){
+						fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+					}
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][HighPt].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
@@ -926,8 +945,11 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[17]);
 				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
 				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc == 0 && reg == gRegion[gBaseRegion] && HighPt == HighPt){
-					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+				if(S->datamc == 0){
+					gRegions[reg]->regionOutstream << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+					if(reg == gRegion[gBaseRegion]){
+						fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+					}
 				}
 				
 				if(S->datamc > 0){

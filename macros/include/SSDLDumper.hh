@@ -287,6 +287,7 @@ public:
 		Channel mm;
 		Channel em;
 		Channel ee;
+		ofstream regionOutstream;
 	};
 	
 	// static const int gNRatioVars = 8;
@@ -370,6 +371,7 @@ public:
 	std::vector< SSDLDumper::Region* > gRegions;
 	std::vector< SSDLDumper::Region* >::iterator regIt;
 	std::map<TString , int> gRegion;
+	//std::map< TString , ofstream > outStreamMap;
 	int gNREGIONS;
 	TString gBaseRegion;
 	std::map<TString , int> gSystematics;
