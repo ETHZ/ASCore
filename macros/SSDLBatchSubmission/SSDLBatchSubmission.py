@@ -216,7 +216,6 @@ def getRegions(dumperConfig):
 		if line[0] == 'v': continue
 		if len(line) == 0: continue
 		if line == '\n': continue
-		print line
 		regs.append(line.split()[0])
 	return regs
 
