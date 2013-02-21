@@ -708,6 +708,7 @@ public:
 	virtual int hasLooseElectrons(int&, int&);
 	virtual int hasLooseElectrons();
 	virtual bool passesJet50Cut();
+	virtual bool passesJet50CutdPhi(int, gChannel);
 	
 	virtual bool passesHTCut(float, float = 8000.);
 	virtual bool passesMETCut(float = -1., float = 8000.);

@@ -330,7 +330,7 @@ void SSDLDumper::init(){
 	setRegionCuts(gRegion[gBaseRegion]); // no argument = reset to gBaseRegion
 
  	fC_maxMet_Control = 20.;
-	fC_maxMt_Control  = 20.;
+	fC_maxMt_Control  = 10.;
 
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
@@ -4873,6 +4873,24 @@ vector<SSDLDumper::lepton> SSDLDumper::sortLeptonsByTypeAndPt(vector<lepton>& le
 	return theLep;
 }
 
+bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
+	// Return true if event contains one good jet with pt > 50 and dPhi > 2.0 from hyp lepton
+	std::vector< int > jetinds;
+	for(size_t i = 0; i < NJets; ++i) {
+		if(isGoodJet(i, 50) ) {
+			jetinds.push_back(i);
+		}
+	}
+	if (jetinds.size() != 1) return false;
+	// check type of lepton
+	float lepphi = (chan == Muon) ? MuPhi[ind] : ElPhi[ind];
+	// get dphi to only jet with pt > 50
+	float dphi = fabs(JetPhi[jetinds[0]] - lepphi);
+	// cout << "dphi: " << dphi << endl;
+	if (fabs(JetPhi[jetinds[0]] - lepphi) > 2.) return true;
+	return false;
+}
+
 bool SSDLDumper::passesJet50Cut(){
 	// Return true if event contains one good jet with pt > 50
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i, 50)) return true;
@@ -5306,8 +5324,7 @@ int SSDLDumper::isSigSupMuEvent(){
 	int mu1(-1), mu2(-1);
 	if(hasLooseMuons(mu1, mu2) < 1) return -1;
 	setHypLepton1(mu1, Muon);
-	if(!passesJet50Cut())  return -1;
-	if(getNJets() < 1)     return -1;
+	if(!passesJet50CutdPhi(mu1, Muon))  return -1;
 	if(getMT(mu1,Muon) > fC_maxMt_Control)  return -1;
 	if(getMET() > fC_maxMet_Control)   return -1;
 	// int nmus(0);
@@ -5342,9 +5359,7 @@ int SSDLDumper::isSigSupElEvent(){
 	int el1(-1), el2(-1);
 	if(hasLooseElectrons(el1, el2) < 1) return -1;
 	setHypLepton1(el1, Elec);
-	if(!passesJet50Cut())          return -1;
-	if(getNJets() < 1)             return -1;
-	//	if(ElMT[0] > fC_maxMt_Control) return false;
+	if(!passesJet50CutdPhi(el1, Elec))          return -1;
 	if(getMT(el1,Elec) > fC_maxMt_Control) return -1;
 	if(getMET() > fC_maxMet_Control)  return -1;
 	// int nels(0);
