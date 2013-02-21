@@ -6,7 +6,6 @@
 #include "TF1.h"
 #include "TTree.h"
 #include <cstdlib>
-#include <assert.h>
 using namespace std;
 
 
@@ -166,6 +165,7 @@ public:
   float type1metUncertainty;
   
   int pfJetGoodNum30;
+  int pfJetGoodNum30Fwd;
   int pfJetGoodNumID;
   int pfJetGoodNump1sigma;
   int pfJetGoodNumn1sigma;
@@ -205,8 +205,11 @@ public:
   int   pfJetGoodTracksNBtag[jMax];
 
   int pfJetGoodNum40;
+  int pfJetGoodNum40Fwd;
   int pfJetGoodNum50;
+  int pfJetGoodNum50Fwd;
   int pfJetGoodNum60;
+  int pfJetGoodNum60Fwd;
 
   int EventFlavor;
   bool EventZToTaus;
@@ -657,9 +660,14 @@ void nanoEvent::reset()
   pfJetGoodNum50p1sigma=0;
   pfJetGoodNum50n1sigma=0;
 
+  pfJetGoodNum30Fwd=0;
+  
   pfJetGoodNum40=0;
+  pfJetGoodNum40Fwd=0;
   pfJetGoodNum50=0;
+  pfJetGoodNum50Fwd=0;
   pfJetGoodNum60=0;
+  pfJetGoodNum60Fwd=0;
 
   eventNum=0;
   runNum=0;
@@ -1317,6 +1325,10 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("metUncertainty",&nEvent.metUncertainty,"metUncertainty/F");
   myTree->Branch("type1metUncertainty",&nEvent.type1metUncertainty,"type1metUncertainty/F");
 
+  myTree->Branch("pfJetGoodNum30Fwd",&nEvent.pfJetGoodNum30Fwd,"pfJetGoodNum30Fwd/I");
+  myTree->Branch("pfJetGoodNum40Fwd",&nEvent.pfJetGoodNum40Fwd,"pfJetGoodNum40Fwd/I");
+  myTree->Branch("pfJetGoodNum50Fwd",&nEvent.pfJetGoodNum50Fwd,"pfJetGoodNum50Fwd/I");
+  myTree->Branch("pfJetGoodNum60Fwd",&nEvent.pfJetGoodNum60Fwd,"pfJetGoodNum60Fwd/I");
   myTree->Branch("pfJetGoodNum30",&nEvent.pfJetGoodNum30,"pfJetGoodNum30/I");
   myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
   myTree->Branch("pfJetGoodNum50",&nEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
@@ -2234,7 +2246,7 @@ void JZBAnalysis::Analyze() {
   //***************//
   
   // Preselection
-  if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
+  if(sortedGoodLeptons[PosLepton1].p.Pt() >= firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() >= secondLeptonPtCut) {
     nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
     nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
     nEvent.iso1 = sortedGoodLeptons[PosLepton1].iso;
@@ -2535,6 +2547,14 @@ void JZBAnalysis::Analyze() {
       // Keep jets over min. pt threshold
       if ( !(jpt>20) ) continue;
       counters[PJ].fill("... pt>20.");
+      
+      
+      if(fabs(jeta)>3.0 && fabs(jeta)<5.0) {
+	if(jpt>30) nEvent.pfJetGoodNum30Fwd++;
+	if(jpt>40) nEvent.pfJetGoodNum40Fwd++;
+	if(jpt>50) nEvent.pfJetGoodNum50Fwd++;
+	if(jpt>60) nEvent.pfJetGoodNum60Fwd++;
+      }
       
       // Keep central jets
       if ( !(fabs(jeta)<3.0 ) ) continue;
