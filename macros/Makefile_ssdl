@@ -12,7 +12,7 @@ ROOFIT_INCLUDE = $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep INC
 ROOFIT_LIBDIR  = $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIBDIR= | sed 's|LIBDIR=||')
 
 #INCLUDES       = -I./include -I${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/interface -I$(CMSSW_RELEASE_BASE)/src/
-INCLUDES       = -I./include -I${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/interface -I$(CMSSW_RELEASE_BASE)/src/ -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/
+INCLUDES       = -I./include -I${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/interface -I$(CMSSW_BASE)/src -I$(CMSSW_RELEASE_BASE)/src/ -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/
 
 CXX            = g++
 CXXFLAGS       = -g -fPIC -fno-var-tracking -Wno-deprecated -D_GNU_SOURCE -O2 -std=c++0x $(INCLUDES) 
@@ -41,17 +41,8 @@ GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/slc5_a
 SRCS           = src/base/TreeClassBase.cc src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
                  src/mcbtagSFuncert.cc \
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/FPRatios.cc src/helper/PUWeight.C \
-                 src/helper/FakeRatios.cc include/helper/BTagSFUtil/BTagSFUtil.cc include/helper/BTagSFUtil/MistagFuncs.cc include/helper/BTagSFUtil/SFlightFuncs.cc \
-                 src/helper/MetaTreeClassBase.C
+                 src/helper/FakeRatios.cc src/helper/MetaTreeClassBase.C src/helper/GoodRunList.C src/helper/BTagSF.cc src/helper/OnTheFlyCorrections.cc
                  
-#SRCS           = src/base/TreeClassBase.cc src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-#                 src/mcbtagSFuncert.cc \
-#                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/FPRatios.cc src/helper/PUWeight.C \
-#                 src/helper/FakeRatios.cc include/helper/BTagSFUtil/BTagSFUtil.cc include/helper/BTagSFUtil/MistagFuncs.cc include/helper/BTagSFUtil/SFlightFuncs.cc \
-#                 src/SSDLAnalyzer.cc src/SSDLAnalysis.cc \
-#                 src/SSDLPlotter.cc src/SSDLDumper.cc src/helper/MetaTreeClassBase.C
-#                 
-
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
 .SUFFIXES: .cc,.C,.hh,.h
@@ -77,6 +68,9 @@ RunSSDLAnalyzer: src/exe/RunSSDLAnalyzer.C $(OBJS) src/SSDLAnalyzer.o src/SSDLAn
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 	mv -f $@ /scratch/$(USER)
 	mv /scratch/$(USER)/$@ $@
+
+ScanZBi_TTWOpt: src/exe/ScanZBi_TTWOpt.C $(OBJS) src/SSDLPlotter.o src/SSDLDumper.o
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) DrawBase.o fitTools.o StatTools.o -o $@ $^
 
 clean:
 	find src -name '*.o' -exec $(RM) -v {} ';' 
