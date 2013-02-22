@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.50 2013/02/08 15:41:24 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.51 2013/02/11 10:47:15 fronga Exp $
 //
 //
 
@@ -3278,7 +3278,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTPFMETpx  = (pfmet->front()).px();
   *fTPFMETpy  = (pfmet->front()).py();
   *fTPFMETphi = (pfmet->front()).phi();
-  *fTPFMETSignificance = (pfmet->front()).significance();
+  double sigmaX2 = (pfmet->front()).getSignificanceMatrix()(0,0);
+  double sigmaY2 = (pfmet->front()).getSignificanceMatrix()(1,1);
+  *fTPFMETSignificance = (sigmaX2<1.0e10 && sigmaY2<1.0e10) ? (pfmet->front()).significance() : 0;
   *fTPFSumEt  = (pfmet->front()).sumEt();
 
   *fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
