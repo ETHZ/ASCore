@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.4 2012/04/16 13:14:08 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.5 2012/11/20 10:43:31 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -51,7 +51,7 @@
 Bool_t ReadDataFromAsciiIFormat = kFALSE;
 bool btagMed_presel_ = true;
    
-void TMVAClassification( std::string selectionName, TString myMethodList = "" ) 
+void TMVAClassification( std::string selectionName, std::string charge, TString myMethodList = "" ) 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the 
@@ -221,12 +221,12 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
       
       TTree* opt_tree = (TTree*)input->Get("tree_opt");
 
-      TFile* signalFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/TTbarW_Yields.root");      
+      TFile* signalFile = TFile::Open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov26_muPFIso0p05_elPFIso0p05_jet20_withZveto/TTbarW_Yields.root");      
       TTree *signal     = (TTree*)signalFile->Get("SigEvents");
 
       TChain* background = new TChain("SigEvents");
-      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/TTJets_Yields.root");
-      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov20_muDetIso0p05_elDetIso0p05_jet20_withZveto_optimization/WZTo3LNu_Yields.root");
+      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov26_muPFIso0p05_elPFIso0p05_jet20_withZveto/TTJets_Yields.root");
+      background->Add("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/plots/Nov26_muPFIso0p05_elPFIso0p05_jet20_withZveto/WZTo3LNu_Yields.root");
 
       //TTree *background = (TTree*)opt_tree->CopyTree("SName==\"TTJets\" || SName==\"DYJets\" || SName==\"WZTo3LNu\"");
       //TTree *background = (TTree*)opt_tree->CopyTree("SName==\"DYJets\"");
@@ -288,8 +288,22 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
 
    // Apply additional cuts on the signal and background samples (can be different)
 
-   TCut mycuts = "NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
-   TCut mycutb = "NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycutb = "abs(var1)<0.5";
+   TCut mycuts;
+   TCut mycutb;
+
+   if( charge == "plus" ) {
+     mycuts = "Charge==1 && SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+     mycutb = "Charge==1 && SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycutb = "abs(var1)<0.5";
+   } else if( charge == "minus" ) {
+     mycuts = "Charge==-1 && SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+     mycutb = "Charge==-1 && SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycutb = "abs(var1)<0.5";
+   } else if( charge == "all" ) {
+     mycuts = "              SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+     mycutb = "              SystFlag==0 && NJ>=3 && pT1>20. && pT2>20. && NbJmed>0 && TLCat==0 && Flavor<3 && PassZVeto==1"; // for example: TCut mycutb = "abs(var1)<0.5";
+   } else {
+     std::cout << "only 'plus' and 'minus' and 'all' are allowed for charge." <<std::endl;
+     return;
+   }
 
    //if( btagMed_presel_ ) {
    //  mycuts += "NbJmed>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
@@ -323,7 +337,7 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
       bookConditions += ":VarProp[0]=FMax"; //HT
       bookConditions += ":VarProp[1]=FMax"; //pt2
 
-      bookConditions += ":EffSel:SampleSize=50000000";
+      bookConditions += ":EffSel:SampleSize=500000000";
       //bookConditions += ":EffSel:SampleSize=50000";
 
       factory->BookMethod( TMVA::Types::kCuts, "Cuts", bookConditions.c_str() );
@@ -528,7 +542,7 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
        TMVA::IMethod* method = (TMVA::IMethod*)factory->GetMethod("Cuts");
        TMVA::MethodCuts* cuts = dynamic_cast<TMVA::MethodCuts*>(method);
 
-       std::string optcutsdir = "optcuts_" + selectionName;
+       std::string optcutsdir = "optcuts_" + selectionName + "_" + charge;
        std::string mkdir_command = "mkdir -p " + optcutsdir;
        system(mkdir_command.c_str());
        char cutsFileName[500];
@@ -568,6 +582,11 @@ void TMVAClassification( std::string selectionName, TString myMethodList = "" )
        if( !found_NJ )  ofs << "NJ 3 100000." << std::endl;
        if( !found_NbJ ) ofs << "NbJ 1 100000." << std::endl;
        if( !found_NbJmed && btagMed_presel_ ) ofs << "NbJmed 1 100000." << std::endl;
+
+       if( charge=="plus" )
+         ofs << "Charge 1 10" << std::endl;
+       else if( charge=="minus" )
+         ofs << "Charge -10 0" << std::endl;
 
        ofs.close();
 
