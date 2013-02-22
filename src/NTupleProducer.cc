@@ -605,7 +605,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTPFType1METpx           = (typeICorMET->front()).px();
   *fTPFType1METpy           = (typeICorMET->front()).py();
   *fTPFType1METphi          = (typeICorMET->front()).phi();
-  *fTPFType1METSignificance = (typeICorMET->front()).significance();
+  double sigmaX2= (typeICorMET->front() ).getSignificanceMatrix()(0,0);
+  double sigmaY2= (typeICorMET->front() ).getSignificanceMatrix()(1,1);
+  double significance = 0;
+  if(sigmaX2<1.e10 && sigmaY2<1.e10) significance = (typeICorMET->front() ).significance();
+  *fTPFType1METSignificance = significance;
   *fTPFType1SumEt           = (typeICorMET->front()).sumEt();
 
 
@@ -3257,7 +3261,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTRawMEThadEtInHB    = (calomet->at(0)).hadEtInHB();
   *fTRawMEThadEtInHE    = (calomet->at(0)).hadEtInHE();
   *fTRawMEThadEtInHF    = (calomet->at(0)).hadEtInHF();
-  *fTRawMETSignificance = (calomet->at(0)).significance();
+  sigmaX2= (calomet->front() ).getSignificanceMatrix()(0,0);
+  sigmaY2= (calomet->front() ).getSignificanceMatrix()(1,1);
+  significance = 0;
+  if(sigmaX2<1.e10 && sigmaY2<1.e10) significance = (calomet->front() ).significance();
+  *fTRawMETSignificance = significance;
 
   if (!fIsRealData) {
     Handle<View<GenMET> > GenMET;
@@ -3272,15 +3280,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTTCMETpx  = (tcmet->at(0)).px();
   *fTTCMETpy  = (tcmet->at(0)).py();
   *fTTCMETphi = (tcmet->at(0)).phi();
-  *fTTCMETSignificance = (tcmet->at(0)).significance();
+  sigmaX2= (tcmet->front() ).getSignificanceMatrix()(0,0);
+  sigmaY2= (tcmet->front() ).getSignificanceMatrix()(1,1);
+  significance = 0;
+  if(sigmaX2<1.e10 && sigmaY2<1.e10) significance = (tcmet->front() ).significance();
+  *fTTCMETSignificance = significance;
 
   *fTPFMET    = (pfmet->front()).pt();
   *fTPFMETpx  = (pfmet->front()).px();
   *fTPFMETpy  = (pfmet->front()).py();
   *fTPFMETphi = (pfmet->front()).phi();
-  double sigmaX2 = (pfmet->front()).getSignificanceMatrix()(0,0);
-  double sigmaY2 = (pfmet->front()).getSignificanceMatrix()(1,1);
-  *fTPFMETSignificance = (sigmaX2<1.0e10 && sigmaY2<1.0e10) ? (pfmet->front()).significance() : 0;
+  sigmaX2= (pfmet->front() ).getSignificanceMatrix()(0,0);
+  sigmaY2= (pfmet->front() ).getSignificanceMatrix()(1,1);
+  significance = 0;
+  if(sigmaX2<1.e10 && sigmaY2<1.e10) significance = (pfmet->front() ).significance();
+  *fTPFMETSignificance = significance;
   *fTPFSumEt  = (pfmet->front()).sumEt();
 
   *fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
