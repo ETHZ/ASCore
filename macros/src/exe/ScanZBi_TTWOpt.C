@@ -53,10 +53,10 @@ int main( int argc, char* argv[] ) {
   int min_NJets_h = 3;
   int min_NBJets_h = 1;
   int min_NBJets_med_h = 1;
-  float min_ptLept1_h = 40.;
-  float min_ptLept2_h = 40.;
+  float min_ptLept1_h = 27.;
+  float min_ptLept2_h = 27.;
   float min_met_h = 0.;
-  float min_ht_h = 285.;
+  float min_ht_h = 250.;
 
   int nEffStep = 10;
   if( min_NJets_h>0 && min_NBJets_h>0 || min_NBJets_med_h>0 ||
@@ -235,7 +235,8 @@ int main( int argc, char* argv[] ) {
     if( effS > effMax )
       effMax = effS;
 
-    gr_ZBi->SetPoint( iEff-1, 100.*effS, ZBi );
+    if( iEff<=10 )
+      gr_ZBi->SetPoint( iEff-1, 100.*effS, ZBi );
 
     if( ZBi > ZBi_max ) {
       ZBi_max = ZBi;
@@ -347,7 +348,7 @@ std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
   label_sqrt->Draw("same");
 
   char ZBi_vs_Seff_name[250];
-  sprintf(ZBi_vs_Seff_name, "%s/ZBi_vs_Seff.eps", optcutsdir.c_str() );
+  sprintf(ZBi_vs_Seff_name, "%s/ZBi_vs_Seff_%s.eps", optcutsdir.c_str(), charge.c_str() );
   c_gr->SaveAs(ZBi_vs_Seff_name);
 
 }
