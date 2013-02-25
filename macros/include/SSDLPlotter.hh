@@ -231,7 +231,7 @@ public:
 	virtual ~SSDLPlotter();
 
 	virtual void init(TString filename = "samples.dat");
-        virtual void doSMSscans(TString);
+	virtual void doSMSscans(TString, TString);
 	virtual void doAnalysis();
 	virtual void sandBox();
 	virtual void pythiaMadgraph(bool pyhia);
@@ -241,6 +241,7 @@ public:
 	virtual void msugraNLOxsecs(TFile *);
 	virtual void scanMSUGRA(const char * filestring);
 	virtual void scanSMS( const char * filestring, int);
+	virtual void scanModelGeneric( const char * filestring, int);
 	// old virtual void scanSMS( const char * filestring, gRegion);
 	// virtual void scanSMSEWKpaper( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2, bool pass3rdVeto);
 	virtual void plotWeightedHT();
