@@ -15785,8 +15785,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
 
-	const float mu_flatout = 35.;
-	const float el_flatout = 40.;
+	const float mu_flatout = 30.;
+	const float el_flatout = 30.;
 	
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MufRatio;
@@ -15820,8 +15820,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
-	const float mu_flatout = 35.;
-	const float el_flatout = 40.;
+	const float mu_flatout = 30.;
+	const float el_flatout = 30.;
 	
 	eta = fabs(eta); // make sure we take the absolute value
 
