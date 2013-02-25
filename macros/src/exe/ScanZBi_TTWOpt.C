@@ -119,8 +119,7 @@ int main( int argc, char* argv[] ) {
   float effMax = 0.;
 
 
-  //for( unsigned iEff=1; iEff<=nEffStep; ++iEff ) {
-  for( unsigned iEff=11; iEff<=nEffStep; ++iEff ) {
+  for( unsigned iEff=1; iEff<=nEffStep; ++iEff ) {
 
     if( iEff==11 ) {
       std::cout << std::endl;
