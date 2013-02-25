@@ -8,6 +8,7 @@
 #include "TLegend.h"
 #include "TPaveText.h"
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 
 #include "UserCode/pandolf/CommonTools/DrawBase.h"
@@ -25,7 +26,7 @@ float fake_lumi_ = 9100.;
 
 
 
-void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff );
+float makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff );
 std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax );
 
 
@@ -114,6 +115,7 @@ int main( int argc, char* argv[] ) {
   ofs_ZBi << "Seff   \tS     \tB +- s(B)\tZBi" << std::endl;
 
   TGraphErrors* gr_ZBi = new TGraphErrors(0);
+  TGraphErrors* gr_significance = new TGraphErrors(0);
   float ZBi_max = 0.;
   float effS_ZBi_max = 0.;
   float effMax = 0.;
@@ -190,8 +192,6 @@ int main( int argc, char* argv[] ) {
 
     } else { //cross check selection
 
-      std::cout << "-> Checking cross check selection." << std::endl;
-      
       min_NJets       = min_NJets_h;
       min_NBJets      = min_NBJets_h;
       min_NBJets_med  = min_NBJets_med_h;
@@ -213,10 +213,7 @@ int main( int argc, char* argv[] ) {
     float lumi_SF = lumi/plotter->fLumiNorm;
     float lumi_SF_fake = lumi/fake_lumi_;
 
-    std::cout << "lumi_SF: "  << lumi_SF << std::endl;
-    std::cout << "lumi_SF_fake: " <<  lumi_SF_fake << std::endl;
-
-    makeDatacard( ttwzpred, lumi_SF, lumi_SF_fake, optcutsdir, iEff );
+    float significance = makeDatacard( ttwzpred, lumi_SF, lumi_SF_fake, optcutsdir, iEff );
 
     float b_pred_mm = (ttwzpred.rare_mm+ttwzpred.wz_mm+ttwzpred.ttz_mm)*lumi_SF + (ttwzpred.fake_mm                 )*lumi_SF_fake;
     float b_pred_em = (ttwzpred.rare_em+ttwzpred.wz_em+ttwzpred.ttz_em)*lumi_SF + (ttwzpred.fake_em+ttwzpred.cmid_em)*lumi_SF_fake;
@@ -264,8 +261,10 @@ int main( int argc, char* argv[] ) {
     if( effS > effMax )
       effMax = effS;
 
-    if( iEff<=10 )
+    if( iEff<=10 ) { 
       gr_ZBi->SetPoint( iEff-1, 100.*effS, ZBi );
+      gr_significance->SetPoint( iEff-1, 100.*effS, significance );
+    }
 
     if( ZBi > ZBi_max ) {
       ZBi_max = ZBi;
@@ -358,21 +357,34 @@ std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
   db->resetStyle();
 
   gr_ZBi->SetMarkerSize(2.);
-  gr_ZBi->SetMarkerStyle(21);
+  gr_ZBi->SetMarkerStyle(20);
   gr_ZBi->SetMarkerColor(kRed+3);
+
+  gr_significance->SetMarkerSize(2.);
+  gr_significance->SetMarkerStyle(21);
+  gr_significance->SetMarkerColor(29);
 
 
   TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.1*effMax*100., 10, 0., 1.6*ZBi_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
-  h2_axes_gr->SetYTitle("Expected ZBi (20 fb^{-1})");
+  char yAxisTitle[512];
+  sprintf( yAxisTitle, "Expected Significance (%.1f fb^{-1})", lumi/1000. );
+  h2_axes_gr->SetYTitle(yAxisTitle);
   h2_axes_gr->SetXTitle("Signal Efficiency [%]");
 
+  TLegend* legend = new TLegend( 0.35, 0.2, 0.6, 0.4 );
+  legend->SetTextSize(0.04);
+  legend->SetFillColor(0);
+  legend->AddEntry(gr_ZBi, "Combined (ZBi)", "P");
+  legend->AddEntry(gr_significance, "3 Channels (combine)", "P");
 
   TCanvas* c_gr = new TCanvas("c_gr", "c_gr", 600., 600.);
   c_gr->cd();
 
   
   h2_axes_gr->Draw();
+  legend->Draw("Same");
+  gr_significance->Draw("P same");
   gr_ZBi->Draw("P same");
   label_sqrt->Draw("same");
 
@@ -416,10 +428,7 @@ std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string
 
 
 
-void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff ) {
-  std::cout << "ttwzpred.fake_mm: " <<  ttwzpred.fake_mm << std::endl;
-  std::cout << "ttwzpred.fake_em: " <<  ttwzpred.fake_em << std::endl;
-  std::cout << "ttwzpred.fake_ee: " <<  ttwzpred.fake_ee << std::endl;
+float makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff ) {
 
   // this is the reference datacard:
   std::string refDatacard = "OPT_ttW/datacard_ssdl_3channels_ttW.txt";
@@ -429,6 +438,7 @@ void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, con
   // this is the output datacard:
   char datacardName[500];
   sprintf( datacardName, "%s/datacard_eff%d.txt", optcutsdir.c_str(), iEff*10 );
+  std::string datacardName_str(datacardName);
   std::ofstream datacard(datacardName);
 
 
@@ -451,7 +461,34 @@ void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, con
   datacard.close();
 
   std::cout << "-> Created datacard: " << datacardName << std::endl;
+  std::cout << "-> Computing significance... " << std::endl;
     
+  char significanceFileName[1028];
+  sprintf( significanceFileName, "%s/significance_eff%d.txt", optcutsdir.c_str(), iEff*10 );
+  std::string significanceFileName_str(significanceFileName);
+  std::string combineCommand = "combine -M ProfileLikelihood --significance " + datacardName_str + "  -t -1 --expectSignal=1";
+////std::string combineCommand = "combine -M ProfileLikelihood --significance " + datacardName_str + "  -t -1 --expectSignal=1 >&! " + significanceFileName_str;
+//std::cout << combineCommand << std::endl;
+//system( combineCommand.c_str() );
+
+  FILE *in;
+  char buff[512];
+
+  if(!(in = popen(combineCommand.c_str(), "r"))){
+      std::cout << "POPEN didn't work!" << std::endl;
+      return -1.;
+  }
+
+    float significance = 0.;
+  while(fgets(buff, sizeof(buff), in)!=NULL) {
+      TString buff_tstr(buff);
+      if( buff_tstr.BeginsWith("Significance") ) {
+        std::string sig_str;
+        istringstream iss(buff);
+        iss >> sig_str >> significance;
+      }
+  }
+  pclose(in);
 
 //datacard <<      "#=========================================================================================" << std::endl;
 //datacard <<      "# Systematics table for ttW/Z analysis, same-sign channel, subchannels" << std::endl;
