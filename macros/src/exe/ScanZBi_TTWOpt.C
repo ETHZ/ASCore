@@ -16,6 +16,16 @@
 #include "SSDLPlotter.hh"
 
 
+
+
+
+float fake_lumi_ = 9100.;
+
+
+
+
+
+void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff );
 std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax );
 
 
@@ -53,10 +63,10 @@ int main( int argc, char* argv[] ) {
   int min_NJets_h = 3;
   int min_NBJets_h = 1;
   int min_NBJets_med_h = 1;
-  float min_ptLept1_h = 27.;
-  float min_ptLept2_h = 27.;
+  float min_ptLept1_h = 40.;
+  float min_ptLept2_h = 40.;
   float min_met_h = 0.;
-  float min_ht_h = 250.;
+  float min_ht_h = 285.;
 
   int nEffStep = 10;
   if( min_NJets_h>0 && min_NBJets_h>0 || min_NBJets_med_h>0 ||
@@ -65,7 +75,8 @@ int main( int argc, char* argv[] ) {
     nEffStep+=1;
 
 
-  float lumi = 20000.;
+  float lumi = 19466.;
+  //float lumi = 9100.;
 
 
   // this sets the style:
@@ -99,7 +110,7 @@ int main( int argc, char* argv[] ) {
   std::string ZBiFileName = optcutsdir + "/ZBiScan.txt";
 
   ofstream ofs_ZBi(ZBiFileName.c_str());
-  ofs_ZBi << "Expected for 20 fb-1:" << std::endl;
+  ofs_ZBi << "Expected for " << lumi/1000. << " fb-1:" << std::endl;
   ofs_ZBi << "Seff   \tS     \tB +- s(B)\tZBi" << std::endl;
 
   TGraphErrors* gr_ZBi = new TGraphErrors(0);
@@ -108,7 +119,20 @@ int main( int argc, char* argv[] ) {
   float effMax = 0.;
 
 
-  for( unsigned iEff=1; iEff<=nEffStep; ++iEff ) {
+  //for( unsigned iEff=1; iEff<=nEffStep; ++iEff ) {
+  for( unsigned iEff=11; iEff<=nEffStep; ++iEff ) {
+
+    if( iEff==11 ) {
+      std::cout << std::endl;
+      std::cout << "-> Cross checking this selection: " << std::endl;
+      std::cout << "NJets >= " << min_NJets_h << std::endl;
+      std::cout << "NBJets >= " << min_NBJets_h << std::endl;
+      std::cout << "NBJets_med >= " << min_NBJets_med_h << std::endl;
+      std::cout << "pt(Lept1) >= " << min_ptLept1_h << std::endl;
+      std::cout << "pt(Lept2) >= " << min_ptLept2_h << std::endl;
+      std::cout << "MET >= " << min_met_h << std::endl;
+      std::cout << "HT >= " << min_ht_h << std::endl;
+    }
 
 
     int min_NJets = 0;
@@ -188,14 +212,20 @@ int main( int argc, char* argv[] ) {
     TTWZPrediction ttwzpred =  plotter->makePredictionSignalEvents(min_ht, 10000., min_met, 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, charge_int, true);
 
     float lumi_SF = lumi/plotter->fLumiNorm;
+    float lumi_SF_fake = lumi/fake_lumi_;
 
-    float b_pred_mm = (ttwzpred.rare_mm+ttwzpred.fake_mm+                 ttwzpred.wz_mm+ttwzpred.ttz_mm)*lumi_SF;
-    float b_pred_em = (ttwzpred.rare_em+ttwzpred.fake_em+ttwzpred.cmid_em+ttwzpred.wz_em+ttwzpred.ttz_em)*lumi_SF;
-    float b_pred_ee = (ttwzpred.rare_ee+ttwzpred.fake_ee+ttwzpred.cmid_ee+ttwzpred.wz_ee+ttwzpred.ttz_ee)*lumi_SF;
+    std::cout << "lumi_SF: "  << lumi_SF << std::endl;
+    std::cout << "lumi_SF_fake: " <<  lumi_SF_fake << std::endl;
 
-    float b_pred_mm_err = (ttwzpred.rare_err_mm+ttwzpred.fake_err_mm                     +ttwzpred.wz_err_mm)*lumi_SF;
-    float b_pred_em_err = (ttwzpred.rare_err_em+ttwzpred.fake_err_em+ttwzpred.cmid_err_em+ttwzpred.wz_err_em)*lumi_SF;
-    float b_pred_ee_err = (ttwzpred.rare_err_ee+ttwzpred.fake_err_ee+ttwzpred.cmid_err_ee+ttwzpred.wz_err_ee)*lumi_SF;
+    makeDatacard( ttwzpred, lumi_SF, lumi_SF_fake, optcutsdir, iEff );
+
+    float b_pred_mm = (ttwzpred.rare_mm+ttwzpred.wz_mm+ttwzpred.ttz_mm)*lumi_SF + (ttwzpred.fake_mm                 )*lumi_SF_fake;
+    float b_pred_em = (ttwzpred.rare_em+ttwzpred.wz_em+ttwzpred.ttz_em)*lumi_SF + (ttwzpred.fake_em+ttwzpred.cmid_em)*lumi_SF_fake;
+    float b_pred_ee = (ttwzpred.rare_ee+ttwzpred.wz_ee+ttwzpred.ttz_ee)*lumi_SF + (ttwzpred.fake_ee+ttwzpred.cmid_ee)*lumi_SF_fake;
+
+    float b_pred_mm_err = (ttwzpred.rare_err_mm+ttwzpred.wz_err_mm)*lumi_SF + (ttwzpred.fake_err_mm                     )*lumi_SF_fake;
+    float b_pred_em_err = (ttwzpred.rare_err_em+ttwzpred.wz_err_em)*lumi_SF + (ttwzpred.fake_err_em+ttwzpred.cmid_err_em)*lumi_SF_fake;
+    float b_pred_ee_err = (ttwzpred.rare_err_ee+ttwzpred.wz_err_ee)*lumi_SF + (ttwzpred.fake_err_ee+ttwzpred.cmid_err_ee)*lumi_SF_fake;
 
     float s_mm = ttwzpred.ttw_mm*lumi_SF;
     float s_em = ttwzpred.ttw_em*lumi_SF;
@@ -387,4 +417,80 @@ std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string
 
 
 
+void makeDatacard( TTWZPrediction ttwzpred, float lumiSF, float lumiSF_fake, const std::string& optcutsdir, int iEff ) {
+  std::cout << "ttwzpred.fake_mm: " <<  ttwzpred.fake_mm << std::endl;
+  std::cout << "ttwzpred.fake_em: " <<  ttwzpred.fake_em << std::endl;
+  std::cout << "ttwzpred.fake_ee: " <<  ttwzpred.fake_ee << std::endl;
 
+  // this is the reference datacard:
+  std::string refDatacard = "OPT_ttW/datacard_ssdl_3channels_ttW.txt";
+  std::ifstream ifs(refDatacard.c_str());
+  
+
+  // this is the output datacard:
+  char datacardName[500];
+  sprintf( datacardName, "%s/datacard_eff%d.txt", optcutsdir.c_str(), iEff*10 );
+  std::ofstream datacard(datacardName);
+
+
+  // read reference and copy to output, except for rate line:
+  while( ifs.good() )  {
+    char thisLine[1024];
+    ifs.getline(thisLine, 1024);
+    TString thisLine_tstr(thisLine);
+    if( thisLine_tstr.BeginsWith("rate") ) {
+      datacard << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+                    ttwzpred.ttw_mm*lumiSF, ttwzpred.ttz_mm*lumiSF, ttwzpred.fake_mm*lumiSF_fake, 0.0                         , ttwzpred.wz_mm*lumiSF, ttwzpred.rare_mm*lumiSF,
+                    ttwzpred.ttw_em*lumiSF, ttwzpred.ttz_em*lumiSF, ttwzpred.fake_em*lumiSF_fake, ttwzpred.cmid_em*lumiSF_fake, ttwzpred.wz_em*lumiSF, ttwzpred.rare_em*lumiSF,
+                    ttwzpred.ttw_ee*lumiSF, ttwzpred.ttz_ee*lumiSF, ttwzpred.fake_ee*lumiSF_fake, ttwzpred.cmid_ee*lumiSF_fake, ttwzpred.wz_ee*lumiSF, ttwzpred.rare_ee*lumiSF) << std::endl;
+    } else {
+      datacard << thisLine << std::endl;
+    }
+  } // while ifs good
+
+
+  datacard.close();
+
+  std::cout << "-> Created datacard: " << datacardName << std::endl;
+    
+
+//datacard <<      "#=========================================================================================" << std::endl;
+//datacard <<      "# Systematics table for ttW/Z analysis, same-sign channel, subchannels" << std::endl;
+//datacard << Form("# Generated on: %s ", asctime(timeinfo)) << std::endl;
+//datacard <<      "# Copy between the dashed lines for datacard" << std::endl;
+//datacard <<      "#-----------------------------------------------------------------------------------------" << std::endl;
+//datacard <<      "imax 3" << std::endl;
+//datacard <<      "jmax 5" << std::endl;
+//datacard <<      "kmax *" << std::endl;
+//datacard << std::endl << std::endl;
+//datacard <<      "bin\t\t1\t2\t3" << std::endl;
+//datacard <<  "observation\t10\t10\t10" << std::endl; // doesnt really matter
+//datacard << std::endl << std::endl;
+//datacard <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t1\t\t2\t\t2\t\t2\t\t2\t\t2\t\t2\t\t3\t\t3\t\t3\t\t3\t\t3\t\t3" << std::endl;
+//datacard <<      "process\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare" << std::endl;
+//datacard <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t0\t\t1\t\t2\t\t3\t\t4\t\t5" << std::endl;
+
+//datacard << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+//              ttwzpred.ttw_mm*lumiSF, ttwzpred.ttz_mm*lumiSF, ttwzpred.fake_mm*lumiSF, 0.0                    , ttwzpred.wz_mm*lumiSF, ttwzpred.rare_mm*lumiSF,
+//              ttwzpred.ttw_em*lumiSF, ttwzpred.ttz_em*lumiSF, ttwzpred.fake_em*lumiSF, ttwzpred.cmid_em*lumiSF, ttwzpred.wz_em*lumiSF, ttwzpred.rare_em*lumiSF,
+//              ttwzpred.ttw_ee*lumiSF, ttwzpred.ttz_ee*lumiSF, ttwzpred.fake_ee*lumiSF, ttwzpred.cmid_ee*lumiSF, ttwzpred.wz_ee*lumiSF, ttwzpred.rare_ee*lumiSF) << std::endl;
+//datacard << std::endl << std::endl;
+//datacard <<      "#syst" << std::endl;
+//float lumiError = 1.022;
+//datacard <<      "lumi     lnN\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"" << std::endl;
+
+//datacard << "bgUncfak lnN\t-\t\t-\t\t2.084\t\t-\t\t -    \t\t-    \t\t-\t\t-\t\t 1.564\t\t-    \t\t-    \t\t-    \t\t-\t\t-\t\t 1.681\t\t-    \t\t-    \t\t-    " << std::endl;
+//datacard << "bgUnccmi lnN\t-\t\t-\t\t-    \t\t-\t\t -    \t\t-    \t\t-\t\t-\t\t -    \t\t1.060\t\t-    \t\t-    \t\t-\t\t-\t\t -    \t\t1.090\t\t-    \t\t-    " << std::endl;
+//datacard << "bgUncwz  lnN\t-\t\t-\t\t-    \t\t-\t\t 1.271\t\t-    \t\t-\t\t-\t\t -    \t\t-    \t\t1.198\t\t-    \t\t-\t\t-\t\t -    \t\t-    \t\t1.278\t\t-    " << std::endl;
+//datacard << "bgUncrar lnN\t-\t\t-\t\t-    \t\t-\t\t -    \t\t2.065\t\t-\t\t-\t\t -    \t\t-    \t\t-    \t\t1.673\t\t-\t\t-\t\t -    \t\t-    \t\t-    \t\t1.781" << std::endl;
+
+//datacard << "lept     lnN\t0.938/1.014\t0.938/1.014\t	-    		-		0.974/1.032	0.960/1.072	0.975/1.022	0.975/1.022	-		-		0.959/1.061	0.990/1.019	0.982/1.018	0.982/1.018	-		-		1.000/1.000	0.985/1.013
+//datacard << "btag     lnN\t0.967/1.013\t0.967/1.013\t	-    		-		0.918/1.094	0.992/1.082	0.989/1.012	0.989/1.012	-		-		0.975/1.037	0.974/0.997	0.973/1.015	0.973/1.015	-		-		0.995/1.028	0.991/1.007
+//datacard << "jes      lnN\t0.968/1.067\t0.968/1.067\t	-    		-		0.862/1.189	0.942/1.058	0.966/1.065	0.966/1.065	-		-		0.939/1.176	0.950/1.066	0.970/1.088	0.970/1.088	-		-		0.886/1.235	0.988/1.018
+//datacard << "jer      lnN\t1.012      \t1.012		-    		-		0.996		0.990		0.993		0.993		-		-		1.085		1.024		0.987		0.987		-		-		0.995		1.000
+//datacard << "pu       lnN\t1.030      \t1.030		-    		-		1.030		1.030		1.030		1.030		-		-		1.030		1.030		1.030		1.030		-		-		1.030		1.030
+//datacard << "matching lnN\t1.015/0.998\t1.015/0.998	-    		-		1.015/0.998	1.015/0.998	1.015/0.998	1.015/0.998	-		-		1.015/0.998	1.015/0.998	1.015/0.998	1.015/0.998	-		-		1.015/0.998	1.015/0.998
+//datacard << "scale    lnN\t1.023/0.966\t1.023/0.966	-    		-		1.023/0.966	1.023/0.966	1.023/0.966	1.023/0.966	-		-		1.023/0.966	1.023/0.966	1.023/0.966	1.023/0.966	-		-		1.023/0.966	1.023/0.966
+
+
+}
