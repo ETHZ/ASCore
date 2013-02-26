@@ -95,10 +95,10 @@ double SSDLDumper::gNVrtxBins[gNNVrtxBins+1]  = {5, 7, 9, 11, 13, 15, 17, 19, 21
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
-TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets", "NbJetsMed"};
-int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
-float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,  30.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
-float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 330.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
+TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars]   = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets", "NbJetsMed"};
+int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]      = {  20 ,  15 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
+float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]       = {   0.,  50.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
+float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]       = {1000., 350.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
                                                                    "Particle Flow ME_{T} [GeV]",
                                                                    "Jet Multiplicity",
@@ -487,7 +487,8 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		// REJECT DOUBLE COUNTED EVENTS
 		/////////////////////////////////////////////
-		// double counting of fakes if (S->datamc!=0 && AvoidDoubleCountingOfFakes(S)) continue;
+		// double counting of fakes 
+		//		if (S->datamc!=0 && AvoidDoubleCountingOfFakes(S)) continue;
 
 		/////////////////////////////////////////////
 		// Event modifications
@@ -537,6 +538,8 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillSigEventTree(S, 0);
 		fillDiffYields(S);
 		fillRatioPlots(S);
+		
+		
 		fillMuIsoPlots(S);
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
@@ -1394,6 +1397,8 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP0->nloose[6]->Fill(getNBTags(),              gEventWeight);
 			}
 		}
+		float tmp_metC = fC_maxMet_Control;
+		float tmp_mtC  = fC_maxMt_Control;
 		fC_maxMet_Control = 1000.;
 		looseMuInd = isSigSupMuEvent();
 		if(isSigSupMuEvent() > -1){
@@ -1404,7 +1409,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP0->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
-		fC_maxMet_Control = 20.;
+		fC_maxMet_Control = tmp_metC;
 		fC_maxMt_Control = 1000.;
 		looseMuInd = isSigSupMuEvent();
 		if(isSigSupMuEvent() > -1){
@@ -1415,7 +1420,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP0->nloose[8]->Fill(MuMT[0],                  gEventWeight);
 			}
 		}		
-		fC_maxMt_Control = 20.;
+		fC_maxMt_Control = tmp_mtC;
 	}
 	resetHypLeptons();
 	setRegionCuts(gRegion[gBaseRegion]);
@@ -1441,6 +1446,8 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP1->nloose[6]->Fill(getNBTags(),                  gEventWeight);
 			}
 		}
+		float tmp_metC = fC_maxMet_Control;
+		float tmp_mtC  = fC_maxMt_Control;
 		fC_maxMet_Control = 1000.;
 		looseElInd = isSigSupElEvent();
 		if(isSigSupElEvent() > -1){
@@ -1451,7 +1458,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP1->nloose[7]->Fill(getMET(),                    gEventWeight);
 			}
 		}		
-		fC_maxMet_Control = 20.;
+		fC_maxMet_Control = tmp_metC;
 		fC_maxMt_Control = 1000.;
 		looseElInd = isSigSupElEvent();
 		if(isSigSupElEvent() > -1){
@@ -1462,7 +1469,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 				RP1->nloose[8]->Fill(ElMT[0],                  gEventWeight);
 			}
 		}		
-		fC_maxMt_Control = 20.;
+		fC_maxMt_Control = tmp_mtC;
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
 	resetHypLeptons();
@@ -1531,9 +1538,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2     = MuPt[ind2];
 		fSETree_eta1    = MuEta[ind1];
 		fSETree_eta2    = MuEta[ind2];
-		gApplyZVeto     = true;
+		//		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
+		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1580,9 +1587,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2    = ElPt[ind2];
 		fSETree_eta1   = MuEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
-		gApplyZVeto     = true;
+		//		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
+		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
@@ -1633,9 +1640,9 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_pT2    = ElPt[ind2];
 		fSETree_eta1   = ElEta[ind1];
 		fSETree_eta2   = ElEta[ind2];
-		gApplyZVeto     = true;
+		//		gApplyZVeto     = true;
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		gApplyZVeto     = false;
+		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = ElPFIso[ind1];
@@ -2210,13 +2217,14 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 		float scale = prescale * gEventWeight;
 
 		// Common event selections
-		if(!passesJet50Cut()) return; // make trigger 100% efficient
+		if(!passesJet50CutdPhi(muind1, Muon)) return; // make trigger 100% efficient
 
 		// Common object selections
 		if(!isLooseMuon(muind1)) return;
 		if(MuPt[muind1] < fC_minMu2pt) return;
 		if(MuPt[muind1] > gMuFPtBins[gNMuFPtBins]) return;
-
+		if(MuPt[muind1] > 35.) return;
+ 
 		////////////////////////////////////////////////////
 		// MOST LOOSE SELECTION
 		IP0->hiso[0]->Fill(MuPFIso[muind1], scale);
@@ -2269,7 +2277,7 @@ void SSDLDumper::fillElIdPlots(Sample *S){
 		float scale = prescale * gEventWeight;
 
 		// Common event selections
-		if(!passesJet50Cut()) return; // make trigger 100% efficient
+		if(!passesJet50CutdPhi(elind1, Elec)) return; // make trigger 100% efficient
 
 		// Common object selections
 		if(!isLooseElectron(elind1)) return;
@@ -2340,13 +2348,14 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 		float scale = prescale * gEventWeight;
 
 		// Common event selections
-		if(!passesJet50Cut()) return; // make trigger 100% efficient
+		if(!passesJet50CutdPhi(elind1, Elec)) return; // make trigger 100% efficient
 
 		// Common object selections
 		if(!isLooseElectron(elind1)) return;
 
 		if(ElPt[elind1] < fC_minEl2pt) return;
 		if(ElPt[elind1] > gElFPtBins[gNElFPtBins]) return;
+		if(ElPt[elind1] > 40.) return;
 
 		////////////////////////////////////////////////////
 		// MOST LOOSE SELECTION
@@ -4890,7 +4899,6 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 	if (fabs(JetPhi[jetinds[0]] - lepphi) > 2.) return true;
 	return false;
 }
-
 bool SSDLDumper::passesJet50Cut(){
 	// Return true if event contains one good jet with pt > 50
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i, 50)) return true;
@@ -5322,7 +5330,7 @@ bool SSDLDumper::isGoodRun(Sample *S){
 //____________________________________________________________________________
 int SSDLDumper::isSigSupMuEvent(){
 	int mu1(-1), mu2(-1);
-	if(hasLooseMuons(mu1, mu2) < 1) return -1;
+	if(hasLooseMuons(mu1, mu2) < 1)        return -1;
 	setHypLepton1(mu1, Muon);
 	if(!passesJet50CutdPhi(mu1, Muon))  return -1;
 	if(getMT(mu1,Muon) > fC_maxMt_Control)  return -1;
@@ -5332,7 +5340,7 @@ int SSDLDumper::isSigSupMuEvent(){
 	// 	if (isLooseMuon(i)) nmus++;
 	// }
 	// if (nmus>1) return -1;
-	if(NMus > 1)                    return -1;
+	if(NMus > 1)                           return -1;
 	return mu1;
 }
 bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
