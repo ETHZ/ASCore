@@ -160,11 +160,6 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(QCD470);
 	fMCBG.push_back(QCD600);
 	fMCBG.push_back(QCD800);
-	fMCBG.push_back(QCDEM20);
-	fMCBG.push_back(QCDEM30);
-	fMCBG.push_back(QCDEM80);
-	fMCBG.push_back(QCDEM170);
-	fMCBG.push_back(QCDEM250);
 
 	fMCBGNoQCDNoGJets.push_back(TTJets);
 	fMCBGNoQCDNoGJets.push_back(SingleT_t);
@@ -248,6 +243,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(QCD600);
 	fMCBGMuEnr.push_back(QCD800);
 	fMCBGMuEnr.push_back(QCDMuEnr15);
+	
 	fMCBGEMEnr.push_back(TTJets);
 	fMCBGEMEnr.push_back(SingleT_t);
 	fMCBGEMEnr.push_back(SingleTbar_t);
@@ -9700,6 +9696,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "#syst" << endl;
 	fOUTSTREAM <<      "lumi     lnN\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"" << endl;
+	fOUTSTREAM << Form("bgUncttz lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+ttwzpreds["Normal"].ttz_err/ttwzpreds["Normal"].ttz)   << endl;
 	fOUTSTREAM << Form("bgUncfak lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-", 1.0+ttwzpreds["Normal"].fake_err/ttwzpreds["Normal"].fake) << endl;
 	fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-", 1.0+ttwzpreds["Normal"].cmid_err/ttwzpreds["Normal"].cmid) << endl;
 	fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-", 1.0+ttwzpreds["Normal"].wz_err  /ttwzpreds["Normal"].wz)   << endl;
@@ -9742,6 +9739,8 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 					   match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn, match_syst_up, match_syst_dn) << endl;
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
+	fOUTSTREAM << Form("NLO      lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-",
+					   1.130) << endl; // old numbers for the moment
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
@@ -10074,6 +10073,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "#syst" << endl;
 	fOUTSTREAM <<      "lumi     lnN\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"" << endl;
+	fOUTSTREAM << Form("bgUncttz lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-",
+					   1.0+ttwzpreds["Normal"].ttz_err_mm/ttwzpreds["Normal"].ttz_mm,
+					   1.0+ttwzpreds["Normal"].ttz_err_em/ttwzpreds["Normal"].ttz_em,
+					   1.0+ttwzpreds["Normal"].ttz_err_ee/ttwzpreds["Normal"].ttz_ee)   << endl;
 	fOUTSTREAM << Form("bgUncfak lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-",
 					   1.0+ttwzpreds["Normal"].fake_err_mm/ttwzpreds["Normal"].fake_mm,
 					   1.0+ttwzpreds["Normal"].fake_err_em/ttwzpreds["Normal"].fake_em,
@@ -10185,6 +10188,8 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn,
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
+	fOUTSTREAM << Form("NLO      lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-",
+					   1.130, 1.130, 1.130) << endl; // old numbers for the moment
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
@@ -10372,6 +10377,9 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	const float WZESyst  = 0.15;
 	const float WZESyst2 = WZESyst*WZESyst;
+	
+	const float TTZESyst  = 0.5;
+	const float TTZESyst2 = TTZESyst*TTZESyst;
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing predictions " ;
@@ -11057,7 +11065,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	// double max = h_obs->Integral();
 	double max = 1.7*h_obs->GetBinContent(4);
-	if (chVeto) max = 15.;
+	if (chVeto) max = 25.;
 
 	// h_obs       ->SetMaximum(max>1?max+1:1.);
 	// h_pred_sfake->SetMaximum(max>1?max+1:1.);
@@ -11160,6 +11168,11 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	pred.ttz_mm   = nt2_ttz_mc_mm;
 	pred.ttz_em   = nt2_ttz_mc_em;
 	pred.ttz_ee   = nt2_ttz_mc_ee;
+	
+	pred.ttz_err    = sqrt(nt2_ttz_mc_ee_e2 + nt2_ttz_mc_mm_e2 + nt2_ttz_mc_em_e2 + TTZESyst2*(nt2_ttz_mc_ee + nt2_ttz_mc_mm + nt2_ttz_mc_em)*(nt2_ttz_mc_ee + nt2_ttz_mc_mm + nt2_ttz_mc_em));
+	pred.ttz_err_mm = sqrt(nt2_ttz_mc_mm_e2 + TTZESyst2*nt2_ttz_mc_mm*nt2_ttz_mc_mm);
+	pred.ttz_err_ee = sqrt(nt2_ttz_mc_em_e2 + TTZESyst2*nt2_ttz_mc_em*nt2_ttz_mc_em);
+	pred.ttz_err_em = sqrt(nt2_ttz_mc_ee_e2 + TTZESyst2*nt2_ttz_mc_ee*nt2_ttz_mc_ee);
 	
 	pred.ttwz     = pred.ttw + pred.ttz;
 	pred.ttwz_mm  = pred.ttw_mm + pred.ttz_mm;
@@ -11531,7 +11544,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		}
 		
 		if (gBaseRegion != "WZEnriched") {
-     		        nt11_sf->Add(nt11_mm_sf);
+     		nt11_sf->Add(nt11_mm_sf);
 			nt11_sf->Add(nt11_ee_sf);
 			nt11_sf->Add(nt11_em_sf);
 			
