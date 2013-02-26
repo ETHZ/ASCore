@@ -61,14 +61,37 @@ int main( int argc, char* argv[] ) {
   // this is an additional selection
   // that can be set by hand
   // to compare to the opt results
-  int min_NJets_h = 3;
-  int min_NBJets_h = 1;
-  int min_NBJets_med_h = 1;
-  float min_ptLept1_h = 40.;
-  float min_ptLept2_h = 40.;
+  int min_NJets_h = 0;
+  int min_NBJets_h = 0;
+  int min_NBJets_med_h = 0;
+  float min_ptLept1_h = 0.;
+  float min_ptLept2_h = 0.;
   float min_met_h = 0.;
-  float min_ht_h = 285.;
+  float min_ht_h = 0.;
 
+  if( charge=="plus" ) {
+
+    min_NJets_h = 3;
+    min_NBJets_h = 1;
+    min_NBJets_med_h = 1;
+    min_ptLept1_h = 35.;
+    min_ptLept2_h = 35.;
+    min_met_h = 0.;
+    min_ht_h = 260.;
+  
+  } else if( charge=="minus" ) {
+
+    min_NJets_h = 3;
+    min_NBJets_h = 1;
+    min_NBJets_med_h = 1;
+    min_ptLept1_h = 33.;
+    min_ptLept2_h = 33.;
+    min_met_h = 0.;
+    min_ht_h = 260.;
+ 
+  }
+
+  
   int nEffStep = 10;
   if( min_NJets_h>0 && min_NBJets_h>0 || min_NBJets_med_h>0 ||
       min_ptLept1_h>0 || min_ptLept2_h>0 || 
@@ -121,6 +144,7 @@ int main( int argc, char* argv[] ) {
   float effMax = 0.;
 
 
+  //for( unsigned iEff=11; iEff<=nEffStep; ++iEff ) {
   for( unsigned iEff=1; iEff<=nEffStep; ++iEff ) {
 
     if( iEff==11 ) {
@@ -346,7 +370,7 @@ int main( int argc, char* argv[] ) {
     delete h1_signal;
     delete h1_bg;
 
-std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
+std::cout << "### " << iEff << "   ZBi: " << ZBi << "  3-channel significance: " << significance << std::endl;
   } // for iEff
 
   std::cout << "> > >   BEST ZBi: " << ZBi_max << std::endl;
@@ -365,14 +389,21 @@ std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
   gr_significance->SetMarkerColor(29);
 
 
-  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.1*effMax*100., 10, 0., 1.6*ZBi_max ); 
+  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.1*effMax*100., 10, 0., 2.);
+  //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.1*effMax*100., 10, 0., 1.6*ZBi_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
   char yAxisTitle[512];
   sprintf( yAxisTitle, "Expected Significance (%.1f fb^{-1})", lumi/1000. );
   h2_axes_gr->SetYTitle(yAxisTitle);
   h2_axes_gr->SetXTitle("Signal Efficiency [%]");
 
-  TLegend* legend = new TLegend( 0.35, 0.2, 0.6, 0.4 );
+  float yMin = 0.2;
+  float yMax = 0.4;
+  if( charge=="minus" ) {
+    yMin = 0.7;
+    yMax = 0.9;
+  }
+  TLegend* legend = new TLegend( 0.47, yMin, 0.72, yMax );
   legend->SetTextSize(0.04);
   legend->SetFillColor(0);
   legend->AddEntry(gr_ZBi, "Combined (ZBi)", "P");
