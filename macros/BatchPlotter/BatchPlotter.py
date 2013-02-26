@@ -102,7 +102,7 @@ def merge_and_clean():
 					absfile = output_location+'/'+ls+'/'+file
 					hadd_region += ' '+os.path.abspath(absfile)
 		hstring = 'hadd '+output_location+'/'+hadd_region
-		os.system(hstring)
+		os.system(hstring+' >& /dev/null')
 					
 	os.system('rm -r tmp/ ; rm plot_* ; rm sgejob-* -rf')
 	#os.system('rm sgejob-* -rf') # no cleaning up, for debugging puposes
