@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Nov 15 15:09:02 2012 by ROOT version 5.32/00
+// Mon Feb 25 10:02:59 2013 by ROOT version 5.32/00
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/Feb19_T4tW/SMS-T4tW-Msbottom-325to700-mChargino-150to625-8TeV-Madgraph/output_47.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -29,6 +29,7 @@ public :
    Float_t         m12;
    Int_t           process;
    Float_t         mGlu;
+   Float_t         mChi;
    Float_t         mLSP;
    Int_t           isTChiSlepSnu;
    Int_t           isRightHanded;
@@ -65,8 +66,10 @@ public :
    Int_t           MuCharge[5];   //[NMus]
    Float_t         MuDetIso[5];   //[NMus]
    Float_t         MuPFIso[5];   //[NMus]
+   Float_t         MuPFIso04[5];   //[NMus]
    Float_t         MuPFChIso[5];   //[NMus]
    Float_t         MuPFNeIso[5];   //[NMus]
+   Float_t         MuPFNeIsoUnc[5];   //[NMus]
    Float_t         MuRadIso[5];   //[NMus]
    Float_t         MuD0[5];   //[NMus]
    Float_t         MuDz[5];   //[NMus]
@@ -139,6 +142,7 @@ public :
    Float_t         JetArea[20];   //[NJets]
    Float_t         JetJEC[20];   //[NJets]
    Int_t           JetPartonID[20];   //[NJets]
+   Int_t           JetPartonFlav[20];   //[NJets]
    Float_t         JetGenPt[20];   //[NJets]
    Float_t         JetGenEta[20];   //[NJets]
    Float_t         JetGenPhi[20];   //[NJets]
@@ -151,6 +155,7 @@ public :
    TBranch        *b_m12;   //!
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
+   TBranch        *b_mChi;   //!
    TBranch        *b_mLSP;   //!
    TBranch        *b_isTChiSlepSnu;   //!
    TBranch        *b_isRightHanded;   //!
@@ -187,8 +192,10 @@ public :
    TBranch        *b_MuCharge;   //!
    TBranch        *b_MuDetIso;   //!
    TBranch        *b_MuPFIso;   //!
+   TBranch        *b_MuPFIso04;   //!
    TBranch        *b_MuPFChIso;   //!
    TBranch        *b_MuPFNeIso;   //!
+   TBranch        *b_MuPFNeIsoUnc;   //!
    TBranch        *b_MuRadIso;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
@@ -261,6 +268,7 @@ public :
    TBranch        *b_JetArea;   //!
    TBranch        *b_JetJEC;   //!
    TBranch        *b_JetPartonID;   //!
+   TBranch        *b_JetPartonFlav;   //!
    TBranch        *b_JetGenPt;   //!
    TBranch        *b_JetGenEta;   //!
    TBranch        *b_JetGenPhi;   //!
@@ -284,9 +292,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/Feb19_T4tW/SMS-T4tW-Msbottom-325to700-mChargino-150to625-8TeV-Madgraph/output_47.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Nov15/DoubleMu-Run2012A-recover-06Aug2012-v1.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/Feb19_T4tW/SMS-T4tW-Msbottom-325to700-mChargino-150to625-8TeV-Madgraph/output_47.root");
       }
       f->GetObject("Analysis",tree);
 
@@ -342,6 +350,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("m12", &m12, &b_m12);
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
+   fChain->SetBranchAddress("mChi", &mChi, &b_mChi);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
    fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
    fChain->SetBranchAddress("isRightHanded", &isRightHanded, &b_isRightHanded);
@@ -378,8 +387,10 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
    fChain->SetBranchAddress("MuDetIso", MuDetIso, &b_MuDetIso);
    fChain->SetBranchAddress("MuPFIso", MuPFIso, &b_MuPFIso);
+   fChain->SetBranchAddress("MuPFIso04", MuPFIso04, &b_MuPFIso04);
    fChain->SetBranchAddress("MuPFChIso", MuPFChIso, &b_MuPFChIso);
    fChain->SetBranchAddress("MuPFNeIso", MuPFNeIso, &b_MuPFNeIso);
+   fChain->SetBranchAddress("MuPFNeIsoUnc", MuPFNeIsoUnc, &b_MuPFNeIsoUnc);
    fChain->SetBranchAddress("MuRadIso", MuRadIso, &b_MuRadIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
@@ -452,6 +463,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
    fChain->SetBranchAddress("JetJEC", JetJEC, &b_JetJEC);
    fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
+   fChain->SetBranchAddress("JetPartonFlav", JetPartonFlav, &b_JetPartonFlav);
    fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
    fChain->SetBranchAddress("JetGenEta", JetGenEta, &b_JetGenEta);
    fChain->SetBranchAddress("JetGenPhi", JetGenPhi, &b_JetGenPhi);
