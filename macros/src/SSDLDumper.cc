@@ -4333,16 +4333,15 @@ void SSDLDumper::scaleLeptons(Sample *S, int flag){
 void SSDLDumper::smearMET(Sample *S){
 	if(S->datamc == 0) return; // don't smear data
 	//TRandom3 * myRand = new TRandom3(0);
-	//float sm_met = pfMET + myRand->Gaus(0, 0.05) * pfMET;
-	float sm_met = pfMET + fRand3->Gaus(0, 0.05) * pfMET;
+	float sm_met = getMET() + fRand3->Gaus(0, 0.05) * getMET();
 	pfMET = sm_met;
 }
 float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-        float met = pfMET;
-        if (gMETType1)  met = pfMETType1;
+	float met = pfMET;
+	if (gMETType1)  met = pfMETType1;
 	else            met = pfMET;
 
 	return met;
@@ -4886,7 +4885,7 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 	// Return true if event contains one good jet with pt > 50 and dPhi > 2.0 from hyp lepton
 	std::vector< int > jetinds;
 	for(size_t i = 0; i < NJets; ++i) {
-		if(isGoodJet(i, 50) ) {
+		if(isGoodJet(i, 70) ) {
 			jetinds.push_back(i);
 		}
 	}
