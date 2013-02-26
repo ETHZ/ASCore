@@ -330,7 +330,7 @@ void SSDLDumper::init(){
 	setRegionCuts(gRegion[gBaseRegion]); // no argument = reset to gBaseRegion
 
  	fC_maxMet_Control = 20.;
-	fC_maxMt_Control  = 10.;
+	fC_maxMt_Control  = 20.;
 
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
