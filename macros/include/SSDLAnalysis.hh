@@ -113,6 +113,7 @@ private:
 	float  fTm12;
 	int    fTprocess;
 	float  fTmGlu;
+	float  fTmChi;
 	float  fTmLSP;
 	int    fTisTChiSlepSnu;
 	int    fTisRightHanded;

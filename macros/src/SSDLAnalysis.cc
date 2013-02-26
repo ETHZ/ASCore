@@ -200,6 +200,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("process",       &fTprocess,    "process/I");
 
 	fAnalysisTree->Branch("mGlu",          &fTmGlu,       "mGlu/F");
+	fAnalysisTree->Branch("mChi",          &fTmChi,       "mChi/F");
 	fAnalysisTree->Branch("mLSP",          &fTmLSP,       "mLSP/F");
 	fAnalysisTree->Branch("isTChiSlepSnu", &fTisTChiSlepSnu,       "isTChiSlepSnu/I");
 	fAnalysisTree->Branch("isRightHanded", &fTisRightHanded,       "isRightHanded/I");
@@ -363,17 +364,17 @@ void SSDLAnalysis::FillAnalysisTree(){
 		// MassLSP is in fact the mass of the LSP
 
 		// now finally filling the histograms
-		                                   fModelCountAll           -> Fill(fTR->MassGlu, fTR->MassLSP);
-		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(fTR->MassGlu, fTR->MassLSP);
-		if (isRightHanded)                 fRightHandedCountAll     -> Fill(fTR->MassGlu, fTR->MassLSP);
-		TChiSlepSnu ?                      fTChiSlepSnuCountAll     -> Fill(fTR->MassGlu, fTR->MassLSP) : fTChiSlepSlepCountAll->Fill(fTR->MassGlu, fTR->MassLSP);
+		                                   fModelCountAll           -> Fill(fTR->MassGlu, fTR->MassChi);
+		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(fTR->MassGlu, fTR->MassChi);
+		if (isRightHanded)                 fRightHandedCountAll     -> Fill(fTR->MassGlu, fTR->MassChi);
+		TChiSlepSnu ?                      fTChiSlepSnuCountAll     -> Fill(fTR->MassGlu, fTR->MassChi) : fTChiSlepSlepCountAll->Fill(fTR->MassGlu, fTR->MassChi);
 
 		for (int i=0; i<nx; ++i){ 
-			if (!TChiSlepSnu  && isRightHanded && x == x_values[i]) fRightHandedSlepCount[i] -> Fill( fTR->MassGlu, fTR->MassLSP);
-			if (isRightHanded &&                  x == x_values[i]) fRightHandedCount[i]     -> Fill( fTR->MassGlu, fTR->MassLSP);
-			if (TChiSlepSnu   &&                  x == x_values[i]) fTChiSlepSnuCount[i]     -> Fill( fTR->MassGlu, fTR->MassLSP);
-			if (!TChiSlepSnu  &&                  x == x_values[i]) fTChiSlepSlepCount[i]    -> Fill( fTR->MassGlu, fTR->MassLSP);
-			if (                                  x == x_values[i]) fModelCount[i]           -> Fill( fTR->MassGlu, fTR->MassLSP);
+			if (!TChiSlepSnu  && isRightHanded && x == x_values[i]) fRightHandedSlepCount[i] -> Fill( fTR->MassGlu, fTR->MassChi);
+			if (isRightHanded &&                  x == x_values[i]) fRightHandedCount[i]     -> Fill( fTR->MassGlu, fTR->MassChi);
+			if (TChiSlepSnu   &&                  x == x_values[i]) fTChiSlepSnuCount[i]     -> Fill( fTR->MassGlu, fTR->MassChi);
+			if (!TChiSlepSnu  &&                  x == x_values[i]) fTChiSlepSlepCount[i]    -> Fill( fTR->MassGlu, fTR->MassChi);
+			if (                                  x == x_values[i]) fModelCount[i]           -> Fill( fTR->MassGlu, fTR->MassChi);
 		}
 
 	}
@@ -414,6 +415,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm12  = fTR->M12;
 		fTprocess = fTR->process;
 		fTmGlu = fTR->MassGlu;
+		fTmChi = fTR->MassChi;
 		fTmLSP = fTR->MassLSP;
 		TChiSlepSnu   ? fTisTChiSlepSnu = 1 : fTisTChiSlepSnu = 0;
 		isRightHanded ? fTisRightHanded = 1 : fTisRightHanded = 0;
@@ -423,6 +425,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm12     = -1;
 		fTprocess = -1;
 		fTmGlu    = -1;
+		fTmChi    = -1;
 		fTmLSP    = -1;
 		fTisTChiSlepSnu  = -1;
 		fTisRightHanded  = -1;
@@ -662,6 +665,7 @@ void SSDLAnalysis::ResetTree(){
 	fTm12     = -999.99;
 	fTprocess = -999;
 	fTmGlu    = -999.99;
+	fTmChi    = -999.99;
 	fTmLSP    = -999.99;
 	fTisTChiSlepSnu   = -999.99;
 	fTisRightHanded   = -999.99;
