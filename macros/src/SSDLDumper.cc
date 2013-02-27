@@ -4272,9 +4272,8 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	tmp -= jets;
 	// reset the minPt cut for the jets . this is important!
 	fC_minJetPt = tmp_minJetPt;
-	// set the new MET value -- ATTENTION: this is only for pfMET, not Type1 corrected MET
-	pfMET = tmp.Pt();
-	
+	// set the new MET value
+	setMET(tmp.Pt());
 }
 void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
@@ -4342,8 +4341,11 @@ float SSDLDumper::getMET(){
 	float met = pfMET;
 	if (gMETType1)  met = pfMETType1;
 	else            met = pfMET;
-
 	return met;
+}
+void SSDLDumper::setMET(float newmet){
+	if (gMETType1)  pfMETType1 = newmet;
+	else            pfMET      = newmet;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
@@ -4640,6 +4642,7 @@ void SSDLDumper::setRegionCuts(int reg){
 	fC_maxHT      = gRegions[reg]->maxHT      ;
 	fC_minMet     = gRegions[reg]->minMet     ;
 	fC_maxMet     = gRegions[reg]->maxMet     ;
+	fC_minJetPt   = gMinJetPt   ;
 	fC_minNjets   = gRegions[reg]->minNjets   ;
 	fC_maxNjets   = gRegions[reg]->maxNjets   ;
 	fC_minNbjets  = gRegions[reg]->minNbjets  ;

@@ -671,6 +671,7 @@ public:
 	virtual void scaleMET(Sample *S, int flag = 0);
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getM3();
+	virtual void  setMET(float );
 	virtual float getMET();
 	virtual float getMETPhi();
 	virtual int getNJets();
