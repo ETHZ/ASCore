@@ -1,6 +1,7 @@
 #include "helper/BTagSF.hh"
 #include <math.h>
 #include <iostream>
+#include <TString.h>
 
 using namespace std;
 
@@ -8,6 +9,20 @@ BTagSF::BTagSF() {
 	fMeanminmax["mean"] =  0.;
 	fMeanminmax["min" ] = -1.;
 	fMeanminmax["max" ] =  1.;
+
+	float ptmax = 800;
+	// eta between 0 and 0.8
+	fLightSFeta0mean  = new TF1("SFlight"   , "((1.06238+(0.00198635*x))+(-4.89082e-06*(x*x)))+(3.29312e-09*(x*(x*x)))" , 20., ptmax);
+	fLightSFeta0min   = new TF1("SFlightMin", "((0.972746+(0.00104424*x))+(-2.36081e-06*(x*x)))+(1.53438e-09*(x*(x*x)))", 20., ptmax);
+	fLightSFeta0max   = new TF1("SFlightMax", "((1.15201+(0.00292575*x))+(-7.41497e-06*(x*x)))+(5.0512e-09*(x*(x*x)))"  , 20., ptmax);
+	// eta between 0.8 and 1.6
+	fLightSFeta1mean  = new TF1("SFlight"   , "((1.08048+(0.00110831*x))+(-2.96189e-06*(x*x)))+(2.16266e-09*(x*(x*x)))" , 20., ptmax);
+	fLightSFeta1min   = new TF1("SFlightMin", "((0.9836+(0.000649761*x))+(-1.59773e-06*(x*x)))+(1.14324e-09*(x*(x*x)))" , 20., ptmax);
+	fLightSFeta1max   = new TF1("SFlightMax", "((1.17735+(0.00156533*x))+(-4.32257e-06*(x*x)))+(3.18197e-09*(x*(x*x)))" , 20., ptmax);
+	// eta between 1.6 and 2.4
+	fLightSFeta2mean  = new TF1("SFlight"   , "((1.09145+(0.000687171*x))+(-2.45054e-06*(x*x)))+(1.7844e-09*(x*(x*x)))" , 20., ptmax);
+	fLightSFeta2min   = new TF1("SFlightMin", "((1.00616+(0.000358884*x))+(-1.23768e-06*(x*x)))+(6.86678e-10*(x*(x*x)))", 20., ptmax);
+	fLightSFeta2max   = new TF1("SFlightMax", "((1.17671+(0.0010147*x))+(-3.66269e-06*(x*x)))+(2.88425e-09*(x*(x*x)))"  , 20., ptmax);
 };
 
 double BTagSF::efficiency(float jetpt, float jeteta, int flavor, TString meanminmax, int uncertaintyLight){
@@ -16,27 +31,27 @@ double BTagSF::efficiency(float jetpt, float jeteta, int flavor, TString meanmin
 	else                      return (0.0113428+(5.18983e-05*jetpt))+(-2.59881e-08*(jetpt*jetpt))*(1+uncertaintyLight*0.5);
 }
 
-void BTagSF::getSFLightFunction(float jeteta, TString meanminmax) {
+float BTagSF::getSFLight(float jetpt, float jeteta, TString meanminmax) {
 	// assuming tagger is always CSV medium. might want to extend that in the future
+	// float ptmax = 800.;
 	float eta = fabs(jeteta); // making sure we're taking the absolute eta
-	float ptmax = 800.;
-	// TF1 * tmpSFl;
+	float sf(-999.);
 	if ( eta >= 0.  && eta <= 0.8 ) {
-		if( meanminmax == "mean" ) fLightSF = new TF1("SFlight"   , "((1.06238+(0.00198635*x))+(-4.89082e-06*(x*x)))+(3.29312e-09*(x*(x*x)))" , 20., ptmax);
-		if( meanminmax == "min"  ) fLightSF = new TF1("SFlightMin", "((0.972746+(0.00104424*x))+(-2.36081e-06*(x*x)))+(1.53438e-09*(x*(x*x)))", 20., ptmax);
-		if( meanminmax == "max"  ) fLightSF = new TF1("SFlightMax", "((1.15201+(0.00292575*x))+(-7.41497e-06*(x*x)))+(5.0512e-09*(x*(x*x)))"  , 20., ptmax);
+		if (meanminmax == "mean" ) sf = fLightSFeta0mean ->Eval(jetpt);
+		if (meanminmax == "min"  ) sf = fLightSFeta0min  ->Eval(jetpt);
+		if (meanminmax == "max"  ) sf = fLightSFeta0max  ->Eval(jetpt);
 	}
-	if ( eta  > 0.8 && eta <= 1.6 ) {
-		if( meanminmax == "mean" ) fLightSF = new TF1("SFlight"   , "((1.08048+(0.00110831*x))+(-2.96189e-06*(x*x)))+(2.16266e-09*(x*(x*x)))" , 20., ptmax);
-		if( meanminmax == "min"  ) fLightSF = new TF1("SFlightMin", "((0.9836+(0.000649761*x))+(-1.59773e-06*(x*x)))+(1.14324e-09*(x*(x*x)))" , 20., ptmax);
-		if( meanminmax == "max"  ) fLightSF = new TF1("SFlightMax", "((1.17735+(0.00156533*x))+(-4.32257e-06*(x*x)))+(3.18197e-09*(x*(x*x)))" , 20., ptmax);
+	else if ( eta  > 0.8 && eta <= 1.6 ) {
+		if (meanminmax == "mean" ) sf = fLightSFeta1mean ->Eval(jetpt);
+		if (meanminmax == "min"  ) sf = fLightSFeta1min  ->Eval(jetpt);
+		if (meanminmax == "max"  ) sf = fLightSFeta1max  ->Eval(jetpt);
 	}
-	if ( eta  > 1.6 && eta <= 2.4 ) {
-		if( meanminmax == "mean" ) fLightSF = new TF1("SFlight"   , "((1.09145+(0.000687171*x))+(-2.45054e-06*(x*x)))+(1.7844e-09*(x*(x*x)))" , 20., ptmax);
-		if( meanminmax == "min"  ) fLightSF = new TF1("SFlightMin", "((1.00616+(0.000358884*x))+(-1.23768e-06*(x*x)))+(6.86678e-10*(x*(x*x)))", 20., ptmax);
-		if( meanminmax == "max"  ) fLightSF = new TF1("SFlightMax", "((1.17671+(0.0010147*x))+(-3.66269e-06*(x*x)))+(2.88425e-09*(x*(x*x)))"  , 20., ptmax);
+	else if ( eta  > 1.6 && eta <= 2.4 ) {
+		if (meanminmax == "mean" ) sf = fLightSFeta2mean ->Eval(jetpt);
+		if (meanminmax == "min"  ) sf = fLightSFeta2min  ->Eval(jetpt);
+		if (meanminmax == "max"  ) sf = fLightSFeta2max  ->Eval(jetpt);
 	}
-//	return tmpSFl;
+	return sf;
 }
 
 double BTagSF::scalefactor(float jetpt, float jeteta, int flavor, TString meanminmax){
@@ -104,10 +119,9 @@ double BTagSF::scalefactor(float jetpt, float jeteta, int flavor, TString meanmi
 	}
 	// LIGHT JETS
 	else {
-		getSFLightFunction(jeteta, meanminmax);
-		if (fLightSF == NULL ) cout << Form("jetpt: %5.2f jeteta: %3.2f jetflavor: %d ", jetpt, jeteta, flavor) << endl;
-		float SFlight = fLightSF->Eval(jetpt, 0., 0.);
-		delete fLightSF;
+		// if (fLightSF == NULL ) cout << Form("jetpt: %5.2f jeteta: %3.2f jetflavor: %d ", jetpt, jeteta, flavor) << endl;
+		float SFlight = getSFLight(jetpt, jeteta, meanminmax);
+		// delete fLightSF;
 		return SFlight; // return only the central value for now. should adapt for jets > 800 GeV etc.
 	}
 }
