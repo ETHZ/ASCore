@@ -21,7 +21,7 @@ class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuFPtBins = 6;
+	static const int gNMuFPtBins = 7;
 	static const int gNMuPPtbins = 10;
 	static const int gNMuEtabins = 5;
 	static const int gNElFPtBins = 8;
@@ -707,10 +707,10 @@ public:
 	virtual int hasLooseMuons();
 	virtual int hasLooseElectrons(int&, int&);
 	virtual int hasLooseElectrons();
+        virtual bool passesJet50CutdPhi(int, gChannel);
 	virtual bool passesJet50Cut();
-	virtual bool passesJet50CutdPhi(int, gChannel);
-	
-	virtual bool passesHTCut(float, float = 8000.);
+
+  	virtual bool passesHTCut(float, float = 8000.);
 	virtual bool passesMETCut(float = -1., float = 8000.);
 	virtual bool passesZVeto(bool(SSDLDumper::*)(int), bool(SSDLDumper::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
