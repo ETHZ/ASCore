@@ -56,7 +56,6 @@ float gElMaxIso     ;
 float gMinJetPt     ;
 float gMaxJetEta    ;
 bool  gTTWZ         ;
-//bool  gApplyZVeto   ;
 bool  gInvertZVeto  ;
 bool  tmp_gApplyZVeto;
 bool  gApplyGStarVeto    ;
@@ -77,7 +76,7 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 35., 40., 50., 60.}; // fake ratios
+double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 32.5, 35., 40., 50., 60.}; // fake ratios
 double SSDLDumper::gMuPPtbins[gNMuPPtbins+1] = {20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
 double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 
@@ -262,14 +261,14 @@ SSDLDumper::SSDLDumper(TString configfile){
 
 	cout << "================  GLOBAL PARAMETERS  ===================" << endl;
 	cout << Form("gTTWZ = %d\ngApplyZVeto = %d\ngInvertZVeto = %d\ngMuMaxIso = %3.2f\ngElMaxIso = %3.2f\ngMinJetPt = %3.2f\ngMaxJetEta = %3.2f\ngBaseRegion = %s",
-		gTTWZ       ,
-		tmp_gApplyZVeto ,
-		gInvertZVeto,
-		gMuMaxIso   ,
-		gElMaxIso   ,
-		gMinJetPt   ,
-		gMaxJetEta   ,
-		tmp_gBaseRegion.Data()  ) << endl;
+		     gTTWZ       ,
+		     tmp_gApplyZVeto ,
+		     gInvertZVeto,
+		     gMuMaxIso   ,
+		     gElMaxIso   ,
+		     gMinJetPt ,
+		     gMaxJetEta   ,
+		     tmp_gBaseRegion.Data()  ) << endl;
 	cout << "========================================================" << endl;
 	SSDLDumper::gBaseRegion = tmp_gBaseRegion;
 	SSDLDumper::gApplyZVeto = tmp_gApplyZVeto;
@@ -330,8 +329,8 @@ void SSDLDumper::init(){
 	setRegionCuts(gRegion[gBaseRegion]); // no argument = reset to gBaseRegion
 
  	fC_maxMet_Control = 20.;
-	fC_maxMt_Control  = 20.;
-
+	fC_maxMt_Control  = 15.;
+	
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 }
@@ -434,12 +433,12 @@ void SSDLDumper::loopEvents(Sample *S){
 	if(S->datamc == 0){
 		TString eventfilename  = fOutputDir + S->sname + "_SignalEvents.txt";
 		fOUTSTREAM.open(eventfilename.Data(), ios::trunc);		
-
-		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
-			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
-			(*regIt)->regionOutstream.open(allRegionSigEvents.Data(), ios::trunc);		
-			//outStreamMap[(*regIt)->sname] = (*regIt)->regionOutstream;
-		}
+		
+//SIGEVENTS PRINTOUT		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+//SIGEVENTS PRINTOUT			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
+//SIGEVENTS PRINTOUT			(*regIt)->regionOutstream.open(allRegionSigEvents.Data(), ios::trunc);		
+//SIGEVENTS PRINTOUT			//outStreamMap[(*regIt)->sname] = (*regIt)->regionOutstream;
+//SIGEVENTS PRINTOUT		}
 	}
 
 	TFile *pFile = new TFile(fOutputFileName, "RECREATE");
@@ -620,10 +619,10 @@ void SSDLDumper::loopEvents(Sample *S){
 
 	if(S->datamc == 0){
 		 fOUTSTREAM.close();
-		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
-			//outStreamMap[(*regIt)->sname].close();
-			(*regIt)->regionOutstream.close();
-		}
+//SIGEVENTS PRINTOUT		 for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
+//SIGEVENTS PRINTOUT			//outStreamMap[(*regIt)->sname].close();
+//SIGEVENTS PRINTOUT			(*regIt)->regionOutstream.close();
+//SIGEVENTS PRINTOUT		}
 	}
 	fDoCounting = false;
 }
@@ -681,7 +680,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
 				if(S->datamc == 0 ){
-				  gRegions[reg]->regionOutstream << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+//SIGEVENTS PRINTOUT				  gRegions[reg]->regionOutstream << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 					if(reg == gRegion[gBaseRegion]){
 					  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 					}
@@ -817,7 +816,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
 				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
 				if(S->datamc == 0 ){
-					gRegions[reg]->regionOutstream << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+//SIGEVENTS PRINTOUT					gRegions[reg]->regionOutstream << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 					if(reg == gRegion[gBaseRegion]){
 						fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 					}
@@ -949,7 +948,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
 				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
 				if(S->datamc == 0){
-					gRegions[reg]->regionOutstream << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+//SIGEVENTS PRINTOUT					gRegions[reg]->regionOutstream << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 					if(reg == gRegion[gBaseRegion]){
 						fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 					}
@@ -4240,8 +4239,8 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	umet += tmp; // add met
 	tmp.SetPtEtaPhiM(0., 0., 0., 0.); // reset
 	// subtract jets
-	float tmp_minJetPt = gMinJetPt;
-	gMinJetPt = 15.;
+	float tmp_minJetPt = fC_minJetPt;
+	fC_minJetPt = 15.;
 	for (int i=0; i<NJets; i++) {
 		if (!isGoodJet(i)) continue;
 		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
@@ -4272,7 +4271,7 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	tmp -= leps;
 	tmp -= jets;
 	// reset the minPt cut for the jets . this is important!
-	gMinJetPt = tmp_minJetPt;
+	fC_minJetPt = tmp_minJetPt;
 	// set the new MET value -- ATTENTION: this is only for pfMET, not Type1 corrected MET
 	pfMET = tmp.Pt();
 	
@@ -4885,7 +4884,7 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 	// Return true if event contains one good jet with pt > 50 and dPhi > 2.0 from hyp lepton
 	std::vector< int > jetinds;
 	for(size_t i = 0; i < NJets; ++i) {
-		if(isGoodJet(i, 70) ) {
+		if(isGoodJet(i, 65) ) {
 			jetinds.push_back(i);
 		}
 	}
@@ -4900,7 +4899,7 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 }
 bool SSDLDumper::passesJet50Cut(){
 	// Return true if event contains one good jet with pt > 50
-	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i, 50)) return true;
+	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i,65)) return true;
 	return false;
 }
 
@@ -6030,7 +6029,7 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 	// JET - LEPTON CLEANING PARAMETER!! should switch to 0.5!!!
 	float minDR = 0.4;
 
-	if(getJetPt(jet) < gMinJetPt) return false;
+	if(getJetPt(jet) < fC_minJetPt) return false;
 	if(getJetPt(jet) < pt) return false;
 	
 	if(fabs(JetEta[jet]) > gMaxJetEta) return false; // btagging only up to 2.4
