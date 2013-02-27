@@ -166,6 +166,11 @@ def clean():
 def merge_and_clean():
 	print '[status] now merging and cleaning up...'
 	print '[status] starting with the special directories...'
+	for ls in os.listdir(output_location):
+		if 'tgz' in ls:
+			os.system('tar xzf '+output_location+'/'+ls+' --directory='+output_location)
+			os.system('mv '+output_location+output_node+'/* '+output_location)
+			os.system('rm '+output_location+'/'+ls)
 	for dir in special_dirs:
 		print '[status] at special dir:', dir
 		dir_cat = 'cat '
@@ -183,7 +188,11 @@ def merge_and_clean():
 		os.system(dir_hadd)
 		if isdata:
 			os.system(dir_cat)
-
+	os.system('rm -rf '+output_location+output_node.split('/')[1])
+	for ls in os.listdir(output_location):
+		if os.path.isdir(output_location+'/'+ls):
+			os.system('mv '+output_location+'/'+ls+'/* '+output_location)
+			os.system('rm -rf '+output_location+'/'+ls)
 	os.system('rm -r tmp/ ; rm ssdl_* ; rm sgejob-* -rf')
 	#os.system('rm sgejob-* -rf') # no cleaning up, for debugging puposes
 	for ls in os.listdir(output_location):
@@ -254,6 +263,7 @@ def do_stuff(config_name):
 		os.system('cp '+dumper_config+' '+output_location+'/dumperconfig.cfg')
 	else:
 		print '[WARNING] output directory', output_location, 'already exists, this might lead to problems.'
+		os.system('cp '+dumper_config+' '+output_location+'/dumperconfig.cfg')
 
 	# checking if a tmp/ subdir exists in the working dir, if so remove it and create an empty one
 	if os.path.isdir('tmp'):
@@ -297,10 +307,13 @@ def do_stuff(config_name):
 		# instead it creates a directory /jobnumber/ on the workernode /scratch/ and afterwards moves everything from there to /shome
 		commit+=str(ind)+'/'
 		if name in special_dirs:
-			copyline = 'mv ' + commit.split()[-1]+' '+output_location
+			copyline = 'tar czf '+str(ind)+'.tgz '+commit.split()[-1]+' && mv ' +str(ind)+'.tgz '+output_location
+			## copyline = 'mv ' + commit.split()[-1]+' '+output_location
 		else:
-			copyline = 'mv ' + commit.split()[-1]+'* ' +output_location
+			copyline = 'tar czf '+str(ind)+'.tgz '+commit.split()[-1]+'* && mv '+str(ind)+'.tgz ' +output_location
+			## copyline = 'mv ' + commit.split()[-1]+'* ' +output_location
 
+		## print copyline
 		shellScript = open(batch_script, 'r')
 		tmpScript_name = 'tmp/tmp_script_'+str(ind)+'.sh'
 		tmpScript = open(tmpScript_name, 'w')
