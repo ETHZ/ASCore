@@ -280,7 +280,13 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(QCDEM80);
 	fMCBGEMEnr.push_back(QCDEM170);
 	fMCBGEMEnr.push_back(QCDEM250);
-	
+	fMCBGEMEnr.push_back(QCD80);
+	fMCBGEMEnr.push_back(QCD120);
+	fMCBGEMEnr.push_back(QCD170);
+	fMCBGEMEnr.push_back(QCD300);
+	fMCBGEMEnr.push_back(QCD470);
+	fMCBGEMEnr.push_back(QCD600);
+	fMCBGEMEnr.push_back(QCD800);
 	fMuEnr.push_back(QCDMuEnr15);
 	
 	fEMEnr.push_back(QCDEM20);
@@ -468,7 +474,9 @@ void SSDLPlotter::doAnalysis(){
 	//makePredictionSignalEvents(280., 8000., 0., 7000., 3, 1, 1, 40., 40., 0, true);
 	// makeRelIsoTTSigPlots();
 	
-	// makeFakeGenIDTables();
+//	makeFakeGenIDTables();
+//	makeMIDIsolationPlots(Muon, SigSup);
+//	makeMIDIsolationPlots(Muon, Sig);
 }
 
 //____________________________________________________________________________
@@ -5231,7 +5239,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
-	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc, *h_ptratio_qcd;
+	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc, *h_ptratio_qcd, *h_ptratio_wjets;
 	TH2D *h_dummy2;
 
 	TH2D *h2d_ntight, *h2d_nloose;
@@ -5240,6 +5248,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNFPtBins(chan), getFPtBins(chan));
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));
 		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNFPtBins(chan), getFPtBins(chan));
+		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNFPtBins(chan), getFPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
@@ -5247,6 +5256,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPPtBins(chan), getPPtBins(chan));
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));
 		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNPPtBins(chan), getPPtBins(chan));
+		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNPPtBins(chan), getPPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
@@ -5254,28 +5264,33 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	vector<int> datasamples;
 	vector<int> mcsamples;
 	vector<int> qcdsamples;
+	vector<int> wjetssamples;
 
 	if(chan == Muon){
 		datasamples = fMuData;
-		//              mcsamples       = fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
-		//              mcsamples       = fTTJets;
+//		mcsamples	= fTTJets;
 		qcdsamples	= fMuEnr;
+		wjetssamples.push_back(WJets);
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		//              mcsamples       = fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
-		//              mcsamples       = fTTJets;
+//		mcsamples	= fTTJets;
 		qcdsamples	= fEMEnr;
+		wjetssamples.push_back(WJets);
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
 	calculateRatio(qcdsamples,  chan, fp, h_dummy2, h_ptratio_qcd,   h_dummy1);
+//	cout << "wjets ratio\n";
+	calculateRatio(wjetssamples,  chan, fp, h_dummy2, h_ptratio_wjets,   h_dummy1);
 
-	float linewidth = 1.;
 	//////////////
+	float linewidth = 1.;
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, fp, 0);
 	eff_data->SetName("eff_data_pt");
 	eff_data->SetLineWidth(linewidth);
@@ -5293,14 +5308,16 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	//////////////
 
-	float maximum = 0.4;
+	float maximum = 0.2; //0.4;
 	if(fp == ZDecay) maximum = 1.1;
 	h_ptratio_data->SetMaximum(maximum);
 	h_ptratio_mc  ->SetMaximum(maximum);
 	h_ptratio_qcd  ->SetMaximum(maximum);
+	h_ptratio_wjets  ->SetMaximum(maximum);
 	h_ptratio_data->SetMinimum(0.0);
 	h_ptratio_mc  ->SetMinimum(0.0);
 	h_ptratio_qcd ->SetMinimum(0.0);
+	h_ptratio_wjets ->SetMinimum(0.0);
 
 	if(chan == Muon) h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
 	if(chan == Elec) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
@@ -5329,6 +5346,14 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_qcd  ->SetLineColor(kBlue);
 	h_ptratio_qcd  ->SetFillColor(kBlue);
 	h_ptratio_qcd  ->GetXaxis()->SetRangeUser(0.,50.);
+	
+	h_ptratio_wjets  ->SetMarkerColor(kYellow);
+	h_ptratio_wjets  ->SetMarkerStyle(23);
+	h_ptratio_wjets  ->SetMarkerSize(1.5);
+	h_ptratio_wjets  ->SetLineWidth(2);
+	h_ptratio_wjets  ->SetLineColor(kYellow);
+	h_ptratio_wjets  ->SetFillColor(kYellow);
+	h_ptratio_wjets  ->GetXaxis()->SetRangeUser(0.,50.);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -5341,6 +5366,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	leg->AddEntry(h_ptratio_data, "Data",       "p");
 	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
 	leg->AddEntry(h_ptratio_qcd,  "QCD",        "p");
+	leg->AddEntry(h_ptratio_wjets,"WJets",        "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -5351,6 +5377,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	// MARC h_ptratio_mc->DrawCopy("axis");
 	h_ptratio_mc->DrawCopy("PE 0");
 	h_ptratio_qcd->Draw("PE 0 same");
+	h_ptratio_wjets->Draw("PE 0 same");
 	// MARC eff_mc->Draw("P same");
 	// MARC h_ptratio_data->Draw("PE X0 same");
 	eff_data->Draw("PZ 0 same");
@@ -5371,7 +5398,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	
 	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd;
+	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
@@ -5576,24 +5603,35 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	TH1D *h_etaratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNEtaBins(chan), getEtaBins(chan));
 	TH1D *h_etaratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_etaratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_etaratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNEtaBins(chan), getEtaBins(chan));
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
+	vector<int> qcdsamples;
+	vector<int> wjetssamples;
 
 	if(chan == Muon){
 		datasamples = fMuData;
 //		mcsamples	= fMCBG;
 		mcsamples   = fMCBGMuEnr;
 //		mcsamples	= fTTJets;
+		qcdsamples   = fMuEnr;
+		wjetssamples.push_back(WJets);
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
 //		mcsamples	= fTTJets;
+		qcdsamples   = fEMEnr;
+		wjetssamples.push_back(WJets);
 	}
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
 	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
+	calculateRatio(qcdsamples,  chan, SigSup, h_dummy2, h_dummy1, h_etaratio_qcd);
+	calculateRatio(wjetssamples,chan, SigSup, h_dummy2, h_dummy1, h_etaratio_wjets);
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, SigSup, 1);
@@ -5602,12 +5640,16 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	eff_data->SetMarkerStyle(20);
 	eff_data->SetMarkerSize(1.5);
 
-	float max = 0.5;
-	if(chan==Elec) max = 0.5;
+	float max = 0.2; //0.4;
+	if(chan==Elec) max = 0.8;
 	h_etaratio_data->SetMaximum(max);
 	h_etaratio_mc  ->SetMaximum(max);
+	h_etaratio_qcd  ->SetMaximum(max);
+	h_etaratio_wjets  ->SetMaximum(max);
 	h_etaratio_data->SetMinimum(0.0);
 	h_etaratio_mc  ->SetMinimum(0.0);
+	h_etaratio_qcd  ->SetMinimum(0.0);
+	h_etaratio_wjets  ->SetMinimum(0.0);
 
 	if(chan == Muon) h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
 	if(chan == Elec) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
@@ -5627,6 +5669,20 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	h_etaratio_mc  ->SetLineWidth(2);
 	h_etaratio_mc  ->SetLineColor(kRed);
 	h_etaratio_mc  ->SetFillColor(kRed);
+	
+	h_etaratio_qcd  ->SetMarkerColor(kBlue);
+	h_etaratio_qcd  ->SetMarkerStyle(23);
+	h_etaratio_qcd  ->SetMarkerSize(1.5);
+	h_etaratio_qcd  ->SetLineWidth(2);
+	h_etaratio_qcd  ->SetLineColor(kBlue);
+	h_etaratio_qcd  ->SetFillColor(kBlue);
+	
+	h_etaratio_wjets  ->SetMarkerColor(kYellow);
+	h_etaratio_wjets  ->SetMarkerStyle(23);
+	h_etaratio_wjets  ->SetMarkerSize(1.5);
+	h_etaratio_wjets  ->SetLineWidth(2);
+	h_etaratio_wjets  ->SetLineColor(kYellow);
+	h_etaratio_wjets  ->SetFillColor(kYellow);
 
 	// // h_etaratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
 	// h_etaratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
@@ -5645,6 +5701,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 	leg->AddEntry(h_etaratio_data, "Data",       "p");
 	leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
+	leg->AddEntry(h_etaratio_qcd,   "QCD", "p");
+	leg->AddEntry(h_etaratio_wjets,   "WJets", "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.04);
@@ -5663,9 +5721,11 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	//     lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 8 TeV");
 	//     lat.DrawLatex(0.83, 0.88, name);
 	
-	h_etaratio_mc->DrawCopy("PE X0");
+	h_etaratio_mc->DrawCopy("PE 0");
 	// MARC h_etaratio_mc->DrawCopy("axis");
 	// MARC eff_data->Draw("P same");
+	h_etaratio_qcd->Draw("PE 0 same");
+	h_etaratio_wjets->Draw("PE 0 same");
 	eff_data->Draw("PZ 0 same");
 	leg->Draw();
 	drawTopLine();
@@ -5678,7 +5738,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	
 	// Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
-	delete h_etaratio_mc, h_etaratio_data;
+	delete h_etaratio_mc, h_etaratio_data, h_etaratio_qcd, h_etaratio_wjets;
 	// delete c_temp;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
@@ -5704,7 +5764,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		//		mcsamples	= fMCBG;
+//		mcsamples	= fMCBG;
 		mcsamples   = fMCBGEMEnr;
 //		mcsamples   = fTTJets;
 	}
@@ -5718,7 +5778,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		h_ratio_data->SetName(Form("FRatio_%s_data", FRatioPlots::var_name[i].Data()));
 		h_ratio_mc  ->SetName(Form("FRatio_%s_mc",   FRatioPlots::var_name[i].Data()));
 
-		float max = 0.5;
+		float max = 0.2;
 		//		if(i==8) max = 1.0;
 		if(chan==Elec) max = 0.5;
 		h_ratio_data->SetMaximum(max);
@@ -5892,26 +5952,37 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 void SSDLPlotter::makeFakeGenIDTables(){
 	TString outputdir = Util::MakeOutputDir(fOutputDir + "FakeGenIDTables");
 // 	for(size_t i = 0; i < gNREGIONS; ++i){
-	TString outputnameMu = outputdir + "MuFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + ".txt";
-	TString outputnameEl = outputdir + "ElFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + ".txt";
-// 		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, i);
+	TString outputnameMuQCD = outputdir + "MuFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_QCD.txt";
+	TString outputnameElQCD = outputdir + "ElFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_QCD.txt";
 	
+	makeFakeGenIDTable(fMuEnr, Muon, SigSup, outputnameMuQCD);
+	makeFakeGenIDTable(fEMEnr, Elec, SigSup, outputnameElQCD);
 	
-	makeFakeGenIDTable(fMuEnr, Muon, SigSup, outputnameMu);
-	makeFakeGenIDTable(fEMEnr, Elec, SigSup, outputnameEl);
+	TString outputnameMuTTJets = outputdir + "MuFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_TTJets.txt";
+	TString outputnameElTTJets = outputdir + "ElFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_TTJets.txt";
 	
-//	makeFakeGenIDTable(fTTJets, Muon, SigSup, outputnameMu);
-//	makeFakeGenIDTable(fTTJets, Elec, SigSup, outputnameEl);
+	makeFakeGenIDTable(fTTJets, Muon, SigSup, outputnameMuTTJets);
+	makeFakeGenIDTable(fTTJets, Elec, SigSup, outputnameElTTJets);
 	
-//	makeFakeGenIDTable(fMCBG, Muon, SigSup, outputnameMu);
-//	makeFakeGenIDTable(fMCBG, Elec, SigSup, outputnameEl);
+	TString outputnameMuMCBG = outputdir + "MuFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_MCBG.txt";
+	TString outputnameElMCBG = outputdir + "ElFakeGenIDTable_" + gRegions[gRegion[gBaseRegion]]->sname + "_MCBG.txt";
+	
+	makeFakeGenIDTable(fMCBG, Muon, SigSup, outputnameMuMCBG);
+	makeFakeGenIDTable(fMCBG, Elec, SigSup, outputnameElMCBG);
 }
 
 void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwitch fp, TString filename){
 	ofstream OUT(filename.Data(), ios::trunc);
-	TH1D* h_temp_loose  = new TH1D("h_temp_loose",  "h_temp_loose",  1001, -0.5, 1000.5);
-	TH1D* h_temp_tight  = new TH1D("h_temp_tight",  "h_temp_tight",  1001, -0.5, 1000.5);
+	TH1D* h_temp_loose         = new TH1D("h_temp_loose"       ,  "h_temp_loose"       ,  1001, -0.5, 1000.5);
+	TH1D* h_temp_tight         = new TH1D("h_temp_tight"       ,  "h_temp_tight"       ,  1001, -0.5, 1000.5);
+	TH1D* h_temp_loose_sig     = new TH1D("h_temp_loose_sig"   ,  "h_temp_loose_sig"   ,  1001, -0.5, 1000.5);
+	TH1D* h_temp_tight_sig     = new TH1D("h_temp_tight_sig"   ,  "h_temp_tight_sig"   ,  1001, -0.5, 1000.5);
+	TH1D* h_temp_loose_sigSup  = new TH1D("h_temp_loose_sigSup",  "h_temp_loose_sigSup",  1001, -0.5, 1000.5);
+	TH1D* h_temp_tight_sigSup  = new TH1D("h_temp_tight_sigSup",  "h_temp_tight_sigSup",  1001, -0.5, 1000.5);
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << "\n\n\n";
+	if(chan == Muon) OUT << "muon fake ratio contributions in" << endl;
+	if(chan == Elec) OUT << "electron fake ratio contributions in" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		Sample *S = fSamples[index];
@@ -5919,28 +5990,36 @@ void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwit
 		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
 		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		if(fp == SigSup){
-			OUT << "\n\n\n";
-			if(chan == Muon) OUT << "muon fake ratio contributions in " << S->sname << " (" << S->ngen << " gen events)" << endl;
-			if(chan == Elec) OUT << "electron fake ratio contributions in " << S->sname << " (" << S->ngen << " gen events)" << endl;
-			OUT << endl;
-			OUT << "=============================================" << endl;
-			OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
-			OUT << "---------------------------------------------" << endl;
-			for (int i = 0; i < C->fnloose_genID->GetNbinsX(); i++){
-				if (C->fnloose_genID->GetBinContent(i) > 0) {
-					
-					OUT << setw(6) << i-1 << " & " << setw(9) << C->fntight_genID->GetBinContent(i) << " & " << setw(9) << C->fnloose_genID->GetBinContent(i) << " & " << setw(9) << setprecision(4) << C->fntight_genID->GetBinContent(i)/C->fnloose_genID->GetBinContent(i) << " \\\\" << endl;
-					
-					
-					
-				}
-			}
-			OUT << "---------------------------------------------" << endl;
-			OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_genID->Integral() << " & " << setw(9) << C->fnloose_genID->Integral() << " & " << setw(9) << setprecision(4) << C->fntight_genID->Integral()/C->fnloose_genID->Integral() << " \\\\" << endl;
-			//		OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_genID->GetEntries() << " & " << setw(9) << C->fnloose_genID->GetEntries() << " & " << setw(9) << setprecision(4) << C->fntight_genID->GetEntries()/C->fnloose_genID->GetEntries() << " \\\\" << endl;
-			OUT << "=============================================" << endl;
-			h_temp_loose->Add(C->fnloose_genID);
-			h_temp_tight->Add(C->fntight_genID);
+			OUT << S->sname << "\t(" << setw(10) << S->ngen << " gen events)" << endl;
+//			OUT << endl;
+//			OUT << "=============================================" << endl;
+//			OUT << "all truth matched              &         same sign pair        &         signal suppressed    \\\\" << endl;
+//			OUT << "---------------------------------------------" << endl;
+//			OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio";
+//			OUT << "    & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio";
+//			OUT << "    & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
+//			OUT << "---------------------------------------------" << endl;
+//			for (int i = 0; i < C->fnloose_sigSup_genID->GetNbinsX(); i++){
+//				if (C->fnloose_genID->GetBinContent(i) > 0 || C->fnloose_sig_genID->GetBinContent(i) > 0 || C->fnloose_sigSup_genID->GetBinContent(i) > 0) {
+//					
+//					OUT << setw(6) << i-1 << " & " << setw(9) << C->fntight_genID->GetBinContent(i) << " & " << setw(9) << C->fnloose_genID->GetBinContent(i) << " & " << setw(9) << setprecision(4) << C->fntight_genID->GetBinContent(i)/C->fnloose_genID->GetBinContent(i);
+//					OUT << "    & " << setw(9) << C->fntight_sig_genID->GetBinContent(i) << " & " << setw(9) << C->fnloose_sig_genID->GetBinContent(i) << " & " << setw(9) << setprecision(4) << C->fntight_sig_genID->GetBinContent(i)/C->fnloose_sig_genID->GetBinContent(i);
+//					OUT << "    & " << setw(9) << C->fntight_sigSup_genID->GetBinContent(i) << " & " << setw(9) << C->fnloose_sigSup_genID->GetBinContent(i) << " & " << setw(9) << setprecision(4) << C->fntight_sigSup_genID->GetBinContent(i)/C->fnloose_sigSup_genID->GetBinContent(i) << " \\\\" << endl;
+//					
+//					
+//					
+//				}
+//			}
+//			OUT << "---------------------------------------------" << endl;
+//			OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_sigSup_genID->Integral() << " & " << setw(9) << C->fnloose_sigSup_genID->Integral() << " & " << setw(9) << setprecision(4) << C->fntight_sigSup_genID->Integral()/C->fnloose_sigSup_genID->Integral() << " \\\\" << endl;
+//			//		OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_sigSup_genID->GetEntries() << " & " << setw(9) << C->fnloose_sigSup_genID->GetEntries() << " & " << setw(9) << setprecision(4) << C->fntight_sigSup_genID->GetEntries()/C->fnloose_sigSup_genID->GetEntries() << " \\\\" << endl;
+//			OUT << "=============================================" << endl;
+			h_temp_loose       ->Add(C->fnloose_genID);
+			h_temp_tight       ->Add(C->fntight_genID);
+			h_temp_loose_sig   ->Add(C->fnloose_sig_genID);
+			h_temp_tight_sig   ->Add(C->fntight_sig_genID);
+			h_temp_loose_sigSup->Add(C->fnloose_sigSup_genID);
+			h_temp_tight_sigSup->Add(C->fntight_sigSup_genID);
 		}
 		
 		
@@ -5953,27 +6032,220 @@ void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwit
 		if(chan == Muon) OUT << "muon fake ratio contributions in total" << endl;
 		if(chan == Elec) OUT << "electron fake ratio contributions in total" << endl;
 		OUT << endl;
-		OUT << "=============================================" << endl;
-		OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
-		OUT << "---------------------------------------------" << endl;
+		OUT << "\\hline %===================================================================================================================" << endl;
+		OUT << "&   \\multicolumn{3}{c|}{all truth matched}   & \\multicolumn{3}{c|}{same sign pair} & \\multicolumn{3}{c}{signal suppressed} \\\\" << endl;
+//		OUT << "all truth matched                             &         same sign pair               &         signal suppressed         \\\\" << endl;
+		OUT << "\\hline %-------------------------------------------------------------------------------------------------------------------" << endl;
+		OUT << setw(6) << "PDG ID" << " & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio";
+		OUT << "    & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio";
+		OUT << "    & " << setw(9) << "ntight" << " & " << setw(9) << "nloose" << " & " << setw(9) << "ratio" << " \\\\" << endl;
+		OUT << "\\hline %-------------------------------------------------------------------------------------------------------------------" << endl;
 		for (int i = 0; i < h_temp_loose->GetNbinsX(); i++){
-			if (h_temp_loose->GetBinContent(i) > 0) {
+			if (h_temp_loose->GetBinContent(i) > 0 || h_temp_loose_sig->GetBinContent(i) > 0 || h_temp_loose_sigSup->GetBinContent(i) > 0) {
 				
-				OUT << setw(6) << i-1 << " & " << setw(9) << h_temp_tight->GetBinContent(i) << " & " << setw(9) << h_temp_loose->GetBinContent(i) << " & " << setw(9) << setprecision(4) << h_temp_tight->GetBinContent(i)/h_temp_loose->GetBinContent(i) << " \\\\" << endl;
+				OUT << setw(6) << i-1 << " & " << setw(9) << h_temp_tight       ->GetBinContent(i) << " & " << setw(9) << h_temp_loose       ->GetBinContent(i) << " & " << setw(9) << setprecision(4) << h_temp_tight       ->GetBinContent(i)/h_temp_loose       ->GetBinContent(i);
+				OUT << "    & " << setw(9) <<                h_temp_tight_sig   ->GetBinContent(i) << " & " << setw(9) << h_temp_loose_sig   ->GetBinContent(i) << " & " << setw(9) << setprecision(4) << h_temp_tight_sig   ->GetBinContent(i)/h_temp_loose_sig   ->GetBinContent(i);
+				OUT << "    & " << setw(9) <<                h_temp_tight_sigSup->GetBinContent(i) << " & " << setw(9) << h_temp_loose_sigSup->GetBinContent(i) << " & " << setw(9) << setprecision(4) << h_temp_tight_sigSup->GetBinContent(i)/h_temp_loose_sigSup->GetBinContent(i) << " \\\\" << endl;
 				
 				
 				
 			}
 		}
-		OUT << "---------------------------------------------" << endl;
-		OUT << setw(6) << "Total " << " & " << setw(9) << h_temp_tight->Integral() << " & " << setw(9) << h_temp_loose->Integral() << " & " << setw(9) << setprecision(4) << h_temp_tight->Integral()/h_temp_loose->Integral() << " \\\\" << endl;
+		OUT << "\\hline %-------------------------------------------------------------------------------------------------------------------" << endl;
+		OUT << setw(6) << "Total " << " & " << setw(9) << h_temp_tight       ->Integral() << " & " << setw(9) << h_temp_loose       ->Integral() << " & " << setw(9) << setprecision(4) << h_temp_tight       ->Integral()/h_temp_loose       ->Integral();
+		OUT << "    & " << setw(9) <<                     h_temp_tight_sig   ->Integral() << " & " << setw(9) << h_temp_loose_sig   ->Integral() << " & " << setw(9) << setprecision(4) << h_temp_tight_sig   ->Integral()/h_temp_loose_sig   ->Integral();
+		OUT << "    & " << setw(9) <<                     h_temp_tight_sigSup->Integral() << " & " << setw(9) << h_temp_loose_sigSup->Integral() << " & " << setw(9) << setprecision(4) << h_temp_tight_sigSup->Integral()/h_temp_loose_sigSup->Integral() << " \\\\" << endl;
 		//		OUT << setw(6) << "Total " << " & " << setw(9) << h_temp_tight->GetEntries() << " & " << setw(9) << h_temp_loose->GetEntries() << " & " << setw(9) << setprecision(4) << h_temp_tight->GetEntries()/h_temp_loose->GetEntries() << " \\\\" << endl;
-		OUT << "=============================================" << endl;
+		OUT << "\\hline %===================================================================================================================" << endl;
 	}
 	
 	OUT.close();
 }
+void SSDLPlotter::makeMIDIsolationPlots(gChannel chan, gFPSwitch fp){
+	fOutputSubDir = "IsolationPlots/";
+	char cmd[100];
+	sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	system(cmd);
+	
+//	TString pfname = "Non-prompt ";
+//	if(fp == ZDecay) pfname = "Prompt ";
+	
+	TString name;
+	if(chan == Muon) name = "MuIsolation_GenID";
+	if(chan == Elec) name = "ElIsolation_GenID";
+	if(fp == SigSup) name = name + "_sigSup";
+	else name = name + "_sig";
+	
+	vector<int> ttbarsamples;
+	vector<int> qcdsamples;
+	
+	ttbarsamples                 = fTTJets;
+	if(chan == Muon) qcdsamples  = fMuEnr;
+	if(chan == Elec) qcdsamples  = fEMEnr;
+	
+	TH1D *hMID24_Iso_ttbar, *hMID500_Iso_ttbar, *hMID400_Iso_ttbar, *hMID15_Iso_ttbar;
+	TH1D *hMID24_Iso_qcd, *hMID500_Iso_qcd, *hMID400_Iso_qcd, *hMID15_Iso_qcd;
+	
+	hMID24_Iso_ttbar	= new TH1D("_sigSup_MID24_Iso_ttbar" , "sigSup_MID24_Iso_ttbar" , 200, 0., 1.);	hMID24_Iso_ttbar ->Sumw2();
+	hMID500_Iso_ttbar	= new TH1D("_sigSup_MID500_Iso_ttbar", "sigSup_MID500_Iso_ttbar", 200, 0., 1.);	hMID500_Iso_ttbar->Sumw2();
+	hMID400_Iso_ttbar	= new TH1D("_sigSup_MID400_Iso_ttbar", "sigSup_MID400_Iso_ttbar", 200, 0., 1.);	hMID400_Iso_ttbar->Sumw2();
+	hMID15_Iso_ttbar	= new TH1D("_sigSup_MID15_Iso_ttbar" , "sigSup_MID15_Iso_ttbar" , 200, 0., 1.);	hMID15_Iso_ttbar ->Sumw2();
+	hMID24_Iso_qcd	    = new TH1D("_sigSup_MID24_Iso_qcd"   , "sigSup_MID24_Iso_qcd"   , 200, 0., 1.);	hMID24_Iso_qcd   ->Sumw2();
+	hMID500_Iso_qcd	    = new TH1D("_sigSup_MID500_Iso_qcd"  , "sigSup_MID500_Iso_qcd"  , 200, 0., 1.);	hMID500_Iso_qcd  ->Sumw2();
+	hMID400_Iso_qcd	    = new TH1D("_sigSup_MID400_Iso_qcd"  , "sigSup_MID400_Iso_qcd"  , 200, 0., 1.);	hMID400_Iso_qcd  ->Sumw2();
+	hMID15_Iso_qcd    	= new TH1D("_sigSup_MID15_Iso_qcd"   , "sigSup_MID15_Iso_qcd"   , 200, 0., 1.);	hMID15_Iso_qcd   ->Sumw2();
+	
+	
+	getMIDIsolationPlots(ttbarsamples, chan, fp, hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar);
+	getMIDIsolationPlots(qcdsamples, chan, fp, hMID24_Iso_qcd, hMID500_Iso_qcd, hMID400_Iso_qcd, hMID15_Iso_qcd);
+	drawMIDIsolationPlots(name + "_qcd", Muon, fp, hMID24_Iso_qcd, hMID500_Iso_qcd, hMID400_Iso_qcd, hMID15_Iso_qcd);
+	drawMIDIsolationPlots(name + "_ttbar", Muon, fp, hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar);
 
+	delete hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar;
+	delete hMID24_Iso_qcd, hMID500_Iso_qcd, hMID400_Iso_qcd, hMID15_Iso_qcd;
+	
+	fOutputSubDir = "";
+}
+void SSDLPlotter::getMIDIsolationPlots(vector<int> samples, gChannel chan, gFPSwitch fp, TH1D*& hMID24iso, TH1D*& hMID500iso, TH1D*& hMID400iso, TH1D*& hMID15iso){
+	cout << "SSDLPlotter::getMIDIsolationPlots" << endl;
+	for (size_t i = 0; i < samples.size(); ++i) {
+		int index = samples[i];
+		Sample *S = fSamples[index];
+		Channel *C;
+		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+		float scale = fLumiNorm / S->getLumi();
+		scale = 1.;
+		cout << "adding histo" << endl;
+		if (fp == SigSup) {
+			hMID24iso ->Add(C->sigSup_MID24_Iso , scale);
+			hMID500iso->Add(C->sigSup_MID500_Iso, scale);
+			hMID400iso->Add(C->sigSup_MID400_Iso, scale);
+			hMID15iso ->Add(C->sigSup_MID15_Iso , scale);
+		}
+		else {
+			hMID24iso ->Add(C->sig_MID24_Iso , scale);
+			hMID500iso->Add(C->sig_MID500_Iso, scale);
+			hMID400iso->Add(C->sig_MID400_Iso, scale);
+			hMID15iso ->Add(C->sig_MID15_Iso , scale);
+		}
+	}
+}
+void SSDLPlotter::drawMIDIsolationPlots(TString title, gChannel chan, gFPSwitch fp, TH1D* hMID24iso, TH1D* hMID500iso, TH1D* hMID400iso, TH1D* hMID15iso){
+	
+	cout << "SSDLPlotter::drawMIDIsolationPlots" << endl;
+//	
+//	TH1D *hMID24iso  = (TH1D*)hMID24iso2 ->Clone();
+//	TH1D *hMID500iso = (TH1D*)hMID500iso2->Clone();
+//	TH1D *hMID400iso = (TH1D*)hMID400iso2->Clone();
+//	TH1D *hMID15iso  = (TH1D*)hMID15iso2 ->Clone();
+	
+	
+	hMID24iso ->Rebin(4);
+	hMID500iso->Rebin(4);
+	hMID400iso->Rebin(4);
+	hMID15iso ->Rebin(4);
+	
+	
+	hMID24iso ->Scale(1./hMID24iso ->Integral());
+	hMID500iso->Scale(1./hMID500iso->Integral());
+	hMID400iso->Scale(1./hMID400iso->Integral());
+	hMID15iso ->Scale(1./hMID15iso ->Integral());
+	
+	float linewidth = 1.;
+	float maximum = 0.1;
+	hMID24iso ->SetMaximum(maximum);
+	hMID500iso->SetMaximum(maximum);
+	hMID400iso->SetMaximum(maximum);
+	hMID15iso ->SetMaximum(maximum);
+	hMID24iso ->SetMinimum(0.);
+	hMID500iso->SetMinimum(0.);
+	hMID400iso->SetMinimum(0.);
+	hMID15iso ->SetMinimum(0.);
+	
+	
+	
+//	if(chan == Muon) hMID24iso->SetXTitle(convertVarName("MuPt[0]"));
+//	if(chan == Elec) hMID24iso->SetXTitle(convertVarName("ElPt[0]"));
+//	hMID500iso ->GetYaxis()->SetTitleOffset(1.2);
+	hMID500iso ->SetXTitle("PF Isolation");
+	
+	hMID24iso ->SetMarkerColor(kBlack);
+	hMID24iso ->SetMarkerStyle(20);
+	hMID24iso ->SetMarkerSize(1.);
+	hMID24iso ->SetLineWidth(linewidth);
+	hMID24iso ->SetLineColor(kBlack);
+	hMID24iso ->SetFillColor(kBlack);
+	
+	hMID500iso->SetMarkerColor(kRed);
+	hMID500iso->SetMarkerStyle(20);
+	hMID500iso->SetMarkerSize(1.);
+	hMID500iso->SetLineWidth(linewidth);
+	hMID500iso->SetLineColor(kYellow);
+	hMID500iso->SetFillColor(kYellow);
+//	hMID500iso->GetXaxis()->SetRangeUser(0.,50.);
+	
+	hMID400iso->SetMarkerColor(kBlue);
+	hMID400iso->SetMarkerStyle(20);
+	hMID400iso->SetMarkerSize(1.);
+	hMID400iso->SetLineWidth(linewidth);
+	hMID400iso->SetLineColor(kBlue);
+	hMID400iso->SetFillColor(kBlue);
+//	hMID400iso->GetXaxis()->SetRangeUser(0.,50.);
+	
+	hMID15iso ->SetMarkerColor(kGreen);
+	hMID15iso ->SetMarkerStyle(20);
+	hMID15iso ->SetMarkerSize(1.);
+	hMID15iso ->SetLineWidth(linewidth);
+	hMID15iso ->SetLineColor(kGreen);
+	hMID15iso ->SetFillColor(kGreen);
+//	hMID15iso ->GetXaxis()->SetRangeUser(0.,50.);
+	
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	
+	TLegend *leg;
+	leg = new TLegend(0.15,0.75,0.35,0.88);
+//	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
+//	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
+	leg->AddEntry(hMID24iso,  "W Mom",             "p");
+	leg->AddEntry(hMID500iso, "Bottom Meson Mom",  "p");
+	leg->AddEntry(hMID400iso, "Charmed Meson Mom", "p");
+	leg->AddEntry(hMID15iso,  "tau Mom",           "p");
+	leg->SetTextSize(0.04);
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_MIDIsoPlot", "Isolation for different lepton gen moms in " + title, 0, 0, 800, 600);
+	c_temp->cd();
+	hMID500iso->Draw("PE 0");
+	hMID400iso->Draw("PE 0 same");
+	hMID15iso ->Draw("PE 0 same");
+	hMID24iso ->Draw("PE 0 same");
+	leg->Draw();
+	//	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+//	lat->SetTextSize(0.04);
+//	lat->DrawLatex(0.62,0.85, title);
+//	if(fp == SigSup) lat->DrawLatex(0.62,0.85, pfname + name);
+//	if(fp == ZDecay) lat->DrawLatex(0.67,0.15, pfname + name);
+//	double ymean(0.), yrms(0.);
+//	getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
+	drawTopLine();
+	lat->SetTextSize(0.03);
+	//	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	
+//	TString fpname = "F";
+//	if(fp == ZDecay) fpname = "P";
+	
+	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
+//	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, title, fOutputDir + fOutputSubDir);
+//	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets;
+	delete c_temp, lat, leg;
+}
 void SSDLPlotter::makePRLPlot1(){
 	FakeRatios *FR = new FakeRatios();
 	const int nchans = 8;
@@ -9484,7 +9756,10 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	float max = 2.0*h_pred_tot->GetBinContent(4);
 	
 //	if(reg != TTbarWPresel) max = 35.;
-//	if(gRegions[reg]->sname == "TTbarWPresel") max = 500.;
+	if(gRegions[reg]->sname == "TTbarWPresel") max = 250.;
+	if(gRegions[reg]->sname == "TTbarWSel") max = 15.;
+	if(gRegions[reg]->sname == "HT200MET50") max = 10.;
+	if(gRegions[reg]->sname == "HT200MET50b") max = 2.;
 	
 	h_obs       ->SetMaximum(max>1?max+1:1.);
 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
@@ -14376,6 +14651,7 @@ void SSDLPlotter::makeAllClosureTestsTTW(){
  	for(size_t i = 0; i < gNREGIONS; ++i){
  		TString outputname = outputdir + "MCClosure_" + gRegions[i]->sname + ".txt";
  		makeIntMCClosureTTW(fClosureSamples, outputname, i);
+// 		makeIntMCClosureTTW(fTTJets, outputname, i);
  	}
 // LUKAS 	for(size_t i = 0; i < gNREGIONS; ++i){
 // LUKAS 		TString outputname = outputdir + "MCClosure_Sig_" + gRegions[i]->sname + ".txt";
@@ -14402,15 +14678,15 @@ void SSDLPlotter::makeIntMCClosureTTW(vector<int> samples, TString filename, int
 // 	calculateRatio(fTTJets, Elec, SigSup, ef, ef_e);
 // 	calculateRatio(fTTJets, Elec, ZDecay, ep, ep_e);
 	
-//	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
-// 	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
-// 	calculateRatio(fMCBGEMEnr, Elec, SigSup, ef, ef_e);
-// 	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
-	
-	calculateRatio(fMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+	calculateRatio(fMCBGMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
  	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
- 	calculateRatio(fEMEnr, Elec, SigSup, ef, ef_e);
+ 	calculateRatio(fMCBGEMEnr, Elec, SigSup, ef, ef_e);
  	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
+	
+//	calculateRatio(fMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
+// 	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mp, mp_e);
+// 	calculateRatio(fEMEnr, Elec, SigSup, ef, ef_e);
+// 	calculateRatio(fMCBGEMEnr, Elec, ZDecay, ep, ep_e);
 	
 //	calculateRatio(fMuEnr, Muon, SigSup, mf, mf_e);	// LUKAS: fMCBG before
 // 	calculateRatio(fDYJets, Muon, ZDecay, mp, mp_e);

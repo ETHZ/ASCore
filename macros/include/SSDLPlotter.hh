@@ -271,6 +271,9 @@ public:
 	void makeNTightLoosePlots(gChannel);
 	void makeFakeGenIDTables();
 	void makeFakeGenIDTable(vector<int>, gChannel, gFPSwitch, TString);
+	void makeMIDIsolationPlots(gChannel chan, gFPSwitch);
+	void getMIDIsolationPlots(vector<int>, gChannel, gFPSwitch, TH1D*&, TH1D*&, TH1D*&, TH1D*&);
+	void drawMIDIsolationPlots(TString, gChannel, gFPSwitch, TH1D*, TH1D*, TH1D*, TH1D*);
 
 	void makeOriginPlots(int);
 	// old void makeOriginPlots(gRegion);
