@@ -110,7 +110,8 @@ public:
 	};
 	enum gFPSwitch{
 		SigSup,
-		ZDecay
+		ZDecay,
+		Sig
 	};
 	// enum gRegion {
 	// 	region_begin,
@@ -207,6 +208,41 @@ public:
 		TH1D *fnloose_genID;
 		TH1D *pntight_genID;
 		TH1D *pnloose_genID;
+		TH1D *fntight_sig_genID;
+		TH1D *fnloose_sig_genID;
+		TH1D *pntight_sig_genID;
+		TH1D *pnloose_sig_genID;
+		TH1D *fntight_sigSup_genID;
+		TH1D *fnloose_sigSup_genID;
+		TH1D *pntight_sigSup_genID;
+		TH1D *pnloose_sigSup_genID;
+		TH1D *fntight_sigSup_genMID;
+		TH1D *fnloose_sigSup_genMID;
+		TH1D *pntight_sigSup_genMID;
+		TH1D *pnloose_sigSup_genMID;
+		TH1D *fntight_sigSup_genGMID;
+		TH1D *fnloose_sigSup_genGMID;
+		TH1D *pntight_sigSup_genGMID;
+		TH1D *pnloose_sigSup_genGMID;
+		
+		// signal suppressed region plots
+		TH1D *sigSup_mll; // m(loose lep, veto lep)
+		TH1D *sigSup_dRVetoLoose; // dR(veto lep, loose lep)
+		TH1D *sigSup_dRVetoJet; // dR(veto lep, jet > 50 GeV)
+		TH2D *sigSup_mllDRVetoLoose; // m(loose lep, veto lep) vs dR(veto lep, loose lep)
+		TH2D *sigSup_jetptDRVetoJet; // jet pt vs dR(veto lep, jet > 50 GeV)
+		TH1D *sigSup_deltaPtVetoJet; // delta pt (veto lep, jet > 50 GeV)
+		TH1D *sigSup_MID24_Iso;
+		TH1D *sigSup_MID500_Iso;
+		TH1D *sigSup_MID400_Iso;
+		TH1D *sigSup_MID15_Iso;
+		TH1D *sigSup_dPhiLooseJet;
+		TH1D *sigSup_nJets;
+		
+		TH1D *sig_MID24_Iso;
+		TH1D *sig_MID500_Iso;
+		TH1D *sig_MID400_Iso;
+		TH1D *sig_MID15_Iso;
 		
 		TEfficiency *fratio_pt;
 		TEfficiency *pratio_pt;
@@ -674,7 +710,7 @@ public:
 	virtual void  setMET(float );
 	virtual float getMET();
 	virtual float getMETPhi();
-	virtual int getNJets();
+	virtual int getNJets(float = 0.);
 	virtual int getNBTags();
 	virtual int getNBTagsMed();
 	virtual std::vector< int > getNBTagsMedIndices();
@@ -683,12 +719,12 @@ public:
 	virtual float getMT(int, gChannel);
 	virtual float getMT2(int, int, gChannel);
 	virtual float getMll(int, int, gChannel);
-  //        virtual float getDPhi(int, int, gChannel);
-	virtual int   getClosestJet(int, gChannel);
-	virtual float getClosestJetPt(int, gChannel);
-	virtual float getClosestJetDR(int, gChannel);
-	virtual float getClosestJetDPhi(int, gChannel);
+	virtual int   getClosestJet(int, gChannel, float = 20.);
+	virtual float getClosestJetPt(int, gChannel, float = 20.);
+	virtual float getClosestJetDR(int, gChannel, float = 20.);
+	virtual float getClosestJetDPhi(int, gChannel, float = 20.);
 	virtual float getSecondClosestJetDR(int, gChannel);
+	virtual int   getFarestJet(int, gChannel, float = 20.);
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
 	
@@ -725,9 +761,11 @@ public:
 	virtual bool passesTTZSel();
         //virtual bool passesGammaStarVeto();
 
+	virtual int isSigSupMuEvent(int&, int&);
 	virtual int isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
 
+	virtual int isSigSupElEvent(int&,int&);
 	virtual int isSigSupElEvent();
 	virtual bool isZElElEvent(int&, int&);
 	virtual bool isZElElChMisIdEvent(int&, int&);
