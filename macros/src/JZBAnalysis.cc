@@ -16,7 +16,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.115 $";
+string sjzbversion="$Revision: 1.70.2.119 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -29,7 +29,7 @@ float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.115 2013/02/15 14:45:07 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.119 2013/02/21 10:37:22 buchmann Exp $
 */
 
 
@@ -173,6 +173,7 @@ public:
   int pfJetGoodNum40n1sigma;
   int pfJetGoodNum50p1sigma;
   int pfJetGoodNum50n1sigma;
+  int pfJetGoodNum40CHS;
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
@@ -662,6 +663,7 @@ void nanoEvent::reset()
 
   pfJetGoodNum30Fwd=0;
   
+  pfJetGoodNum40CHS=0;
   pfJetGoodNum40=0;
   pfJetGoodNum40Fwd=0;
   pfJetGoodNum50=0;
@@ -1325,6 +1327,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("metUncertainty",&nEvent.metUncertainty,"metUncertainty/F");
   myTree->Branch("type1metUncertainty",&nEvent.type1metUncertainty,"type1metUncertainty/F");
 
+  myTree->Branch("pfJetGoodNum40CHS",&nEvent.pfJetGoodNum40CHS,"pfJetGoodNum40CHS/I");
   myTree->Branch("pfJetGoodNum30Fwd",&nEvent.pfJetGoodNum30Fwd,"pfJetGoodNum30Fwd/I");
   myTree->Branch("pfJetGoodNum40Fwd",&nEvent.pfJetGoodNum40Fwd,"pfJetGoodNum40Fwd/I");
   myTree->Branch("pfJetGoodNum50Fwd",&nEvent.pfJetGoodNum50Fwd,"pfJetGoodNum50Fwd/I");
@@ -2454,7 +2457,9 @@ void JZBAnalysis::Analyze() {
 	nEvent.ZbCHS1010_pfJetGoodPt[nEvent.ZbCHS1010_pfJetGoodNum]=jpt;
 	nEvent.ZbCHS1010_pfJetGoodNum++;
       }
-
+      
+      //JZB case!!!
+      if(jpt>40 && isJetID) nEvent.pfJetGoodNum40CHS++;
       
     }
 
