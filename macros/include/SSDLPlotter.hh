@@ -328,9 +328,9 @@ public:
 	TH2D* fillRatio(gChannel, int, gFPSwitch, bool = false);
 	TH2D* fillRatio(gChannel, vector<int>, gFPSwitch, bool = false);
 
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, TH1D*&, bool = false, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
         

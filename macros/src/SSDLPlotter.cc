@@ -454,8 +454,8 @@ void SSDLPlotter::doAnalysis(){
 	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
-	makeAllIntPredictions();
-	makeAllClosureTests();
+//	makeAllIntPredictions();
+//	makeAllClosureTests();
 //
 	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
@@ -5239,7 +5239,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
-	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc, *h_ptratio_qcd, *h_ptratio_wjets;
+	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc, *h_ptratio_qcd, *h_ptratio_wjets, *h_ptratio_ttbar;
 	TH2D *h_dummy2;
 
 	TH2D *h2d_ntight, *h2d_nloose;
@@ -5249,6 +5249,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));
 		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNFPtBins(chan), getFPtBins(chan));
 		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNFPtBins(chan), getFPtBins(chan));
+		h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNFPtBins(chan), getFPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
@@ -5257,6 +5258,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));
 		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNPPtBins(chan), getPPtBins(chan));
 		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNPPtBins(chan), getPPtBins(chan));
+		h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNPPtBins(chan), getPPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
@@ -5265,6 +5267,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	vector<int> mcsamples;
 	vector<int> qcdsamples;
 	vector<int> wjetssamples;
+	vector<int> ttbarsamples;
 
 	if(chan == Muon){
 		datasamples = fMuData;
@@ -5273,6 +5276,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 //		mcsamples	= fTTJets;
 		qcdsamples	= fMuEnr;
 		wjetssamples.push_back(WJets);
+		ttbarsamples = fTTJets;
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
@@ -5281,13 +5285,14 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 //		mcsamples	= fTTJets;
 		qcdsamples	= fEMEnr;
 		wjetssamples.push_back(WJets);
+		ttbarsamples = fTTJets;
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
 	calculateRatio(qcdsamples,  chan, fp, h_dummy2, h_ptratio_qcd,   h_dummy1);
-//	cout << "wjets ratio\n";
 	calculateRatio(wjetssamples,  chan, fp, h_dummy2, h_ptratio_wjets,   h_dummy1);
+	calculateRatio(ttbarsamples,  chan, fp, h_dummy2, h_ptratio_ttbar,   h_dummy1, false, true);
 
 	//////////////
 	float linewidth = 1.;
@@ -5314,10 +5319,12 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_mc  ->SetMaximum(maximum);
 	h_ptratio_qcd  ->SetMaximum(maximum);
 	h_ptratio_wjets  ->SetMaximum(maximum);
+	h_ptratio_ttbar  ->SetMaximum(maximum);
 	h_ptratio_data->SetMinimum(0.0);
 	h_ptratio_mc  ->SetMinimum(0.0);
 	h_ptratio_qcd ->SetMinimum(0.0);
 	h_ptratio_wjets ->SetMinimum(0.0);
+	h_ptratio_ttbar ->SetMinimum(0.0);
 
 	if(chan == Muon) h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
 	if(chan == Elec) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
@@ -5339,21 +5346,29 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_mc  ->SetFillColor(kRed);
 	h_ptratio_mc  ->GetXaxis()->SetRangeUser(0.,50.);
 	
-	h_ptratio_qcd  ->SetMarkerColor(kBlue);
+	h_ptratio_qcd  ->SetMarkerColor(kGreen);
 	h_ptratio_qcd  ->SetMarkerStyle(23);
 	h_ptratio_qcd  ->SetMarkerSize(1.5);
 	h_ptratio_qcd  ->SetLineWidth(linewidth);
-	h_ptratio_qcd  ->SetLineColor(kBlue);
-	h_ptratio_qcd  ->SetFillColor(kBlue);
+	h_ptratio_qcd  ->SetLineColor(kGreen);
+	h_ptratio_qcd  ->SetFillColor(kGreen);
 	h_ptratio_qcd  ->GetXaxis()->SetRangeUser(0.,50.);
 	
-	h_ptratio_wjets  ->SetMarkerColor(kYellow);
+	h_ptratio_wjets  ->SetMarkerColor(kOrange);
 	h_ptratio_wjets  ->SetMarkerStyle(23);
 	h_ptratio_wjets  ->SetMarkerSize(1.5);
 	h_ptratio_wjets  ->SetLineWidth(2);
-	h_ptratio_wjets  ->SetLineColor(kYellow);
-	h_ptratio_wjets  ->SetFillColor(kYellow);
+	h_ptratio_wjets  ->SetLineColor(kOrange);
+	h_ptratio_wjets  ->SetFillColor(kOrange);
 	h_ptratio_wjets  ->GetXaxis()->SetRangeUser(0.,50.);
+	
+	h_ptratio_ttbar  ->SetMarkerColor(kBlue);
+	h_ptratio_ttbar  ->SetMarkerStyle(23);
+	h_ptratio_ttbar  ->SetMarkerSize(1.5);
+	h_ptratio_ttbar  ->SetLineWidth(2);
+	h_ptratio_ttbar  ->SetLineColor(kBlue);
+	h_ptratio_ttbar  ->SetFillColor(kBlue);
+	h_ptratio_ttbar  ->GetXaxis()->SetRangeUser(0.,50.);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -5361,12 +5376,13 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	lat->SetTextSize(0.04);
 	
 	TLegend *leg;
-	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
-	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
+	if(fp == SigSup) leg = new TLegend(0.15,0.66,0.35,0.88);
+	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.37);
 	leg->AddEntry(h_ptratio_data, "Data",       "p");
 	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
 	leg->AddEntry(h_ptratio_qcd,  "QCD",        "p");
 	leg->AddEntry(h_ptratio_wjets,"WJets",        "p");
+	leg->AddEntry(h_ptratio_ttbar,"ttbar",        "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -5377,7 +5393,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	// MARC h_ptratio_mc->DrawCopy("axis");
 	h_ptratio_mc->DrawCopy("PE 0");
 	h_ptratio_qcd->Draw("PE 0 same");
-	h_ptratio_wjets->Draw("PE 0 same");
+	h_ptratio_ttbar->Draw("PE 0 same");
 	// MARC eff_mc->Draw("P same");
 	// MARC h_ptratio_data->Draw("PE X0 same");
 	eff_data->Draw("PZ 0 same");
@@ -5398,7 +5414,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	
 	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets;
+	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets, h_ptratio_ttbar;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
@@ -6650,18 +6666,18 @@ TH2D* SSDLPlotter::fillRatio(gChannel chan, vector<int> samples, gFPSwitch fp, b
 }
 
 //____________________________________________________________________________
-void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, bool output){
+void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, bool output, bool ttbarMatched){
 	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", 1, 0.,1.);
 	TH1D *h_dummy2 = new TH1D("dummy2", "dummy2", 1, 0.,1.);
-	calculateRatio(samples, chan, fp, h_2d, h_dummy1, h_dummy2, output);
+	calculateRatio(samples, chan, fp, h_2d, h_dummy1, h_dummy2, output, ttbarMatched);
 	delete h_dummy1, h_dummy2;
 }
-void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, TH1D*& h_pt, TH1D*& h_eta, bool output){
+void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, TH1D*& h_pt, TH1D*& h_eta, bool output, bool ttbarMatched){
 	TH1D *h_dummy1 = new TH1D("rat_dummy1", "rat_dummy1", 18, 0.,36.);
-	calculateRatio(samples, chan, fp, h_2d, h_pt, h_eta, h_dummy1, output);
+	calculateRatio(samples, chan, fp, h_2d, h_pt, h_eta, h_dummy1, output, ttbarMatched);
 	delete h_dummy1;
 }
-void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, TH1D*& h_pt, TH1D*& h_eta, TH1D*& h_nv, bool output){
+void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, TH1D*& h_pt, TH1D*& h_eta, TH1D*& h_nv, bool output, bool ttbarMatched){
 /*
 TODO Fix treatment of statistical errors and luminosity scaling here!
 */
@@ -6678,7 +6694,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 
 	TH1D *H_ntight_nv = new TH1D("NTight_NV", "NTight Muons NV", 18, 0., 36.); H_ntight_nv->Sumw2();
 	TH1D *H_nloose_nv = new TH1D("NLoose_NV", "NLoose Muons NV", 18, 0., 36.); H_nloose_nv->Sumw2();
-	if (gRatiosFromTTbar) getPassedTotalTTbar(samples, chan, fp, H_ntight, H_nloose, output);
+	if (gRatiosFromTTbar || ttbarMatched) getPassedTotalTTbar(samples, chan, fp, H_ntight, H_nloose, output);
 	// marc jan 27 else getPassedTotal(samples, chan, fp, H_ntight, H_nloose, output);
 	else getPassedTotal(samples, chan, fp, H_ntight, H_nloose, H_ntight_nv, H_nloose_nv, output);
 	h_2d->Divide(H_ntight,    H_nloose,    1., 1., "B");
