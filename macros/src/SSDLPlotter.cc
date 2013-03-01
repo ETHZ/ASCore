@@ -5378,11 +5378,11 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	TLegend *leg;
 	if(fp == SigSup) leg = new TLegend(0.15,0.66,0.35,0.88);
 	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.37);
-	leg->AddEntry(h_ptratio_data, "Data",       "p");
-	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
-	leg->AddEntry(h_ptratio_qcd,  "QCD",        "p");
-	leg->AddEntry(h_ptratio_wjets,"WJets",        "p");
-	leg->AddEntry(h_ptratio_ttbar,"ttbar",        "p");
+	leg->AddEntry(h_ptratio_data, "Data",            "p");
+	leg->AddEntry(h_ptratio_mc,   "Simulation",      "p");
+	leg->AddEntry(h_ptratio_qcd,  "QCD",             "p");
+	leg->AddEntry(h_ptratio_wjets,"WJets",           "p");
+	leg->AddEntry(h_ptratio_ttbar,"ttbar (matched)", "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
