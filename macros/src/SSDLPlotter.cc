@@ -36,6 +36,7 @@ using namespace std;
 static const bool gEWKino = true;
 static const bool gRunSMSscan = false;
 static const bool gRatiosFromTTbar = false;
+static const bool gFullDataBlind = false;
 
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -97,8 +98,10 @@ void SSDLPlotter::init(TString filename){
 	// Luminosity
 	//	fLumiNorm = 3950.; // HPA ICHEP dataset
 	//	fLumiNorm = 9185.6; //HCP analysis
-	//	fLumiNorm = 9100.;	// ttV 2012 analysis
-	fLumiNorm = 19466.;   // Moriond 2013 dataset 
+	if (gFullDataBlind) fLumiNorm = 19466.;   // Moriond 2013 dataset
+	else fLumiNorm = 9100.;	// ttV 2012 analysis
+//	fLumiNorm = 9100.;	// ttV 2012 analysis
+//	fLumiNorm = 19466.;   // Moriond 2013 dataset
 
 	// Cuts:
 	fC_minMu1pt = 20.;
@@ -436,22 +439,22 @@ void SSDLPlotter::doAnalysis(){
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
+//	makeRatioPlots(Muon);
+//	makeRatioPlots(Elec);
+//	make2DRatioPlots(Muon);
+//	make2DRatioPlots(Elec);
 //	// // makeNTightLoosePlots(Muon);
 //	// // makeNTightLoosePlots(Elec);
 //	// 
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsNVPlots(Muon, ZDecay); 
-	makeFRvsNVPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
-	makeChMidvsPtPlots();
+//	makeFRvsPtPlots(Muon, SigSup);
+//	makeFRvsPtPlots(Elec, SigSup);
+//	makeFRvsPtPlots(Muon, ZDecay);
+//	makeFRvsPtPlots(Elec, ZDecay);
+//	makeFRvsNVPlots(Muon, ZDecay); 
+//	makeFRvsNVPlots(Elec, ZDecay);
+//	makeFRvsEtaPlots(Muon);
+//	makeFRvsEtaPlots(Elec);
+//	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
 //	makeAllIntPredictions();
@@ -464,6 +467,7 @@ void SSDLPlotter::doAnalysis(){
 	
 
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+ 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
 //	makePredictionSignalEvents(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
@@ -9916,7 +9920,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1" << endl;
-	fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d", 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
 	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -9977,7 +9984,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1" << endl;
-	fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d", 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
 	fOUTSTREAM <<      "process\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -10047,7 +10057,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1" << endl;
-	fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_mm) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d", 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_mm) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
 	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -10108,7 +10121,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1" << endl;
-	fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_em) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d", 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_em) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
 	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -10169,7 +10185,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1" << endl;
-	fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_ee) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d", 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d", ttwzpreds["Normal"].obs_ee) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
 	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -10230,7 +10249,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t2\t3" << endl;
-	fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds["Normal"].obs_mm, ttwzpreds["Normal"].obs_em, ttwzpreds["Normal"].obs_ee) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d\t%d\t%d", 999, 999, 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds["Normal"].obs_mm, ttwzpreds["Normal"].obs_em, ttwzpreds["Normal"].obs_ee) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t2\t\t2\t\t2\t\t2\t\t2\t\t3\t\t3\t\t3\t\t3\t\t3" << endl;
 	fOUTSTREAM <<      "process\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttWZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
@@ -10352,7 +10374,10 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM <<      "kmax *" << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t2\t3" << endl;
-	fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds["Normal"].obs_mm, ttwzpreds["Normal"].obs_em, ttwzpreds["Normal"].obs_ee) << endl;
+	if (gFullDataBlind)
+		fOUTSTREAM << Form("observation\t%d\t%d\t%d", 999, 999, 999) << endl;
+	else
+		fOUTSTREAM << Form("observation\t%d\t%d\t%d", ttwzpreds["Normal"].obs_mm, ttwzpreds["Normal"].obs_em, ttwzpreds["Normal"].obs_ee) << endl;
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1\t\t1\t\t2\t\t2\t\t2\t\t2\t\t2\t\t2\t\t3\t\t3\t\t3\t\t3\t\t3\t\t3" << endl;
 	fOUTSTREAM <<      "process\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare\t\tttW\t\tttZ\t\tfake\t\tcmid\t\twz\t\trare" << endl;
