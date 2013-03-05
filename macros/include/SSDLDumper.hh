@@ -37,19 +37,32 @@ public:
 	static double gElFPtBins[gNElFPtBins+1];
 	static double gElEtabins[gNElEtabins+1];
 
-	static const int gNDiffHTBins   = 6;
-	static const int gNDiffMETBins  = 6;
+	// Binning for TTbarWSel baseline region (adding M3)
+	static const int gNDiffHTBins   = 4;
+	static const int gNDiffMETBins  = 4;
 	static const int gNDiffMET3Bins = 9;
-	static const int gNDiffNJBins   = 6;
+	static const int gNDiffNJBins   = 5;
 	static const int gNDiffMT2Bins  = 3;
-	static const int gNDiffPT1Bins  = 9;
-	static const int gNDiffPT2Bins  = 8;
-	static const int gNDiffNBJBins  = 4;
+	static const int gNDiffPT1Bins  = 4;
+	static const int gNDiffPT2Bins  = 4;
+	static const int gNDiffNBJBins  = 3;
 	static const int gNDiffNBJMBins = 3;
+	static const int gNDiffM3Bins   = 4;
+	// Binning for TTbarWPresel baseline region
+	// static const int gNDiffHTBins   = 6;
+	// static const int gNDiffMETBins  = 6;
+	// static const int gNDiffMET3Bins = 9;
+	// static const int gNDiffNJBins   = 6;
+	// static const int gNDiffMT2Bins  = 3;
+	// static const int gNDiffPT1Bins  = 9;
+	// static const int gNDiffPT2Bins  = 8;
+	// static const int gNDiffNBJBins  = 4;
+	// static const int gNDiffNBJMBins = 3;
 
 	static double gDiffHTBins  [gNDiffHTBins+1];
 	static double gDiffMETBins [gNDiffMETBins+1];
 	static double gDiffMET3Bins[gNDiffMET3Bins+1];
+	static double gDiffM3Bins  [gNDiffM3Bins+1];
 	static double gDiffNJBins  [gNDiffNJBins+1];
 	static double gDiffMT2Bins [gNDiffMT2Bins+1];
 	static double gDiffPT1Bins [gNDiffPT1Bins+1];
@@ -302,7 +315,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 
-	static const int gNDiffVars = 10;
+	static const int gNDiffVars = 11;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];

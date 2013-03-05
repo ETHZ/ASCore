@@ -145,7 +145,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(TTbarW);
 	fMCBG.push_back(TTbarZ);
 	fMCBG.push_back(TTbarG);
-	// fMCBG.push_back(TTbarH);
+	fMCBG.push_back(TTbarH);
 	fMCBG.push_back(TBZ);
 	fMCBG.push_back(WpWp);
 	fMCBG.push_back(WmWm);
@@ -355,9 +355,9 @@ void SSDLPlotter::doAnalysis(){
 	// makeDiffPrediction();
 
 	makeTTWIntPredictions();
-	// makeTTWDiffPredictions();
+	makeTTWDiffPredictions();
 
-	// printAllYieldTables();
+	printAllYieldTables();
 
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 20.);
@@ -7594,12 +7594,12 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 
 	TLegend *leg = new TLegend(0.16,0.43,0.48,0.85);
 	leg->AddEntry(h_obs,        "Data","p");
-	leg->AddEntry(h_pred_ttz,   "t#bar{t} + Z","f");
-	leg->AddEntry(h_pred_ttw,   "t#bar{t} + W","f");
-	leg->AddEntry(h_pred_sfake, "Fakes","f");
-	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
-	leg->AddEntry(h_pred_wz,    "WZ","f");
-	leg->AddEntry(h_pred_mc,    "Rare SM","f");
+	leg->AddEntry(h_pred_ttz,   "t#bar{t} + Z",      "f");
+	leg->AddEntry(h_pred_ttw,   "t#bar{t} + W",      "f");
+	leg->AddEntry(h_pred_sfake, "Non-prompt / MisID","f");
+	leg->AddEntry(h_pred_chmid, "Charge MisID",      "f");
+	leg->AddEntry(h_pred_wz,    "WZ",                "f");
+	leg->AddEntry(h_pred_mc,    "Rare SM",           "f");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.038);
@@ -9323,9 +9323,10 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
-	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
-	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
-	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      ,  10}
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2",  "M3"}
+	// float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
+	float binwidthscale[gNDiffVars] = {150., 50., 1., 25., 40., 20., 1., 10., 1., 1., 125.};
 
 	// Loop on the different variables
 	TString varname    = DiffPredYields::var_name[varbin];
@@ -9950,7 +9951,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	// Axis labels
 	bool intlabel = false;
 	if(varbin == 2 || varbin == 6 || varbin == 8 || varbin == 9) intlabel = true;
-	TString ytitle = Form("Events / %3.0f GeV", binwidthscale[varbin]);
+	TString ytitle = Form("Events / (%3.0f GeV)", binwidthscale[varbin]);
 	if(intlabel) ytitle = "Events";
 
 	nt11_tot->Draw("goff");
@@ -9963,7 +9964,8 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_tot->GetXaxis()->SetLabelSize(0.045);
 	nt11_tot->GetYaxis()->SetTitleOffset(1.25);
 	nt11_tot->GetXaxis()->SetTitleOffset(1.065);
-	if(varbin==2) nt11_tot->GetYaxis()->SetTitleOffset(1.4);
+	// if(varbin==2)  nt11_tot->GetYaxis()->SetTitleOffset(1.4);
+	if(varbin==10) nt11_tot->GetXaxis()->SetNdivisions(505);
 
 	nt11_mm_tot->Draw("goff");
 	nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
@@ -9975,7 +9977,8 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_mm_tot->GetXaxis()->SetLabelSize(0.045);
 	nt11_mm_tot->GetYaxis()->SetTitleOffset(1.25);
 	nt11_mm_tot->GetXaxis()->SetTitleOffset(1.065);
-	if(varbin==2) nt11_mm_tot->GetYaxis()->SetTitleOffset(1.4);
+	// if(varbin==2)  nt11_mm_tot->GetYaxis()->SetTitleOffset(1.4);
+	if(varbin==10) nt11_mm_tot->GetXaxis()->SetNdivisions(505);
 
 	nt11_ee_tot->Draw("goff");
 	nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
@@ -9987,7 +9990,8 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_ee_tot->GetXaxis()->SetLabelSize(0.045);
 	nt11_ee_tot->GetYaxis()->SetTitleOffset(1.25);
 	nt11_ee_tot->GetXaxis()->SetTitleOffset(1.065);
-	if(varbin==2) nt11_ee_tot->GetYaxis()->SetTitleOffset(1.4);
+	// if(varbin==2)  nt11_ee_tot->GetYaxis()->SetTitleOffset(1.4);
+	if(varbin==10) nt11_ee_tot->GetXaxis()->SetNdivisions(505);
 
 	nt11_em_tot->Draw("goff");
 	nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[varbin]);
@@ -9999,13 +10003,16 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_em_tot->GetXaxis()->SetLabelSize(0.045);
 	nt11_em_tot->GetYaxis()->SetTitleOffset(1.25);
 	nt11_em_tot->GetXaxis()->SetTitleOffset(1.065);
-	if(varbin==2) nt11_em_tot->GetYaxis()->SetTitleOffset(1.4);
+	// if(varbin==2)  nt11_em_tot->GetYaxis()->SetTitleOffset(1.4);
+	if(varbin==10) nt11_em_tot->GetXaxis()->SetNdivisions(505);
 
 	if(intlabel){
-		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_tot   ->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
-		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_mm_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
-		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_ee_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
-		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_em_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
+		int minlabel = 1;
+		if(varbin==2) minlabel = 3;
+		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_tot   ->GetXaxis()->SetBinLabel(i, Form("%d", minlabel+i-1));
+		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_mm_tot->GetXaxis()->SetBinLabel(i, Form("%d", minlabel+i-1));
+		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_ee_tot->GetXaxis()->SetBinLabel(i, Form("%d", minlabel+i-1));
+		for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_em_tot->GetXaxis()->SetBinLabel(i, Form("%d", minlabel+i-1));
 		nt11_tot   ->GetXaxis()->SetLabelSize(0.07);
 		nt11_mm_tot->GetXaxis()->SetLabelSize(0.07);
 		nt11_ee_tot->GetXaxis()->SetLabelSize(0.07);
@@ -10066,14 +10073,14 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 
 	fOutputSubDir = "DiffPredictionPlots/";
 	/////////////////////////////////////////////////////////////////
-	TLegend *leg = new TLegend(0.60,0.43,0.90,0.85);
-	leg->AddEntry(nt11,     "Data",        "p");
-	leg->AddEntry(nt11_ttz, "t#bar{t} + Z","f");
-	leg->AddEntry(nt11_ttw, "t#bar{t} + W","f");
-	leg->AddEntry(nt11_sf,  "Fakes",       "f");
-	leg->AddEntry(nt11_cm,  "Charge MisID","f");
-	leg->AddEntry(nt11_wz,  "WZ",          "f");
-	leg->AddEntry(nt11_ss,  "Rare SM",     "f");
+	TLegend *leg = new TLegend(0.55,0.43,0.85,0.85);
+	leg->AddEntry(nt11,     "Data",               "p");
+	leg->AddEntry(nt11_ttz, "t#bar{t} + Z",       "f");
+	leg->AddEntry(nt11_ttw, "t#bar{t} + W",       "f");
+	leg->AddEntry(nt11_sf,  "Non-prompt / MisID", "f");
+	leg->AddEntry(nt11_cm,  "Charge MisID",       "f");
+	leg->AddEntry(nt11_wz,  "WZ",                 "f");
+	leg->AddEntry(nt11_ss,  "Rare SM",            "f");
 	// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -11233,7 +11240,7 @@ void SSDLPlotter::storeWeightedPred(){
 	string *sname = 0;
 	int flag, passttz;
 	int   stype, flav, cat, njets, nbjets, nbjetsmed;
-	float puweight, slumi, pT1, pT2, HT, MET, MT2;
+	float puweight, slumi, pT1, pT2, HT, MET, MT2, M3;
 	float eta1, eta2;
 	int event, run;
 
@@ -11254,6 +11261,7 @@ void SSDLPlotter::storeWeightedPred(){
 	sigtree->SetBranchAddress("HT",         &HT);
 	sigtree->SetBranchAddress("MET",        &MET);
 	sigtree->SetBranchAddress("MT2",        &MT2);
+	sigtree->SetBranchAddress("M3",         &M3);
 	sigtree->SetBranchAddress("NJ",         &njets);
 	sigtree->SetBranchAddress("NbJ",        &nbjets);
 	sigtree->SetBranchAddress("NbJmed",     &nbjetsmed);
@@ -11347,6 +11355,7 @@ void SSDLPlotter::storeWeightedPred(){
 			S->numbers[r][chan].nff += puweight * nff;
 		}
 
+		//////////////////////////////////////////////////
 		// Differential predictions
 		if(flag != 0) continue;
 		float maxpt = TMath::Max(pT1, pT2);
@@ -11360,15 +11369,17 @@ void SSDLPlotter::storeWeightedPred(){
 		}
 
 		// Check pt cuts of TTbarWPresel:
-		bool passespt = passesPtCuts(pT1, pT2, TTbarWPresel, chan);
+		// gRegion base_reg = TTbarWPresel;
+		gRegion base_reg = TTbarWSel;
+		bool passespt = passesPtCuts(pT1, pT2, base_reg, chan);
 
-		if(HT        >= Region::minHT    [TTbarWPresel] &&
-           HT        <  Region::maxHT    [TTbarWPresel] &&
-           MET       >= Region::minMet   [TTbarWPresel] &&
-           MET       <  Region::maxMet   [TTbarWPresel] &&
-           nbjets    >= Region::minNbjets[TTbarWPresel] &&
-           nbjetsmed >= Region::minNbjmed[TTbarWPresel] &&
-		   // passttz == 0 &&
+		if(HT        >= Region::minHT    [base_reg] &&
+           HT        <  Region::maxHT    [base_reg] &&
+           MET       >= Region::minMet   [base_reg] &&
+           MET       <  Region::maxMet   [base_reg] &&
+           nbjets    >= Region::minNbjets[base_reg] &&
+           nbjetsmed >= Region::minNbjmed[base_reg] &&
+		   passttz == 0 &&
            passespt)
 		{
 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
@@ -11376,7 +11387,7 @@ void SSDLPlotter::storeWeightedPred(){
 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);
 
-			if(njets >= Region::minNjets [TTbarWPresel]){
+			if(njets >= Region::minNjets [base_reg]){
 				fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
 				fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
 				fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
@@ -11407,15 +11418,20 @@ void SSDLPlotter::storeWeightedPred(){
 				fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
 				fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
 
-				fillWithoutOF(S->diffyields[chan].hnpp[8], nbjets+0.5, puweight * npp);
-				fillWithoutOF(S->diffyields[chan].hnpf[8], nbjets+0.5, puweight * npf);
-				fillWithoutOF(S->diffyields[chan].hnfp[8], nbjets+0.5, puweight * nfp);
-				fillWithoutOF(S->diffyields[chan].hnff[8], nbjets+0.5, puweight * nff);
+				fillWithoutOF(S->diffyields[chan].hnpp[8], nbjetsmed+0.5, puweight * npp);
+				fillWithoutOF(S->diffyields[chan].hnpf[8], nbjetsmed+0.5, puweight * npf);
+				fillWithoutOF(S->diffyields[chan].hnfp[8], nbjetsmed+0.5, puweight * nfp);
+				fillWithoutOF(S->diffyields[chan].hnff[8], nbjetsmed+0.5, puweight * nff);
 
-				fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed, puweight * npp);
-				fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed, puweight * npf);
-				fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed, puweight * nfp);
-				fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed, puweight * nff);
+				fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed+0.5, puweight * npp);
+				fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed+0.5, puweight * npf);
+				fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed+0.5, puweight * nfp);
+				fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed+0.5, puweight * nff);
+
+				fillWithoutOF(S->diffyields[chan].hnpp[10], M3, puweight * npp);
+				fillWithoutOF(S->diffyields[chan].hnpf[10], M3, puweight * npf);
+				fillWithoutOF(S->diffyields[chan].hnfp[10], M3, puweight * nfp);
+				fillWithoutOF(S->diffyields[chan].hnff[10], M3, puweight * nff);
 			}
 		}
 
@@ -11995,7 +12011,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		ntl_sum_ee += ntl_ee_temp;
 		nll_sum_ee += nll_ee_temp;
 
-		if(proc == 5 || proc == 16) continue; // fuck QCD and g+jets for the errors
+		if(proc == 5 || proc == 18) continue; // fuck QCD and g+jets for the errors
 		// Careful, I assume now that they will always have 0 events in tight-tight,
 		// otherwise my yield table won't be self consistent anymore
 
@@ -12086,7 +12102,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	OUT << "------------------------------------------------------------------------------------------------------------------" << endl;
 
 	for(size_t i = 1; i < nprocs; ++i){ // skip data
-		if(i == 5 || i == 16) continue; // fuck QCD and g+jets
+		if(i == 5 || i == 18) continue; // fuck QCD and g+jets
 		OUT << Form("%24s & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f & %6.2f $\\pm$ %6.2f \\\\",
 		fSamples[DoubleMu1]->getProcName(i).Data(),
 		ntt_mm[i], sqrt(ntt_mm_e2[i]), ntt_em[i], sqrt(ntt_em_e2[i]), ntt_ee[i], sqrt(ntt_ee_e2[i]),
@@ -12759,9 +12775,8 @@ void SSDLPlotter::drawTopLine(float rightedge, float scale, float leftedge){
 
 	// TTWZ
 	fLatex->SetTextSize(scale*0.045);
-	// fLatex->DrawLatex(leftedge,0.925, "CMS");
-	// fLatex->SetTextSize(scale*0.045);
-	fLatex->DrawLatex(leftedge,0.925, "CMS Preliminary");
+	fLatex->DrawLatex(leftedge,0.925, "CMS");
+	// fLatex->DrawLatex(leftedge,0.925, "CMS Preliminary");
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(scale*0.045);
 	fLatex->DrawLatex(rightedge, 0.925, Form("L = %3.1f fb^{-1} at #sqrt{s} = 7 TeV", fLumiNorm/1000.));

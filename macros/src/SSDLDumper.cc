@@ -128,18 +128,30 @@ TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} (GeV)"
                                                                    "Number of Vertices"};
 
 //////////////////////////////////////////////////////////////////////////////////
-double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = { 0., 100., 200., 300., 400., 500., 600.};
-double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,  20.,  40.,  60.,  80., 100., 120.};
-double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 0., 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
+// Binning for TTbarWSel region (adding M3)
+double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = {100., 250., 400., 550., 700.};
+double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,  50.,  100., 150., 200.};
+double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 3., 4., 5., 6., 7., 8.}; // fill NJets + 0.5 to hit the right bin
 double SSDLDumper::gDiffMT2Bins [gNDiffMT2Bins+1]  = { 0.,  25.,  50., 100.};
-double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100., 120., 140., 160., 180., 200.};
-double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.};
-double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
-double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
+double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 50., 90., 130., 170., 210.};
+double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 30., 50., 70., 90., 110.};
+double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 1., 2., 3., 4.};
+double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 1., 2., 3., 4.};
+double SSDLDumper::gDiffM3Bins  [gNDiffM3Bins+1]   = {100., 225., 350., 475., 600.};
 double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
-TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"};
-int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
-double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
+// Binning for TTbarWPresel region
+// double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = { 0., 100., 200., 300., 400., 500., 600.};
+// double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,  20.,  40.,  60.,  80., 100., 120.};
+// double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 0., 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
+// double SSDLDumper::gDiffMT2Bins [gNDiffMT2Bins+1]  = { 0.,  25.,  50., 100.};
+// double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100., 120., 140., 160., 180., 200.};
+// double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.};
+// double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
+// double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
+// double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
+TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2", "M3"};
+int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins, gNDiffM3Bins};
+double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins,  gDiffM3Bins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} [GeV]",
                                                                           "Particle Flow ME_{T} [GeV]",
                                                                           "Jet Multiplicity",
@@ -149,7 +161,8 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
                                                                           "b-Jet Multiplicity (loose)",
                                                                           "E_{T}^{miss} [GeV]",
                                                                           "b-Jet Multiplicity (medium)",
-                                                                          "b-Jet Multiplicity (medium)"};
+                                                                          "b-Jet Multiplicity (medium)",
+                                                                          "M3 [GeV]"};
 
 //////////////////////////////////////////////////////////////////////////////////
 float  SSDLDumper::gFRatioNJBins     [gNFRatioNJBins+1]      = { 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
@@ -772,10 +785,11 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	resetHypLeptons();
 }
 void SSDLDumper::fillDiffYields(Sample *S){
-	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
-	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      ,    10 }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2",  "M3" }
 	///////////////////////////////////////////////////
 	setRegionCuts();
+	gRegion baseline_reg = TTbarWSel;
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// SS YIELDS
@@ -789,14 +803,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(mumuSignalTrigger()){ // Trigger selection
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		if(isSSLLMuEvent(mu1, mu2)){
 			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
 			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
@@ -805,6 +819,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVar(S, mu1, mu2, MuPt[mu2],              5, Muon);
 			fillDiffVar(S, mu1, mu2, getNBTags()+0.5,        6, Muon);
 			fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5,     8, Muon);
+			fillDiffVar(S, mu1, mu2, getM3(),               10, Muon);
 		}
 		resetHypLeptons();
 
@@ -835,14 +850,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elelSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
@@ -851,6 +866,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVar(S, el1, el2, ElPt[el2],              5, Elec);
 			fillDiffVar(S, el1, el2, getNBTags()+0.5,        6, Elec);
 			fillDiffVar(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
+			fillDiffVar(S, el1, el2, getM3(),               10, Elec);
 		}
 		resetHypLeptons();
 
@@ -881,20 +897,21 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
 			fillDiffVar(S, mu, el, getMT2(mu, el, ElMu), 3, ElMu);
 			fillDiffVar(S, mu, el, getNBTags()+0.5,      6, ElMu);
 			fillDiffVar(S, mu, el, getNBTagsMed()+0.5,   8, ElMu);
+			fillDiffVar(S, mu, el, getM3(),             10, ElMu);
 			float ptmax = MuPt[mu];
 			float ptmin = ElPt[el];
 			if(ptmin > ptmax){
@@ -937,14 +954,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		if(isSSLLElEvent(el1, el2)){
 			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
 			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
@@ -953,6 +970,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVarOS(S, el1, el2, ElPt[el2],              5, Elec);
 			fillDiffVarOS(S, el1, el2, getNBTags()+0.5,        6, Elec);
 			fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
+			fillDiffVarOS(S, el1, el2, getM3(),               10, Elec);
 		}
 		resetHypLeptons();
 
@@ -982,14 +1000,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	if(elmuSignalTrigger()){
 		////////////////////////////
 		// njets binning, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		fC_minNjets = 0;
 		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
 		resetHypLeptons();
 
 		////////////////////////////
 		// Other binnings, ttbarW preselection
-		setRegionCuts(TTbarWPresel);
+		setRegionCuts(baseline_reg);
 		if(isSSLLElMuEvent(mu, el)){
 			fillDiffVarOS(S, mu, el, getHT(),                        0, ElMu);
 			fillDiffVarOS(S, mu, el, getMET(),                       1, ElMu);
@@ -998,6 +1016,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVarOS(S, mu, el, TMath::Min(MuPt[mu], ElPt[el]), 5, ElMu);
 			fillDiffVarOS(S, mu, el, getNBTags()+0.5,                6, ElMu);
 			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,             8, ElMu);
+			fillDiffVarOS(S, mu, el, getM3(),                       10, ElMu);
 		}
 		resetHypLeptons();
 
