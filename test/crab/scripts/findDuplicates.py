@@ -41,14 +41,14 @@ def refreshFileList( srmPath, tmpFile, options ):
 #     print 'Reloading list of files in '+tmpFile+'...',
 #     sys.stdout.flush()
 
-    cmd = 'srmls -count=1000 '+srmPath+' | grep .root > '+tmpFile
+    cmd = 'srmls -count=999 '+srmPath+' | grep .root > '+tmpFile
     if options.debug: print '\nRunning',cmd
     srmls = subprocess.Popen(cmd, shell=True)
     srmls.wait()
     attempts = 1
-    while ( (sum(1 for line in open(tmpFile)))==1000*attempts ):
-        off = 1000*attempts
-        srmls = subprocess.Popen('srmls -count=1000 -offset=%s'%off+' '+srmPath+' | grep .root >> '+tmpFile, shell=True)
+    while ( (sum(1 for line in open(tmpFile)))==999*attempts ):
+        off = 999*attempts
+        srmls = subprocess.Popen('srmls -count=999 -offset=%s'%off+' '+srmPath+' | grep .root >> '+tmpFile, shell=True)
         srmls.wait()
         attempts+=1
 #     print 'Done'
