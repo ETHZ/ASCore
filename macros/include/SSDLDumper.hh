@@ -697,7 +697,7 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
-	virtual void scaleBTags(Sample *S, int flag = 0);
+	virtual void scaleBTags(Sample *S, int flag = 0, TString model = "");
 	virtual void saveBTags();
 	virtual void resetBTags();
 	virtual void smearJetPts(Sample *S, int flag = 0);

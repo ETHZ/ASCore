@@ -48,6 +48,7 @@ using namespace std;
 static const bool  gApplyTauVeto = true;
 static       bool  gSmearMET     = false;
 
+float gSigSupJetPt = 65.;
 bool ttbarSigSup = true;
 bool gDoSystStudies;
 static const bool gDoSyncExercise = false;
@@ -458,6 +459,8 @@ void SSDLDumper::loopEvents(Sample *S){
 	tree->ResetBranchAddresses();
 	// Init(tree);
 	Init(tree);
+	int ntrigger;
+	int nused;
 
 	if (fChain == 0) return;
 	Long64_t nentries = fChain->GetEntriesFast();
@@ -475,6 +478,15 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		if (S->datamc == 0 && !IsInJSON()) continue;
 		
+	// FOR PABLO // FOR PABLO
+	// FOR PABLO int mu1(-1), mu2(-1);
+	// FOR PABLO if(mumuSignalTrigger()){ // Trigger selection
+	// FOR PABLO 	ntrigger++;
+	// FOR PABLO 	if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
+	// FOR PABLO 	nused++;
+	// FOR PABLO 	resetHypLeptons();
+	// FOR PABLO 	}
+	// FOR PABLO }
 		// if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		// DEBUG
@@ -491,8 +503,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// Event modifications
-		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
-		saveBTags(); // this just saves the btag values for each jet.
+		// scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
+		// saveBTags(); // this just saves the btag values for each jet.
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -597,6 +609,11 @@ void SSDLDumper::loopEvents(Sample *S){
  		// fillYields(S, gRegion["TTbarWSelLD"]);
 		fillSigEventTree(S, gSystematics["LepDown"]);
 	}
+	//FOR PABLO	cout << "--------------------------------------------------" << endl;
+	//FOR PABLO	cout << "--------------------------------------------------" << endl;
+	//FOR PABLO	cout << "--" << Form("fired the trigger: %d   used in my analysis: %d", ntrigger, nused) << endl;
+	//FOR PABLO	cout << "--------------------------------------------------" << endl;
+	//FOR PABLO	cout << "--------------------------------------------------" << endl;
 
 	// Stuff to execute for each sample AFTER looping on the events
 	fillCutFlowHistos(S);
@@ -1565,7 +1582,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	fC_minMet    = 0.;
 	fC_app3rdVet  = 0;
 	fC_chargeVeto = 0;
-	gApplyZVeto   = false;
+	gApplyZVeto   = true;
 
 	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
@@ -4438,19 +4455,21 @@ bool SSDLDumper::eMuTrigger(){
 //////////////////////////////////////////////////////////////////////////////
 // Helper functions:
 //____________________________________________________________________________
-void SSDLDumper::scaleBTags(Sample *S, int flag){
+void SSDLDumper::scaleBTags(Sample *S, int flag, TString model){
 	// for now supports only CSVM b-tagger. can be extended if need be
 	if(S->datamc == 0) return; // don't smear data
+	bool isFastsim = false;
+	if (model != "") isFastsim= true;
 	for(size_t i = 0; i < NJets; ++i){
 		if(isGoodJet(i) == false) continue;
-		bool is_tagged_lse = JetCSVBTag[i] > 0.244;
+		bool is_tagged_lse = JetCSVBTag[i] > 0.244; // not used in RA5
 		bool is_tagged_med = JetCSVBTag[i] > 0.679;
-		float random = fRand3->Uniform(0,1);
+		float random = fRand3->Uniform(0,1); // get random number from uniform distribution
 		string meanminmax = "mean";
 		if(flag == 1) meanminmax = "max";
 		if(flag == 2) meanminmax = "min";
 
-		bool newTag = fBTagSF->modifyBTagsWithSF(is_tagged_med, JetPt[i], JetEta[i], JetPartonID[i], meanminmax, random); // WARNING: change this to partonflavor once the minitrees are ready!!!
+		bool newTag = fBTagSF->modifyBTagsWithSF(is_tagged_med, JetPt[i], JetEta[i], JetPartonID[i], meanminmax, random, isFastsim, model); // WARNING: change this to partonflavor once the minitrees are ready!!!
 		if(!newTag) JetCSVBTag[i] = 0.1; // not tagged
 		if( newTag) JetCSVBTag[i] = 1.0; // tagged
 	}
@@ -5153,12 +5172,11 @@ vector<SSDLDumper::lepton> SSDLDumper::sortLeptonsByTypeAndPt(vector<lepton>& le
 	sort (theLep.begin(), theLep.end(), momentumAndTypeComparator);
 	return theLep;
 }
-
 bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 	// Return true if event contains one good jet with pt > 50 and dPhi > 2.0 from hyp lepton
 	std::vector< int > jetinds;
 	for(size_t i = 0; i < NJets; ++i) {
-		if(isGoodJet(i, 65) ) {
+		if(isGoodJet(i, gSigSupJetPt) ) {
 			jetinds.push_back(i);
 		}
 	}
@@ -5173,10 +5191,9 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 }
 bool SSDLDumper::passesJet50Cut(){
 	// Return true if event contains one good jet with pt > 50
-	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i,65)) return true;
+	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i,gSigSupJetPt)) return true;
 	return false;
 }
-
 //____________________________________________________________________________
 bool SSDLDumper::passesHTCut(float min, float max){
 	return (getHT() >= min && getHT() < max);
@@ -6020,7 +6037,7 @@ bool SSDLDumper::isLooseMuon(int muon){
 	else {
 		if(MuPFIso[muon] > 1.00) return false;
 	}
-	if (MuD0[muon] > 0.005) return false; // this is for testing only!!!
+	if (fabs(MuD0[muon]) > 0.005) return false; // this is for testing only!!!
 	return true;
 }
 bool SSDLDumper::isTightMuon(int muon){
@@ -6208,7 +6225,7 @@ bool SSDLDumper::isLooseElectron(int ele){
 		if(ElPFIso[ele] > 0.6) return false;
 		if(ElIsGoodTriggerEl[ele] != 1) return false; // trigger ID cuts
 	}
-	if (ElD0[ele] > 0.01) return false; // this is for testing!!!!
+	if (fabs(ElD0[ele]) > 0.01) return false; // this is for testing!!!!
 
 	// JUST FOR FUTURE REFERENCE, THOSE ARE THE VALUES FOR MVA-ID WE USED
 	// loose MVA-ID values 	if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.949) return false;
