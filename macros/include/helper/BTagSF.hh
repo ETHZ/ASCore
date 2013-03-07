@@ -10,11 +10,17 @@ class BTagSF {
 		BTagSF ();
 		~BTagSF(){};
 		
+		struct SFandErr {
+			float sf;
+			float err;
+		};
+
 		double efficiency (float pt, float eta, int flavor, TString meanminmax, int lightUnc = 0);
-		double scalefactor(float pt, float eta, int flavor, TString meanminmax);
+		double scalefactor(float pt, float eta, int flavor, TString meanminmax, bool isFastsim=false, TString model="");
 		float getSFLight(float jetpt, float jeteta, TString meanminmax);
 		bool   applySF(bool& isBTagged, float SF, float eff, float random);
-		bool   modifyBTagsWithSF(bool& is_tagged, float pt, float eta, int flavor, TString meanminmax, float random); // just to have it in a similar format as before
+		bool   modifyBTagsWithSF(bool&, float, float, int, TString, float, bool = false, TString = ""); // just to have it in a similar format as before
+		SFandErr getSMSSFandError(float, float, int, TString);
 
 		TF1 * fLightSF;
 		std::map< TString, float> fMeanminmax;
