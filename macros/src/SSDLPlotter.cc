@@ -33,10 +33,11 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const bool gEWKino = true;
+static const bool gEWKino = false;
 static const bool gRunSMSscan = false;
 static const bool gRatiosFromTTbar = false;
-static const bool gFullDataBlind = false;
+static const bool gFullDataBlind = true;
+static const bool gTTHBG = true;
 
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -304,7 +305,7 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZ);
 	// MARC fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
-	if(gEWKino)  fMCRareSM.push_back(TTbarH);
+	if(gEWKino || gTTHBG)  fMCRareSM.push_back(TTbarH);
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
@@ -11219,7 +11220,8 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		OUT << "==============================================================================================" << endl;
 	}
 	OUT << "==============================================================================================" << endl;
-	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
+	if (gFullDataBlind)	OUT << Form("%16s || %16s                     || %16s                     || %16s                     ||\n", "observed", "xx", "xx", "xx");
+	else				OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
 	OUT << "==============================================================================================" << endl;
 	OUT << "        predicted: ";
 	float tot_pred        = nF +           nt2_rare_mc_mm + nt2_ttz_mc_mm + nt2_wz_mc_mm +
@@ -11245,7 +11247,8 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		OUT << setw(5) << left << Form("%5.2f", sqrt(nt2_sig_mc_mm_e2 + nt2_sig_mc_em_e2 + nt2_sig_mc_ee_e2)) << endl;
 	}
 	OUT << "combined observed: ";
-	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
+	if (gFullDataBlind)	OUT << setw(5) << left << Form("%16s ", "xx" ) << endl;
+	else				OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
 	
