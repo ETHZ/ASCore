@@ -469,6 +469,9 @@ void SSDLPlotter::doAnalysis(){
 
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
  	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
+ 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+ 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 31., 31.,+1, true);
+// 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
 //	makePredictionSignalEvents(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
@@ -10390,7 +10393,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM << endl << endl;
 	fOUTSTREAM <<      "#syst" << endl;
 	fOUTSTREAM <<      "lumi     lnN\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"\t\t"+lumiError+"" << endl;
-	fOUTSTREAM << Form("bgUncttz lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-",
+	fOUTSTREAM << Form("bgUncttz lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-",
 					   1.0+ttwzpreds["Normal"].ttz_err_mm/ttwzpreds["Normal"].ttz_mm,
 					   1.0+ttwzpreds["Normal"].ttz_err_em/ttwzpreds["Normal"].ttz_em,
 					   1.0+ttwzpreds["Normal"].ttz_err_ee/ttwzpreds["Normal"].ttz_ee)   << endl;
@@ -11111,7 +11114,6 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		// float EM_stat = rareMapEM_stat.find(it->first) != rareMapEM_stat.end() ? weight*S->getError(rareMapEM_npass[it->first]):0.;
 		// float EE_stat = rareMapEE_stat.find(it->first) != rareMapEE_stat.end() ? weight*S->getError(rareMapEE_npass[it->first]):0.;
 
-
 		if (it->first == "WZTo3LNu") {
 			nt2_wz_mc_mm = MM_yiel; nt2_wz_mc_mm_e2 = MM_stat*MM_stat;
 			nt2_wz_mc_em = EM_yiel; nt2_wz_mc_em_e2 = EM_stat*EM_stat;
@@ -11144,7 +11146,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		       EM_yiel, sqrt(EM_stat*MM_stat), RareESyst*(EM_yiel),
 		       EE_yiel, sqrt(EE_stat*MM_stat), RareESyst*(EE_yiel)) << endl;
 	}
-	OUT << Form("%16s || %5.2f ? %5.2f ? %5.2f || %5.2f ? %5.2f ? %5.2f || %5.2f ? %5.2f ? %5.2f ||", "TTbarZ",
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||", "TTbarZ",
        nt2_ttz_mc_mm, sqrt(nt2_ttz_mc_mm_e2), RareESyst*(nt2_ttz_mc_mm),
        nt2_ttz_mc_em, sqrt(nt2_ttz_mc_em_e2), RareESyst*(nt2_ttz_mc_em),
        nt2_ttz_mc_ee, sqrt(nt2_ttz_mc_ee_e2), RareESyst*(nt2_ttz_mc_ee)) << endl;
