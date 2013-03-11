@@ -322,7 +322,8 @@ void SSDLDumper::init(){
 
 	// fBTagSFUtil = new BTagSFUtil("CSV", 28);
 	fBTagSF = new BTagSF();
-	fRand3 = new TRandom3(0);
+	fRand3 = new TRandom3(50);
+	fRand3Normal = new TRandom3(10);
 
 	resetHypLeptons();
 	initCutNames();
@@ -503,8 +504,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// Event modifications
-		// scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
-		// saveBTags(); // this just saves the btag values for each jet.
+		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
+		saveBTags(); // this just saves the btag values for each jet.
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -4464,7 +4465,9 @@ void SSDLDumper::scaleBTags(Sample *S, int flag, TString model){
 		if(isGoodJet(i) == false) continue;
 		bool is_tagged_lse = JetCSVBTag[i] > 0.244; // not used in RA5
 		bool is_tagged_med = JetCSVBTag[i] > 0.679;
-		float random = fRand3->Uniform(0,1); // get random number from uniform distribution
+		float random(-1.);
+		if (flag == 0)	random = fRand3Normal->Uniform(0,1); // get random number from uniform distribution
+		else			random = fRand3->Uniform(0,1); // get random number from uniform distribution
 		string meanminmax = "mean";
 		if(flag == 1) meanminmax = "max";
 		if(flag == 2) meanminmax = "min";

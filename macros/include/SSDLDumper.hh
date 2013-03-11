@@ -956,6 +956,7 @@ public:
 	BTagSF *fBTagSF;
         GoodRunList *fGoodRunList;
 	TRandom3 *fRand3;
+	TRandom3 *fRand3Normal;
 
         Int_t fCurRun;
         Int_t fCurLumi;
