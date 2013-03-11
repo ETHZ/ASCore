@@ -4509,47 +4509,55 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	// first try on MET uncertainty
 	if(S->datamc == 0) return; // don't scale data
 	TLorentzVector umet, jets, leps, tmp;
+	// umet.SetPtEtaPhiM(0., 0., 0., 0.); // init
 	jets.SetPtEtaPhiM(0., 0., 0., 0.); // init
 	leps.SetPtEtaPhiM(0., 0., 0., 0.); // init
-	tmp .SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.); // set to MET
-	umet += tmp; // add met
-	tmp.SetPtEtaPhiM(0., 0., 0., 0.); // reset
-	// subtract jets
+	tmp.SetPtEtaPhiM(0., 0., 0., 0.);  // init
+	umet.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.); // add met
+	// cout << Form("------------flag: %d", flag) << endl;
+	// cout << Form("MET before scaling: %.3f phi: %.3f", umet.Pt(), umet.Phi())<< endl;
+	// subtract uncleaned jets
 	float tmp_minJetPt = fC_minJetPt;
 	fC_minJetPt = 15.;
 	for (int i=0; i<NJets; i++) {
-		// if (!isGoodJet(i)) continue; // do this on all jets in the event, not only the good jets with pT > 40
+		if (!isGoodJet(i, 15.)) continue; // do this on all jets in the event, not only the good jets with pT > 40
 		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
 		umet += tmp;
 		jets += tmp;
 		tmp.SetPtEtaPhiE(0., 0., 0., 0.);
 	}
-	// // subtract muons
-	// for (int i=0; i<NMus; i++) {
-	// 	if (!isGoodMuon(i, 5.)) continue;
-	// 	tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
-	// 	umet += tmp;
-	// 	leps += tmp;
-	// 	tmp.SetPtEtaPhiM(0., 0., 0., 0.);
-	// }
-	// // subtract electrons
-	// for (int i=0; i<NEls; i++) {
-	// 	if (!isGoodElectron(i, 5.)) continue;
-	// 	tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-	// 	umet += tmp;
-	// 	leps += tmp;
-	// 	tmp.SetPtEtaPhiM(0., 0., 0., 0.);
-	// }
+	// subtract muons
+	for (int i=0; i<NMus; i++) {
+		// if (!isGoodMuon(i, 20.)) continue;
+		if (!isTightMuon(i)) continue;
+		tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+		umet += tmp;
+		leps += tmp;
+		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	}
+	// subtract electrons
+	for (int i=0; i<NEls; i++) {
+		// if (!isGoodElectron(i, 20.)) continue;
+		if (!isTightElectron(i)) continue;
+		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+		umet += tmp;
+		leps += tmp;
+		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	}
+
 	// scale the unclustered energy by 10%
+	// cout << Form("jets 4-vec pt: %.3f eta: %.3f phi: %.3f mass: %.3f", jets.Pt(), jets.Eta(), jets.Phi(), jets.M()) << endl;
+	// cout << Form("  umet before scaling: %.3f ", umet.Pt());
 	if (flag == 0) tmp.SetPtEtaPhiE(1.1 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
 	if (flag == 1) tmp.SetPtEtaPhiE(0.9 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
 	// subtract the leptons and jets again
 	tmp -= leps;
 	tmp -= jets;
-	// reset the minPt cut for the jets . this is important!
+	// reset the minPt cut for the jets . THIS IS IMPORTANT!
 	fC_minJetPt = tmp_minJetPt;
 	// set the new MET value
 	setMET(tmp.Pt());
+	// cout << Form("  MET after scaling: %.3f ", getMET())<< endl;
 }
 void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
@@ -4557,11 +4565,6 @@ void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	// set the pfMET to the old MET minus original vector plus new vector
 	setMET( (met+oVec-nVec).Pt() );
 }
-/*
-
-IDEA: WRITE A FUNCTION THAT GIVES THE CLEANED JET COLLECTION AND THEN APPLY THE JES/JER JUST ON THOSE...
-
-*/
 float getDR(float eta1, float phi1, float eta2, float phi2){
 	return sqrt( (eta1-eta2)*(eta1-eta2) + (phi1-phi2)*(phi1-phi2)  );
 }
@@ -4665,10 +4668,10 @@ float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
   	// float phi = pfMETType1Phi;
-	float phi = pfMETPhi;
-        if (gMETType1)  phi = pfMETType1Phi;
+	float phi;// = pfMETPhi;
+	if (gMETType1)  phi = pfMETType1Phi;
 	else            phi = pfMETPhi;
-
+	return phi;
 }
 float SSDLDumper::getM3(){
 	// Return M3
