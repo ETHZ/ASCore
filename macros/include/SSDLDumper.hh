@@ -697,6 +697,8 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
+	virtual void cleanedJetIndices(float pt);
+	std::vector<int> fC_cleanJetIndices;
 	virtual void scaleBTags(Sample *S, int flag = 0, TString model = "");
 	virtual void saveBTags();
 	virtual void resetBTags();

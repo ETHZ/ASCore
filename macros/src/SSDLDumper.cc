@@ -4509,35 +4509,37 @@ void SSDLDumper::scaleMET(Sample *S, int flag){
 	// first try on MET uncertainty
 	if(S->datamc == 0) return; // don't scale data
 	TLorentzVector umet, jets, leps, tmp;
-	tmp.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
+	jets.SetPtEtaPhiM(0., 0., 0., 0.); // init
+	leps.SetPtEtaPhiM(0., 0., 0., 0.); // init
+	tmp .SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.); // set to MET
 	umet += tmp; // add met
 	tmp.SetPtEtaPhiM(0., 0., 0., 0.); // reset
 	// subtract jets
 	float tmp_minJetPt = fC_minJetPt;
 	fC_minJetPt = 15.;
 	for (int i=0; i<NJets; i++) {
-		if (!isGoodJet(i)) continue;
+		// if (!isGoodJet(i)) continue; // do this on all jets in the event, not only the good jets with pT > 40
 		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
 		umet += tmp;
 		jets += tmp;
 		tmp.SetPtEtaPhiE(0., 0., 0., 0.);
 	}
-	// subtract muons
-	for (int i=0; i<NMus; i++) {
-		if (!isGoodMuon(i, 5.)) continue;
-		tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
-		umet += tmp;
-		leps += tmp;
-		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
-	}
-	// subtract electrons
-	for (int i=0; i<NEls; i++) {
-		if (!isGoodElectron(i, 5.)) continue;
-		tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-		umet += tmp;
-		leps += tmp;
-		tmp.SetPtEtaPhiM(0., 0., 0., 0.);
-	}
+	// // subtract muons
+	// for (int i=0; i<NMus; i++) {
+	// 	if (!isGoodMuon(i, 5.)) continue;
+	// 	tmp.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+	// 	umet += tmp;
+	// 	leps += tmp;
+	// 	tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	// }
+	// // subtract electrons
+	// for (int i=0; i<NEls; i++) {
+	// 	if (!isGoodElectron(i, 5.)) continue;
+	// 	tmp.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+	// 	umet += tmp;
+	// 	leps += tmp;
+	// 	tmp.SetPtEtaPhiM(0., 0., 0., 0.);
+	// }
 	// scale the unclustered energy by 10%
 	if (flag == 0) tmp.SetPtEtaPhiE(1.1 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
 	if (flag == 1) tmp.SetPtEtaPhiE(0.9 * umet.Pt(), umet.Eta(), umet.Phi(), umet.E());
@@ -4553,7 +4555,40 @@ void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 	TLorentzVector met;
 	met.SetPtEtaPhiM(getMET(), 0., getMETPhi(), 0.);
 	// set the pfMET to the old MET minus original vector plus new vector
-	pfMET = (met-oVec+nVec).Pt();
+	setMET( (met+oVec-nVec).Pt() );
+}
+/*
+
+IDEA: WRITE A FUNCTION THAT GIVES THE CLEANED JET COLLECTION AND THEN APPLY THE JES/JER JUST ON THOSE...
+
+*/
+float getDR(float eta1, float phi1, float eta2, float phi2){
+	return sqrt( (eta1-eta2)*(eta1-eta2) + (phi1-phi2)*(phi1-phi2)  );
+}
+void SSDLDumper::cleanedJetIndices(float pt){
+	fC_cleanJetIndices.clear(); // fresh start
+	float tmp = fC_minJetPt;
+	fC_minJetPt = pt; 
+	for(size_t i = 0; i < NJets; ++i){
+		if (!isGoodJet(i)) continue;
+		if (JetPt[i] < pt) continue;
+		for (int m = 0; m <= NMus; ++m){
+			if (!isLooseMuon(m)) continue;
+			if (getDR(JetEta[i], JetPhi[i], MuEta[m], MuPhi[m]) < 0.5 ) continue;
+			fC_cleanJetIndices.push_back(i);
+		}
+		for (int e = 0; e <= NEls; ++e){
+			if (!isLooseElectron(e)) continue;
+			if (getDR(JetEta[i], JetPhi[i], ElEta[e], ElPhi[e]) < 0.5 ) {
+				if (std::find(fC_cleanJetIndices.begin(), fC_cleanJetIndices.end(), i) != fC_cleanJetIndices.end() ) {
+					fC_cleanJetIndices.pop_back(); // erase jet index if it passed the muon cleaning but not the electron cleaning
+				}
+				continue; // if it isn't in there, move to next electron
+			}
+			if (std::find(fC_cleanJetIndices.begin(), fC_cleanJetIndices.end(), i) != fC_cleanJetIndices.end()-1 ) fC_cleanJetIndices.push_back(i);
+		}
+	}
+	fC_minJetPt = tmp; 
 }
 void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Modify the jet pt for systematics studies
@@ -4561,17 +4596,22 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// propagate to the MET!!
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;
+	if(fC_cleanJetIndices.size() == 0) cleanedJetIndices(15.);
 	TLorentzVector ojets, jets, tmp;
-	for(size_t i = 0; i < NJets; ++i){
-		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+	std::vector<int>::const_iterator it = fC_cleanJetIndices.begin();
+	// for(size_t i = 0; i < NJets; ++i)
+	for( ; it != fC_cleanJetIndices.end(); ++it) {
+		// cout << Form("smearJetPts: index: %d before: %.2f", *it, JetPt[*it]);
+		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
 		ojets += tmp;
-		if(flag == 1){ JetPt[i] += JetJEC[i]*JetPt[i]; continue; }
-		if(flag == 2){ JetPt[i] -= JetJEC[i]*JetPt[i]; continue; }
+		if(flag == 1) JetPt[*it] += JetJEC[*it]*JetPt[*it];
+		if(flag == 2) JetPt[*it] -= JetJEC[*it]*JetPt[*it];
 		if(flag == 3){
-			if(JetGenPt[i] > -100.)	JetPt[i] = TMath::Max(float(0.), JetGenPt[i] + getJERScale(i)*(JetPt[i] - JetGenPt[i]));
-			else                    JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));
+			if(JetGenPt[*it] > -100.)	JetPt[*it] = TMath::Max(float(0.), JetGenPt[*it] + getJERScale(*it)*(JetPt[*it] - JetGenPt[*it]));
+			// else                    JetPt[*it] = JetPt[*it] * fRand3->Gaus(1., fabs(1. - getJERScale(*it)));
 		}
-		tmp.SetPtEtaPhiE(JetPt[i], JetEta[i], JetPhi[i], JetEnergy[i]);
+		// cout << Form(" after: %.2f", JetPt[*it]) << endl;
+		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
 		jets += tmp;
 	}
 	propagateMET(jets, ojets);
