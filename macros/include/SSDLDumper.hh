@@ -763,12 +763,14 @@ public:
 	virtual bool passesTTZSel();
         //virtual bool passesGammaStarVeto();
 
-	virtual int isSigSupMuEvent(int&, int&);
-	virtual int isSigSupMuEvent();
+	virtual bool isSigSupMuEvent(int&, int&);
+	virtual bool isSigSupMuEvent(int&);
+	virtual bool isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
 
-	virtual int isSigSupElEvent(int&,int&);
-	virtual int isSigSupElEvent();
+	virtual bool isSigSupElEvent(int&,int&);
+	virtual bool isSigSupElEvent(int&);
+	virtual bool isSigSupElEvent();
 	virtual bool isZElElEvent(int&, int&);
 	virtual bool isZElElChMisIdEvent(int&, int&);
 

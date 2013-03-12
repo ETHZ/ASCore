@@ -827,7 +827,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 
 	int looseMuInd(-1);
 	if(singleMuTrigger() && isSigSupMuEvent(looseMuInd)){
-		cout << looseMuInd << endl;
 		if( isTightMuon(looseMuInd) ){
 			S->region[reg][HighPt].mm.fntight->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
 			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
