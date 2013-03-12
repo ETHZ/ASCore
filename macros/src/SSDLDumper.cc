@@ -479,6 +479,9 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		if (S->datamc == 0 && !IsInJSON()) continue;
 		
+		// reset hypothesis leptons
+		resetHypLeptons();
+		
 	// FOR PABLO // FOR PABLO
 	// FOR PABLO int mu1(-1), mu2(-1);
 	// FOR PABLO if(mumuSignalTrigger()){ // Trigger selection
