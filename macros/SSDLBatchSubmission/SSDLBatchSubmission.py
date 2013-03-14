@@ -7,7 +7,7 @@ def usage():
 	print 'Here are your options:'
 	print '        -c <your_config_file>'
 	print '              Does all the work. Takes the input of the datacard and creates a lot of'
-	print '              jobs that go to the batch system. Once the jobs are finished it merges'
+	print '              josbs that go to the batch system. Once the jobs are finished it merges'
 	print '              them together into a file called allYields.root in your output directory'
 	print '              The directories and some other things must be specified in the config'
 	print '              file. IMPORTANT: Read below for more details'
@@ -174,14 +174,14 @@ def merge_and_clean():
 	for dir in special_dirs:
 		print '[status] at special dir:', dir
 		dir_cat = 'cat '
-		dir_cat_reg = 'cat '
+##		dir_cat_reg = 'cat '
 		isdata=False
 		for ls in os.listdir(output_location):
 			if os.path.isdir(output_location+ls) and ls.startswith(dir+'_output'):
 				if os.path.isfile(output_location+ls+'/'+dir+'_SignalEvents.txt'):
 					dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
-					for reg in regions:
-						os.system('cat '+output_location+ls+'/'+dir+'_SignalEvents_'+reg+'.txt >> '+output_location+dir+'_SignalEvents_'+reg+'.txt ')
+##					for reg in regions:
+##						os.system('cat '+output_location+ls+'/'+dir+'_SignalEvents_'+reg+'.txt >> '+output_location+dir+'_SignalEvents_'+reg+'.txt ')
 					isdata=True
 		dir_hadd = 'hadd -f '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root > /dev/null'
 		dir_cat+=' >& '+output_location+dir+'_SignalEvents.txt '
@@ -198,7 +198,13 @@ def merge_and_clean():
 	for ls in os.listdir(output_location):
 		if os.path.isdir(output_location+ls) and 'output' in ls:
 			os.system('rm -rf '+output_location+ls)
-		
+
+	# put all the root files on a directory and keep only SSDLYields.root (merged) on the outputdirectory.
+	print '[status] now putting Yields.root on a separate folder and hadd them...'
+	os.system('mkdir '+output_location+'YieldsFiles/')
+	os.system('mv '+output_location+'/*root '+output_location+'YieldsFiles/')
+	os.system('mv '+output_location+'/*txt '+output_location+'YieldsFiles/')
+	os.system('hadd '+output_location+'SSDLYields.root '+output_location+'YieldsFiles/*Yields.root')
 
 def check_on_jobs(jobnames, time_elapsed):
 	tmp = commands.getoutput('qstat')
