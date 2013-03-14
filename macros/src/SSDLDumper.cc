@@ -860,7 +860,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		// signal suppressed region with at least one veto muon
 		int mu1(-1), mu2(-1);
 		isSigSupMuEvent(mu1, mu2);
-		if (mu2 > 0) {
+		if (mu2 > -1) {
 			float dRVetoLoose(-1.), dRVetoJet(-1);
 			dRVetoLoose	= Util::GetDeltaR(MuEta[mu1], MuEta[mu2], MuPhi[mu1], MuPhi[mu2]);	if (fabs(dRVetoLoose) > TMath::Pi()) dRVetoLoose = fabs(dRVetoLoose) - TMath::Pi();
 			dRVetoJet	= getClosestJetDR(mu2, Muon, 50.);									if (fabs(dRVetoJet  ) > TMath::Pi()) dRVetoJet   = fabs(dRVetoJet  ) - TMath::Pi();
@@ -4214,7 +4214,7 @@ int  SSDLDumper::readHistos(TString filename){
 						getObjectSafe(pFile, root + "_sigSup_MID15_Iso", C->sigSup_MID15_Iso);
 						getObjectSafe(pFile, root + "_sigSup_dPhiLooseJet", C->sigSup_dPhiLooseJet);
 						getObjectSafe(pFile, root + "_sigSup_nJets", C->sigSup_nJets);
-						
+
 						getObjectSafe(pFile, root + "_sig_MID24_Iso", C->sig_MID24_Iso);
 						getObjectSafe(pFile, root + "_sig_MID500_Iso", C->sig_MID500_Iso);
 						getObjectSafe(pFile, root + "_sig_MID400_Iso", C->sig_MID400_Iso);
