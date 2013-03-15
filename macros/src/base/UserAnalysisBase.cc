@@ -18,42 +18,24 @@
 
 using namespace std;
 
-UserAnalysisBase::UserAnalysisBase(TreeReader *tr, bool isData){
+UserAnalysisBase::UserAnalysisBase(TreeReader *tr, bool isData, string globaltag){
     fTR = tr;
     fTlat = new TLatex();
     fVerbose = 0;
     fDoPileUpReweight = false;
-    string JESPathPrefix="/shome/buchmann/material/JEStxtfiles/data/GR_P_V40_AN1_";
-    if(!isData) JESPathPrefix="/shome/buchmann/material/JEStxtfiles/mc/START53_V7A_";
-    
-    // Put all JES-related stuff between pre-compiler flags
-    //----------- Correction Object ------------------------------
-    vector<JetCorrectorParameters> JetCorPar;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(JESPathPrefix+"L2L3Residual_AK5PF.txt");
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(JESPathPrefix+"L3Absolute_AK5PF.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(JESPathPrefix+"L2Relative_AK5PF.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(JESPathPrefix+"L1FastJet_AK5PF.txt");
-    JetCorPar.push_back(*L1JetPar);
-    JetCorPar.push_back(*L2JetPar);
-    JetCorPar.push_back(*L3JetPar);
-    if(isData) JetCorPar.push_back(*ResJetPar);
 
-    fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-    fJECUnc = new JetCorrectionUncertainty(JESPathPrefix+"Uncertainty_AK5PF.txt");
-    delete L1JetPar;
-    delete L2JetPar; 
-    delete L3JetPar; 
-    delete ResJetPar; 
 
-	fMetCorrector = new OnTheFlyCorrections("FT_P_V42_AN3", isData);
+    string JESPathPrefix="/shome/mdunser/jetfiles/";
+
+    if(!isData) JESPathPrefix="/shome/mdunser/jetfiles/";
+	if(globaltag == "") globaltag = "START53_V7A"; // need a default GT, otherwise the next line crashes
+	fMetCorrector = new OnTheFlyCorrections(globaltag, isData);
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
     if(fDoPileUpReweight) delete fPUWeight;
+	delete fMetCorrector;
 //     if(fDoPileUpReweight3D) delete fPUWeight3D;
-
-    delete fJetCorrector;
-    delete fJECUnc;
 
 }
 std::pair<float ,float> UserAnalysisBase::GetOnTheFlyCorrections(){
@@ -335,11 +317,12 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuNSiLayers[index] < 6) return false;
     if(fTR->MuNPxHits[index] < 1)   return false;
     // if(fTR->MuNMuHits [index] < 2)   return false;
-    if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
+    // if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
+	if(fTR->MuNGlMuHits [index] < 1) return false;
 	// if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
-	         if(fTR->MuNMatchedStations.size() > 0) { 	 
-	                 if(fTR->MuNMatchedStations[index] < 2)   return false; // muon.numberOfMatchedStations() 	 
-	         }
+	if(fTR->MuNMatchedStations.size() > 0) { 	 
+		if(fTR->MuNMatchedStations[index] < 2)   return false; // muon.numberOfMatchedStations() 	 
+	}
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
     if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;
@@ -995,34 +978,20 @@ bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
 
 ///////////////////////////////////////////////////////////////
 // JEC
-float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
-    if(!fIsData) return fTR->JPt[jetindex]; // do nothing for MC (no res corr here)
-
-    float rawpt = fTR->JPt[jetindex]/fTR->JEcorr[jetindex];
-    fJetCorrector->setJetEta(fTR->JEta[jetindex]);
-    fJetCorrector->setRho(fTR->Rho);
-    fJetCorrector->setJetA(fTR->JArea[jetindex]);
-    fJetCorrector->setJetPt(rawpt); // IMPORTANT: the correction is a function of the RAW pt
-
-    // The getSubCorrections member function returns the vector of the subcorrections UP to
-    // the given level. For example in the example above, factors[0] is the L1 correction
-    // and factors[3] is the L1+L2+L3+Residual correction.
-    vector<float> factors = fJetCorrector->getSubCorrections();
-
-    // Sanity check: JEcorr should be the full set of corrections applied
-    if(fabs(factors[3] - fTR->JEcorr[jetindex]) > 0.000001 && fVerbose > 2) cout << "UserAnalysisBase::GetJetPtNoResidual ==> WARNING: Your JECs don't seem to be consistent!" << endl;
-
-    double l1l2l3scale = factors[2];
-    return rawpt*l1l2l3scale;
+float UserAnalysisBase::getNewJetInfo(int ind, string which){
+	std::vector<float> newjet = fMetCorrector->getCorrPtECorr(fTR->JPt[ind]   , fTR->JEta[ind]  , fTR->JE[ind], 
+	                                          fTR->JEcorr[ind], fTR->JArea[ind] , fTR->Rho);
+	if (which == "pt"  ) return newjet[0]; // new jet pt
+	if (which == "e"   ) return newjet[1]; // new jet energy
+	if (which == "corr") return newjet[2]; // new jet correction
+}
+float UserAnalysisBase::GetJetPtNoResidual(int ind){
+	float pt = fMetCorrector->getJetPtNoResidual(fTR->JPt[ind], fTR->JEta[ind], fTR->JEcorr[ind], 
+	                                  fTR->JArea[ind], fTR->Rho);
+	return pt;
 }
 float UserAnalysisBase::GetJECUncert(float pt, float eta){
-	if      (eta> 5.0) eta = 5.0;
-	else if (eta<-5.0) eta =-5.0;
-
-	fJECUnc->setJetPt(pt);   
-	fJECUnc->setJetEta(eta); 
-	float uncert= fJECUnc->getUncertainty(true);
-	return uncert;
+	return fMetCorrector->getJECUncertainty(pt, eta);
 }
 
 // ///////////////////////////////////////////////////////////////

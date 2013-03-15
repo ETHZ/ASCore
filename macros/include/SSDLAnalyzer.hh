@@ -9,7 +9,8 @@
 
 class SSDLAnalyzer : public TreeAnalyzerBase {
 public:
-	SSDLAnalyzer(std::vector<std::string>& fileList);
+	// test mar14 SSDLAnalyzer(std::vector<std::string>& fileList);
+	SSDLAnalyzer(std::vector<std::string>& fileList, bool isdata, string globaltag="");
 	// MARC SSDLAnalyzer(TTree *tree = 0);
 	virtual ~SSDLAnalyzer();
 	void BeginJob	();

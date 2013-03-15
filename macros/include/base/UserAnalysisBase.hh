@@ -22,7 +22,7 @@
 
 class UserAnalysisBase{
 public:
-    UserAnalysisBase(TreeReader *tr = 0, bool isData=1);
+    UserAnalysisBase(TreeReader *tr = 0, bool isData=1, string globaltag="");
     virtual ~UserAnalysisBase();
   
     virtual void Begin() {}
@@ -134,6 +134,7 @@ public:
     // Put all JES-related stuff between precompiler flags
     FactorizedJetCorrector *fJetCorrector;
     JetCorrectionUncertainty *fJECUnc;
+	virtual float getNewJetInfo(int ind, string which);
     virtual float GetJetPtNoResidual(int);
 	virtual float GetJECUncert(float pt, float eta);
 

@@ -29,7 +29,8 @@ using namespace std;
 
 class SSDLAnalysis : public UserAnalysisBase{
 public:
-	SSDLAnalysis(TreeReader *tr = 0);
+	// test mar 14 SSDLAnalysis(TreeReader *tr = 0);
+	SSDLAnalysis(TreeReader *tr = 0, bool data =1, string globaltag="");
 	virtual ~SSDLAnalysis();
 	
 	void Begin(const char* filename = "SSDLTree.root");
@@ -103,6 +104,7 @@ private:
 	TH2D* fTChiSlepSnuCount[nx];
 	TH2D* fModelCount[nx];
 	
+	std::string fGlobalTag;
 	/////////////////////////////////////
 	// Tree branches
 	int   fTRunNumber;

@@ -3,8 +3,12 @@
 
 using namespace std;
 
-SSDLAnalyzer::SSDLAnalyzer(std::vector<std::string>& fileList) : TreeAnalyzerBase(fileList) {
-	fSSDLAnalysis = new SSDLAnalysis(fTR);
+// test mar 14 SSDLAnalyzer::SSDLAnalyzer(std::vector<std::string>& fileList) : TreeAnalyzerBase(fileList) {
+// test mar 14 	fSSDLAnalysis = new SSDLAnalysis(fTR);
+// test mar 14 	fDoFillEffTree = false;
+// test mar 14 }
+SSDLAnalyzer::SSDLAnalyzer(std::vector<std::string>& fileList, bool isdata, string globaltag) : TreeAnalyzerBase(fileList) {
+	fSSDLAnalysis = new SSDLAnalysis(fTR, isdata, globaltag);
 	fDoFillEffTree = false;
 }
 

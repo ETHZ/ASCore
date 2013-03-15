@@ -18,8 +18,11 @@ TString SSDLAnalysis::gBaseDir = "/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLep
 // TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
-SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
+// test mar 14 SSDLAnalysis::SSDLAnalysis(TreeReader *tr, bool data): UserAnalysisBase(tr, fIsData){
+SSDLAnalysis::SSDLAnalysis(TreeReader *tr, bool data, string globaltag): UserAnalysisBase(tr, data, globaltag){
 	fHLTPaths.clear();
+
+	fGlobalTag = globaltag;
 
 	fCutnames[0] = "All events";
 	fCutnames[1] = " ... passes primary Vertex cuts";
@@ -41,6 +44,7 @@ void SSDLAnalysis::Begin(const char* filename){
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL_2012.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
 
+	cout << "ssdlanalysis ----------------  isdata "  << fIsData << endl;
 	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
 	if(!fIsData){
 		fMsugraCount = new TH2D("msugra_count", "msugra_count", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
@@ -433,14 +437,18 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt      [ind] = fTR->JPt[jetindex];
+		
+		float pt = (fGlobalTag == "" ? fTR->JPt[jetindex]:getNewJetInfo(jetindex, "pt") ); // new or old pt
+		fTJetpt      [ind] = pt;
 		fTJeteta     [ind] = fTR->JEta[jetindex];
 		fTJetphi     [ind] = fTR->JPhi[jetindex];
-		fTJetenergy  [ind] = fTR->JE[jetindex];
+		fTJetenergy  [ind] = (fGlobalTag == "" ? fTR->JE[jetindex]:getNewJetInfo(jetindex, "e") ); // new energy
 		fTJetbtag1   [ind] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[jetindex];
 		fTJetbtag2   [ind] = fTR->JnewPFJetProbabilityBPFJetTags[jetindex];
 		fTJetArea    [ind] = fTR->JArea[jetindex];
-		fTJetJEC     [ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex])/fTR->JEcorr[jetindex];
+		float corr = (fGlobalTag == "" ? fTR->JEcorr[jetindex]:getNewJetInfo(jetindex, "corr") ); // new correction
+		fTJetJEC     [ind] = GetJECUncert(pt, fTR->JEta[jetindex])/corr;
+		// fTJetJEC     [ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex])/fTR->JEcorr[jetindex];
 		fTJetPartonID[ind] = JetPartonMatch(jetindex);
 		fTJetPartonFlav[ind] = fTR->JPartonFlavour[jetindex];
 		int genjetind = GenJetMatch(jetindex);
@@ -460,9 +468,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Get METs
 	fTpfMET     = fTR->PFMET;
 	fTpfMETphi  = fTR->PFMETphi;
-	fTpfMETType1   = fTR->PFType1MET;
-	fTpfMETType1phi  = fTR->PFType1METphi;
 	std::pair<float, float> newmet = GetOnTheFlyCorrections();
+	fTpfMETType1     = fGlobalTag == "" ? fTR->PFType1MET   : newmet.first ;
+	fTpfMETType1phi  = fGlobalTag == "" ? fTR->PFType1METphi: newmet.second;
 	// cout << "        leading jet pt, eta from event: " << fTR->JPt[0] << " , " << fTR->JEta[0] << endl;
 	// cout << "JChargedMuEnergyFrac[0]: " << fTR->JChargedMuEnergyFrac[0] << endl;
 	// if (fabs(1-newmet.first/fTpfMETType1) > 0.001) cout << "---------------------------------" << endl;
