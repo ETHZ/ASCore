@@ -21,7 +21,7 @@ class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuFPtBins = 7;
+	static const int gNMuFPtBins = 6;
 	static const int gNMuPPtbins = 10;
 	static const int gNMuEtabins = 5;
 	static const int gNElFPtBins = 8;
@@ -130,7 +130,7 @@ public:
 		ElMu,
 		Elec,
 		gNCHANNELS
-	};
+	};        
         enum gChMisIdReg {
 	  chmisidreg_begin,
 	  BB = chmisidreg_begin,
@@ -187,6 +187,69 @@ public:
 		TH2D *nt01_eta;
 		TH2D *nt00_eta;
 
+		// Gen matched yields: t = tight, p = prompt, etc.
+		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
+		TH2D *npp_cm_pt; // charge misid
+		TH2D *nfp_pt;
+		TH2D *npf_pt; // only filled for e/mu
+		TH2D *nff_pt;
+		TH2D *nt2pp_pt; // pp/fp/.. in tt window, binned in pt1 vs pt2
+		TH2D *nt2pp_cm_pt; // charge misid
+		TH2D *nt2fp_pt;
+		TH2D *nt2pf_pt; // only filled for e/mu
+		TH2D *nt2ff_pt;
+
+		// Origin histos
+		TH2D *nt11_origin;
+		TH2D *nt10_origin;
+		TH2D *nt01_origin;
+		TH2D *nt00_origin;
+	  
+	        // OS Yields
+		// Only filled for electrons
+		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
+		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
+		TH2D *nt20_OS_EE_pt; // BB = barrel/barrel, EE = endcap/endcap
+		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
+		TH2D *nt10_OS_BB_pt;
+		TH2D *nt10_OS_EE_pt;
+		TH2D *nt10_OS_EB_pt;
+		TH2D *nt01_OS_BB_pt;
+		TH2D *nt01_OS_EE_pt;
+		TH2D *nt01_OS_EB_pt;
+		TH2D *nt00_OS_BB_pt;
+		TH2D *nt00_OS_EE_pt;
+		TH2D *nt00_OS_EB_pt;
+	};
+	
+	struct Region{
+		TString sname;
+		// Two different pt cuts
+		float minMu1pt;
+		float minMu2pt;
+		float minEl1pt;
+		float minEl2pt;
+		// Custom selections for every region
+		float minHT    ;
+		float maxHT    ;
+		float minMet   ;
+		float maxMet   ;
+		float minJetPt ;
+		int   minNjets ;
+		int   maxNjets ;
+		int   minNbjets;
+		int   maxNbjets;
+		int   minNbjmed;
+		int   maxNbjmed;
+		int   app3rdVet;
+		int   vetoTTZSel;
+		int   chargeVeto;
+		Channel mm;
+		Channel em;
+		Channel ee;
+		ofstream regionOutstream;
+	};
+        struct TLRatios{
 		TH2D *fntight; // pt vs eta
 		TH2D *fnloose;
 		TH2D *pntight; // pt vs eta
@@ -250,6 +313,14 @@ public:
 		TEfficiency *pratio_eta;
 		TEfficiency *fratio_nv;
 		TEfficiency *pratio_nv;
+	        
+	        // ORIGIN histos
+		TH1D *sst_origin;
+		TH1D *ssl_origin;
+		TH1D *zt_origin;
+		TH1D *zl_origin;
+        };
+        struct ChMisIDProb{
 		// Charged miss-id calculation
 		TH2D *ospairs;
 		TH2D *sspairs;
@@ -258,74 +329,7 @@ public:
 	        TEfficiency *chmid_BB_pt;
 	        TEfficiency *chmid_EE_pt;
     	        TEfficiency *chmid_BE_pt;
-
-		// Gen matched yields: t = tight, p = prompt, etc.
-		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
-		TH2D *npp_cm_pt; // charge misid
-		TH2D *nfp_pt;
-		TH2D *npf_pt; // only filled for e/mu
-		TH2D *nff_pt;
-		TH2D *nt2pp_pt; // pp/fp/.. in tt window, binned in pt1 vs pt2
-		TH2D *nt2pp_cm_pt; // charge misid
-		TH2D *nt2fp_pt;
-		TH2D *nt2pf_pt; // only filled for e/mu
-		TH2D *nt2ff_pt;
-
-		// Origin histos
-		TH2D *nt11_origin;
-		TH2D *nt10_origin;
-		TH2D *nt01_origin;
-		TH2D *nt00_origin;
-		TH1D *sst_origin;
-		TH1D *ssl_origin;
-		TH1D *zt_origin;
-		TH1D *zl_origin;
-
-        // OS Yields
-		// Only filled for electrons
-		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
-		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
-		TH2D *nt20_OS_EE_pt; // BB = barrel/barrel, EE = endcap/endcap
-		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
-		TH2D *nt10_OS_BB_pt;
-		TH2D *nt10_OS_EE_pt;
-		TH2D *nt10_OS_EB_pt;
-		TH2D *nt01_OS_BB_pt;
-		TH2D *nt01_OS_EE_pt;
-		TH2D *nt01_OS_EB_pt;
-		TH2D *nt00_OS_BB_pt;
-		TH2D *nt00_OS_EE_pt;
-		TH2D *nt00_OS_EB_pt;
 	};
-	
-	struct Region{
-		TString sname;
-		// Two different pt cuts
-		float minMu1pt;
-		float minMu2pt;
-		float minEl1pt;
-		float minEl2pt;
-		// Custom selections for every region
-		float minHT    ;
-		float maxHT    ;
-		float minMet   ;
-		float maxMet   ;
-		float minJetPt ;
-		int   minNjets ;
-		int   maxNjets ;
-		int   minNbjets;
-		int   maxNbjets;
-		int   minNbjmed;
-		int   maxNbjmed;
-		int   app3rdVet;
-		int   vetoTTZSel;
-		int   chargeVeto;
-		Channel mm;
-		Channel em;
-		Channel ee;
-		ofstream regionOutstream;
-	};
-	
 	// static const int gNRatioVars = 8;
 	static const int gNRatioVars = 9;
 	struct FRatioPlots{
@@ -413,7 +417,7 @@ public:
 	std::map<TString , int> gSystematics;
 	std::map<TString , int>::const_iterator gsystIt;
 	bool gApplyZVeto;
-    bool    gDoWZValidation;
+        bool gDoWZValidation;
 
 	class Sample{
 	public:
@@ -459,12 +463,14 @@ public:
 		DiffPredYields diffyields[gNCHANNELS];
 		NumberSet **numbers; // summary of integrated numbers
 //		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
-		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
-	        KinPlots kinplots_wz[gNKinSels];
-	        IsoPlots isoplots[2]; // e and mu
- 	        IdPlots  idplots; // only for electrons
+		KinPlots    kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
+	        KinPlots    kinplots_wz[gNKinSels];
+	        IsoPlots    isoplots[2]; // e and mu
+ 	        IdPlots     idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
-	        PuPlots  puplots[2];
+	        TLRatios    tlratios[2]; //e and mu   ///SAVING ALL RATIO INFORMATION HERE INSTEAD ON EACH REGION
+ 	        ChMisIDProb chmisid;                  ///SAVING ALL CHMID INFORMATION HERE INSTEAD ON EACH REGION
+	        PuPlots     puplots[2];
 		TGraph *sigevents[gNCHANNELS][2];
 
 		float getLumi(){
@@ -650,6 +656,8 @@ public:
 	void fillDiffVar(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
 	void fillDiffVarOS(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
 	void fillRatioPlots(Sample*);
+        void fillTLRatios(Sample*);
+        void fillChMisIDProb(Sample*);
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);

@@ -77,7 +77,7 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 32.5, 35., 40., 50., 60.}; // fake ratios
+double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {20., 25., 30., 35., 40., 50., 60.}; // fake ratios
 double SSDLDumper::gMuPPtbins[gNMuPPtbins+1] = {20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
 double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 
@@ -179,7 +179,6 @@ void setVariables(char buffer[1000]){
 		cout << " SSDLDumper::setVariables ==> Wrong configfile format for special variables. Have a look in the dumperconfig.cfg for more info. Aborting..." << endl;
 		exit(1);
 	}
-
 }
 //____________________________________________________________________________
 SSDLDumper::SSDLDumper(TString configfile){
@@ -537,13 +536,14 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		fillKinPlots(S,gRegion[gBaseRegion]);
 		if (gDoWZValidation) fillKinPlots(S,gRegion["WZEnriched"]);
+
 		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
 			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
 			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = true;
 			fillYields(S, gRegion[(*regIt)->sname]);
 			if ( (*regIt)->sname == "TTbarWSel") fDoCounting = false;
 		}
-
+		
 		// fillYields(S, gRegion["TTbarWPresel"]);
 
 		// fDoCounting = true;
@@ -554,6 +554,9 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillDiffYields(S);
 		fillRatioPlots(S);
 		
+		/// NEW Methods for saving TL and ChMisID only once...
+		fillTLRatios(S);
+		fillChMisIDProb(S);
 		
 		fillMuIsoPlots(S);
 		fillElIsoPlots(S);
@@ -740,162 +743,11 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-	
-	// filling histos for ttbar only ratios. this is a fairly random place to do this, but ok...
-	if(S->sname == "TTJets"){
-		for (int i =0 ; i < NMus; ++i) {
-			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isLooseMuon(i) &&  IsSignalMuon[i] ) S->region[reg][HighPt].mm.pnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-			if( isTightMuon(i) &&  IsSignalMuon[i] ) S->region[reg][HighPt].mm.pntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
-		}
-		for (int i =0 ; i < NEls; ++i) {
-			if ( abs(ElGenID[i])  == 13 ) continue;
-			if ( abs(ElGenID[i]) == 0  ) continue;
-			if ( abs(ElGenMID[i]) == 13 ) continue;
-			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isLooseElectron(i) &&  IsSignalElectron[i] ) S->region[reg][HighPt].ee.pnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-			if( isTightElectron(i) &&  IsSignalElectron[i] ) S->region[reg][HighPt].ee.pntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
-		}
-	}
-	// end filling the ttbar ratio histograms
-	
-	// filling histos for with gen ID of truth matched fake leptons
-	for (int i = 0 ; i < NMus; ++i) {
-		if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-		if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-	}
-	for (int i = 0 ; i < NEls; ++i) {
-		if ( abs(ElGenID[i])  == 13 ) continue;
-		if ( abs(ElGenMID[i]) == 13 ) continue;
-		if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-		if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-	}
-	// same sign mu pair in the event
-//	int mu1(0), mu2(0);
-	if (fabs(isSSLLEvent(mu1, mu2)) == 1) {
-		for (int i = 0 ; i < NMus; ++i) {
-			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_sig_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_sig_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-			
-			if (!isLooseMuon(i)) continue;
-			if (fabs(MuGenMID[i]) == 24) S->region[reg][HighPt].mm.sig_MID24_Iso->Fill(MuPFIso[i], gEventWeight);
-			if ((int)fabs(MuGenMID[i])/100 == 5) S->region[reg][HighPt].mm.sig_MID500_Iso->Fill(MuPFIso[i], gEventWeight);
-			if ((int)fabs(MuGenMID[i])/100 == 4) S->region[reg][HighPt].mm.sig_MID400_Iso->Fill(MuPFIso[i], gEventWeight);
-			if (fabs(MuGenMID[i]) == 15) S->region[reg][HighPt].mm.sig_MID15_Iso->Fill(MuPFIso[i], gEventWeight);
-		}
-	}
-	// same sign el pair in the event
-	int el1(0), el2(0);
-	if (fabs(isSSLLEvent(el1, el2)) == 2) {
-		for (int i = 0 ; i < NEls; ++i) {
-			if ( abs(ElGenID[i])  == 13 ) continue;
-			if ( abs(ElGenMID[i]) == 13 ) continue;
-			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_sig_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_sig_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-		}
-	}
-	// signal suppressed region
-	if (isSigSupMuEvent()/* && getNBTagsMed() > 0*/) {
-		for (int i = 0 ; i < NMus; ++i) {
-			//			if (getClosestJetDPhi(i, Muon) < 2.0) continue;
-			//			if (getClosestJetDR(i, Muon) < 0.5) continue;
-			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_sigSup_genID  ->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_sigSup_genID  ->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
-			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_sigSup_genMID ->Fill(fabs(MuGenMID[i])/*, gEventWeight*/);
-			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_sigSup_genMID ->Fill(fabs(MuGenMID[i])/*, gEventWeight*/);
-			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fnloose_sigSup_genGMID->Fill(fabs(MuGenGMID[i])/*, gEventWeight*/);
-			if( isTightMuon(i) && !IsSignalMuon[i] ) S->region[reg][HighPt].mm.fntight_sigSup_genGMID->Fill(fabs(MuGenGMID[i])/*, gEventWeight*/);
-		}
-	}
-//	int elec1(-1), elec2(-1);
-	if (isSigSupElEvent()) {
-		for (int i = 0 ; i < NEls; ++i) {
-			if ( abs(ElGenID[i])  == 13 ) continue;
-			if ( abs(ElGenMID[i]) == 13 ) continue;
-			//			if (getClosestJetDR(i, Elec) < 0.5) continue;
-			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_sigSup_genID  ->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_sigSup_genID  ->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
-			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_sigSup_genMID ->Fill(fabs(ElGenMID[i])/*, gEventWeight*/);
-			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_sigSup_genMID ->Fill(fabs(ElGenMID[i])/*, gEventWeight*/);
-			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fnloose_sigSup_genGMID->Fill(fabs(ElGenGMID[i])/*, gEventWeight*/);
-			if( isTightElectron(i) && !IsSignalElectron[i] ) S->region[reg][HighPt].ee.fntight_sigSup_genGMID->Fill(fabs(ElGenGMID[i])/*, gEventWeight*/);
-		}
-	}
-	// end filling the gen ID histograms
-
-	int looseMuInd(-1);
-	if(singleMuTrigger() && isSigSupMuEvent(looseMuInd)){
-		if( isTightMuon(looseMuInd) ){
-			S->region[reg][HighPt].mm.fntight->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
-			// marc S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
-			S->region[reg][HighPt].mm.fntight_nv->Fill(NVrtx,                   gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
-		}
-		if( isLooseMuon(looseMuInd) ){
-			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(looseMuInd), MuPt[looseMuInd]);
-			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(looseMuInd), fabs(MuEta[looseMuInd]));
-			S->region[reg][HighPt].mm.fratio_nv ->Fill(isTightMuon(looseMuInd), NVrtx);
-			// marc S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
-			// marc S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
-
-			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
-			S->region[reg][HighPt].mm.fnloose_nv->Fill(NVrtx,                   gEventWeight);
-			// marc S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
-			
-			if (S->datamc > 0) {
-				if (fabs(MuGenMID[looseMuInd]) == 24) S->region[reg][HighPt].mm.sigSup_MID24_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
-				if ((int)fabs(MuGenMID[looseMuInd])/100 == 5) S->region[reg][HighPt].mm.sigSup_MID500_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
-				if ((int)fabs(MuGenMID[looseMuInd])/100 == 4) S->region[reg][HighPt].mm.sigSup_MID400_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
-				if (fabs(MuGenMID[looseMuInd]) == 15) S->region[reg][HighPt].mm.sigSup_MID15_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
-			}
-			float dPhiLooseJet(-1.);
-			dPhiLooseJet = fabs(getClosestJetDPhi(looseMuInd, Muon, 50.)); if (dPhiLooseJet > TMath::Pi()) dPhiLooseJet =- TMath::Pi();
-			S->region[reg][HighPt].mm.sigSup_dPhiLooseJet->Fill(dPhiLooseJet , gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_nJets       ->Fill(getNJets(50.), gEventWeight);
-		}
-		
-		// signal suppressed region with at least one veto muon
-		int mu1(-1), mu2(-1);
-		isSigSupMuEvent(mu1, mu2);
-		if (mu2 > -1) {
-			float dRVetoLoose(-1.), dRVetoJet(-1);
-			dRVetoLoose	= Util::GetDeltaR(MuEta[mu1], MuEta[mu2], MuPhi[mu1], MuPhi[mu2]);	if (fabs(dRVetoLoose) > TMath::Pi()) dRVetoLoose = fabs(dRVetoLoose) - TMath::Pi();
-			dRVetoJet	= getClosestJetDR(mu2, Muon, 50.);									if (fabs(dRVetoJet  ) > TMath::Pi()) dRVetoJet   = fabs(dRVetoJet  ) - TMath::Pi();
-			S->region[reg][HighPt].mm.sigSup_mll           ->Fill(getMll(mu1, mu2, Muon), gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_dRVetoLoose   ->Fill(dRVetoLoose           , gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_dRVetoJet     ->Fill(dRVetoJet             , gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_mllDRVetoLoose->Fill(getMll(mu1, mu2, Muon), dRVetoLoose, gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_jetptDRVetoJet->Fill(getClosestJetPt(mu2, Muon, 50.), dRVetoJet, gEventWeight);
-			S->region[reg][HighPt].mm.sigSup_deltaPtVetoJet->Fill(getClosestJetPt(mu2, Muon, 50.) - MuPt[mu2]);
-		}
-	}
-	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
-		if( isTightMuon(mu2) ){
-			S->region[reg][HighPt].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			S->region[reg][HighPt].mm.pntight_nv->Fill(NVrtx,                    gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
-		}
-		if( isLooseMuon(mu2) ){
-			S->region[reg][HighPt].mm.pratio_pt ->Fill(isTightMuon(mu2), MuPt[mu2]);
-			S->region[reg][HighPt].mm.pratio_eta->Fill(isTightMuon(mu2), fabs(MuEta[mu2]));
-			S->region[reg][HighPt].mm.pratio_nv ->Fill(isTightMuon(mu2), NVrtx);
-			// S->region[reg][HighPt].mm.pratio_pt ->FillWeighted(isTightMuon(mu2), gEventWeight, MuPt[mu2]);
-			// S->region[reg][HighPt].mm.pratio_eta->FillWeighted(isTightMuon(mu2), gEventWeight, fabs(MuEta[mu2]));
-
-			S->region[reg][HighPt].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			S->region[reg][HighPt].mm.pnloose_nv->Fill(NVrtx,                       gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
-		}
-	}
-	resetHypLeptons();
-
+	resetHypLeptons();	
 
 	// EE Channel
 	fCurrentChannel = Elec;
-//	int el1(-1), el2(-1);
+	int el1(-1), el2(-1);
 	if(elelSignalTrigger()){
 		if(fDoCounting) fCounter[Elec].fill(fEECutNames[2]);
 		if( isSSLLElEvent(el1, el2) ){
@@ -955,83 +807,6 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 		}
 		resetHypLeptons();
 	}
-	int looseElInd(-1);
-	if(singleElTrigger() && isSigSupElEvent(looseElInd)){
-		if( isTightElectron(looseElInd) ){
-			S->region[reg][HighPt].ee.fntight->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
-			S->region[reg][HighPt].ee.fntight_nv->Fill(NVrtx,                   gEventWeight);
-			// marc S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
-		}
-		if( isLooseElectron(looseElInd) ){
-			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(looseElInd), ElPt[looseElInd]);
-			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(looseElInd), fabs(ElEta[looseElInd]));
-			S->region[reg][HighPt].ee.fratio_nv ->Fill(isTightElectron(looseElInd), NVrtx);
-			// marc S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
-			// marc S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
-
-			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
-			S->region[reg][HighPt].ee.fnloose_nv->Fill(NVrtx,                   gEventWeight);
-			// marc S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
-		}
-		
-		// signal suppressed region with at least one veto electron
-		int el1(-1), el2(-1);
-		isSigSupElEvent(el1, el2);
-		if (el2 > 0) {
-			S->region[reg][HighPt].ee.sigSup_mll        ->Fill(getMll(el1, el2, Elec)                                         , gEventWeight);
-			S->region[reg][HighPt].ee.sigSup_dRVetoLoose->Fill(Util::GetDeltaR(ElEta[el1], ElEta[el2], ElPhi[el1], ElPhi[el2]), gEventWeight);
-			S->region[reg][HighPt].ee.sigSup_dRVetoJet  ->Fill(getClosestJetDR(el2, Elec, 50.)                                , gEventWeight);
-		}
-	}
-	int elind;
-	if(doubleElTrigger() && isZElElEvent(el1, el2)){
-		if( isTightElectron(el2) ){
-			S->region[reg][HighPt].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			S->region[reg][HighPt].ee.pntight_nv->Fill(NVrtx,                       gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
-		}
-		if( isLooseElectron(el2) ){
-			S->region[reg][HighPt].ee.pratio_pt ->Fill(isTightElectron(el2), ElPt[el2]);
-			S->region[reg][HighPt].ee.pratio_eta->Fill(isTightElectron(el2), fabs(ElEta[el2]));
-			S->region[reg][HighPt].ee.pratio_nv ->Fill(isTightElectron(el2), NVrtx);
-			// S->region[reg][HighPt].ee.pratio_pt ->FillWeighted(isTightElectron(el2), gEventWeight, ElPt[el2]);
-			// S->region[reg][HighPt].ee.pratio_eta->FillWeighted(isTightElectron(el2), gEventWeight, fabs(ElEta[el2]));
-
-			S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			S->region[reg][HighPt].ee.pnloose_nv->Fill(NVrtx,                       gEventWeight);
-			if(S->datamc > 0) S->region[reg][HighPt].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
-		}
-	}
-	if (doubleElTrigger() && isZElElChMisIdEvent(el1, el2)){
-	  if ( ElCharge[el1] != ElCharge[el2]) {  //OS pair
-	    S->region[reg][HighPt].ee.ospairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-	  }
-	  if ( ElCharge[el1] == ElCharge[el2]) {  //SS pair
-	    S->region[reg][HighPt].ee.sspairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-	  }
-
-	  // Calculating the systematics of the ch. mid background                                                                                                                                                                            
-	  bool isSS = (ElCharge[el1] == ElCharge[el2]);
-          if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
-            S->region[reg][HighPt].ee.chmid_BB_pt->Fill(isSS, ElPt[el1]);
-            S->region[reg][HighPt].ee.chmid_BB_pt->Fill(isSS, ElPt[el2]);
-          }
-          if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) {
-	    S->region[reg][HighPt].ee.chmid_EE_pt->Fill(isSS, ElPt[el1]);
-	    S->region[reg][HighPt].ee.chmid_EE_pt->Fill(isSS, ElPt[el2]);
-	  }
-	  if( isBarrelElectron(el1) && !isBarrelElectron(el2)) {
-            S->region[reg][HighPt].ee.chmid_BE_pt->Fill(isSS, ElPt[el1]);
-            S->region[reg][HighPt].ee.chmid_BE_pt->Fill(isSS, ElPt[el2]);
-          }
-          if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
-	    S->region[reg][HighPt].ee.chmid_BE_pt->Fill(isSS, ElPt[el1]);
-	    S->region[reg][HighPt].ee.chmid_BE_pt->Fill(isSS, ElPt[el2]);
-	  }
-	}
-
 	resetHypLeptons();
 	
 	// EMu Channel
@@ -1570,6 +1345,230 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 		fC_maxMt_Control = tmp_mtC;
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
+	resetHypLeptons();
+}
+void SSDLDumper::fillTLRatios(Sample *S){
+        // Fill TL Ratio plots only once
+        setRegionCuts(gRegion["Baseline"]);
+	resetHypLeptons();
+
+	fCurrentChannel = Muon;
+	// QCD Control Region
+	int looseMuInd(-1);
+	if(singleMuTrigger() && isSigSupMuEvent(looseMuInd)){
+		if( isTightMuon(looseMuInd) ){
+			S->tlratios[0].fntight   ->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);	
+			S->tlratios[0].fntight_nv->Fill(NVrtx,                                     gEventWeight);
+			if(S->datamc > 0) S->tlratios[0].sst_origin->Fill(muIndexToBin(0)-0.5,     gEventWeight);
+		}
+		if( isLooseMuon(looseMuInd) ){
+			S->tlratios[0].fratio_pt ->Fill(isTightMuon(looseMuInd), MuPt[looseMuInd]);
+			S->tlratios[0].fratio_eta->Fill(isTightMuon(looseMuInd), fabs(MuEta[looseMuInd]));
+			S->tlratios[0].fratio_nv ->Fill(isTightMuon(looseMuInd), NVrtx);
+
+			S->tlratios[0].fnloose   ->Fill(MuPt[looseMuInd], fabs(MuEta[looseMuInd]), gEventWeight);
+			S->tlratios[0].fnloose_nv->Fill(NVrtx,                                     gEventWeight);
+			if(S->datamc > 0) S->tlratios[0].ssl_origin->Fill(muIndexToBin(0)-0.5,     gEventWeight);
+			
+			if (S->datamc > 0) {
+				if (fabs(MuGenMID[looseMuInd]) == 24)         S->tlratios[0].sigSup_MID24_Iso ->Fill(MuPFIso[looseMuInd], gEventWeight);
+				if ((int)fabs(MuGenMID[looseMuInd])/100 == 5) S->tlratios[0].sigSup_MID500_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
+				if ((int)fabs(MuGenMID[looseMuInd])/100 == 4) S->tlratios[0].sigSup_MID400_Iso->Fill(MuPFIso[looseMuInd], gEventWeight);
+				if (fabs(MuGenMID[looseMuInd]) == 15)         S->tlratios[0].sigSup_MID15_Iso ->Fill(MuPFIso[looseMuInd], gEventWeight);
+			}
+			float dPhiLooseJet(-1.);
+			dPhiLooseJet = fabs(getClosestJetDPhi(looseMuInd, Muon, 50.)); 	if (dPhiLooseJet > TMath::Pi()) dPhiLooseJet =- TMath::Pi();
+			S->tlratios[0].sigSup_dPhiLooseJet->Fill(dPhiLooseJet , gEventWeight);
+			S->tlratios[0].sigSup_nJets       ->Fill(getNJets(50.), gEventWeight);
+		}
+		
+		// signal suppressed region with at least one veto muon
+		int mu1(-1), mu2(-1);
+		isSigSupMuEvent(mu1, mu2);
+		if (mu2 > 0) {
+			float dRVetoLoose(-1.), dRVetoJet(-1);
+			dRVetoLoose	= Util::GetDeltaR(MuEta[mu1], MuEta[mu2], MuPhi[mu1], MuPhi[mu2]);	if (fabs(dRVetoLoose) > TMath::Pi()) dRVetoLoose = fabs(dRVetoLoose) - TMath::Pi();
+			dRVetoJet	= getClosestJetDR(mu2, Muon, 50.);									if (fabs(dRVetoJet  ) > TMath::Pi()) dRVetoJet   = fabs(dRVetoJet  ) - TMath::Pi();
+			S->tlratios[0].sigSup_mll           ->Fill(getMll(mu1, mu2, Muon), gEventWeight);
+			S->tlratios[0].sigSup_dRVetoLoose   ->Fill(dRVetoLoose           , gEventWeight);
+			S->tlratios[0].sigSup_dRVetoJet     ->Fill(dRVetoJet             , gEventWeight);
+			S->tlratios[0].sigSup_mllDRVetoLoose->Fill(getMll(mu1, mu2, Muon), dRVetoLoose, gEventWeight);
+			S->tlratios[0].sigSup_jetptDRVetoJet->Fill(getClosestJetPt(mu2, Muon, 50.), dRVetoJet, gEventWeight);
+			S->tlratios[0].sigSup_deltaPtVetoJet->Fill(getClosestJetPt(mu2, Muon, 50.) - MuPt[mu2]);
+		}
+	}
+	// ZMuMu Control Region
+	int mu1(-1), mu2(-1);
+	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
+		if( isTightMuon(mu2) ){
+			S->tlratios[0].pntight   ->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			S->tlratios[0].pntight_nv->Fill(NVrtx,                       gEventWeight);
+			if(S->datamc > 0) S->tlratios[0].zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
+		}
+		if( isLooseMuon(mu2) ){
+			S->tlratios[0].pratio_pt ->Fill(isTightMuon(mu2), MuPt[mu2]);
+			S->tlratios[0].pratio_eta->Fill(isTightMuon(mu2), fabs(MuEta[mu2]));
+			S->tlratios[0].pratio_nv ->Fill(isTightMuon(mu2), NVrtx);
+
+			S->tlratios[0].pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			S->tlratios[0].pnloose_nv->Fill(NVrtx,                    gEventWeight);
+			if(S->datamc > 0) S->tlratios[0].zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
+		}
+	}
+	resetHypLeptons();
+	
+	// Electron QCD Control region
+	fCurrentChannel = Elec;
+	int looseElInd(-1);
+	if(singleElTrigger() && isSigSupElEvent(looseElInd)){
+		if( isTightElectron(looseElInd) ){
+			S->tlratios[1].fntight   ->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
+			S->tlratios[1].fntight_nv->Fill(NVrtx,                                     gEventWeight);
+			if(S->datamc > 0) S->tlratios[1].sst_origin->Fill(elIndexToBin(0)-0.5,     gEventWeight);
+		}
+		if( isLooseElectron(looseElInd) ){
+			S->tlratios[1].fratio_pt ->Fill(isTightElectron(looseElInd), ElPt[looseElInd]);
+			S->tlratios[1].fratio_eta->Fill(isTightElectron(looseElInd), fabs(ElEta[looseElInd]));
+			S->tlratios[1].fratio_nv ->Fill(isTightElectron(looseElInd), NVrtx);
+
+			S->tlratios[1].fnloose   ->Fill(ElPt[looseElInd], fabs(ElEta[looseElInd]), gEventWeight);
+			S->tlratios[1].fnloose_nv->Fill(NVrtx,                                     gEventWeight);
+			if(S->datamc > 0) S->tlratios[1].ssl_origin->Fill(elIndexToBin(0)-0.5,     gEventWeight);
+		}
+		
+		// signal suppressed region with at least one veto electron
+		int el1(-1), el2(-1);
+		isSigSupElEvent(el1, el2);
+		if (el2 > 0) {
+			S->tlratios[1].sigSup_mll        ->Fill(getMll(el1, el2, Elec)                                         , gEventWeight);
+			S->tlratios[1].sigSup_dRVetoLoose->Fill(Util::GetDeltaR(ElEta[el1], ElEta[el2], ElPhi[el1], ElPhi[el2]), gEventWeight);
+			S->tlratios[1].sigSup_dRVetoJet  ->Fill(getClosestJetDR(el2, Elec, 50.)                                , gEventWeight);
+		}
+	}
+
+	int el1(-1), el2(-1);
+	if(doubleElTrigger() && isZElElEvent(el1, el2)){
+		if( isTightElectron(el2) ){
+			S->tlratios[1].pntight   ->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			S->tlratios[1].pntight_nv->Fill(NVrtx,                       gEventWeight);
+			if(S->datamc > 0) S->tlratios[1].zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
+		}
+		if( isLooseElectron(el2) ){
+			S->tlratios[1].pratio_pt ->Fill(isTightElectron(el2), ElPt[el2]);
+			S->tlratios[1].pratio_eta->Fill(isTightElectron(el2), fabs(ElEta[el2]));
+			S->tlratios[1].pratio_nv ->Fill(isTightElectron(el2), NVrtx);
+
+			S->tlratios[1].pnloose   ->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			S->tlratios[1].pnloose_nv->Fill(NVrtx,                       gEventWeight);
+			if(S->datamc > 0) S->tlratios[1].zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
+		}
+	}
+	
+	// USING GEN INFORMATION 
+	// filling histos for ttbar only ratios. 
+	if(S->sname == "TTJets"){
+		for (int i =0 ; i < NMus; ++i) {
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isLooseMuon(i) &&  IsSignalMuon[i] ) S->tlratios[0].pnloose_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+			if( isTightMuon(i) &&  IsSignalMuon[i] ) S->tlratios[0].pntight_ttbar->Fill(MuPt[i], fabs(MuEta[i]), gEventWeight);
+		}
+		for (int i =0 ; i < NEls; ++i) {
+			if ( abs(ElGenID[i])  == 13 ) continue;
+			if ( abs(ElGenID[i]) == 0  )  continue;
+			if ( abs(ElGenMID[i]) == 13 ) continue;
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isLooseElectron(i) &&  IsSignalElectron[i] ) S->tlratios[1].pnloose_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+			if( isTightElectron(i) &&  IsSignalElectron[i] ) S->tlratios[1].pntight_ttbar->Fill(ElPt[i], fabs(ElEta[i]), gEventWeight);
+		}
+	}
+	
+	// filling histos for with gen ID of truth matched fake leptons
+	for (int i = 0 ; i < NMus; ++i) {
+		if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+		if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+
+		// same sign mu pair in the event
+		if (fabs(isSSLLEvent(mu1, mu2)) == 1) {
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_sig_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_sig_genID->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+			
+			if (!isLooseMuon(i)) continue;
+			if (fabs(MuGenMID[i]) == 24)         S->tlratios[0].sig_MID24_Iso ->Fill(MuPFIso[i], gEventWeight);
+			if ((int)fabs(MuGenMID[i])/100 == 5) S->tlratios[0].sig_MID500_Iso->Fill(MuPFIso[i], gEventWeight);
+			if ((int)fabs(MuGenMID[i])/100 == 4) S->tlratios[0].sig_MID400_Iso->Fill(MuPFIso[i], gEventWeight);
+			if (fabs(MuGenMID[i]) == 15)         S->tlratios[0].sig_MID15_Iso ->Fill(MuPFIso[i], gEventWeight);
+		}
+		// signal suppressed region
+		if (isSigSupMuEvent()/* && getNBTagsMed() > 0*/) {
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_sigSup_genID  ->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_sigSup_genID  ->Fill(fabs(MuGenID[i])/*, gEventWeight*/);
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_sigSup_genMID ->Fill(fabs(MuGenMID[i])/*, gEventWeight*/);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_sigSup_genMID ->Fill(fabs(MuGenMID[i])/*, gEventWeight*/);
+			if( isLooseMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fnloose_sigSup_genGMID->Fill(fabs(MuGenGMID[i])/*, gEventWeight*/);
+			if( isTightMuon(i) && !IsSignalMuon[i] ) S->tlratios[0].fntight_sigSup_genGMID->Fill(fabs(MuGenGMID[i])/*, gEventWeight*/);
+			
+		}	
+	}
+
+	for (int i = 0 ; i < NEls; ++i) {
+		if ( abs(ElGenID[i])  == 13 ) continue;
+		if ( abs(ElGenMID[i]) == 13 ) continue;
+		if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+		if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+
+		// same sign el pair in the event
+		if (fabs(isSSLLEvent(el1, el2)) == 2) {
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_sig_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_sig_genID->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+		}
+		if (isSigSupElEvent()) {
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_sigSup_genID  ->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_sigSup_genID  ->Fill(fabs(ElGenID[i])/*, gEventWeight*/);
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_sigSup_genMID ->Fill(fabs(ElGenMID[i])/*, gEventWeight*/);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_sigSup_genMID ->Fill(fabs(ElGenMID[i])/*, gEventWeight*/);
+			if( isLooseElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fnloose_sigSup_genGMID->Fill(fabs(ElGenGMID[i])/*, gEventWeight*/);
+			if( isTightElectron(i) && !IsSignalElectron[i] ) S->tlratios[1].fntight_sigSup_genGMID->Fill(fabs(ElGenGMID[i])/*, gEventWeight*/);
+		}
+	}
+	// end filling the gen ID histograms
+	resetHypLeptons();
+}
+void SSDLDumper::fillChMisIDProb(Sample *S){
+        // Fill TL Ratio plots only once
+        setRegionCuts(gRegion["Baseline"]);
+	resetHypLeptons();
+         
+        fCurrentChannel = Elec;
+	int el1(-1), el2(-1);
+	if (doubleElTrigger() && isZElElChMisIdEvent(el1, el2)){
+	        if ( ElCharge[el1] != ElCharge[el2]) {  //OS pair
+	                S->chmisid.ospairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+		}
+		if ( ElCharge[el1] == ElCharge[el2]) {  //SS pair
+	                S->chmisid.sspairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+		}
+
+		// Calculating the systematics of the ch. mid background                                                                                                                                                                            
+		bool isSS = (ElCharge[el1] == ElCharge[el2]);
+		if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
+		        S->chmisid.chmid_BB_pt->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_BB_pt->Fill(isSS, ElPt[el2]);
+		}
+		if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) {
+		        S->chmisid.chmid_EE_pt->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_EE_pt->Fill(isSS, ElPt[el2]);
+		}
+		if( isBarrelElectron(el1) && !isBarrelElectron(el2)) {
+		        S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el2]);
+		}
+		if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
+		        S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el2]);
+		}
+	}
 	resetHypLeptons();
 }
 void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
@@ -2635,10 +2634,13 @@ void SSDLDumper::storeNumbers(Sample *S, gChannel chan, int reg){
 	S->numbers[reg][chan].ll_avweight = C->nt00_pt->GetEntries()>0?C->nt00_pt->Integral(0, getNFPtBins(chan)+1)/C->nt00_pt->GetEntries():1.;
 	
 	if(chan != ElMu){
-		S->numbers[reg][chan].nsst = C->fntight->GetEntries();
-		S->numbers[reg][chan].nssl = C->fnloose->GetEntries();
-		S->numbers[reg][chan].nzt  = C->pntight->GetEntries();
-		S->numbers[reg][chan].nzl  = C->pnloose->GetEntries();
+	        int muelswitch = -1;
+	        if      (chan == Muon) muelswitch = 0;
+		else if (chan == Elec) muelswitch = 1;
+		S->numbers[reg][chan].nsst = S->tlratios[muelswitch].fntight->GetEntries();
+		S->numbers[reg][chan].nssl = S->tlratios[muelswitch].fnloose->GetEntries();
+		S->numbers[reg][chan].nzt  = S->tlratios[muelswitch].pntight->GetEntries();
+		S->numbers[reg][chan].nzl  = S->tlratios[muelswitch].pnloose->GetEntries();
 	}
 }
 
@@ -3211,6 +3213,101 @@ void SSDLDumper::bookHistos(Sample *S){
 		}
 	}
 
+	// TLRATIOS 
+	for(size_t l = 0; l < 2; ++l){
+	        gChannel c = channels_begin;
+		if      (l == 0) c = Muon; 
+		else if (l == 1) c = Elec; 
+	        TString rootname = S->sname + "_" + gChanLabel[c];
+	        S->tlratios[l].fntight  = new TH2D(rootname + "_fNTight",  "fNTight",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].fntight ->Sumw2();
+		S->tlratios[l].fnloose  = new TH2D(rootname + "_fNLoose",  "fNLoose",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].fnloose ->Sumw2();
+		S->tlratios[l].pntight  = new TH2D(rootname + "_pNTight",  "pNTight",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].pntight ->Sumw2();
+		S->tlratios[l].pnloose  = new TH2D(rootname + "_pNLoose",  "pNLoose",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].pnloose ->Sumw2();
+
+		S->tlratios[l].fntight_nv  = new TH1D(rootname + "_fNTight_nv",  "fNTight_nv", 18, 0., 36.); S->tlratios[l].fntight_nv ->Sumw2();
+		S->tlratios[l].fnloose_nv  = new TH1D(rootname + "_fNLoose_nv",  "fNLoose_nv", 18, 0., 36.); S->tlratios[l].fnloose_nv ->Sumw2();
+		S->tlratios[l].pntight_nv  = new TH1D(rootname + "_pNTight_nv",  "pNTight_nv", 18, 0., 36.); S->tlratios[l].pntight_nv ->Sumw2();
+		S->tlratios[l].pnloose_nv  = new TH1D(rootname + "_pNLoose_nv",  "pNLoose_nv", 18, 0., 36.); S->tlratios[l].pnloose_nv ->Sumw2();
+		// duplicate for only ttbar ratios
+		S->tlratios[l].fntight_ttbar  = new TH2D(rootname + "_fNTight_ttbar",  "fNTight_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].fntight_ttbar ->Sumw2();
+		S->tlratios[l].fnloose_ttbar  = new TH2D(rootname + "_fNLoose_ttbar",  "fNLoose_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].fnloose_ttbar ->Sumw2();
+		S->tlratios[l].pntight_ttbar  = new TH2D(rootname + "_pNTight_ttbar",  "pNTight_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].pntight_ttbar ->Sumw2();
+		S->tlratios[l].pnloose_ttbar  = new TH2D(rootname + "_pNLoose_ttbar",  "pNLoose_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); S->tlratios[l].pnloose_ttbar ->Sumw2();
+
+		//gen ID
+		S->tlratios[l].fntight_genID  = new TH1D(rootname + "_fNTight_genID",  "fNTight_genID",  1001, -0.5, 1000.5); S->tlratios[l].fntight_genID ->Sumw2();
+		S->tlratios[l].fnloose_genID  = new TH1D(rootname + "_fNLoose_genID",  "fNLoose_genID",  1001, -0.5, 1000.5); S->tlratios[l].fnloose_genID ->Sumw2();
+		S->tlratios[l].pntight_genID  = new TH1D(rootname + "_pNTight_genID",  "pNTight_genID",  1001, -0.5, 1000.5); S->tlratios[l].pntight_genID ->Sumw2();
+		S->tlratios[l].pnloose_genID  = new TH1D(rootname + "_pNLoose_genID",  "pNLoose_genID",  1001, -0.5, 1000.5); S->tlratios[l].pnloose_genID ->Sumw2();
+
+		S->tlratios[l].fntight_sig_genID  = new TH1D(rootname + "_fNTight_sig_genID",  "fNTight_sig_genID",  1001, -0.5, 1000.5); S->tlratios[l].fntight_sig_genID ->Sumw2();
+		S->tlratios[l].fnloose_sig_genID  = new TH1D(rootname + "_fNLoose_sig_genID",  "fNLoose_sig_genID",  1001, -0.5, 1000.5); S->tlratios[l].fnloose_sig_genID ->Sumw2();
+		S->tlratios[l].pntight_sig_genID  = new TH1D(rootname + "_pNTight_sig_genID",  "pNTight_sig_genID",  1001, -0.5, 1000.5); S->tlratios[l].pntight_sig_genID ->Sumw2();
+		S->tlratios[l].pnloose_sig_genID  = new TH1D(rootname + "_pNLoose_sig_genID",  "pNLoose_sig_genID",  1001, -0.5, 1000.5); S->tlratios[l].pnloose_sig_genID ->Sumw2();
+
+		S->tlratios[l].fntight_sigSup_genID  = new TH1D(rootname + "_fNTight_sigSup_genID",  "fNTight_sigSup_genID",  1001, -0.5, 1000.5); S->tlratios[l].fntight_sigSup_genID ->Sumw2();
+		S->tlratios[l].fnloose_sigSup_genID  = new TH1D(rootname + "_fNLoose_sigSup_genID",  "fNLoose_sigSup_genID",  1001, -0.5, 1000.5); S->tlratios[l].fnloose_sigSup_genID ->Sumw2();
+		S->tlratios[l].pntight_sigSup_genID  = new TH1D(rootname + "_pNTight_sigSup_genID",  "pNTight_sigSup_genID",  1001, -0.5, 1000.5); S->tlratios[l].pntight_sigSup_genID ->Sumw2();
+		S->tlratios[l].pnloose_sigSup_genID  = new TH1D(rootname + "_pNLoose_sigSup_genID",  "pNLoose_sigSup_genID",  1001, -0.5, 1000.5); S->tlratios[l].pnloose_sigSup_genID ->Sumw2();
+
+		S->tlratios[l].fntight_sigSup_genMID  = new TH1D(rootname + "_fNTight_sigSup_genMID",  "fNTight_sigSup_genMID",  1001, -0.5, 1000.5); S->tlratios[l].fntight_sigSup_genMID ->Sumw2();
+		S->tlratios[l].fnloose_sigSup_genMID  = new TH1D(rootname + "_fNLoose_sigSup_genMID",  "fNLoose_sigSup_genMID",  1001, -0.5, 1000.5); S->tlratios[l].fnloose_sigSup_genMID ->Sumw2();
+		S->tlratios[l].pntight_sigSup_genMID  = new TH1D(rootname + "_pNTight_sigSup_genMID",  "pNTight_sigSup_genMID",  1001, -0.5, 1000.5); S->tlratios[l].pntight_sigSup_genMID ->Sumw2();
+		S->tlratios[l].pnloose_sigSup_genMID  = new TH1D(rootname + "_pNLoose_sigSup_genMID",  "pNLoose_sigSup_genMID",  1001, -0.5, 1000.5); S->tlratios[l].pnloose_sigSup_genMID ->Sumw2();
+
+		S->tlratios[l].fntight_sigSup_genGMID  = new TH1D(rootname + "_fNTight_sigSup_genGMID",  "fNTight_sigSup_genGMID",  1001, -0.5, 1000.5); S->tlratios[l].fntight_sigSup_genGMID ->Sumw2();
+		S->tlratios[l].fnloose_sigSup_genGMID  = new TH1D(rootname + "_fNLoose_sigSup_genGMID",  "fNLoose_sigSup_genGMID",  1001, -0.5, 1000.5); S->tlratios[l].fnloose_sigSup_genGMID ->Sumw2();
+		S->tlratios[l].pntight_sigSup_genGMID  = new TH1D(rootname + "_pNTight_sigSup_genGMID",  "pNTight_sigSup_genGMID",  1001, -0.5, 1000.5); S->tlratios[l].pntight_sigSup_genGMID ->Sumw2();
+		S->tlratios[l].pnloose_sigSup_genGMID  = new TH1D(rootname + "_pNLoose_sigSup_genGMID",  "pNLoose_sigSup_genGMID",  1001, -0.5, 1000.5); S->tlratios[l].pnloose_sigSup_genGMID ->Sumw2();
+
+		S->tlratios[l].fratio_pt  = new TEfficiency(rootname + "_fRatio_pt",  "fRatio_pt",  getNFPtBins(c), getFPtBins(c));
+		S->tlratios[l].fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
+		S->tlratios[l].pratio_pt  = new TEfficiency(rootname + "_pRatio_pt",  "pRatio_pt",  getNPPtBins(c), getPPtBins(c));
+		S->tlratios[l].pratio_eta = new TEfficiency(rootname + "_pRatio_eta", "pRatio_eta", getNEtaBins(c), getEtaBins(c));
+		S->tlratios[l].fratio_nv  = new TEfficiency(rootname + "_fRatio_nv",  "fRatio_nv",  18, 0., 36.);
+		S->tlratios[l].pratio_nv  = new TEfficiency(rootname + "_pRatio_nv",  "pRatio_nv",  18, 0., 36.);
+
+		// signal suppressed region
+		S->tlratios[l].sigSup_mll            = new TH1D(rootname + "_sigSup_mll",            "sigSup_mll",  50, 0., 10.);	                       S->tlratios[l].sigSup_mll           ->Sumw2(); // m(loose lep, veto lep)
+		S->tlratios[l].sigSup_dRVetoLoose    = new TH1D(rootname + "_sigSup_dRVetoLoose",    "sigSup_dRVetoLoose",  100, 0., 3.5);	               S->tlratios[l].sigSup_dRVetoLoose   ->Sumw2(); // dR(veto lep, loose lep)
+		S->tlratios[l].sigSup_dRVetoJet	     = new TH1D(rootname + "_sigSup_dRVetoJet"  ,    "sigSup_dRVetoJet"  ,  100, 0., 3.5);	               S->tlratios[l].sigSup_dRVetoJet     ->Sumw2(); // dR(veto lep, jet > 50 GeV)
+		S->tlratios[l].sigSup_mllDRVetoLoose = new TH2D(rootname + "_sigSup_mllDRVetoLoose", "sigSup_mllDRVetoLoose", 750, 0., 150., 100, 0., 3.5);    S->tlratios[l].sigSup_mllDRVetoLoose->Sumw2(); // m(loose lep, veto lep) vs dR(veto lep, loose lep)
+		S->tlratios[l].sigSup_jetptDRVetoJet = new TH2D(rootname + "_sigSup_jetptDRVetoJet", "sigSup_jetptDRVetoJet"  , 100, 0., 200., 100, 0., 3.5);  S->tlratios[l].sigSup_jetptDRVetoJet->Sumw2(); // jet pT vs dR(veto lep, jet > 50 GeV)
+		S->tlratios[l].sigSup_deltaPtVetoJet = new TH1D(rootname + "_sigSup_deltaPtVetoJet", "sigSup_deltaPtVetoJet"  , 200, -200., 200.);	       S->tlratios[l].sigSup_deltaPtVetoJet->Sumw2(); // delta pT(veto lep, jet > 50 GeV)
+		S->tlratios[l].sigSup_MID24_Iso      = new TH1D(rootname + "_sigSup_MID24_Iso"  ,    "sigSup_MID24_Iso"  , 200, 0., 1.);	               S->tlratios[l].sigSup_MID24_Iso     ->Sumw2(); // isolation if mom is W
+		S->tlratios[l].sigSup_MID500_Iso     = new TH1D(rootname + "_sigSup_MID500_Iso"  ,   "sigSup_MID500_Iso"  , 200, 0., 1.);		       S->tlratios[l].sigSup_MID500_Iso    ->Sumw2(); // isolation if mom is B
+		S->tlratios[l].sigSup_MID400_Iso     = new TH1D(rootname + "_sigSup_MID400_Iso"  ,   "sigSup_MID400_Iso"  , 200, 0., 1.);		       S->tlratios[l].sigSup_MID400_Iso    ->Sumw2(); // isolation if mom is 4**
+		S->tlratios[l].sigSup_MID15_Iso	     = new TH1D(rootname + "_sigSup_MID15_Iso"  ,    "sigSup_MID15_Iso"  , 200, 0., 1.);		       S->tlratios[l].sigSup_MID15_Iso     ->Sumw2(); // isolation if mom is tau
+		S->tlratios[l].sigSup_dPhiLooseJet   = new TH1D(rootname + "_sigSup_dPhiLooseJet",   "sigSup_dPhiLooseJet"  , 200, 0., 3.5);	               S->tlratios[l].sigSup_dPhiLooseJet  ->Sumw2(); // dPhi(loose, jet > 50 GeV)
+		S->tlratios[l].sigSup_nJets	     = new TH1D(rootname + "_sigSup_nJets"  ,        "sigSup_nJets"  , 5, 0., 5.); 	                       S->tlratios[l].sigSup_nJets         ->Sumw2(); // nJets
+				
+		// same sign loose-loose leptons
+		S->tlratios[l].sig_MID24_Iso  = new TH1D(rootname + "_sig_MID24_Iso" , "sig_MID24_Iso" , 200, 0., 1.);	S->tlratios[l].sig_MID24_Iso ->Sumw2();	// isolation if mom is W
+		S->tlratios[l].sig_MID500_Iso = new TH1D(rootname + "_sig_MID500_Iso", "sig_MID500_Iso", 200, 0., 1.);	S->tlratios[l].sig_MID500_Iso->Sumw2();	// isolation if mom is B
+		S->tlratios[l].sig_MID400_Iso = new TH1D(rootname + "_sig_MID400_Iso", "sig_MID400_Iso", 200, 0., 1.);	S->tlratios[l].sig_MID400_Iso->Sumw2();	// isolation if mom is 4**
+		S->tlratios[l].sig_MID15_Iso  = new TH1D(rootname + "_sig_MID15_Iso" , "sig_MID15_Iso" , 200, 0., 1.);	S->tlratios[l].sig_MID15_Iso ->Sumw2();	// isolation if mom is tau
+
+		if(S->datamc > 0){
+			S->tlratios[l].sst_origin = new TH1D(rootname + "_fTOrigin", "fTOrigin", 15, 0, 15); S->tlratios[l].sst_origin->Sumw2();
+			S->tlratios[l].ssl_origin = new TH1D(rootname + "_fLOrigin", "fLOrigin", 15, 0, 15); S->tlratios[l].ssl_origin->Sumw2();
+			S->tlratios[l].zt_origin  = new TH1D(rootname + "_pTOrigin", "pTOrigin", 15, 0, 15); S->tlratios[l].zt_origin ->Sumw2();
+			S->tlratios[l].zl_origin  = new TH1D(rootname + "_pLOrigin", "pLOrigin", 15, 0, 15); S->tlratios[l].zl_origin ->Sumw2();
+			labelOriginAxis(S->tlratios[l].sst_origin->GetXaxis() , c);
+			labelOriginAxis(S->tlratios[l].ssl_origin->GetXaxis() , c);
+			labelOriginAxis(S->tlratios[l].zt_origin->GetXaxis()  , c);
+			labelOriginAxis(S->tlratios[l].zl_origin->GetXaxis()  , c);
+		}
+	}
+	// CHARGE MIS ID
+	TString chmidname = Form("%s_%s", S->sname.Data(), gChanLabel[Elec].Data());
+	S->chmisid.ospairs = new TH2D(chmidname + "_ospairs", "ospairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); S->chmisid.ospairs->Sumw2();
+	S->chmisid.sspairs = new TH2D(chmidname + "_sspairs", "sspairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); S->chmisid.sspairs->Sumw2();
+
+	S->chmisid.chmid_BB_pt = new TEfficiency(chmidname + "_chmid_BB_pt", "ChMid_BB_pt", getNPPtBins(Elec), getPPtBins(Elec));
+	S->chmisid.chmid_EE_pt = new TEfficiency(chmidname + "_chmid_EE_pt", "ChMid_EE_pt", getNPPtBins(Elec), getPPtBins(Elec));
+	S->chmisid.chmid_BE_pt = new TEfficiency(chmidname + "_chmid_BE_pt", "ChMid_BE_pt", getNPPtBins(Elec), getPPtBins(Elec));
+	
+	
 	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
 		int r = gRegion[(*regIt)->sname];
 		Region *R = &S->region[r][HighPt];
@@ -3288,125 +3385,6 @@ void SSDLDumper::bookHistos(Sample *S){
 				C->nt00_OS_BB_pt = new TH2D(rootname + "_NT00_OS_BB_pt",  "NT00_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt00_OS_BB_pt ->Sumw2();
 				C->nt00_OS_EE_pt = new TH2D(rootname + "_NT00_OS_EE_pt",  "NT00_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt00_OS_EE_pt ->Sumw2();
 			}
-
-			// Ratios
-			if(c != ElMu){
-				C->fntight  = new TH2D(rootname + "_fNTight",  "fNTight",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fntight ->Sumw2();
-				C->fnloose  = new TH2D(rootname + "_fNLoose",  "fNLoose",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose ->Sumw2();
-				C->pntight  = new TH2D(rootname + "_pNTight",  "pNTight",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight ->Sumw2();
-				C->pnloose  = new TH2D(rootname + "_pNLoose",  "pNLoose",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose ->Sumw2();
-
-				C->fntight_nv  = new TH1D(rootname + "_fNTight_nv",  "fNTight_nv", 18, 0., 36.); C->fntight_nv ->Sumw2();
-				C->fnloose_nv  = new TH1D(rootname + "_fNLoose_nv",  "fNLoose_nv", 18, 0., 36.); C->fnloose_nv ->Sumw2();
-				C->pntight_nv  = new TH1D(rootname + "_pNTight_nv",  "pNTight_nv", 18, 0., 36.); C->pntight_nv ->Sumw2();
-				C->pnloose_nv  = new TH1D(rootname + "_pNLoose_nv",  "pNLoose_nv", 18, 0., 36.); C->pnloose_nv ->Sumw2();
-				// duplicate for only ttbar ratios
-				C->fntight_ttbar  = new TH2D(rootname + "_fNTight_ttbar",  "fNTight_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fntight_ttbar ->Sumw2();
-				C->fnloose_ttbar  = new TH2D(rootname + "_fNLoose_ttbar",  "fNLoose_ttbar",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose_ttbar ->Sumw2();
-				C->pntight_ttbar  = new TH2D(rootname + "_pNTight_ttbar",  "pNTight_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight_ttbar ->Sumw2();
-				C->pnloose_ttbar  = new TH2D(rootname + "_pNLoose_ttbar",  "pNLoose_ttbar",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose_ttbar ->Sumw2();
-				
-				// gen ID
-				C->fntight_genID  = new TH1D(rootname + "_fNTight_genID",  "fNTight_genID",  1001, -0.5, 1000.5); C->fntight_genID ->Sumw2();
-				C->fnloose_genID  = new TH1D(rootname + "_fNLoose_genID",  "fNLoose_genID",  1001, -0.5, 1000.5); C->fnloose_genID ->Sumw2();
-				C->pntight_genID  = new TH1D(rootname + "_pNTight_genID",  "pNTight_genID",  1001, -0.5, 1000.5); C->pntight_genID ->Sumw2();
-				C->pnloose_genID  = new TH1D(rootname + "_pNLoose_genID",  "pNLoose_genID",  1001, -0.5, 1000.5); C->pnloose_genID ->Sumw2();
-				
-				C->fntight_sig_genID  = new TH1D(rootname + "_fNTight_sig_genID",  "fNTight_sig_genID",  1001, -0.5, 1000.5); C->fntight_sig_genID ->Sumw2();
-				C->fnloose_sig_genID  = new TH1D(rootname + "_fNLoose_sig_genID",  "fNLoose_sig_genID",  1001, -0.5, 1000.5); C->fnloose_sig_genID ->Sumw2();
-				C->pntight_sig_genID  = new TH1D(rootname + "_pNTight_sig_genID",  "pNTight_sig_genID",  1001, -0.5, 1000.5); C->pntight_sig_genID ->Sumw2();
-				C->pnloose_sig_genID  = new TH1D(rootname + "_pNLoose_sig_genID",  "pNLoose_sig_genID",  1001, -0.5, 1000.5); C->pnloose_sig_genID ->Sumw2();
-				
-				C->fntight_sigSup_genID  = new TH1D(rootname + "_fNTight_sigSup_genID",  "fNTight_sigSup_genID",  1001, -0.5, 1000.5); C->fntight_sigSup_genID ->Sumw2();
-				C->fnloose_sigSup_genID  = new TH1D(rootname + "_fNLoose_sigSup_genID",  "fNLoose_sigSup_genID",  1001, -0.5, 1000.5); C->fnloose_sigSup_genID ->Sumw2();
-				C->pntight_sigSup_genID  = new TH1D(rootname + "_pNTight_sigSup_genID",  "pNTight_sigSup_genID",  1001, -0.5, 1000.5); C->pntight_sigSup_genID ->Sumw2();
-				C->pnloose_sigSup_genID  = new TH1D(rootname + "_pNLoose_sigSup_genID",  "pNLoose_sigSup_genID",  1001, -0.5, 1000.5); C->pnloose_sigSup_genID ->Sumw2();
-				
-				C->fntight_sigSup_genMID  = new TH1D(rootname + "_fNTight_sigSup_genMID",  "fNTight_sigSup_genMID",  1001, -0.5, 1000.5); C->fntight_sigSup_genMID ->Sumw2();
-				C->fnloose_sigSup_genMID  = new TH1D(rootname + "_fNLoose_sigSup_genMID",  "fNLoose_sigSup_genMID",  1001, -0.5, 1000.5); C->fnloose_sigSup_genMID ->Sumw2();
-				C->pntight_sigSup_genMID  = new TH1D(rootname + "_pNTight_sigSup_genMID",  "pNTight_sigSup_genMID",  1001, -0.5, 1000.5); C->pntight_sigSup_genMID ->Sumw2();
-				C->pnloose_sigSup_genMID  = new TH1D(rootname + "_pNLoose_sigSup_genMID",  "pNLoose_sigSup_genMID",  1001, -0.5, 1000.5); C->pnloose_sigSup_genMID ->Sumw2();
-				
-				C->fntight_sigSup_genGMID  = new TH1D(rootname + "_fNTight_sigSup_genGMID",  "fNTight_sigSup_genGMID",  1001, -0.5, 1000.5); C->fntight_sigSup_genGMID ->Sumw2();
-				C->fnloose_sigSup_genGMID  = new TH1D(rootname + "_fNLoose_sigSup_genGMID",  "fNLoose_sigSup_genGMID",  1001, -0.5, 1000.5); C->fnloose_sigSup_genGMID ->Sumw2();
-				C->pntight_sigSup_genGMID  = new TH1D(rootname + "_pNTight_sigSup_genGMID",  "pNTight_sigSup_genGMID",  1001, -0.5, 1000.5); C->pntight_sigSup_genGMID ->Sumw2();
-				C->pnloose_sigSup_genGMID  = new TH1D(rootname + "_pNLoose_sigSup_genGMID",  "pNLoose_sigSup_genGMID",  1001, -0.5, 1000.5); C->pnloose_sigSup_genGMID ->Sumw2();
-				
-				C->fratio_pt  = new TEfficiency(rootname + "_fRatio_pt",  "fRatio_pt",  getNFPtBins(c), getFPtBins(c));
-				C->fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
-				C->pratio_pt  = new TEfficiency(rootname + "_pRatio_pt",  "pRatio_pt",  getNPPtBins(c), getPPtBins(c));
-				C->pratio_eta = new TEfficiency(rootname + "_pRatio_eta", "pRatio_eta", getNEtaBins(c), getEtaBins(c));
-				C->fratio_nv  = new TEfficiency(rootname + "_fRatio_nv",  "fRatio_nv",  18, 0., 36.);
-				C->pratio_nv  = new TEfficiency(rootname + "_pRatio_nv",  "pRatio_nv",  18, 0., 36.);
-
-				// C->fratio_pt ->SetUseWeightedEvents();
-				// C->fratio_eta->SetUseWeightedEvents();
-				// C->pratio_pt ->SetUseWeightedEvents();
-				// C->pratio_eta->SetUseWeightedEvents();
-
-				if(S->datamc > 0){
-					C->sst_origin = new TH1D(rootname + "_fTOrigin", "fTOrigin", 15, 0, 15); C->sst_origin->Sumw2();
-					C->ssl_origin = new TH1D(rootname + "_fLOrigin", "fLOrigin", 15, 0, 15); C->ssl_origin->Sumw2();
-					C->zt_origin  = new TH1D(rootname + "_pTOrigin", "pTOrigin", 15, 0, 15); C->zt_origin ->Sumw2();
-					C->zl_origin  = new TH1D(rootname + "_pLOrigin", "pLOrigin", 15, 0, 15); C->zl_origin ->Sumw2();
-					labelOriginAxis(C->sst_origin->GetXaxis() , c);
-					labelOriginAxis(C->ssl_origin->GetXaxis() , c);
-					labelOriginAxis(C->zt_origin->GetXaxis()  , c);
-					labelOriginAxis(C->zl_origin->GetXaxis()  , c);
-				}
-				
-				// signal suppressed region
-				
-				// m(loose lep, veto lep)
-//				C->sigSup_mll  = new TH1D(rootname + "_sigSup_mll",  "sigSup_mll",  75, 0., 150.);	C->sigSup_mll ->Sumw2();
-				C->sigSup_mll  = new TH1D(rootname + "_sigSup_mll",  "sigSup_mll",  50, 0., 10.);	C->sigSup_mll ->Sumw2();
-				// dR(veto lep, loose lep)
-				C->sigSup_dRVetoLoose		= new TH1D(rootname + "_sigSup_dRVetoLoose", "sigSup_dRVetoLoose",  100, 0., 3.5);	C->sigSup_dRVetoLoose->Sumw2();
-				// dR(veto lep, jet > 50 GeV)
-				C->sigSup_dRVetoJet			= new TH1D(rootname + "_sigSup_dRVetoJet"  , "sigSup_dRVetoJet"  ,  100, 0., 3.5);	C->sigSup_dRVetoJet  ->Sumw2();
-				// m(loose lep, veto lep) vs dR(veto lep, loose lep)
-				C->sigSup_mllDRVetoLoose	= new TH2D(rootname + "_sigSup_mllDRVetoLoose", "sigSup_mllDRVetoLoose", 750, 0., 150., 100, 0., 3.5);	C->sigSup_mllDRVetoLoose->Sumw2();
-				// jet pT vs dR(veto lep, jet > 50 GeV)
-				C->sigSup_jetptDRVetoJet	= new TH2D(rootname + "_sigSup_jetptDRVetoJet"  , "sigSup_jetptDRVetoJet"  , 100, 0., 200., 100, 0., 3.5);	C->sigSup_jetptDRVetoJet  ->Sumw2();
-				// delta pT(veto lep, jet > 50 GeV)
-				C->sigSup_deltaPtVetoJet	= new TH1D(rootname + "_sigSup_deltaPtVetoJet"  , "sigSup_deltaPtVetoJet"  , 200, -200., 200.);	C->sigSup_deltaPtVetoJet  ->Sumw2();
-				// isolation if mom is W
-				C->sigSup_MID24_Iso	= new TH1D(rootname + "_sigSup_MID24_Iso"  , "sigSup_MID24_Iso"  , 200, 0., 1.);	C->sigSup_MID24_Iso  ->Sumw2();
-				// isolation if mom is B
-				C->sigSup_MID500_Iso	= new TH1D(rootname + "_sigSup_MID500_Iso"  , "sigSup_MID500_Iso"  , 200, 0., 1.);	C->sigSup_MID500_Iso  ->Sumw2();
-				// isolation if mom is 4**
-				C->sigSup_MID400_Iso	= new TH1D(rootname + "_sigSup_MID400_Iso"  , "sigSup_MID400_Iso"  , 200, 0., 1.);	C->sigSup_MID400_Iso  ->Sumw2();
-				// isolation if mom is tau
-				C->sigSup_MID15_Iso	= new TH1D(rootname + "_sigSup_MID15_Iso"  , "sigSup_MID15_Iso"  , 200, 0., 1.);	C->sigSup_MID15_Iso  ->Sumw2();
-				
-				
-				// dPhi(loose, jet > 50 GeV)
-				C->sigSup_dPhiLooseJet	= new TH1D(rootname + "_sigSup_dPhiLooseJet"  , "sigSup_dPhiLooseJet"  , 200, 0., 3.5);	C->sigSup_dPhiLooseJet  ->Sumw2();
-				// nJets
-				C->sigSup_nJets	= new TH1D(rootname + "_sigSup_nJets"  , "sigSup_nJets"  , 5, 0., 5.);	C->sigSup_nJets  ->Sumw2();
-				
-				// same sign loose-loose leptons
-				// isolation if mom is W
-				C->sig_MID24_Iso	= new TH1D(rootname + "_sig_MID24_Iso"  , "sig_MID24_Iso"  , 200, 0., 1.);	C->sig_MID24_Iso  ->Sumw2();
-				// isolation if mom is B
-				C->sig_MID500_Iso	= new TH1D(rootname + "_sig_MID500_Iso"  , "sig_MID500_Iso"  , 200, 0., 1.);	C->sig_MID500_Iso  ->Sumw2();
-				// isolation if mom is 4**
-				C->sig_MID400_Iso	= new TH1D(rootname + "_sig_MID400_Iso"  , "sig_MID400_Iso"  , 200, 0., 1.);	C->sig_MID400_Iso  ->Sumw2();
-				// isolation if mom is tau
-				C->sig_MID15_Iso	= new TH1D(rootname + "_sig_MID15_Iso"  , "sig_MID15_Iso"  , 200, 0., 1.);	C->sig_MID15_Iso  ->Sumw2();
-			}
-			
-			// Charge Mis id
-			if (c == Elec){
-			        C->ospairs = new TH2D(rootname + "_ospairs", "ospairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); C->ospairs->Sumw2();
-			        C->sspairs = new TH2D(rootname + "_sspairs", "sspairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); C->sspairs->Sumw2();
-
-                                C->chmid_BB_pt = new TEfficiency(rootname + "_chmid_BB_pt", "ChMid_BB_pt", getNPPtBins(c), getPPtBins(c));
-                                C->chmid_EE_pt = new TEfficiency(rootname + "_chmid_EE_pt", "ChMid_EE_pt", getNPPtBins(c), getPPtBins(c));
-                                C->chmid_BE_pt = new TEfficiency(rootname + "_chmid_BE_pt", "ChMid_BE_pt", getNPPtBins(c), getPPtBins(c));
-				  
-			}
-
 		}
 	}
 	// }
@@ -3479,8 +3457,89 @@ void SSDLDumper::deleteHistos(Sample *S){
 		delete S->puplots[l].hssdl;
 		delete S->puplots[l].hntight;
 		delete S->puplots[l].hnloose;
+		
+		// TL RATIOS
+		delete S->tlratios[l].fntight;
+		delete S->tlratios[l].fnloose;
+		delete S->tlratios[l].pntight;
+		delete S->tlratios[l].pnloose;
+		delete S->tlratios[l].fntight_nv;
+		delete S->tlratios[l].fnloose_nv;
+		delete S->tlratios[l].pntight_nv;
+		delete S->tlratios[l].pnloose_nv;
+				
+		delete S->tlratios[l].fratio_nv;
+		delete S->tlratios[l].pratio_nv;
+		// duplicate for ttbar only ratios
+		delete S->tlratios[l].fntight_ttbar;
+		delete S->tlratios[l].fnloose_ttbar;
+		delete S->tlratios[l].pntight_ttbar;
+		delete S->tlratios[l].pnloose_ttbar;
+				
+		// gen ID
+		delete S->tlratios[l].fntight_genID;
+		delete S->tlratios[l].fnloose_genID;
+		delete S->tlratios[l].pntight_genID;
+		delete S->tlratios[l].pnloose_genID;
+				
+		delete S->tlratios[l].fntight_sig_genID;
+		delete S->tlratios[l].fnloose_sig_genID;
+		delete S->tlratios[l].pntight_sig_genID;
+		delete S->tlratios[l].pnloose_sig_genID;
+				
+		delete S->tlratios[l].fntight_sigSup_genID;
+		delete S->tlratios[l].fnloose_sigSup_genID;
+		delete S->tlratios[l].pntight_sigSup_genID;
+		delete S->tlratios[l].pnloose_sigSup_genID;
+				
+		delete S->tlratios[l].fntight_sigSup_genMID;
+		delete S->tlratios[l].fnloose_sigSup_genMID;
+		delete S->tlratios[l].pntight_sigSup_genMID;
+		delete S->tlratios[l].pnloose_sigSup_genMID;
+				
+		delete S->tlratios[l].fntight_sigSup_genGMID;
+		delete S->tlratios[l].fnloose_sigSup_genGMID;
+		delete S->tlratios[l].pntight_sigSup_genGMID;
+		delete S->tlratios[l].pnloose_sigSup_genGMID;
+				
+		delete S->tlratios[l].fratio_pt;
+		delete S->tlratios[l].pratio_pt;
+		delete S->tlratios[l].fratio_eta;
+		delete S->tlratios[l].pratio_eta;
 
+		// SigSup plots
+		delete S->tlratios[l].sigSup_mll;
+		delete S->tlratios[l].sigSup_dRVetoLoose;
+		delete S->tlratios[l].sigSup_dRVetoJet;
+		delete S->tlratios[l].sigSup_mllDRVetoLoose;
+		delete S->tlratios[l].sigSup_jetptDRVetoJet;
+		delete S->tlratios[l].sigSup_deltaPtVetoJet;
+		delete S->tlratios[l].sigSup_MID24_Iso;
+		delete S->tlratios[l].sigSup_MID500_Iso;
+		delete S->tlratios[l].sigSup_MID400_Iso;
+		delete S->tlratios[l].sigSup_MID15_Iso;
+		delete S->tlratios[l].sigSup_dPhiLooseJet;
+		delete S->tlratios[l].sigSup_nJets;
+		delete S->tlratios[l].sig_MID24_Iso;
+		delete S->tlratios[l].sig_MID500_Iso;
+		delete S->tlratios[l].sig_MID400_Iso;
+		delete S->tlratios[l].sig_MID15_Iso;
+
+		if(S->datamc > 0){
+			delete S->tlratios[l].sst_origin;
+			delete S->tlratios[l].ssl_origin;
+			delete S->tlratios[l].zt_origin;
+			delete S->tlratios[l].zl_origin;
+		}
 	}
+	//	CHMID INFORMATION
+	delete S->chmisid.ospairs;
+	delete S->chmisid.sspairs;
+
+	delete S->chmisid.chmid_BB_pt;
+	delete S->chmisid.chmid_BE_pt;
+	delete S->chmisid.chmid_EE_pt;
+			
 
 	for(regIt = gRegions.begin(); regIt != gRegions.end() ; regIt++){
 		int r = gRegion[(*regIt)->sname];
@@ -3554,92 +3613,6 @@ void SSDLDumper::deleteHistos(Sample *S){
 				delete C->nt00_OS_BB_pt;
 				delete C->nt00_OS_EE_pt;
 			}
-
-			// Ratios
-			if(c != ElMu){
-				delete C->fntight;
-				delete C->fnloose;
-				delete C->pntight;
-				delete C->pnloose;
-				delete C->fntight_nv;
-				delete C->fnloose_nv;
-				delete C->pntight_nv;
-				delete C->pnloose_nv;
-				
-				delete C->fratio_nv;
-				delete C->pratio_nv;
-				// duplicate for ttbar only ratios
-				delete C->fntight_ttbar;
-				delete C->fnloose_ttbar;
-				delete C->pntight_ttbar;
-				delete C->pnloose_ttbar;
-				
-				// gen ID
-				delete C->fntight_genID;
-				delete C->fnloose_genID;
-				delete C->pntight_genID;
-				delete C->pnloose_genID;
-				
-				delete C->fntight_sig_genID;
-				delete C->fnloose_sig_genID;
-				delete C->pntight_sig_genID;
-				delete C->pnloose_sig_genID;
-				
-				delete C->fntight_sigSup_genID;
-				delete C->fnloose_sigSup_genID;
-				delete C->pntight_sigSup_genID;
-				delete C->pnloose_sigSup_genID;
-				
-				delete C->fntight_sigSup_genMID;
-				delete C->fnloose_sigSup_genMID;
-				delete C->pntight_sigSup_genMID;
-				delete C->pnloose_sigSup_genMID;
-				
-				delete C->fntight_sigSup_genGMID;
-				delete C->fnloose_sigSup_genGMID;
-				delete C->pntight_sigSup_genGMID;
-				delete C->pnloose_sigSup_genGMID;
-				
-				delete C->fratio_pt;
-				delete C->pratio_pt;
-				delete C->fratio_eta;
-				delete C->pratio_eta;
-
-				if(S->datamc > 0){
-					delete C->sst_origin;
-					delete C->ssl_origin;
-					delete C->zt_origin;
-					delete C->zl_origin;
-				}
-				
-				// SigSup plots
-				delete C->sigSup_mll;
-				delete C->sigSup_dRVetoLoose;
-				delete C->sigSup_dRVetoJet;
-				delete C->sigSup_mllDRVetoLoose;
-				delete C->sigSup_jetptDRVetoJet;
-				delete C->sigSup_deltaPtVetoJet;
-				delete C->sigSup_MID24_Iso;
-				delete C->sigSup_MID500_Iso;
-				delete C->sigSup_MID400_Iso;
-				delete C->sigSup_MID15_Iso;
-				delete C->sigSup_dPhiLooseJet;
-				delete C->sigSup_nJets;
-				delete C->sig_MID24_Iso;
-				delete C->sig_MID500_Iso;
-				delete C->sig_MID400_Iso;
-				delete C->sig_MID15_Iso;
-			}
-			//  Charge Miss-ID
-			if (c == Elec){
-			       delete C->ospairs;
-			       delete C->sspairs;
-
-                               delete C->chmid_BB_pt;
-                               delete C->chmid_BE_pt;
-                               delete C->chmid_EE_pt;
-			}
-			
 		}
 	}
 	// }
@@ -3753,6 +3726,96 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 			rp->nloose[j]->Write(rp->nloose[j]->GetName(), TObject::kWriteDelete);
 		}
 	}
+	
+	// TL RATIOS
+	temp = S->sname + "/TLRatios/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	for(size_t l = 0; l < 2; ++l){
+	        TLRatios *tl = &S->tlratios[l];
+		tl->fntight   ->Write(tl->fntight   ->GetName(), TObject::kWriteDelete);
+		tl->fnloose   ->Write(tl->fnloose   ->GetName(), TObject::kWriteDelete);
+		tl->pntight   ->Write(tl->pntight   ->GetName(), TObject::kWriteDelete);
+		tl->pnloose   ->Write(tl->pnloose   ->GetName(), TObject::kWriteDelete);
+		tl->fntight_nv->Write(tl->fntight_nv->GetName(), TObject::kWriteDelete);
+		tl->fnloose_nv->Write(tl->fnloose_nv->GetName(), TObject::kWriteDelete);
+		tl->pntight_nv->Write(tl->pntight_nv->GetName(), TObject::kWriteDelete);
+		tl->pnloose_nv->Write(tl->pnloose_nv->GetName(), TObject::kWriteDelete);
+
+		// duplicate for ttbar only ratios
+		tl->fntight_ttbar->Write(tl->fntight_ttbar->GetName(), TObject::kWriteDelete);
+		tl->fnloose_ttbar->Write(tl->fnloose_ttbar->GetName(), TObject::kWriteDelete);
+		tl->pntight_ttbar->Write(tl->pntight_ttbar->GetName(), TObject::kWriteDelete);
+		tl->pnloose_ttbar->Write(tl->pnloose_ttbar->GetName(), TObject::kWriteDelete);
+				
+		// gen ID
+		tl->fntight_genID         ->Write(tl->fntight_genID         ->GetName(), TObject::kWriteDelete);
+		tl->fnloose_genID         ->Write(tl->fnloose_genID         ->GetName(), TObject::kWriteDelete);
+		tl->pntight_genID         ->Write(tl->pntight_genID         ->GetName(), TObject::kWriteDelete);
+		tl->pnloose_genID         ->Write(tl->pnloose_genID         ->GetName(), TObject::kWriteDelete);
+		tl->fntight_sig_genID     ->Write(tl->fntight_sig_genID     ->GetName(), TObject::kWriteDelete);
+		tl->fnloose_sig_genID     ->Write(tl->fnloose_sig_genID     ->GetName(), TObject::kWriteDelete);
+		tl->pntight_sig_genID     ->Write(tl->pntight_sig_genID     ->GetName(), TObject::kWriteDelete);
+		tl->pnloose_sig_genID     ->Write(tl->pnloose_sig_genID     ->GetName(), TObject::kWriteDelete);
+		tl->fntight_sigSup_genID  ->Write(tl->fntight_sigSup_genID  ->GetName(), TObject::kWriteDelete);
+		tl->fnloose_sigSup_genID  ->Write(tl->fnloose_sigSup_genID  ->GetName(), TObject::kWriteDelete);
+		tl->pntight_sigSup_genID  ->Write(tl->pntight_sigSup_genID  ->GetName(), TObject::kWriteDelete);
+		tl->pnloose_sigSup_genID  ->Write(tl->pnloose_sigSup_genID  ->GetName(), TObject::kWriteDelete);
+		tl->fntight_sigSup_genMID ->Write(tl->fntight_sigSup_genMID ->GetName(), TObject::kWriteDelete);
+		tl->fnloose_sigSup_genMID ->Write(tl->fnloose_sigSup_genMID ->GetName(), TObject::kWriteDelete);
+		tl->pntight_sigSup_genMID ->Write(tl->pntight_sigSup_genMID ->GetName(), TObject::kWriteDelete);
+		tl->pnloose_sigSup_genMID ->Write(tl->pnloose_sigSup_genMID ->GetName(), TObject::kWriteDelete);
+		tl->fntight_sigSup_genGMID->Write(tl->fntight_sigSup_genGMID->GetName(), TObject::kWriteDelete);
+		tl->fnloose_sigSup_genGMID->Write(tl->fnloose_sigSup_genGMID->GetName(), TObject::kWriteDelete);
+		tl->pntight_sigSup_genGMID->Write(tl->pntight_sigSup_genGMID->GetName(), TObject::kWriteDelete);
+		tl->pnloose_sigSup_genGMID->Write(tl->pnloose_sigSup_genGMID->GetName(), TObject::kWriteDelete);
+
+		// TEffiencies for calculates the ratios...
+		tl->fratio_pt ->Write(tl->fratio_pt ->GetName(), TObject::kWriteDelete);
+		tl->pratio_pt ->Write(tl->pratio_pt ->GetName(), TObject::kWriteDelete);
+		tl->fratio_eta->Write(tl->fratio_eta->GetName(), TObject::kWriteDelete);
+		tl->pratio_eta->Write(tl->pratio_eta->GetName(), TObject::kWriteDelete);
+		tl->fratio_nv ->Write(tl->fratio_nv ->GetName(), TObject::kWriteDelete);
+		tl->pratio_nv ->Write(tl->pratio_nv ->GetName(), TObject::kWriteDelete);
+
+		// SigSup plots
+		tl->sigSup_mll           ->Write(tl->sigSup_mll           ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_dRVetoLoose   ->Write(tl->sigSup_dRVetoLoose   ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_dRVetoJet     ->Write(tl->sigSup_dRVetoJet     ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_mllDRVetoLoose->Write(tl->sigSup_mllDRVetoLoose->GetName(), TObject::kWriteDelete);
+		tl->sigSup_jetptDRVetoJet->Write(tl->sigSup_jetptDRVetoJet->GetName(), TObject::kWriteDelete);
+		tl->sigSup_deltaPtVetoJet->Write(tl->sigSup_deltaPtVetoJet->GetName(), TObject::kWriteDelete);
+		tl->sigSup_MID24_Iso     ->Write(tl->sigSup_MID24_Iso     ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_MID500_Iso    ->Write(tl->sigSup_MID500_Iso    ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_MID400_Iso    ->Write(tl->sigSup_MID400_Iso    ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_MID15_Iso     ->Write(tl->sigSup_MID15_Iso     ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_dPhiLooseJet  ->Write(tl->sigSup_dPhiLooseJet  ->GetName(), TObject::kWriteDelete);
+		tl->sigSup_nJets         ->Write(tl->sigSup_nJets         ->GetName(), TObject::kWriteDelete);
+								
+		tl->sig_MID24_Iso        ->Write(tl->sig_MID24_Iso        ->GetName(), TObject::kWriteDelete);
+		tl->sig_MID500_Iso       ->Write(tl->sig_MID500_Iso       ->GetName(), TObject::kWriteDelete);
+		tl->sig_MID400_Iso       ->Write(tl->sig_MID400_Iso       ->GetName(), TObject::kWriteDelete);
+		tl->sig_MID15_Iso        ->Write(tl->sig_MID15_Iso        ->GetName(), TObject::kWriteDelete);
+
+		
+		if(S->datamc > 0){
+			tl->sst_origin->Write(tl->sst_origin->GetName(), TObject::kWriteDelete);
+			tl->ssl_origin->Write(tl->ssl_origin->GetName(), TObject::kWriteDelete);
+			tl->zt_origin ->Write(tl->zt_origin ->GetName(), TObject::kWriteDelete);
+			tl->zl_origin ->Write(tl->zl_origin ->GetName(), TObject::kWriteDelete);						
+		}
+	}
+	// CHMID INFORMATION
+	temp = S->sname + "/ChMisID/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	
+	S->chmisid.ospairs->Write(S->chmisid.ospairs->GetName(), TObject::kWriteDelete);
+	S->chmisid.sspairs->Write(S->chmisid.sspairs->GetName(), TObject::kWriteDelete);
+	
+	S->chmisid.chmid_BB_pt->Write(S->chmisid.chmid_BB_pt->GetName(), TObject::kWriteDelete);
+	S->chmisid.chmid_BE_pt->Write(S->chmisid.chmid_BE_pt->GetName(), TObject::kWriteDelete);
+	S->chmisid.chmid_EE_pt->Write(S->chmisid.chmid_EE_pt->GetName(), TObject::kWriteDelete);
 
 	// Yields
 	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
@@ -3810,90 +3873,6 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 					C->npp_cm_pt  ->Write(C->npp_cm_pt  ->GetName(), TObject::kWriteDelete);
 					C->nt2pp_cm_pt->Write(C->nt2pp_cm_pt->GetName(), TObject::kWriteDelete);						
 				}
-			}
-			if(ch != ElMu){
-				C->fntight    ->Write(C->fntight    ->GetName(), TObject::kWriteDelete);
-				C->fnloose    ->Write(C->fnloose    ->GetName(), TObject::kWriteDelete);
-				C->pntight    ->Write(C->pntight    ->GetName(), TObject::kWriteDelete);
-				C->pnloose    ->Write(C->pnloose    ->GetName(), TObject::kWriteDelete);
-				C->fntight_nv ->Write(C->fntight_nv ->GetName(), TObject::kWriteDelete);
-				C->fnloose_nv ->Write(C->fnloose_nv ->GetName(), TObject::kWriteDelete);
-				C->pntight_nv ->Write(C->pntight_nv ->GetName(), TObject::kWriteDelete);
-				C->pnloose_nv ->Write(C->pnloose_nv ->GetName(), TObject::kWriteDelete);
-
-				// duplicate for ttbar only ratios
-				C->fntight_ttbar    ->Write(C->fntight_ttbar    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_ttbar    ->Write(C->fnloose_ttbar    ->GetName(), TObject::kWriteDelete);
-				C->pntight_ttbar    ->Write(C->pntight_ttbar    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_ttbar    ->Write(C->pnloose_ttbar    ->GetName(), TObject::kWriteDelete);
-				
-				// gen ID
-				C->fntight_genID    ->Write(C->fntight_genID    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_genID    ->Write(C->fnloose_genID    ->GetName(), TObject::kWriteDelete);
-				C->pntight_genID    ->Write(C->pntight_genID    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_genID    ->Write(C->pnloose_genID    ->GetName(), TObject::kWriteDelete);
-				
-				C->fntight_sig_genID    ->Write(C->fntight_sig_genID    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_sig_genID    ->Write(C->fnloose_sig_genID    ->GetName(), TObject::kWriteDelete);
-				C->pntight_sig_genID    ->Write(C->pntight_sig_genID    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_sig_genID    ->Write(C->pnloose_sig_genID    ->GetName(), TObject::kWriteDelete);
-				
-				C->fntight_sigSup_genID    ->Write(C->fntight_sigSup_genID    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_sigSup_genID    ->Write(C->fnloose_sigSup_genID    ->GetName(), TObject::kWriteDelete);
-				C->pntight_sigSup_genID    ->Write(C->pntight_sigSup_genID    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_sigSup_genID    ->Write(C->pnloose_sigSup_genID    ->GetName(), TObject::kWriteDelete);
-				
-				C->fntight_sigSup_genMID    ->Write(C->fntight_sigSup_genMID    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_sigSup_genMID    ->Write(C->fnloose_sigSup_genMID    ->GetName(), TObject::kWriteDelete);
-				C->pntight_sigSup_genMID    ->Write(C->pntight_sigSup_genMID    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_sigSup_genMID    ->Write(C->pnloose_sigSup_genMID    ->GetName(), TObject::kWriteDelete);
-				
-				C->fntight_sigSup_genGMID    ->Write(C->fntight_sigSup_genGMID    ->GetName(), TObject::kWriteDelete);
-				C->fnloose_sigSup_genGMID    ->Write(C->fnloose_sigSup_genGMID    ->GetName(), TObject::kWriteDelete);
-				C->pntight_sigSup_genGMID    ->Write(C->pntight_sigSup_genGMID    ->GetName(), TObject::kWriteDelete);
-				C->pnloose_sigSup_genGMID    ->Write(C->pnloose_sigSup_genGMID    ->GetName(), TObject::kWriteDelete);
-
-				C->fratio_pt ->Write(C->fratio_pt ->GetName(), TObject::kWriteDelete);
-				C->pratio_pt ->Write(C->pratio_pt ->GetName(), TObject::kWriteDelete);
-				C->fratio_eta->Write(C->fratio_eta->GetName(), TObject::kWriteDelete);
-				C->pratio_eta->Write(C->pratio_eta->GetName(), TObject::kWriteDelete);
-				C->fratio_nv ->Write(C->fratio_nv ->GetName(), TObject::kWriteDelete);
-				C->pratio_nv ->Write(C->pratio_nv ->GetName(), TObject::kWriteDelete);
-
-				if(S->datamc > 0){
-					C->sst_origin ->Write(C->sst_origin ->GetName(), TObject::kWriteDelete);
-					C->ssl_origin ->Write(C->ssl_origin ->GetName(), TObject::kWriteDelete);
-					C->zt_origin  ->Write(C->zt_origin  ->GetName(), TObject::kWriteDelete);
-					C->zl_origin  ->Write(C->zl_origin  ->GetName(), TObject::kWriteDelete);						
-				}
-				
-				// SigSup plots
-				C->sigSup_mll           ->Write(C->sigSup_mll           ->GetName(), TObject::kWriteDelete);
-				C->sigSup_dRVetoLoose   ->Write(C->sigSup_dRVetoLoose   ->GetName(), TObject::kWriteDelete);
-				C->sigSup_dRVetoJet     ->Write(C->sigSup_dRVetoJet     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_mllDRVetoLoose->Write(C->sigSup_mllDRVetoLoose->GetName(), TObject::kWriteDelete);
-				C->sigSup_jetptDRVetoJet->Write(C->sigSup_jetptDRVetoJet->GetName(), TObject::kWriteDelete);
-				C->sigSup_deltaPtVetoJet->Write(C->sigSup_deltaPtVetoJet->GetName(), TObject::kWriteDelete);
-				C->sigSup_MID24_Iso     ->Write(C->sigSup_MID24_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_MID500_Iso     ->Write(C->sigSup_MID500_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_MID400_Iso     ->Write(C->sigSup_MID400_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_MID15_Iso     ->Write(C->sigSup_MID15_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_dPhiLooseJet     ->Write(C->sigSup_dPhiLooseJet     ->GetName(), TObject::kWriteDelete);
-				C->sigSup_nJets     ->Write(C->sigSup_nJets     ->GetName(), TObject::kWriteDelete);
-				
-				
-				C->sig_MID24_Iso     ->Write(C->sig_MID24_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sig_MID500_Iso     ->Write(C->sig_MID500_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sig_MID400_Iso     ->Write(C->sig_MID400_Iso     ->GetName(), TObject::kWriteDelete);
-				C->sig_MID15_Iso     ->Write(C->sig_MID15_Iso     ->GetName(), TObject::kWriteDelete);
-			}
-			if (ch == Elec){
-                          	C->ospairs->Write(C->ospairs->GetName(), TObject::kWriteDelete);
-                          	C->sspairs->Write(C->sspairs->GetName(), TObject::kWriteDelete);
-
-                                C->chmid_BB_pt->Write(C->chmid_BB_pt->GetName(), TObject::kWriteDelete);
-                                C->chmid_BE_pt->Write(C->chmid_BE_pt->GetName(), TObject::kWriteDelete);
-                                C->chmid_EE_pt->Write(C->chmid_EE_pt->GetName(), TObject::kWriteDelete);
 			}
 		}
 	}
@@ -3960,6 +3939,9 @@ int  SSDLDumper::readHistos(TString filename){
 
 		// Cut flow histos
 		getObjectSafe(pFile, S->sname + "/MMCutFlow", S->cutFlowHisto[Muon]);
+
+
+
 		getObjectSafe(pFile, S->sname + "/EECutFlow", S->cutFlowHisto[Elec]);
 		getObjectSafe(pFile, S->sname + "/EMCutFlow", S->cutFlowHisto[ElMu]);
 
@@ -4087,9 +4069,93 @@ int  SSDLDumper::readHistos(TString filename){
 			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hntight);
 			getname = Form("%s_%s_nloose", S->sname.Data(), gEMULabel[lep].Data());
 			getObjectSafe(pFile, S->sname + "/PuPlots/" + getname, pu->hnloose);
+			
+			// TL RATIOS
+			TString chanlabel = "";
+			if      (lep == 0) chanlabel = gChanLabel[Muon];
+			else if (lep == 1) chanlabel = gChanLabel[Elec];
+			TString tlname = S->sname + "/TLRatios/" + S->sname + "_" + chanlabel;
+			getObjectSafe(pFile, tlname + "_fNTight", S->tlratios[lep].fntight);
+			getObjectSafe(pFile, tlname + "_fNLoose", S->tlratios[lep].fnloose);
+			getObjectSafe(pFile, tlname + "_pNTight", S->tlratios[lep].pntight);
+			getObjectSafe(pFile, tlname + "_pNLoose", S->tlratios[lep].pnloose);
+			
+			getObjectSafe(pFile, tlname + "_fNTight_nv", S->tlratios[lep].fntight_nv);
+			getObjectSafe(pFile, tlname + "_fNLoose_nv", S->tlratios[lep].fnloose_nv);
+			getObjectSafe(pFile, tlname + "_pNTight_nv", S->tlratios[lep].pntight_nv);
+			getObjectSafe(pFile, tlname + "_pNLoose_nv", S->tlratios[lep].pnloose_nv);
+			// duplicate for ttbar only ratios
+			getObjectSafe(pFile, tlname + "_fNTight_ttbar", S->tlratios[lep].fntight_ttbar);
+			getObjectSafe(pFile, tlname + "_fNLoose_ttbar", S->tlratios[lep].fnloose_ttbar);
+			getObjectSafe(pFile, tlname + "_pNTight_ttbar", S->tlratios[lep].pntight_ttbar);
+			getObjectSafe(pFile, tlname + "_pNLoose_ttbar", S->tlratios[lep].pnloose_ttbar);
+			
+			// gen ID
+			getObjectSafe(pFile, tlname + "_fNTight_genID", S->tlratios[lep].fntight_genID);
+			getObjectSafe(pFile, tlname + "_fNLoose_genID", S->tlratios[lep].fnloose_genID);
+			getObjectSafe(pFile, tlname + "_pNTight_genID", S->tlratios[lep].pntight_genID);
+			getObjectSafe(pFile, tlname + "_pNLoose_genID", S->tlratios[lep].pnloose_genID);
+			
+			getObjectSafe(pFile, tlname + "_fNTight_sig_genID", S->tlratios[lep].fntight_sig_genID);
+			getObjectSafe(pFile, tlname + "_fNLoose_sig_genID", S->tlratios[lep].fnloose_sig_genID);
+			getObjectSafe(pFile, tlname + "_pNTight_sig_genID", S->tlratios[lep].pntight_sig_genID);
+			getObjectSafe(pFile, tlname + "_pNLoose_sig_genID", S->tlratios[lep].pnloose_sig_genID);
+			
+			getObjectSafe(pFile, tlname + "_fNTight_sigSup_genID", S->tlratios[lep].fntight_sigSup_genID);
+			getObjectSafe(pFile, tlname + "_fNLoose_sigSup_genID", S->tlratios[lep].fnloose_sigSup_genID);
+			getObjectSafe(pFile, tlname + "_pNTight_sigSup_genID", S->tlratios[lep].pntight_sigSup_genID);
+			getObjectSafe(pFile, tlname + "_pNLoose_sigSup_genID", S->tlratios[lep].pnloose_sigSup_genID);
+			
+			getObjectSafe(pFile, tlname + "_fNTight_sigSup_genMID", S->tlratios[lep].fntight_sigSup_genMID);
+			getObjectSafe(pFile, tlname + "_fNLoose_sigSup_genMID", S->tlratios[lep].fnloose_sigSup_genMID);
+			getObjectSafe(pFile, tlname + "_pNTight_sigSup_genMID", S->tlratios[lep].pntight_sigSup_genMID);
+			getObjectSafe(pFile, tlname + "_pNLoose_sigSup_genMID", S->tlratios[lep].pnloose_sigSup_genMID);
+			
+			getObjectSafe(pFile, tlname + "_fNTight_sigSup_genGMID", S->tlratios[lep].fntight_sigSup_genGMID);
+			getObjectSafe(pFile, tlname + "_fNLoose_sigSup_genGMID", S->tlratios[lep].fnloose_sigSup_genGMID);
+			getObjectSafe(pFile, tlname + "_pNTight_sigSup_genGMID", S->tlratios[lep].pntight_sigSup_genGMID);
+			getObjectSafe(pFile, tlname + "_pNLoose_sigSup_genGMID", S->tlratios[lep].pnloose_sigSup_genGMID);
 
+			getObjectSafe(pFile, tlname + "_fRatio_pt",  S->tlratios[lep].fratio_pt);
+			getObjectSafe(pFile, tlname + "_pRatio_pt",  S->tlratios[lep].pratio_pt);
+			getObjectSafe(pFile, tlname + "_fRatio_eta", S->tlratios[lep].fratio_eta);
+			getObjectSafe(pFile, tlname + "_pRatio_eta", S->tlratios[lep].pratio_eta);
+			getObjectSafe(pFile, tlname + "_fRatio_nv", S->tlratios[lep].fratio_nv);
+			getObjectSafe(pFile, tlname + "_pRatio_nv", S->tlratios[lep].pratio_nv);
+
+			// SigSup plots
+			getObjectSafe(pFile, tlname + "_sigSup_mll"           , S->tlratios[lep].sigSup_mll           );
+			getObjectSafe(pFile, tlname + "_sigSup_dRVetoLoose"   , S->tlratios[lep].sigSup_dRVetoLoose   );
+			getObjectSafe(pFile, tlname + "_sigSup_dRVetoJet"     , S->tlratios[lep].sigSup_dRVetoJet     );
+			getObjectSafe(pFile, tlname + "_sigSup_mllDRVetoLoose", S->tlratios[lep].sigSup_mllDRVetoLoose);
+			getObjectSafe(pFile, tlname + "_sigSup_jetptDRVetoJet", S->tlratios[lep].sigSup_jetptDRVetoJet);
+			getObjectSafe(pFile, tlname + "_sigSup_deltaPtVetoJet", S->tlratios[lep].sigSup_deltaPtVetoJet);
+			getObjectSafe(pFile, tlname + "_sigSup_MID24_Iso",      S->tlratios[lep].sigSup_MID24_Iso     );
+			getObjectSafe(pFile, tlname + "_sigSup_MID500_Iso",     S->tlratios[lep].sigSup_MID500_Iso    );
+			getObjectSafe(pFile, tlname + "_sigSup_MID400_Iso",     S->tlratios[lep].sigSup_MID400_Iso    );
+			getObjectSafe(pFile, tlname + "_sigSup_MID15_Iso",      S->tlratios[lep].sigSup_MID15_Iso     );
+			getObjectSafe(pFile, tlname + "_sigSup_dPhiLooseJet",   S->tlratios[lep].sigSup_dPhiLooseJet  );
+			getObjectSafe(pFile, tlname + "_sigSup_nJets",          S->tlratios[lep].sigSup_nJets         );
+			
+			getObjectSafe(pFile, tlname + "_sig_MID24_Iso",  S->tlratios[lep].sig_MID24_Iso );
+			getObjectSafe(pFile, tlname + "_sig_MID500_Iso", S->tlratios[lep].sig_MID500_Iso);
+			getObjectSafe(pFile, tlname + "_sig_MID400_Iso", S->tlratios[lep].sig_MID400_Iso);
+			getObjectSafe(pFile, tlname + "_sig_MID15_Iso",  S->tlratios[lep].sig_MID15_Iso );
+			if(S->datamc > 0){
+				getObjectSafe(pFile, tlname + "_fTOrigin", S->tlratios[lep].sst_origin);
+				getObjectSafe(pFile, tlname + "_fLOrigin", S->tlratios[lep].ssl_origin);
+				getObjectSafe(pFile, tlname + "_pTOrigin", S->tlratios[lep].zt_origin );
+				getObjectSafe(pFile, tlname + "_pLOrigin", S->tlratios[lep].zl_origin );
+			}
 		}
-
+		
+		TString chmidname = S->sname + "/ChMisID/" + S->sname + "_" + gChanLabel[Elec].Data();
+		getObjectSafe(pFile, chmidname + "_ospairs", S->chmisid.ospairs);
+		getObjectSafe(pFile, chmidname + "_sspairs", S->chmisid.sspairs);
+		getObjectSafe(pFile, chmidname + "_chmid_BB_pt", S->chmisid.chmid_BB_pt);
+		getObjectSafe(pFile, chmidname + "_chmid_BE_pt", S->chmisid.chmid_BE_pt);
+		getObjectSafe(pFile, chmidname + "_chmid_EE_pt", S->chmisid.chmid_EE_pt);
+		
 		// Yields
 		for(size_t HighPt = 0; HighPt < 2; ++HighPt){
 			for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){ // Loop over regions
@@ -4143,92 +4209,6 @@ int  SSDLDumper::readHistos(TString filename){
 							getObjectSafe(pFile, root + "_NT01_OS_EB_pt", C->nt01_OS_EB_pt);
 							getObjectSafe(pFile, root + "_NT00_OS_EB_pt", C->nt00_OS_EB_pt);
 						}
-					}
-
-					if(ch != ElMu){
-						getObjectSafe(pFile, root + "_fNTight", C->fntight);
-						getObjectSafe(pFile, root + "_fNLoose", C->fnloose);
-						getObjectSafe(pFile, root + "_pNTight", C->pntight);
-						getObjectSafe(pFile, root + "_pNLoose", C->pnloose);
-
-						getObjectSafe(pFile, root + "_fNTight_nv", C->fntight_nv);
-						getObjectSafe(pFile, root + "_fNLoose_nv", C->fnloose_nv);
-						getObjectSafe(pFile, root + "_pNTight_nv", C->pntight_nv);
-						getObjectSafe(pFile, root + "_pNLoose_nv", C->pnloose_nv);
-						// duplicate for ttbar only ratios
-						getObjectSafe(pFile, root + "_fNTight_ttbar", C->fntight_ttbar);
-						getObjectSafe(pFile, root + "_fNLoose_ttbar", C->fnloose_ttbar);
-						getObjectSafe(pFile, root + "_pNTight_ttbar", C->pntight_ttbar);
-						getObjectSafe(pFile, root + "_pNLoose_ttbar", C->pnloose_ttbar);
-						
-						// gen ID
-						getObjectSafe(pFile, root + "_fNTight_genID", C->fntight_genID);
-						getObjectSafe(pFile, root + "_fNLoose_genID", C->fnloose_genID);
-						getObjectSafe(pFile, root + "_pNTight_genID", C->pntight_genID);
-						getObjectSafe(pFile, root + "_pNLoose_genID", C->pnloose_genID);
-						
-						getObjectSafe(pFile, root + "_fNTight_sig_genID", C->fntight_sig_genID);
-						getObjectSafe(pFile, root + "_fNLoose_sig_genID", C->fnloose_sig_genID);
-						getObjectSafe(pFile, root + "_pNTight_sig_genID", C->pntight_sig_genID);
-						getObjectSafe(pFile, root + "_pNLoose_sig_genID", C->pnloose_sig_genID);
-						
-						getObjectSafe(pFile, root + "_fNTight_sigSup_genID", C->fntight_sigSup_genID);
-						getObjectSafe(pFile, root + "_fNLoose_sigSup_genID", C->fnloose_sigSup_genID);
-						getObjectSafe(pFile, root + "_pNTight_sigSup_genID", C->pntight_sigSup_genID);
-						getObjectSafe(pFile, root + "_pNLoose_sigSup_genID", C->pnloose_sigSup_genID);
-						
-						getObjectSafe(pFile, root + "_fNTight_sigSup_genMID", C->fntight_sigSup_genMID);
-						getObjectSafe(pFile, root + "_fNLoose_sigSup_genMID", C->fnloose_sigSup_genMID);
-						getObjectSafe(pFile, root + "_pNTight_sigSup_genMID", C->pntight_sigSup_genMID);
-						getObjectSafe(pFile, root + "_pNLoose_sigSup_genMID", C->pnloose_sigSup_genMID);
-						
-						getObjectSafe(pFile, root + "_fNTight_sigSup_genGMID", C->fntight_sigSup_genGMID);
-						getObjectSafe(pFile, root + "_fNLoose_sigSup_genGMID", C->fnloose_sigSup_genGMID);
-						getObjectSafe(pFile, root + "_pNTight_sigSup_genGMID", C->pntight_sigSup_genGMID);
-						getObjectSafe(pFile, root + "_pNLoose_sigSup_genGMID", C->pnloose_sigSup_genGMID);
-
-						getObjectSafe(pFile, root + "_fRatio_pt",  C->fratio_pt);
-						getObjectSafe(pFile, root + "_pRatio_pt",  C->pratio_pt);
-						getObjectSafe(pFile, root + "_fRatio_eta", C->fratio_eta);
-						getObjectSafe(pFile, root + "_pRatio_eta", C->pratio_eta);
-						getObjectSafe(pFile, root + "_fRatio_nv", C->fratio_nv);
-						getObjectSafe(pFile, root + "_pRatio_nv", C->pratio_nv);
-
-						if(S->datamc > 0){
-							getObjectSafe(pFile, root + "_fTOrigin", C->sst_origin);
-							getObjectSafe(pFile, root + "_fLOrigin", C->ssl_origin);
-							getObjectSafe(pFile, root + "_pTOrigin", C->zt_origin );
-							getObjectSafe(pFile, root + "_pLOrigin", C->zl_origin );
-						}
-						
-						// SigSup plots
-						getObjectSafe(pFile, root + "_sigSup_mll"           , C->sigSup_mll           );
-						getObjectSafe(pFile, root + "_sigSup_dRVetoLoose"   , C->sigSup_dRVetoLoose   );
-						getObjectSafe(pFile, root + "_sigSup_dRVetoJet"     , C->sigSup_dRVetoJet     );
-						getObjectSafe(pFile, root + "_sigSup_mllDRVetoLoose", C->sigSup_mllDRVetoLoose);
-						getObjectSafe(pFile, root + "_sigSup_jetptDRVetoJet", C->sigSup_jetptDRVetoJet);
-						getObjectSafe(pFile, root + "_sigSup_deltaPtVetoJet", C->sigSup_deltaPtVetoJet);
-						getObjectSafe(pFile, root + "_sigSup_MID24_Iso", C->sigSup_MID24_Iso);
-						getObjectSafe(pFile, root + "_sigSup_MID500_Iso", C->sigSup_MID500_Iso);
-						getObjectSafe(pFile, root + "_sigSup_MID400_Iso", C->sigSup_MID400_Iso);
-						getObjectSafe(pFile, root + "_sigSup_MID15_Iso", C->sigSup_MID15_Iso);
-						getObjectSafe(pFile, root + "_sigSup_dPhiLooseJet", C->sigSup_dPhiLooseJet);
-						getObjectSafe(pFile, root + "_sigSup_nJets", C->sigSup_nJets);
-
-						getObjectSafe(pFile, root + "_sig_MID24_Iso", C->sig_MID24_Iso);
-						getObjectSafe(pFile, root + "_sig_MID500_Iso", C->sig_MID500_Iso);
-						getObjectSafe(pFile, root + "_sig_MID400_Iso", C->sig_MID400_Iso);
-						getObjectSafe(pFile, root + "_sig_MID15_Iso", C->sig_MID15_Iso);
-					}
-					if (ch == Elec){
-					       getObjectSafe(pFile, root + "_ospairs", C->ospairs);
-					       getObjectSafe(pFile, root + "_sspairs", C->sspairs);
-
-                                               getObjectSafe(pFile, root + "_chmid_BB_pt", C->chmid_BB_pt);
-                                               getObjectSafe(pFile, root + "_chmid_BE_pt", C->chmid_BE_pt);
-                                               getObjectSafe(pFile, root + "_chmid_EE_pt", C->chmid_EE_pt);
-
-
 					}
 				}
 				if(HighPt == HighPt){
@@ -5717,7 +5697,7 @@ bool SSDLDumper::isSigSupElEvent(int &el1, int &el2){
 	el2 = -1;
 	setHypLepton1(el1, Elec);
 	if(!passesJet50CutdPhi(el1, Elec))          return false;
-	if(getMT(el1,Elec) > fC_maxMt_Control) return false;
+	if(getMT(el1,Elec) > (fC_maxMt_Control+5.)) return false;
 	if(getMET() > fC_maxMet_Control)  return false;
 	int nels(0);
 	for (int i = 0; i < NEls; i++) {

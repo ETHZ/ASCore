@@ -291,6 +291,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(QCD470);
 	fMCBGEMEnr.push_back(QCD600);
 	fMCBGEMEnr.push_back(QCD800);
+	
 	fMuEnr.push_back(QCDMuEnr15);
 	
 	fEMEnr.push_back(QCDEM20);
@@ -429,8 +430,8 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	makeElIsolationPlots(true); // if true, loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
@@ -440,26 +441,26 @@ void SSDLPlotter::doAnalysis(){
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-//	makeRatioPlots(Muon);
-//	makeRatioPlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
 //	make2DRatioPlots(Muon);
 //	make2DRatioPlots(Elec);
 //	// // makeNTightLoosePlots(Muon);
 //	// // makeNTightLoosePlots(Elec);
 //	// 
-//	makeFRvsPtPlots(Muon, SigSup);
-//	makeFRvsPtPlots(Elec, SigSup);
-//	makeFRvsPtPlots(Muon, ZDecay);
-//	makeFRvsPtPlots(Elec, ZDecay);
-//	makeFRvsNVPlots(Muon, ZDecay); 
-//	makeFRvsNVPlots(Elec, ZDecay);
-//	makeFRvsEtaPlots(Muon);
-//	makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsNVPlots(Muon, ZDecay); 
+	makeFRvsNVPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 //	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
-//	makeAllIntPredictions();
-//	makeAllClosureTests();
+	makeAllIntPredictions();
+	makeAllClosureTests();
 //
 	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
@@ -468,9 +469,9 @@ void SSDLPlotter::doAnalysis(){
 	
 
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
- 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
- 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
- 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 31., 31.,+1, true);
+//	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
+//	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+//	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 31., 31.,+1, true);
 // 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
@@ -2229,7 +2230,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 
 			////////////////////////////////////////////////////
 			// SIGNAL SUPPRESSED SELECTION
-			if(isSigSupMuEvent()){
+			//			if(isSigSupMuEvent()){
 				hiso_ttbar[1]->Fill(MuPFIso[muind1]);
 				for(size_t k = 0; k < gNMuFPtBins; ++k){
 					if(MuPt[muind1] < gMuFPtBins[k]) continue;
@@ -2240,7 +2241,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 					if(NVrtx < gNVrtxBins[k]) continue;
 					if(NVrtx > gNVrtxBins[k+1]) continue;
 					hiso_ttbar_nv[1][k]->Fill(MuPFIso[muind1]); // MARC
-				}
+					//				}
 			}
 			// ////////////////////////////////////////////////////
 			// // SIGNAL SELECTION
@@ -2263,7 +2264,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// }
 			////////////////////////////////////////////////////
 		}
-		fSamples[TTJets]->cleanUp();
+		//		fSamples[TTJets]->cleanUp();
 		cout << endl;
 	} // end dottbar
 	////////////////////////////////////////////////////
@@ -2731,7 +2732,9 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	if(dottbar){
 		// Fill ttbar histos
 		// Sample loop
-		TTree *tree = fSamples[TTJets]->getTree();
+	  //		TTree *tree = fSamples[TTJets]->getTree();
+		TFile * file_ = new TFile("/shome/lbaeni/top/CMSSW_5_3_2_patch4/src/DiLeptonAnalysis/NTupleProducer/macros/TT_CT10_TuneZ2star_8TeV-powheg-tauola-Summer12_DR53X-PU_S10_START53_V7A-v1_output_0.root", "READ", "file_");
+		TTree * tree = (TTree *) file_->Get("Analysis");
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -2781,7 +2784,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 
 			////////////////////////////////////////////////////
 			// SIGNAL SUPPRESSED SELECTION
-			if(isSigSupElEvent()){
+			//			if(isSigSupElEvent()){
 				hiso_ttbar[1]->Fill(ElPFIso[elind1]);
 				for(size_t k = 0; k < gNElFPtBins; ++k){
 					if(ElPt[elind1] < gElFPtBins[k]) continue;
@@ -2793,11 +2796,11 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 					if(NVrtx > gNVrtxBins[k+1]) continue;
 					hiso_ttbar_nv[1][k]->Fill(ElPFIso[elind1]); // MARC
 				}
-			}
+				//			}
 			////////////////////////////////////////////////////
 		}
 	// attention, this only loops on one of the ttbar samples
-		fSamples[TTJets]->cleanUp();
+		//		fSamples[TTJets]->cleanUp();
 		cout << endl;
 	}
 	////////////////////////////////////////////////////
@@ -5036,9 +5039,9 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 		Sample *S  = fSamples[samples[i]];
 		Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 
-		TEfficiency *tempeff_BB = new TEfficiency(*C->chmid_BB_pt);
-		TEfficiency *tempeff_BE = new TEfficiency(*C->chmid_BE_pt);
-		TEfficiency *tempeff_EE = new TEfficiency(*C->chmid_EE_pt);
+		TEfficiency *tempeff_BB = new TEfficiency(*S->chmisid.chmid_BB_pt);
+		TEfficiency *tempeff_BE = new TEfficiency(*S->chmisid.chmid_BE_pt);
+		TEfficiency *tempeff_EE = new TEfficiency(*S->chmisid.chmid_EE_pt);
 		
 		eff_BB->Add(*tempeff_BB);
 		eff_BE->Add(*tempeff_BE);
@@ -6007,12 +6010,13 @@ void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwit
 	OUT << "\n\n\n";
 	if(chan == Muon) OUT << "muon fake ratio contributions in" << endl;
 	if(chan == Elec) OUT << "electron fake ratio contributions in" << endl;
+	int muelswitch = -1;
+	if      (chan == Muon) muelswitch = 0;
+	else if (chan == Elec) muelswitch = 1;
+	
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		Sample *S = fSamples[index];
-		Channel *C;
-		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
-		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		if(fp == SigSup){
 			OUT << S->sname << "\t(" << setw(10) << S->ngen << " gen events)" << endl;
 //			OUT << endl;
@@ -6038,12 +6042,12 @@ void SSDLPlotter::makeFakeGenIDTable(vector<int> samples, gChannel chan, gFPSwit
 //			OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_sigSup_genID->Integral() << " & " << setw(9) << C->fnloose_sigSup_genID->Integral() << " & " << setw(9) << setprecision(4) << C->fntight_sigSup_genID->Integral()/C->fnloose_sigSup_genID->Integral() << " \\\\" << endl;
 //			//		OUT << setw(6) << "Total " << " & " << setw(9) << C->fntight_sigSup_genID->GetEntries() << " & " << setw(9) << C->fnloose_sigSup_genID->GetEntries() << " & " << setw(9) << setprecision(4) << C->fntight_sigSup_genID->GetEntries()/C->fnloose_sigSup_genID->GetEntries() << " \\\\" << endl;
 //			OUT << "=============================================" << endl;
-			h_temp_loose       ->Add(C->fnloose_genID);
-			h_temp_tight       ->Add(C->fntight_genID);
-			h_temp_loose_sig   ->Add(C->fnloose_sig_genID);
-			h_temp_tight_sig   ->Add(C->fntight_sig_genID);
-			h_temp_loose_sigSup->Add(C->fnloose_sigSup_genID);
-			h_temp_tight_sigSup->Add(C->fntight_sigSup_genID);
+			h_temp_loose       ->Add(S->tlratios[muelswitch].fnloose_genID);
+			h_temp_tight       ->Add(S->tlratios[muelswitch].fntight_genID);
+			h_temp_loose_sig   ->Add(S->tlratios[muelswitch].fnloose_sig_genID);
+			h_temp_tight_sig   ->Add(S->tlratios[muelswitch].fntight_sig_genID);
+			h_temp_loose_sigSup->Add(S->tlratios[muelswitch].fnloose_sigSup_genID);
+			h_temp_tight_sigSup->Add(S->tlratios[muelswitch].fntight_sigSup_genID);
 		}
 		
 		
@@ -6110,19 +6114,19 @@ void SSDLPlotter::makeMIDIsolationPlots(gChannel chan, gFPSwitch fp){
 	TH1D *hMID24_Iso_ttbar, *hMID500_Iso_ttbar, *hMID400_Iso_ttbar, *hMID15_Iso_ttbar;
 	TH1D *hMID24_Iso_qcd, *hMID500_Iso_qcd, *hMID400_Iso_qcd, *hMID15_Iso_qcd;
 	
-	hMID24_Iso_ttbar	= new TH1D("_sigSup_MID24_Iso_ttbar" , "sigSup_MID24_Iso_ttbar" , 200, 0., 1.);	hMID24_Iso_ttbar ->Sumw2();
-	hMID500_Iso_ttbar	= new TH1D("_sigSup_MID500_Iso_ttbar", "sigSup_MID500_Iso_ttbar", 200, 0., 1.);	hMID500_Iso_ttbar->Sumw2();
-	hMID400_Iso_ttbar	= new TH1D("_sigSup_MID400_Iso_ttbar", "sigSup_MID400_Iso_ttbar", 200, 0., 1.);	hMID400_Iso_ttbar->Sumw2();
-	hMID15_Iso_ttbar	= new TH1D("_sigSup_MID15_Iso_ttbar" , "sigSup_MID15_Iso_ttbar" , 200, 0., 1.);	hMID15_Iso_ttbar ->Sumw2();
-	hMID24_Iso_qcd	    = new TH1D("_sigSup_MID24_Iso_qcd"   , "sigSup_MID24_Iso_qcd"   , 200, 0., 1.);	hMID24_Iso_qcd   ->Sumw2();
-	hMID500_Iso_qcd	    = new TH1D("_sigSup_MID500_Iso_qcd"  , "sigSup_MID500_Iso_qcd"  , 200, 0., 1.);	hMID500_Iso_qcd  ->Sumw2();
-	hMID400_Iso_qcd	    = new TH1D("_sigSup_MID400_Iso_qcd"  , "sigSup_MID400_Iso_qcd"  , 200, 0., 1.);	hMID400_Iso_qcd  ->Sumw2();
-	hMID15_Iso_qcd    	= new TH1D("_sigSup_MID15_Iso_qcd"   , "sigSup_MID15_Iso_qcd"   , 200, 0., 1.);	hMID15_Iso_qcd   ->Sumw2();
-	
+ 	hMID24_Iso_ttbar  = new TH1D("_sigSup_MID24_Iso_ttbar" , "sigSup_MID24_Iso_ttbar" , 200, 0., 1.);	hMID24_Iso_ttbar ->Sumw2();
+	hMID500_Iso_ttbar = new TH1D("_sigSup_MID500_Iso_ttbar", "sigSup_MID500_Iso_ttbar", 200, 0., 1.);	hMID500_Iso_ttbar->Sumw2();
+	hMID400_Iso_ttbar = new TH1D("_sigSup_MID400_Iso_ttbar", "sigSup_MID400_Iso_ttbar", 200, 0., 1.);	hMID400_Iso_ttbar->Sumw2();
+	hMID15_Iso_ttbar  = new TH1D("_sigSup_MID15_Iso_ttbar" , "sigSup_MID15_Iso_ttbar" , 200, 0., 1.);	hMID15_Iso_ttbar ->Sumw2();
+	hMID24_Iso_qcd	  = new TH1D("_sigSup_MID24_Iso_qcd"   , "sigSup_MID24_Iso_qcd"   , 200, 0., 1.);	hMID24_Iso_qcd   ->Sumw2();
+	hMID500_Iso_qcd	  = new TH1D("_sigSup_MID500_Iso_qcd"  , "sigSup_MID500_Iso_qcd"  , 200, 0., 1.);	hMID500_Iso_qcd  ->Sumw2();
+	hMID400_Iso_qcd	  = new TH1D("_sigSup_MID400_Iso_qcd"  , "sigSup_MID400_Iso_qcd"  , 200, 0., 1.);	hMID400_Iso_qcd  ->Sumw2();
+	hMID15_Iso_qcd    = new TH1D("_sigSup_MID15_Iso_qcd"   , "sigSup_MID15_Iso_qcd"   , 200, 0., 1.);	hMID15_Iso_qcd   ->Sumw2();
 	
 	getMIDIsolationPlots(ttbarsamples, chan, fp, hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar);
-	getMIDIsolationPlots(qcdsamples, chan, fp, hMID24_Iso_qcd, hMID500_Iso_qcd, hMID400_Iso_qcd, hMID15_Iso_qcd);
-	drawMIDIsolationPlots(name + "_qcd", Muon, fp, hMID24_Iso_qcd, hMID500_Iso_qcd, hMID400_Iso_qcd, hMID15_Iso_qcd);
+	getMIDIsolationPlots(qcdsamples,   chan, fp, hMID24_Iso_qcd,   hMID500_Iso_qcd,   hMID400_Iso_qcd,   hMID15_Iso_qcd);
+	
+	drawMIDIsolationPlots(name + "_qcd",   Muon, fp, hMID24_Iso_qcd,   hMID500_Iso_qcd,   hMID400_Iso_qcd,   hMID15_Iso_qcd);
 	drawMIDIsolationPlots(name + "_ttbar", Muon, fp, hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar);
 
 	delete hMID24_Iso_ttbar, hMID500_Iso_ttbar, hMID400_Iso_ttbar, hMID15_Iso_ttbar;
@@ -6141,17 +6145,21 @@ void SSDLPlotter::getMIDIsolationPlots(vector<int> samples, gChannel chan, gFPSw
 		float scale = fLumiNorm / S->getLumi();
 		scale = 1.;
 		cout << "adding histo" << endl;
+	        int muelswitch = -1;
+	        if      (chan == Muon) muelswitch = 0;
+		else if (chan == Elec) muelswitch = 1;
+
 		if (fp == SigSup) {
-			hMID24iso ->Add(C->sigSup_MID24_Iso , scale);
-			hMID500iso->Add(C->sigSup_MID500_Iso, scale);
-			hMID400iso->Add(C->sigSup_MID400_Iso, scale);
-			hMID15iso ->Add(C->sigSup_MID15_Iso , scale);
-		}
-		else {
-			hMID24iso ->Add(C->sig_MID24_Iso , scale);
-			hMID500iso->Add(C->sig_MID500_Iso, scale);
-			hMID400iso->Add(C->sig_MID400_Iso, scale);
-			hMID15iso ->Add(C->sig_MID15_Iso , scale);
+			hMID24iso ->Add(S->tlratios[muelswitch].sigSup_MID24_Iso , scale);
+			hMID500iso->Add(S->tlratios[muelswitch].sigSup_MID500_Iso, scale);
+			hMID400iso->Add(S->tlratios[muelswitch].sigSup_MID400_Iso, scale);
+			hMID15iso ->Add(S->tlratios[muelswitch].sigSup_MID15_Iso , scale);
+		}				    
+		else {				   
+			hMID24iso ->Add(S->tlratios[muelswitch].sig_MID24_Iso , scale);
+			hMID500iso->Add(S->tlratios[muelswitch].sig_MID500_Iso, scale);
+			hMID400iso->Add(S->tlratios[muelswitch].sig_MID400_Iso, scale);
+			hMID15iso ->Add(S->tlratios[muelswitch].sig_MID15_Iso , scale);
 		}
 	}
 }
@@ -6735,6 +6743,10 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 	vector<int> v_ntight, v_nloose;
 	vector<float> v_scale;
 	vector<TString> v_name;
+	int muelswitch = -1;
+	if      (chan == Muon) muelswitch = 0;
+	else if (chan == Elec) muelswitch = 1;
+
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		Sample *S = fSamples[index];
@@ -6745,16 +6757,13 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 		float scale = fLumiNorm/S->getLumi(); // Normalize all
 		if(S->datamc == 0) scale = 1;
 		if (gRatiosFromTTbar) {
-			Channel *C;
-			if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
-			if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 			if(fp == SigSup){
-				ntight = C->fntight_ttbar->GetEntries();
-				nloose = C->fnloose_ttbar->GetEntries();
+				ntight = S->tlratios[muelswitch].fntight_ttbar->GetEntries();
+				nloose = S->tlratios[muelswitch].fnloose_ttbar->GetEntries();
 			}
 			if(fp == ZDecay){
-				ntight = C->pntight_ttbar->GetEntries();
-				nloose = C->pnloose_ttbar->GetEntries();
+				ntight = S->tlratios[muelswitch].pntight_ttbar->GetEntries();
+				nloose = S->tlratios[muelswitch].pnloose_ttbar->GetEntries();
 			}
 		}
 		else {
@@ -6787,7 +6796,7 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 		if(fp == ZDecay) s_forp = "p Ratio";
 		TString s_channel;
 		if(chan == Muon)     s_channel = "Muon";
-		if(chan == Elec) s_channel = "Electron";
+		if(chan == Elec)     s_channel = "Electron";
 		cout << " Calling calculateRatio for " << s_forp << " in " << s_channel << " channel..." << endl;
 		for(size_t i = 0; i < v_ntight.size(); ++i){
 			cout << setw(9) << v_name[i] << ": ";
@@ -6871,22 +6880,25 @@ TEfficiency *SSDLPlotter::getMergedEfficiency(vector<int> samples, gChannel chan
 	if(fp == ZDecay && pteta == 1) eff = new TEfficiency("fRatio_eta", "fRatio_eta", getNEtaBins(chan), getEtaBins(chan));
 	if(fp == SigSup && pteta == 2) eff = new TEfficiency("fRatio_nv",  "fRatio_nv",  18, 0., 36.);
 	if(fp == ZDecay && pteta == 2) eff = new TEfficiency("fRatio_nv",  "fRatio_nv",  18, 0., 36.);
+
+	int muelswitch = -1;
+	if      (chan == Muon) muelswitch = 0;
+	else if (chan == Elec) muelswitch = 1;
+	
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
-
 		if(S->datamc > 0) { cout << "Calling the wrong method -> call the combined one" << endl; exit(-1);}
 		Channel *C;
-			// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
 		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
 		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		TEfficiency *tempeff;
-		if(fp == SigSup && pteta == 0) tempeff = new TEfficiency(*C->fratio_pt);
-		if(fp == SigSup && pteta == 1) tempeff = new TEfficiency(*C->fratio_eta);
-		if(fp == SigSup && pteta == 2) tempeff = new TEfficiency(*C->fratio_nv);
-		if(fp == ZDecay && pteta == 0) tempeff = new TEfficiency(*C->pratio_pt);
-		if(fp == ZDecay && pteta == 1) tempeff = new TEfficiency(*C->pratio_eta);
-		if(fp == ZDecay && pteta == 2) tempeff = new TEfficiency(*C->pratio_nv);
-
+		if(fp == SigSup && pteta == 0) tempeff = new TEfficiency(*S->tlratios[muelswitch].fratio_pt);
+		if(fp == SigSup && pteta == 1) tempeff = new TEfficiency(*S->tlratios[muelswitch].fratio_eta);
+		if(fp == SigSup && pteta == 2) tempeff = new TEfficiency(*S->tlratios[muelswitch].fratio_nv);
+		if(fp == ZDecay && pteta == 0) tempeff = new TEfficiency(*S->tlratios[muelswitch].pratio_pt);
+		if(fp == ZDecay && pteta == 1) tempeff = new TEfficiency(*S->tlratios[muelswitch].pratio_eta);
+		if(fp == ZDecay && pteta == 2) tempeff = new TEfficiency(*S->tlratios[muelswitch].pratio_nv);
 		eff->Add(*tempeff);
 		delete tempeff;
 	}
@@ -6896,6 +6908,10 @@ TGraphAsymmErrors *SSDLPlotter::getCombEfficiency(vector<int> samples, gChannel 
 	// pteta switch: 0: pt (default), 1: eta
 	TList *list = new TList();
 	vector<TEfficiency*> veff;
+	int muelswitch = -1;
+	if      (chan == Muon) muelswitch = 0;
+	else if (chan == Elec) muelswitch = 1;
+	
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 		float scale = fLumiNorm / S->getLumi();
@@ -6904,10 +6920,10 @@ TGraphAsymmErrors *SSDLPlotter::getCombEfficiency(vector<int> samples, gChannel 
 			// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
 		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
 		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
-		if(fp == SigSup && pteta == 0) veff.push_back(new TEfficiency(*C->fratio_pt));
-		if(fp == SigSup && pteta == 1) veff.push_back(new TEfficiency(*C->fratio_eta));
-		if(fp == ZDecay && pteta == 0) veff.push_back(new TEfficiency(*C->pratio_pt));
-		if(fp == ZDecay && pteta == 1) veff.push_back(new TEfficiency(*C->pratio_eta));
+		if(fp == SigSup && pteta == 0) veff.push_back(new TEfficiency(*S->tlratios[muelswitch].fratio_pt));
+		if(fp == SigSup && pteta == 1) veff.push_back(new TEfficiency(*S->tlratios[muelswitch].fratio_eta));
+		if(fp == ZDecay && pteta == 0) veff.push_back(new TEfficiency(*S->tlratios[muelswitch].pratio_pt));
+		if(fp == ZDecay && pteta == 1) veff.push_back(new TEfficiency(*S->tlratios[muelswitch].pratio_eta));
 		cout << veff[i]->GetName() << endl;
 		veff[i]->SetWeight(scale);
 		list->Add(veff[i]);
@@ -6920,28 +6936,31 @@ TGraphAsymmErrors *SSDLPlotter::getCombEfficiency(vector<int> samples, gChannel 
 
 void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, TH1D*& h_passed_nv, TH1D*& h_total_nv, bool output){
 	if(fVerbose>2) cout << "---------------" << endl;
+	int muelswitch = 0;
+	if (chan == Elec) muelswitch = 1;
+	
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 
 		float scale = fLumiNorm / S->getLumi();
 		if(S->datamc == 0) scale = 1;
 
-		Channel *C;
-		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
-		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
-		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+		//		Channel *C;
+		//		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+		//		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+		//		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		TH2D *ntight, *nloose;
 		TH1D *ntight_nv, *nloose_nv;
 		if(fp == SigSup){
-			ntight = C->fntight;
-			nloose = C->fnloose;
-			ntight_nv = C->fntight_nv;
-			nloose_nv = C->fnloose_nv;
+			ntight = S->tlratios[muelswitch].fntight;
+			nloose = S->tlratios[muelswitch].fnloose;
+			ntight_nv = S->tlratios[muelswitch].fntight_nv;
+			nloose_nv = S->tlratios[muelswitch].fnloose_nv;
 		} else if(fp == ZDecay){
-			ntight = C->pntight;
-			nloose = C->pnloose;
-			ntight_nv = C->pntight_nv;
-			nloose_nv = C->pnloose_nv;
+			ntight = S->tlratios[muelswitch].pntight;
+			nloose = S->tlratios[muelswitch].pnloose;
+			ntight_nv = S->tlratios[muelswitch].pntight_nv;
+			nloose_nv = S->tlratios[muelswitch].pnloose_nv;
 		}
 		h_passed->Add(ntight, scale);
 		h_total ->Add(nloose, scale);
@@ -6961,23 +6980,26 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 }
 void SSDLPlotter::getPassedTotalTTbar(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output){
 	if(fVerbose>2) cout << "---------------" << endl;
+	int muelswitch = 0;
+	if (chan == Elec) muelswitch = 1;
+
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 
 		float scale = fLumiNorm / S->getLumi();
 		if(S->datamc == 0) scale = 1; // this function doesn't really make sense for data, since the histograms aren't filled.
 
-		Channel *C;
-		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
-		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
-		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
+		//		Channel *C;
+		//		// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
+		//		if(chan == Muon) C = &S->region[gRegion[gBaseRegion]][HighPt].mm;
+		//		if(chan == Elec) C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 		TH2D *ntight, *nloose;
 		if(fp == SigSup){
-			ntight = C->fntight_ttbar;
-			nloose = C->fnloose_ttbar;
+			ntight = S->tlratios[muelswitch].fntight_ttbar;
+			nloose = S->tlratios[muelswitch].fnloose_ttbar;
 		} else if(fp == ZDecay){
-			ntight = C->pntight_ttbar;
-			nloose = C->pnloose_ttbar;
+			ntight = S->tlratios[muelswitch].pntight_ttbar;
+			nloose = S->tlratios[muelswitch].pnloose_ttbar;
 		}
 		h_passed->Add(ntight, scale);
 		h_total ->Add(nloose, scale);
@@ -7032,8 +7054,8 @@ void SSDLPlotter::calculateChMisIdProb(vector<int>  samples, gChMisIdReg chmid_r
 
 	// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
     Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
-    TH2D *ospairstmp = C->ospairs;
-    TH2D *sspairstmp = C->sspairs;
+    TH2D *ospairstmp = S->chmisid.ospairs;
+    TH2D *sspairstmp = S->chmisid.sspairs;
     
     if (chmid_reg == BB){
       ospair   += ospairstmp->GetBinContent(1,1) * scale;
@@ -7107,7 +7129,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
-	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM << Form(" Generated on: %S ", asctime(timeinfo)) << endl;
 	fOUTSTREAM << endl;
 	
 	fOUTSTREAM3.open(notetable.Data(), ios::trunc);
@@ -16017,6 +16039,13 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			S->numbers[r][chan].npf += puweight * npf;
 			S->numbers[r][chan].nfp += puweight * nfp;
 			S->numbers[r][chan].nff += puweight * nff;
+
+//			if (S->sname.Contains("DoubleEl")){
+//			  cout << "[DEGUG]: npp-> " << S->numbers[r][chan].npp << endl;
+//			  cout << "[DEBUG]: npf-> " << S->numbers[r][chan].npf + S->numbers[r][chan].nfp << endl;
+//			  cout << "[DEBUG]: nff-> " << S->numbers[r][chan].nff << endl;
+//			}
+
 		}
 		
 		// Differential predictions
@@ -16123,8 +16152,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
 
-	const float mu_flatout = 30.;
-	const float el_flatout = 30.;
+	const float mu_flatout = 35.;
+	const float el_flatout = 40.;
 	
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MufRatio;
@@ -16158,8 +16187,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
-	const float mu_flatout = 30.;
-	const float el_flatout = 30.;
+	const float mu_flatout = 35.;
+	const float el_flatout = 40.;
 	
 	eta = fabs(eta); // make sure we take the absolute value
 
@@ -17096,10 +17125,10 @@ void SSDLPlotter::printMuOriginFromSample(Sample *S, int toggle, int reg, gHiLoS
 	Channel *C = &S->region[reg][hilo].mm;
 
 	TH1D *histo;
-	if(toggle == 1) histo = (TH1D*)C->sst_origin->Clone();
-	if(toggle == 2) histo = (TH1D*)C->ssl_origin->Clone();
-	if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
-	if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
+	if(toggle == 1) histo = (TH1D*)S->tlratios[0].sst_origin->Clone();
+	if(toggle == 2) histo = (TH1D*)S->tlratios[0].ssl_origin->Clone();
+	if(toggle == 3) histo = (TH1D*)S->tlratios[0].zt_origin->Clone();
+	if(toggle == 4) histo = (TH1D*)S->tlratios[0].zl_origin->Clone();
 
 	if(histo->Integral() == 0.) return;
 	histo->Scale(100./histo->Integral());
@@ -17115,10 +17144,10 @@ void SSDLPlotter::printElOriginFromSample(Sample *S, int toggle, int reg, gHiLoS
 	Channel *C = &S->region[reg][hilo].ee;
 
 	TH1D *histo;
-	if(toggle == 1) histo = (TH1D*)C->sst_origin->Clone();
-	if(toggle == 2) histo = (TH1D*)C->ssl_origin->Clone();
-	if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
-	if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
+	if(toggle == 1) histo = (TH1D*)S->tlratios[1].sst_origin->Clone();
+	if(toggle == 2) histo = (TH1D*)S->tlratios[1].ssl_origin->Clone();
+	if(toggle == 3) histo = (TH1D*)S->tlratios[1].zt_origin->Clone();
+	if(toggle == 4) histo = (TH1D*)S->tlratios[1].zl_origin->Clone();
 
 	if(histo->Integral() == 0.) return;
 	histo->Scale(100./histo->Integral());
@@ -17221,14 +17250,15 @@ void SSDLPlotter::printOriginSummary(vector<int> samples, int toggle, gChannel c
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 		Channel *C;
-		if(chan == Muon) C = &S->region[reg][hilo].mm;
-		if(chan == Elec) C = &S->region[reg][hilo].ee;
-
+		int muelswitch = -1;
+		if(chan == Muon) { C = &S->region[reg][hilo].mm; muelswitch = 0; }
+		if(chan == Elec) { C = &S->region[reg][hilo].ee; muelswitch = 1; }
+		
 		TH1D *histo;
-		if(toggle == 1) histo = (TH1D*)C->sst_origin->Clone();
-		if(toggle == 2) histo = (TH1D*)C->ssl_origin->Clone();
-		if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
-		if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
+		if(toggle == 1) histo = (TH1D*)S->tlratios[muelswitch].sst_origin->Clone();
+		if(toggle == 2) histo = (TH1D*)S->tlratios[muelswitch].ssl_origin->Clone();
+		if(toggle == 3) histo = (TH1D*)S->tlratios[muelswitch].zt_origin->Clone();
+		if(toggle == 4) histo = (TH1D*)S->tlratios[muelswitch].zl_origin->Clone();
 
 		float scale = fLumiNorm / S->getLumi();
 		//histosum->Add(histo, scale);
