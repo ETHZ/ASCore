@@ -204,6 +204,40 @@ void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
     return;
 
 }
+int UserAnalysisBase::getMLSP(){
+	int mlsp(-1000);
+	for (int i = 0; i < fTR->nGenParticles; ++i){
+		if (fabs(fTR->genInfoId[i]) != 1000022) continue;
+		else {
+		mlsp = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
+		break;
+		}
+	}
+	return mlsp;
+}
+int UserAnalysisBase::getMGlu(){
+	int mglu(-1000);
+	for (int i = 0; i < fTR->nGenParticles; ++i){
+		if (fabs(fTR->genInfoId[i]) != 1000021) continue;
+		else {
+			mglu = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
+			break;
+		}
+	}
+	return mglu;
+}
+int UserAnalysisBase::getMChi1(){
+	int mchi1(-1000);
+	for (int i = 0; i < fTR->nGenParticles; ++i){
+		if (fabs(fTR->genInfoId[i]) != 1000024) continue;
+		else {
+			mchi1 = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
+			break;
+		}
+	}
+	return mchi1;
+}
+
 
 ///////////////////////////////////////////////////////////////
 // Object selections:

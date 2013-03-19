@@ -65,6 +65,9 @@ public:
     map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
     vector<string>   fHLTLabels;   // Vector with current HLT names
 	
+	virtual int getMLSP();
+	virtual int getMGlu();
+	virtual int getMChi1();
 
     // Jet Selectors
 //     virtual bool IsGoodBasicJet(int);
