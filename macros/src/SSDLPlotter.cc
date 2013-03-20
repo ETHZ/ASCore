@@ -430,8 +430,8 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
 
-	makeMuIsolationPlots(true); // if true, loops on TTbar sample
-	makeElIsolationPlots(true); // if true, loops on TTbar sample
+	//	makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	//	makeElIsolationPlots(true); // if true, loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
@@ -441,26 +441,26 @@ void SSDLPlotter::doAnalysis(){
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
+	//	makeRatioPlots(Muon);
+	//	makeRatioPlots(Elec);
 //	make2DRatioPlots(Muon);
 //	make2DRatioPlots(Elec);
 //	// // makeNTightLoosePlots(Muon);
 //	// // makeNTightLoosePlots(Elec);
 //	// 
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsNVPlots(Muon, ZDecay); 
-	makeFRvsNVPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
+//	makeFRvsPtPlots(Muon, SigSup);
+//	makeFRvsPtPlots(Elec, SigSup);
+//	makeFRvsPtPlots(Muon, ZDecay);
+//	makeFRvsPtPlots(Elec, ZDecay);
+//	makeFRvsNVPlots(Muon, ZDecay); 
+//	makeFRvsNVPlots(Elec, ZDecay);
+//	makeFRvsEtaPlots(Muon);
+//	makeFRvsEtaPlots(Elec);
 //	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
 	makeAllIntPredictions();
-	makeAllClosureTests();
+	//	makeAllClosureTests();
 //
 	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
@@ -13658,13 +13658,15 @@ void SSDLPlotter::makeAllClosureTests(){
  	TString outputdir = Util::MakeOutputDir(fOutputDir + "MCClosure");
  	for(size_t i = 0; i < gNREGIONS; ++i){
  		TString outputname = outputdir + "MCClosure_" + gRegions[i]->sname + ".txt";
- 		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, i);
+		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, i);
  	}
- 	for(size_t i = 0; i < gNREGIONS; ++i){
- 		TString outputname = outputdir + "MCClosure_Sig_" + gRegions[i]->sname + ".txt";
- 		// TString outputname = outputdir + "MCClosure_Sig_" + Region::sname[i] + ".txt";
- 		makeIntMCClosure(fMCBGNoQCDNoGJetsSig, outputname, i);
- 	}
+	if (fMCBGNoQCDNoGJetsSig.size() > 0) {
+	        for(size_t i = 0; i < gNREGIONS; ++i){
+ 	  		TString outputname = outputdir + "MCClosure_Sig_" + gRegions[i]->sname + ".txt";
+			// TString outputname = outputdir + "MCClosure_Sig_" + Region::sname[i] + ".txt";
+			makeIntMCClosure(fMCBGNoQCDNoGJetsSig, outputname, i);
+		}
+	}
 	//	makeTTbarClosure();
  	fOutputSubDir = "";
 }
@@ -14629,74 +14631,140 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " " << endl;
 	
- 	float finalWZ  = hvar_wz[1] ->GetEntries();
-	float fakes    = hvar_ttj[1]->GetSumOfWeights();
-	float fakes_mm = hvar_ttj[6]->GetSumOfWeights();
-	float fakes_ee = hvar_ttj[7]->GetSumOfWeights();
-	float fakes_em = hvar_ttj[8]->GetSumOfWeights();
+ 	float finalWZ = hvar_wz[1] ->GetEntries();
 	
+	Double_t rare(0.),    wz(0.),    top(0.),    ewk(0.),    qcd(0.);
+	Double_t rare_mm(0.), wz_mm(0.), top_mm(0.), ewk_mm(0.), qcd_mm(0.);
+	Double_t rare_em(0.), wz_em(0.), top_em(0.), ewk_em(0.), qcd_em(0.);
+	Double_t rare_ee(0.), wz_ee(0.), top_ee(0.), ewk_ee(0.), qcd_ee(0.);
+
+	Double_t rare_err(0.),    wz_err(0.),    top_err(0.),    ewk_err(0.),    qcd_err(0.);
+	Double_t rare_err_mm(0.), wz_err_mm(0.), top_err_mm(0.), ewk_err_mm(0.), qcd_err_mm(0.);
+	Double_t rare_err_em(0.), wz_err_em(0.), top_err_em(0.), ewk_err_em(0.), qcd_err_em(0.);
+	Double_t rare_err_ee(0.), wz_err_ee(0.), top_err_ee(0.), ewk_err_ee(0.), qcd_err_ee(0.);
+	
+	rare    = hvar_rare[1]->IntegralAndError(0,1000.,rare_err   );
+	rare_mm = hvar_rare[6]->IntegralAndError(0,1000.,rare_err_mm);
+	rare_ee = hvar_rare[7]->IntegralAndError(0,1000.,rare_err_ee);
+	rare_em = hvar_rare[8]->IntegralAndError(0,1000.,rare_err_em);
+	wz      = hvar_wz  [1]->IntegralAndError(0,1000.,wz_err     );
+	wz_mm   = hvar_wz  [6]->IntegralAndError(0,1000.,wz_err_mm  );
+	wz_ee   = hvar_wz  [7]->IntegralAndError(0,1000.,wz_err_ee  );
+	wz_em   = hvar_wz  [8]->IntegralAndError(0,1000.,wz_err_em  );
+	top     = hvar_ttj [1]->IntegralAndError(0,1000.,top_err    );
+	top_mm  = hvar_ttj [6]->IntegralAndError(0,1000.,top_err_mm );
+	top_ee  = hvar_ttj [7]->IntegralAndError(0,1000.,top_err_ee );
+	top_em  = hvar_ttj [8]->IntegralAndError(0,1000.,top_err_em );
+	ewk     = hvar_ewk [1]->IntegralAndError(0,1000.,ewk_err    );
+	ewk_mm  = hvar_ewk [6]->IntegralAndError(0,1000.,ewk_err_mm );
+	ewk_ee  = hvar_ewk [7]->IntegralAndError(0,1000.,ewk_err_ee );
+	ewk_em  = hvar_ewk [8]->IntegralAndError(0,1000.,ewk_err_em );
+	qcd     = hvar_qcd [1]->IntegralAndError(0,1000.,qcd_err    );
+	qcd_mm  = hvar_qcd [6]->IntegralAndError(0,1000.,qcd_err_mm );
+	qcd_ee  = hvar_qcd [7]->IntegralAndError(0,1000.,qcd_err_ee );
+	qcd_em  = hvar_qcd [8]->IntegralAndError(0,1000.,qcd_err_em );
+		
 	float obsbkg_mm(0) , obsbkg_em(0) , obsbkg_ee(0) , obsbkg(0) ;
 	float obspred_mm(0), obspred_em(0), obspred_ee(0), obspred(0);
 	float obsbkg_err_mm(0) , obsbkg_err_em(0) , obsbkg_err_ee(0) , obsbkg_err(0) ;
 	
-	obsbkg_mm  = (pred.obs_mm - (pred.cmid_mm+pred.rare_mm)) / pred.wz_mm;
-	obsbkg_em  = (pred.obs_em - (pred.cmid_em+pred.rare_em)) / pred.wz_em;
-	obsbkg_ee  = (pred.obs_ee - (pred.cmid_ee+pred.rare_ee)) / pred.wz_ee;
-	obsbkg     = (pred.obs    - (pred.cmid   +pred.rare   )) / pred.wz   ;
-	obspred_mm = (pred.obs_mm - (pred.cmid_mm+pred.rare_mm+pred.wz_mm)) / pred.wz_mm;
-	obspred_em = (pred.obs_em - (pred.cmid_em+pred.rare_em+pred.wz_em)) / pred.wz_em;
-	obspred_ee = (pred.obs_ee - (pred.cmid_ee+pred.rare_ee+pred.wz_ee)) / pred.wz_ee;
-	obspred    = (pred.obs    - (pred.cmid   +pred.rare   +pred.wz   )) / pred.wz   ;
+	obsbkg_mm  = (pred.obs_mm - (ewk_mm+qcd_mm+top_mm+rare_mm)) / wz_mm;
+	obsbkg_em  = (pred.obs_em - (ewk_em+qcd_em+top_em+rare_em)) / wz_em;
+	obsbkg_ee  = (pred.obs_ee - (ewk_ee+qcd_ee+top_ee+rare_ee)) / wz_ee;
+	obsbkg     = (pred.obs    - (ewk   +qcd   +top   +rare   )) / wz   ;
+	obspred_mm = (pred.obs_mm - (ewk_mm+qcd_mm+top_mm+rare_mm+wz_mm)) / wz_mm;
+	obspred_em = (pred.obs_em - (ewk_em+qcd_em+top_em+rare_em+wz_em)) / wz_em;
+	obspred_ee = (pred.obs_ee - (ewk_ee+qcd_ee+top_ee+rare_ee+wz_ee)) / wz_ee;
+	obspred    = (pred.obs    - (ewk   +qcd   +top   +rare   +wz   )) / wz   ;
 
-	obsbkg_err_mm  = sqrt((pred.cmid_stat_mm/pred.wz_mm)*(pred.cmid_stat_mm/pred.wz_mm)+(pred.rare_stat_mm/pred.wz_mm)*(pred.rare_stat_mm/pred.wz_mm)+(obsbkg_mm*pred.wz_stat_mm/pred.wz_mm)*(obsbkg_mm*pred.wz_stat_mm/pred.wz_mm));
-	obsbkg_err_em  = sqrt((pred.cmid_stat_em/pred.wz_em)*(pred.cmid_stat_em/pred.wz_em)+(pred.rare_stat_em/pred.wz_em)*(pred.rare_stat_em/pred.wz_em)+(obsbkg_em*pred.wz_stat_em/pred.wz_em)*(obsbkg_em*pred.wz_stat_em/pred.wz_em));
-	obsbkg_err_ee  = sqrt((pred.cmid_stat_ee/pred.wz_ee)*(pred.cmid_stat_ee/pred.wz_ee)+(pred.rare_stat_ee/pred.wz_ee)*(pred.rare_stat_ee/pred.wz_ee)+(obsbkg_ee*pred.wz_stat_ee/pred.wz_ee)*(obsbkg_ee*pred.wz_stat_ee/pred.wz_ee));
-	obsbkg_err     = sqrt((pred.cmid_stat/pred.wz)      *(pred.cmid_stat/pred.wz)      +(pred.rare_stat/pred.wz)      *(pred.rare_stat/pred.wz)      +(obsbkg*pred.wz_stat/pred.wz)         *(obsbkg*pred.wz_stat/pred.wz));
+	obsbkg_err_mm  = sqrt((ewk_err_mm/wz_mm)*(ewk_err_mm/wz_mm)+(rare_err_mm/wz_mm)*(rare_err_mm/wz_mm)+(top_err_mm/wz_mm)*(top_err_mm/wz_mm)+(qcd_err_mm/wz_mm)*(qcd_err_mm/wz_mm)+(obsbkg_mm*wz_err_mm/wz_mm)*(obsbkg_mm*wz_err_mm/wz_mm));
+	obsbkg_err_em  = sqrt((ewk_err_em/wz_em)*(ewk_err_em/wz_em)+(rare_err_em/wz_em)*(rare_err_em/wz_em)+(top_err_em/wz_em)*(top_err_em/wz_em)+(qcd_err_em/wz_em)*(qcd_err_em/wz_em)+(obsbkg_em*wz_err_em/wz_em)*(obsbkg_em*wz_err_em/wz_em));
+	obsbkg_err_ee  = sqrt((ewk_err_ee/wz_ee)*(ewk_err_ee/wz_ee)+(rare_err_ee/wz_ee)*(rare_err_ee/wz_ee)+(top_err_ee/wz_ee)*(top_err_ee/wz_ee)+(qcd_err_ee/wz_ee)*(qcd_err_ee/wz_ee)+(obsbkg_ee*wz_err_ee/wz_ee)*(obsbkg_ee*wz_err_ee/wz_ee));
+	obsbkg_err     = sqrt((ewk_err   /wz)   *(ewk_err   /wz)   +(rare_err/wz)      *(rare_err/wz)      +(top_err/wz)      *(top_err/wz)      +(qcd_err/wz)      *(qcd_err/wz)      +(obsbkg*wz_err/wz)         *(obsbkg*wz_err/wz));
 
 	OUT << endl;
-	OUT << "-----------------------------------------------------------------------------------------------------------------------" << endl;
- 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||         TOTAL         ||" << endl;
- 	OUT << "=======================================================================================================================" << endl;
-	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Pred. chmisid",
-		    pred.cmid_em, pred.cmid_stat_em, pred.cmid_err_em, 
-		    pred.cmid_ee, pred.cmid_stat_ee, pred.cmid_err_ee,
-		    pred.cmid   , pred.cmid_stat   , pred.cmid_err   );
- 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
-		    pred.rare_mm, pred.rare_stat_mm, pred.rare_err_mm, 
-		    pred.rare_em, pred.rare_stat_em, pred.rare_err_em, 
-		    pred.rare_ee, pred.rare_stat_ee, pred.rare_err_ee,
-		    pred.rare   , pred.rare_stat   , pred.rare_err   );
-	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "WZ Prod",
-		    pred.wz_mm, pred.wz_stat_mm, pred.wz_err_mm, 
-		    pred.wz_em, pred.wz_stat_em, pred.wz_err_em, 
-		    pred.wz_ee, pred.wz_stat_ee, pred.wz_err_ee,
-		    pred.wz   , pred.wz_stat   , pred.wz_err   );
-	OUT << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << Form("%16s || %d                    || %d                    || %d                    || %d                    ||\n", "Observed",
-		    pred.obs_mm, pred.obs_em, pred.obs_ee,  pred.obs    );
-	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Background",
-		    pred.cmid_mm+pred.rare_mm+pred.wz_mm+fakes_mm, sqrt(pred.cmid_stat_mm*pred.cmid_stat_mm+pred.rare_stat_mm*pred.rare_stat_mm+pred.wz_stat_mm*pred.wz_stat_mm), sqrt(pred.cmid_err_mm*pred.cmid_err_mm+pred.rare_err_mm*pred.rare_err_mm+pred.wz_err_mm*pred.wz_err_mm), 
-		    pred.cmid_em+pred.rare_em+pred.wz_em+fakes_em, sqrt(pred.cmid_stat_em*pred.cmid_stat_em+pred.rare_stat_em*pred.rare_stat_em+pred.wz_stat_em*pred.wz_stat_em), sqrt(pred.cmid_err_em*pred.cmid_err_em+pred.rare_err_em*pred.rare_err_em+pred.wz_err_em*pred.wz_err_em), 
-		    pred.cmid_ee+pred.rare_ee+pred.wz_ee+fakes_ee, sqrt(pred.cmid_stat_ee*pred.cmid_stat_ee+pred.rare_stat_ee*pred.rare_stat_ee+pred.wz_stat_ee*pred.wz_stat_ee), sqrt(pred.cmid_err_ee*pred.cmid_err_ee+pred.rare_err_ee*pred.rare_err_ee+pred.wz_err_ee*pred.wz_err_ee), 
-		    pred.cmid   +pred.rare   +pred.wz   +fakes   , sqrt(pred.cmid_stat   *pred.cmid_stat   +pred.rare_stat   *pred.rare_stat   +pred.wz_stat   *pred.wz_stat   ), sqrt(pred.cmid_err   *pred.cmid_err   +pred.rare_err   *pred.rare_err   +pred.wz_err   *pred.wz_err   )); 
-	OUT << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "Obs. - Bkg./ WZ",
+	OUT << "-------------------------------------------------------------------------------------------" << endl;
+ 	OUT << "       SUMMARY   ||     Mu/Mu      ||      E/Mu      ||       E/E      ||      TOTAL     ||" << endl;
+ 	OUT << "===========================================================================================" << endl;
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "W/Z/WW/WZ",
+		    ewk_mm, ewk_err_mm,
+		    ewk_em, ewk_err_em, 
+		    ewk_ee, ewk_err_ee,
+		    ewk   , ewk_err   );
+ 	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "Rare SM (Sum)",
+		    rare_mm, rare_err_mm, 
+		    rare_em, rare_err_em, 
+		    rare_ee, rare_err_ee,
+		    rare   , rare_err   );
+ 	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "QCD/Top",
+		    top_mm+qcd_mm, sqrt(top_err_mm*top_err_mm+qcd_err_mm*qcd_err_mm), 
+		    top_em+qcd_em, sqrt(top_err_em*top_err_em+qcd_err_em*qcd_err_em), 
+		    top_ee+qcd_ee, sqrt(top_err_ee*top_err_ee+qcd_err_ee*qcd_err_ee),
+		    top   +qcd   , sqrt(top_err   *top_err   +qcd_err   *qcd_err   ));
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "WZ Prod",
+		    wz_mm, wz_err_mm, 
+		    wz_em, wz_err_em, 
+		    wz_ee, wz_err_ee,
+		    wz   , wz_err   );
+	OUT << "-------------------------------------------------------------------------------------------" << endl;
+	OUT << Form("%16s || %3.0f            || %3.0f            || %3.0f            || %3.0f            ||\n", "Observed",
+		    (float)pred.obs_mm, (float)pred.obs_em, (float)pred.obs_ee,  (float)pred.obs    );
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "Background",
+		    ewk_mm+rare_mm+wz_mm+top_mm+qcd_mm, sqrt(ewk_err_mm*ewk_err_mm+rare_err_mm*rare_err_mm+wz_err_mm*wz_err_mm+qcd_err_mm*qcd_err_mm+top_err_mm*top_err_mm), 
+		    ewk_em+rare_em+wz_em+top_em+qcd_em, sqrt(ewk_err_em*ewk_err_em+rare_err_em*rare_err_em+wz_err_em*wz_err_em+qcd_err_em*qcd_err_em+top_err_em*top_err_em), 
+		    ewk_ee+rare_ee+wz_ee+top_ee+qcd_ee, sqrt(ewk_err_ee*ewk_err_ee+rare_err_ee*rare_err_ee+wz_err_ee*wz_err_ee+qcd_err_ee*qcd_err_ee+top_err_ee*top_err_ee), 
+		    ewk   +rare   +wz   +top   +qcd   , sqrt(ewk_err   *ewk_err   +rare_err   *rare_err   +wz_err   *wz_err   +qcd_err   *qcd_err   +top_err   *top_err   )); 
+	OUT << "-------------------------------------------------------------------------------------------" << endl;
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "Obs. - Bkg./ WZ",
 		    obsbkg_mm, obsbkg_err_mm, obsbkg_em, obsbkg_err_em, obsbkg_ee, obsbkg_err_ee, obsbkg,    obsbkg_err     );
-	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "Obs. - Pred./ WZ",
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "Obs. - Pred./ WZ",
 		    obspred_mm, obsbkg_err_mm, obspred_em, obsbkg_err_em, obspred_ee, obsbkg_err_ee, obspred,    obsbkg_err    );
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "-------------------------------------------------------------------------------------------" << endl;
 	OUT << endl;
-	OUT << "Including fakes taken from ttbar MC sample... " << endl;
 
 	float syst1(0), syst2(0);
 	syst1 = sqrt( obspred_mm*obspred_mm*((float)pred.obs_mm/(float)pred.obs) + obspred_em*obspred_em*((float)pred.obs_em/(float)pred.obs) + obspred_ee*obspred_ee*((float)pred.obs_ee/(float)pred.obs));
 	syst2 = sqrt(obspred_mm*obspred_mm)*((float)pred.obs_mm/(float)pred.obs) + sqrt(obspred_em*obspred_em)*((float)pred.obs_em/(float)pred.obs) + sqrt(obspred_ee*obspred_ee)*((float)pred.obs_ee/(float)pred.obs);
 
 	OUT << " Taking as systematic the mean syst. error among all channels... " << endl;
-	OUT << Form("Syst = %4.3f", syst2) << endl;
+	OUT << Form("Syst = %4.3f", syst1) << endl;
+	//	OUT << Form("Syst = %4.3f", syst2) << endl;
 	OUT << endl;
 	OUT << endl;
+	
+	OUT << " Taking as systematic the bin-by-bin difference between Data/MC" << endl;
+	float met_weighted(0.), met_absolute(0.), met_sigma(0.), met_nbins(0.);
+	float ht_weighted(0.),  ht_absolute(0.),  ht_sigma(0.),  ht_nbins(0.);
+	for (int i=3; i<SSDLDumper::KinPlots::nbins[1]; i++){ //Starting at MET 80 for EWKino
+		if (hvar_data[1]->GetBinContent(i) == 0) continue;
 
+	        float diff     = fabs(hvar_tot[1]->GetBinContent(i) - hvar_data[1]->GetBinContent(i))/hvar_data[1]->GetBinContent(i);
+		float diff_err = sqrt(hvar_data[1]->GetBinError(i)*hvar_data[1]->GetBinError(i));
+		
+	        met_absolute += diff / hvar_data[1]->GetBinContent(i);
+		met_sigma    += 1/(diff_err*diff_err);
+		met_weighted += (diff/(diff_err*diff_err)) / hvar_data[1]->GetBinContent(i);
+		met_nbins++;
+	}
+	for (int i=3; i<SSDLDumper::KinPlots::nbins[0]; i++){ //Starting at HT 100 for SS+b
+		if (hvar_data[0]->GetBinContent(i) == 0) continue;
+
+	        float diff     = fabs(hvar_tot[0]->GetBinContent(i) - hvar_data[0]->GetBinContent(i))/hvar_data[0]->GetBinContent(i);
+		float diff_err = sqrt(hvar_data[0]->GetBinError(i)*hvar_data[0]->GetBinError(i));
+		
+	        ht_absolute += diff / hvar_data[0]->GetBinContent(i);
+		ht_sigma    += 1/(diff_err*diff_err); 
+	        ht_weighted += (diff/(diff_err*diff_err)) / hvar_data[0]->GetBinContent(i);
+		ht_nbins++;
+	}
+	met_absolute = met_absolute / met_nbins;
+	met_weighted = met_weighted / met_nbins;
+	ht_absolute  = ht_absolute  / ht_nbins;
+	ht_weighted  = ht_weighted  / ht_nbins;
+	
+	OUT << "Syst. (MET):  Abs. = " << met_absolute << " --->  Err.Weighted = " << met_weighted << endl;
+	OUT << "Syst. (HT) :  Abs. = " << ht_absolute  << " --->  Err.Weighted = " << ht_weighted  << endl ;
+		
 	/// CALCULATE XSECTION
 	float eff    = finalWZ / 2011253;
 	float W2e    = 0.1075;
@@ -14704,11 +14772,11 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	float W2tau  = 0.1125;
 	float Z2ll   = 0.033658;
 	float WZ3lnu = 3*Z2ll*(W2e + W2m + W2tau);	//	float WZ3lnu = 0.04036309056;
-	float xsec   = (pred.obs - (pred.rare + pred.cmid + fakes))/(eff * fLumiNorm * WZ3lnu);
+	float xsec   = (pred.obs - (rare + ewk + top + qcd))/(eff * fLumiNorm * WZ3lnu);
 	OUT << endl;
 	OUT << endl;
 	OUT << "The total WZ cross-section is: " << xsec << " ± " << syst2*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
-	xsec = (pred.obs - (pred.rare + pred.cmid + fakes))/(eff * fLumiNorm);
+	xsec = (pred.obs - (rare + ewk + qcd + top))/(eff * fLumiNorm);
 	OUT << "The WZ->3l3N cross-section is: " << xsec << " ± " << syst2*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
 	OUT << "-------------------------------------------------------------" << endl;
 
