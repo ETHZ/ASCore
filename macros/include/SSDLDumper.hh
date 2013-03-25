@@ -44,6 +44,7 @@ public:
 
 	static const int gNDiffHTBins   = 6;
 	static const int gNDiffMETBins  = 6;
+	static const int gNDiffMET2Bins = 6;
 	static const int gNDiffMET3Bins = 9;
 	static const int gNDiffNJBins   = 6;
 	static const int gNDiffMT2Bins  = 3;
@@ -54,6 +55,7 @@ public:
 
 	static double gDiffHTBins  [gNDiffHTBins+1];
 	static double gDiffMETBins [gNDiffMETBins+1];
+	static double gDiffMET2Bins[gNDiffMET2Bins+1];
 	static double gDiffMET3Bins[gNDiffMET3Bins+1];
 	static double gDiffNJBins  [gNDiffNJBins+1];
 	static double gDiffMT2Bins [gNDiffMT2Bins+1];
@@ -332,6 +334,9 @@ public:
 	        TEfficiency *chmid_BB_pt;
 	        TEfficiency *chmid_EE_pt;
     	        TEfficiency *chmid_BE_pt;
+
+	        TEfficiency *chmid_E_pt;
+    	        TEfficiency *chmid_B_pt;
 	};
 	// static const int gNRatioVars = 8;
 	static const int gNRatioVars = 9;
@@ -384,7 +389,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 10;
+	static const int gNDiffVars = 11;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -842,6 +847,9 @@ public:
 
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_MuEG(           float pt, float eta, const std::string& runPeriod="" );
+        float getTriggerSFMuMu(float);
+        float getTriggerSFElEl(float);
+        float getTriggerSFMuEl();
 	float diMuonHLTSF2012();
 	float muEleHLTSF2012();
 	float diEleHLTSF2012();

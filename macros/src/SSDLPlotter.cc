@@ -433,49 +433,49 @@ void SSDLPlotter::doAnalysis(){
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 
-	// makeOriginPlots(gRegion["Baseline"]);
-	// printOrigins(gRegion["Baseline"]);
+	//	makeOriginPlots(gRegion["Baseline"]);
+	//	printOrigins(gRegion["Baseline"]);
 	// makeOriginPlots(HT0MET120);
 	// printOrigins(HT0MET120);
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
-
-	//	makeMuIsolationPlots(true); // if true, loops on TTbar sample
-	//	makeElIsolationPlots(true); // if true, loops on TTbar sample
-	// makeElIdPlots();
+	 
+	makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	makeElIsolationPlots(true); // if true, loops on TTbar sample
+	makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
 	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
-	// makeMETvsHTPlotPRL();
+	//	makeMETvsHTPlotPRL();
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	//	makeRatioPlots(Muon);
-	//	makeRatioPlots(Elec);
-//	make2DRatioPlots(Muon);
-//	make2DRatioPlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
 //	// // makeNTightLoosePlots(Muon);
 //	// // makeNTightLoosePlots(Elec);
 //	// 
-//	makeFRvsPtPlots(Muon, SigSup);
-//	makeFRvsPtPlots(Elec, SigSup);
-//	makeFRvsPtPlots(Muon, ZDecay);
-//	makeFRvsPtPlots(Elec, ZDecay);
-//	makeFRvsNVPlots(Muon, ZDecay); 
-//	makeFRvsNVPlots(Elec, ZDecay);
-//	makeFRvsEtaPlots(Muon);
-//	makeFRvsEtaPlots(Elec);
-//	makeChMidvsPtPlots();
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsNVPlots(Muon, ZDecay); 
+	makeFRvsNVPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
+	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
 	makeAllIntPredictions();
-	//	makeAllClosureTests();
+	makeAllClosureTests();
 //
-	// makeDiffPrediction();
+	makeDiffPrediction();
 	// makeTTWDiffPredictions();
 	// makeTTWIntPredictions();
-	// printAllYieldTables();
+	printAllYieldTables();
 	
 
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
@@ -2511,7 +2511,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		if(dottbar) hiso_ttbar[i]->DrawCopy("PE X0 same");
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 		lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 		lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 		lat->SetTextColor(kRed);
@@ -2557,7 +2557,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
 			lat->DrawLatex(0.20,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", getFPtBins(Muon)[k], getFPtBins(Muon)[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -2602,7 +2602,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_data_nv[i][k]->DrawCopy("PE X0 same");
 			leg_nv->Draw();
 			lat->DrawLatex(0.20,0.92, Form("N_{Vrtx.} %2.0f - %2.0f", gNVrtxBins[k], gNVrtxBins[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -3044,7 +3044,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		if(dottbar) hiso_ttbar[i]->DrawCopy("PE X0 same");
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 		lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 		lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 		lat->SetTextColor(kRed);
@@ -3091,7 +3091,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
 			lat->DrawLatex(0.20,0.92, Form("p_{T}(e) %3.0f - %3.0f GeV", getFPtBins(Elec)[k], getFPtBins(Elec)[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -3138,7 +3138,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			hiso_data_nv[i][k]->DrawCopy("PE X0 same");
 			leg_nv->Draw();
 			lat->DrawLatex(0.20,0.92, Form("N_{Vrtx.} %2.0f - %2.0f", gNVrtxBins[k], gNVrtxBins[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.1f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -5044,19 +5044,27 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 	TEfficiency *eff_BB = new TEfficiency("ChMid_BB_pt",  "ChMid_BB_pt",  getNPPtBins(Elec), getPPtBins(Elec));
 	TEfficiency *eff_BE = new TEfficiency("ChMid_BE_pt",  "ChMid_BE_pt",  getNPPtBins(Elec), getPPtBins(Elec));
 	TEfficiency *eff_EE = new TEfficiency("ChMid_EE_pt",  "ChMid_EE_pt",  getNPPtBins(Elec), getPPtBins(Elec));
+ 
+	TEfficiency *eff_B  = new TEfficiency("ChMid_B_pt",  "ChMid_B_pt",  getNPPtBins(Elec), getPPtBins(Elec));
+	TEfficiency *eff_E  = new TEfficiency("ChMid_E_pt",  "ChMid_E_pt",  getNPPtBins(Elec), getPPtBins(Elec));
 
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S  = fSamples[samples[i]];
-		Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
 
 		TEfficiency *tempeff_BB = new TEfficiency(*S->chmisid.chmid_BB_pt);
 		TEfficiency *tempeff_BE = new TEfficiency(*S->chmisid.chmid_BE_pt);
 		TEfficiency *tempeff_EE = new TEfficiency(*S->chmisid.chmid_EE_pt);
+		TEfficiency *tempeff_B  = new TEfficiency(*S->chmisid.chmid_B_pt);
+		TEfficiency *tempeff_E  = new TEfficiency(*S->chmisid.chmid_E_pt);
 		
 		eff_BB->Add(*tempeff_BB);
 		eff_BE->Add(*tempeff_BE);
 		eff_EE->Add(*tempeff_EE);
+		eff_B ->Add(*tempeff_B );
+		eff_E ->Add(*tempeff_E );
+
 		delete tempeff_BB,tempeff_BE,tempeff_EE;
+		delete tempeff_B, tempeff_E;
 	}
        
 	eff_BB->SetName("eff_BB_pt");
@@ -5079,8 +5087,21 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 	eff_BE->SetMarkerColor(kBlue);
 	eff_BE->SetMarkerSize(1.5);
 
-	//////////////
+	eff_E->SetName("eff_E_pt");
+	eff_E->SetLineWidth(2);
+	eff_E->SetLineColor(kRed);
+	eff_E->SetMarkerStyle(20);
+	eff_E->SetMarkerColor(kRed);
+	eff_E->SetMarkerSize(1.5);
+	     
+	eff_B->SetName("eff_B_pt");
+	eff_B->SetLineWidth(2);
+	eff_B->SetLineColor(kBlue);
+	eff_B->SetMarkerStyle(20);
+	eff_B->SetMarkerColor(kBlue);
+	eff_B->SetMarkerSize(1.5);
 
+	//////////////
 	float maximum = 0.01;
 	h_ratio_BB->SetMaximum(maximum);
 	h_ratio_BB->SetMinimum(0.0);
@@ -5126,6 +5147,8 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 
 	TCanvas *c_temp = new TCanvas("C_PtRatioPlot", "Ratio vs Pt", 0, 0, 800, 600);
 	c_temp->cd();
+	maximum = 0.004;
+	h_ratio_BB->SetMaximum(maximum);
 	h_ratio_BB->DrawCopy("PE 0");
 	eff_BB->Draw("PZ 0 same");
 	eff_BE->Draw("PZ 0 same");
@@ -5137,16 +5160,44 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 	drawTopLine();
 	lat->SetTextSize(0.03);
 	
-	Util::SaveAll (c_temp, fOutputSubDir, fOutputFile);
+	//	Util::SaveAll (c_temp, fOutputSubDir, fOutputFile);
 	Util::PrintPDF(c_temp, "ChMissID_Prob_Pt", fOutputDir + fOutputSubDir);
 
+	TLegend *leg1;
+	leg1 = new TLegend(0.15,0.75,0.35,0.88);
+	leg1->AddEntry(h_ratio_BE, "Barrel", "p");
+	leg1->AddEntry(h_ratio_EE, "EndCap", "p");
+	leg1->SetTextSize(0.04);
+	leg1->SetFillStyle(0);
+	leg1->SetTextFont(42);
+	leg1->SetBorderSize(0);
+
+	c_temp->cd();
+	h_ratio_BB->DrawCopy("PE 0");
+	eff_B->Draw("PZ 0 same");
+	eff_E->Draw("PZ 0 same");
+	leg1->Draw();
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.62,0.85, name);
+
+	drawTopLine();
+	Util::PrintPDF(c_temp, "ChMissID_Prob2_Pt", fOutputDir + fOutputSubDir);
 
 	float fbb(0.),fee(0.),feb(0.);
 	float fbbE(0.),feeE(0.),febE(0.);
-
+	float fb(0.), fe(0.), fbE(0.), feE(0.);
+	
 	calculateChMisIdProb(fEGData, BB, fbb, fbbE);
 	calculateChMisIdProb(fEGData, EB, feb, febE);
 	calculateChMisIdProb(fEGData, EE, fee, feeE);
+	
+	for (size_t i=1; i<gNElPPtbins+1; i++){
+	       fb  += eff_B->GetEfficiency(i)/gNElPPtbins;  
+	       fbE += (eff_B->GetEfficiencyErrorLow(i)*eff_B->GetEfficiencyErrorLow(i)+eff_B->GetEfficiencyErrorUp(i)*eff_B->GetEfficiencyErrorUp(i));  	  
+	       fe  += eff_E->GetEfficiency(i)/gNElPPtbins;
+	       feE += (eff_E->GetEfficiencyErrorLow(i)*eff_E->GetEfficiencyErrorLow(i)+eff_E->GetEfficiencyErrorUp(i)*eff_E->GetEfficiencyErrorUp(i));  	  
+	}
+	fbE = sqrt(fbE)/(2.*gNElPPtbins);	feE = sqrt(feE)/(2.*gNElPPtbins);
 
 	ofstream OUT(outputname.Data(), ios::trunc);
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
@@ -5155,95 +5206,148 @@ void SSDLPlotter::makeChMidvsPtPlots(){
 	OUT << " " << endl;
  	OUT << "-------------------------------------------------------------------------------------------" << endl;
  	OUT << "       E-ChMisID  ||     Barrel-Barrel    |    Barrel - EndCap   |    Endcap - EndCap    ||" << endl;
- 	OUT << "-------------------------------------------------------------------------------------------" << endl;
+	OUT << "-------------------------------------------------------------------------------------------" << endl;
  	OUT << "  Data            ||";
  	OUT << setw(8) << setprecision(2) << fbb  << " +/- " << setw(8) << setprecision(2) << fbbE  << " |";
  	OUT << setw(8) << setprecision(2) << feb  << " +/- " << setw(8) << setprecision(2) << febE  << " |";
  	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << "  ||" << endl;
- 	OUT << "-------------------------------------------------------------------------------------------" << endl << endl;
-
-	int  nbin = getNPPtBins(Elec)-2;
-	float  diff_BB[nbin], diff_BE[nbin], diff_EE[nbin];
-	float   err_BB[nbin],  err_BE[nbin],  err_EE[nbin];
-	float wdiff_BB[nbin],wdiff_BE[nbin],wdiff_EE[nbin];
-	
-	float syst_BB_max_weighted(0),syst_BB_max_abs(0),syst_BB_mean_weighted(0),syst_BB_mean_abs(0);
-	float syst_BE_max_weighted(0),syst_BE_max_abs(0),syst_BE_mean_weighted(0),syst_BE_mean_abs(0);
-	float syst_EE_max_weighted(0),syst_EE_max_abs(0),syst_EE_mean_weighted(0),syst_EE_mean_abs(0);
-	float syst_max_weighted(0),syst_max_abs(0),syst_mean_weighted(0),syst_mean_abs(0);
-
-	
-	OUT << "  ElPt |  P_{cmm}   (barrel-barrel) |   (barrel-endcap)   |  (endcap-endcap) |" << endl;
-	OUT << " ---------------------------------------------------------------------------- "  << endl;
-	for (int i=0; i<getNPPtBins(Elec)-4; i++){
-	  diff_BB [i] =  eff_BB->GetEfficiency(i+3)/2.;
-	  diff_BE [i] =  eff_BE->GetEfficiency(i+3)/2.;
-	  diff_EE [i] =  eff_EE->GetEfficiency(i+3)/2.;
-	  err_BB  [i] = (eff_BB->GetEfficiencyErrorLow(i+3) + eff_BB->GetEfficiencyErrorUp(i+3))/(2.*diff_BB[i]);
-	  err_BE  [i] = (eff_BE->GetEfficiencyErrorLow(i+3) + eff_BE->GetEfficiencyErrorUp(i+3))/(2.*diff_BE[i]);
-	  err_EE  [i] = (eff_EE->GetEfficiencyErrorLow(i+3) + eff_EE->GetEfficiencyErrorUp(i+3))/(2.*diff_EE[i]);
-
-	  diff_BB [i] = fabs(diff_BB[i] - fbb);
-	  diff_BE [i] = fabs(diff_BE[i] - feb);
-	  diff_EE [i] = fabs(diff_EE[i] - fee);
-	  wdiff_BB[i] = diff_BB[i]*(1/err_BB[i]);
-	  wdiff_BE[i] = diff_BE[i]*(1/err_BE[i]);
-	  wdiff_EE[i] = diff_EE[i]*(1/err_EE[i]);
-	  
-	  OUT << Form("  %4.1f |         %6.5f ± %6.5f  |  %6.5f ± %6.5f  |  %5.4f ± %5.4f |", 
-		      h_ratio_BB->GetBinCenter(i+3),
-		      eff_BB->GetEfficiency(i+3)/2.,err_BB[i]*eff_BB->GetEfficiency(i+3)/2.,
-		      eff_BE->GetEfficiency(i+3)/2.,err_BE[i]*eff_BE->GetEfficiency(i+3)/2.,
-		      eff_EE->GetEfficiency(i+3)/2.,err_EE[i]*eff_EE->GetEfficiency(i+3)/2.) 
-	      << endl;
-	  
-	  if (wdiff_BB[i] > syst_BB_max_weighted) syst_BB_max_weighted = wdiff_BB[i];
-	  if ( diff_BB[i] > syst_BB_max_abs     ) syst_BB_max_abs      = diff_BB[i];
-	  if (wdiff_BE[i] > syst_BE_max_weighted) syst_BE_max_weighted = wdiff_BE[i];
-	  if ( diff_BE[i] > syst_BE_max_abs     ) syst_BE_max_abs      = diff_BE[i];
-	  if (wdiff_EE[i] > syst_EE_max_weighted) syst_EE_max_weighted = wdiff_EE[i];
-	  if ( diff_EE[i] > syst_EE_max_abs     ) syst_EE_max_abs      = diff_EE[i];
-	  
-	  syst_BB_mean_weighted += wdiff_BB[i]/nbin;  
-	  syst_BB_mean_abs      +=  diff_BB[i]/nbin;  
-	  syst_BE_mean_weighted += wdiff_BE[i]/nbin;  
-	  syst_BE_mean_abs      +=  diff_BE[i]/nbin;  
-	  syst_EE_mean_weighted += wdiff_EE[i]/nbin;
-	  syst_EE_mean_abs      +=  diff_EE[i]/nbin;
-	}
-
-	/// all the values are in absolut terms... convert it to % 
-	syst_BB_max_weighted  = syst_BB_max_weighted  / fbb * 100;	
-	syst_BB_max_abs       = syst_BB_max_abs       / fbb * 100;
-	syst_BB_mean_weighted = syst_BB_mean_weighted / fbb * 100;
-	syst_BB_mean_abs      = syst_BB_mean_abs      / fbb * 100;
-
-	syst_BE_max_weighted  = syst_BE_max_weighted  / feb * 100;	
-	syst_BE_max_abs       = syst_BE_max_abs       / feb * 100;
-	syst_BE_mean_weighted = syst_BE_mean_weighted / feb * 100;
-	syst_BE_mean_abs      = syst_BE_mean_abs      / feb * 100;
-
-	syst_EE_max_weighted  = syst_EE_max_weighted  / fee * 100;
-	syst_EE_max_abs       = syst_EE_max_abs       / fee * 100;
-	syst_EE_mean_weighted = syst_EE_mean_weighted / fee * 100;
-	syst_EE_mean_abs      = syst_EE_mean_abs      / fee * 100;
-
-	syst_max_weighted   = (syst_BB_max_weighted  + syst_BE_max_weighted  + syst_EE_max_weighted )/3.;
-	syst_max_abs        = (syst_BB_max_abs       + syst_BE_max_abs       + syst_EE_max_abs      )/3.;
-	syst_mean_weighted  = (syst_BB_mean_weighted + syst_BE_mean_weighted + syst_EE_mean_weighted)/3.;
-	syst_mean_abs       = (syst_BB_mean_abs      + syst_BE_mean_abs      + syst_EE_mean_abs     )/3.;
+	OUT << "  Data            ||";
+	OUT << setw(8) << setprecision(2) << fb  << " +/- " << setw(8) << setprecision(2) << fbE  << " |                      |";
+	OUT << setw(8) << setprecision(2) << fe  << " +/- " << setw(8) << setprecision(2) << feE  << "  ||" << endl;
+ 	OUT << "-------------------------------------------------------------------------------------------"  << endl;
 	
 	OUT << endl;
+	OUT << "Calculating as systematic the difference on the pt dependence" << endl;
+	
+	float syst_B_max_weighted(0),syst_B_max_abs(0),syst_B_mean_weighted(0),syst_B_mean_abs(0);
+	float syst_E_max_weighted(0),syst_E_max_abs(0),syst_E_mean_weighted(0),syst_E_mean_abs(0);
+	float syst_B_err(0), syst_E_err(0);
+//	int  nbin = getNPPtBins(Elec)-2;
+//	float  diff_BB[nbin], diff_BE[nbin], diff_EE[nbin], diff_B[nbin], diff_E[nbin];
+//	float   err_BB[nbin],  err_BE[nbin],  err_EE[nbin],  err_B[nbin],  err_E[nbin];
+//	float wdiff_BB[nbin],wdiff_BE[nbin],wdiff_EE[nbin],wdiff_B[nbin],wdiff_E[nbin];
+//	
+//	float syst_BB_max_weighted(0),syst_BB_max_abs(0),syst_BB_mean_weighted(0),syst_BB_mean_abs(0);
+//	float syst_BE_max_weighted(0),syst_BE_max_abs(0),syst_BE_mean_weighted(0),syst_BE_mean_abs(0);
+//	float syst_EE_max_weighted(0),syst_EE_max_abs(0),syst_EE_mean_weighted(0),syst_EE_mean_abs(0);
+	float syst_max_weighted(0),syst_max_abs(0),syst_mean_weighted(0),syst_mean_abs(0);
+	int   nbins(0);
+	for (int i=1; i<getNPPtBins(Elec)+1; i++){
+	        float diff_B  = fabs(fb - eff_B->GetEfficiency(i)) / fb;
+		float diff_E  = fabs(fe - eff_E->GetEfficiency(i)) / fe;
+		float err_B   = sqrt(eff_B->GetEfficiencyErrorLow(i)*eff_B->GetEfficiencyErrorLow(i) + eff_B->GetEfficiencyErrorUp(i)*eff_B->GetEfficiencyErrorUp(i)) / (2*fb);
+		float err_E   = sqrt(eff_E->GetEfficiencyErrorLow(i)*eff_E->GetEfficiencyErrorLow(i) + eff_E->GetEfficiencyErrorUp(i)*eff_E->GetEfficiencyErrorUp(i)) / (2*fe);
+		float wdiff_B = diff_B/err_B;
+		float wdiff_E = diff_E/err_E;
+
+		if (fabs(wdiff_B) > syst_B_max_weighted) syst_B_max_weighted = wdiff_B;
+		if (fabs( diff_B) > syst_B_max_abs     ) syst_B_max_abs      =  diff_B;
+		if (fabs(wdiff_E) > syst_E_max_weighted) syst_E_max_weighted = wdiff_E;
+		if (fabs( diff_E) > syst_E_max_abs     ) syst_E_max_abs      =  diff_E;
+		
+		syst_B_mean_weighted += wdiff_B*wdiff_B;
+		syst_E_mean_weighted += wdiff_E*wdiff_E;
+		syst_B_mean_abs      +=  diff_B* diff_B;
+		syst_E_mean_abs      +=  diff_E* diff_E;
+		syst_B_err           += 1/(err_B*err_B);
+		syst_E_err           += 1/(err_E*err_E);
+		nbins++;
+	}
+	
+	syst_B_max_weighted  = syst_B_max_weighted / sqrt(syst_B_err);
+	syst_E_max_weighted  = syst_E_max_weighted / sqrt(syst_E_err);
+	syst_B_max_abs       = syst_B_max_abs;
+	syst_E_max_abs       = syst_E_max_abs;
+	syst_max_abs         = (syst_B_max_abs       >= syst_E_max_abs)?      syst_B_max_abs : syst_E_max_abs;
+	syst_max_weighted    = (syst_B_max_weighted  >= syst_E_max_weighted)? syst_B_max_weighted : syst_E_max_weighted;
+
+	syst_B_mean_weighted = sqrt(syst_B_mean_weighted / syst_B_err) / nbins;
+	syst_E_mean_weighted = sqrt(syst_E_mean_weighted / syst_E_err) / nbins;
+	syst_B_mean_abs      = sqrt(syst_B_mean_abs     ) / nbins;
+	syst_E_mean_abs      = sqrt(syst_E_mean_abs     ) / nbins;
+
+	syst_mean_abs        = (syst_B_mean_abs      + syst_E_mean_abs     ) / 2.;
+	syst_mean_weighted   = (syst_B_mean_weighted + syst_E_mean_weighted) / 2.;
+	
 	OUT << " ============================================================================== "  << endl;
-	OUT << Form(" The max. abs     syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_max_abs,       syst_BB_max_abs,       syst_BE_max_abs,       syst_EE_max_abs      ) << endl;
-	OUT << Form(" The max. weighed syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_max_weighted,  syst_BB_max_weighted,  syst_BE_max_weighted,  syst_EE_max_weighted ) << endl;
-	OUT << Form(" The mean abs     syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_mean_abs,      syst_BB_mean_abs,      syst_BE_mean_abs,      syst_EE_mean_abs     ) << endl;
-	OUT << Form(" The mean weighed syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_mean_weighted, syst_BB_mean_weighted, syst_BE_mean_weighted, syst_EE_mean_weighted) << endl;
+	OUT << Form(" The max. abs     syst. error is: %3.2f (B: %3.2f | E: %3.2f)", syst_max_abs,       syst_B_max_abs,       syst_E_max_abs      ) << endl;
+	OUT << Form(" The max. weighed syst. error is: %3.2f (B: %3.2f | E: %3.2f)", syst_max_weighted,  syst_B_max_weighted,  syst_E_max_weighted ) << endl;
+	OUT << Form(" The mean abs     syst. error is: %3.2f (B: %3.2f | E: %3.2f)", syst_mean_abs,      syst_B_mean_abs,      syst_E_mean_abs     ) << endl;
+	OUT << Form(" The mean weighed syst. error is: %3.2f (B: %3.2f | E: %3.2f)", syst_mean_weighted, syst_B_mean_weighted, syst_E_mean_weighted) << endl;
 	OUT << " ============================================================================== " <<endl;
+	
+//	OUT << "  ElPt |  P_{cmm}   (barrel-barrel) |   (barrel-endcap)   |  (endcap-endcap) |" << endl;
+//	OUT << " ---------------------------------------------------------------------------- "  << endl;
+//	for (int i=0; i<getNPPtBins(Elec)-4; i++){
+//	  diff_BB [i] =  eff_BB->GetEfficiency(i+3)/2.;
+//	  diff_BE [i] =  eff_BE->GetEfficiency(i+3)/2.;
+//	  diff_EE [i] =  eff_EE->GetEfficiency(i+3)/2.;
+//	  err_BB  [i] = (eff_BB->GetEfficiencyErrorLow(i+3) + eff_BB->GetEfficiencyErrorUp(i+3))/(2.*diff_BB[i]);
+//	  err_BE  [i] = (eff_BE->GetEfficiencyErrorLow(i+3) + eff_BE->GetEfficiencyErrorUp(i+3))/(2.*diff_BE[i]);
+//	  err_EE  [i] = (eff_EE->GetEfficiencyErrorLow(i+3) + eff_EE->GetEfficiencyErrorUp(i+3))/(2.*diff_EE[i]);
+//
+//	  diff_BB [i] = fabs(diff_BB[i] - fbb);
+//	  diff_BE [i] = fabs(diff_BE[i] - feb);
+//	  diff_EE [i] = fabs(diff_EE[i] - fee);
+//	  wdiff_BB[i] = diff_BB[i]*(1/err_BB[i]);
+//	  wdiff_BE[i] = diff_BE[i]*(1/err_BE[i]);
+//	  wdiff_EE[i] = diff_EE[i]*(1/err_EE[i]);
+//	  
+//	  OUT << Form("  %4.1f |         %6.5f ± %6.5f  |  %6.5f ± %6.5f  |  %5.4f ± %5.4f |", 
+//		      h_ratio_BB->GetBinCenter(i+3),
+//		      eff_BB->GetEfficiency(i+3)/2.,err_BB[i]*eff_BB->GetEfficiency(i+3)/2.,
+//		      eff_BE->GetEfficiency(i+3)/2.,err_BE[i]*eff_BE->GetEfficiency(i+3)/2.,
+//		      eff_EE->GetEfficiency(i+3)/2.,err_EE[i]*eff_EE->GetEfficiency(i+3)/2.) 
+//	      << endl;
+//	  
+//	  if (wdiff_BB[i] > syst_BB_max_weighted) syst_BB_max_weighted = wdiff_BB[i];
+//	  if ( diff_BB[i] > syst_BB_max_abs     ) syst_BB_max_abs      = diff_BB[i];
+//	  if (wdiff_BE[i] > syst_BE_max_weighted) syst_BE_max_weighted = wdiff_BE[i];
+//	  if ( diff_BE[i] > syst_BE_max_abs     ) syst_BE_max_abs      = diff_BE[i];
+//	  if (wdiff_EE[i] > syst_EE_max_weighted) syst_EE_max_weighted = wdiff_EE[i];
+//	  if ( diff_EE[i] > syst_EE_max_abs     ) syst_EE_max_abs      = diff_EE[i];
+//	  
+//	  syst_BB_mean_weighted += wdiff_BB[i]/nbin;  
+//	  syst_BB_mean_abs      +=  diff_BB[i]/nbin;  
+//	  syst_BE_mean_weighted += wdiff_BE[i]/nbin;  
+//	  syst_BE_mean_abs      +=  diff_BE[i]/nbin;  
+//	  syst_EE_mean_weighted += wdiff_EE[i]/nbin;
+//	  syst_EE_mean_abs      +=  diff_EE[i]/nbin;
+//	}
+//
+//	/// all the values are in absolut terms... convert it to % 
+//	syst_BB_max_weighted  = syst_BB_max_weighted  / fbb * 100;	
+//	syst_BB_max_abs       = syst_BB_max_abs       / fbb * 100;
+//	syst_BB_mean_weighted = syst_BB_mean_weighted / fbb * 100;
+//	syst_BB_mean_abs      = syst_BB_mean_abs      / fbb * 100;
+//
+//	syst_BE_max_weighted  = syst_BE_max_weighted  / feb * 100;	
+//	syst_BE_max_abs       = syst_BE_max_abs       / feb * 100;
+//	syst_BE_mean_weighted = syst_BE_mean_weighted / feb * 100;
+//	syst_BE_mean_abs      = syst_BE_mean_abs      / feb * 100;
+//
+//	syst_EE_max_weighted  = syst_EE_max_weighted  / fee * 100;
+//	syst_EE_max_abs       = syst_EE_max_abs       / fee * 100;
+//	syst_EE_mean_weighted = syst_EE_mean_weighted / fee * 100;
+//	syst_EE_mean_abs      = syst_EE_mean_abs      / fee * 100;
+//
+//	syst_max_weighted   = (syst_BB_max_weighted  + syst_BE_max_weighted  + syst_EE_max_weighted )/3.;
+//	syst_max_abs        = (syst_BB_max_abs       + syst_BE_max_abs       + syst_EE_max_abs      )/3.;
+//	syst_mean_weighted  = (syst_BB_mean_weighted + syst_BE_mean_weighted + syst_EE_mean_weighted)/3.;
+//	syst_mean_abs       = (syst_BB_mean_abs      + syst_BE_mean_abs      + syst_EE_mean_abs     )/3.;
+//	
+//	OUT << endl;
+//	OUT << " ============================================================================== "  << endl;
+//	OUT << Form(" The max. abs     syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_max_abs,       syst_BB_max_abs,       syst_BE_max_abs,       syst_EE_max_abs      ) << endl;
+//	OUT << Form(" The max. weighed syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_max_weighted,  syst_BB_max_weighted,  syst_BE_max_weighted,  syst_EE_max_weighted ) << endl;
+//	OUT << Form(" The mean abs     syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_mean_abs,      syst_BB_mean_abs,      syst_BE_mean_abs,      syst_EE_mean_abs     ) << endl;
+//	OUT << Form(" The mean weighed syst. error is: %4.2f (BB: %4.2f | BE: %4.2f | EE: %4.2f)", syst_mean_weighted, syst_BB_mean_weighted, syst_BE_mean_weighted, syst_EE_mean_weighted) << endl;
+//	OUT << " ============================================================================== " <<endl;
 	OUT.close();
 
 	delete h_ratio_EE, h_ratio_BB,h_ratio_BE;
 	delete eff_BB,eff_EE,eff_BE;
+	delete eff_B,eff_E;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
@@ -7063,7 +7167,6 @@ void SSDLPlotter::calculateChMisIdProb(vector<int>  samples, gChMisIdReg chmid_r
     if(S->datamc == 0) scale = 1;    
 
 	// old: pay attention here. does this make sense to change to the baseregion?? it was Baseline before...
-    Channel *C = &S->region[gRegion[gBaseRegion]][HighPt].ee;
     TH2D *ospairstmp = S->chmisid.ospairs;
     TH2D *sspairstmp = S->chmisid.sspairs;
     
@@ -7135,7 +7238,6 @@ void SSDLPlotter::makeAllIntPredictions(){
 	TString tablefilename = outputdir + "Table2.tex";
 	TString notetable     = outputdir + "NoteTable.tex";
 	TString combotool     = outputdir + "eth_signalRegions_highpt.txt";
-
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
@@ -7226,6 +7328,65 @@ void SSDLPlotter::makeAllIntPredictions(){
 			     sspreds[reg].cmid,sspreds[reg].cmid_err, 0., 0., sspreds[reg].rare, sspreds[reg].rare_err) << endl;
 	  fOUTSTREAM << "#=====================================================================================================" << endl;
  	}
+	fOUTSTREAM.close();
+	
+	// PRODUCE SUMMARY TABLE
+	TString SS_Table = outputdir + "SS_Table.tex";
+	fOUTSTREAM.open(SS_Table.Data(), ios::trunc);
+	fOUTSTREAM << "\\begin{table}[htb]" << endl;
+	fOUTSTREAM << " \\begin{center}" << endl;
+	fOUTSTREAM << "	 \\caption{Summary of background predictions and observed yields for search regions: " << endl;
+	fOUTSTREAM << "           120$<$\\MET$<$200 \\GeV, $N_{jets} \\leq 2$ and $N_{bjets} = 0$, and " << endl;
+	fOUTSTREAM << "           \\MET$>$200 \\GeV, with and without third lepton veto applied (including taus)." << endl;
+	fOUTSTREAM << "           Uncertainties include statistical and systematic contributions.}" << endl;
+	fOUTSTREAM << "   \\label{tab:SSYields}" << endl;
+	fOUTSTREAM << "   \\small "            << endl;
+	fOUTSTREAM << "    \\begin{tabular}{c|c|c|c|c}" << endl;
+	fOUTSTREAM << "    \\hline" << endl; 
+	fOUTSTREAM << "                & 120$<$\\MET$<$200 \\GeV              & 120$<$\\MET$<$200 \\GeV             & \\MET$>$200 \\GeV & \\MET$>$200 \\GeV    \\\\ " << endl; 
+	fOUTSTREAM << "	               & $N_{jets} \\leq 2$, $N_{bjets} = 0$  & $N_{jets} \\leq 2$, $N_{bjets} = 0$ &                   &                      \\\\ " << endl;
+	fOUTSTREAM << "                &                                      & $3^{rd}$ lepton veto                &                   & $3^{rd}$ lepton veto \\\\ \\hline " << endl; 
+	fOUTSTREAM << Form(" Double Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .df,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].df,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat),
+			   sspreds[gRegion["HT0MET200"]]       .df,sqrt(sspreds[gRegion["HT0MET200"]]       .df_err*sspreds[gRegion["HT0MET200"]]       .df_err + sspreds[gRegion["HT0MET200"]]       .df_stat*sspreds[gRegion["HT0MET200"]]       .df_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .df,sqrt(sspreds[gRegion["HT0MET200lV"]]     .df_err*sspreds[gRegion["HT0MET200lV"]]     .df_err + sspreds[gRegion["HT0MET200lV"]]     .df_stat*sspreds[gRegion["HT0MET200lV"]]     .df_stat)) << endl;			  
+	fOUTSTREAM << Form(" Single Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .sf,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].sf,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat),
+			   sspreds[gRegion["HT0MET200"]]       .sf,sqrt(sspreds[gRegion["HT0MET200"]]       .sf_err*sspreds[gRegion["HT0MET200"]]       .sf_err + sspreds[gRegion["HT0MET200"]]       .sf_stat*sspreds[gRegion["HT0MET200"]]       .sf_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .sf,sqrt(sspreds[gRegion["HT0MET200lV"]]     .sf_err*sspreds[gRegion["HT0MET200lV"]]     .sf_err + sspreds[gRegion["HT0MET200lV"]]     .sf_stat*sspreds[gRegion["HT0MET200lV"]]     .sf_stat)) << endl;			  
+	fOUTSTREAM << Form(" Charge MisID   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat),
+			   sspreds[gRegion["HT0MET200"]]       .cmid,sqrt(sspreds[gRegion["HT0MET200"]]       .cmid_err*sspreds[gRegion["HT0MET200"]]       .cmid_err + sspreds[gRegion["HT0MET200"]]       .cmid_stat*sspreds[gRegion["HT0MET200"]]       .cmid_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .cmid,sqrt(sspreds[gRegion["HT0MET200lV"]]     .cmid_err*sspreds[gRegion["HT0MET200lV"]]     .cmid_err + sspreds[gRegion["HT0MET200lV"]]     .cmid_stat*sspreds[gRegion["HT0MET200lV"]]     .cmid_stat)) << endl;			  
+	fOUTSTREAM << Form(" Rare SM        & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .rare,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].rare,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat),
+			   sspreds[gRegion["HT0MET200"]]       .rare,sqrt(sspreds[gRegion["HT0MET200"]]       .rare_err*sspreds[gRegion["HT0MET200"]]       .rare_err + sspreds[gRegion["HT0MET200"]]       .rare_stat*sspreds[gRegion["HT0MET200"]]       .rare_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .rare,sqrt(sspreds[gRegion["HT0MET200lV"]]     .rare_err*sspreds[gRegion["HT0MET200lV"]]     .rare_err + sspreds[gRegion["HT0MET200lV"]]     .rare_stat*sspreds[gRegion["HT0MET200lV"]]     .rare_stat)) << endl;			  
+	fOUTSTREAM << Form(" WZ Prod.       & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .wz,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].wz,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat),
+			   sspreds[gRegion["HT0MET200"]]       .wz,sqrt(sspreds[gRegion["HT0MET200"]]       .wz_err*sspreds[gRegion["HT0MET200"]]       .wz_err + sspreds[gRegion["HT0MET200"]]       .wz_stat*sspreds[gRegion["HT0MET200"]]       .wz_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .wz,sqrt(sspreds[gRegion["HT0MET200lV"]]     .wz_err*sspreds[gRegion["HT0MET200lV"]]     .wz_err + sspreds[gRegion["HT0MET200lV"]]     .wz_stat*sspreds[gRegion["HT0MET200lV"]]     .wz_stat)) << endl;			  
+	fOUTSTREAM << Form(" Total Bkg      & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat),
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat),
+			   sspreds[gRegion["HT0MET200"]]       .bkg,sqrt(sspreds[gRegion["HT0MET200"]]       .bkg_err*sspreds[gRegion["HT0MET200"]]       .bkg_err + sspreds[gRegion["HT0MET200"]]       .bkg_stat*sspreds[gRegion["HT0MET200"]]       .bkg_stat),
+			   sspreds[gRegion["HT0MET200lV"]]     .bkg,sqrt(sspreds[gRegion["HT0MET200lV"]]     .bkg_err*sspreds[gRegion["HT0MET200lV"]]     .bkg_err + sspreds[gRegion["HT0MET200lV"]]     .bkg_stat*sspreds[gRegion["HT0MET200lV"]]     .bkg_stat)) << endl;			  
+	fOUTSTREAM << Form(" Data           & %d & %d & %d & %d \\\\",
+			   sspreds[gRegion["HT0MET120NJ2bV"]]  .obs,
+			   sspreds[gRegion["HT0MET120NJ2bVlV"]].obs,
+			   sspreds[gRegion["HT0MET200"]]       .obs,
+			   sspreds[gRegion["HT0MET200lV"]]     .obs) << endl;			  
+	fOUTSTREAM << "    \\hline" << endl; 
+	fOUTSTREAM << "    \\end{tabular}" << endl;
+	fOUTSTREAM << " \\end{center}" << endl;
+	fOUTSTREAM << "\\end{table}" << endl;
+	fOUTSTREAM << endl;
+	fOUTSTREAM.close();
 
 	// PRODUCE SUMMARY PLOTS ONLY FOR CERTAIN REGIONS
 	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  4, 0., 4.);
@@ -7323,17 +7484,6 @@ void SSDLPlotter::makeAllIntPredictions(){
 	TString hadString;
 	for (size_t i = 0; i<ewkregions.size(); i++) {
 	  int reg = ewkregions.at(i);
-// 	  hadString = "#splitline{";
-// 	  if (gRegions[reg]->maxMet < 7900) hadString += Form("%.0f < E_{T}^{miss} < %.0f GeV", gRegions[reg]->minMet, gRegions[reg]->maxMet);
-// 	  else                              hadString += Form("E_{T}^{miss} > %.0f GeV", gRegions[reg]->minMet);
-// 	  hadString += "}{#splitline{";
-	  
-// 	  if (gRegions[reg]->maxNjets < 99) hadString += Form("N_{jets} #leq %1d,  N_{bjets} = %1d", gRegions[reg]->maxNjets, gRegions[reg]->maxNbjets);
-// 	  hadString += "}{";
-	  
-// 	  if (gRegions[reg]->app3rdVet != 0)hadString += Form("3^{rd} lepton Veto");
-// 	  hadString += "}}";
-	  
 	  // first line
 	  hadString = "#splitline{";
 	  if (gRegions[reg]->maxMet < 7900) hadString += Form("%.0f < E_{T}^{miss} < %.0f GeV", gRegions[reg]->minMet, gRegions[reg]->maxMet);
@@ -8229,7 +8379,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
-	const float WZESyst  = 0.2;
+	const float WZESyst  = 0.08;
 	const float WZESyst2 = WZESyst*WZESyst;
 
 	musamples  = fMuData;
@@ -8662,7 +8812,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	OUT << "combined observed: ";
  	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
  	OUT << "==============================================================================================" << endl;
- 	OUT.close();
+	OUT.close();
  		
 	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT FOR COMBINATION TOOL  //////////////////////////////////////////////////
@@ -8686,81 +8836,81 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
- 	fOUTSTREAM3 << "%% " + gRegions[reg]->sname << endl;
- 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
- 	fOUTSTREAM3 << Form("DF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << "%% " + gRegions[reg]->sname << endl;
+ 	fOUTSTREAM << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM << Form("DF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
  	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
  	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
  	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
- 	fOUTSTREAM3 << Form("SF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << Form("SF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
  	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
  	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
  	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
- 	fOUTSTREAM3 << Form("CM:  %6.2f ± %6.2f  ( %5.2f±%5.2f |   -         | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << Form("CM:  %6.2f ± %6.2f  ( %5.2f±%5.2f |   -         | %5.2f±%5.2f )\n",
  	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
  	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
  	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
- 	fOUTSTREAM3 << Form("MC:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << Form("MC:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
  	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
  	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
  	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
- 	fOUTSTREAM3 << Form("WZ:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << Form("WZ:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
  	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
  	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
  	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
  	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em));
- 	fOUTSTREAM3 << Form("Tot: %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
+ 	fOUTSTREAM << Form("Tot: %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
  	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
  	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
  	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
- 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
- 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
- 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
- 	fOUTSTREAM3 << endl;
+ 	fOUTSTREAM << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
+ 	fOUTSTREAM << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM << endl;
  	
 	
  	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
- 	fOUTSTREAM << gRegions[reg]->sname << endl;
- 	fOUTSTREAM << Form("Double Fakes   & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
+ 	fOUTSTREAM3 << gRegions[reg]->sname << endl;
+ 	fOUTSTREAM3 << Form("Double Fakes   & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
  	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
  	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
  	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
  	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
- 	fOUTSTREAM << Form("Single Fakes   & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
+ 	fOUTSTREAM3 << Form("Single Fakes   & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
  	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
  	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
  	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
  	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
- 	fOUTSTREAM << Form("Charge MisID   &        -          & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
+ 	fOUTSTREAM3 << Form("Charge MisID   &        -          & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
  	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
  	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
  	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
- 	fOUTSTREAM << Form("Rare SM        & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
+ 	fOUTSTREAM3 << Form("Rare SM        & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
  	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
  	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
  	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
  	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
- 	fOUTSTREAM << Form("WZ Prod.       & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
+ 	fOUTSTREAM3 << Form("WZ Prod.       & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
  	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
  	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em),
  	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
  	wz_nt2_ee + wz_nt2_mm + wz_nt2_em, sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)));
- 	fOUTSTREAM << Form("Total Bkg      & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
+ 	fOUTSTREAM3 << Form("Total Bkg      & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
  	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
  	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
  	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
  	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
- 	fOUTSTREAM << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
+ 	fOUTSTREAM3 << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
  	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
- 	fOUTSTREAM << endl;
- 	
+ 	fOUTSTREAM3 << endl;
+
  	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT AS DATACARD  ///////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
@@ -11602,9 +11752,9 @@ void SSDLPlotter::makeDiffPrediction(){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
-	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
-	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
-	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,   8   ,      9     ,     10      }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET2", "MET3", "NBJetsMed", "NBJetsMed2"}
+	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 10., 1., 1.};
 
 	// Loop on the different variables
 	for(size_t j = 0; j < gNDiffVars; ++j){
@@ -12288,7 +12438,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		rat_ee->Divide(nt11_ee,h_nt11_ee);
 
 		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
-		if(j==4 || j==8 || j==10) ytitle = "Events";
+		if(j==3 || j==9 || j==10) ytitle = "Events";
 		nt11_tot->Draw("goff");
 		if (plotRatios) for(size_t i = 1; i <= nt11->GetNbinsX(); ++i)     nt11_tot->GetXaxis()->SetBinLabel(i, "");
 		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
@@ -14732,13 +14882,10 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	OUT << "-------------------------------------------------------------------------------------------" << endl;
 	OUT << endl;
 
-	float syst1(0), syst2(0);
-	syst1 = sqrt( obspred_mm*obspred_mm*((float)pred.obs_mm/(float)pred.obs) + obspred_em*obspred_em*((float)pred.obs_em/(float)pred.obs) + obspred_ee*obspred_ee*((float)pred.obs_ee/(float)pred.obs));
-	syst2 = sqrt(obspred_mm*obspred_mm)*((float)pred.obs_mm/(float)pred.obs) + sqrt(obspred_em*obspred_em)*((float)pred.obs_em/(float)pred.obs) + sqrt(obspred_ee*obspred_ee)*((float)pred.obs_ee/(float)pred.obs);
+	float syst1 = sqrt( obspred_mm*obspred_mm*((float)pred.obs_mm/(float)pred.obs) + obspred_em*obspred_em*((float)pred.obs_em/(float)pred.obs) + obspred_ee*obspred_ee*((float)pred.obs_ee/(float)pred.obs));
 
 	OUT << " Taking as systematic the mean syst. error among all channels... " << endl;
 	OUT << Form("Syst = %4.3f", syst1) << endl;
-	//	OUT << Form("Syst = %4.3f", syst2) << endl;
 	OUT << endl;
 	OUT << endl;
 	
@@ -14750,10 +14897,10 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 
 	        float diff     = fabs(hvar_tot[1]->GetBinContent(i) - hvar_data[1]->GetBinContent(i))/hvar_data[1]->GetBinContent(i);
 		float diff_err = sqrt(hvar_data[1]->GetBinError(i)*hvar_data[1]->GetBinError(i));
-		
-	        met_absolute += diff / hvar_data[1]->GetBinContent(i);
+
+		met_absolute += (diff*diff) / hvar_data[1]->GetBinError(i);
 		met_sigma    += 1/(diff_err*diff_err);
-		met_weighted += (diff/(diff_err*diff_err)) / hvar_data[1]->GetBinContent(i);
+		met_weighted += (diff*diff/(diff_err*diff_err)) / hvar_data[1]->GetBinError(i);
 		met_nbins++;
 	}
 	for (int i=3; i<SSDLDumper::KinPlots::nbins[0]; i++){ //Starting at HT 100 for SS+b
@@ -14762,18 +14909,18 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	        float diff     = fabs(hvar_tot[0]->GetBinContent(i) - hvar_data[0]->GetBinContent(i))/hvar_data[0]->GetBinContent(i);
 		float diff_err = sqrt(hvar_data[0]->GetBinError(i)*hvar_data[0]->GetBinError(i));
 		
-	        ht_absolute += diff / hvar_data[0]->GetBinContent(i);
+	        ht_absolute += diff*diff / hvar_data[0]->GetBinError(i);
 		ht_sigma    += 1/(diff_err*diff_err); 
-	        ht_weighted += (diff/(diff_err*diff_err)) / hvar_data[0]->GetBinContent(i);
+	        ht_weighted += (diff*diff/(diff_err*diff_err)) / hvar_data[0]->GetBinError(i);
 		ht_nbins++;
 	}
-	met_absolute = met_absolute / met_nbins;
-	met_weighted = met_weighted / met_nbins;
-	ht_absolute  = ht_absolute  / ht_nbins;
-	ht_weighted  = ht_weighted  / ht_nbins;
+	met_absolute = sqrt(met_absolute) / met_nbins;
+	met_weighted = sqrt(met_weighted) / met_nbins;
+	ht_absolute  = sqrt(ht_absolute ) / ht_nbins;
+	ht_weighted  = sqrt(ht_weighted ) / ht_nbins;
 	
-	OUT << "Syst. (MET):  Abs. = " << met_absolute << " --->  Err.Weighted = " << met_weighted << endl;
-	OUT << "Syst. (HT) :  Abs. = " << ht_absolute  << " --->  Err.Weighted = " << ht_weighted  << endl ;
+	OUT << Form("Syst. (MET):  Abs. = %4.3f ---> Err. Weighted = %4.3f", met_absolute, met_weighted) << endl;
+	OUT << Form("Syst. (HT) :  Abs. = %4.3f ---> Err. Weighted = %4.3f",  ht_absolute,  ht_weighted) << endl ;
 		
 	/// CALCULATE XSECTION
 	float eff    = finalWZ / 2011253;
@@ -14785,9 +14932,9 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	float xsec   = (pred.obs - (rare + ewk + top + qcd))/(eff * fLumiNorm * WZ3lnu);
 	OUT << endl;
 	OUT << endl;
-	OUT << "The total WZ cross-section is: " << xsec << " ± " << syst2*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
+	OUT << "The total WZ cross-section is: " << xsec << " ± " << syst1*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
 	xsec = (pred.obs - (rare + ewk + qcd + top))/(eff * fLumiNorm);
-	OUT << "The WZ->3l3N cross-section is: " << xsec << " ± " << syst2*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
+	OUT << "The WZ->3l3N cross-section is: " << xsec << " ± " << syst1*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
 	OUT << "-------------------------------------------------------------" << endl;
 
 	fOutputSubDir = "IntPredictions/";
@@ -16140,10 +16287,10 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 		  // not in benjamins code    nbjets    <= gRegions[baseRegion]->maxNbjets &&
 		  // not in benjamins code    nbjetsmed >= gRegions[baseRegion]->minNbjmed &&
 		  // not in benjamins code    nbjetsmed <= gRegions[baseRegion]->maxNbjmed){
-			fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
-			fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
-			fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
-			fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
+			fillWithoutOF(S->diffyields[chan].hnpp[8], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[8], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[8], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[8], MET, puweight * nff);
 		  // not in benjamins code    }
 		}
 
@@ -16199,15 +16346,20 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
 			
-			fillWithoutOF(S->diffyields[chan].hnpp[8], nbjetsmed+0.5, puweight * npp);
-			fillWithoutOF(S->diffyields[chan].hnpf[8], nbjetsmed+0.5, puweight * npf);
-			fillWithoutOF(S->diffyields[chan].hnfp[8], nbjetsmed+0.5, puweight * nfp);
-			fillWithoutOF(S->diffyields[chan].hnff[8], nbjetsmed+0.5, puweight * nff);
-			
+			fillWithoutOF(S->diffyields[chan].hnpp[7], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[7], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[7], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[7], MET, puweight * nff);
+
 			fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed+0.5, puweight * npp);
 			fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed+0.5, puweight * npf);
 			fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed+0.5, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed+0.5, puweight * nff);
+			
+			fillWithoutOF(S->diffyields[chan].hnpp[10], nbjetsmed+0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[10], nbjetsmed+0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[10], nbjetsmed+0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[10], nbjetsmed+0.5, puweight * nff);
 		   }
 		}
 
@@ -17402,7 +17554,7 @@ void SSDLPlotter::drawTopLine(float rightedge, float scale, float leftedge){
 	fLatex->DrawLatex(leftedge,0.92, "CMS Preliminary");
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(scale*0.04);
-	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.2f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
+	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.1f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	return;
 }
@@ -17412,7 +17564,7 @@ void SSDLPlotter::drawTopLineSim(float rightedge, float scale, float leftedge){
 	fLatex->DrawLatex(leftedge,0.92, "CMS Simulation");
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(scale*0.04);
-	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.2f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
+	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.1f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	return;
 }
@@ -18252,3 +18404,5 @@ void SSDLPlotter::SUSYWorkshopPlots( TString sestring, int mgluino, int mlsp){
 
 	res_->Close();
 }
+
+//  LocalWords:  endl
