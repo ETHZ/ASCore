@@ -82,14 +82,16 @@ public:
 	enum gSample {
 		sample_begin,
 		// data samples
-		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 , DoubleMu5 , DoubleMu5a ,
-		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5, DoubleEle5a,
-		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     , MuEG5     , MuEG5a     ,
+		DoubleMu1 = sample_begin, DoubleMu1a , DoubleMu2 , DoubleMu3 , DoubleMu4 , DoubleMu5 ,
+		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
+		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     , MuEG5     ,
 		// fake samples
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
 		WJets,
 		DYJets,
-		GJets200, GJets400, WW,
+		GVJets,
+		// not here yet GJets200, GJets400, 
+		WGstarMu, WGstarTau, WW,
 		// start of the rares
 		WZ,ZZ,
 		TTbarH, TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
@@ -99,8 +101,9 @@ public:
 		WpWp, WmWm,
 		// QCD samples
 		QCDMuEnr15,
-		QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
-		QCDEM20, QCDEM30, QCDEM80, QCDEM170, QCDEM250,
+		QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
+		QCDEM30, QCDEM80, QCDEM170, QCDEM250, QCDEM350,
+		QCDbEnr50, QCDbEnr150,
 		gNSAMPLES
 	};
 	enum gHiLoSwitch{
@@ -740,6 +743,8 @@ public:
 	
 	virtual int getNTightMuons();
 	virtual int getNTightElectrons();
+	virtual float getTightPt(int=0);
+	virtual float getJetsPt (int=0);
 	
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
@@ -832,6 +837,7 @@ public:
 
 	virtual bool isGoodJet(int, float = 20.);
 	virtual float getJERScale(int);
+	virtual float getErrPt(float, float);
 	
 
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
@@ -845,6 +851,9 @@ public:
 	ValueAndError getMuonIsoSF(               float pt, float eta );
 	ValueAndError getElectronRecoSF(          float pt, float eta );
 	ValueAndError getElectronIsoSF(           float pt, float eta );
+	
+	float getLeptonSFMu( float pt, float eta );
+	float getLeptonSFEl( float pt, float eta );
 
 	float getMuScale(float pt, float eta);
 	float getElScale(float pt, float eta);

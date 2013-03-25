@@ -238,6 +238,7 @@ public:
 	virtual void doSMSscans(TString, TString);
 	virtual void doAnalysis();
 	virtual void sandBox();
+	virtual void SUSYWorkshopPlots(TString, int , int);
 	virtual void pythiaMadgraph(bool pyhia);
 	virtual void makeROCCurve();
 	virtual void msugraKfacs(TFile *);

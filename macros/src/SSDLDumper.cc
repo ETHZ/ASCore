@@ -506,8 +506,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// Event modifications
-		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
 		saveBTags(); // this just saves the btag values for each jet.
+		// scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -592,12 +592,14 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		// Btags scaled up
 		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
 		scaleBTags(S, 1);
  		// fillYields(S, gRegion["TTbarWSelBU"]);
 		fillSigEventTree(S, gSystematics["BUp"]);
 
 		// Btags scaled down
 		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags();
 		scaleBTags(S, 2);
  		// fillYields(S, gRegion["TTbarWSelBD"]);
 		fillSigEventTree(S, gSystematics["BDown"]);
@@ -2857,31 +2859,31 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM << " Printing Cutflow for Mu/Mu channel..." << endl;
 	// printCutFlow(Muon, DoubleMu1, EleHad2);
 	printCutFlow(Muon, DoubleMu1, DoubleMu4);
-	printCutFlow(Muon, TTJets, GJets400);
+	// printCutFlow(Muon, TTJets, GJets400);
 	printCutFlow(Muon, WW, WmWm);
 	// printCutFlow(Muon, LM0, LM6);
 	// printCutFlow(Muon, LM7, LM13);
-	printCutFlow(Muon, QCDMuEnr15, QCD800);
+	// printCutFlow(Muon, QCDMuEnr15, QCD800);
 	// printCutFlow(Muon, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
 	printCutFlow(ElMu, MuEG1, MuEG4);
-	printCutFlow(ElMu, TTJets, GJets400);
+	// printCutFlow(ElMu, TTJets, GJets400);
 	printCutFlow(ElMu, WW, WmWm);
 	// printCutFlow(ElMu, LM0, LM6);
 	// printCutFlow(ElMu, LM7, LM13);
-	printCutFlow(ElMu, QCDMuEnr15, QCD800);
+	// printCutFlow(ElMu, QCDMuEnr15, QCD800);
 	// printCutFlow(ElMu, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
 	printCutFlow(Elec, DoubleEle1, DoubleEle4);
-	printCutFlow(Elec, TTJets, GJets400);
+	// printCutFlow(Elec, TTJets, GJets400);
 	printCutFlow(Elec, WW, WmWm);
 	// printCutFlow(Elec, LM0, LM6);
 	// printCutFlow(Elec, LM7, LM13);
-	printCutFlow(Elec, QCDEM20, QCDEM250);
+	// printCutFlow(Elec, QCDEM20, QCDEM250);
 	// printCutFlow(Elec, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 
@@ -4584,27 +4586,51 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Either shifted or smeared
 	// propagate to the MET!!
 	if(S->datamc == 0) return; // don't smear data
-	if(flag == 0) return;
-	if(fC_cleanJetIndices.size() == 0) cleanedJetIndices(15.);
-	TLorentzVector ojets, jets, tmp;
+	if(flag == 0) return;      // 0 makes no sense
+	if(fC_cleanJetIndices.size() == 0) cleanedJetIndices(15.); // cleaned jets (pT > 15) w/r/t signal leptons
+	TLorentzVector ojets, jets, tmp;                           // 4-vec of old jets, newjets and a tmp-vector
 	std::vector<int>::const_iterator it = fC_cleanJetIndices.begin();
-	// for(size_t i = 0; i < NJets; ++i)
 	for( ; it != fC_cleanJetIndices.end(); ++it) {
-		// cout << Form("smearJetPts: index: %d before: %.2f", *it, JetPt[*it]);
-		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
-		ojets += tmp;
-		if(flag == 1) JetPt[*it] += JetJEC[*it]*JetPt[*it];
-		if(flag == 2) JetPt[*it] -= JetJEC[*it]*JetPt[*it];
+		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set temp to the jet
+		ojets += tmp;                                                           // add jet to the old jets vector
+		if(flag == 1) JetPt[*it] += JetJEC[*it]*JetPt[*it];                     // vary up for flag 1
+		if(flag == 2) JetPt[*it] -= JetJEC[*it]*JetPt[*it];                     // vary down for flag 2;
 		if(flag == 3){
-			if(JetGenPt[*it] > -100.)	JetPt[*it] = TMath::Max(float(0.), JetGenPt[*it] + getJERScale(*it)*(JetPt[*it] - JetGenPt[*it]));
-			// else                    JetPt[*it] = JetPt[*it] * fRand3->Gaus(1., fabs(1. - getJERScale(*it)));
+			float sigmaMC  = getErrPt(JetPt[*it], JetEta[*it])/JetPt[*it];      // get the resolution
+			float jerScale = getJERScale(*it);                                  // get JER scale factors
+			JetPt[*it] = JetPt[*it] * fRand3->Gaus(1., sqrt(jerScale*jerScale -1)*sigmaMC ); // smear for flag 3
 		}
-		// cout << Form(" after: %.2f", JetPt[*it]) << endl;
-		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
-		jets += tmp;
+		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set tmp to the scaled/smeared jet
+		jets += tmp;                                                            // add scaled/smeared jet to the new jets
 	}
-	propagateMET(jets, ojets);
+	propagateMET(jets, ojets);                                                  // propagate this change to the MET
 }
+// original void SSDLDumper::smearJetPts(Sample *S, int flag){
+// original 	// Modify the jet pt for systematics studies
+// original 	// Either shifted or smeared
+// original 	// propagate to the MET!!
+// original 	if(S->datamc == 0) return; // don't smear data
+// original 	if(flag == 0) return;
+// original 	if(fC_cleanJetIndices.size() == 0) cleanedJetIndices(15.);
+// original 	TLorentzVector ojets, jets, tmp;
+// original 	std::vector<int>::const_iterator it = fC_cleanJetIndices.begin();
+// original 	// for(size_t i = 0; i < NJets; ++i)
+// original 	for( ; it != fC_cleanJetIndices.end(); ++it) {
+// original 		// cout << Form("smearJetPts: index: %d before: %.2f", *it, JetPt[*it]);
+// original 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
+// original 		ojets += tmp;
+// original 		if(flag == 1) JetPt[*it] += JetJEC[*it]*JetPt[*it];
+// original 		if(flag == 2) JetPt[*it] -= JetJEC[*it]*JetPt[*it];
+// original 		if(flag == 3){
+// original 			if(JetGenPt[*it] > -100.)	JetPt[*it] = TMath::Max(float(0.), JetGenPt[*it] + getJERScale(*it)*(JetPt[*it] - JetGenPt[*it]));
+// original 			// else                    JetPt[*it] = JetPt[*it] * fRand3->Gaus(1., fabs(1. - getJERScale(*it)));
+// original 		}
+// original 		// cout << Form(" after: %.2f", JetPt[*it]) << endl;
+// original 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]);
+// original 		jets += tmp;
+// original 	}
+// original 	propagateMET(jets, ojets);
+// original }
 void SSDLDumper::scaleLeptons(Sample *S, int flag){
 	// Shift the lepton pts for systematics studies
 	if(S->datamc == 0) return; // don't smear data
@@ -4653,8 +4679,7 @@ void SSDLDumper::setMET(float newmet){
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-  	// float phi = pfMETType1Phi;
-	float phi;// = pfMETPhi;
+	float phi;
 	if (gMETType1)  phi = pfMETType1Phi;
 	else            phi = pfMETPhi;
 	return phi;
@@ -4905,6 +4930,29 @@ int SSDLDumper::getNTightElectrons(){
 	int nels = 0;
 	for(size_t i = 0; i < NEls; ++i) if(isTightElectron(i)) nels++;
 	return nels;
+}
+float SSDLDumper::getTightPt(int n){
+	std::vector<float> pts;
+	for(size_t i = 0; i < NMus; ++i) {
+		if(isTightMuon(i))     pts.push_back(MuPt[i]);
+	}
+	for(size_t i = 0; i < NEls; ++i) {
+		if(isTightElectron(i)) pts.push_back(ElPt[i]);
+	}
+	if (pts.size() ==  0) return -999.;   // return bogus if vector is empty
+	std::sort(pts.rbegin(), pts.rend());  // reverse sort, so that highest pt is element 0
+	if (pts.size() < n+1) return -999.;   // return bogus if vector is too small
+	return pts[n];
+}
+float SSDLDumper::getJetsPt(int n){
+	std::vector<float> pts;
+	for(size_t i = 0; i < NJets; ++i) {
+		 if(isGoodJet(i) ) pts.push_back(JetPt[i]);
+	}
+	if (pts.size() ==  0) return -999.;   // return bogus if vector is empty
+	std::sort(pts.rbegin(), pts.rend());  // reverse sort, so that highest pt is element 0
+	if (pts.size() < n+1) return -999.;   // return bogus if vector is too small
+	return pts[n];
 }
 
 void SSDLDumper::resetHypLeptons(){
@@ -6403,6 +6451,142 @@ float SSDLDumper::getJERScale(int jet){
 	else if(fabs(eta) < 1.7) return 1.096;
 	else if(fabs(eta) < 2.3) return 1.134;
 	else                     return 1.288;
+}
+float SSDLDumper::getErrPt(float Pt, float Eta) {
+  
+	float InvPerr2;
+	float N, S, C, m;
+	if(fabs(Eta) < 0.5 ) {
+		N = 3.96859;
+		S = 0.18348;
+		C = 0.;
+		m = 0.62627;
+	} else if( fabs(Eta) < 1.  ) {
+		N = 3.55226;
+		S = 0.24026;
+		C = 0.;
+		m = 0.52571;
+	} else if( fabs(Eta) < 1.5  ) {
+		N = 4.54826;
+		S = 0.22652;
+		C = 0.;
+		m = 0.58963;
+	} else if( fabs(Eta) < 2.  ) {
+		N = 4.62622;
+		S = 0.23664;
+		C = 0.;
+		m = 0.48738;
+	} else if( fabs(Eta) < 2.5  ) {
+		N = 2.53324;
+		S = 0.34306;
+		C = 0.;
+		m = 0.28662;
+	} else if( fabs(Eta) < 3.  ) {
+		N = -3.33814;
+		S = 0.73360;
+		C = 0.;
+		m = 0.08264;
+	} else if( fabs(Eta) < 5.  ) {
+		N = 2.95397;
+		S = 0.11619;
+		C = 0.;
+		m = 0.96086;
+	}
+	// this is the absolute resolution (squared), not sigma(pt)/pt
+	// so have to multiply by pt^2, thats why m+1 instead of m-1
+	InvPerr2 =  (N * fabs(N) ) + (S * S) * pow(Pt, m+1) + (C * C) * Pt * Pt ;
+
+	return sqrt(InvPerr2);
+}
+
+///////////////////////////////////////////////////
+// 2013 T&P lepton SFs from ryan kelley.
+float SSDLDumper::getLeptonSFMu(float pt, float eta){
+	const double aeta = fabs(eta);
+	
+	if (10 < pt && pt < 15)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.973;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.954;}
+	}
+	else if (15 < pt && pt < 20)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.957;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.971;}
+	}
+	else if (20 < pt && pt < 30)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.964;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.981;}
+	}
+	else if (30 < pt && pt < 40)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.971;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.978;}
+	}
+	else if (40 < pt && pt < 50)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.978;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.984;}
+	}
+	else if (pt > 50)
+	{
+		if (0.00  < aeta && aeta < 1.20) {return 0.974;}
+		if (1.20  < aeta && aeta < 2.50) {return 0.977;}
+	}
+	
+	// if we get here, return bogus value
+	return -999999.0;
+}
+float SSDLDumper::getLeptonSFEl(float pt, float eta){
+	// take the SC eta for this one...
+	const double aeta = fabs(eta);
+	
+	if (10 < pt && pt < 15)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.834;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.973;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.954;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 1.119;}
+	}
+	else if (15 < pt && pt < 20)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.918;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.906;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.909;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 0.944;}
+	}
+	else if (20 < pt && pt < 30)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.954;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.923;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.921;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 0.993;}
+	}
+	else if (30 < pt && pt < 40)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.960;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.935;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.924;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 0.959;}
+	}
+	else if (40 < pt && pt < 50)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.972;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.955;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.950;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 0.968;}
+	}
+	else if (pt > 50)
+	{
+		if (0.00   < aeta && aeta < 0.80  ) {return 0.969;}
+		if (0.80   < aeta && aeta < 1.4442) {return 0.956;}
+		if (1.566  < aeta && aeta < 2.00  ) {return 0.995;}
+		if (2.00   < aeta && aeta < 2.50  ) {return 0.969;}
+	}
+	
+	// if we get here, return bogus value
+	return -999999.0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

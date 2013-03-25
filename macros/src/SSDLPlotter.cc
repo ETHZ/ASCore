@@ -80,6 +80,7 @@ void SSDLPlotter::init(TString filename){
 	Util::SetStyle();
 	gStyle->SetOptStat(0);
 	
+	fBTagSF = new BTagSF();
 	readDatacard(filename);
 
 	readVarNames("varnames.dat");
@@ -131,12 +132,12 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
 	// MARC fMCBG.push_back(GJets40);
-	fMCBG.push_back(GJets200);
-	fMCBG.push_back(GJets400);
+	// fMCBG.push_back(GJets200);
+	// fMCBG.push_back(GJets400);
 	fMCBG.push_back(WW);
 	fMCBG.push_back(WZ);
 	fMCBG.push_back(ZZ);
-	// MARC fMCBG.push_back(GVJets);
+	fMCBG.push_back(GVJets);
 	fMCBG.push_back(DPSWW);
 	fMCBG.push_back(TTbarH);
 	fMCBG.push_back(TTbarW);
@@ -152,11 +153,12 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(ZZZ);
 	// QCD:
 	fMCBG.push_back(QCDMuEnr15);
-	fMCBG.push_back(QCDEM20);
+	// fMCBG.push_back(QCDEM20);
 	fMCBG.push_back(QCDEM30);
 	fMCBG.push_back(QCDEM80);
 	fMCBG.push_back(QCDEM170);
 	fMCBG.push_back(QCDEM250);
+	fMCBG.push_back(QCD50);
 	fMCBG.push_back(QCD80);
 	fMCBG.push_back(QCD120);
 	fMCBG.push_back(QCD170);
@@ -220,12 +222,12 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(DYJets);
 	// MARC fMCBGMuEnr.push_back(GJets40);
 	// MARC fMCBGMuEnr.push_back(GJets100);
-	fMCBGMuEnr.push_back(GJets200);
-	fMCBGMuEnr.push_back(GJets400);
+	// fMCBGMuEnr.push_back(GJets200);
+	// fMCBGMuEnr.push_back(GJets400);
 	fMCBGMuEnr.push_back(WW);
 	fMCBGMuEnr.push_back(WZ);
 	fMCBGMuEnr.push_back(ZZ);
-	// MARC fMCBGMuEnr.push_back(GVJets);
+	fMCBGMuEnr.push_back(GVJets);
 	fMCBGMuEnr.push_back(DPSWW);
 	fMCBGMuEnr.push_back(TTbarH);
 	fMCBGMuEnr.push_back(TTbarW);
@@ -239,6 +241,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WWG);
 	fMCBGMuEnr.push_back(WWW);
 	fMCBGMuEnr.push_back(ZZZ);
+	fMCBGMuEnr.push_back(QCD50);
 	fMCBGMuEnr.push_back(QCD80);
 	fMCBGMuEnr.push_back(QCD120);
 	fMCBGMuEnr.push_back(QCD170);
@@ -259,12 +262,12 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(DYJets);
 	// MARC fMCBGEMEnr.push_back(GJets40);
 	// MARC fMCBGEMEnr.push_back(GJets100);
-	fMCBGEMEnr.push_back(GJets200);
-	fMCBGEMEnr.push_back(GJets400);
+	// fMCBGEMEnr.push_back(GJets200);
+	// fMCBGEMEnr.push_back(GJets400);
 	fMCBGEMEnr.push_back(WW);
 	fMCBGEMEnr.push_back(WZ);
 	fMCBGEMEnr.push_back(ZZ);
-	// MARC fMCBGEMEnr.push_back(GVJets);
+	fMCBGEMEnr.push_back(GVJets);
 	fMCBGEMEnr.push_back(DPSWW);
 	fMCBGEMEnr.push_back(TTbarH);
 	fMCBGEMEnr.push_back(TTbarW);
@@ -279,11 +282,12 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WWW);
 	fMCBGEMEnr.push_back(ZZZ);
 
-	fMCBGEMEnr.push_back(QCDEM20);
+	// fMCBGEMEnr.push_back(QCDEM20);
 	fMCBGEMEnr.push_back(QCDEM30);
 	fMCBGEMEnr.push_back(QCDEM80);
 	fMCBGEMEnr.push_back(QCDEM170);
 	fMCBGEMEnr.push_back(QCDEM250);
+	fMCBGEMEnr.push_back(QCD50);
 	fMCBGEMEnr.push_back(QCD80);
 	fMCBGEMEnr.push_back(QCD120);
 	fMCBGEMEnr.push_back(QCD170);
@@ -294,7 +298,7 @@ void SSDLPlotter::init(TString filename){
 	
 	fMuEnr.push_back(QCDMuEnr15);
 	
-	fEMEnr.push_back(QCDEM20);
+	// fEMEnr.push_back(QCDEM20);
 	fEMEnr.push_back(QCDEM30);
 	fEMEnr.push_back(QCDEM80);
 	fEMEnr.push_back(QCDEM170);
@@ -304,7 +308,7 @@ void SSDLPlotter::init(TString filename){
 
 
 	fMCRareSM.push_back(ZZ);
-	// MARC fMCRareSM.push_back(GVJets);
+	fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
 	if(gEWKino || gTTHBG)  fMCRareSM.push_back(TTbarH);
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
@@ -325,7 +329,7 @@ void SSDLPlotter::init(TString filename){
 	fMuData    .push_back(DoubleMu3);
 	fMuData    .push_back(DoubleMu4);
 	fMuData    .push_back(DoubleMu5);
-	fMuData    .push_back(DoubleMu5a);
+	// fMuData    .push_back(DoubleMu5a);
 	// fMuHadData .push_back(MuHad1);
 	// fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
@@ -334,7 +338,7 @@ void SSDLPlotter::init(TString filename){
 	fEGData    .push_back(DoubleEle3);
 	fEGData    .push_back(DoubleEle4);
 	fEGData    .push_back(DoubleEle5);
-	fEGData    .push_back(DoubleEle5a);
+	// fEGData    .push_back(DoubleEle5a);
 	// fEleHadData.push_back(EleHad1);
 	// fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
@@ -343,7 +347,7 @@ void SSDLPlotter::init(TString filename){
 	fMuEGData  .push_back(MuEG3);
 	fMuEGData  .push_back(MuEG4);
 	fMuEGData  .push_back(MuEG5);
-	fMuEGData  .push_back(MuEG5a);
+	// fMuEGData  .push_back(MuEG5a);
 
 	fHighPtData.push_back(DoubleMu1);
 	fHighPtData.push_back(DoubleMu1a);
@@ -351,21 +355,21 @@ void SSDLPlotter::init(TString filename){
 	fHighPtData.push_back(DoubleMu3);
 	fHighPtData.push_back(DoubleMu4);
 	fHighPtData.push_back(DoubleMu5);
-	fHighPtData.push_back(DoubleMu5a);
+	// fHighPtData.push_back(DoubleMu5a);
 	fHighPtData.push_back(DoubleEle1);
 	fHighPtData.push_back(DoubleEle1a);
 	fHighPtData.push_back(DoubleEle2);
 	fHighPtData.push_back(DoubleEle3);
 	fHighPtData.push_back(DoubleEle4);
 	fHighPtData.push_back(DoubleEle5);
-	fHighPtData.push_back(DoubleEle5a);
+	// fHighPtData.push_back(DoubleEle5a);
 	fHighPtData.push_back(MuEG1);
 	fHighPtData.push_back(MuEG1a);
 	fHighPtData.push_back(MuEG2);
 	fHighPtData.push_back(MuEG3);
 	fHighPtData.push_back(MuEG4);
 	fHighPtData.push_back(MuEG5);
-	fHighPtData.push_back(MuEG5a);
+	// fHighPtData.push_back(MuEG5a);
 
 	// fLowPtData.push_back(MuHad1);
 	// fLowPtData.push_back(MuHad2);
@@ -390,6 +394,12 @@ void SSDLPlotter::doSMSscans(TString region, TString file){
 }
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
+	//SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-800to1400-mLSP-1-50GeVX50GeV-Binning-Summer12-START52-V9-FSIM-v2.root", 1100, 5);
+	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 25);
+	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 225);
+	//SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 475);
+	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-525to875-50GeVX50GeV-Binning.root", 1075, 800);
+	return;
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
         // return;
@@ -8557,7 +8567,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 
  	vector<int> mcbkg;
 	mcbkg.push_back(ZZ);
-// MARC 	mcbkg.push_back(GVJets);
+	mcbkg.push_back(GVJets);
  	mcbkg.push_back(DPSWW);
 	mcbkg.push_back(TTbarH);
 	mcbkg.push_back(TTbarW);
@@ -9364,7 +9374,7 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	vector<int> mcbkg;
 	//mcbkg.push_back(WZ);
 	mcbkg.push_back(ZZ);
-// MARC	mcbkg.push_back(GVJets);
+	mcbkg.push_back(GVJets);
 	mcbkg.push_back(DPSWW);
 	if (!separateTTH) mcbkg.push_back(TTbarH);
 	mcbkg.push_back(TTbarG);
@@ -12711,7 +12721,7 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	vector<int> raremc;
 //	raremc.push_back(WZ);
 	raremc.push_back(ZZ);
-	// MARC raremc.push_back(GVJets);
+	raremc.push_back(GVJets);
 	raremc.push_back(DPSWW);
 	raremc.push_back(TTbarG);
 	if (!separateTTH) raremc.push_back(TTbarH);
@@ -17937,35 +17947,49 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 }
 void SSDLPlotter::scanModelGeneric( const char * filestring, int reg){
 
+	SSDLDumper::setRegionCuts(reg);
+/*
+	cout<< "minHT     " << fC_minHT     << endl;
+	cout<< "maxHT     " << fC_maxHT     << endl;
+	cout<< "minMet    " << fC_minMet    << endl;
+	cout<< "maxMet    " << fC_maxMet    << endl;
+	cout<< "minJetPt  " << fC_minJetPt  << endl;
+	cout<< "minNjets  " << fC_minNjets  << endl;
+	cout<< "maxNjets  " << fC_maxNjets  << endl;
+	cout<< "minNbjets " << fC_minNbjets << endl;
+	cout<< "maxNbjets " << fC_maxNbjets << endl;
+	cout<< "minNbjmed " << fC_minNbjmed << endl;
+	cout<< "maxNbjmed " << fC_maxNbjmed << endl;
+*/
 	TString name = "T6ttWW";
 	bool verbose = false;
 	if (verbose) fOUTSTREAM.open( name+"_"+gRegions[reg]->sname+".txt" );
 
+	/////////////////////////////////////////////////////
+	// for debugging:
+ 	// setRegionCuts(0);
 
+	/////////////////////////////////////////////////////
 	TH2D * Model_yield_ ;
 	Model_yield_  = new TH2D(name+"_yield"      , name+"_yield"  , 101, -5, 1005    , 101 , -5 , 1005);
 	Model_yield_ ->Sumw2();
 
-	int nSyst(9);
+	int nSyst(8);
 	TString systs[nSyst];
 	systs[0] = "norm";
-	systs[1] = "metsmear";
-	systs[2] = "lepup";
-	systs[3] = "lepdown";
-	systs[4] = "JESup";
-	systs[5] = "JESdown";
-	systs[6] = "JER";
-	systs[7] = "METup";
-	systs[8] = "METdown";
+	systs[1] = "JESup";
+	systs[2] = "JESdown";
+	systs[3] = "JER";
+	systs[4] = "btagUp";
+	systs[5] = "btagDown";
+	systs[6] = "METup";
+	systs[7] = "METdown";
 
 	TH2D  * Model_nPass_    [nSyst];
 	for (int j = 0; j<nSyst; j++) {
 		Model_nPass_      [j] = new TH2D(name+"_nPass_"+systs[j], name+"_nPass_"+systs[j] , 101, -5, 1005, 101, -5, 1005);
 		Model_nPass_      [j]->Sumw2();
 	}
-
-	// get the histo with the x-secs
-
 
 	TFile * xsecFile_ = new TFile("/shome/mdunser/xsecfiles/"+name+"_xsecs.root", "READ", "xsecFile_");
 	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
@@ -17987,30 +18011,51 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg){
 	int n_tot = 0;
 	int signalTot(0);
 	int nEE(0), nEM(0), nMM(0);
-	int nSlepSnu(0), nSlepSlep(0);
 
 	bool doSystematic = true;
 	// make a dummy sample for the systematic functions
 	Sample *S = new Sample();
 	S->datamc = 1;
 	// need to initialize the TRandom object for the systematic studies
-	SSDLDumper::fRand3 = new TRandom3(0);
+	SSDLDumper::fRand3       = new TRandom3(10);
+	SSDLDumper::fRand3Normal = new TRandom3(10);
 
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		setRegionCuts(reg);
 		printProgress(jentry, tot_events, name+" Scan "+gRegions[reg]->sname);
 		for (int i = 0; i<nSyst; i++) {
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
+			// if (Event!=45001) continue;
+			saveBTags();      // save the values of the new btag
+			scaleBTags(S, 0, "T2tt"); // this applies the bTagSF
 			 
+			// if ( (i == 0 || i == 4 || i == 5 ) && Event==45001){
+			// 	for (int ij = 0; ij<NJets; ++ij){
+			// 		cout << Form("index: %d btag after scaling: %.2f", ij, JetCSVBTag[ij]) << endl;
+			// 	}
+			// }
 			if (!doSystematic && i!=0) continue;
-			if (i == 1) smearMET(S);
-			if (i == 2) scaleLeptons(S, 1);
-			if (i == 3) scaleLeptons(S, 2);
-			if (i == 4) smearJetPts(S, 1);
-			if (i == 5) smearJetPts(S, 2);
-			if (i == 6) smearJetPts(S, 3);
-			if (i == 7) scaleMET(S, 0);
-			if (i == 8) scaleMET(S, 1);
+			if (i == 1) smearJetPts(S, 1);
+			if (i == 2) smearJetPts(S, 2);
+			if (i == 3) smearJetPts(S, 3);
+			if (i == 4) {resetBTags(); scaleBTags(S, 1, "T1tttt");}
+			if (i == 5) {resetBTags(); scaleBTags(S, 2, "T1tttt");}
+			if (i == 6) scaleMET(S, 0);
+			if (i == 7) scaleMET(S, 1);
+
+
+			// int m1(-1),m2(-1),m3(-1),e3(-1),e1(-1),e2(-1);
+			// cleanedJetIndices(15.);
+			// if (i == 6 || i == 7){
+			// 	if (Event>=45000 && Event<= 46000 && (isSSLLMuEvent(m1, m2) || isSSLLElMuEvent(m3, e3) || isSSLLElEvent(e1, e2)) ){
+			// 		// for (int ij = 0; ij<=fC_cleanJetIndices.size(); ++ij){
+			// 		// 	// if (!isGoodJet(ij, 15.)) continue;
+			// 		// 	if ( i == 0 ) cout << Form("systematic: %d jetpt: %.3f jeteta: %.3f", i, JetPt[ij], JetEta[ij]) << endl;
+			// 		// }
+			// 		cout << Form("%d systematic: %d njets: %d nbjets: %d met: %.3f ht: %.3f jetpt[0]: %.3f jetpt[1]: %.3f", Event, i, getNJets(), getNBTagsMed(), getMET(), getHT(), JetPt[0], JetPt[1]) << endl;
+			// 	}	
+			// }
+
 			float nloXsec      = xsecfit->Eval(mGlu);
 			int   nGenBin      = Model_nTot_->FindBin(mGlu, mChi);
 			float nGen         = Model_nTot_->GetBinContent(nGenBin);
@@ -18093,6 +18138,117 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg){
 	file_->Close();
 	res_->Close();
 
-	//	delete S;
-	delete res_;
+	delete res_, Model_nTot_;
+}
+void SSDLPlotter::SUSYWorkshopPlots( TString sestring, int mgluino, int mlsp){
+
+	//SSDLDumper::setRegionCuts(reg);
+	SSDLDumper::setRegionCuts(0);
+
+	fC_minHT  =0;
+	cout<< "minHT     " << fC_minHT     << endl;
+	cout<< "maxHT     " << fC_maxHT     << endl;
+	fC_minMet =0.;
+	cout<< "minMet    " << fC_minMet    << endl;
+	cout<< "maxMet    " << fC_maxMet    << endl;
+	cout<< "minJetPt  " << fC_minJetPt  << endl;
+	fC_minNjets  =0;
+	cout<< "minNjets  " << fC_minNjets  << endl;
+	cout<< "maxNjets  " << fC_maxNjets  << endl;
+	cout<< "minNbjets " << fC_minNbjets << endl;
+	cout<< "maxNbjets " << fC_maxNbjets << endl;
+	cout<< "minNbjmed " << fC_minNbjmed << endl;
+	cout<< "maxNbjmed " << fC_maxNbjmed << endl;
+
+	TString name = "T1tttt";
+
+	// get the histo with the count for each point
+	TFile * file_ = TFile::Open(sestring); //, "READ", "file_");
+	// get the Analysis tree from the file, initialize it
+	TTree * tree_ = (TTree *) file_->Get("Analysis");
+	tree_->ResetBranchAddresses();
+	Init(tree_);
+	// just for counting, really
+	Long64_t tot_events = tree_->GetEntriesFast();
+
+	// TChain * c = new TChain("Analysis");
+	// c->Add(sestring+"/output*.root");
+	// c->ResetBranchAddresses();
+	// Init(c);
+	// Long64_t tot_events = c->GetEntriesFast();
+
+	TH1D * njets  = new TH1D("njets"  , "njets"  ,  20, 0,    20);
+	TH1D * nbjets = new TH1D("nbjets" , "nbjets" ,  10, 0,    10);
+	TH1D * nlepts = new TH1D("nlepts" , "nlepts" ,   5, 0,     5);
+	TH1D * nlepinc= new TH1D("nlepinc", "nlepinc",   5, 0,     5);
+	TH1D * met    = new TH1D("met"    , "met"    ,  28, 0,   700);
+	TH1D * ht     = new TH1D("ht"     , "ht"     ,  50, 0,  2500);
+	TH1D * l0pt   = new TH1D("l0pt"   , "l0pt"   ,  35, 0,   350);
+	TH1D * l1pt   = new TH1D("l1pt"   , "l1pt"   ,  35, 0,   350);
+	TH1D * j0pt   = new TH1D("j0pt"   , "j0pt"   ,  50, 0,  1000);
+	TH1D * j1pt   = new TH1D("j1pt"   , "j1pt"   ,  50, 0,  1000);
+
+	cout << "Total Number of entries: " << tot_events << endl;
+	// loop
+	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
+		printProgress(jentry, tot_events, name+" Scan ");
+		tree_->GetEntry(jentry);
+		if (mGlu != mgluino) continue;
+		if (mlsp < 20) {if (mLSP > mlsp   ) continue;}
+		else if (mLSP != mlsp) continue;
+		
+		int nj = getNJets();
+		int nb = getNBTagsMed();
+		int nl = getNTightMuons() + getNTightElectrons();
+		int nli= NEls + NMus;
+		float mt = getMET();
+		float h  = getHT();
+		float l0 = getTightPt(0);
+		float l1 = getTightPt(1);
+		float j0 = getJetsPt(0);
+		float j1 = getJetsPt(1);
+		
+		if (nj  >  njets   -> GetXaxis() -> GetXmax() ) { njets   -> AddBinContent(njets   -> GetXaxis() -> GetNbins()) ;} else { njets   -> Fill(nj );}
+		if (nb  >  nbjets  -> GetXaxis() -> GetXmax() ) { nbjets  -> AddBinContent(nbjets  -> GetXaxis() -> GetNbins()) ;} else { nbjets  -> Fill(nb );}
+		if (nl  >  nlepts  -> GetXaxis() -> GetXmax() ) { nlepts  -> AddBinContent(nlepts  -> GetXaxis() -> GetNbins()) ;} else { nlepts  -> Fill(nl );}
+		if (nli >  nlepinc -> GetXaxis() -> GetXmax() ) { nlepinc -> AddBinContent(nlepinc -> GetXaxis() -> GetNbins()) ;} else { nlepinc -> Fill(nli);}
+		if (mt  >  met     -> GetXaxis() -> GetXmax() ) { met     -> AddBinContent(met     -> GetXaxis() -> GetNbins()) ;} else { met     -> Fill(mt );}
+		if (h   >  ht      -> GetXaxis() -> GetXmax() ) { ht      -> AddBinContent(ht      -> GetXaxis() -> GetNbins()) ;} else { ht      -> Fill(h  );}
+		if (l0  >  l0pt    -> GetXaxis() -> GetXmax() ) { l0pt    -> AddBinContent(l0pt    -> GetXaxis() -> GetNbins()) ;} else { l0pt    -> Fill(l0 );}
+		if (l1  >  l1pt    -> GetXaxis() -> GetXmax() ) { l1pt    -> AddBinContent(l1pt    -> GetXaxis() -> GetNbins()) ;} else { l1pt    -> Fill(l1 );}
+		if (j0  >  j0pt    -> GetXaxis() -> GetXmax() ) { j0pt    -> AddBinContent(j0pt    -> GetXaxis() -> GetNbins()) ;} else { j0pt    -> Fill(j0 );}
+		if (j1  >  j1pt    -> GetXaxis() -> GetXmax() ) { j1pt    -> AddBinContent(j1pt    -> GetXaxis() -> GetNbins()) ;} else { j1pt    -> Fill(j1 );}
+		// nbjets ->Fill(getNBTagsMed());
+		// nlepts ->Fill(getNTightMuons() + getNTightElectrons());
+		// nlepinc->Fill(NEls + NMus);
+		// met    ->Fill(getMET());
+		// ht     ->Fill(getHT());
+
+		// // fill lepton pts
+		// l0pt->Fill(getTightPt(0));
+		// l1pt->Fill(getTightPt(1));
+		// // fill jet pts
+		// j0pt->Fill(getJetsPt(0));
+		// j1pt->Fill(getJetsPt(1));
+
+
+	} // end loop on all events
+	file_->Close();
+
+	TFile * res_;
+	res_ = new TFile(Form(name+"_susyWorkshop_mglu%d_mlsp%d.root", mgluino, mlsp), "RECREATE", "res_");
+	res_   -> cd();
+
+	njets  ->Write();
+	nbjets ->Write();
+	nlepts ->Write();
+	nlepinc->Write();
+	met    ->Write();
+	ht     ->Write();
+	l0pt   ->Write();
+	l1pt   ->Write();
+	j0pt   ->Write();
+	j1pt   ->Write();
+
+	res_->Close();
 }
