@@ -121,12 +121,14 @@ double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100.,
 double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.      };
 double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
 double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.    };
-double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
+double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {80., 90., 100., 110., 120., 140., 160., 180., 200., 250.};
+double SSDLDumper::gDiffMET2Bins[gNDiffMET2Bins+1] = {120., 140., 160., 180., 200., 250., 300.};
+
 
 //////////////////////////////////////////////////////////////////////////////////
-TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"};
-int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
-double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
+TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET2","MET3", "NBJetsMed", "NBJetsMed2"};
+int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET2Bins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
+double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET2Bins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} [GeV]",
                                                                           "Particle Flow ME_{T} [GeV]",
                                                                           "Jet Multiplicity",
@@ -134,6 +136,7 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
                                                                           "Leading Lepton p_{T} [GeV]",
                                                                           "Subleading Lepton p_{T} [GeV]",
                                                                           "b-Jet Multiplicity (loose)",
+                                                                          "Particle Flow ME_{T} [GeV]",
                                                                           "Particle Flow ME_{T} [GeV]",
                                                                           "b-Jet Multiplicity (medium)",
                                                                           "b-Jet Multiplicity (medium)"};
@@ -930,8 +933,8 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 	resetHypLeptons();
 }
 void SSDLDumper::fillDiffYields(Sample *S){
-	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
-	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,   8   ,      9     ,     10      }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET2", "MET3", "NBJetsMed", "NBJetsMed2"}
 	///////////////////////////////////////////////////
 	setRegionCuts(gRegion[gBaseRegion]);
 	
@@ -962,7 +965,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVar(S, mu1, mu2, MuPt[mu1],              4, Muon);
 			fillDiffVar(S, mu1, mu2, MuPt[mu2],              5, Muon);
 			fillDiffVar(S, mu1, mu2, getNBTags()+0.5,        6, Muon);
-			fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5,     8, Muon);
+			fillDiffVar(S, mu1, mu2, getMET(),               7, Muon);
+			fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5,     9, Muon);
+
 		}
 		resetHypLeptons();
 
@@ -973,7 +978,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 // cout << __LINE__ << "min HT: " << fC_minHT << " minMET: " << fC_minMet << " minNjets: " << fC_minNjets << " minNbjets: " << fC_minNbjets << endl;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getMET(), 7, Muon);
+		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getMET(), 8, Muon);
 		resetHypLeptons();
 		
 		////////////////////////////
@@ -981,7 +986,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
+		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 10, Muon);
 		resetHypLeptons();
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
@@ -1008,7 +1013,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVar(S, el1, el2, ElPt[el1],              4, Elec);
 			fillDiffVar(S, el1, el2, ElPt[el2],              5, Elec);
 			fillDiffVar(S, el1, el2, getNBTags()+0.5,        6, Elec);
-			fillDiffVar(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
+			fillDiffVar(S, el1, el2, getMET(),               7, Elec);
+			fillDiffVar(S, el1, el2, getNBTagsMed()+0.5,     9, Elec);
 		}
 		resetHypLeptons();
 
@@ -1018,7 +1024,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0.;
-		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getMET(), 7, Elec);
+		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getMET(), 8, Elec);
 		resetHypLeptons();
 		
 		////////////////////////////
@@ -1026,7 +1032,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
+		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 10, Elec);
 		resetHypLeptons();
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
@@ -1051,7 +1057,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
 			fillDiffVar(S, mu, el, getMT2(mu, el, ElMu), 3, ElMu);
 			fillDiffVar(S, mu, el, getNBTags()+0.5,      6, ElMu);
-			fillDiffVar(S, mu, el, getNBTagsMed()+0.5,   8, ElMu);
+			fillDiffVar(S, mu, el, getMET(),             7, ElMu);
+			fillDiffVar(S, mu, el, getNBTagsMed()+0.5,   9, ElMu);
 			float ptmax = MuPt[mu];
 			float ptmin = ElPt[el];
 			if(ptmin > ptmax){
@@ -1069,7 +1076,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getMET(), 7, ElMu);
+		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getMET(), 8, ElMu);
 		resetHypLeptons();
 		
 		////////////////////////////
@@ -1077,7 +1084,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
+		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 10, ElMu);
 		resetHypLeptons();
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
@@ -1108,7 +1115,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVarOS(S, el1, el2, ElPt[el1],              4, Elec);
 			fillDiffVarOS(S, el1, el2, ElPt[el2],              5, Elec);
 			fillDiffVarOS(S, el1, el2, getNBTags()+0.5,        6, Elec);
-			fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
+			fillDiffVarOS(S, el1, el2, getMET(),               7, Elec);
+			fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5,     9, Elec);
 		}
 		resetHypLeptons();
 
@@ -1118,7 +1126,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getMET(), 7, Elec);
+		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getMET(), 8, Elec);
 		resetHypLeptons();
 		
 		////////////////////////////
@@ -1126,7 +1134,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
+		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 10, Elec);
 		resetHypLeptons();
 	}
 	setRegionCuts(gRegion[gBaseRegion]);
@@ -1152,7 +1160,8 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			fillDiffVarOS(S, mu, el, TMath::Max(MuPt[mu], ElPt[el]), 4, ElMu);
 			fillDiffVarOS(S, mu, el, TMath::Min(MuPt[mu], ElPt[el]), 5, ElMu);
 			fillDiffVarOS(S, mu, el, getNBTags()+0.5,                6, ElMu);
-			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,             8, ElMu);
+			fillDiffVarOS(S, mu, el, getMET(),                       7, ElMu);
+			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,             9, ElMu);
 		}
 		resetHypLeptons();
 
@@ -1162,7 +1171,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getMET(), 7, ElMu);
+		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getMET(), 8, ElMu);
 		resetHypLeptons();
 		
 		////////////////////////////
@@ -1170,7 +1179,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		setRegionCuts(gRegion[gBaseRegion]);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
+		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 10, ElMu);
 		resetHypLeptons();
 	}
 
@@ -1557,18 +1566,26 @@ void SSDLDumper::fillChMisIDProb(Sample *S){
 		if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
 		        S->chmisid.chmid_BB_pt->Fill(isSS, ElPt[el1]);
 			S->chmisid.chmid_BB_pt->Fill(isSS, ElPt[el2]);
+			S->chmisid.chmid_B_pt ->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_B_pt ->Fill(isSS, ElPt[el2]);					    
 		}
 		if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) {
 		        S->chmisid.chmid_EE_pt->Fill(isSS, ElPt[el1]);
 			S->chmisid.chmid_EE_pt->Fill(isSS, ElPt[el2]);
+			S->chmisid.chmid_E_pt ->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_E_pt ->Fill(isSS, ElPt[el2]);					    
 		}
 		if( isBarrelElectron(el1) && !isBarrelElectron(el2)) {
 		        S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el1]);
 			S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el2]);
+			S->chmisid.chmid_B_pt ->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_E_pt ->Fill(isSS, ElPt[el2]);					    
 		}
 		if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) {
 		        S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el1]);
 			S->chmisid.chmid_BE_pt->Fill(isSS, ElPt[el2]);
+			S->chmisid.chmid_E_pt ->Fill(isSS, ElPt[el1]);
+			S->chmisid.chmid_B_pt ->Fill(isSS, ElPt[el2]);					    
 		}
 	}
 	resetHypLeptons();
@@ -3308,8 +3325,10 @@ void SSDLDumper::bookHistos(Sample *S){
 	S->chmisid.chmid_BB_pt = new TEfficiency(chmidname + "_chmid_BB_pt", "ChMid_BB_pt", getNPPtBins(Elec), getPPtBins(Elec));
 	S->chmisid.chmid_EE_pt = new TEfficiency(chmidname + "_chmid_EE_pt", "ChMid_EE_pt", getNPPtBins(Elec), getPPtBins(Elec));
 	S->chmisid.chmid_BE_pt = new TEfficiency(chmidname + "_chmid_BE_pt", "ChMid_BE_pt", getNPPtBins(Elec), getPPtBins(Elec));
-	
-	
+
+	S->chmisid.chmid_B_pt  = new TEfficiency(chmidname + "_chmid_B_pt", "ChMid_B_pt", getNPPtBins(Elec), getPPtBins(Elec));
+	S->chmisid.chmid_E_pt  = new TEfficiency(chmidname + "_chmid_E_pt", "ChMid_E_pt", getNPPtBins(Elec), getPPtBins(Elec));
+		
 	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
 		int r = gRegion[(*regIt)->sname];
 		Region *R = &S->region[r][HighPt];
@@ -3541,7 +3560,8 @@ void SSDLDumper::deleteHistos(Sample *S){
 	delete S->chmisid.chmid_BB_pt;
 	delete S->chmisid.chmid_BE_pt;
 	delete S->chmisid.chmid_EE_pt;
-			
+	delete S->chmisid.chmid_B_pt;
+	delete S->chmisid.chmid_E_pt;
 
 	for(regIt = gRegions.begin(); regIt != gRegions.end() ; regIt++){
 		int r = gRegion[(*regIt)->sname];
@@ -3818,6 +3838,9 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	S->chmisid.chmid_BB_pt->Write(S->chmisid.chmid_BB_pt->GetName(), TObject::kWriteDelete);
 	S->chmisid.chmid_BE_pt->Write(S->chmisid.chmid_BE_pt->GetName(), TObject::kWriteDelete);
 	S->chmisid.chmid_EE_pt->Write(S->chmisid.chmid_EE_pt->GetName(), TObject::kWriteDelete);
+
+	S->chmisid.chmid_B_pt->Write(S->chmisid.chmid_B_pt->GetName(), TObject::kWriteDelete);
+	S->chmisid.chmid_E_pt->Write(S->chmisid.chmid_E_pt->GetName(), TObject::kWriteDelete);
 
 	// Yields
 	for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++){
@@ -4157,6 +4180,8 @@ int  SSDLDumper::readHistos(TString filename){
 		getObjectSafe(pFile, chmidname + "_chmid_BB_pt", S->chmisid.chmid_BB_pt);
 		getObjectSafe(pFile, chmidname + "_chmid_BE_pt", S->chmisid.chmid_BE_pt);
 		getObjectSafe(pFile, chmidname + "_chmid_EE_pt", S->chmisid.chmid_EE_pt);
+		getObjectSafe(pFile, chmidname + "_chmid_B_pt",  S->chmisid.chmid_B_pt);
+		getObjectSafe(pFile, chmidname + "_chmid_E_pt",  S->chmisid.chmid_E_pt);
 		
 		// Yields
 		for(size_t HighPt = 0; HighPt < 2; ++HighPt){
@@ -6592,6 +6617,30 @@ float SSDLDumper::getLeptonSFEl(float pt, float eta){
 //////////////////////////////////////////////////////////////////////////////
 // HLT Scale Factors
 //____________________________________________________________________________
+float SSDLDumper::getTriggerSFMuMu(float eta){
+        // Pt of the trailing lepton needed 
+        float aeta = fabs(eta);
+        if (aeta < 1) {
+		return 0.9;
+	}
+	else if (aeta >= 1){
+		return 0.81;
+	}
+	return -9999;
+}
+float SSDLDumper::getTriggerSFElEl(float pt){
+        // Pt of the trailing lepton needed 
+        if (pt < 30) {
+		return 0.92;
+	}
+	else if (pt >= 30){
+		return 0.96;
+	}
+	return -9999;
+}
+float SSDLDumper::getTriggerSFMuEl(){
+	return 0.93;
+}
 float SSDLDumper::getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod ) {
 	return 1.;
 }
@@ -6602,7 +6651,7 @@ float SSDLDumper::diMuonHLTSF2012(){
 	return 0.872;
 }
 float SSDLDumper::muEleHLTSF2012(){
-	return 0.925;
+	return 0.93;
 }
 float SSDLDumper::diEleHLTSF2012(){
 	return 0.954;
