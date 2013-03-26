@@ -29,7 +29,7 @@ MuEG5			mdunser/SSDLTrees/2013/Mar16/MuEG-Run2012D-PromptReco-v1/							0	2
 ####################################################################################################################
 # Top and EWK
 TTJets			mdunser/SSDLTrees/2013/Mar16/TT-CT10-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v2/					1	-1	225.197
-SingleT_t		mdunser/SSDLTrees/2013/Mar16/T-t-channel-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root			1	-1	55.531
+SingleT_t		mdunser/SSDLTrees/2013/Mar16/T-t-channel-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v3.root			1	-1	55.531
 SingleTbar_t	mdunser/SSDLTrees/2013/Mar16/Tbar-t-channel-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root			1	-1	30.0042
 SingleT_tW		mdunser/SSDLTrees/2013/Mar16/T-tW-channel-DR-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root		1	-1	11.1773
 SingleTbar_tW	mdunser/SSDLTrees/2013/Mar16/Tbar-tW-channel-DR-TuneZ2star-8TeV-powheg-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root		1	-1	11.1773
@@ -49,25 +49,25 @@ WZTo3LNu		mdunser/SSDLTrees/2013/Mar16/WZJetsTo3LNu-TuneZ2-8TeV-madgraph-tauola-
 ZZTo4L			mdunser/SSDLTrees/2013/Mar16/ZZJetsTo4L-TuneZ2star-8TeV-madgraph-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1/				1	-1	0.1769
 ######################################################################################################################
 ## Rare SM
-TTbarH			mdunser/SSDLTrees/2013/Mar16/TTH-Inclusive-M-125-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v1.root		3	-1	0.130
-TTbarW			mdunser/SSDLTrees/2013/Mar16/TTWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	0.232
-TTbarZ			mdunser/SSDLTrees/2013/Mar16/TTZJets-8TeV-madgraph-v2-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	0.2057
-TTbarG			mdunser/SSDLTrees/2013/Mar16/TTGJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	2.166
-TbZ				mdunser/SSDLTrees/2013/Mar16/TBZToLL-TuneZ2star-8TeV-madgraph-tauola-Summer12-START52-V9-FSIM-v1.root		3	-1	0.0114
-DPSWW			mdunser/SSDLTrees/2013/Mar16/WW-DoubleScattering-8TeV-pythia8-Summer12-DR53X-PU-S10-START53-V7A-v1.root		3	-1	0.5879
-WWZ				mdunser/SSDLTrees/2013/Mar16/WWZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root			3	-1	0.05795
-WZZ				mdunser/SSDLTrees/2013/Mar16/WZZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root			3	-1	0.01968
-WWG				mdunser/SSDLTrees/2013/Mar16/WWGJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	0.528
-ZZZ				mdunser/SSDLTrees/2013/Mar16/ZZZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root			3	-1	0.005527
-WWW				mdunser/SSDLTrees/2013/Mar16/WWWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	0.08058
-TTbarWW			mdunser/SSDLTrees/2013/Mar16/TTWWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root				3	-1	0.002037
-W+W+			mdunser/SSDLTrees/2013/Mar16/WpWpqq-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root					3	-1	0.2482
-W-W-			mdunser/SSDLTrees/2013/Mar16/WmWmqq-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root					3	-1	0.08888
+TTbarH			mdunser/SSDLTrees/2013/Mar16/TTH-Inclusive-M-125-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v1.root					3	-1	0.130
+TTbarW			mdunser/SSDLTrees/2013/Mar16/TTWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.232
+TTbarZ			mdunser/SSDLTrees/2013/Mar16/TTZJets-8TeV-madgraph-v2-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.2057
+TTbarG			mdunser/SSDLTrees/2013/Mar16/TTGJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	2.166
+TbZ				mdunser/SSDLTrees/2013/Mar16/TBZToLL-4F-TuneZ2star-8TeV-madgraph-tauola-Summer12-DR53X-PU-S10-START53-V7C-v1.root		3	-1	0.0114
+DPSWW			mdunser/SSDLTrees/2013/Mar16/WW-DoubleScattering-8TeV-pythia8-Summer12-DR53X-PU-S10-START53-V7A-v1.root					3	-1	0.5879
+WWZ				mdunser/SSDLTrees/2013/Mar16/WWZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root						3	-1	0.05795
+WZZ				mdunser/SSDLTrees/2013/Mar16/WZZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root						3	-1	0.01968
+WWG				mdunser/SSDLTrees/2013/Mar16/WWGJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.528
+ZZZ				mdunser/SSDLTrees/2013/Mar16/ZZZNoGstarJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root						3	-1	0.005527
+WWW				mdunser/SSDLTrees/2013/Mar16/WWWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.08058
+TTbarWW			mdunser/SSDLTrees/2013/Mar16/TTWWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.002037
+W+W+			mdunser/SSDLTrees/2013/Mar16/WpWpqq-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root								3	-1	0.2482
+W-W-			mdunser/SSDLTrees/2013/Mar16/WmWmqq-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root								3	-1	0.08888
 ####################################################################################################################
 MuEnr15			mdunser/SSDLTrees/2013/Mar16b/QCD-Pt-20-MuEnrichedPt-15-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v3/		1	-1	1.347e+05
 QCD50			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-50to80-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	8148778.
-QCD80			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-80to120-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	40448.
-QCD120			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-120to170-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	157800.
+QCD80			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-80to120-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v3.root		1	-1	40448.
+QCD120			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-120to170-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v3.root		1	-1	157800.
 QCD170			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-170to300-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	34020.
 QCD300			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-300to470-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	1757.
 QCD470			mdunser/SSDLTrees/2013/Mar19/QCD-Pt-470to600-TuneZ2star-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v2.root		1	-1	115.2
