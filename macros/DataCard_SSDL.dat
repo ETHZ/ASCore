@@ -13,12 +13,12 @@ DoubleMu3		mdunser/SSDLTrees/2013/Mar16/DoubleMu-Run2012C-24Aug2012-v1/							0	
 DoubleMu4		mdunser/SSDLTrees/2013/Mar16/DoubleMu-Run2012C-PromptReco-v2-RETRY/						0	0
 DoubleMu5		mdunser/SSDLTrees/2013/Mar16/DoubleMu-Run2012D-PromptReco-v1-RETRY/						0	0
 ##
-DoubleEle1		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012A-13Jul2012-v1/						0	1
-DoubleEle1a		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012A-recover-06Aug2012-v1-CorrectGT/	0	1
-DoubleEle2		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012B-13Jul2012-v1/						0	1
-DoubleEle3		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012C-24Aug2012-v1/						0	1
-DoubleEle4		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012C-PromptReco-v2/						0	1
-DoubleEle5		mdunser/SSDLTrees/2013/Mar16/DoubleElectron-Run2012D-PromptReco-v1/						0	1
+DoubleEle1		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012A-13Jul2012-v1/						0	1
+DoubleEle1a		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012A-recover-06Aug2012-v1-CorrectGT/	0	1
+DoubleEle2		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012B-13Jul2012-v1/						0	1
+DoubleEle3		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012C-24Aug2012-v1/						0	1
+DoubleEle4		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012C-PromptReco-v2/						0	1
+DoubleEle5		mdunser/SSDLTrees/2013/Mar26/DoubleElectron-Run2012D-PromptReco-v1/						0	1
 ##
 MuEG1			mdunser/SSDLTrees/2013/Mar16/MuEG-Run2012A-13Jul2012-v1/							0	2
 MuEG1a			mdunser/SSDLTrees/2013/Mar16/MuEG-Run2012A-recover-06Aug2012-v1/					0	2
