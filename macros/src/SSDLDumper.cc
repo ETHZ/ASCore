@@ -5048,6 +5048,13 @@ void SSDLDumper::setRegionCuts(int reg){
 	if(reg == gRegion["WZEnriched"])  gInvertZVeto = true;
 	else                              gInvertZVeto = false;
 }
+void SSDLDumper::setLowPtCuts(){
+	if (fC_minHT < 250) fC_minHT = 250.;
+	fC_minMu1pt = 10.;
+	fC_minMu2pt = 10.;
+	fC_minEl1pt = 10.;
+	fC_minEl2pt = 10.;
+}
 
 //____________________________________________________________________________
 bool SSDLDumper::isGoodEvent(){
@@ -6560,8 +6567,9 @@ float SSDLDumper::getLeptonSFMu(float pt, float eta){
 		if (1.20  < aeta && aeta < 2.50) {return 0.977;}
 	}
 	
-	// if we get here, return bogus value
-	return -999999.0;
+	// if we get here, return no SF
+	cout << "this should not happen" << endl;
+	return 0.;
 }
 float SSDLDumper::getLeptonSFEl(float pt, float eta){
 	// take the SC eta for this one...
@@ -6610,13 +6618,25 @@ float SSDLDumper::getLeptonSFEl(float pt, float eta){
 		if (2.00   < aeta && aeta < 2.50  ) {return 0.969;}
 	}
 	
-	// if we get here, return bogus value
-	return -999999.0;
+	// if we get here, return 0.
+	return 0.;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // HLT Scale Factors
 //____________________________________________________________________________
+float SSDLDumper::getTriggerSFMuMuLowpt(float eta){
+	// Pt of the trailing lepton needed 
+	float aeta = fabs(eta);
+	if (aeta < 1) return 0.94;
+	return 0.9;
+}
+float SSDLDumper::getTriggerSFElElLowpt(){
+	return 0.93;
+}
+float SSDLDumper::getTriggerSFMuElLowpt(){
+	return 0.93;
+}
 float SSDLDumper::getTriggerSFMuMu(float eta){
         // Pt of the trailing lepton needed 
         float aeta = fabs(eta);

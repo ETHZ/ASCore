@@ -847,6 +847,9 @@ public:
 
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_MuEG(           float pt, float eta, const std::string& runPeriod="" );
+        float getTriggerSFMuMuLowpt(float);
+        float getTriggerSFElElLowpt();
+        float getTriggerSFMuElLowpt();
         float getTriggerSFMuMu(float);
         float getTriggerSFElEl(float);
         float getTriggerSFMuEl();
@@ -897,6 +900,7 @@ public:
 	
 	// old void setRegionCuts(gRegion reg = Baseline);
 	void setRegionCuts(int reg);
+	void setLowPtCuts();
 	
 	const int     getNFPtBins(gChannel); // fake ratios
 	const double *getFPtBins (gChannel);

@@ -385,21 +385,23 @@ void SSDLPlotter::doSMSscans(TString region, TString file){
 	// TString pathtofile = ""; //"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
 	// TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
 	// TString filename   = "/shome//mdunser/xsecfiles/output_38.root";  
+
+	// bool for the low-pt analysis...
+	bool lowpt = true;
 	
 	cout << "Running Over region: " << region << endl;
 	cout << "On file: " << file << endl;
-	// scanSMS(pathtofile + filename, gRegion[region]);
-	scanModelGeneric(file , gRegion[region]);
+	scanModelGeneric(file , gRegion[region], lowpt);
 	
 }
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
-	//SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-800to1400-mLSP-1-50GeVX50GeV-Binning-Summer12-START52-V9-FSIM-v2.root", 1100, 5);
-	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 25);
-	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 225);
-	//SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 475);
-	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-525to875-50GeVX50GeV-Binning.root", 1075, 800);
-	return;
+	// //SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-800to1400-mLSP-1-50GeVX50GeV-Binning-Summer12-START52-V9-FSIM-v2.root", 1100, 5);
+	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 25);
+	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 225);
+	// //SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 475);
+	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-525to875-50GeVX50GeV-Binning.root", 1075, 800);
+	// return;
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
         // return;
@@ -18097,201 +18099,6 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 	//	delete S;
 	delete res_;
 }
-void SSDLPlotter::scanModelGeneric( const char * filestring, int reg){
-
-	SSDLDumper::setRegionCuts(reg);
-/*
-	cout<< "minHT     " << fC_minHT     << endl;
-	cout<< "maxHT     " << fC_maxHT     << endl;
-	cout<< "minMet    " << fC_minMet    << endl;
-	cout<< "maxMet    " << fC_maxMet    << endl;
-	cout<< "minJetPt  " << fC_minJetPt  << endl;
-	cout<< "minNjets  " << fC_minNjets  << endl;
-	cout<< "maxNjets  " << fC_maxNjets  << endl;
-	cout<< "minNbjets " << fC_minNbjets << endl;
-	cout<< "maxNbjets " << fC_maxNbjets << endl;
-	cout<< "minNbjmed " << fC_minNbjmed << endl;
-	cout<< "maxNbjmed " << fC_maxNbjmed << endl;
-*/
-	TString name = "T6ttWW";
-	bool verbose = false;
-	if (verbose) fOUTSTREAM.open( name+"_"+gRegions[reg]->sname+".txt" );
-
-	/////////////////////////////////////////////////////
-	// for debugging:
- 	// setRegionCuts(0);
-
-	/////////////////////////////////////////////////////
-	TH2D * Model_yield_ ;
-	Model_yield_  = new TH2D(name+"_yield"      , name+"_yield"  , 101, -5, 1005    , 101 , -5 , 1005);
-	Model_yield_ ->Sumw2();
-
-	int nSyst(8);
-	TString systs[nSyst];
-	systs[0] = "norm";
-	systs[1] = "JESup";
-	systs[2] = "JESdown";
-	systs[3] = "JER";
-	systs[4] = "btagUp";
-	systs[5] = "btagDown";
-	systs[6] = "METup";
-	systs[7] = "METdown";
-
-	TH2D  * Model_nPass_    [nSyst];
-	for (int j = 0; j<nSyst; j++) {
-		Model_nPass_      [j] = new TH2D(name+"_nPass_"+systs[j], name+"_nPass_"+systs[j] , 101, -5, 1005, 101, -5, 1005);
-		Model_nPass_      [j]->Sumw2();
-	}
-
-	TFile * xsecFile_ = new TFile("/shome/mdunser/xsecfiles/"+name+"_xsecs.root", "READ", "xsecFile_");
-	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
-	TF1   * xsecfit =  xsecs->GetFunction("xsec_fit1");
-
-	// get the histo with the count for each point
-	TFile * file_ = TFile::Open(filestring); //, "READ", "file_");
-	TH2D  * Model_nTot_ ;
-	Model_nTot_ = (TH2D  *) file_->Get("ModelCountAll");
-	Model_nTot_ ->Sumw2();
-	// get the Analysis tree from the file, initialize it
-	TTree * tree_ = (TTree *) file_->Get("Analysis");
-	tree_->ResetBranchAddresses();
-	Init(tree_);
-
-	// just for counting, really
-	Long64_t tot_events = tree_->GetEntriesFast();
-	cout << "Total Number of entries: " << tot_events << endl;
-	int n_tot = 0;
-	int signalTot(0);
-	int nEE(0), nEM(0), nMM(0);
-
-	bool doSystematic = true;
-	// make a dummy sample for the systematic functions
-	Sample *S = new Sample();
-	S->datamc = 1;
-	// need to initialize the TRandom object for the systematic studies
-	SSDLDumper::fRand3       = new TRandom3(10);
-	SSDLDumper::fRand3Normal = new TRandom3(10);
-
-	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
-		setRegionCuts(reg);
-		printProgress(jentry, tot_events, name+" Scan "+gRegions[reg]->sname);
-		for (int i = 0; i<nSyst; i++) {
-			tree_->GetEntry(jentry); // have to reload the entry for each systematic
-			// if (Event!=45001) continue;
-			saveBTags();      // save the values of the new btag
-			scaleBTags(S, 0, "T2tt"); // this applies the bTagSF
-			 
-			// if ( (i == 0 || i == 4 || i == 5 ) && Event==45001){
-			// 	for (int ij = 0; ij<NJets; ++ij){
-			// 		cout << Form("index: %d btag after scaling: %.2f", ij, JetCSVBTag[ij]) << endl;
-			// 	}
-			// }
-			if (!doSystematic && i!=0) continue;
-			if (i == 1) smearJetPts(S, 1);
-			if (i == 2) smearJetPts(S, 2);
-			if (i == 3) smearJetPts(S, 3);
-			if (i == 4) {resetBTags(); scaleBTags(S, 1, "T1tttt");}
-			if (i == 5) {resetBTags(); scaleBTags(S, 2, "T1tttt");}
-			if (i == 6) scaleMET(S, 0);
-			if (i == 7) scaleMET(S, 1);
-
-
-			// int m1(-1),m2(-1),m3(-1),e3(-1),e1(-1),e2(-1);
-			// cleanedJetIndices(15.);
-			// if (i == 6 || i == 7){
-			// 	if (Event>=45000 && Event<= 46000 && (isSSLLMuEvent(m1, m2) || isSSLLElMuEvent(m3, e3) || isSSLLElEvent(e1, e2)) ){
-			// 		// for (int ij = 0; ij<=fC_cleanJetIndices.size(); ++ij){
-			// 		// 	// if (!isGoodJet(ij, 15.)) continue;
-			// 		// 	if ( i == 0 ) cout << Form("systematic: %d jetpt: %.3f jeteta: %.3f", i, JetPt[ij], JetEta[ij]) << endl;
-			// 		// }
-			// 		cout << Form("%d systematic: %d njets: %d nbjets: %d met: %.3f ht: %.3f jetpt[0]: %.3f jetpt[1]: %.3f", Event, i, getNJets(), getNBTagsMed(), getMET(), getHT(), JetPt[0], JetPt[1]) << endl;
-			// 	}	
-			// }
-
-			float nloXsec      = xsecfit->Eval(mGlu);
-			int   nGenBin      = Model_nTot_->FindBin(mGlu, mChi);
-			float nGen         = Model_nTot_->GetBinContent(nGenBin);
-			float weight       = fLumiNorm * nloXsec / nGen;
-
-			int mu1(-1), mu2(-1);
-			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
-				if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-					n_tot++;
-					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
-					signalTot++;
-					if (verbose) fOUTSTREAM << Form("MM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1], isTChiSlepSnu) << endl ;
-					Model_nPass_[i]-> Fill(mGlu, mChi);
-					if (i==0) {
-						Model_yield_-> Fill(mGlu, mChi, weight * gMMTrigScale);
-					}
-					nMM++;
-					continue;
-				}
-				resetHypLeptons();
-			} // end loop on mumu channel
-			int mu(-1), el(-1);
-			if( isSSLLElMuEvent(mu, el) ){
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
-				if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-					n_tot++;
-					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
-					signalTot++;
-					if (verbose) fOUTSTREAM << Form("EM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu1], isTChiSlepSnu) << endl ;
-					Model_nPass_[i]-> Fill(mGlu, mChi);
-					if (i==0) {
-						Model_yield_-> Fill(mGlu, mChi, weight * gEMTrigScale);
-					}
-					nEM++;
-					continue;
-				}
-				resetHypLeptons();
-			} // end loop on emu channel
-			int el1(-1), el2(-1);
-			if( isSSLLElEvent(el1, el2) ){
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
-				if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-					n_tot++;
-					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
-					signalTot++;
-					if (verbose) fOUTSTREAM << Form("EE - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1], isTChiSlepSnu) << endl ;
-					Model_nPass_[i]-> Fill(mGlu, mChi);
-					if (i==0) {
-						Model_yield_-> Fill(mGlu, mChi, weight * gEETrigScale);
-					}
-					nEE++;
-				}
-			} // end loop on ee channel
-		} // end loop on all systematics
-	} // end loop on all events
-	if (verbose) cout << "Total Number of SS events: " << n_tot << endl;
-	if (verbose) cout << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
-	if (verbose) fOUTSTREAM << "Total number of tight pairs: " << n_tot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/n_tot << endl;
-	if (verbose) fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
-
-	TH2D * Model_eff_     [nSyst];
-	for (int i=0; i<nSyst;i++) {
-		Model_eff_ [i] = new TH2D(name+"_eff_"+systs[i], name+"_eff_"+systs[i], 101, -5, 1005, 101, -5, 1005);
-		Model_eff_ [i]->Sumw2();
-		Model_eff_ [i]->Divide(Model_nPass_[i], Model_nTot_ , 1. , 1.);
-	}
-
-	TFile * res_;
-	res_ = new TFile(fOutputDir+name+"_results_"+gRegions[reg]->sname+".root", "RECREATE", "res_");
-	res_   -> cd();
-
-	Model_yield_ ->Write();
-	Model_nTot_  ->Write();
-
-	for (int i=0; i<nSyst; i++) {
-		Model_eff_   [i]->Write();
-		Model_nPass_ [i]->Write();
-	}
-	file_->Close();
-	res_->Close();
-
-	delete res_, Model_nTot_;
-}
 void SSDLPlotter::SUSYWorkshopPlots( TString sestring, int mgluino, int mlsp){
 
 	//SSDLDumper::setRegionCuts(reg);
@@ -18404,5 +18211,218 @@ void SSDLPlotter::SUSYWorkshopPlots( TString sestring, int mgluino, int mlsp){
 
 	res_->Close();
 }
+void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt){
 
-//  LocalWords:  endl
+	SSDLDumper::setRegionCuts(reg);
+	if (lowpt) setLowPtCuts();
+
+	cout<< "minMu1pt  " << fC_minMu1pt  << endl;
+	cout<< "minMu2pt  " << fC_minMu2pt  << endl;
+	cout<< "minEl1pt  " << fC_minEl1pt  << endl;
+	cout<< "minEl2pt  " << fC_minEl2pt  << endl;
+	cout<< "minHT     " << fC_minHT     << endl;
+	cout<< "maxHT     " << fC_maxHT     << endl;
+	cout<< "minMet    " << fC_minMet    << endl;
+	cout<< "maxMet    " << fC_maxMet    << endl;
+	cout<< "minJetPt  " << fC_minJetPt  << endl;
+	cout<< "minNjets  " << fC_minNjets  << endl;
+	cout<< "maxNjets  " << fC_maxNjets  << endl;
+	cout<< "minNbjets " << fC_minNbjets << endl;
+	cout<< "maxNbjets " << fC_maxNbjets << endl;
+	cout<< "minNbjmed " << fC_minNbjmed << endl;
+	cout<< "maxNbjmed " << fC_maxNbjmed << endl;
+
+	TString name = "T6ttWW";
+	bool verbose = false;
+	if (verbose) fOUTSTREAM.open( name+"_"+gRegions[reg]->sname+".txt" );
+
+	/////////////////////////////////////////////////////
+	// for debugging:
+ 	// setRegionCuts(0);
+
+	/////////////////////////////////////////////////////
+	TH2D * Model_yield_ ;
+	Model_yield_  = new TH2D(name+"_yield"      , name+"_yield"  , 101, -5, 1005    , 101 , -5 , 1005);
+	Model_yield_ ->Sumw2();
+
+	int nSyst(8);
+	TString systs[nSyst];
+	systs[0] = "norm";
+	systs[1] = "JESup";
+	systs[2] = "JESdown";
+	systs[3] = "JER";
+	systs[4] = "btagUp";
+	systs[5] = "btagDown";
+	systs[6] = "METup";
+	systs[7] = "METdown";
+
+	TH2D  * Model_nPass_noScale_[nSyst];
+	TH2D  * Model_nPass_        [nSyst];
+	for (int j = 0; j<nSyst; j++) {
+		Model_nPass_         [j] = new TH2D(name+"_nPass_"+systs[j], name+"_nPass_"+systs[j] , 101, -5, 1005, 101, -5, 1005);
+		Model_nPass_         [j]->Sumw2();
+		Model_nPass_noScale_ [j] = new TH2D(name+"_nPass_noScale_"+systs[j], name+"_nPass_noScale_"+systs[j] , 101, -5, 1005, 101, -5, 1005);
+		Model_nPass_noScale_ [j]->Sumw2();
+	}
+
+	TFile * xsecFile_ = new TFile("/shome/mdunser/xsecfiles/"+name+"_xsecs.root", "READ", "xsecFile_");
+	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
+	TF1   * xsecfit =  xsecs->GetFunction("xsec_fit1");
+
+	// get the histo with the count for each point
+	TFile * file_ = TFile::Open(filestring); //, "READ", "file_");
+	TH2D  * Model_nTot_ ;
+	Model_nTot_ = (TH2D  *) file_->Get("ModelCountAll");
+	Model_nTot_ ->Sumw2();
+	// get the Analysis tree from the file, initialize it
+	TTree * tree_ = (TTree *) file_->Get("Analysis");
+	tree_->ResetBranchAddresses();
+	Init(tree_);
+
+	// just for counting, really
+	Long64_t tot_events = tree_->GetEntriesFast();
+	cout << "Total Number of entries: " << tot_events << endl;
+	int n_tot = 0;
+	int signalTot(0);
+	int nEE(0), nEM(0), nMM(0);
+
+	bool doSystematic = true;
+	// make a dummy sample for the systematic functions
+	Sample *S = new Sample();
+	S->datamc = 1;
+	// need to initialize the TRandom object for the systematic studies
+	SSDLDumper::fRand3       = new TRandom3(10);
+	SSDLDumper::fRand3Normal = new TRandom3(10);
+
+	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
+		setRegionCuts(reg);
+		setLowPtCuts();
+		printProgress(jentry, tot_events, name+" Scan "+gRegions[reg]->sname);
+		for (int i = 0; i<nSyst; i++) {
+			tree_->GetEntry(jentry); // have to reload the entry for each systematic
+			// if (Event!=45001) continue;
+			saveBTags();      // save the values of the new btag
+			scaleBTags(S, 0, "T2tt"); // this applies the bTagSF
+			 
+			// if ( (i == 0 || i == 4 || i == 5 ) && Event==45001){
+			// 	for (int ij = 0; ij<NJets; ++ij){
+			// 		cout << Form("index: %d btag after scaling: %.2f", ij, JetCSVBTag[ij]) << endl;
+			// 	}
+			// }
+			if (!doSystematic && i!=0) continue;
+			if (i == 1) smearJetPts(S, 1);
+			if (i == 2) smearJetPts(S, 2);
+			if (i == 3) smearJetPts(S, 3);
+			if (i == 4) {resetBTags(); scaleBTags(S, 1, "T2tt");}
+			if (i == 5) {resetBTags(); scaleBTags(S, 2, "T2tt");}
+			if (i == 6) scaleMET(S, 0);
+			if (i == 7) scaleMET(S, 1);
+
+
+			// int m1(-1),m2(-1),m3(-1),e3(-1),e1(-1),e2(-1);
+			// cleanedJetIndices(15.);
+			// if (i == 6 || i == 7){
+			// 	if (Event>=45000 && Event<= 46000 && (isSSLLMuEvent(m1, m2) || isSSLLElMuEvent(m3, e3) || isSSLLElEvent(e1, e2)) ){
+			// 		// for (int ij = 0; ij<=fC_cleanJetIndices.size(); ++ij){
+			// 		// 	// if (!isGoodJet(ij, 15.)) continue;
+			// 		// 	if ( i == 0 ) cout << Form("systematic: %d jetpt: %.3f jeteta: %.3f", i, JetPt[ij], JetEta[ij]) << endl;
+			// 		// }
+			// 		cout << Form("%d systematic: %d njets: %d nbjets: %d met: %.3f ht: %.3f jetpt[0]: %.3f jetpt[1]: %.3f", Event, i, getNJets(), getNBTagsMed(), getMET(), getHT(), JetPt[0], JetPt[1]) << endl;
+			// 	}	
+			// }
+
+			float nloXsec      = xsecfit->Eval(mGlu);
+			int   nGenBin      = Model_nTot_->FindBin(mGlu, mChi);
+			float nGen         = Model_nTot_->GetBinContent(nGenBin);
+			float weight       = fLumiNorm * nloXsec / nGen;
+			float idsf(-999.), trigsf(-999.);
+
+			int mu1(-1), mu2(-1);
+			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+					n_tot++;
+					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
+					signalTot++;
+					idsf   = getLeptonSFMu(MuPt[mu1], MuEta[mu1])*getLeptonSFMu(MuPt[mu2], MuEta[mu2]);
+					trigsf = getTriggerSFMuMu(MuEta[mu2]);
+					if (lowpt) trigsf =  getTriggerSFMuMuLowpt(MuEta[mu2]);
+					Model_nPass_         [i]-> Fill(mGlu, mChi, idsf*trigsf); // fill weighted by SFs
+					Model_nPass_noScale_ [i]-> Fill(mGlu, mChi);
+					if (i==0) {
+						Model_yield_-> Fill(mGlu, mChi, weight * gMMTrigScale);
+					}
+					nMM++;
+					continue;
+				}
+				resetHypLeptons();
+			} // end loop on mumu channel
+			int mu(-1), el(-1);
+			if( isSSLLElMuEvent(mu, el) ){
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+					n_tot++;
+					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
+					signalTot++;
+					idsf   = getLeptonSFMu(MuPt[mu], MuEta[mu])*getLeptonSFEl(ElPt[el], ElEta[el]);
+					trigsf = getTriggerSFMuEl();
+					if (lowpt) trigsf =  getTriggerSFMuElLowpt();
+					Model_nPass_         [i]-> Fill(mGlu, mChi, idsf*trigsf); // fill weighted by SFs
+					Model_nPass_noScale_ [i]-> Fill(mGlu, mChi);
+					if (i==0) {
+						Model_yield_-> Fill(mGlu, mChi, weight * gEMTrigScale);
+					}
+					nEM++;
+					continue;
+				}
+				resetHypLeptons();
+			} // end loop on emu channel
+			int el1(-1), el2(-1);
+			if( isSSLLElEvent(el1, el2) ){
+				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
+				if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+					n_tot++;
+					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
+					signalTot++;
+					idsf   = getLeptonSFEl(ElPt[el1], ElEta[el1])*getLeptonSFEl(ElPt[el2], ElEta[el2]);
+					trigsf = getTriggerSFElEl(ElPt[el2]);
+					if (lowpt) trigsf =  getTriggerSFElElLowpt();
+					Model_nPass_         [i]-> Fill(mGlu, mChi, idsf*trigsf); // fill weighted by SFs
+					Model_nPass_noScale_ [i]-> Fill(mGlu, mChi);
+					if (i==0) {
+						Model_yield_-> Fill(mGlu, mChi, weight * gEETrigScale);
+					}
+					nEE++;
+				}
+			} // end loop on ee channel
+		} // end loop on all systematics
+	} // end loop on all events
+	if (verbose) cout << "Total Number of SS events: " << n_tot << endl;
+	if (verbose) cout << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
+	if (verbose) fOUTSTREAM << "Total number of tight pairs: " << n_tot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/n_tot << endl;
+	if (verbose) fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
+
+	TH2D * Model_eff_     [nSyst];
+	for (int i=0; i<nSyst;i++) {
+		Model_eff_ [i] = new TH2D(name+"_eff_"+systs[i], name+"_eff_"+systs[i], 101, -5, 1005, 101, -5, 1005);
+		Model_eff_ [i]->Sumw2();
+		Model_eff_ [i]->Divide(Model_nPass_[i], Model_nTot_ , 1. , 1.);
+	}
+
+	TFile * res_;
+	res_ = new TFile(fOutputDir+name+"_results_"+gRegions[reg]->sname+".root", "RECREATE", "res_");
+	res_   -> cd();
+
+	Model_yield_ ->Write();
+	Model_nTot_  ->Write();
+
+	for (int i=0; i<nSyst; i++) {
+		Model_eff_           [i]->Write();
+		Model_nPass_         [i]->Write();
+		Model_nPass_noScale_ [i]->Write();
+	}
+	file_->Close();
+	res_->Close();
+
+	delete res_, Model_nTot_;
+}
