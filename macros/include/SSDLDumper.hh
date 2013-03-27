@@ -862,7 +862,8 @@ public:
 	ValueAndError getMuonIsoSF(               float pt, float eta );
 	ValueAndError getElectronRecoSF(          float pt, float eta );
 	ValueAndError getElectronIsoSF(           float pt, float eta );
-	
+        
+        float getSF(Sample *S, gChannel, int, int);
 	float getLeptonSFMu( float pt, float eta );
 	float getLeptonSFEl( float pt, float eta );
 

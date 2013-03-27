@@ -53,9 +53,9 @@ double SSDLPlotter::gEChMisIDB_E = 0.;
 double SSDLPlotter::gEChMisIDE   = 0.;
 double SSDLPlotter::gEChMisIDE_E = 0.;
 
-float SSDLPlotter::gMMTrigScale = 0.872;
-float SSDLPlotter::gEMTrigScale = 0.925;
-float SSDLPlotter::gEETrigScale = 0.954;
+float SSDLPlotter::gMMTrigScale = 1.; //0.872;
+float SSDLPlotter::gEMTrigScale = 1.; //0.925;
+float SSDLPlotter::gEETrigScale = 1.; //0.954;
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(TString configfile):SSDLDumper(configfile){ 
@@ -382,8 +382,8 @@ void SSDLPlotter::init(TString filename){
 }
 void SSDLPlotter::doSMSscans(TString region, TString file){
         // This macro runs over the the SMS scans 
-	// TString pathtofile = ""; //"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
-	// TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
+        // TString pathtofile = ""; //"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
+        // TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
 	// TString filename   = "/shome//mdunser/xsecfiles/output_38.root";  
 
 	// bool for the low-pt analysis...
@@ -392,16 +392,15 @@ void SSDLPlotter::doSMSscans(TString region, TString file){
 	cout << "Running Over region: " << region << endl;
 	cout << "On file: " << file << endl;
 	scanModelGeneric(file , gRegion[region], lowpt);
-	
 }
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
-	// //SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-800to1400-mLSP-1-50GeVX50GeV-Binning-Summer12-START52-V9-FSIM-v2.root", 1100, 5);
-	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 25);
-	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 225);
-	// //SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 475);
-	// SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-525to875-50GeVX50GeV-Binning.root", 1075, 800);
-	// return;
+
+  //    SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-800to1400-mLSP-1-50GeVX50GeV-Binning-Summer12-START52-V9-FSIM-v2.root", 1100, 5);
+  //	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 25);
+  //	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 225);
+  //    SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-25to500-50GeVX50GeV-Binning.root", 1075, 475);
+  //	SUSYWorkshopPlots("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2013/SUSYWorkshop/SMS-MadGraph-Pythia6Zstar-8TeV-T1tttt-2J-mGo-775to1075-mLSP-525to875-50GeVX50GeV-Binning.root", 1075, 800);
 	// pythiaMadgraph(true);
 	// pythiaMadgraph(false);
         // return;
@@ -447,8 +446,8 @@ void SSDLPlotter::doAnalysis(){
 	makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
-	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-
+	//	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	
 	//	makeMETvsHTPlotPRL();
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
@@ -3912,8 +3911,8 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/10 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
 	fOutputSubDir = "PRL";
 	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
+	sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	system(cmd);
 	
 	const float htmax = 1500.;
 	const float metmax = 250.;
@@ -5784,7 +5783,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	eff_data->SetMarkerSize(1.5);
 
 	float max = 0.2; //0.4;
-	if(chan==Elec) max = 0.8;
+	//	if(chan==Elec) max = 0.8;
 	h_etaratio_data->SetMaximum(max);
 	h_etaratio_mc  ->SetMaximum(max);
 	h_etaratio_qcd  ->SetMaximum(max);
@@ -7257,8 +7256,8 @@ void SSDLPlotter::makeAllIntPredictions(){
 
 	vector<SSPrediction> sspreds;
  	for(size_t i = 0; i < gNREGIONS; ++i){
-	  TString outputname = outputdir + "DataPred_" + gRegions[i]->sname + ".txt";
-	  sspreds.push_back(makeIntPrediction(outputname, i));
+		TString outputname = outputdir + "DataPred_" + gRegions[i]->sname + ".txt";
+		sspreds.push_back(makeIntPrediction(outputname, i));
  	}
 
 	fOUTSTREAM.close();
@@ -7278,118 +7277,120 @@ void SSDLPlotter::makeAllIntPredictions(){
 	ewkregions.push_back(gRegion["HT0MET200lV"]);
 	
 	for (size_t i = 0; i<ewkregions.size(); i++) {
-	  int reg = ewkregions.at(i);
-	  // old gRegion reg = gRegion(ewkregions.at(i));
-	  TString datacard = outputdir + "datacard_"+ gRegions[reg]->sname + ".txt";
-	  fOUTSTREAM.open(datacard.Data(), ios::trunc);
-	  fOUTSTREAM <<      "#=========================================================================================" << endl;
-	  fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
-	  fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
-	  fOUTSTREAM << Form("# Generated for region: %s ", gRegions[reg]->sname.Data()) << endl;
-	  fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
-	  fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
-	  fOUTSTREAM <<      "imax 1" << endl;
-	  fOUTSTREAM <<      "jmax *" << endl;
-	  fOUTSTREAM <<      "kmax *" << endl;
-	  fOUTSTREAM << endl << endl;
-	  fOUTSTREAM <<      "bin\t\t1" << endl;
-	  fOUTSTREAM << Form("observation\t%d", sspreds[reg].obs) << endl;
-	  fOUTSTREAM << endl << endl;
-	  fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
-	  fOUTSTREAM <<      "process\t\tsig\t\tfake\t\tcmid\t\twz\t\trare" << endl;
-	  fOUTSTREAM <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4" << endl;
-	  fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
-			     sspreds[reg].s, sspreds[reg].fake, sspreds[reg].cmid, sspreds[reg].wz, sspreds[reg].rare) << endl;
-	  fOUTSTREAM << endl << endl;
-	  fOUTSTREAM <<      "lumi     lnN\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05" << endl;
-	  //	  fOUTSTREAM << Form("bgUncsf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+sspreds[reg].df_err/fabs(sspreds[reg].df))     << endl;
-	  fOUTSTREAM << Form("sigUnc   lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+0.3/sspreds[reg].s)                       << endl;
-	  fOUTSTREAM << Form("bgUncdf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-", 1.0+sspreds[reg].fake_err/sspreds[reg].fake) << endl;
-	  fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-", 1.0+sspreds[reg].cmid_err/sspreds[reg].cmid) << endl;
-	  fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-", 1.0+sspreds[reg].wz_err  /sspreds[reg].wz)   << endl;
-	  fOUTSTREAM << Form("bgUncrar lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f", 1.0+sspreds[reg].rare_err/sspreds[reg].rare) << endl;
-	  fOUTSTREAM << endl;
-	  fOUTSTREAM.close();
+		int reg = ewkregions.at(i);
+		// old gRegion reg = gRegion(ewkregions.at(i));
+		TString datacard = outputdir + "datacard_"+ gRegions[reg]->sname + ".txt";
+		fOUTSTREAM.open(datacard.Data(), ios::trunc);
+		fOUTSTREAM <<      "#=========================================================================================" << endl;
+		fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
+		fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+		fOUTSTREAM << Form("# Generated for region: %s ", gRegions[reg]->sname.Data()) << endl;
+		fOUTSTREAM <<      "# Copy between the dashed lines for datacard" << endl;
+		fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+		fOUTSTREAM <<      "imax 1" << endl;
+		fOUTSTREAM <<      "jmax *" << endl;
+		fOUTSTREAM <<      "kmax *" << endl;
+		fOUTSTREAM << endl << endl;
+		fOUTSTREAM <<      "bin\t\t1" << endl;
+		fOUTSTREAM << Form("observation\t%d", sspreds[reg].obs) << endl;
+		fOUTSTREAM << endl << endl;
+		fOUTSTREAM <<      "bin\t\t1\t\t1\t\t1\t\t1\t\t1" << endl;
+		fOUTSTREAM <<      "process\t\tsig\t\tfake\t\tcmid\t\twz\t\trare" << endl;
+		fOUTSTREAM <<      "process\t\t0\t\t1\t\t2\t\t3\t\t4" << endl;
+		fOUTSTREAM << Form("rate\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%5.3f",
+				   sspreds[reg].s, sspreds[reg].fake, sspreds[reg].cmid, sspreds[reg].wz, sspreds[reg].rare) << endl;
+		fOUTSTREAM << endl << endl;
+		fOUTSTREAM <<      "lumi     lnN\t1.05\t\t1.05\t\t1.05\t\t1.05\t\t1.05" << endl;
+		//	  fOUTSTREAM << Form("bgUncsf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+sspreds[reg].df_err/fabs(sspreds[reg].df))     << endl;
+		fOUTSTREAM << Form("sigUnc   lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-", 1.0+0.3/sspreds[reg].s)                       << endl;
+		fOUTSTREAM << Form("bgUncdf  lnN\t-\t\t%5.3f\t\t-\t\t-\t\t-", 1.0+sspreds[reg].fake_err/sspreds[reg].fake) << endl;
+		fOUTSTREAM << Form("bgUnccmi lnN\t-\t\t-\t\t%5.3f\t\t-\t\t-", 1.0+sspreds[reg].cmid_err/sspreds[reg].cmid) << endl;
+		fOUTSTREAM << Form("bgUncwz  lnN\t-\t\t-\t\t-\t\t%5.3f\t\t-", 1.0+sspreds[reg].wz_err  /sspreds[reg].wz)   << endl;
+		fOUTSTREAM << Form("bgUncrar lnN\t-\t\t-\t\t-\t\t-\t\t%5.3f", 1.0+sspreds[reg].rare_err/sspreds[reg].rare) << endl;
+		fOUTSTREAM << endl;
+		fOUTSTREAM.close();
 	}
-
- 	TString datacard = outputdir + "EWKdatacard.txt";
- 	fOUTSTREAM.open(datacard.Data(), ios::trunc);
- 	fOUTSTREAM <<      "#=========================================================================================" << endl;
- 	fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
- 	fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
- 	fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
-	fOUTSTREAM <<      "#<channel label> <observed> <total background> <total bkg uncertainty> <stat uncertainty> <wz> <wz uncertainty> <ttbar+fakes> <ttbar+fakes uncertainty> <zgamma> <zgamma uncertainty> <zz> <z uncertainty><rare> <rare uncertainty>" << endl;
-	for (size_t i = 0; i<ewkregions.size(); i++) {
- 	  int reg = ewkregions.at(i);
- 	  // old gRegion reg = gRegion(ewkregions.at(i));
- 	  fOUTSTREAM << Form("# Generated for region: %s ", gRegions[reg]->sname.Data()) << endl;
-	  fOUTSTREAM << Form("data %d %d %6.4f %6.4f %6.4f ",i, sspreds[reg].obs, 
-			     sspreds[reg].bkg, sspreds[reg].bkg_err, sspreds[reg].bkg_stat);
-	  fOUTSTREAM << Form("%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f",
-			     sspreds[reg].wz, sspreds[reg].wz_err, sspreds[reg].fake, sspreds[reg].fake_err,
-			     sspreds[reg].cmid,sspreds[reg].cmid_err, 0., 0., sspreds[reg].rare, sspreds[reg].rare_err) << endl;
-	  fOUTSTREAM << "#=====================================================================================================" << endl;
- 	}
-	fOUTSTREAM.close();
 	
-	// PRODUCE SUMMARY TABLE
-	TString SS_Table = outputdir + "SS_Table.tex";
-	fOUTSTREAM.open(SS_Table.Data(), ios::trunc);
-	fOUTSTREAM << "\\begin{table}[htb]" << endl;
-	fOUTSTREAM << " \\begin{center}" << endl;
-	fOUTSTREAM << "	 \\caption{Summary of background predictions and observed yields for search regions: " << endl;
-	fOUTSTREAM << "           120$<$\\MET$<$200 \\GeV, $N_{jets} \\leq 2$ and $N_{bjets} = 0$, and " << endl;
-	fOUTSTREAM << "           \\MET$>$200 \\GeV, with and without third lepton veto applied (including taus)." << endl;
-	fOUTSTREAM << "           Uncertainties include statistical and systematic contributions.}" << endl;
-	fOUTSTREAM << "   \\label{tab:SSYields}" << endl;
-	fOUTSTREAM << "   \\small "            << endl;
-	fOUTSTREAM << "    \\begin{tabular}{c|c|c|c|c}" << endl;
-	fOUTSTREAM << "    \\hline" << endl; 
-	fOUTSTREAM << "                & 120$<$\\MET$<$200 \\GeV              & 120$<$\\MET$<$200 \\GeV             & \\MET$>$200 \\GeV & \\MET$>$200 \\GeV    \\\\ " << endl; 
-	fOUTSTREAM << "	               & $N_{jets} \\leq 2$, $N_{bjets} = 0$  & $N_{jets} \\leq 2$, $N_{bjets} = 0$ &                   &                      \\\\ " << endl;
-	fOUTSTREAM << "                &                                      & $3^{rd}$ lepton veto                &                   & $3^{rd}$ lepton veto \\\\ \\hline " << endl; 
-	fOUTSTREAM << Form(" Double Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .df,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].df,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat),
-			   sspreds[gRegion["HT0MET200"]]       .df,sqrt(sspreds[gRegion["HT0MET200"]]       .df_err*sspreds[gRegion["HT0MET200"]]       .df_err + sspreds[gRegion["HT0MET200"]]       .df_stat*sspreds[gRegion["HT0MET200"]]       .df_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .df,sqrt(sspreds[gRegion["HT0MET200lV"]]     .df_err*sspreds[gRegion["HT0MET200lV"]]     .df_err + sspreds[gRegion["HT0MET200lV"]]     .df_stat*sspreds[gRegion["HT0MET200lV"]]     .df_stat)) << endl;			  
-	fOUTSTREAM << Form(" Single Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .sf,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].sf,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat),
-			   sspreds[gRegion["HT0MET200"]]       .sf,sqrt(sspreds[gRegion["HT0MET200"]]       .sf_err*sspreds[gRegion["HT0MET200"]]       .sf_err + sspreds[gRegion["HT0MET200"]]       .sf_stat*sspreds[gRegion["HT0MET200"]]       .sf_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .sf,sqrt(sspreds[gRegion["HT0MET200lV"]]     .sf_err*sspreds[gRegion["HT0MET200lV"]]     .sf_err + sspreds[gRegion["HT0MET200lV"]]     .sf_stat*sspreds[gRegion["HT0MET200lV"]]     .sf_stat)) << endl;			  
-	fOUTSTREAM << Form(" Charge MisID   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat),
-			   sspreds[gRegion["HT0MET200"]]       .cmid,sqrt(sspreds[gRegion["HT0MET200"]]       .cmid_err*sspreds[gRegion["HT0MET200"]]       .cmid_err + sspreds[gRegion["HT0MET200"]]       .cmid_stat*sspreds[gRegion["HT0MET200"]]       .cmid_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .cmid,sqrt(sspreds[gRegion["HT0MET200lV"]]     .cmid_err*sspreds[gRegion["HT0MET200lV"]]     .cmid_err + sspreds[gRegion["HT0MET200lV"]]     .cmid_stat*sspreds[gRegion["HT0MET200lV"]]     .cmid_stat)) << endl;			  
-	fOUTSTREAM << Form(" Rare SM        & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .rare,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].rare,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat),
-			   sspreds[gRegion["HT0MET200"]]       .rare,sqrt(sspreds[gRegion["HT0MET200"]]       .rare_err*sspreds[gRegion["HT0MET200"]]       .rare_err + sspreds[gRegion["HT0MET200"]]       .rare_stat*sspreds[gRegion["HT0MET200"]]       .rare_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .rare,sqrt(sspreds[gRegion["HT0MET200lV"]]     .rare_err*sspreds[gRegion["HT0MET200lV"]]     .rare_err + sspreds[gRegion["HT0MET200lV"]]     .rare_stat*sspreds[gRegion["HT0MET200lV"]]     .rare_stat)) << endl;			  
-	fOUTSTREAM << Form(" WZ Prod.       & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .wz,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].wz,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat),
-			   sspreds[gRegion["HT0MET200"]]       .wz,sqrt(sspreds[gRegion["HT0MET200"]]       .wz_err*sspreds[gRegion["HT0MET200"]]       .wz_err + sspreds[gRegion["HT0MET200"]]       .wz_stat*sspreds[gRegion["HT0MET200"]]       .wz_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .wz,sqrt(sspreds[gRegion["HT0MET200lV"]]     .wz_err*sspreds[gRegion["HT0MET200lV"]]     .wz_err + sspreds[gRegion["HT0MET200lV"]]     .wz_stat*sspreds[gRegion["HT0MET200lV"]]     .wz_stat)) << endl;			  
-	fOUTSTREAM << Form(" Total Bkg      & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat),
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat),
-			   sspreds[gRegion["HT0MET200"]]       .bkg,sqrt(sspreds[gRegion["HT0MET200"]]       .bkg_err*sspreds[gRegion["HT0MET200"]]       .bkg_err + sspreds[gRegion["HT0MET200"]]       .bkg_stat*sspreds[gRegion["HT0MET200"]]       .bkg_stat),
-			   sspreds[gRegion["HT0MET200lV"]]     .bkg,sqrt(sspreds[gRegion["HT0MET200lV"]]     .bkg_err*sspreds[gRegion["HT0MET200lV"]]     .bkg_err + sspreds[gRegion["HT0MET200lV"]]     .bkg_stat*sspreds[gRegion["HT0MET200lV"]]     .bkg_stat)) << endl;			  
-	fOUTSTREAM << Form(" Data           & %d & %d & %d & %d \\\\",
-			   sspreds[gRegion["HT0MET120NJ2bV"]]  .obs,
-			   sspreds[gRegion["HT0MET120NJ2bVlV"]].obs,
-			   sspreds[gRegion["HT0MET200"]]       .obs,
-			   sspreds[gRegion["HT0MET200lV"]]     .obs) << endl;			  
-	fOUTSTREAM << "    \\hline" << endl; 
-	fOUTSTREAM << "    \\end{tabular}" << endl;
-	fOUTSTREAM << " \\end{center}" << endl;
-	fOUTSTREAM << "\\end{table}" << endl;
-	fOUTSTREAM << endl;
-	fOUTSTREAM.close();
+	if (ewkregions.size() > 0) {
+		TString datacard = outputdir + "EWKdatacard.txt";
+		fOUTSTREAM.open(datacard.Data(), ios::trunc);
+		fOUTSTREAM <<      "#=========================================================================================" << endl;
+		fOUTSTREAM <<      "# Systematics table for EWKino analysis, same-sign channel" << endl;
+		fOUTSTREAM << Form("# Generated on: %s ", asctime(timeinfo)) << endl;
+		fOUTSTREAM <<      "#-----------------------------------------------------------------------------------------" << endl;
+		fOUTSTREAM <<      "#<channel label> <observed> <total background> <total bkg uncertainty> <stat uncertainty> <wz> <wz uncertainty> <ttbar+fakes> <ttbar+fakes uncertainty> <zgamma> <zgamma uncertainty> <zz> <z uncertainty><rare> <rare uncertainty>" << endl;
+		for (size_t i = 0; i<ewkregions.size(); i++) {
+			int reg = ewkregions.at(i);
+			// old gRegion reg = gRegion(ewkregions.at(i));
+			fOUTSTREAM << Form("# Generated for region: %s ", gRegions[reg]->sname.Data()) << endl;
+			fOUTSTREAM << Form("data %d %d %6.4f %6.4f %6.4f ",i, sspreds[reg].obs, 
+					   sspreds[reg].bkg, sspreds[reg].bkg_err, sspreds[reg].bkg_stat);
+			fOUTSTREAM << Form("%6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f",
+					   sspreds[reg].wz, sspreds[reg].wz_err, sspreds[reg].fake, sspreds[reg].fake_err,
+					   sspreds[reg].cmid,sspreds[reg].cmid_err, 0., 0., sspreds[reg].rare, sspreds[reg].rare_err) << endl;
+			fOUTSTREAM << "#=====================================================================================================" << endl;
+		}
+		fOUTSTREAM.close();
+	
 
+		// PRODUCE SUMMARY TABLE
+		TString SS_Table = outputdir + "SS_Table.tex";
+		fOUTSTREAM.open(SS_Table.Data(), ios::trunc);
+		fOUTSTREAM << "\\begin{table}[htb]" << endl;
+		fOUTSTREAM << " \\begin{center}" << endl;
+		fOUTSTREAM << "	 \\caption{Summary of background predictions and observed yields for search regions: " << endl;
+		fOUTSTREAM << "           120$<$\\MET$<$200 \\GeV, $N_{jets} \\leq 2$ and $N_{bjets} = 0$, and " << endl;
+		fOUTSTREAM << "           \\MET$>$200 \\GeV, with and without third lepton veto applied (including taus)." << endl;
+		fOUTSTREAM << "           Uncertainties include statistical and systematic contributions.}" << endl;
+		fOUTSTREAM << "   \\label{tab:SSYields}" << endl;
+		fOUTSTREAM << "   \\small "            << endl;
+		fOUTSTREAM << "    \\begin{tabular}{c|c|c|c|c}" << endl;
+		fOUTSTREAM << "    \\hline" << endl; 
+		fOUTSTREAM << "                & 120$<$\\MET$<$200 \\GeV              & 120$<$\\MET$<$200 \\GeV             & \\MET$>$200 \\GeV & \\MET$>$200 \\GeV    \\\\ " << endl; 
+		fOUTSTREAM << "	               & $N_{jets} \\leq 2$, $N_{bjets} = 0$  & $N_{jets} \\leq 2$, $N_{bjets} = 0$ &                   &                      \\\\ " << endl;
+		fOUTSTREAM << "                &                                      & $3^{rd}$ lepton veto                &                   & $3^{rd}$ lepton veto \\\\ \\hline " << endl; 
+		fOUTSTREAM << Form(" Double Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .df,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .df_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].df,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].df_stat),
+				   sspreds[gRegion["HT0MET200"]]       .df,sqrt(sspreds[gRegion["HT0MET200"]]       .df_err*sspreds[gRegion["HT0MET200"]]       .df_err + sspreds[gRegion["HT0MET200"]]       .df_stat*sspreds[gRegion["HT0MET200"]]       .df_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .df,sqrt(sspreds[gRegion["HT0MET200lV"]]     .df_err*sspreds[gRegion["HT0MET200lV"]]     .df_err + sspreds[gRegion["HT0MET200lV"]]     .df_stat*sspreds[gRegion["HT0MET200lV"]]     .df_stat)) << endl;			  
+		fOUTSTREAM << Form(" Single Fakes   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .sf,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .sf_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].sf,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].sf_stat),
+				   sspreds[gRegion["HT0MET200"]]       .sf,sqrt(sspreds[gRegion["HT0MET200"]]       .sf_err*sspreds[gRegion["HT0MET200"]]       .sf_err + sspreds[gRegion["HT0MET200"]]       .sf_stat*sspreds[gRegion["HT0MET200"]]       .sf_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .sf,sqrt(sspreds[gRegion["HT0MET200lV"]]     .sf_err*sspreds[gRegion["HT0MET200lV"]]     .sf_err + sspreds[gRegion["HT0MET200lV"]]     .sf_stat*sspreds[gRegion["HT0MET200lV"]]     .sf_stat)) << endl;			  
+		fOUTSTREAM << Form(" Charge MisID   & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .cmid_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].cmid_stat),
+				   sspreds[gRegion["HT0MET200"]]       .cmid,sqrt(sspreds[gRegion["HT0MET200"]]       .cmid_err*sspreds[gRegion["HT0MET200"]]       .cmid_err + sspreds[gRegion["HT0MET200"]]       .cmid_stat*sspreds[gRegion["HT0MET200"]]       .cmid_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .cmid,sqrt(sspreds[gRegion["HT0MET200lV"]]     .cmid_err*sspreds[gRegion["HT0MET200lV"]]     .cmid_err + sspreds[gRegion["HT0MET200lV"]]     .cmid_stat*sspreds[gRegion["HT0MET200lV"]]     .cmid_stat)) << endl;			  
+		fOUTSTREAM << Form(" Rare SM        & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .rare,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .rare_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].rare,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].rare_stat),
+				   sspreds[gRegion["HT0MET200"]]       .rare,sqrt(sspreds[gRegion["HT0MET200"]]       .rare_err*sspreds[gRegion["HT0MET200"]]       .rare_err + sspreds[gRegion["HT0MET200"]]       .rare_stat*sspreds[gRegion["HT0MET200"]]       .rare_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .rare,sqrt(sspreds[gRegion["HT0MET200lV"]]     .rare_err*sspreds[gRegion["HT0MET200lV"]]     .rare_err + sspreds[gRegion["HT0MET200lV"]]     .rare_stat*sspreds[gRegion["HT0MET200lV"]]     .rare_stat)) << endl;			  
+		fOUTSTREAM << Form(" WZ Prod.       & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .wz,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .wz_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].wz,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].wz_stat),
+				   sspreds[gRegion["HT0MET200"]]       .wz,sqrt(sspreds[gRegion["HT0MET200"]]       .wz_err*sspreds[gRegion["HT0MET200"]]       .wz_err + sspreds[gRegion["HT0MET200"]]       .wz_stat*sspreds[gRegion["HT0MET200"]]       .wz_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .wz,sqrt(sspreds[gRegion["HT0MET200lV"]]     .wz_err*sspreds[gRegion["HT0MET200lV"]]     .wz_err + sspreds[gRegion["HT0MET200lV"]]     .wz_stat*sspreds[gRegion["HT0MET200lV"]]     .wz_stat)) << endl;			  
+		fOUTSTREAM << Form(" Total Bkg      & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f & %4.2f $\\pm$ %4.2f \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_err + sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat*sspreds[gRegion["HT0MET120NJ2bV"]]  .bkg_stat),
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat),
+				   sspreds[gRegion["HT0MET200"]]       .bkg,sqrt(sspreds[gRegion["HT0MET200"]]       .bkg_err*sspreds[gRegion["HT0MET200"]]       .bkg_err + sspreds[gRegion["HT0MET200"]]       .bkg_stat*sspreds[gRegion["HT0MET200"]]       .bkg_stat),
+				   sspreds[gRegion["HT0MET200lV"]]     .bkg,sqrt(sspreds[gRegion["HT0MET200lV"]]     .bkg_err*sspreds[gRegion["HT0MET200lV"]]     .bkg_err + sspreds[gRegion["HT0MET200lV"]]     .bkg_stat*sspreds[gRegion["HT0MET200lV"]]     .bkg_stat)) << endl;			  
+		fOUTSTREAM << Form(" Data           & %d & %d & %d & %d \\\\",
+				   sspreds[gRegion["HT0MET120NJ2bV"]]  .obs,
+				   sspreds[gRegion["HT0MET120NJ2bVlV"]].obs,
+				   sspreds[gRegion["HT0MET200"]]       .obs,
+				   sspreds[gRegion["HT0MET200lV"]]     .obs) << endl;			  
+		fOUTSTREAM << "    \\hline" << endl; 
+		fOUTSTREAM << "    \\end{tabular}" << endl;
+		fOUTSTREAM << " \\end{center}" << endl;
+		fOUTSTREAM << "\\end{table}" << endl;
+		fOUTSTREAM << endl;
+		fOUTSTREAM.close();
+	}	
 	// PRODUCE SUMMARY PLOTS ONLY FOR CERTAIN REGIONS
 	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  4, 0., 4.);
 	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 4, 0., 4.);
