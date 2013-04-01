@@ -7237,7 +7237,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	// access a chararray containing the date with asctime(timeinfo)
 	
 	TString tablefilename = outputdir + "Table2.tex";
-	TString notetable     = outputdir + "NoteTable.tex";
+	TString notetable     = outputdir + "SR_tables.tex";
 	TString combotool     = outputdir + "eth_signalRegions_highpt.txt";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
@@ -7248,7 +7248,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM3.open(notetable.Data(), ios::trunc);
 	fOUTSTREAM3 << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	fOUTSTREAM3 << Form("%%%% Generated on: %s ", asctime(timeinfo)) << endl;
-	fOUTSTREAM3 << "%% Format is tot, (ee, mm, em)" << endl;
+	fOUTSTREAM3 << "%% Format is mm, em, ee, tot " << endl;
 	fOUTSTREAM3 << endl;
 	
 	fOUTSTREAM4.open(combotool.Data(), ios::trunc);
@@ -8880,7 +8880,17 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	///////////////////////////////////////////////////////////////////////////////////
  	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
- 	fOUTSTREAM3 << gRegions[reg]->sname << endl;
+	
+	// Calculate whether \clearpage needs to be called or not 
+	if (reg%4 == 0) fOUTSTREAM3 << "\\clearpage" << endl; 
+	fOUTSTREAM3 << "\\begin{table}[htb!]" << endl;
+	fOUTSTREAM3 << "\\begin{center}" << endl;
+	fOUTSTREAM3 << Form("\\caption{Summary of background predictions and observed yields in %s}",gRegions[reg]->sname.Data()) << endl;
+	fOUTSTREAM3 << Form("\\label{tab:%s}",gRegions[reg]->sname.Data())<< endl;
+	fOUTSTREAM3 << "\\vspace{0.3cm}" << endl;
+	fOUTSTREAM3 << "\\begin{tabular}{l|c|c|c|c}" << endl;
+	fOUTSTREAM3 << "\\hline \\hline" << endl;
+	fOUTSTREAM3 << "&       $\\mu\\mu$    &   $e\\mu$     &    $ee$           &    Total          \\\\ \\hline" << endl;
  	fOUTSTREAM3 << Form("Double Fakes   & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
  	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
  	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
@@ -8912,6 +8922,10 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
  	fOUTSTREAM3 << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
  	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
+	fOUTSTREAM3 << "      \\hline \\hline" << endl;
+	fOUTSTREAM3 << "\\end{tabular}" << endl;
+	fOUTSTREAM3 << "\\end{center}" << endl;
+	fOUTSTREAM3 << "\\end{table}" << endl;
  	fOUTSTREAM3 << endl;
 
  	///////////////////////////////////////////////////////////////////////////////////
