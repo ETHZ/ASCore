@@ -52,7 +52,7 @@ ZZTo4L			mdunser/SSDLTrees/2013/Mar16/ZZJetsTo4L-TuneZ2star-8TeV-madgraph-tauola
 ## TTbarH			mdunser/SSDLTrees/2013/Mar16/TTH-Inclusive-M-125-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v1.root					3	-1	0.130
 HWW				mdunser/SSDLTrees/2013/Apr2/WH-ZH-TTH-HToWW-M-125-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v1.root						3	-1	0.2604
 HZZ				mdunser/SSDLTrees/2013/Apr2/WH-ZH-TTH-HToZZ-M-125-8TeV-pythia6-Summer12-DR53X-PU-S10-START53-V7A-v1.root						3	-1	0.0320
-HTauTau			mdunser/SSDLTrees/2013/Apr2/WH-ZH-TTH-HToTauTau-M-125-lepdecay-8TeV-pythia6-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root	3	-1	0.0251
+HTauTau			mdunser/SSDLTrees/2013/Apr2/WH-ZH-TTH-HToTauTau-M-125-lepdecay-8TeV-pythia6-tauola-Summer12-DR53X-PU-S10-START53-V7A-v1.root	3	-1	0.0177
 TTbarW			mdunser/SSDLTrees/2013/Mar16/TTWJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.232
 TTbarZ			mdunser/SSDLTrees/2013/Mar16/TTZJets-8TeV-madgraph-v2-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	0.2057
 TTbarG			mdunser/SSDLTrees/2013/Mar16/TTGJets-8TeV-madgraph-Summer12-DR53X-PU-S10-START53-V7A-v1.root							3	-1	2.166
