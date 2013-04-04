@@ -52,17 +52,17 @@ void SSDLAnalysis::Begin(const char* filename){
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
 		// define all x-values for your scan in the header before running this code!
-		fRightHandedSlepCountAll    = new TH2D("RightHandedSlepCountAll" , "RightHandedSlepCountAll" , 101 , -5 , 1005 , 101 , -5 , 1005);
-		fRightHandedCountAll        = new TH2D("RightHandedCountAll"     , "RightHandedCountAll"     , 101 , -5 , 1005 , 101 , -5 , 1005);
-		fTChiSlepSlepCountAll       = new TH2D("TChiSlepSlepCountAll"    , "TChiSlepSlepCountAll"    , 101 , -5 , 1005 , 101 , -5 , 1005);
-		fTChiSlepSnuCountAll        = new TH2D("TChiSlepSnuCountAll"     , "TChiSlepSnuCountAll"     , 101 , -5 , 1005 , 101 , -5 , 1005);
-		fModelCountAll              = new TH2D("ModelCountAll"           , "ModelCountAll"           , 101 , -5 , 1005 , 101 , -5 , 1005);
+		fRightHandedSlepCountAll    = new TH2D("RightHandedSlepCountAll" , "RightHandedSlepCountAll" , 300 , 0 , 1500 , 300 , 0 , 1500);
+		fRightHandedCountAll        = new TH2D("RightHandedCountAll"     , "RightHandedCountAll"     , 300 , 0 , 1500 , 300 , 0 , 1500);
+		fTChiSlepSlepCountAll       = new TH2D("TChiSlepSlepCountAll"    , "TChiSlepSlepCountAll"    , 300 , 0 , 1500 , 300 , 0 , 1500);
+		fTChiSlepSnuCountAll        = new TH2D("TChiSlepSnuCountAll"     , "TChiSlepSnuCountAll"     , 300 , 0 , 1500 , 300 , 0 , 1500);
+		fModelCountAll              = new TH2D("ModelCountAll"           , "ModelCountAll"           , 300 , 0 , 1500 , 300 , 0 , 1500);
 		for (int i = 0; i < nx; ++i) {
-			fRightHandedSlepCount[i] = new TH2D(Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
-			fRightHandedCount[i]     = new TH2D(Form("RightHandedCount%.0f"     , 100*x_values[i]) , Form("RightHandedCount%.0f"     , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
-			fTChiSlepSlepCount[i]    = new TH2D(Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
-			fTChiSlepSnuCount[i]     = new TH2D(Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
-			fModelCount[i]           = new TH2D(Form("ModelCount%.0f"           , 100*x_values[i]) , Form("ModelCount%.0f"           , 100*x_values[i]) , 101 , -5 , 1005 , 101 , -5 , 1005);
+			fRightHandedSlepCount[i] = new TH2D(Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , Form("RightHandedSlepCount%.0f" , 100*x_values[i]) , 300 , 0 , 1500 , 300 , 0 , 1500);
+			fRightHandedCount[i]     = new TH2D(Form("RightHandedCount%.0f"     , 100*x_values[i]) , Form("RightHandedCount%.0f"     , 100*x_values[i]) , 300 , 0 , 1500 , 300 , 0 , 1500);
+			fTChiSlepSlepCount[i]    = new TH2D(Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , Form("TChiSlepSlepCount%.0f"    , 100*x_values[i]) , 300 , 0 , 1500 , 300 , 0 , 1500);
+			fTChiSlepSnuCount[i]     = new TH2D(Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , Form("TChiSlepSnuCount%.0f"     , 100*x_values[i]) , 300 , 0 , 1500 , 300 , 0 , 1500);
+			fModelCount[i]           = new TH2D(Form("ModelCount%.0f"           , 100*x_values[i]) , Form("ModelCount%.0f"           , 100*x_values[i]) , 300 , 0 , 1500 , 300 , 0 , 1500);
 		}
 	}
 	BookTree();
@@ -252,6 +252,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElChIsCons",             &fTElChargeIsCons,      "ElChIsCons[NEls]/I");
 	fAnalysisTree->Branch("ElPt",                   &fTElpt,                "ElPt[NEls]/F");
 	fAnalysisTree->Branch("ElEta",                  &fTEleta,               "ElEta[NEls]/F");
+	fAnalysisTree->Branch("ElSCEta",                &fTElSCeta,             "ElSCEta[NEls]/F");
 	fAnalysisTree->Branch("ElPhi",                  &fTElphi,               "ElPhi[NEls]/F");
 	fAnalysisTree->Branch("ElD0",                   &fTEld0,                "ElD0[NEls]/F");
 	fAnalysisTree->Branch("ElD0Err",                &fTElD0Err,             "ElD0Err[NEls]/F");
@@ -368,17 +369,19 @@ void SSDLAnalysis::FillAnalysisTree(){
 		// MassLSP is in fact the mass of the LSP
 
 		// now finally filling the histograms
-		                                   fModelCountAll           -> Fill(fTR->MassGlu, fTR->MassChi);
-		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(fTR->MassGlu, fTR->MassChi);
-		if (isRightHanded)                 fRightHandedCountAll     -> Fill(fTR->MassGlu, fTR->MassChi);
-		TChiSlepSnu ?                      fTChiSlepSnuCountAll     -> Fill(fTR->MassGlu, fTR->MassChi) : fTChiSlepSlepCountAll->Fill(fTR->MassGlu, fTR->MassChi);
+		int var1 = getMGlu(25);
+		int var2 = getMSTop(25);
+		                                   fModelCountAll           -> Fill(var1, var2);
+		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(var1, var2);
+		if (isRightHanded)                 fRightHandedCountAll     -> Fill(var1, var2);
+		TChiSlepSnu ?                      fTChiSlepSnuCountAll     -> Fill(var1, var2) : fTChiSlepSlepCountAll->Fill(var1, var2);
 
 		for (int i=0; i<nx; ++i){ 
-			if (!TChiSlepSnu  && isRightHanded && x == x_values[i]) fRightHandedSlepCount[i] -> Fill( fTR->MassGlu, fTR->MassChi);
-			if (isRightHanded &&                  x == x_values[i]) fRightHandedCount[i]     -> Fill( fTR->MassGlu, fTR->MassChi);
-			if (TChiSlepSnu   &&                  x == x_values[i]) fTChiSlepSnuCount[i]     -> Fill( fTR->MassGlu, fTR->MassChi);
-			if (!TChiSlepSnu  &&                  x == x_values[i]) fTChiSlepSlepCount[i]    -> Fill( fTR->MassGlu, fTR->MassChi);
-			if (                                  x == x_values[i]) fModelCount[i]           -> Fill( fTR->MassGlu, fTR->MassChi);
+			if (!TChiSlepSnu  && isRightHanded && x == x_values[i]) fRightHandedSlepCount[i] -> Fill( var1, var2);
+			if (isRightHanded &&                  x == x_values[i]) fRightHandedCount[i]     -> Fill( var1, var2);
+			if (TChiSlepSnu   &&                  x == x_values[i]) fTChiSlepSnuCount[i]     -> Fill( var1, var2);
+			if (!TChiSlepSnu  &&                  x == x_values[i]) fTChiSlepSlepCount[i]    -> Fill( var1, var2);
+			if (                                  x == x_values[i]) fModelCount[i]           -> Fill( var1, var2);
 		}
 
 	}
@@ -406,7 +409,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 
 	// Require at least one loose lepton
 	// if( (fTnqmus + fTnqels) < 1 ) return;
-	if( (nLooseMus + fTnqels) < 1 ) return;
+	// ONLY FOR THE SUSY WORKSHOP!!!!! if( (nLooseMus + fTnqels) < 1 ) return;
 	fCounter.fill(fCutnames[3]);
 
 	// Event and run info
@@ -418,9 +421,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm0   = fTR->M0;
 		fTm12  = fTR->M12;
 		fTprocess = fTR->process;
-		fTmGlu = fTR->MassGlu;
-		fTmChi = fTR->MassChi;
-		fTmLSP = fTR->MassLSP;
+		fTmGlu = getMGlu(25);  //fTR->MassGlu;
+		fTmChi = getMSTop(25); //fTR->MassChi;
+		fTmLSP = getMLSP();  //fTR->MassLSP;
 		TChiSlepSnu   ? fTisTChiSlepSnu = 1 : fTisTChiSlepSnu = 0;
 		isRightHanded ? fTisRightHanded = 1 : fTisRightHanded = 0;
 	}
@@ -539,6 +542,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTElChargeIsCons    [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
 		fTElpt              [ind] = fTR->ElPt                    [elindex];
 		fTEleta             [ind] = fTR->ElEta                   [elindex];
+		fTElSCeta           [ind] = fTR->ElSCEta                 [elindex];
 		fTElphi             [ind] = fTR->ElPhi                   [elindex];
 		fTEld0              [ind] = fTR->ElD0PV                  [elindex];
 		fTElD0Err           [ind] = fTR->ElD0E                   [elindex];
@@ -725,6 +729,7 @@ void SSDLAnalysis::ResetTree(){
 		fTElChargeIsCons    [i] = -999;
 		fTElpt              [i] = -999.99;
 		fTEleta             [i] = -999.99;
+		fTElSCeta           [i] = -999.99;
 		fTElphi             [i] = -999.99;
 		fTEld0              [i] = -999.99;
 		fTElD0Err           [i] = -999.99;

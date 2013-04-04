@@ -189,6 +189,7 @@ private:
 	int   fTElChargeIsCons   [fMaxNeles];
 	float fTElpt             [fMaxNeles];
 	float fTEleta            [fMaxNeles];
+	float fTElSCeta          [fMaxNeles];
 	float fTElphi            [fMaxNeles];
 	float fTEld0             [fMaxNeles];
 	float fTElD0Err          [fMaxNeles];
