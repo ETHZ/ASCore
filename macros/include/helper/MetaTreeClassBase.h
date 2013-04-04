@@ -90,6 +90,7 @@ public :
    Int_t           ElChIsCons[5];   //[NEls]
    Float_t         ElPt[5];   //[NEls]
    Float_t         ElEta[5];   //[NEls]
+   Float_t         ElSCEta[5];   //[NEls]
    Float_t         ElPhi[5];   //[NEls]
    Float_t         ElD0[5];   //[NEls]
    Float_t         ElD0Err[5];   //[NEls]
@@ -216,6 +217,7 @@ public :
    TBranch        *b_ElChIsCons;   //!
    TBranch        *b_ElPt;   //!
    TBranch        *b_ElEta;   //!
+   TBranch        *b_ElSCEta;   //!
    TBranch        *b_ElPhi;   //!
    TBranch        *b_ElD0;   //!
    TBranch        *b_ElD0Err;   //!
@@ -411,6 +413,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
    fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
    fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
+   fChain->SetBranchAddress("ElSCEta", ElSCEta, &b_ElSCEta);
    fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
    fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
    fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
