@@ -17,7 +17,8 @@
 #include "base/TreeReader.hh"
 #include "base/UserAnalysisBase.hh"
 #include "helper/Monitor.hh"
-
+#include "helper/Davismt2.h"
+#include "SolveTTbarNew.hh"
 
 struct lepton {
   TLorentzVector p;
@@ -53,6 +54,9 @@ public:
   void ContainsSoftLepton();
   void IsParticleFromB(int);
   bool IsPUJet(float jpt, float jeta, float jphi);
+  void ComputeD2MT2(float &FinalD2,float &FinalMT2);
+  Double_t CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
+  double getD2(SolveTTbarNew *solver, TLorentzVector b1, TLorentzVector b2, TLorentzVector l1, TLorentzVector l2, double met, double metphi);
 //  const int IsJetFromPU(float, float, float);
   float ElPFIso(int index);
   float MuPFIso(int index);

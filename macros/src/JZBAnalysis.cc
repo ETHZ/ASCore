@@ -1,4 +1,6 @@
 #include "helper/Utilities.hh"
+#include "helper/Davismt2.h"
+#include "SolveTTbarNew.hh"
 #include "JZBAnalysis.hh"
 #include "TH1.h"
 #include <time.h>
@@ -16,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.119 $";
+string sjzbversion="$Revision: 1.70.2.120 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -24,12 +26,13 @@ TF1 *L5corr_qJ;
 TF1 *L5corr_cJ;
 TF1 *L5corr_gJ;
 
+SolveTTbarNew *solver;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.119 2013/02/21 10:37:22 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.120 2013/02/28 14:45:33 buchmann Exp $
 */
 
 
@@ -231,6 +234,8 @@ public:
   int badJet;
 
   float jzb[jzbtype_max];
+  float d2;
+  float mt2;
   float sjzb[jzbtype_max]; // smeared JZB
   float dphi_sumJetVSZ[jzbtype_max];
   float sumJetPt[jzbtype_max];
@@ -265,6 +270,7 @@ public:
   int DecayCode; //decay code: 100*h + l, where h = number of hadronically decaying Z's, l = number of leptonically decaying Z's (e.g. 102 = 1 had. Z, 2 lep. Z's)
   float realx; // this is the "x" we measure (for scans)
   float imposedx; // this is the "x" we imposed.
+  float GeneratorZPt;
   float pureGeneratorZpt;
   float pureGeneratorZM;
   float pureGeneratorZphi;
@@ -686,6 +692,8 @@ void nanoEvent::reset()
     sumJetPt[rCounter]=0;
   }
 
+  d2=-9;
+  mt2=-9;
   weight = 1.0;
   PUweight = 1.0;
   PUweightUP = 1.0;
@@ -749,6 +757,7 @@ void nanoEvent::reset()
   pureGeneratorSumJetEta=0;
   pureGeneratorSumJetPhi=0;
 
+  GeneratorZPt=0;
   pure2ndGeneratorJZB=0;
   pure2ndGeneratorZpt=0;
   pureGeneratorZpt=0;
@@ -940,6 +949,91 @@ TTree *myInfo;
 TH1F *weight_histo;
 
 nanoEvent nEvent;
+
+Double_t JZBAnalysis::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
+
+ double pa[3];
+ double pb[3];
+ double pmiss[3];
+
+ pmiss[0] = 0;
+ pmiss[1] = MET.Px();
+ pmiss[2] = MET.Py();
+
+ pa[0] = massive ? visible1.M() : 0;
+ pa[1] = visible1.Px();
+ pa[2] = visible1.Py();
+
+ pb[0] = massive ? visible2.M() : 0;
+ pb[1] = visible2.Px();
+ pb[2] = visible2.Py();
+
+ Davismt2 *mt2 = new Davismt2();
+ mt2->set_momenta(pa, pb, pmiss);
+ mt2->set_mn(testmass);
+ Double_t MT2=mt2->get_mt2();
+ delete mt2;
+ return MT2;
+
+}
+
+
+double JZBAnalysis::getD2(SolveTTbarNew *solver, TLorentzVector b1, TLorentzVector b2, TLorentzVector l1, TLorentzVector l2, double met, double metphi) {
+
+  int status = 0;
+  double edm = 0;
+  double q1z = 0;
+  double q2z = 0;
+  
+  double pb1[4] = {b1.Px(), b1.Py(), b1.Pz(), b1.Pt()};  
+  double pb2[4] = {b2.Px(), b2.Py(), b2.Pz(), b2.Pt()};  
+  double pl1[4] = {l1.Px(), l1.Py(), l1.Pz(), l1.Pt()};  
+  double pl2[4] = {l2.Px(), l2.Py(), l2.Pz(), l2.Pt()};  
+  double ptM[] = {met*cos(metphi), met*sin(metphi)}; 
+  double d2 = solver->NumericalMinimization(status, edm, q1z, q2z, pb1, pb2, pl1, pl2, ptM);
+  if(fabs(q1z)>=8000.||fabs(q2z)>=8000.||q1z==0.||q2z==0.||edm>0.01||status!=0) return -1;
+  return d2;
+
+}
+
+void JZBAnalysis::ComputeD2MT2(float &FinalD2,float &FinalMT2) {
+      TLorentzVector b1(0,0,0,0);
+      TLorentzVector bj1(0,0,0,0);
+      TLorentzVector bj2(0,0,0,0);
+      TLorentzVector bj3(0,0,0,0);
+      TLorentzVector l1(0,0,0,0);
+      TLorentzVector l2(0,0,0,0);
+      TLorentzVector MET(0,0,0,0);
+      MET.SetPtEtaPhiM(nEvent.met[4], 0, nEvent.metPhi[4], 0);
+      b1.SetPtEtaPhiE(nEvent.pfJetGoodPtBtag[0], nEvent.pfJetGoodEtaBtag[0], nEvent.pfJetGoodPhiBtag[0], nEvent.pfJetGoodEBtag[0]);
+      bj1.SetPtEtaPhiE(nEvent.pfJetGoodPt[0], nEvent.pfJetGoodEta[0], nEvent.pfJetGoodPhi[0], nEvent.pfJetGoodE[0]);
+      bj2.SetPtEtaPhiE(nEvent.pfJetGoodPt[1], nEvent.pfJetGoodEta[1], nEvent.pfJetGoodPhi[1], nEvent.pfJetGoodE[1]);
+      bj3.SetPtEtaPhiE(nEvent.pfJetGoodPt[2], nEvent.pfJetGoodEta[2], nEvent.pfJetGoodPhi[2], nEvent.pfJetGoodE[2]);
+      double d1 = -1, d2 = -1, d3 = -1;
+      nEvent.id1 ? l1.SetPtEtaPhiM(nEvent.pt1, nEvent.eta1, nEvent.phi1, 0.151) : l1.SetPtEtaPhiM(nEvent.pt1, nEvent.eta1, nEvent.phi1, 0.00051);
+      nEvent.id2 ? l2.SetPtEtaPhiM(nEvent.pt2, nEvent.eta2, nEvent.phi2, 0.151) : l2.SetPtEtaPhiM(nEvent.pt2, nEvent.eta2, nEvent.phi2, 0.00051);
+      if(b1 != bj1) d1 = getD2(solver, b1, bj1, l1, l2, nEvent.met[4], nEvent.metPhi[4]);
+      if(b1 != bj2) d2 = getD2(solver, b1, bj2, l1, l2, nEvent.met[4], nEvent.metPhi[4]);
+      if(b1 != bj3) d3 = getD2(solver, b1, bj3, l1, l2, nEvent.met[4], nEvent.metPhi[4]);
+      if(d1 == -1 && d2 == -1 && d3 == -1) d2 = -1; 
+      if(d1 == -1 && d2 == -1 && d3 != -1) d2 = d3; 
+      if(d1 == -1 && d2 != -1 && d3 == -1) d2 = d2; 
+      if(d1 != -1 && d2 == -1 && d3 == -1) d2 = d1; 
+      if(d1 != -1 && d2 != -1 && d3 == -1) d2 = TMath::Min(d1, d2);
+      if(d1 != -1 && d2 == -1 && d3 != -1) d2 = TMath::Min(d1, d3);
+      if(d1 == -1 && d2 != -1 && d3 != -1) d2 = TMath::Min(d2, d3);
+      if(d1 != -1 && d2 != -1 && d3 != -1) {
+        double auxiliar = TMath::Min(d1, d2);
+        d2 = TMath::Min(auxiliar, d3);
+      }
+      
+      double mt2 = CalcMT2(0., 0, l1, l2,  MET);
+      FinalMT2=mt2;
+      FinalD2=d2;
+  
+}
+
+
 
 bool IsLepton(const int pdgid) {
   int tid = abs(pdgid);
@@ -1139,6 +1233,7 @@ JZBAnalysis::~JZBAnalysis(){}
 //________________________________________________________________________________________
 void JZBAnalysis::Begin(TFile *f){
 
+  solver = new SolveTTbarNew();
   
   CSVT_CorrectionFile = new TFile("/shome/buchmann/material/Corrections/CSVT_Complete.root");
   CSVT_EfficiencyCorrection = (TH2F*)CSVT_CorrectionFile->Get("EfficiencyCorrection");
@@ -1381,6 +1476,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,Form("dphi_sumJetVSZ[%d]/F",int(jzbtype_max)));
   myTree->Branch("sumJetPt",nEvent.sumJetPt,Form("sumJetPt[%d]/F",int(jzbtype_max)));
 
+  myTree->Branch("mt2",&nEvent.mt2,"mt2/F");
+  myTree->Branch("d2",&nEvent.d2,"d2/F");
+  
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
   myTree->Branch("PUweightUP",&nEvent.PUweightUP,"PUweightUP/F");
@@ -1568,6 +1666,10 @@ void JZBAnalysis::Begin(TFile *f){
 
   
   //generator information
+  
+  myTree->Branch("GeneratorZPt",&nEvent.GeneratorZPt,"GeneratorZPt/F");
+  
+  
   if(fdoGenInfo) {
 	myTree->Branch("nZ",&nEvent.nZ,"nZ/I");
 	myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
@@ -2767,6 +2869,8 @@ void JZBAnalysis::Analyze() {
   // --- recoil met and pf recoil met
   nEvent.met[PFRECOILMET] = (sumOfPFJets + s1 + s2).Pt(); 
   nEvent.met[RECOILMET] = 0.;//kicked (recoil + s1 + s2).Pt();
+  
+  ComputeD2MT2(nEvent.d2,nEvent.mt2);
     
   // Statistics ///////////////////////////////////////
   string type("");
@@ -2981,6 +3085,8 @@ void JZBAnalysis::Analyze() {
 
 void JZBAnalysis::End(TFile *f){
   f->cd();	
+  
+  delete solver;
 
   myTree->Write();
   weight_histo->Write();
@@ -3763,8 +3869,9 @@ bool JZBAnalysis::DecaysToTaus(bool fdoGenInfo,TreeReader *fTR) {
   int nMu=0;
   int nEl=0;
   for(int iMother=0;iMother<fTR->nGenParticles;iMother++) {
-    if(fTR->genInfoStatus[iMother]==2) continue;
+//    if(fTR->genInfoStatus[iMother]==2) continue;
     if(!(abs(fTR->genInfoId[iMother])==23)) continue; // not a Z
+    if(nEvent.GeneratorZPt==0) nEvent.GeneratorZPt=fTR->genInfoPt[iMother];
     for(int da=iMother+1;da<fTR->nGenParticles;da++) {
       if(fTR->genInfoStatus[da]==2) continue;
       if(!(fTR->genInfoMo1[da]==iMother) ) continue; // not a daughter
@@ -3815,6 +3922,4 @@ bool JZBAnalysis::MatchTrigger(lepton *a) {
   return false;
 
 }
-
-
 
