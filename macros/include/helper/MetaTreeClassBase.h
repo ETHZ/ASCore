@@ -141,7 +141,8 @@ public :
    Float_t         JetCSVBTag[20];   //[NJets]
    Float_t         JetProbBTag[20];   //[NJets]
    Float_t         JetArea[20];   //[NJets]
-   Float_t         JetJEC[20];   //[NJets]
+   Float_t         JetCorr[20];   //[NJets]
+   Float_t         JetCorrUnc[20];   //[NJets]
    Int_t           JetPartonID[20];   //[NJets]
    Int_t           JetPartonFlav[20];   //[NJets]
    Float_t         JetGenPt[20];   //[NJets]
@@ -268,7 +269,8 @@ public :
    TBranch        *b_JetCSVBTag;   //!
    TBranch        *b_JetProbBTag;   //!
    TBranch        *b_JetArea;   //!
-   TBranch        *b_JetJEC;   //!
+   TBranch        *b_JetCorr;   //!
+   TBranch        *b_JetCorrUnc;   //!
    TBranch        *b_JetPartonID;   //!
    TBranch        *b_JetPartonFlav;   //!
    TBranch        *b_JetGenPt;   //!
@@ -464,7 +466,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetCSVBTag", JetCSVBTag, &b_JetCSVBTag);
    fChain->SetBranchAddress("JetProbBTag", JetProbBTag, &b_JetProbBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
-   fChain->SetBranchAddress("JetJEC", JetJEC, &b_JetJEC);
+   fChain->SetBranchAddress("JetCorr", JetCorr, &b_JetCorr);
+   fChain->SetBranchAddress("JetCorrUnc", JetCorrUnc, &b_JetCorrUnc);
    fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
    fChain->SetBranchAddress("JetPartonFlav", JetPartonFlav, &b_JetPartonFlav);
    fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
