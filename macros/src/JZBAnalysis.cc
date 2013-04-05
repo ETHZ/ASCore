@@ -236,6 +236,7 @@ public:
   float jzb[jzbtype_max];
   float d2;
   float mt2;
+  float st;
   float sjzb[jzbtype_max]; // smeared JZB
   float dphi_sumJetVSZ[jzbtype_max];
   float sumJetPt[jzbtype_max];
@@ -694,6 +695,7 @@ void nanoEvent::reset()
 
   d2=-9;
   mt2=-9;
+  st=0;
   weight = 1.0;
   PUweight = 1.0;
   PUweightUP = 1.0;
@@ -1478,6 +1480,7 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("mt2",&nEvent.mt2,"mt2/F");
   myTree->Branch("d2",&nEvent.d2,"d2/F");
+  myTree->Branch("st",&nEvent.st,"st/F");
   
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
@@ -2296,11 +2299,14 @@ void JZBAnalysis::Analyze() {
   // Trileptons: the highest pt lepton that fired the trigger is our first lepton!
   nEvent.tri_MatchFound=false;
   
-  for(int ilep=0;ilep<sortedGoodLeptons.size();ilep++) {
-    if(MatchTrigger(&sortedGoodLeptons[ilep])) {
-      TriLepton1=ilep;
-      nEvent.tri_MatchFound=true;
-      break;
+  if(isMC) TriLepton1=0; 
+  else {
+    for(int ilep=0;ilep<sortedGoodLeptons.size();ilep++) {
+      if(MatchTrigger(&sortedGoodLeptons[ilep])) {
+	TriLepton1=ilep;
+	nEvent.tri_MatchFound=true;
+	break;
+      }
     }
   }
   
@@ -2443,6 +2449,7 @@ void JZBAnalysis::Analyze() {
   TLorentzVector type1METvector(nEvent.fact*type1METpx,nEvent.fact*type1METpy,0,0);
   TLorentzVector Cleantype1METvector(type1METpx,type1METpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
+  float ScalarSumOfJets=0;
   TLorentzVector zVector;
   zVector.SetPtEtaPhiE(nEvent.pt,nEvent.eta,nEvent.phi,nEvent.E);
 
@@ -2694,6 +2701,7 @@ void JZBAnalysis::Analyze() {
       nEvent.pfHT    += jpt;
       nEvent.pfGoodHT += jpt;
       sumOfPFJets += aJet;
+      ScalarSumOfJets+=aJet.Pt();
       pfGoodJets.push_back(tmpLepton);
 
       if ( jpt>40 ) {
@@ -2871,6 +2879,7 @@ void JZBAnalysis::Analyze() {
   nEvent.met[RECOILMET] = 0.;//kicked (recoil + s1 + s2).Pt();
   
   ComputeD2MT2(nEvent.d2,nEvent.mt2);
+  nEvent.st=nEvent.pt1+nEvent.pt2+nEvent.met[4]+ScalarSumOfJets; // lepton 1   + lepton2   + MET  + scalar sum of jets
     
   // Statistics ///////////////////////////////////////
   string type("");
