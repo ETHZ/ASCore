@@ -1,5 +1,5 @@
 #! /usr/bin/python
-import os, sys, commands, subprocess
+import os, sys, commands, subprocess, time
 
 def usage():
 	print ' Usage: ./BatchPlotter -c config.cfg'
@@ -45,6 +45,18 @@ def read_config(config_name):
 	cfg.close()
 	return info
 
+def nRunningJobs(jobnames):
+	tmp = commands.getoutput('qstat')
+	jobs = tmp.split('\n')[2:]
+	running_jobs = []
+	for job in jobs:
+		running_jobs.append(job.split()[2])
+	cnt=0
+	for job in jobnames:
+		if job[:10] in running_jobs:
+			cnt+=1
+	return cnt
+
 def check_on_jobs(jobnames, time_elapsed):
 	tmp = commands.getoutput('qstat')
 	jobs = tmp.split('\n')[2:]
@@ -60,6 +72,36 @@ def check_on_jobs(jobnames, time_elapsed):
 		## print '[status] '+str(int(commands.getoutput('qstat | wc -l'))-2),' jobs still running after', n_min, 'minutes...'
 		print '[status]', cnt, ' jobs still running after', n_min, 'minutes...'
 	return cnt
+
+def nRunningJobs():
+	tmp = commands.getoutput('qstat')
+	jobs = tmp.split('\n')[2:]
+	running_jobs = []
+	for job in jobs:
+		running_jobs.append(job.split()[2])
+	return len(running_jobs)
+	
+def slowSubmit():
+	## print jobstrings
+	## sys.exit(0)
+	njobs = len(jobstrings)
+	nsub = 0
+	for job in jobstrings:
+		## if nsub < 100:
+		## 	print 'submitting', job
+		## 	os.system(job)
+		## 	nsub += 1
+		## 	continue
+		## else:                            # if more than 100 jobs have already been submitted
+		mustend = time.time() + 1000 # wait max 1000 seconds for each new job
+		while time.time() < mustend: # max timout
+			if nRunningJobs() < 100: # if less than a hundred jobs are running
+				## print 'submitting', job
+				os.system(job)       # go ahead and submit one
+				nsub += 1            # increment number of submitted jobs
+				break                # and move to the next one. continue acts on the while, just fyi
+			time.sleep(0.1)          # if more than a hundred jobs are running, wait half a second
+			
 
 def getRegions(region_file):
 	f=open(region_file, 'r')
@@ -79,6 +121,7 @@ def getFileList(directory):
 	files = []
 	print '[status] searching for all files to run over'
 	raw_files = commands.getoutput('srmls '+srm_path+directory)
+	## print raw_files
 	raw_file_list = raw_files.split('\n')
 	for file in raw_file_list:
 		if len(file) == 0 or file.split()[0] == '0': continue
@@ -103,12 +146,12 @@ def merge_and_clean():
 					hadd_region += ' '+os.path.abspath(absfile)
 		hstring = 'hadd '+output_location+'/'+hadd_region
 		os.system(hstring+' >& /dev/null')
+	os.system('rm -rf '+output_location+'/output_*')
 					
 	os.system('rm -r tmp/ ; rm plot_* ; rm sgejob-* -rf')
 	#os.system('rm sgejob-* -rf') # no cleaning up, for debugging puposes
 	## for ls in os.listdir(output_location):
 	## 	if os.path.isdir(output_location+ls) and 'output' in ls:
-	## 		os.system('rm -rf '+output_location+ls)
 
 def do_stuff(config_name):
 	print '[status] starting script...'
@@ -158,10 +201,13 @@ def do_stuff(config_name):
 		for region in regions:
 			outloc = output_node + astring
 			commit_strings.append(plotter_location + ' -v 1 -c '+datacard_location+' -p '+dumper_config+' -s ' + region + ' -i '+ f + ' -d '+outloc)
+			## print plotter_location + ' -v 1 -c '+datacard_location+' -p '+dumper_config+' -s ' + region + ' -i '+ f + ' -d '+outloc
 		
 	print '[status] starting to submit jobs...'
-	global jobnames
+	global jobnames, jobstrings
 	jobnames = []
+	jobstrings = []
+	
 
 	for commit in commit_strings:
 		ind = commit_strings.index(commit)
@@ -187,8 +233,14 @@ def do_stuff(config_name):
 		if not dryrun:
 			#os.system('qsub -q all.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
 			##os.system('qsub -q short.q  -N ssdl_'+str(ind)+' '+tmpScript_name)
-			os.system('qsub -q short.q  -N plot_'+str(ind)+' '+tmpScript_name+' > /dev/null')
-			jobnames.append('plot_'+str(ind))
+			jn = 'plot_'+str(ind)
+			jobnames.append(jn)
+			jobstrings.append('qsub -q short.q  -N '+jn+' '+tmpScript_name+' > /dev/null')
+			## os.system('qsub -q short.q  -N '+jn+' '+tmpScript_name+' > /dev/null')
+			## os.system('sleep 1')
+	if not dryrun:
+		print '[status] i\'m going to slowly submit', len(commit_strings), '...'
+		slowSubmit()
 	print '[status] submitted', len(commit_strings), 'jobs'
 
 	print '[status] done submitting jobs...'
