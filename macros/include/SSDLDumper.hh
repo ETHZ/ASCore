@@ -515,7 +515,9 @@ public:
 			if( (sname.Contains("DYJets")) ||
 			    (sname.Contains("GJets"))  ||
 			    (sname) == "WJets" )   return 3;
-			if( (sname) == "TTbarH"    ||
+			if( (sname) == "HWW"    ||
+			    (sname) == "HZZ"    ||
+			    (sname) == "HTauTau"   ||
 			    (sname) == "TTbarW"    ||
 			    (sname) == "TTbarZ"    ||
 			    (sname) == "TTbarG"    ||
@@ -549,7 +551,7 @@ public:
 			if(sname.Contains("WZTo3LNu"))                  return 7; 
 			if(sname.Contains("ZZTo4L"))                    return 8; 
 			if(sname.Contains("GVJets"))                    return 9; 
-			if(sname == "TTbarH")                           return 10;
+			if(sname == "HWW" || sname == "HZZ" || sname == "HTauTau") return 10;
 			if(sname == "TTbarW")                           return 11;
 			if(sname == "TTbarZ")                           return 12;
 			if(sname == "TTbarG")                           return 13;
@@ -714,8 +716,7 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
-	virtual void cleanedJetIndices(float pt);
-	std::vector<int> fC_cleanJetIndices;
+	std::vector<int> cleanedJetIndices(float pt);
 	virtual void scaleBTags(Sample *S, int flag = 0, TString model = "");
 	virtual void saveBTags();
 	virtual void resetBTags();

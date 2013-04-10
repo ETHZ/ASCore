@@ -4643,30 +4643,15 @@ void SSDLDumper::propagateMET(TLorentzVector nVec, TLorentzVector oVec){
 float getDR(float eta1, float phi1, float eta2, float phi2){
 	return sqrt( (eta1-eta2)*(eta1-eta2) + (phi1-phi2)*(phi1-phi2)  );
 }
-void SSDLDumper::cleanedJetIndices(float pt){
-	fC_cleanJetIndices.clear(); // fresh start
-	float tmp = fC_minJetPt;
-	fC_minJetPt = pt; 
+std::vector<int> SSDLDumper::cleanedJetIndices(float pt){
+	std::vector<int> cleanJetsInd;
+	float tmp = fC_minJetPt; // make sure to save this here
+	fC_minJetPt = pt;        // set the jetpt value new 
 	for(size_t i = 0; i < NJets; ++i){
-		if (!isGoodJet(i)) continue;
-		if (JetPt[i] < pt) continue;
-		for (int m = 0; m <= NMus; ++m){
-			if (!isLooseMuon(m)) continue;
-			if (getDR(JetEta[i], JetPhi[i], MuEta[m], MuPhi[m]) < 0.5 ) continue;
-			fC_cleanJetIndices.push_back(i);
-		}
-		for (int e = 0; e <= NEls; ++e){
-			if (!isLooseElectron(e)) continue;
-			if (getDR(JetEta[i], JetPhi[i], ElEta[e], ElPhi[e]) < 0.5 ) {
-				if (std::find(fC_cleanJetIndices.begin(), fC_cleanJetIndices.end(), i) != fC_cleanJetIndices.end() ) {
-					fC_cleanJetIndices.pop_back(); // erase jet index if it passed the muon cleaning but not the electron cleaning
-				}
-				continue; // if it isn't in there, move to next electron
-			}
-			if (std::find(fC_cleanJetIndices.begin(), fC_cleanJetIndices.end(), i) != fC_cleanJetIndices.end()-1 ) fC_cleanJetIndices.push_back(i);
-		}
+		if (isGoodJet(i)) cleanJetsInd.push_back(i);
 	}
-	fC_minJetPt = tmp; 
+	fC_minJetPt = tmp;       // reset jetpt threshold to original value
+	return cleanJetsInd;
 }
 void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Modify the jet pt for systematics studies
@@ -4674,14 +4659,30 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// propagate to the MET!!
 	if(S->datamc == 0) return; // don't smear data
 	if(flag == 0) return;      // 0 makes no sense
-	if(fC_cleanJetIndices.size() == 0) cleanedJetIndices(15.); // cleaned jets (pT > 15) w/r/t signal leptons
+	// select the jets you want to have...
+	// fC_cleanJetIndices.clear();
+	// float t = fC_minJetPt;
+	// fC_minJetPt = 15.; 
+	// for(size_t i = 0; i < NJets; ++i){
+	// 	if (isGoodJet(i)) fC_cleanJetIndices.push_back(i);
+	// }
+	// fC_minJetPt = t; 
+	
+	std::vector<int> cleanJets = cleanedJetIndices(15.);
 	TLorentzVector ojets, jets, tmp;                           // 4-vec of old jets, newjets and a tmp-vector
-	std::vector<int>::const_iterator it = fC_cleanJetIndices.begin();
-	for( ; it != fC_cleanJetIndices.end(); ++it) {
+	std::vector<int>::const_iterator it = cleanJets.begin();
+	
+	for( it = cleanJets.begin(); it != cleanJets.end(); ++it) {
+		if (Event == 45978937) {
+			cout << "at jet: " << *it<< endl;
+			cout << "---------------------------" << endl;
+			cout << Form("before: jeti: %d jetpt: %.2f jeteta %.2f jetphi: %.2f", *it, JetPt[*it], JetEta[*it], JetPhi[*it]) << endl;
+			cout << Form("  JEC-uncertainty: %.7f", JetCorrUnc[*it]) << endl;
+		}
 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set temp to the jet
 		ojets += tmp;                                                           // add jet to the old jets vector
-		if(flag == 1) JetPt[*it] += JetJEC[*it]*JetPt[*it];                     // vary up for flag 1
-		if(flag == 2) JetPt[*it] -= JetJEC[*it]*JetPt[*it];                     // vary down for flag 2;
+		if(flag == 1) JetPt[*it] *= (1 + JetCorrUnc[*it]);                     // vary up for flag 1
+		if(flag == 2) JetPt[*it] *= (1 - JetCorrUnc[*it]);                     // vary down for flag 2;
 		if(flag == 3){
 			float sigmaMC  = getErrPt(JetPt[*it], JetEta[*it])/JetPt[*it];      // get the resolution
 			float jerScale = getJERScale(*it);                                  // get JER scale factors
@@ -4689,6 +4690,9 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 		}
 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set tmp to the scaled/smeared jet
 		jets += tmp;                                                            // add scaled/smeared jet to the new jets
+		if (Event == 45978937) {
+			cout << Form("after: jeti: %d jetpt: %.2f jeteta %.2f jetphi: %.2f", *it, JetPt[*it], JetEta[*it], JetPhi[*it]) << endl;
+		}
 	}
 	propagateMET(jets, ojets);                                                  // propagate this change to the MET
 }
@@ -6099,6 +6103,8 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 		if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[7]);
 	}
 
+	// this is a cross-flavor same sign mass cut. wtf.
+	if(getMll(mu, el, ElMu) < 8.)      return false; // no low mass cross flavor, same sign lepton pair
 	if(!passesGammaStarVeto(mu, el, 1)) return false; // reject GStar
 
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
@@ -6393,6 +6399,9 @@ bool SSDLDumper::isLooseElectron(int ele){
 	// temporary if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	// temporary if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	// temporary if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+
+	// gap veto now in the dumper
+	if (fabs(ElSCEta[ele]) > 1.4442 && fabs(ElSCEta[ele]) < 1.566) return false;
 	
 	// ISO AND ID FOR TT+W
 	if (gTTWZ) {
@@ -6405,6 +6414,26 @@ bool SSDLDumper::isLooseElectron(int ele){
 		if(ElIsGoodTriggerEl[ele] != 1) return false; // trigger ID cuts
 	}
 	if (fabs(ElD0[ele]) > 0.01) return false; // this is for testing!!!!
+
+
+// TEST FOR SYNCHING -------------------
+
+// TEST FOR SYNCHING	if (fabs(ElEta[ele]) < 1.4442){
+// TEST FOR SYNCHING		if (ElDPhi[ele]          > 0.160) return false;
+// TEST FOR SYNCHING		if (ElDEta[ele]          > 0.008) return false;
+// TEST FOR SYNCHING		if (ElSigmaIetaIeta[ele] > 0.010) return false;
+// TEST FOR SYNCHING		if (ElHoverE[ele]        > 0.012) return false;
+// TEST FOR SYNCHING	}
+// TEST FOR SYNCHING	else if (fabs(ElEta[ele]) > 1.4442 && fabs(ElEta[ele]) < 2.5){
+// TEST FOR SYNCHING		if (ElDPhi[ele]          > 0.100) return false;
+// TEST FOR SYNCHING		if (ElDEta[ele]          > 0.010) return false;
+// TEST FOR SYNCHING		if (ElSigmaIetaIeta[ele] > 0.030) return false;
+// TEST FOR SYNCHING		if (ElHoverE[ele]        > 0.010) return false;
+// TEST FOR SYNCHING	}
+
+
+// -------------------------------------
+
 
 	// JUST FOR FUTURE REFERENCE, THOSE ARE THE VALUES FOR MVA-ID WE USED
 	// loose MVA-ID values 	if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.949) return false;

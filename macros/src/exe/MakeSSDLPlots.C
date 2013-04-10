@@ -45,11 +45,12 @@ int main(int argc, char* argv[]) {
 	TString configfile;
 	bool cfg = false;
 	TString region = "";
+	TString model = "";
 	TString file = "";
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:c:v:m:s:i:p:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:c:v:m:s:i:p:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
 			case 'p': configfile = TString(optarg); break;
 			case 's': region = TString(optarg); break; 
 			case 'i': file   = TString(optarg); break; 
+			case 'm': model   = TString(optarg); break; 
 			case '?':
 			case 'h': usage(0); break;
 			default:
@@ -84,7 +86,7 @@ int main(int argc, char* argv[]) {
 	tA->setVerbose(verbose);
 	tA->init(datacard);
 	if (region != "")	
-	  tA->doSMSscans(region, file);
+	  tA->doSMSscans(region, file, model);
 	else 
 	  tA->doAnalysis();
 

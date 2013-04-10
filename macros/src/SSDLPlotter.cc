@@ -393,18 +393,18 @@ void SSDLPlotter::init(TString filename){
 	// fLowPtData.push_back(MuEG3);
 	// fLowPtData.push_back(MuEG4);
 }
-void SSDLPlotter::doSMSscans(TString region, TString file){
+void SSDLPlotter::doSMSscans(TString region, TString file, TString model){
         // This macro runs over the the SMS scans 
         // TString pathtofile = ""; //"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
         // TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
 	// TString filename   = "/shome//mdunser/xsecfiles/output_38.root";  
 
 	// bool for the low-pt analysis...
-	bool lowpt = false;
+	bool lowpt = true;
 	
 	cout << "Running Over region: " << region << endl;
 	cout << "On file: " << file << endl;
-	scanModelGeneric(file , gRegion[region], lowpt);
+	scanModelGeneric(file , gRegion[region], model, lowpt);
 }
 void SSDLPlotter::doAnalysis(){
 	// sandBox();
@@ -454,9 +454,9 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
 	 
-	makeMuIsolationPlots(true); // if true, loops on TTbar sample
-	makeElIsolationPlots(true); // if true, loops on TTbar sample
-	makeElIdPlots();
+	// makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	// makeElIsolationPlots(true); // if true, loops on TTbar sample
+	// makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
 	//	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
@@ -480,7 +480,7 @@ void SSDLPlotter::doAnalysis(){
 	makeFRvsNVPlots(Elec, ZDecay);
 	makeFRvsEtaPlots(Muon);
 	makeFRvsEtaPlots(Elec);
-	makeChMidvsPtPlots();
+	// makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
 	makeAllIntPredictions();
@@ -18285,7 +18285,7 @@ void SSDLPlotter::SUSYWorkshopPlots( TString sestring, int mgluino, int mlsp){
 
 	res_->Close();
 }
-void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt){
+void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString model, bool lowpt){
 
 	SSDLDumper::setRegionCuts(reg);
 	if (lowpt) setLowPtCuts();
@@ -18306,18 +18306,15 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 	cout<< "minNbjmed " << fC_minNbjmed << endl;
 	cout<< "maxNbjmed " << fC_maxNbjmed << endl;
 
-	TString name = "T6ttWWx05";
 	bool verbose = false;
-	if (verbose) fOUTSTREAM.open( name+"_"+gRegions[reg]->sname+".txt" );
+	if (verbose) fOUTSTREAM.open( model+"_"+gRegions[reg]->sname+".txt" );
+	fOUTSTREAM.open("/shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/SMSresults/T6ttWW_debug.txt");
 
 	/////////////////////////////////////////////////////
 	// for debugging:
  	// setRegionCuts(0);
 
 	/////////////////////////////////////////////////////
-	TH2D * Model_yield_ ;
-	Model_yield_  = new TH2D(name+"_yield"      , name+"_yield"  , 151, -5, 1505    , 151, -5 , 1505);
-	Model_yield_ ->Sumw2();
 
 	int nSyst(8);
 	TString systs[nSyst];
@@ -18329,17 +18326,29 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 	systs[5] = "btagDown";
 	systs[6] = "METup";
 	systs[7] = "METdown";
+	
+	int nbins, min, max;
+	// other scans:
+	nbins =  300;
+	min   =    0;
+	max   = 1500;
 
 	TH2D  * Model_nPass_noScale_[nSyst];
 	TH2D  * Model_nPass_        [nSyst];
+	TH2D  * Model_eff_          [nSyst];
 	for (int j = 0; j<nSyst; j++) {
-		Model_nPass_         [j] = new TH2D(name+"_nPass_"+systs[j], name+"_nPass_"+systs[j] , 151, -5, 1505, 151, -5, 1505);
+		Model_nPass_         [j] = new TH2D(model+"_nPass_"+systs[j]         , model+"_nPass_"+systs[j]         , nbins, min, max, nbins, min, max);
 		Model_nPass_         [j]->Sumw2();
-		Model_nPass_noScale_ [j] = new TH2D(name+"_nPass_noScale_"+systs[j], name+"_nPass_noScale_"+systs[j] , 151, -5, 1505, 151, -5, 1505);
+		Model_nPass_noScale_ [j] = new TH2D(model+"_nPass_noScale_"+systs[j] , model+"_nPass_noScale_"+systs[j] , nbins, min, max, nbins, min, max);
 		Model_nPass_noScale_ [j]->Sumw2();
+		Model_eff_           [j] = new TH2D(model+"_eff_"+systs[j]           , model+"_eff_"+systs[j]           , nbins, min, max, nbins, min, max);
+		Model_eff_           [j]->Sumw2();
 	}
+	TH2D * Model_yield_ ;
+	Model_yield_  = new TH2D(model+"_yield"      , model+"_yield"  , nbins, min, max, nbins, min, max);
+	Model_yield_ ->Sumw2();
 
-	TFile * xsecFile_ = new TFile("/shome/mdunser/xsecfiles/"+name+"_xsecs.root", "READ", "xsecFile_");
+	TFile * xsecFile_ = new TFile("/shome/mdunser/xsecfiles/"+model+"_xsecs.root", "READ", "xsecFile_");
 	TH1D  * xsecs     = (TH1D *) xsecFile_->Get("xsecs");
 	TF1   * xsecfit =  xsecs->GetFunction("xsec_fit1");
 
@@ -18368,15 +18377,75 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 	SSDLDumper::fRand3       = new TRandom3(10);
 	SSDLDumper::fRand3Normal = new TRandom3(10);
 
+	float xvar(-1);
+	float yvar(-1);
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		setRegionCuts(reg);
 		if (lowpt) setLowPtCuts();
-		printProgress(jentry, tot_events, name+" Scan "+gRegions[reg]->sname);
+		printProgress(jentry, tot_events, model+" Scan "+gRegions[reg]->sname);
 		for (int i = 0; i<nSyst; i++) {
+			if (Event == 45978937) cout << filestring << endl;
+			if (Event == 45978937) cout << "AT SYSTEMATIC " << i << endl;
+			if (Event == 45978937) cout << "======================================================================"<< endl;
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
-			// if (Event!=45001) continue;
+			if (Event == 45978937) cout << Form("before systematics: ht: %.2f  met %.2f ", getHT(), getMET())<< endl;
+			fRand3       ->SetSeed(Event);
+			fRand3Normal ->SetSeed(Event);
+			if (i==0) {
+				if (Event == 16104387) {
+					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
+					fOUTSTREAM << "-------------------------" << endl;
+					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), ElPt[0], ElPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
+					for (int ij=0; ij<NJets; ++ij){
+						if (!isGoodJet(ij)) continue;
+						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
+					}
+					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
+					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sig1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", ElPt[0], ElEta[0], IsSignalElectron[0], ElPt[1], ElEta[1], IsSignalElectron[1], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 2)) << endl;
+				}
+				if (Event == 16380983) {
+					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
+					fOUTSTREAM << "-------------------------" << endl;
+					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], ElPt[0], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
+					for (int ij=0; ij<NJets; ++ij){
+						if (!isGoodJet(ij)) continue;
+						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
+					}
+					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
+					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], IsSignalMuon[0], ElPt[0], ElEta[0], IsSignalElectron[0], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
+				}
+			}
 			saveBTags();      // save the values of the new btag
 			scaleBTags(S, 0, "T2tt"); // this applies the bTagSF
+			if (i==0) {
+				if (Event == 16104387) {
+					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
+					fOUTSTREAM << "-------------------------" << endl;
+					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), ElPt[0], ElPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
+					for (int ij=0; ij<NJets; ++ij){
+						if (!isGoodJet(ij)) continue;
+						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
+					}
+					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
+					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sig1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", ElPt[0], ElEta[0], IsSignalElectron[0], ElPt[1], ElEta[1], IsSignalElectron[1], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 2)) << endl;
+				}
+				if (Event == 16380983) {
+					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
+					fOUTSTREAM << "-------------------------" << endl;
+					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], ElPt[0], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
+					for (int ij=0; ij<NJets; ++ij){
+						if (!isGoodJet(ij)) continue;
+						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
+					}
+					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
+					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], IsSignalMuon[0], ElPt[0], ElEta[0], IsSignalElectron[0], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
+				}
+				if (Event == 45978937) {
+					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], MuPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
+					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
+					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f l1phi: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f l2phi: %.2f sig2: %d passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], MuPhi[0], IsSignalMuon[0], MuPt[1], MuEta[1], MuPhi[1], IsSignalMuon[1], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
+				}
+			}
 			 
 			// if ( (i == 0 || i == 4 || i == 5 ) && Event==45001){
 			// 	for (int ij = 0; ij<NJets; ++ij){
@@ -18391,26 +18460,29 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 			if (i == 5) {resetBTags(); scaleBTags(S, 2, "T2tt");}
 			if (i == 6) scaleMET(S, 0);
 			if (i == 7) scaleMET(S, 1);
-			if (Event ==45978937){
-				cout << Form("systematic: %d  met: %.2f ht: %.2f njets: %d nbjets: %d", i, getMET(), getHT(), getNJets(), getNBTagsMed()) << endl;
-			}
+			if (Event == 45978937) cout << Form("after systematic #%d: ht: %.2f  met %.2f ", i, getHT(), getMET())<< endl;
 
-			float xvar = mGlu;
-			float yvar = mLSP;
+			// T6ttWW     scan: xvar = mGlu and yvar = mChi
+			// T6ttWW x05 scan: xvar = mGlu and yvar = mLSP
+			// T5tttt     scan: xvar = mGlu and yvar = mChi
+			xvar = mGlu;
+			yvar = mLSP;
 
 			// int m1(-1),m2(-1),m3(-1),e3(-1),e1(-1),e2(-1);
 			// cleanedJetIndices(15.);
-			// if (i == 6 || i == 7){
-			// 	if (Event>=45000 && Event<= 46000 && (isSSLLMuEvent(m1, m2) || isSSLLElMuEvent(m3, e3) || isSSLLElEvent(e1, e2)) ){
-			// 		// for (int ij = 0; ij<=fC_cleanJetIndices.size(); ++ij){
-			// 		// 	// if (!isGoodJet(ij, 15.)) continue;
-			// 		// 	if ( i == 0 ) cout << Form("systematic: %d jetpt: %.3f jeteta: %.3f", i, JetPt[ij], JetEta[ij]) << endl;
-			// 		// }
+			// if (i == 3 || i == 0){
+			// 	if ( Event == 45978937) { // && (isSSLLMuEvent(m1, m2) || isSSLLElMuEvent(m3, e3) || isSSLLElEvent(e1, e2)) )
+			// 		fOUTSTREAM << "----------------------------" << endl;
+			// 		fOUTSTREAM << filestring << endl;
+			// 		for (int ij = 0; ij<=fC_cleanJetIndices.size(); ++ij){
+			// 			// if (!isGoodJet(ij, 15.)) continue;
+			// 			cout << Form("systematic: %d jetpt: %.3f jeteta: %.3f", i, JetPt[ij], JetEta[ij]) << endl;
+			// 		}
 			// 		cout << Form("%d systematic: %d njets: %d nbjets: %d met: %.3f ht: %.3f jetpt[0]: %.3f jetpt[1]: %.3f", Event, i, getNJets(), getNBTagsMed(), getMET(), getHT(), JetPt[0], JetPt[1]) << endl;
 			// 	}	
 			// }
 
-			float nloXsec      = xsecfit->Eval(mGlu);
+			float nloXsec      = xsecfit->Eval(xvar);
 			int   nGenBin      = Model_nTot_->FindBin(xvar, yvar);
 			float nGen         = Model_nTot_->GetBinContent(nGenBin);
 			float weight       = fLumiNorm * nloXsec / nGen;
@@ -18418,7 +18490,6 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 
 			int mu1(-1), mu2(-1);
 			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
 					n_tot++;
 					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
@@ -18431,6 +18502,9 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 					if (i==0) {
 						Model_yield_-> Fill(xvar, yvar, weight * gMMTrigScale);
 					}
+					if (xvar == 525 && yvar == 250) {
+						fOUTSTREAM << Form("%d mumu systematic: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f trigSF: %.2f idSF: %.2f", Event, i, MuPt[mu1], MuPt[mu2], getNJets(), getNBTagsMed(), getMET(), getHT(), trigsf, idsf) << endl;
+					}
 					nMM++;
 					continue;
 				}
@@ -18438,7 +18512,6 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 			} // end loop on mumu channel
 			int mu(-1), el(-1);
 			if( isSSLLElMuEvent(mu, el) ){
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 					n_tot++;
 					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
@@ -18452,13 +18525,15 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 						Model_yield_-> Fill(xvar, yvar, weight * gEMTrigScale);
 					}
 					nEM++;
+					if (xvar == 525 && yvar == 250) {
+						fOUTSTREAM << Form("%d emu systematic: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f trigSF: %.2f idSF: %.2f", Event, i, MuPt[mu], ElPt[el], getNJets(), getNBTagsMed(), getMET(), getHT(), trigsf, idsf) << endl;
+					}
 					continue;
 				}
 				resetHypLeptons();
 			} // end loop on emu channel
 			int el1(-1), el2(-1);
 			if( isSSLLElEvent(el1, el2) ){
-				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
 				if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 					n_tot++;
 					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
@@ -18472,6 +18547,9 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 						Model_yield_-> Fill(xvar, yvar, weight * gEETrigScale);
 					}
 					nEE++;
+					if (xvar == 525 && yvar == 250) {
+						fOUTSTREAM << Form("%d ee systematic: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f trigSF: %.2f idSF: %.2f", Event, i, ElPt[el1], ElPt[el2], getNJets(), getNBTagsMed(), getMET(), getHT(), trigsf, idsf) << endl;
+					}
 				}
 			} // end loop on ee channel
 		} // end loop on all systematics
@@ -18481,15 +18559,14 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, bool lowpt
 	if (verbose) fOUTSTREAM << "Total number of tight pairs: " << n_tot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/n_tot << endl;
 	if (verbose) fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
 
-	TH2D * Model_eff_     [nSyst];
+	fOUTSTREAM.close();
+
 	for (int i=0; i<nSyst;i++) {
-		Model_eff_ [i] = new TH2D(name+"_eff_"+systs[i], name+"_eff_"+systs[i], 151, -5, 1505, 151, -5, 1505);
-		Model_eff_ [i]->Sumw2();
 		Model_eff_ [i]->Divide(Model_nPass_[i], Model_nTot_ , 1. , 1.);
 	}
 
 	TFile * res_;
-	res_ = new TFile(fOutputDir+name+"_results_"+gRegions[reg]->sname+".root", "RECREATE", "res_");
+	res_ = new TFile(fOutputDir+model+"_results_"+gRegions[reg]->sname+".root", "RECREATE", "res_");
 	res_   -> cd();
 
 	Model_yield_ ->Write();
