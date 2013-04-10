@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:c:v:m:s:i:p:m:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:c:v:s:i:p:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
