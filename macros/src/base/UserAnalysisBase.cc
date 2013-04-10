@@ -204,40 +204,20 @@ void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
     return;
 
 }
-int UserAnalysisBase::getMLSP(){
-	int mlsp(-1000);
+int UserAnalysisBase::getSusyMass(int pdgid, int round){
+	float mpart(0.);
+	int npart(0);
 	for (int i = 0; i < fTR->nGenParticles; ++i){
-		if (fabs(fTR->genInfoId[i]) != 1000022) continue;
+		if (fabs(fTR->genInfoId[i]) != pdgid || fTR->genInfoStatus[i] != 3) continue;
 		else {
-		mlsp = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
-		break;
+			mpart += fTR->genInfoM[i];
+			npart++;
 		}
 	}
-	return mlsp;
+	mpart = mpart/npart; // averaging over both particles in the event
+	int roundmass = round * (int) (mpart/round + 0.5);
+	return roundmass;
 }
-int UserAnalysisBase::getMGlu(){
-	int mglu(-1000);
-	for (int i = 0; i < fTR->nGenParticles; ++i){
-		if (fabs(fTR->genInfoId[i]) != 1000021) continue;
-		else {
-			mglu = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
-			break;
-		}
-	}
-	return mglu;
-}
-int UserAnalysisBase::getMChi1(){
-	int mchi1(-1000);
-	for (int i = 0; i < fTR->nGenParticles; ++i){
-		if (fabs(fTR->genInfoId[i]) != 1000024) continue;
-		else {
-			mchi1 = (int) fTR->genInfoM[i] + 0.5; // rounding to next integer
-			break;
-		}
-	}
-	return mchi1;
-}
-
 
 ///////////////////////////////////////////////////////////////
 // Object selections:
@@ -421,7 +401,7 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
     }
 	
     // ECAL gap veto
-    if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
+    // do in dumper if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
 
     if(fabs(fTR->ElD0PV[index]) > 0.04) return false;
     if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
@@ -444,7 +424,7 @@ bool UserAnalysisBase::IsGoodTriggerEl(int index){
     }
 	
     // ECAL gap veto
-    if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
+    // do in dumper if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
 
 	// the following two cuts are applied in the basicEle function
     // if(fabs(fTR->ElD0PV[index]) > 0.04) return false;
@@ -821,6 +801,15 @@ vector<int> UserAnalysisBase::ElectronSelection(bool(UserAnalysisBase::*eleSelec
         // selection
         if((*this.*eleSelector)(ind) == false) continue;
 
+		if (fTR->ElPt[ind] != fTR->ElPt[ind]) { 
+			std::cout<<"ERROR!!!! this should never happen!!! there is an electron which's pT is NaN!!!!!"<<std::endl;
+			std::cout<<"ERROR!!!! I'll skip it now. But this is seriously not cool." <<std::endl;
+			std::cout<<"ERROR!!!! here's some more info:"<<std::endl;
+			std::cout<<"          run: "<<fTR->Run<<" ls: " << fTR->LumiSection<< " event: " << fTR->Event<<std::endl;
+			std::cout<<"          elpt: "<<fTR->ElPt[ind]<<" eleta: " << fTR->ElEta[ind]<< " elSCeta: " << fTR->ElSCEta[ind]<< " elphi: "<< fTR->ElPhi[ind]<<std::endl;
+			
+			continue;
+		}
         selectedObjInd.push_back(ind);
         selectedObjPt.push_back(fTR->ElPt[ind]);
     }

@@ -307,7 +307,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetCSVBTag",    &fTJetbtag1,      "JetCSVBTag[NJets]/F");
 	fAnalysisTree->Branch("JetProbBTag",   &fTJetbtag2,      "JetProbBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,       "JetArea[NJets]/F");
-	fAnalysisTree->Branch("JetJEC",        &fTJetJEC,        "JetJEC[NJets]/F");
+	fAnalysisTree->Branch("JetCorr",       &fTJetCorr,       "JetCorr[NJets]/F");
+	fAnalysisTree->Branch("JetCorrUnc",    &fTJetCorrUnc,    "JetCorrUnc[NJets]/F");
 	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID,   "JetPartonID[NJets]/I");
 	fAnalysisTree->Branch("JetPartonFlav", &fTJetPartonFlav, "JetPartonFlav[NJets]/I");
 	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,     "JetGenPt[NJets]/F");
@@ -369,8 +370,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 		// MassLSP is in fact the mass of the LSP
 
 		// now finally filling the histograms
-		int var1 = getMGlu(25);
-		int var2 = getMSTop(25);
+		// sbottom = 1000005 , stop = 1000006, neutralino = 1000022, chi1 = 1000024, gluino = 1000021
+		int var1 = fTR->MassGlu; //getSusyMass(1000005, 25);
+		int var2 = fTR->MassChi; //getSusyMass(1000022, 25);
 		                                   fModelCountAll           -> Fill(var1, var2);
 		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(var1, var2);
 		if (isRightHanded)                 fRightHandedCountAll     -> Fill(var1, var2);
@@ -421,9 +423,10 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm0   = fTR->M0;
 		fTm12  = fTR->M12;
 		fTprocess = fTR->process;
-		fTmGlu = getMGlu(25);  //fTR->MassGlu;
-		fTmChi = getMSTop(25); //fTR->MassChi;
-		fTmLSP = getMLSP();  //fTR->MassLSP;
+		// sbottom = 1000005 , stop = 1000006, neutralino = 1000022, chi1 = 1000024, gluino = 1000021
+		fTmGlu = fTR->MassGlu; //getSusyMass(1000005, 25);
+		fTmChi = fTR->MassChi; //getSusyMass(1000024, 25);
+		fTmLSP = fTR->MassLSP; //getSusyMass(1000022, 25);
 		TChiSlepSnu   ? fTisTChiSlepSnu = 1 : fTisTChiSlepSnu = 0;
 		isRightHanded ? fTisRightHanded = 1 : fTisRightHanded = 0;
 	}
@@ -450,7 +453,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetbtag2   [ind] = fTR->JnewPFJetProbabilityBPFJetTags[jetindex];
 		fTJetArea    [ind] = fTR->JArea[jetindex];
 		float corr = (fGlobalTag == "" ? fTR->JEcorr[jetindex]:getNewJetInfo(jetindex, "corr") ); // new correction
-		fTJetJEC     [ind] = GetJECUncert(pt, fTR->JEta[jetindex])/corr;
+		fTJetCorr    [ind] = corr;
+		fTJetCorrUnc [ind] = GetJECUncert(pt, fTR->JEta[jetindex]);
 		// fTJetJEC     [ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex])/fTR->JEcorr[jetindex];
 		fTJetPartonID[ind] = JetPartonMatch(jetindex);
 		fTJetPartonFlav[ind] = fTR->JPartonFlavour[jetindex];
@@ -786,7 +790,8 @@ void SSDLAnalysis::ResetTree(){
 		// MARC fTJetbtag3[i]     = -999.99;
 		// MARC fTJetbtag4[i]     = -999.99;
 		fTJetArea[i]      = -999.99;
-		fTJetJEC[i]       = -999.99;
+		fTJetCorr[i]      = -999.99;
+		fTJetCorrUnc[i]   = -999.99;
 		fTJetPartonID[i]  = -999;
 		fTJetPartonFlav[i]  = -999;
 		fTJetGenpt [i]    = -999.99;

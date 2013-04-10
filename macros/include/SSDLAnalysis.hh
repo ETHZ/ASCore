@@ -142,7 +142,8 @@ private:
 	// MARC float fTJetbtag3[fMaxNjets]; // TCHP
 	// MARC float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
-	float fTJetJEC[fMaxNjets];
+	float fTJetCorr[fMaxNjets];
+	float fTJetCorrUnc[fMaxNjets];
 	int   fTJetPartonID[fMaxNjets];
 	int   fTJetPartonFlav[fMaxNjets];
 	float fTJetGenpt [fMaxNjets];
