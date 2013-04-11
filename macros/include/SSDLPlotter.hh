@@ -212,7 +212,14 @@ struct SSPrediction {
 	float rare_stat_ee;
 	float rare_stat_em;
 };
-
+struct ttGpred{
+	float val_mm;
+	float val_ee;
+	float val_em;
+	float err_mm;
+	float err_ee;
+	float err_em;
+};
 
 class SSDLPlotter : public SSDLDumper{
 
@@ -290,7 +297,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-        void makeWZValidation(SSPrediction);
+        void makeWZValidation(SSPrediction,TString label="");
         SSPrediction makeIntPrediction(TString, int);
         // old SSPrediction makeIntPrediction(TString, gRegion);
 	void makeTTWIntPredictions();
@@ -314,6 +321,7 @@ public:
         void makeRelIsoTTSigPlots();
 	
 	void storeWeightedPred(int reg);
+        ttGpred setTTGammaPred(int);
 	// void storeWeightedPred(gRegion reg);
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only
 	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta

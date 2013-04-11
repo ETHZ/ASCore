@@ -13,6 +13,7 @@
 #include "helper/FPRatios.hh"
 #include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
+#include "helper/TTGammaScaleFactor.h"
 
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
@@ -56,6 +57,8 @@ double SSDLPlotter::gEChMisIDE_E = 0.;
 float SSDLPlotter::gMMTrigScale = 1.; //0.872;
 float SSDLPlotter::gEMTrigScale = 1.; //0.925;
 float SSDLPlotter::gEETrigScale = 1.; //0.954;
+
+ttGpred ttG_SR0;
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(TString configfile):SSDLDumper(configfile){ 
@@ -137,7 +140,10 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WW);
 	fMCBG.push_back(WZ);
 	fMCBG.push_back(ZZ);
-	// marc fMCBG.push_back(GVJets);
+	//	fMCBG.push_back(GVJets);
+	fMCBG.push_back(WGstarMu);
+	fMCBG.push_back(WGstarTau);
+
 	fMCBG.push_back(DPSWW);
 	// fMCBG.push_back(TTbarH);
 	fMCBG.push_back(HWW);
@@ -159,7 +165,7 @@ void SSDLPlotter::init(TString filename){
 	// fMCBG.push_back(QCDEM20);
 	fMCBG.push_back(QCDEM30);
 	fMCBG.push_back(QCDEM80);
-	fMCBG.push_back(QCDEM170);
+	//	fMCBG.push_back(QCDEM170);
 	fMCBG.push_back(QCDEM250);
 	fMCBG.push_back(QCD50);
 	fMCBG.push_back(QCD80);
@@ -233,7 +239,10 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WW);
 	fMCBGMuEnr.push_back(WZ);
 	fMCBGMuEnr.push_back(ZZ);
-	// marc fMCBGMuEnr.push_back(GVJets);
+	//	fMCBGMuEnr.push_back(GVJets);
+	fMCBGMuEnr.push_back(WGstarMu);
+	fMCBGMuEnr.push_back(WGstarTau);
+
 	fMCBGMuEnr.push_back(DPSWW);
 	// fMCBGMuEnr.push_back(TTbarH);
 	fMCBGMuEnr.push_back(HWW);
@@ -276,7 +285,9 @@ void SSDLPlotter::init(TString filename){
 	fMCBGEMEnr.push_back(WW);
 	fMCBGEMEnr.push_back(WZ);
 	fMCBGEMEnr.push_back(ZZ);
-	// marc fMCBGEMEnr.push_back(GVJets);
+	fMCBGEMEnr.push_back(WGstarMu);
+	fMCBGEMEnr.push_back(WGstarTau);
+
 	fMCBGEMEnr.push_back(DPSWW);
 	// fMCBGEMEnr.push_back(TTbarH);
 	fMCBGEMEnr.push_back(HWW);
@@ -297,7 +308,7 @@ void SSDLPlotter::init(TString filename){
 	// fMCBGEMEnr.push_back(QCDEM20);
 	fMCBGEMEnr.push_back(QCDEM30);
 	fMCBGEMEnr.push_back(QCDEM80);
-	fMCBGEMEnr.push_back(QCDEM170);
+	//	fMCBGEMEnr.push_back(QCDEM170);
 	fMCBGEMEnr.push_back(QCDEM250);
 	fMCBGEMEnr.push_back(QCD50);
 	fMCBGEMEnr.push_back(QCD80);
@@ -313,14 +324,16 @@ void SSDLPlotter::init(TString filename){
 	// fEMEnr.push_back(QCDEM20);
 	fEMEnr.push_back(QCDEM30);
 	fEMEnr.push_back(QCDEM80);
-	fEMEnr.push_back(QCDEM170);
+	//	fEMEnr.push_back(QCDEM170);
 	fEMEnr.push_back(QCDEM250);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
 
 
 	fMCRareSM.push_back(ZZ);
-	// marc fMCRareSM.push_back(GVJets);
+	//V2	fMCRareSM.push_back(GVJets);
+	fMCRareSM.push_back(WGstarMu);
+	fMCRareSM.push_back(WGstarTau);
 	fMCRareSM.push_back(DPSWW);
 	// if(gEWKino || gTTHBG)  fMCRareSM.push_back(TTbarH);
 	if(gEWKino || gTTHBG)  { fMCBGEMEnr.push_back(HWW); fMCBGEMEnr.push_back(HZZ); fMCBGEMEnr.push_back(HTauTau); }
@@ -396,7 +409,7 @@ void SSDLPlotter::init(TString filename){
 void SSDLPlotter::doSMSscans(TString region, TString file, TString model){
         // This macro runs over the the SMS scans 
         // TString pathtofile = ""; //"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/";
-        // TString filename   = "/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
+  //        TString filename   = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/mdunser/SSDLTrees/2012/Oct15/SMS-TChiSlepSnu_Mchargino-100to1000_mLSP-0to975_8TeV-Pythia6Z_4.root";  
 	// TString filename   = "/shome//mdunser/xsecfiles/output_38.root";  
 
 	// bool for the low-pt analysis...
@@ -404,6 +417,7 @@ void SSDLPlotter::doSMSscans(TString region, TString file, TString model){
 	
 	cout << "Running Over region: " << region << endl;
 	cout << "On file: " << file << endl;
+	//	scanSMS(file, gRegion[region]);
 	scanModelGeneric(file , gRegion[region], model, lowpt);
 }
 void SSDLPlotter::doAnalysis(){
@@ -423,8 +437,9 @@ void SSDLPlotter::doAnalysis(){
 	fillRatios(fMuData, fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBGEMEnr, 1);
 	storeWeightedPred(gRegion[gBaseRegion]);
-
-
+	ttG_SR0 = setTTGammaPred(gRegion["SR00"]);
+	
+	
 //SANTI	makeOSSFEfficiency();
 //SANTI	// ------------------- the following is for testing and closure things
 	// fill fake ratios to run closure tests
@@ -449,14 +464,15 @@ void SSDLPlotter::doAnalysis(){
 
 	//	makeOriginPlots(gRegion["Baseline"]);
 	//	printOrigins(gRegion["Baseline"]);
-	// makeOriginPlots(HT0MET120);
-	// printOrigins(HT0MET120);
-	// makeOriginPlots(HT0MET120lV);
-	// printOrigins(HT0MET120lV);
-	 
-	// makeMuIsolationPlots(true); // if true, loops on TTbar sample
-	// makeElIsolationPlots(true); // if true, loops on TTbar sample
-	// makeElIdPlots();
+	makeOriginPlots(gRegion["HT0MET120"]);
+	printOrigins(gRegion["HT0MET120"]);
+	makeOriginPlots(gRegion["HT0MET120lV"]);
+	printOrigins(gRegion["HT0MET120lV"]);
+	//	makeOriginPlots(gRegion["HT0MET120NJ2bVlV"]);
+	//	printOrigins(gRegion["HT0MET120NJ2bVlV"]);
+	makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	makeElIsolationPlots(true); // if true, loops on TTbar sample
+	//	makeElIdPlots();
 	// makeNT2KinPlots(false);
 	// makeNT2KinPlots(true);
 	//	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
@@ -6300,12 +6316,10 @@ void SSDLPlotter::drawMIDIsolationPlots(TString title, gChannel chan, gFPSwitch 
 //	TH1D *hMID400iso = (TH1D*)hMID400iso2->Clone();
 //	TH1D *hMID15iso  = (TH1D*)hMID15iso2 ->Clone();
 	
-	
 	hMID24iso ->Rebin(4);
 	hMID500iso->Rebin(4);
 	hMID400iso->Rebin(4);
 	hMID15iso ->Rebin(4);
-	
 	
 	hMID24iso ->Scale(1./hMID24iso ->Integral());
 	hMID500iso->Scale(1./hMID500iso->Integral());
@@ -7279,7 +7293,6 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM4.open(combotool.Data(), ios::trunc);
 	fOUTSTREAM4 << "{" << endl;
 
-	
 	if (gDoWZValidation) makeWZValidation(sspreds.at(gRegion["WZEnriched"]));
 	
 	// Produce Datacards only for certain regions.
@@ -7392,6 +7405,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 				   sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg,sqrt(sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_err + sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat*sspreds[gRegion["HT0MET120NJ2bVlV"]].bkg_stat),
 				   sspreds[gRegion["HT0MET200"]]       .bkg,sqrt(sspreds[gRegion["HT0MET200"]]       .bkg_err*sspreds[gRegion["HT0MET200"]]       .bkg_err + sspreds[gRegion["HT0MET200"]]       .bkg_stat*sspreds[gRegion["HT0MET200"]]       .bkg_stat),
 				   sspreds[gRegion["HT0MET200lV"]]     .bkg,sqrt(sspreds[gRegion["HT0MET200lV"]]     .bkg_err*sspreds[gRegion["HT0MET200lV"]]     .bkg_err + sspreds[gRegion["HT0MET200lV"]]     .bkg_stat*sspreds[gRegion["HT0MET200lV"]]     .bkg_stat)) << endl;			  
+		fOUTSTREAM << "    \\hline" << endl; 
 		fOUTSTREAM << Form(" Data           & %d & %d & %d & %d \\\\",
 				   sspreds[gRegion["HT0MET120NJ2bV"]]  .obs,
 				   sspreds[gRegion["HT0MET120NJ2bVlV"]].obs,
@@ -8395,7 +8409,7 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 	const float FakeESyst  = 0.5;
 	const float FakeESyst2 = FakeESyst*FakeESyst;
 
-	const float WZESyst  = 0.08;
+	const float WZESyst  = 0.15;
 	const float WZESyst2 = WZESyst*WZESyst;
 
 	musamples  = fMuData;
@@ -8733,9 +8747,11 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 
  	vector<int> mcbkg;
 	mcbkg.push_back(ZZ);
-	// marc mcbkg.push_back(GVJets);
+	//V2	mcbkg.push_back(GVJets);
+	mcbkg.push_back(WGstarMu);
+	mcbkg.push_back(WGstarTau);
  	mcbkg.push_back(DPSWW);
-	// mcbkg.push_back(TTbarH);
+	//	mcbkg.push_back(TTbarH);
 	mcbkg.push_back(HWW);
 	mcbkg.push_back(HZZ);
 	mcbkg.push_back(HTauTau);
@@ -8751,25 +8767,51 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  	mcbkg.push_back(WWW);
  	mcbkg.push_back(ZZZ);
  	for(size_t i = 0; i < mcbkg.size(); ++i){
- 		Sample *S = fSamples[mcbkg[i]];
- 		float scale = fLumiNorm/S->getLumi();
-  		
- 		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
- 		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
- 		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
- 
- 		nt2_rare_mc_mm += temp_nt2_mm;
- 		nt2_rare_mc_em += temp_nt2_em;
- 		nt2_rare_mc_ee += temp_nt2_ee;
- 
- 		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
- 		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
- 		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
- 
- 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
- 		temp_nt2_mm, gMMTrigScale*S->numbers[reg][Muon].tt_avweight * scale*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
- 		temp_nt2_em, gEMTrigScale*S->numbers[reg][ElMu].tt_avweight * scale*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
- 		temp_nt2_ee, gEETrigScale*S->numbers[reg][Elec].tt_avweight * scale*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
+	        float temp_nt2_mm(0.),    temp_nt2_em(0.),    temp_nt2_ee(0.); 
+	        float temp_nt2_mm_e1(0.), temp_nt2_em_e1(0.), temp_nt2_ee_e1(0.); 
+		Sample *S = fSamples[mcbkg[i]];
+		TString regname = gRegions[reg]->sname;
+		bool useTTGSF = (regname.Contains("SR") && !(regname=="SR00" || regname=="SR10" || regname=="SR20"));
+		int SR = getSRNumber(reg);
+ 		if (mcbkg[i] == TTbarG && useTTGSF && SR<29){ //Change TTbarG estimation by TTbar with SF
+			std::pair<float,float> ttG;
+			
+			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_mm, ttG_SR0.err_mm);
+			temp_nt2_mm    = ttG.first;  
+			temp_nt2_mm_e1 = ttG.second;
+
+			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_em, ttG_SR0.err_em);
+			temp_nt2_em    = ttG.first;  
+			temp_nt2_em_e1 = ttG.second;
+			
+			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_ee, ttG_SR0.err_ee);
+			temp_nt2_ee    = ttG.first;  
+			temp_nt2_ee_e1 = ttG.second;
+		}
+		else {
+		        float scale = fLumiNorm/S->getLumi();
+
+			temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+			temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+			temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+			
+			temp_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries());
+			temp_nt2_em_e1 = gEMTrigScale*gEMTrigScale*scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+			temp_nt2_ee_e1 = gEETrigScale*gEETrigScale*scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
+		}
+		nt2_rare_mc_mm += temp_nt2_mm;
+		nt2_rare_mc_em += temp_nt2_em;
+		nt2_rare_mc_ee += temp_nt2_ee;
+		
+		nt2_rare_mc_mm_e1 += temp_nt2_mm_e1;
+		nt2_rare_mc_em_e1 += temp_nt2_em_e1;
+		nt2_rare_mc_ee_e1 += temp_nt2_ee_e1;
+		
+		
+		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
+			    temp_nt2_mm, sqrt(temp_nt2_mm_e1),
+			    temp_nt2_em, sqrt(temp_nt2_em_e1),
+			    temp_nt2_ee, sqrt(temp_nt2_ee_e1));
  	}
  	OUT << "----------------------------------------------------------------------------------------------" << endl;
  	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
@@ -9557,7 +9599,9 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, int reg){
 	vector<int> mcbkg;
 	//mcbkg.push_back(WZ);
 	mcbkg.push_back(ZZ);
-	// marc mcbkg.push_back(GVJets);
+	//V2	mcbkg.push_back(GVJets);
+	mcbkg.push_back(WGstarMu);
+	mcbkg.push_back(WGstarTau);
 	mcbkg.push_back(DPSWW);
 	// if (!separateTTH) mcbkg.push_back(TTbarH);
 	if (!separateTTH) { mcbkg.push_back(HWW); mcbkg.push_back(HZZ); mcbkg.push_back(HTauTau); }
@@ -12106,7 +12150,7 @@ void SSDLPlotter::makeDiffPrediction(){
 			
 			delete FR;
 		}
-		
+
 		if (gBaseRegion != "WZEnriched") {
      		nt11_sf->Add(nt11_mm_sf);
 			nt11_sf->Add(nt11_ee_sf);
@@ -12585,8 +12629,8 @@ void SSDLPlotter::makeDiffPrediction(){
 		if (plotRatios)	{
 		  p_ratio->Draw();
 		  p_ratio->cd();
-		  rat->SetMaximum(1.8);
-		  rat->SetMinimum(0.2);
+		  rat->SetMaximum(2.0);
+		  rat->SetMinimum(0.0);
 		  rat->DrawCopy("E2");
 		  l3->SetLineWidth(2);
 		  l3->SetLineStyle(7);
@@ -12640,8 +12684,8 @@ void SSDLPlotter::makeDiffPrediction(){
 		  p_plot->Draw();
 		  p_ratio->Draw();
 		  p_ratio->cd();
-		  rat_mm->SetMaximum(1.8);
-		  rat_mm->SetMinimum(0.2);
+		  rat_mm->SetMaximum(2.0);
+		  rat_mm->SetMinimum(0.0);
 		  rat_mm->DrawCopy("E2");
 		  l3 = new TLine(nt11_mm->GetXaxis()->GetXmin(), 1.00, nt11_mm->GetXaxis()->GetXmax(), 1.00);
 		  l3->SetLineWidth(2);
@@ -12696,8 +12740,8 @@ void SSDLPlotter::makeDiffPrediction(){
 		  p_plot->Draw();
 		  p_ratio->Draw();
 		  p_ratio->cd();
-		  rat_ee->SetMaximum(1.8);
-		  rat_ee->SetMinimum(0.2);
+		  rat_ee->SetMaximum(2.0);
+		  rat_ee->SetMinimum(0.0);
 		  rat_ee->DrawCopy("E2");
 		  l3 = new TLine(nt11_ee->GetXaxis()->GetXmin(), 1.00, nt11_ee->GetXaxis()->GetXmax(), 1.00);
 		  l3->SetLineWidth(2);
@@ -12751,8 +12795,8 @@ void SSDLPlotter::makeDiffPrediction(){
 		  p_plot->Draw();
 		  p_ratio->Draw();
 		  p_ratio->cd();
-		  rat_em->SetMaximum(1.8);
-		  rat_em->SetMinimum(0.2);
+		  rat_em->SetMaximum(2.0);
+		  rat_em->SetMinimum(0.0);
 		  rat_em->DrawCopy("E2");
 		  l3 = new TLine(nt11_em->GetXaxis()->GetXmin(), 1.00, nt11_em->GetXaxis()->GetXmax(), 1.00);
 		  l3->SetLineWidth(2);
@@ -12932,7 +12976,9 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	vector<int> raremc;
 //	raremc.push_back(WZ);
 	raremc.push_back(ZZ);
-	// marc raremc.push_back(GVJets);
+	//V2	raremc.push_back(GVJets);
+	raremc.push_back(WGstarMu);
+	raremc.push_back(WGstarTau);
 	raremc.push_back(DPSWW);
 	raremc.push_back(TTbarG);
 	// if (!separateTTH) {raremc.push_back(TTbarH);}
@@ -14607,10 +14653,10 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, int re
  	OUT.close();
  	delete FR;
 }
-void SSDLPlotter::makeWZValidation(SSPrediction pred){
+void SSDLPlotter::makeWZValidation(SSPrediction pred, TString label){
         fOutputSubDir = "WZValidation/";
 	TString outputdir = Util::MakeOutputDir(fOutputDir + fOutputSubDir);
-	TString outputname = outputdir + "WZValidation.txt";
+	TString outputname = outputdir + "WZValidation"+label+".txt";
 	
 	
 	////////////////////////////////////////
@@ -14824,8 +14870,8 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	  gPad->RedrawAxis();
 	  c_temp->Update();
 	  
-	  Util::PrintPDF(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
-	  Util::PrintPNG(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
+	  Util::PrintPDF(c_temp, KinPlots::var_name[i]+label, fOutputDir + fOutputSubDir);
+	  //	  Util::PrintPNG(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
 	  
 	  // LOG
 	  hvar_mc_s[i]->SetMaximum(5.*max);
@@ -14843,7 +14889,7 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	  if(i < 5)  lat->DrawLatex(0.14,0.85, "ee/e#mu/#mu#mu");
 	  if(i == 5) lat->DrawLatex(0.14,0.85, "ee/#mu#mu");
 	  if(i == 6) lat->DrawLatex(0.14,0.85, "#mu#mu");
-	  if(i == 7) lat->DrawLatex(0.14,0.85, "ee");
+ 	  if(i == 7) lat->DrawLatex(0.14,0.85, "ee");
 	  if(i == 8) lat->DrawLatex(0.14,0.85, "e#mu");
 	  if(i > 8)  lat->DrawLatex(0.14,0.85, "ee/e#mu/#mu#mu");
 	  
@@ -14851,8 +14897,8 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	  gPad->RedrawAxis();
 	  c_temp->Update();
 
-	  Util::PrintPDF(c_temp, KinPlots::var_name[i]+"_log", fOutputDir + fOutputSubDir);  
-	  Util::PrintPNG(c_temp, KinPlots::var_name[i]+"_log", fOutputDir + fOutputSubDir);  
+	  Util::PrintPDF(c_temp, KinPlots::var_name[i]+label+"_log", fOutputDir + fOutputSubDir);  
+	  //	  Util::PrintPNG(c_temp, KinPlots::var_name[i]+"_log", fOutputDir + fOutputSubDir);  
 	  
 	  delete gr_obs;
 	  delete c_temp;
@@ -14867,7 +14913,10 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " " << endl;
 	
- 	float finalWZ = hvar_wz[1] ->GetEntries();
+ 	float finalWZ    = hvar_wz[1] ->GetEntries();
+ 	float finalWZ_mm = hvar_wz[6] ->GetEntries();
+ 	float finalWZ_em = hvar_wz[8] ->GetEntries();
+ 	float finalWZ_ee = hvar_wz[7] ->GetEntries();
 	
 	Double_t rare(0.),    wz(0.),    top(0.),    ewk(0.),    qcd(0.);
 	Double_t rare_mm(0.), wz_mm(0.), top_mm(0.), ewk_mm(0.), qcd_mm(0.);
@@ -14899,7 +14948,28 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	qcd_mm  = hvar_qcd [6]->IntegralAndError(0,1000.,qcd_err_mm );
 	qcd_ee  = hvar_qcd [7]->IntegralAndError(0,1000.,qcd_err_ee );
 	qcd_em  = hvar_qcd [8]->IntegralAndError(0,1000.,qcd_err_em );
-		
+	
+	// SYST. PROPAGATION OF BKG
+	rare_err    = sqrt(rare_err   *rare_err    + 0.5*rare   *rare   );
+	rare_err_mm = sqrt(rare_err_mm*rare_err_mm + 0.5*rare_mm*rare_mm);
+	rare_err_em = sqrt(rare_err_em*rare_err_em + 0.5*rare_em*rare_em);
+	rare_err_ee = sqrt(rare_err_ee*rare_err_ee + 0.5*rare_ee*rare_ee);
+
+	top_err     = sqrt(top_err   *top_err    + 0.5*top   *top   );
+	top_err_mm  = sqrt(top_err_mm*top_err_mm + 0.5*top_mm*top_mm);
+	top_err_em  = sqrt(top_err_em*top_err_em + 0.5*top_em*top_em);
+	top_err_ee  = sqrt(top_err_ee*top_err_ee + 0.5*top_ee*top_ee);
+
+	qcd_err     = sqrt(qcd_err   *qcd_err    + 0.5*qcd   *qcd   );
+	qcd_err_mm  = sqrt(qcd_err_mm*qcd_err_mm + 0.5*qcd_mm*qcd_mm);
+	qcd_err_em  = sqrt(qcd_err_em*qcd_err_em + 0.5*qcd_em*qcd_em);
+	qcd_err_ee  = sqrt(qcd_err_ee*qcd_err_ee + 0.5*qcd_ee*qcd_ee);
+
+	ewk_err     = sqrt(ewk_err   *ewk_err    + 0.2*ewk   *ewk   );
+	ewk_err_mm  = sqrt(ewk_err_mm*ewk_err_mm + 0.2*ewk_mm*ewk_mm);
+	ewk_err_em  = sqrt(ewk_err_em*ewk_err_em + 0.2*ewk_em*ewk_em);
+	ewk_err_ee  = sqrt(ewk_err_ee*ewk_err_ee + 0.2*ewk_ee*ewk_ee);
+	
 	float obsbkg_mm(0) , obsbkg_em(0) , obsbkg_ee(0) , obsbkg(0) ;
 	float obspred_mm(0), obspred_em(0), obspred_ee(0), obspred(0);
 	float obsbkg_err_mm(0) , obsbkg_err_em(0) , obsbkg_err_ee(0) , obsbkg_err(0) ;
@@ -14922,7 +14992,7 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	OUT << "-------------------------------------------------------------------------------------------" << endl;
  	OUT << "       SUMMARY   ||     Mu/Mu      ||      E/Mu      ||       E/E      ||      TOTAL     ||" << endl;
  	OUT << "===========================================================================================" << endl;
-	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "W/Z/WW/WZ",
+	OUT << Form("%16s || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f || %6.2f ± %5.2f ||\n", "W/Z/WW/ZZ",
 		    ewk_mm, ewk_err_mm,
 		    ewk_em, ewk_err_em, 
 		    ewk_ee, ewk_err_ee,
@@ -14999,20 +15069,30 @@ void SSDLPlotter::makeWZValidation(SSPrediction pred){
 	OUT << Form("Syst. (HT) :  Abs. = %4.3f ---> Err. Weighted = %4.3f",  ht_absolute,  ht_weighted) << endl ;
 		
 	/// CALCULATE XSECTION
-	float eff    = finalWZ / 2011253;
-	float W2e    = 0.1075;
-	float W2m    = 0.1057;
-	float W2tau  = 0.1125;
-	float Z2ll   = 0.033658;
-	float WZ3lnu = 3*Z2ll*(W2e + W2m + W2tau);	//	float WZ3lnu = 0.04036309056;
-	float xsec   = (pred.obs - (rare + ewk + top + qcd))/(eff * fLumiNorm * WZ3lnu);
+	float nWZgen  = 1428711; //2011253;
+	float eff     = finalWZ / nWZgen; 
+	float eff_mm  = finalWZ_mm / nWZgen; 
+	float eff_em  = finalWZ_em / nWZgen; 
+	float eff_ee  = finalWZ_ee / nWZgen; 
+	float W2e     = 0.1075;
+	float W2m     = 0.1057;
+	float W2tau   = 0.1125;
+	float Z2ll    = 0.033658;
+	float WZ3lnu  = 3*Z2ll*(W2e + W2m + W2tau);	//	float WZ3lnu = 0.04036309056;
+	float xsec    = (pred.obs - (rare + ewk + top + qcd))/(eff * fLumiNorm * WZ3lnu);
+	float xsec_mm = (pred.obs_mm - (rare_mm + ewk_mm + top_mm + qcd_mm))/(eff_mm * fLumiNorm * WZ3lnu);
+	float xsec_em = (pred.obs_em - (rare_em + ewk_em + top_em + qcd_em))/(eff_em * fLumiNorm * WZ3lnu);
+	float xsec_ee = (pred.obs_ee - (rare_ee + ewk_ee + top_ee + qcd_ee))/(eff_ee * fLumiNorm * WZ3lnu);
 	OUT << endl;
 	OUT << endl;
-	OUT << "The total WZ cross-section is: " << xsec << " ± " << syst1*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
-	xsec = (pred.obs - (rare + ewk + qcd + top))/(eff * fLumiNorm);
-	OUT << "The WZ->3l3N cross-section is: " << xsec << " ± " << syst1*xsec <<" (syst) ± " << obsbkg_err*xsec << " (stat) ± " << 0.044*xsec << " (lumi)" << endl;
+	OUT << "The total WZ cross-section is     : " << xsec    << " ± " << syst1*xsec    <<" (syst) ± " << obsbkg_err*xsec    << " (stat) ± " << 0.044*xsec    << " (lumi)" << endl;
+	OUT << "The       WZ cross-section is (MM): " << xsec_mm << " ± " << syst1*xsec_mm <<" (syst) ± " << obsbkg_err*xsec_mm << " (stat) ± " << 0.044*xsec_mm << " (lumi)" << endl;
+	OUT << "The       WZ cross-section is (EM): " << xsec_em << " ± " << syst1*xsec_em <<" (syst) ± " << obsbkg_err*xsec_em << " (stat) ± " << 0.044*xsec_em << " (lumi)" << endl;
+	OUT << "The       WZ cross-section is (EE): " << xsec_ee << " ± " << syst1*xsec_ee <<" (syst) ± " << obsbkg_err*xsec_ee << " (stat) ± " << 0.044*xsec_ee << " (lumi)" << endl;
 	OUT << "-------------------------------------------------------------" << endl;
-
+	OUT << "The theoretical WZ x-section (MCFM) is 21.60 pb" << endl;
+	OUT << "-------------------------------------------------------------" << endl;
+	
 	fOutputSubDir = "IntPredictions/";
 }
 void SSDLPlotter::makeAllClosureTestsTTW(){
@@ -16331,7 +16411,7 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			if(njets     < gRegions[r]->minNjets  || njets     > gRegions[r]->maxNjets )   continue;
 			if(nbjets    < gRegions[r]->minNbjets || nbjets    > gRegions[r]->maxNbjets)   continue;
 			if(nbjetsmed < gRegions[r]->minNbjmed || nbjetsmed > gRegions[r]->maxNbjmed)   continue;
-			if(gRegions[r]->app3rdVet  != 0       && pass3rdVeto == 1)                     continue;
+			if(gRegions[r]->app3rdVet  != 0       && pass3rdVeto == 0)                     continue; /// THIS HAS TO BE CHANGED TO 0 !!! 
 			if(gRegions[r]->chargeVeto != 0       && (charge == gRegions[r]->chargeVeto) ) continue;
 			   
 			if(passesPtCuts(pT1, pT2, r, chan) == false) continue;
@@ -16453,7 +16533,21 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 	}
 	delete FR;
 }
+ttGpred SSDLPlotter::setTTGammaPred(int baseregion){
+        ttGpred pred;
+	Sample *S = fSamples[TTbarG];
+	float scale = fLumiNorm/S->getLumi();
 
+	pred.val_mm = scale*S->region[baseregion][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	pred.val_em = scale*S->region[baseregion][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	pred.val_ee = scale*S->region[baseregion][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+
+	pred.err_mm = S->numbers[baseregion][Muon].tt_avweight * scale*S->getError(S->region[baseregion][HighPt].mm.nt20_pt->GetEntries());
+	pred.err_em = S->numbers[baseregion][ElMu].tt_avweight * scale*S->getError(S->region[baseregion][HighPt].em.nt20_pt->GetEntries());
+	pred.err_ee = S->numbers[baseregion][Elec].tt_avweight * scale*S->getError(S->region[baseregion][HighPt].ee.nt20_pt->GetEntries());
+	
+        return pred;
+}
 float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
@@ -17630,7 +17724,8 @@ void SSDLPlotter::drawTopLine(float rightedge, float scale, float leftedge){
 	fLatex->DrawLatex(leftedge,0.92, "CMS Preliminary");
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(scale*0.04);
-	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.1f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
+	//OLD	fLatex->DrawLatex(rightedge,0.92, Form("L = %4.1f fb^{-1} at #sqrt{s} = 8 TeV", fLumiNorm/1000.));
+	fLatex->DrawLatex(rightedge,0.92, Form("#sqrt{s} = 8 TeV, L_{int} = %4.1f fb^{-1}", fLumiNorm/1000.)); //EWKINO
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	return;
 }
@@ -18061,7 +18156,8 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 			float nGenRight    = TChiRight_nTot_[x]->GetBinContent(nGenBin);
 			float weight       = fLumiNorm * nloXsec / nGen;
 			float weightRight  = fLumiNorm * nloXsec / nGenRight;
-
+			float idsf(-999.), trigsf(-999.);
+			
 			int mu1(-1), mu2(-1);
 			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
 				// if(pass3rdVeto && !passes3rdLepVeto()) continue;
@@ -18069,15 +18165,17 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 					n_tot++;
 					if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
 					signalTot++;
+					idsf   = getLeptonSFMu(MuPt[mu1], MuEta[mu1])*getLeptonSFMu(MuPt[mu2], MuEta[mu2]);
+					trigsf = getTriggerSFMuMu(MuEta[mu2]);
 					if (verbose) fOUTSTREAM << Form("MM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1], isTChiSlepSnu) << endl ;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gMMTrigScale);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * idsf*trigsf);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * gMMTrigScale);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * idsf*trigsf);
 						}
 					}
 					nMM++;
@@ -18092,15 +18190,18 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 					n_tot++;
 					if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
 					signalTot++;
+					idsf   = getLeptonSFMu(MuPt[mu], MuEta[mu])*getLeptonSFEl(ElPt[el], ElEta[el]);
+					trigsf = getTriggerSFMuEl();
+
 					if (verbose) fOUTSTREAM << Form("EM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu1], isTChiSlepSnu) << endl ;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gEMTrigScale);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * idsf*trigsf);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * gEMTrigScale);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight * idsf*trigsf);
 						}
 					}
 					nEM++;
@@ -18115,15 +18216,18 @@ void SSDLPlotter::scanSMS( const char * filestring, int reg){
 					n_tot++;
 					if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
 					signalTot++;
+					idsf   = getLeptonSFEl(ElPt[el1], ElEta[el1])*getLeptonSFEl(ElPt[el2], ElEta[el2]);
+					trigsf = getTriggerSFElEl(ElPt[el2]);
+
 					if (verbose) fOUTSTREAM << Form("EE - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d | SlepSnu: %2i", mGlu, mLSP, getHT(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1], isTChiSlepSnu) << endl ;
 					TChi_nPass_[x] [i]-> Fill(mGlu, mLSP);
 					if (i==0) {
-						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * gEETrigScale);
+						TChi_yield_ [x]-> Fill(mGlu, mLSP, weight * idsf*trigsf);
 					}
 					if (isRightHanded == 1 && isTChiSlepSnu == 0){
 						TChiRight_nPass_[x] [i]-> Fill(mGlu, mLSP);
 						if (i==0) {
-							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight* gEETrigScale);
+							TChiRight_yield_ [x]-> Fill(mGlu, mLSP, weightRight* idsf*trigsf);
 						}
 					}
 					nEE++;

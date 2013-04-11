@@ -105,7 +105,8 @@ public:
 		// QCD samples
 		QCDMuEnr15,
 		QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
-		QCDEM30, QCDEM80, QCDEM170, QCDEM250, QCDEM350,
+		QCDEM30, QCDEM80, //QCDEM170, 
+		QCDEM250, QCDEM350,
 		QCDbEnr50, QCDbEnr150,
 		gNSAMPLES
 	};
@@ -474,6 +475,7 @@ public:
 //		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots    kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 	        KinPlots    kinplots_wz[gNKinSels];
+	        KinPlots    kinplots_wz2l[gNKinSels];
 	        IsoPlots    isoplots[2]; // e and mu
  	        IdPlots     idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
@@ -531,7 +533,9 @@ public:
 			    (sname) == "WWW"       ||
 			    (sname) == "W+W+"      ||
 			    (sname) == "W-W-")     return 4;
-			if( (sname.Contains("GVJets"))    ||
+			if( (sname.Contains("GVJets"))    || 
+			    (sname.Contains("WGstarMu"))  || 
+			    (sname.Contains("WGstarTau")) ||
 			    (sname.Contains("WWTo2L2Nu")) ||
 			    (sname.Contains("WZTo3LNu"))  ||
 			    (sname.Contains("ZZTo4L")) ) return 5;
@@ -550,8 +554,12 @@ public:
 			if(sname.Contains("WWTo2L2Nu"))                 return 6; 
 			if(sname.Contains("WZTo3LNu"))                  return 7; 
 			if(sname.Contains("ZZTo4L"))                    return 8; 
-			if(sname.Contains("GVJets"))                    return 9; 
-			if(sname == "HWW" || sname == "HZZ" || sname == "HTauTau") return 10;
+			if(sname.Contains("GVJets") ||
+			   sname.Contains("WGstarMu") ||
+			   sname.Contains("WGstarTau"))                 return 9; 
+			if(sname == "HWW" || 
+			   sname == "HZZ" || 
+			   sname == "HTauTau")                          return 10;
 			if(sname == "TTbarW")                           return 11;
 			if(sname == "TTbarZ")                           return 12;
 			if(sname == "TTbarG")                           return 13;
@@ -675,6 +683,7 @@ public:
 	void fillPileUpPlots(Sample*);
         void fillKinPlots(Sample*, int);
         void fillSyncCounters(Sample*); 
+        void fillPuritiesCounters(Sample*); 
 	
 	//////////////////////////////
 	// I/O
@@ -747,11 +756,11 @@ public:
 	virtual int   getFarestJet(int, gChannel, float = 20.);
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
-	
 	virtual int getNTightMuons();
 	virtual int getNTightElectrons();
 	virtual float getTightPt(int=0);
 	virtual float getJetsPt (int=0);
+        virtual int   getSRNumber(int);
 	
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
@@ -1001,7 +1010,11 @@ public:
 	
 	Monitor fCounter[3];	
         Monitor fCounterSync[3];
+        Monitor fCounterPurities[3];
+        Monitor fCounterWZ[3];
 	vector<string> fSyncCutNames;
+	vector<string> fPuritiesCutNames;
+	vector<string> fWZCutNames;
 };
 
 #endif

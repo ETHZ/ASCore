@@ -100,7 +100,7 @@ int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]      = {  20 ,  15 , 
 float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]       = {   0.,  50.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
 float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]       = {1000., 350.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
-                                                                   "Particle Flow ME_{T} [GeV]",
+                                                                   "E_{T}^{miss} [GeV]",
                                                                    "Jet Multiplicity",
                                                                    "Leading Lepton p_{T} [GeV]",
                                                                    "Subleading Lepton p_{T} [GeV]",
@@ -130,14 +130,14 @@ TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", 
 int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET2Bins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
 double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET2Bins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} [GeV]",
-                                                                          "Particle Flow ME_{T} [GeV]",
+                                                                          "E_{T}^{miss} [GeV]",
                                                                           "Jet Multiplicity",
                                                                           "M_{T2} [GeV]",
                                                                           "Leading Lepton p_{T} [GeV]",
                                                                           "Subleading Lepton p_{T} [GeV]",
                                                                           "b-Jet Multiplicity (loose)",
-                                                                          "Particle Flow ME_{T} [GeV]",
-                                                                          "Particle Flow ME_{T} [GeV]",
+                                                                          "E_{T}^{miss} [GeV]",
+                                                                          "E_{T}^{miss} [GeV]",
                                                                           "b-Jet Multiplicity (medium)",
                                                                           "b-Jet Multiplicity (medium)"};
 
@@ -535,8 +535,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		
 		gEventWeight  = gHLTSF * gBtagSF;
 		if( S->datamc!=4 ) gEventWeight *= PUWeight; // no pu weight for mc with no pu, that really doesn't exist anymore in 2012, so it's fine
-
-
+		
 		fillKinPlots(S,gRegion[gBaseRegion]);
 		if (gDoWZValidation) fillKinPlots(S,gRegion["WZEnriched"]);
 
@@ -568,6 +567,7 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		fillPileUpPlots(S);
 		//		fillSyncCounters(S);
+		fillPuritiesCounters(S);
 		/////////////////////////////////////////////
 		// Systematic studies
 		if(!gDoSystStudies) continue;
@@ -2614,6 +2614,68 @@ void SSDLDumper::fillPileUpPlots(Sample *S){
 	}
 	resetHypLeptons();
 }
+void SSDLDumper::fillPuritiesCounters(Sample *S){
+	resetHypLeptons();
+	setRegionCuts(gRegion[gBaseRegion]);
+	
+	fCurrentChannel = Muon;
+	int mu1(-1), mu2(-1);
+	if(mumuSignalTrigger()){ // Trigger selection
+	        fCounterPurities[Muon].fill(fPuritiesCutNames[0]);
+		if(isSSLLMuEvent(mu1, mu2)){
+		        fCounterPurities[Muon].fill(fPuritiesCutNames[1]);
+			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+				fCounterPurities[Muon].fill(fPuritiesCutNames[2]);  
+			}  
+		}
+		resetHypLeptons();
+		fChargeSwitch = 1;
+		if(isSSLLMuEvent(mu1, mu2)){
+			fCounterPurities[Muon].fill(fPuritiesCutNames[3]); 
+		}
+		fChargeSwitch = 0;
+	}
+	resetHypLeptons();
+
+	fCurrentChannel = Elec;
+	int el1(-1), el2(-1);
+	if(elelSignalTrigger()){ // Trigger selection
+	        fCounterPurities[Elec].fill(fPuritiesCutNames[0]);
+		if(isSSLLElEvent(el1, el2)){
+		        fCounterPurities[Elec].fill(fPuritiesCutNames[1]);
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				fCounterPurities[Elec].fill(fPuritiesCutNames[2]);  
+			}  
+		}
+		resetHypLeptons();
+		fChargeSwitch = 1;
+		if(isSSLLElEvent(el1, el2)){
+			fCounterPurities[Elec].fill(fPuritiesCutNames[3]); 
+		}
+		fChargeSwitch = 0;
+	}
+	resetHypLeptons();
+	
+	fCurrentChannel = ElMu;
+	int mu(-1), el(-1);
+	if(elmuSignalTrigger()){ // Trigger selection
+	        fCounterPurities[ElMu].fill(fPuritiesCutNames[0]);
+		if(isSSLLElMuEvent(mu, el)){
+		        fCounterPurities[ElMu].fill(fPuritiesCutNames[1]);
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				fCounterPurities[ElMu].fill(fPuritiesCutNames[2]);  
+			}  
+		}
+		resetHypLeptons();
+		fChargeSwitch = 1;
+		if(isSSLLElMuEvent(mu, el)){
+			fCounterPurities[ElMu].fill(fPuritiesCutNames[3]); 
+		}
+		fChargeSwitch = 0;
+	}
+	resetHypLeptons();
+	
+}
 void SSDLDumper::fillSyncCounters(Sample *S){
   resetHypLeptons();
   if (!gDoSyncExercise) return;
@@ -2797,6 +2859,11 @@ void SSDLDumper::initCutNames(){
 	fSyncCutNames.push_back(" + pfmet > 10"); //6
 	fSyncCutNames.push_back(" + t1met > 10"); //7
 
+	fPuritiesCutNames.push_back(" Trigger      "); //0
+	fPuritiesCutNames.push_back(" Used SS      "); //1
+	fPuritiesCutNames.push_back(" Used SS Tight"); //2
+	fPuritiesCutNames.push_back(" Used OS      "); //3
+
 }
 void SSDLDumper::initCounters(){
 	fCounter[Muon].fill(fMMCutNames[0],  0.);
@@ -2882,6 +2949,30 @@ void SSDLDumper::initCounters(){
 	fCounterSync[ElMu].fill(fSyncCutNames[5], 0.);
 	fCounterSync[ElMu].fill(fSyncCutNames[6], 0.);
 	fCounterSync[ElMu].fill(fSyncCutNames[7], 0.);
+	
+
+	fCounterPurities[Muon].fill(fPuritiesCutNames[0],0.);
+	fCounterPurities[Muon].fill(fPuritiesCutNames[1],0.);
+	fCounterPurities[Muon].fill(fPuritiesCutNames[2],0.);
+	fCounterPurities[Muon].fill(fPuritiesCutNames[3],0.);
+	fCounterPurities[Elec].fill(fPuritiesCutNames[0],0.);
+	fCounterPurities[Elec].fill(fPuritiesCutNames[1],0.);
+	fCounterPurities[Elec].fill(fPuritiesCutNames[2],0.);
+	fCounterPurities[Elec].fill(fPuritiesCutNames[3],0.);
+	fCounterPurities[ElMu].fill(fPuritiesCutNames[0],0.);
+	fCounterPurities[ElMu].fill(fPuritiesCutNames[1],0.);
+	fCounterPurities[ElMu].fill(fPuritiesCutNames[2],0.);
+	fCounterPurities[ElMu].fill(fPuritiesCutNames[3],0.);
+//
+//	fCounterWZ[Muon].fill(fWZCutNames[0],0.);
+//	fCounterWZ[Muon].fill(fWZCutNames[1],0.);
+//	fCounterWZ[Muon].fill(fWZCutNames[2],0.);
+//	fCounterWZ[Elec].fill(fWZCutNames[0],0.);
+//	fCounterWZ[Elec].fill(fWZCutNames[1],0.);
+//	fCounterWZ[Elec].fill(fWZCutNames[2],0.);
+//	fCounterWZ[ElMu].fill(fWZCutNames[0],0.);
+//	fCounterWZ[ElMu].fill(fWZCutNames[1],0.);
+//	fCounterWZ[ElMu].fill(fWZCutNames[2],0.);
 	
 }
 void SSDLDumper::fillCutFlowHistos(Sample *S){
@@ -4076,7 +4167,7 @@ int  SSDLDumper::readHistos(TString filename){
 			}
 		}
 
-
+		
 		// WZ Kinematic histos
 		for(size_t k = 0; k < gNKinSels; ++k){
 			KinPlots *kp = &S->kinplots_wz[k];
@@ -5045,7 +5136,12 @@ float SSDLDumper::getJetsPt(int n){
 	if (pts.size() < n+1) return -999.;   // return bogus if vector is too small
 	return pts[n];
 }
-
+int  SSDLDumper::getSRNumber(int reg){
+        TString regname = gRegions[reg]->sname;
+	TString regnum  = regname.Remove(0,2);
+	int SRN = atoi(regnum);
+        return SRN;
+}
 void SSDLDumper::resetHypLeptons(){
 	TLorentzVector vec(0., 0., 0., 0.);
 	fHypLepton1 = lepton(vec, 0, -1, -1);
