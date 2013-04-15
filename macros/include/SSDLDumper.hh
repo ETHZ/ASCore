@@ -137,7 +137,7 @@ public:
 		ElMu,
 		Elec,
 		gNCHANNELS
-	};        
+	};
         enum gChMisIdReg {
 	  chmisidreg_begin,
 	  BB = chmisidreg_begin,
@@ -787,7 +787,9 @@ public:
 	virtual bool passesChVeto(int = 1);
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
+//	virtual bool passes3rdLepVeto(int&, int&);
 	virtual bool passes3rdLepVeto();
+	virtual bool passes3rdSFLepVeto(gChannel);
 	virtual bool passesTauVeto();
 	virtual bool passesTTZSel();
         //virtual bool passesGammaStarVeto();
@@ -960,6 +962,7 @@ public:
 	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
 	int         fSETree_ZVeto;   // passes Z veto
 	int         fSETree_3rdVeto; // passes 3rd lepton veto
+	int			fSETree_3rdSFLepVeto; // passes 3rd SF lepton veto
 	int         fSETree_ttZSel;  // passes ttz sel
 	float       fSETree_HT;
 	float       fSETree_MET;
@@ -981,6 +984,11 @@ public:
 	float		fSETree_MVAID2;
 	float		fSETree_medWP1;
 	float		fSETree_medWP2;
+//	float		fSETree_Ml1l3; // invariant mass of 3rd lepton pair
+//	float		fSETree_Ml2l3; // invariant mass of 3rd lepton pair
+//	int			fSETree_Charge3rdLep;
+//	int			fSETree_Flavor3rdLep; // mu(0), el(2)
+//	int			fSETree_TauVeto;
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;

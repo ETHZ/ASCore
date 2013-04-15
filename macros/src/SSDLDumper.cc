@@ -334,6 +334,7 @@ void SSDLDumper::init(){
 
  	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 15.;
+//	fC_maxMt_Control  = 20.;
 	
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
@@ -1691,7 +1692,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	}
 
 
-	int ind1(-1), ind2(-1);
+	int ind1(-1), ind2(-1), mu3(-1), el3(-1);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
@@ -1713,6 +1714,8 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_ZVeto   = passesZVeto()?1:0;
 		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+//		fSETree_3rdVeto = passes3rdLepVeto(mu3, el3)?1:0;
+		fSETree_3rdSFLepVeto = passes3rdSFLepVeto(Muon)?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
 		fSETree_PFIso2  = MuPFIso[ind2];
@@ -1721,6 +1724,19 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
 		fSETree_HLTSF   = getSF(S, Muon, ind1, ind2);
+//		if (mu3 > -1) {
+//			fSETree_Ml1l3			= getMll(ind1, mu3, Muon);
+//			fSETree_Ml2l3			= getMll(ind2, mu3, Muon);
+//			fSETree_Charge3rdLep	= MuCharge[mu3];
+//			fSETree_Flavor3rdLep	= 0;
+//		}
+//		if (el3 > -1) {
+//			fSETree_Ml1l3			= getMll(ind1, el3, ElMu);
+//			fSETree_Ml2l3			= getMll(ind2, el3, ElMu);
+//			fSETree_Charge3rdLep	= ElCharge[el3];
+//			fSETree_Flavor3rdLep	= 2;
+//		}
+//		fSETree_TauVeto	= passesTauVeto()?1:0;
 		fSigEv_Tree->Fill();
 
 		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
@@ -1763,6 +1779,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_ZVeto   = passesZVeto()?1:0;
 		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+		fSETree_3rdSFLepVeto = passes3rdSFLepVeto(ElMu)?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = MuPFIso[ind1];
 		fSETree_PFIso2  = ElPFIso[ind2];
@@ -1817,6 +1834,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		fSETree_ZVeto   = passesZVeto()?1:0;
 		//		gApplyZVeto     = false;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+		fSETree_3rdSFLepVeto = passes3rdSFLepVeto(Elec)?1:0;
 		fSETree_ttZSel  = passesTTZSel()?1:0;
 		fSETree_PFIso1  = ElPFIso[ind1];
 		fSETree_PFIso2  = ElPFIso[ind2];
@@ -1876,6 +1894,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 				fSETree_ZVeto   = passesZVeto()?1:0;
 				//fSETree_ZVeto   = passesZVetoNew(ind1, ind2, 1)?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+				fSETree_3rdSFLepVeto = passes3rdSFLepVeto(ElMu)?1:0;
 				fSETree_ttZSel  = passesTTZSel()?1:0;
 				fSETree_PFIso1  = MuPFIso[ind1];
 				fSETree_PFIso2  = ElPFIso[ind2];
@@ -1907,6 +1926,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 				fSETree_ZVeto   = passesZVeto()?1:0;
 				//fSETree_ZVeto   = passesZVetoNew(ind1, ind2, 2)?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+				fSETree_3rdSFLepVeto = passes3rdSFLepVeto(Elec)?1:0;
 				fSETree_ttZSel  = passesTTZSel()?1:0;
 				fSETree_PFIso1  = ElPFIso[ind1];
 				fSETree_PFIso2  = ElPFIso[ind2];
@@ -3079,6 +3099,7 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("Charge",      &fSETree_Charge  , "Charge/I");
 	fSigEv_Tree->Branch("TLCat",       &fSETree_TLCat   , "TLCat/I");
 	fSigEv_Tree->Branch("Pass3rdVeto", &fSETree_3rdVeto , "Pass3rdVeto/I");
+	fSigEv_Tree->Branch("Pass3rdSFLepVeto", &fSETree_3rdSFLepVeto , "Pass3rdSFLepVeto/I");
 	fSigEv_Tree->Branch("PassTTZSel",  &fSETree_ttZSel  , "PassTTZSel/I");
 	fSigEv_Tree->Branch("PassZVeto",   &fSETree_ZVeto   , "PassZVeto/I");
 	fSigEv_Tree->Branch("HT",          &fSETree_HT      , "HT/F");
@@ -3101,6 +3122,12 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("MVAID2",      &fSETree_MVAID2  , "MVAID2/F");
 	fSigEv_Tree->Branch("medWP1",      &fSETree_medWP1  , "medWP1/F");
 	fSigEv_Tree->Branch("medWP2",      &fSETree_medWP2  , "medWP2/F");
+//	fSigEv_Tree->Branch("Ml1l3",             &fSETree_Ml1l3         , "Ml1l3/F");
+//	fSigEv_Tree->Branch("Ml2l3",             &fSETree_Ml2l3         , "Ml2l3/F");
+//	fSigEv_Tree->Branch("Charge3rdLep",      &fSETree_Charge3rdLep  , "Charge3rdLep/I");
+//	fSigEv_Tree->Branch("Flavor3rdLep",      &fSETree_Flavor3rdLep  , "Flavor3rdLep/I");
+//	fSigEv_Tree->Branch("PassTauVeto", &fSETree_TauVeto , "PassTauVeto/I");
+	
 }
 void SSDLDumper::resetSigEventTree(){
 	fSETree_SystFlag = -1;
@@ -3119,6 +3146,7 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_TLCat    = -1;
 	fSETree_ZVeto    = -1;
 	fSETree_3rdVeto  = -1;
+	fSETree_3rdSFLepVeto = -1;
 	fSETree_ttZSel   = -1;
 	fSETree_HT       = -1.;
 	fSETree_MET      = -1.;
@@ -3140,6 +3168,11 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_MVAID2   = -999.;
 	fSETree_medWP1   = -1.;
 	fSETree_medWP2   = -1.;
+//	fSETree_Ml1l3	 = -1.;
+//	fSETree_Ml2l3	 = -1.;
+//	fSETree_Charge3rdLep = -99;
+//	fSETree_Flavor3rdLep = -1;
+//	fSETree_TauVeto		 = -1;
 }
 void SSDLDumper::writeSigEvTree(TFile *pFile){
 	pFile->cd();
@@ -4118,9 +4151,6 @@ int  SSDLDumper::readHistos(TString filename){
 
 		// Cut flow histos
 		getObjectSafe(pFile, S->sname + "/MMCutFlow", S->cutFlowHisto[Muon]);
-
-
-
 		getObjectSafe(pFile, S->sname + "/EECutFlow", S->cutFlowHisto[Elec]);
 		getObjectSafe(pFile, S->sname + "/EMCutFlow", S->cutFlowHisto[ElMu]);
 
@@ -4631,7 +4661,7 @@ void SSDLDumper::scaleBTags(Sample *S, int flag, TString model){
 		bool is_tagged_med = JetCSVBTag[i] > 0.679;
 		float random(-1.);
 		if (flag == 0)	random = fRand3Normal->Uniform(0,1); // get random number from uniform distribution
-		else		random = fRand3->Uniform(0,1);       // get random number from uniform distribution
+		else			random = fRand3->Uniform(0,1); // get random number from uniform distribution
 		string meanminmax = "mean";
 		if(flag == 1) meanminmax = "max";
 		if(flag == 2) meanminmax = "min";
@@ -5717,7 +5747,53 @@ bool SSDLDumper::passes3rdLepVeto(){
 		if(isGoodEleFor3rdLepVeto(i)) return false;
 	}
 	if (gApplyTauVeto && !passesTauVeto()) return false;
-
+	
+	return true;
+}
+//bool SSDLDumper::passes3rdLepVeto(int &mu3, int &el3){
+//	// Checks if there is a 3rd lepton (other than hyp leptons) in the event
+//	// Obviously requires for hyp leptons to be set...
+//	mu3 = -1;
+//	el3 = -1;
+//	for(size_t i = 0; i < NMus; ++i){
+//		if(fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
+//		if(fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
+//		if(isGoodMuonFor3rdLepVeto(i)) {
+//			mu3 = i;
+//			return false;
+//		}
+//	}
+//	for(size_t i = 0; i < NEls; ++i){
+//		if(fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
+//		if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
+//		if(isGoodEleFor3rdLepVeto(i)) {
+//			el3 = i;
+//			return false;
+//		}
+//	}
+//	if (gApplyTauVeto && !passesTauVeto()) return false;
+//
+//	return true;
+//}
+//bool SSDLDumper::passes3rdLepVeto(){
+//	int mu3(-1), el3(-1);
+//	return passes3rdLepVeto(mu3, el3);
+//}
+bool SSDLDumper::passes3rdSFLepVeto(gChannel chan){
+	if(chan == Muon || chan == ElMu){ // mu
+		for(size_t i = 0; i < NMus; ++i){
+			if(fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
+			if(fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
+			if(isGoodMuonFor3rdLepVeto(i)) return false;
+		}
+	}
+	if(chan == Elec || chan == ElMu){ // el
+		for(size_t i = 0; i < NEls; ++i){
+			if(fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
+			if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
+			if(isGoodEleFor3rdLepVeto(i)) return false;
+		}
+	}
 	return true;
 }
 bool SSDLDumper::passesTauVeto(){
@@ -5948,6 +6024,7 @@ bool SSDLDumper::isSigSupElEvent(int &el1, int &el2){
 	setHypLepton1(el1, Elec);
 	if(!passesJet50CutdPhi(el1, Elec))          return false;
 	if(getMT(el1,Elec) > (fC_maxMt_Control+5.)) return false;
+//	if(getMT(el1,Elec) > (fC_maxMt_Control)) return false;
 	if(getMET() > fC_maxMet_Control)  return false;
 	int nels(0);
 	for (int i = 0; i < NEls; i++) {
