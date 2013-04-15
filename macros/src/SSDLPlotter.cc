@@ -37,7 +37,7 @@ using namespace std;
 static const bool gEWKino = false;
 static const bool gRunSMSscan = false;
 static const bool gRatiosFromTTbar = false;
-static const bool gFullDataBlind = true;
+static const bool gFullDataBlind = false;
 static const bool gTTHBG = true;
 
 static const float gMMU = 0.1057;
@@ -103,7 +103,7 @@ void SSDLPlotter::init(TString filename){
 	// Luminosity
 	//	fLumiNorm = 3950.; // HPA ICHEP dataset
 	//	fLumiNorm = 9185.6; //HCP analysis
-	if (gFullDataBlind) fLumiNorm = 19466.;   // Moriond 2013 dataset
+	if (gFullDataBlind || true) fLumiNorm = 19466.;   // Moriond 2013 dataset
 	else fLumiNorm = 9100.;	// ttV 2012 analysis
 //	fLumiNorm = 9100.;	// ttV 2012 analysis
 //	fLumiNorm = 19466.;   // Moriond 2013 dataset
@@ -336,7 +336,7 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(WGstarTau);
 	fMCRareSM.push_back(DPSWW);
 	// if(gEWKino || gTTHBG)  fMCRareSM.push_back(TTbarH);
-	if(gEWKino || gTTHBG)  { fMCBGEMEnr.push_back(HWW); fMCBGEMEnr.push_back(HZZ); fMCBGEMEnr.push_back(HTauTau); }
+	if(gEWKino || gTTHBG)  { fMCRareSM.push_back(HWW); fMCRareSM.push_back(HZZ); fMCRareSM.push_back(HTauTau); }
 	if(gEWKino)  fMCRareSM.push_back(TTbarW);
 	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
@@ -462,56 +462,73 @@ void SSDLPlotter::doAnalysis(){
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 
-	//	makeOriginPlots(gRegion["Baseline"]);
-	//	printOrigins(gRegion["Baseline"]);
-	makeOriginPlots(gRegion["HT0MET120"]);
-	printOrigins(gRegion["HT0MET120"]);
-	makeOriginPlots(gRegion["HT0MET120lV"]);
-	printOrigins(gRegion["HT0MET120lV"]);
-	//	makeOriginPlots(gRegion["HT0MET120NJ2bVlV"]);
-	//	printOrigins(gRegion["HT0MET120NJ2bVlV"]);
-	makeMuIsolationPlots(true); // if true, loops on TTbar sample
-	makeElIsolationPlots(true); // if true, loops on TTbar sample
-	//	makeElIdPlots();
-	// makeNT2KinPlots(false);
-	// makeNT2KinPlots(true);
-	//	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	
-	//	makeMETvsHTPlotPRL();
+	// makeOriginPlots(gRegion["Baseline"]);
+	// printOrigins(gRegion["Baseline"]);
+	// makeOriginPlots(HT0MET120);
+	// printOrigins(HT0MET120);
+	// makeOriginPlots(HT0MET120lV);
+	// printOrigins(HT0MET120lV);
+
+	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	// makeElIdPlots();
+//	makeNT2KinPlots(false);
+//	makeNT2KinPlots(true);
+	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+
+	// makeMETvsHTPlotPRL();
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
+//	makeRatioPlots(Muon);
+//	makeRatioPlots(Elec);
+//	make2DRatioPlots(Muon);
+//	make2DRatioPlots(Elec);
 //	// // makeNTightLoosePlots(Muon);
 //	// // makeNTightLoosePlots(Elec);
 //	// 
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsNVPlots(Muon, ZDecay); 
-	makeFRvsNVPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
-	// makeChMidvsPtPlots();
+//	makeFRvsPtPlots(Muon, SigSup);
+//	makeFRvsPtPlots(Elec, SigSup);
+//	makeFRvsPtPlots(Muon, ZDecay);
+//	makeFRvsPtPlots(Elec, ZDecay);
+//	makeFRvsNVPlots(Muon, ZDecay); 
+//	makeFRvsNVPlots(Elec, ZDecay);
+//	makeFRvsEtaPlots(Muon);
+//	makeFRvsEtaPlots(Elec);
+//	makeChMidvsPtPlots();
 //
 //	makeAllClosureTestsTTW();
-	makeAllIntPredictions();
-	makeAllClosureTests();
+//	makeAllIntPredictions();
+//	makeAllClosureTests();
 //
-	makeDiffPrediction();
-	// makeTTWDiffPredictions();
-	// makeTTWIntPredictions();
-	printAllYieldTables();
+	// makeDiffPrediction();
+//	makeTTWDiffPredictions();
+//	makeTTWIntPredictions();
+	// printAllYieldTables();
 	
 
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
-//	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
-//	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
-//	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 31., 31.,+1, true);
+	
+	// presel
+//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20., 0, true);
+//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20.,-1, true);
+//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20.,+1, true);
+	
+	// optimized selection
+// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+// 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 31., 31.,-1, true);
+// 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
+	
+	// optimized selection March 20
+ 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+ 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
+ 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+	
+	
+// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
+// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
+	
+	
 // 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
@@ -10154,7 +10171,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	if (chVeto == +1) chargeString = "_plpl";
 
 	TString tablefilename = outputdir + "Table2.tex";
-	TString notetable     = outputdir + "NoteTable.tex";
+	TString notetable     = outputdir + "NoteTable" + chargeString + ".tex";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
@@ -10185,6 +10202,83 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	cout << " example: observed in the normal mode:   " << ttwzpreds["Normal"].obs << endl;
 	cout << " example: ttwz of the b-scale down mode: " << ttwzpreds["BDown"].ttwz << endl;
 	
+	////////////////////////////////////////////////////
+	// note table
+	////////////////////////////////////////////////////
+//	fOUTSTREAM3 << "\"\begin{tabular}{l|c|c|c|c|c|c}" << endl;
+//	fOUTSTREAM3 << "\\hline\\hline" << endl;
+//	fOUTSTREAM3 << "& $\mu^+\mu^+$ & $e^+\mu^+$ & $e^+e^+$ & $\mu^-\mu^-$ & $e^-\mu^-$ & $e^-e^-$ \\ \hline" << endl;
+	fOUTSTREAM3 << "\\begin{tabular}{l|r@{$\\,\\pm\\,$}l|r@{$\\,\\pm\\,$}l|r@{$\\,\\pm\\,$}l}\n\\hline \\hline\n";
+	if (chVeto ==  0) fOUTSTREAM3 << "& \\multicolumn{2}{c|}{$\\mu\\mu$} & \\multicolumn{2}{c|}{$e\\mu$} & \\multicolumn{2}{c}{$ee$} \\\\\n\\hline\n";
+	if (chVeto == -1) fOUTSTREAM3 << "                 &\\multicolumn{2}{c|}{$\\mu^-\\mu^-$}&\\multicolumn{2}{c|}{$e^-\\mu^-$}&\\multicolumn{2}{c}{$e^-e^-$} \\\\\n\\hline\n";
+	if (chVeto == +1) fOUTSTREAM3 << "                 &\\multicolumn{2}{c|}{$\\mu^+\\mu^+$}&\\multicolumn{2}{c|}{$e^+\\mu^+$}&\\multicolumn{2}{c}{$e^+e^+$} \\\\\n\\hline\n";
+	fOUTSTREAM3 << Form("Fakes            & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \n",
+						ttwzpreds["Normal"].fake_mm, ttwzpreds["Normal"].fake_err_mm,
+						ttwzpreds["Normal"].fake_em, ttwzpreds["Normal"].fake_err_em,
+						ttwzpreds["Normal"].fake_ee, ttwzpreds["Normal"].fake_err_ee
+						);
+//	fOUTSTREAM3 << Form("Double Fakes   & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+//					   nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
+//					   nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
+//					   nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
+//					   nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
+//	fOUTSTREAM3 << Form("Single Fakes   & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+//					   npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
+//					   npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
+//					   npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
+//					   npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
+	fOUTSTREAM3 << Form("Charge MisID     & \\multicolumn{2}{c|}{-}        & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \n",
+						ttwzpreds["Normal"].cmid_em, ttwzpreds["Normal"].cmid_err_em,
+						ttwzpreds["Normal"].cmid_ee, ttwzpreds["Normal"].cmid_err_ee
+						);
+	fOUTSTREAM3 << Form("Rare SM          & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \n",
+						ttwzpreds["Normal"].rare_mm, ttwzpreds["Normal"].rare_err_mm,
+						ttwzpreds["Normal"].rare_em, ttwzpreds["Normal"].rare_err_em,
+						ttwzpreds["Normal"].rare_ee, ttwzpreds["Normal"].rare_err_ee
+						);
+	fOUTSTREAM3 << Form("WZ Prod.         & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \n",
+						ttwzpreds["Normal"].wz_mm, ttwzpreds["Normal"].wz_err_mm,
+						ttwzpreds["Normal"].wz_em, ttwzpreds["Normal"].wz_err_em,
+						ttwzpreds["Normal"].wz_ee, ttwzpreds["Normal"].wz_err_ee
+						);
+	fOUTSTREAM3 << Form("ttZ Prod.        & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \\hline \n",
+						ttwzpreds["Normal"].ttz_mm, ttwzpreds["Normal"].ttz_err_mm,
+						ttwzpreds["Normal"].ttz_em, ttwzpreds["Normal"].ttz_err_em,
+						ttwzpreds["Normal"].ttz_ee, ttwzpreds["Normal"].ttz_err_ee
+						);
+//	if (separateTTH) {
+//		fOUTSTREAM3 << Form("ttH Prod.      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
+//							tth_nt2_mm, sqrt(tth_nt2_mm_e1 + RareESyst2*tth_nt2_mm*tth_nt2_mm),
+//							tth_nt2_em, sqrt(tth_nt2_em_e1 + RareESyst2*tth_nt2_em*tth_nt2_em),
+//							tth_nt2_ee, sqrt(tth_nt2_ee_e1 + RareESyst2*tth_nt2_ee*tth_nt2_ee),
+//							tth_nt2_ee + tth_nt2_mm + tth_nt2_em, sqrt(tth_nt2_mm_e1 + tth_nt2_ee_e1 + tth_nt2_em_e1 + RareESyst2*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)*(tth_nt2_ee + tth_nt2_mm + tth_nt2_em)));
+//	}
+	fOUTSTREAM3 << Form("Total Bkg        & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \n",
+						ttwzpreds["Normal"].fake_mm                               + ttwzpreds["Normal"].rare_mm + ttwzpreds["Normal"].wz_mm + ttwzpreds["Normal"].ttz_mm, ttwzpreds["Normal"].tot_err_mm,
+						ttwzpreds["Normal"].fake_em + ttwzpreds["Normal"].cmid_em + ttwzpreds["Normal"].rare_em + ttwzpreds["Normal"].wz_em + ttwzpreds["Normal"].ttz_em, ttwzpreds["Normal"].tot_err_em,
+						ttwzpreds["Normal"].fake_ee + ttwzpreds["Normal"].cmid_ee + ttwzpreds["Normal"].rare_ee + ttwzpreds["Normal"].wz_ee + ttwzpreds["Normal"].ttz_ee, ttwzpreds["Normal"].tot_err_ee
+						);
+	fOUTSTREAM3 << Form("\\bf{Observed}    & \\multicolumn{2}{c|}{\\bf{%3d}} & \\multicolumn{2}{c|}{\\bf{%3d}}  & \\multicolumn{2}{c}{\\bf{%3d}} \\\\ \n",
+						ttwzpreds["Normal"].obs_mm,
+						ttwzpreds["Normal"].obs_em,
+						ttwzpreds["Normal"].obs_ee
+						);
+	cout << "ttwzpreds[\"Normal\"].obs_mm: " << ttwzpreds["Normal"].obs_mm << endl;
+	cout << "ttwzpreds[\"Normal\"].obs_em: " << ttwzpreds["Normal"].obs_em << endl;
+	cout << "ttwzpreds[\"Normal\"].obs_ee: " << ttwzpreds["Normal"].obs_ee << endl;
+	fOUTSTREAM3 << Form("Obs. - Tot. Bkg. & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \\hline \n",
+						ttwzpreds["Normal"].obs_mm - (ttwzpreds["Normal"].fake_mm                               + ttwzpreds["Normal"].rare_mm + ttwzpreds["Normal"].wz_mm + ttwzpreds["Normal"].ttz_mm), ttwzpreds["Normal"].tot_err_mm,
+						ttwzpreds["Normal"].obs_em - (ttwzpreds["Normal"].fake_em + ttwzpreds["Normal"].cmid_em + ttwzpreds["Normal"].rare_em + ttwzpreds["Normal"].wz_em + ttwzpreds["Normal"].ttz_em), ttwzpreds["Normal"].tot_err_em,
+						ttwzpreds["Normal"].obs_ee - (ttwzpreds["Normal"].fake_ee + ttwzpreds["Normal"].cmid_ee + ttwzpreds["Normal"].rare_ee + ttwzpreds["Normal"].wz_ee + ttwzpreds["Normal"].ttz_ee), ttwzpreds["Normal"].tot_err_ee
+						);
+	fOUTSTREAM3 << Form("ttW Prod.        & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f & %13.1f \\\\ \\hline \\hline \n",
+						ttwzpreds["Normal"].ttw_mm, ttwzpreds["Normal"].ttw_err_mm,
+						ttwzpreds["Normal"].ttw_em, ttwzpreds["Normal"].ttw_err_em,
+						ttwzpreds["Normal"].ttw_ee, ttwzpreds["Normal"].ttw_err_ee
+						);
+	fOUTSTREAM3 << "\\end{tabular}\n";
+	fOUTSTREAM3 << endl;
+	
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
 	fOUTSTREAM3.close();
@@ -10193,10 +10287,14 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	// Datacards and systematics
 	TString datacard;
 	const float pu_syst = 1.03;
-	const float match_syst_up = 1.01485;
-	const float match_syst_dn = 0.997558;
-	const float scale_syst_up = 1.02302;
-	const float scale_syst_dn = 0.965962;
+//	const float match_syst_up = 1.01485;
+//	const float match_syst_dn = 0.997558;
+//	const float scale_syst_up = 1.02302;
+//	const float scale_syst_dn = 0.965962;
+	const float match_syst_up = 0.992;
+	const float match_syst_dn = 0.989;
+	const float scale_syst_up = 1.046;
+	const float scale_syst_dn = 0.961;
 	TString lumiError = "1.045";
 	
 	datacard = outputdir + "datacard_TTWZ" + chargeString + ".txt";
@@ -10987,6 +11085,9 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	const float TTZESyst  = 0.5;
 	const float TTZESyst2 = TTZESyst*TTZESyst;
+	
+	const float TTWESyst  = 0.5;
+	const float TTWESyst2 = TTWESyst*TTWESyst;
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing predictions " ;
@@ -11053,7 +11154,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	float eta1, eta2, mll;
 	int   event, run;
 	int charge;
-	int passZVeto;
+	int passZVeto, passes3rdSFLepVeto;
 
 	sigtree->SetBranchAddress("SystFlag", &flag);
 	sigtree->SetBranchAddress("Event",    &event);
@@ -11077,6 +11178,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	sigtree->SetBranchAddress("NbJmed",   &NbJmed);
 	sigtree->SetBranchAddress("Mll",      &mll);
 	sigtree->SetBranchAddress("PassZVeto",&passZVeto);
+	sigtree->SetBranchAddress("Pass3rdSFLepVeto",&passes3rdSFLepVeto);
 
 	FakeRatios *FR = new FakeRatios();
 
@@ -11125,6 +11227,8 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 			if(pT1 < minPt1) continue;
 			if(pT2 < minPt2) continue;
 		}
+		
+//		if (passes3rdSFLepVeto == 0) continue;
 
 		// GET ALL DATA EVENTS
 		if(SType < 3) {             // 0,1,2 are DoubleMu, DoubleEle, MuEG
@@ -11544,14 +11648,38 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	TH1D    *h_obs        = new TH1D("h_observed"   , "Observed number of events" , 4 , 0. , 4. );
-	TH1D    *h_pred_fake  = new TH1D("h_pred_sfake" , "Predicted fakes"           , 4 , 0. , 4. );
-	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid" , "Predicted charge mis id"   , 4 , 0. , 4. );
-	TH1D    *h_pred_mc    = new TH1D("h_pred_mc"    , "Predicted Rare SM"         , 4 , 0. , 4. );
-	TH1D    *h_pred_wz    = new TH1D("h_pred_wz"    , "Predicted WZ"              , 4 , 0. , 4. );
-	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw"   , "Predicted ttW"             , 4 , 0. , 4. );
-	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz"   , "Predicted ttZ"             , 4 , 0. , 4. );
-	TH1D    *h_pred_tot   = new TH1D("h_pred_tot"   , "Total Prediction"          , 4 , 0. , 4. );
+	
+	bool addTotalBin = false;
+	
+	TH1D    *h_obs        ;
+	TH1D    *h_pred_fake  ;
+	TH1D    *h_pred_chmid ;
+	TH1D    *h_pred_mc    ;
+	TH1D    *h_pred_wz    ;
+	TH1D    *h_pred_ttw   ;
+	TH1D    *h_pred_ttz   ;
+	TH1D    *h_pred_tot   ;
+	
+	if (addTotalBin) {
+		h_obs        = new TH1D("h_observed"   , "Observed number of events" , 4 , 0. , 4. );
+		h_pred_fake  = new TH1D("h_pred_sfake" , "Predicted fakes"           , 4 , 0. , 4. );
+		h_pred_chmid = new TH1D("h_pred_chmid" , "Predicted charge mis id"   , 4 , 0. , 4. );
+		h_pred_mc    = new TH1D("h_pred_mc"    , "Predicted Rare SM"         , 4 , 0. , 4. );
+		h_pred_wz    = new TH1D("h_pred_wz"    , "Predicted WZ"              , 4 , 0. , 4. );
+		h_pred_ttw   = new TH1D("h_pred_ttw"   , "Predicted ttW"             , 4 , 0. , 4. );
+		h_pred_ttz   = new TH1D("h_pred_ttz"   , "Predicted ttZ"             , 4 , 0. , 4. );
+		h_pred_tot   = new TH1D("h_pred_tot"   , "Total Prediction"          , 4 , 0. , 4. );
+	}
+	else {
+		h_obs        = new TH1D("h_observed"   , "Observed number of events" , 3 , 0. , 3. );
+		h_pred_fake  = new TH1D("h_pred_sfake" , "Predicted fakes"           , 3 , 0. , 3. );
+		h_pred_chmid = new TH1D("h_pred_chmid" , "Predicted charge mis id"   , 3 , 0. , 3. );
+		h_pred_mc    = new TH1D("h_pred_mc"    , "Predicted Rare SM"         , 3 , 0. , 3. );
+		h_pred_wz    = new TH1D("h_pred_wz"    , "Predicted WZ"              , 3 , 0. , 3. );
+		h_pred_ttw   = new TH1D("h_pred_ttw"   , "Predicted ttW"             , 3 , 0. , 3. );
+		h_pred_ttz   = new TH1D("h_pred_ttz"   , "Predicted ttZ"             , 3 , 0. , 3. );
+		h_pred_tot   = new TH1D("h_pred_tot"   , "Total Prediction"          , 3 , 0. , 3. );
+	}
 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
 
 	h_obs->SetMarkerColor(kBlack);
@@ -11590,7 +11718,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
-	h_obs->SetBinContent(4, nt2_ee+nt2_mm+nt2_em);
+	if (addTotalBin) h_obs->SetBinContent(4, nt2_ee+nt2_mm+nt2_em);
 
 	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
 	gr_obs->SetMarkerColor(kBlack);
@@ -11621,37 +11749,37 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_fake->SetBinContent(1, npf_ee+         nff_ee);
 	h_pred_fake->SetBinContent(2, npf_mm+         nff_mm);
 	h_pred_fake->SetBinContent(3, npf_em+nfp_em + nff_em);
-	h_pred_fake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em + nff_ee+nff_mm+nff_em);
+	if (addTotalBin) h_pred_fake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em + nff_ee+nff_mm+nff_em);
 	h_pred_fake->GetXaxis()->SetBinLabel(1, eeLabel);
 	h_pred_fake->GetXaxis()->SetBinLabel(2, mmLabel);
 	h_pred_fake->GetXaxis()->SetBinLabel(3, emLabel);
-	h_pred_fake->GetXaxis()->SetBinLabel(4, allLabel);
+	if (addTotalBin) h_pred_fake->GetXaxis()->SetBinLabel(4, allLabel);
 
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
-	h_pred_chmid->SetBinContent(4, nt2_ee_chmid+nt2_em_chmid);
+	if (addTotalBin) h_pred_chmid->SetBinContent(4, nt2_ee_chmid+nt2_em_chmid);
 
 	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
 	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
 	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
-	h_pred_mc->SetBinContent(4, nt2_rare_mc_ee+nt2_rare_mc_mm+nt2_rare_mc_em);
+	if (addTotalBin) h_pred_mc->SetBinContent(4, nt2_rare_mc_ee+nt2_rare_mc_mm+nt2_rare_mc_em);
 
 	h_pred_wz->SetBinContent(1, nt2_wz_mc_ee);
 	h_pred_wz->SetBinContent(2, nt2_wz_mc_mm);
 	h_pred_wz->SetBinContent(3, nt2_wz_mc_em);
-	h_pred_wz->SetBinContent(4, nt2_wz_mc_ee+nt2_wz_mc_mm+nt2_wz_mc_em);
+	if (addTotalBin) h_pred_wz->SetBinContent(4, nt2_wz_mc_ee+nt2_wz_mc_mm+nt2_wz_mc_em);
 
 	h_pred_ttw->SetBinContent(1, nt2_ttw_mc_ee);
 	h_pred_ttw->SetBinContent(2, nt2_ttw_mc_mm);
 	h_pred_ttw->SetBinContent(3, nt2_ttw_mc_em);
-	h_pred_ttw->SetBinContent(4, nt2_ttw_mc_ee+nt2_ttw_mc_mm+nt2_ttw_mc_em);
+	if (addTotalBin) h_pred_ttw->SetBinContent(4, nt2_ttw_mc_ee+nt2_ttw_mc_mm+nt2_ttw_mc_em);
 
 	h_pred_ttz->SetBinContent(1, nt2_ttz_mc_ee);
 	h_pred_ttz->SetBinContent(1, nt2_ttz_mc_ee);
 	h_pred_ttz->SetBinContent(2, nt2_ttz_mc_mm);
 	h_pred_ttz->SetBinContent(3, nt2_ttz_mc_em);
-	h_pred_ttz->SetBinContent(4, nt2_ttz_mc_ee+nt2_ttz_mc_mm+nt2_ttz_mc_em);
+	if (addTotalBin) h_pred_ttz->SetBinContent(4, nt2_ttz_mc_ee+nt2_ttz_mc_mm+nt2_ttz_mc_em);
 
 	h_pred_tot->Add(h_pred_fake);
 	h_pred_tot->Add(h_pred_chmid);
@@ -11661,7 +11789,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_tot->SetBinError(1, sqrt(ee_tot_stat2 + ee_tot_syst2));
 	h_pred_tot->SetBinError(2, sqrt(mm_tot_stat2 + mm_tot_syst2));
 	h_pred_tot->SetBinError(3, sqrt(em_tot_stat2 + em_tot_syst2));
-	h_pred_tot->SetBinError(4, sqrt(comb_tot_stat2 + comb_tot_syst2));
+	if (addTotalBin) h_pred_tot->SetBinError(4, sqrt(comb_tot_stat2 + comb_tot_syst2));
 
 	hs_pred->Add(h_pred_fake);
 	hs_pred->Add(h_pred_chmid);
@@ -11672,8 +11800,11 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	
 	// double max = h_obs->Integral();
-	double max = 1.7*h_obs->GetBinContent(4);
-	if (chVeto) max = 25.;
+	double max(0.);
+	if (addTotalBin)	max = 1.7*h_obs->GetBinContent(4);
+	else				max = 1.9*h_obs->GetBinContent(3);
+	max = 29.;
+//	if (chVeto) max = 25.;
 
 	// h_obs       ->SetMaximum(max>1?max+1:1.);
 	// h_pred_sfake->SetMaximum(max>1?max+1:1.);
@@ -11698,7 +11829,7 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
 	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
 	hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
-	hs_pred->GetXaxis()->SetBinLabel(4, "all");
+	if (addTotalBin) hs_pred->GetXaxis()->SetBinLabel(4, "all");
 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
 	hs_pred->GetXaxis()->SetLabelFont(42);
 	hs_pred->GetXaxis()->SetLabelSize(0.1);
@@ -11742,11 +11873,11 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	float yPos = (minMET > 0. ? 0.75:0.8);
 	if (minNbjetsL != 0) lat->DrawLatex(0.45, yPos, Form("N_{b-Jets} #geq %.0d", minNbjetsL));
 
-	if (chVeto != 0) {
-		lat->SetTextFont(62);
-		if (chVeto == -1) lat->DrawLatex(0.45, yPos-0.05, "-- only");
-		if (chVeto == +1) lat->DrawLatex(0.45, yPos-0.05, "++ only");
-	}
+//	if (chVeto != 0) {
+//		lat->SetTextFont(62);
+//		if (chVeto == -1) lat->DrawLatex(0.45, yPos-0.05, "-- only");
+//		if (chVeto == +1) lat->DrawLatex(0.45, yPos-0.05, "++ only");
+//	}
 
 	drawTopLine(0.56, 0.8);
 	
@@ -11771,12 +11902,15 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	pred.ttw_mm   = nt2_ttw_mc_mm;
 	pred.ttw_em   = nt2_ttw_mc_em;
 	pred.ttw_ee   = nt2_ttw_mc_ee;
+	pred.ttw_err    = sqrt(nt2_ttw_mc_ee_e2 + nt2_ttw_mc_mm_e2 + nt2_ttw_mc_em_e2 + TTWESyst2*(nt2_ttw_mc_ee + nt2_ttw_mc_mm + nt2_ttw_mc_em)*(nt2_ttw_mc_ee + nt2_ttw_mc_mm + nt2_ttw_mc_em));
+	pred.ttw_err_mm = sqrt(nt2_ttw_mc_mm_e2 + TTWESyst2*nt2_ttw_mc_mm*nt2_ttw_mc_mm);
+	pred.ttw_err_ee = sqrt(nt2_ttw_mc_em_e2 + TTWESyst2*nt2_ttw_mc_em*nt2_ttw_mc_em);
+	pred.ttw_err_em = sqrt(nt2_ttw_mc_ee_e2 + TTWESyst2*nt2_ttw_mc_ee*nt2_ttw_mc_ee);
 	
 	pred.ttz      = nt2_ttz_mc_mm + nt2_ttz_mc_em + nt2_ttz_mc_ee;
 	pred.ttz_mm   = nt2_ttz_mc_mm;
 	pred.ttz_em   = nt2_ttz_mc_em;
 	pred.ttz_ee   = nt2_ttz_mc_ee;
-	
 	pred.ttz_err    = sqrt(nt2_ttz_mc_ee_e2 + nt2_ttz_mc_mm_e2 + nt2_ttz_mc_em_e2 + TTZESyst2*(nt2_ttz_mc_ee + nt2_ttz_mc_mm + nt2_ttz_mc_em)*(nt2_ttz_mc_ee + nt2_ttz_mc_mm + nt2_ttz_mc_em));
 	pred.ttz_err_mm = sqrt(nt2_ttz_mc_mm_e2 + TTZESyst2*nt2_ttz_mc_mm*nt2_ttz_mc_mm);
 	pred.ttz_err_ee = sqrt(nt2_ttz_mc_em_e2 + TTZESyst2*nt2_ttz_mc_em*nt2_ttz_mc_em);
@@ -11791,7 +11925,6 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	pred.fake_mm  = nF_mm;
 	pred.fake_em  = nF_em;
 	pred.fake_ee  = nF_ee;
-	
 	pred.fake_err    = sqrt(FR->getTotEStat()*FR->getTotEStat() + FakeESyst2*nF*nF);
 	pred.fake_err_mm = sqrt(FR->getMMTotEStat()*FR->getMMTotEStat() + FakeESyst2*nF_mm*nF_mm);
 	pred.fake_err_em = sqrt(FR->getEMTotEStat()*FR->getEMTotEStat() + FakeESyst2*nF_em*nF_em);
@@ -11821,6 +11954,17 @@ TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	pred.rare_err_mm = sqrt(nt2_rare_mc_mm_e2 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm);
 	pred.rare_err_em = sqrt(nt2_rare_mc_em_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em);
 	pred.rare_err_ee = sqrt(nt2_rare_mc_ee_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee);
+	
+	pred.tot         = nF_mm                + nt2_rare_mc_mm + nt2_wz_mc_mm + nt2_ttz_mc_mm
+					 + nF_em + nt2_em_chmid + nt2_rare_mc_em + nt2_wz_mc_em + nt2_ttz_mc_em
+					 + nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + nt2_wz_mc_ee + nt2_ttz_mc_ee;
+	pred.tot_mm      = nF_mm                + nt2_rare_mc_mm + nt2_wz_mc_mm + nt2_ttz_mc_mm;
+	pred.tot_em      = nF_em + nt2_em_chmid + nt2_rare_mc_em + nt2_wz_mc_em + nt2_ttz_mc_em;
+	pred.tot_ee      = nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + nt2_wz_mc_ee + nt2_ttz_mc_ee;
+	pred.tot_err     = sqrt(comb_tot_stat2 + comb_tot_syst2);
+	pred.tot_err_mm  = sqrt(mm_tot_stat2 + mm_tot_syst2);
+	pred.tot_err_em  = sqrt(em_tot_stat2 + em_tot_syst2);
+	pred.tot_err_ee  = sqrt(ee_tot_stat2 + ee_tot_syst2);
 
 	return pred;
 
@@ -13189,10 +13333,10 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	nt11_ttz->Add(nt11_ee_ttz);
 	nt11_ttz->Add(nt11_em_ttz);
 
-	// totbg   ->Add(nt11_ttz);
-	// totbg_mm->Add(nt11_mm_ttz);
-	// totbg_em->Add(nt11_em_ttz);
-	// totbg_ee->Add(nt11_ee_ttz);
+	totbg   ->Add(nt11_ttz);
+	totbg_mm->Add(nt11_mm_ttz);
+	totbg_em->Add(nt11_em_ttz);
+	totbg_ee->Add(nt11_ee_ttz);
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// TTH PRODUCTION /////////////////////////////////////////////////////////////////
@@ -13591,36 +13735,36 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
 	THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
 	
+	nt11_tot->Add(nt11_sf);
+	nt11_tot->Add(nt11_cm);
 	nt11_tot->Add(nt11_ss);
 	nt11_tot->Add(nt11_wz);
-	nt11_tot->Add(nt11_cm);
-	nt11_tot->Add(nt11_sf);
-	nt11_tot->Add(nt11_ttw);
 	nt11_tot->Add(nt11_ttz);
 	if (separateTTH) nt11_tot->Add(nt11_tth);
-
+	nt11_tot->Add(nt11_ttw);
+	
+	nt11_mm_tot->Add(nt11_mm_sf);
 	nt11_mm_tot->Add(nt11_mm_ss);
 	nt11_mm_tot->Add(nt11_mm_wz);
-	nt11_mm_tot->Add(nt11_mm_sf);
-	nt11_mm_tot->Add(nt11_mm_ttw);
 	nt11_mm_tot->Add(nt11_mm_ttz);
 	if (separateTTH) nt11_mm_tot->Add(nt11_mm_tth);
-
+	nt11_mm_tot->Add(nt11_mm_ttw);
+	
+	nt11_ee_tot->Add(nt11_ee_sf);
+	nt11_ee_tot->Add(nt11_ee_cm);
 	nt11_ee_tot->Add(nt11_ee_ss);
 	nt11_ee_tot->Add(nt11_ee_wz);
-	nt11_ee_tot->Add(nt11_ee_cm);
-	nt11_ee_tot->Add(nt11_ee_sf);
-	nt11_ee_tot->Add(nt11_ee_ttw);
 	nt11_ee_tot->Add(nt11_ee_ttz);
 	if (separateTTH) nt11_ee_tot->Add(nt11_ee_tth);
-
+	nt11_ee_tot->Add(nt11_ee_ttw);
+	
+	nt11_em_tot->Add(nt11_em_sf);
+	nt11_em_tot->Add(nt11_em_cm);
 	nt11_em_tot->Add(nt11_em_ss);
 	nt11_em_tot->Add(nt11_em_wz);
-	nt11_em_tot->Add(nt11_em_cm);
-	nt11_em_tot->Add(nt11_em_sf);
-	nt11_em_tot->Add(nt11_em_ttw);
 	nt11_em_tot->Add(nt11_em_ttz);
 	if (separateTTH) nt11_em_tot->Add(nt11_em_tth);
+	nt11_em_tot->Add(nt11_em_ttw);
 
 	// Axis labels
 	bool intlabel = false;
@@ -13747,13 +13891,13 @@ void SSDLPlotter::makeDiffPredictionTTW(int varbin){
 	/////////////////////////////////////////////////////////////////
 	TLegend *leg = new TLegend(0.65,0.47,0.90,0.90);
 	leg->AddEntry(nt11,     "Data",        "p");
+	leg->AddEntry(nt11_sf,  "Fakes",       "f");
+	leg->AddEntry(nt11_cm,  "Charge MisID","f");
+	leg->AddEntry(nt11_ss,  "Rare SM",     "f");
+	leg->AddEntry(nt11_wz,  "WZ",          "f");
 	leg->AddEntry(nt11_ttz, "t#bar{t} + Z","f");
 	if (separateTTH) leg->AddEntry(nt11_tth, "t#bar{t} + H","f");
 	leg->AddEntry(nt11_ttw, "t#bar{t} + W","f");
-	leg->AddEntry(nt11_sf,  "Fakes",       "f");
-	leg->AddEntry(nt11_cm,  "Charge MisID","f");
-	leg->AddEntry(nt11_wz,  "WZ",          "f");
-	leg->AddEntry(nt11_ss,  "Rare SM",     "f");
 	// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -16552,8 +16696,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
 
-	const float mu_flatout = 35.;
-	const float el_flatout = 40.;
+	const float mu_flatout = 30.;
+	const float el_flatout = 30.;
 	
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MufRatio;
@@ -16587,8 +16731,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
-	const float mu_flatout = 35.;
-	const float el_flatout = 40.;
+	const float mu_flatout = 30.;
+	const float el_flatout = 30.;
 	
 	eta = fabs(eta); // make sure we take the absolute value
 

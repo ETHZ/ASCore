@@ -70,6 +70,10 @@ struct TTWZPrediction {
 	float ttw_mm;
 	float ttw_ee;
 	float ttw_em;
+	float ttw_err;
+	float ttw_err_mm;
+	float ttw_err_ee;
+	float ttw_err_em;
 	
 	float ttz;
 	float ttz_mm;
@@ -79,6 +83,15 @@ struct TTWZPrediction {
 	float ttz_err_mm;
 	float ttz_err_ee;
 	float ttz_err_em;
+	
+	float tth;
+	float tth_mm;
+	float tth_ee;
+	float tth_em;
+	float tth_err;
+	float tth_err_mm;
+	float tth_err_ee;
+	float tth_err_em;
 	
 	float ttwz;
 	float ttwz_mm;
@@ -118,6 +131,15 @@ struct TTWZPrediction {
 	float rare_err_mm;
 	float rare_err_ee;
 	float rare_err_em;
+	
+	float tot;
+	float tot_mm;
+	float tot_em;
+	float tot_ee;
+	float tot_err;
+	float tot_err_mm;
+	float tot_err_em;
+	float tot_err_ee;
 };
 struct SSPrediction {
 	int obs;
