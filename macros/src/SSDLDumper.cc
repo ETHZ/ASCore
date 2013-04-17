@@ -510,8 +510,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// Event modifications
-		saveBTags(); // this just saves the btag values for each jet.
 		scaleBTags(S, 0); // this applies the bTagSF which comes from pandolfis function
+		saveBTags(); // this just saves the btag values for each jet.
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -572,52 +572,50 @@ void SSDLDumper::loopEvents(Sample *S){
 		/////////////////////////////////////////////
 		// Systematic studies
 		if(!gDoSystStudies) continue;
-		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
 
 		// Jet pts scaled down
+		fChain->GetEntry(jentry); // reset tree vars
+		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 1);
  		// fillYields(S, gRegion["TTbarWSelJU"]);
 		fillSigEventTree(S, gSystematics["JetUp"]);
 
 		// Jet pts scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
+		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 2);
  		// fillYields(S, gRegion["TTbarWSelJD"]);
 		fillSigEventTree(S, gSystematics["JetDown"]);
 
 		// Jet pts smeared
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
+		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 3);
  		// fillYields(S, gRegion["TTbarWSelJS"]);
 		fillSigEventTree(S, gSystematics["JetSmear"]);
 
 		// Btags scaled up
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
 		scaleBTags(S, 1);
  		// fillYields(S, gRegion["TTbarWSelBU"]);
 		fillSigEventTree(S, gSystematics["BUp"]);
 
 		// Btags scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
 		scaleBTags(S, 2);
  		// fillYields(S, gRegion["TTbarWSelBD"]);
 		fillSigEventTree(S, gSystematics["BDown"]);
 
 		// Lepton pts scaled up
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
+		resetBTags(); // reset to scaled btag values
 		scaleLeptons(S, 1);
  		// fillYields(S, gRegion["TTbarWSelLU"]);
 		fillSigEventTree(S, gSystematics["LepUp"]);
 
 		// Lepton pts scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		resetBTags();
+		resetBTags(); // reset to scaled btag values
 		scaleLeptons(S, 2);
  		// fillYields(S, gRegion["TTbarWSelLD"]);
 		fillSigEventTree(S, gSystematics["LepDown"]);
@@ -5502,8 +5500,8 @@ bool SSDLDumper::passesHTCut(float min, float max){
 	return (getHT() >= min && getHT() < max);
 }
 bool SSDLDumper::passesMETCut(float min, float max){
-        if (max > 7999. && min < 49.) {  // for Baseline regions... 
-	        if (getHT() < 500.) return (getMET() >= 30. && getMET() < max);
+	if (!gTTWZ && max > 7999. && min < 49.) {  // for Baseline regions...
+		if (getHT() < 500.) return (getMET() >= 30. && getMET() < max);
 		else                return (getMET() >=  0. && getMET() < max);
 	}
 	else {
