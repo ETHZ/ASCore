@@ -7,6 +7,7 @@
 #include <TRandom.h>
 #include "TF1.h"
 #include "TTree.h"
+#include "TMinuit.h"
 #include <cstdlib>
 using namespace std;
 
@@ -30,6 +31,8 @@ SolveTTbarNew *solver;
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
+
+TMinuit *minuit;
 
 /*
 $Id: JZBAnalysis.cc,v 1.70.2.120 2013/02/28 14:45:33 buchmann Exp $
@@ -236,6 +239,11 @@ public:
   float jzb[jzbtype_max];
   float d2;
   float mt2;
+  float mt2j;
+  float ml1b;
+  float ml2b;
+  float mjl[jMax];
+  float mjll[jMax];
   float st;
   float sjzb[jzbtype_max]; // smeared JZB
   float dphi_sumJetVSZ[jzbtype_max];
@@ -643,6 +651,8 @@ void nanoEvent::reset()
     pfJetGoodIDBtag[jCounter]=0;
     bTagProbCSVBP[jCounter] = 0;
     bTagProbCSVMVA[jCounter] = 0;
+    mjl[jCounter]=0;
+    mjll[jCounter]=0;
   }
 
   EventFlavor=0;
@@ -695,6 +705,9 @@ void nanoEvent::reset()
 
   d2=-9;
   mt2=-9;
+  mt2j=-9;
+  ml1b=-9;
+  ml2b=-9;
   st=0;
   weight = 1.0;
   PUweight = 1.0;
@@ -1189,7 +1202,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
 
   addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,30);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,30);
-  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",9,20);
+//  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",9,20);
   
   addPath(meTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
@@ -1481,6 +1494,12 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("mt2",&nEvent.mt2,"mt2/F");
   myTree->Branch("d2",&nEvent.d2,"d2/F");
   myTree->Branch("st",&nEvent.st,"st/F");
+  myTree->Branch("mjl",nEvent.mjl,"mjl[pfJetGoodNum40]/F");
+  myTree->Branch("mjll",nEvent.mjll,"mjll[pfJetGoodNum40]/F");
+  
+  myTree->Branch("mt2j",&nEvent.mt2j,"mt2j/F");
+  myTree->Branch("ml1b",&nEvent.ml1b,"ml1b/F");
+  myTree->Branch("ml2b",&nEvent.ml2b,"ml2b/F");
   
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
@@ -1910,6 +1929,8 @@ bool is_charged_lepton(const int code) {
 
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
+  minuit = new TMinuit();
+  minuit->SetPrintLevel(-1);
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
   counters[EV].fill("All events");
@@ -2591,6 +2612,7 @@ void JZBAnalysis::Analyze() {
   
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
+  unsigned int mjlcounter=0;
   for(int i =0 ; i<fTR->NJets;i++) // PF jet loop
     {
       counters[PJ].fill("All PF jets");
@@ -2732,7 +2754,26 @@ void JZBAnalysis::Analyze() {
            nEvent.pfJetGoodTracksBtag[nEvent.pfJetGoodNumBtag40] = ntracksch;
            nEvent.pfJetGoodTracksNBtag[nEvent.pfJetGoodNumBtag40] = ntracksne;
 	   nEvent.pfJetGoodNumBtag40++;
+	   
+	   float ml1b_cand=(aJet+sortedGoodLeptons[PosLepton1].p).M();
+	   
+	   if(nEvent.ml1b<0) nEvent.ml1b=ml1b_cand;
+	   else if(ml1b_cand<nEvent.ml1b) nEvent.ml1b=ml1b_cand;
+	   
+	   float ml2b_cand=(aJet+sortedGoodLeptons[PosLepton2].p).M();
+	   if(nEvent.ml2b<0) nEvent.ml2b=ml2b_cand;
+	   else if(ml2b_cand<nEvent.ml2b) nEvent.ml2b=ml2b_cand;
         }
+        
+        if(nEvent.pfJetGoodNum40*2<jMax) {
+	  nEvent.mjl[mjlcounter]=(sortedGoodLeptons[PosLepton1].p+aJet).M();
+	  mjlcounter++;
+	  nEvent.mjl[mjlcounter]=(sortedGoodLeptons[PosLepton2].p+aJet).M();
+	  mjlcounter++;
+	}
+	
+	nEvent.mjll[nEvent.pfJetGoodNum40]=(sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+aJet).M();
+        
         nEvent.pfJetGoodNum40++;
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
@@ -2879,6 +2920,9 @@ void JZBAnalysis::Analyze() {
   nEvent.met[RECOILMET] = 0.;//kicked (recoil + s1 + s2).Pt();
   
   ComputeD2MT2(nEvent.d2,nEvent.mt2);
+  
+  //******** missing mt2j
+  
   nEvent.st=nEvent.pt1+nEvent.pt2+nEvent.met[4]+ScalarSumOfJets; // lepton 1   + lepton2   + MET  + scalar sum of jets
     
   // Statistics ///////////////////////////////////////
