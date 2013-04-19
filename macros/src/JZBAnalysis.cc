@@ -1202,7 +1202,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
 
   addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,30);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,30);
-//  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",9,20);
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",9,20);
   
   addPath(meTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 4, 15);
