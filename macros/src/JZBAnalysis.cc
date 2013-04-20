@@ -1,5 +1,6 @@
 #include "helper/Utilities.hh"
 #include "helper/Davismt2.h"
+#include "helper/Hemisphere.hh"
 #include "SolveTTbarNew.hh"
 #include "JZBAnalysis.hh"
 #include "TH1.h"
@@ -964,9 +965,9 @@ TTree *myInfo;
 TH1F *weight_histo;
 
 nanoEvent nEvent;
+  
 
 Double_t JZBAnalysis::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
-
  double pa[3];
  double pb[3];
  double pmiss[3];
@@ -2610,6 +2611,9 @@ void JZBAnalysis::Analyze() {
   TLorentzVector Type1ResidualMet(type1METpx,type1METpy,0,0);
   TLorentzVector Type1VariedMet(0,0,0,0);
   
+  HemiObj hemiobjs;
+  vector<float> Mpx, Mpy, Mpz, ME;
+  
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
   unsigned int mjlcounter=0;
@@ -2629,7 +2633,6 @@ void JZBAnalysis::Analyze() {
       bool  isJetID = IsGoodBasicPFJet(i,0.0,5.0);
       int   ntracksch = fTR->JNAssoTracks[i];  
       int   ntracksne = fTR->JNConstituents[i];
-
 
 //      jpt=jpt/jesC;
 //      jenergy=jenergy/jesC;
@@ -2683,8 +2686,8 @@ void JZBAnalysis::Analyze() {
       // Keep jets over min. pt threshold
       if ( !(jpt>20) ) continue;
       counters[PJ].fill("... pt>20.");
-      
-      
+
+	
       if(fabs(jeta)>3.0 && fabs(jeta)<5.0) {
 	if(jpt>30) nEvent.pfJetGoodNum30Fwd++;
 	if(jpt>40) nEvent.pfJetGoodNum40Fwd++;
@@ -2695,6 +2698,16 @@ void JZBAnalysis::Analyze() {
       // Keep central jets
       if ( !(fabs(jeta)<3.0 ) ) continue;
       counters[PJ].fill("... |eta|<3.0");
+      
+      
+      Mpx.push_back(jpx);
+      Mpy.push_back(jpy);
+      Mpz.push_back(jpz);
+      ME .push_back(jenergy);
+      
+      hemiobjs.index.push_back(i);
+      hemiobjs.type.push_back("jet"),
+      hemiobjs.hemisphere.push_back(0);
       
       // Flag good jets failing ID
       if (!isJetID) { 
@@ -2775,6 +2788,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.mjll[nEvent.pfJetGoodNum40]=(sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+aJet).M();
         
         nEvent.pfJetGoodNum40++;
+	
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
@@ -2834,7 +2848,67 @@ void JZBAnalysis::Analyze() {
 
     }
 
-    
+  
+  Mpx.push_back(sortedGoodLeptons[PosLepton1].p.Px());
+  Mpy.push_back(sortedGoodLeptons[PosLepton1].p.Py());
+  Mpz.push_back(sortedGoodLeptons[PosLepton1].p.Pz());
+  ME.push_back(sortedGoodLeptons[PosLepton1].p.E());
+  hemiobjs.index.push_back(PosLepton1); 
+  if(sortedGoodLeptons[PosLepton1].type==0) hemiobjs.type.push_back("ele");
+  else hemiobjs.type.push_back("muo");
+  hemiobjs.hemisphere.push_back(0);
+  
+  Mpx.push_back(sortedGoodLeptons[PosLepton2].p.Px());
+  Mpy.push_back(sortedGoodLeptons[PosLepton2].p.Py());
+  Mpz.push_back(sortedGoodLeptons[PosLepton2].p.Pz());
+  ME.push_back(sortedGoodLeptons[PosLepton2].p.E());
+  hemiobjs.index.push_back(PosLepton2); 
+  if(sortedGoodLeptons[PosLepton2].type==0) hemiobjs.type.push_back("ele");
+  else hemiobjs.type.push_back("muo");
+  hemiobjs.hemisphere.push_back(0);
+  
+  int hemi_association=3; // association method: default 3 = minimal lund distance
+  int hemi_seed=2; // seed 2: max inv mass
+  Hemisphere* hemisp = new Hemisphere(Mpx, Mpy, Mpz, ME, hemi_seed, hemi_association);
+  for(unsigned int i=0;i<hemiobjs.type.size();i++) {
+    if(hemiobjs.type[i]=="jet") hemisp->SetNoSeed(i);
+  }
+      
+  vector<int> grouping = hemisp->getGrouping();
+  int NHemiIterations  = hemisp->GetNumLoop();
+
+  TLorentzVector pseudojet1(0.,0.,0.,0.);
+  TLorentzVector pseudojet2(0.,0.,0.,0.);
+	
+  
+  
+  float dHT=0;
+  for(int i=0; i<Mpx.size(); ++i){
+	if(grouping[i]==1){
+		pseudojet1.SetPx(pseudojet1.Px() + Mpx[i]);
+		pseudojet1.SetPy(pseudojet1.Py() + Mpy[i]);
+		pseudojet1.SetPz(pseudojet1.Pz() + Mpz[i]);
+		pseudojet1.SetE( pseudojet1.E()  + ME[i]);	
+		dHT += sqrt(Mpx[i]*Mpx[i] + Mpy[i]*Mpy[i]);
+		hemiobjs.hemisphere[i]=1;
+	}else if(grouping[i] == 2){
+		pseudojet2.SetPx(pseudojet2.Px() + Mpx[i]);
+		pseudojet2.SetPy(pseudojet2.Py() + Mpy[i]);
+		pseudojet2.SetPz(pseudojet2.Pz() + Mpz[i]);
+		pseudojet2.SetE( pseudojet2.E()  + ME[i]);
+		dHT -= sqrt(Mpx[i]*Mpx[i] + Mpy[i]*Mpy[i]);
+		hemiobjs.hemisphere[i]=2;
+	}
+  }
+  delete hemisp;
+  
+  TLorentzVector MET(fTR->PFType1METpx,fTR->PFType1METpy,0,0);
+  
+  float testmass=0;
+  float massive=0;
+  nEvent.mt2j = CalcMT2(testmass, massive, pseudojet1, pseudojet2, MET);
+  
+  
   for(int jl=0;jl<sortedGoodLeptons.size();jl++) {
     float factor=1.0;
     if(sortedGoodLeptons[jl].type==0) {

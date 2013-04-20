@@ -32,6 +32,11 @@ struct lepton {
   bool ElCInfoIsGsfScPixCons;
 };
 
+struct HemiObj {
+  vector<TString> type; 
+  vector<int> index; 
+  vector<int> hemisphere; 
+};
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
