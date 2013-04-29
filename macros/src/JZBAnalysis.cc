@@ -1,6 +1,5 @@
 #include "helper/Utilities.hh"
 #include "helper/Davismt2.h"
-#include "helper/Hemisphere.hh"
 #include "SolveTTbarNew.hh"
 #include "JZBAnalysis.hh"
 #include "TH1.h"
@@ -8,7 +7,6 @@
 #include <TRandom.h>
 #include "TF1.h"
 #include "TTree.h"
-#include "TMinuit.h"
 #include <cstdlib>
 using namespace std;
 
@@ -20,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.120 $";
+string sjzbversion="$Revision: 1.70.2.122 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -33,10 +31,8 @@ SolveTTbarNew *solver;
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
-TMinuit *minuit;
-
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.120 2013/02/28 14:45:33 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.122 2013/04/05 07:38:13 buchmann Exp $
 */
 
 
@@ -240,11 +236,6 @@ public:
   float jzb[jzbtype_max];
   float d2;
   float mt2;
-  float mt2j;
-  float ml1b;
-  float ml2b;
-  float mjl[jMax];
-  float mjll[jMax];
   float st;
   float sjzb[jzbtype_max]; // smeared JZB
   float dphi_sumJetVSZ[jzbtype_max];
@@ -652,8 +643,6 @@ void nanoEvent::reset()
     pfJetGoodIDBtag[jCounter]=0;
     bTagProbCSVBP[jCounter] = 0;
     bTagProbCSVMVA[jCounter] = 0;
-    mjl[jCounter]=0;
-    mjll[jCounter]=0;
   }
 
   EventFlavor=0;
@@ -706,9 +695,6 @@ void nanoEvent::reset()
 
   d2=-9;
   mt2=-9;
-  mt2j=-9;
-  ml1b=-9;
-  ml2b=-9;
   st=0;
   weight = 1.0;
   PUweight = 1.0;
@@ -965,9 +951,9 @@ TTree *myInfo;
 TH1F *weight_histo;
 
 nanoEvent nEvent;
-  
 
 Double_t JZBAnalysis::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
+
  double pa[3];
  double pb[3];
  double pmiss[3];
@@ -1495,12 +1481,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("mt2",&nEvent.mt2,"mt2/F");
   myTree->Branch("d2",&nEvent.d2,"d2/F");
   myTree->Branch("st",&nEvent.st,"st/F");
-  myTree->Branch("mjl",nEvent.mjl,"mjl[pfJetGoodNum40]/F");
-  myTree->Branch("mjll",nEvent.mjll,"mjll[pfJetGoodNum40]/F");
-  
-  myTree->Branch("mt2j",&nEvent.mt2j,"mt2j/F");
-  myTree->Branch("ml1b",&nEvent.ml1b,"ml1b/F");
-  myTree->Branch("ml2b",&nEvent.ml2b,"ml2b/F");
   
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
@@ -1930,8 +1910,6 @@ bool is_charged_lepton(const int code) {
 
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
-  minuit = new TMinuit();
-  minuit->SetPrintLevel(-1);
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
   counters[EV].fill("All events");
@@ -2611,12 +2589,8 @@ void JZBAnalysis::Analyze() {
   TLorentzVector Type1ResidualMet(type1METpx,type1METpy,0,0);
   TLorentzVector Type1VariedMet(0,0,0,0);
   
-  HemiObj hemiobjs;
-  vector<float> Mpx, Mpy, Mpz, ME;
-  
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
-  unsigned int mjlcounter=0;
   for(int i =0 ; i<fTR->NJets;i++) // PF jet loop
     {
       counters[PJ].fill("All PF jets");
@@ -2633,6 +2607,7 @@ void JZBAnalysis::Analyze() {
       bool  isJetID = IsGoodBasicPFJet(i,0.0,5.0);
       int   ntracksch = fTR->JNAssoTracks[i];  
       int   ntracksne = fTR->JNConstituents[i];
+
 
 //      jpt=jpt/jesC;
 //      jenergy=jenergy/jesC;
@@ -2686,8 +2661,8 @@ void JZBAnalysis::Analyze() {
       // Keep jets over min. pt threshold
       if ( !(jpt>20) ) continue;
       counters[PJ].fill("... pt>20.");
-
-	
+      
+      
       if(fabs(jeta)>3.0 && fabs(jeta)<5.0) {
 	if(jpt>30) nEvent.pfJetGoodNum30Fwd++;
 	if(jpt>40) nEvent.pfJetGoodNum40Fwd++;
@@ -2698,16 +2673,6 @@ void JZBAnalysis::Analyze() {
       // Keep central jets
       if ( !(fabs(jeta)<3.0 ) ) continue;
       counters[PJ].fill("... |eta|<3.0");
-      
-      
-      Mpx.push_back(jpx);
-      Mpy.push_back(jpy);
-      Mpz.push_back(jpz);
-      ME .push_back(jenergy);
-      
-      hemiobjs.index.push_back(i);
-      hemiobjs.type.push_back("jet"),
-      hemiobjs.hemisphere.push_back(0);
       
       // Flag good jets failing ID
       if (!isJetID) { 
@@ -2767,28 +2732,8 @@ void JZBAnalysis::Analyze() {
            nEvent.pfJetGoodTracksBtag[nEvent.pfJetGoodNumBtag40] = ntracksch;
            nEvent.pfJetGoodTracksNBtag[nEvent.pfJetGoodNumBtag40] = ntracksne;
 	   nEvent.pfJetGoodNumBtag40++;
-	   
-	   float ml1b_cand=(aJet+sortedGoodLeptons[PosLepton1].p).M();
-	   
-	   if(nEvent.ml1b<0) nEvent.ml1b=ml1b_cand;
-	   else if(ml1b_cand<nEvent.ml1b) nEvent.ml1b=ml1b_cand;
-	   
-	   float ml2b_cand=(aJet+sortedGoodLeptons[PosLepton2].p).M();
-	   if(nEvent.ml2b<0) nEvent.ml2b=ml2b_cand;
-	   else if(ml2b_cand<nEvent.ml2b) nEvent.ml2b=ml2b_cand;
         }
-        
-        if(nEvent.pfJetGoodNum40*2<jMax) {
-	  nEvent.mjl[mjlcounter]=(sortedGoodLeptons[PosLepton1].p+aJet).M();
-	  mjlcounter++;
-	  nEvent.mjl[mjlcounter]=(sortedGoodLeptons[PosLepton2].p+aJet).M();
-	  mjlcounter++;
-	}
-	
-	nEvent.mjll[nEvent.pfJetGoodNum40]=(sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+aJet).M();
-        
         nEvent.pfJetGoodNum40++;
-	
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
@@ -2848,67 +2793,7 @@ void JZBAnalysis::Analyze() {
 
     }
 
-  
-  Mpx.push_back(sortedGoodLeptons[PosLepton1].p.Px());
-  Mpy.push_back(sortedGoodLeptons[PosLepton1].p.Py());
-  Mpz.push_back(sortedGoodLeptons[PosLepton1].p.Pz());
-  ME.push_back(sortedGoodLeptons[PosLepton1].p.E());
-  hemiobjs.index.push_back(PosLepton1); 
-  if(sortedGoodLeptons[PosLepton1].type==0) hemiobjs.type.push_back("ele");
-  else hemiobjs.type.push_back("muo");
-  hemiobjs.hemisphere.push_back(0);
-  
-  Mpx.push_back(sortedGoodLeptons[PosLepton2].p.Px());
-  Mpy.push_back(sortedGoodLeptons[PosLepton2].p.Py());
-  Mpz.push_back(sortedGoodLeptons[PosLepton2].p.Pz());
-  ME.push_back(sortedGoodLeptons[PosLepton2].p.E());
-  hemiobjs.index.push_back(PosLepton2); 
-  if(sortedGoodLeptons[PosLepton2].type==0) hemiobjs.type.push_back("ele");
-  else hemiobjs.type.push_back("muo");
-  hemiobjs.hemisphere.push_back(0);
-  
-  int hemi_association=3; // association method: default 3 = minimal lund distance
-  int hemi_seed=2; // seed 2: max inv mass
-  Hemisphere* hemisp = new Hemisphere(Mpx, Mpy, Mpz, ME, hemi_seed, hemi_association);
-  for(unsigned int i=0;i<hemiobjs.type.size();i++) {
-    if(hemiobjs.type[i]=="jet") hemisp->SetNoSeed(i);
-  }
-      
-  vector<int> grouping = hemisp->getGrouping();
-  int NHemiIterations  = hemisp->GetNumLoop();
-
-  TLorentzVector pseudojet1(0.,0.,0.,0.);
-  TLorentzVector pseudojet2(0.,0.,0.,0.);
-	
-  
-  
-  float dHT=0;
-  for(int i=0; i<Mpx.size(); ++i){
-	if(grouping[i]==1){
-		pseudojet1.SetPx(pseudojet1.Px() + Mpx[i]);
-		pseudojet1.SetPy(pseudojet1.Py() + Mpy[i]);
-		pseudojet1.SetPz(pseudojet1.Pz() + Mpz[i]);
-		pseudojet1.SetE( pseudojet1.E()  + ME[i]);	
-		dHT += sqrt(Mpx[i]*Mpx[i] + Mpy[i]*Mpy[i]);
-		hemiobjs.hemisphere[i]=1;
-	}else if(grouping[i] == 2){
-		pseudojet2.SetPx(pseudojet2.Px() + Mpx[i]);
-		pseudojet2.SetPy(pseudojet2.Py() + Mpy[i]);
-		pseudojet2.SetPz(pseudojet2.Pz() + Mpz[i]);
-		pseudojet2.SetE( pseudojet2.E()  + ME[i]);
-		dHT -= sqrt(Mpx[i]*Mpx[i] + Mpy[i]*Mpy[i]);
-		hemiobjs.hemisphere[i]=2;
-	}
-  }
-  delete hemisp;
-  
-  TLorentzVector MET(fTR->PFType1METpx,fTR->PFType1METpy,0,0);
-  
-  float testmass=0;
-  float massive=0;
-  nEvent.mt2j = CalcMT2(testmass, massive, pseudojet1, pseudojet2, MET);
-  
-  
+    
   for(int jl=0;jl<sortedGoodLeptons.size();jl++) {
     float factor=1.0;
     if(sortedGoodLeptons[jl].type==0) {
@@ -2994,9 +2879,6 @@ void JZBAnalysis::Analyze() {
   nEvent.met[RECOILMET] = 0.;//kicked (recoil + s1 + s2).Pt();
   
   ComputeD2MT2(nEvent.d2,nEvent.mt2);
-  
-  //******** missing mt2j
-  
   nEvent.st=nEvent.pt1+nEvent.pt2+nEvent.met[4]+ScalarSumOfJets; // lepton 1   + lepton2   + MET  + scalar sum of jets
     
   // Statistics ///////////////////////////////////////

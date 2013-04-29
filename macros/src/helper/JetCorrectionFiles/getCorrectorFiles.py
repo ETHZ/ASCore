@@ -3,7 +3,8 @@ process = cms.Process("jectxt")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # define your favorite global tag
-globalTag = 'FT_P_V42_AN3'
+## globalTag = 'START53_V7A'
+globalTag = 'START52_V9'
 
 process.GlobalTag.globaltag = globalTag+'::All'
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
@@ -17,7 +18,7 @@ process.readAK5PF    = cms.EDAnalyzer('JetCorrectorDBReader',
       printScreen    = cms.untracked.bool(False),
       createTextFile = cms.untracked.bool(True)
 )
-process.readAK5Calo = process.readAK5PF.clone(payloadName = 'AK5Calo')
-process.readAK5JPT = process.readAK5PF.clone(payloadName = 'AK5JPT')
-process.p = cms.Path(process.readAK5PF * process.readAK5Calo * process.readAK5JPT)
+# process.readAK5Calo = process.readAK5PF.clone(payloadName = 'AK5Calo')
+# process.readAK5JPT = process.readAK5PF.clone(payloadName = 'AK5JPT')
+process.p = cms.Path(process.readAK5PF ) #* process.readAK5Calo * process.readAK5JPT)
 

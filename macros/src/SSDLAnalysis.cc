@@ -371,8 +371,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 
 		// now finally filling the histograms
 		// sbottom = 1000005 , stop = 1000006, neutralino = 1000022, chi1 = 1000024, gluino = 1000021
-		int var1 = fTR->MassGlu; //getSusyMass(1000005, 25);
-		int var2 = fTR->MassChi; //getSusyMass(1000022, 25);
+		int var1 = getSusyMass(1000021, 25);
+		int var2 = getSusyMass(1000006, 25);
 		                                   fModelCountAll           -> Fill(var1, var2);
 		if (!TChiSlepSnu && isRightHanded) fRightHandedSlepCountAll -> Fill(var1, var2);
 		if (isRightHanded)                 fRightHandedCountAll     -> Fill(var1, var2);
@@ -424,9 +424,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm12  = fTR->M12;
 		fTprocess = fTR->process;
 		// sbottom = 1000005 , stop = 1000006, neutralino = 1000022, chi1 = 1000024, gluino = 1000021
-		fTmGlu = fTR->MassGlu; //getSusyMass(1000005, 25);
-		fTmChi = fTR->MassChi; //getSusyMass(1000024, 25);
-		fTmLSP = fTR->MassLSP; //getSusyMass(1000022, 25);
+		fTmGlu = getSusyMass(1000021, 25);
+		fTmChi = getSusyMass(1000006, 25);
+		fTmLSP = getSusyMass(1000022, 25);
 		TChiSlepSnu   ? fTisTChiSlepSnu = 1 : fTisTChiSlepSnu = 0;
 		isRightHanded ? fTisRightHanded = 1 : fTisRightHanded = 0;
 	}

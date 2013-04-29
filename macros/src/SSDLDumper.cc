@@ -143,9 +143,9 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
-int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   10 ,      10 ,        10  ,        10  ,        10  ,       3 ,   15 ,   10 };
-float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         5. ,        30. ,        30. ,       0.,    0.,    0.};
-float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        25. ,       150. ,       300. ,       3.,  150.,  100.};
+int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     5 ,   10 ,      10 ,         5  ,        10  ,        10  ,       3 ,    5 ,   10 };
+float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         5. ,        30. ,        50. ,       0.,    0.,    0.};
+float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     6.,  500.,     300.,        25. ,       150. ,       150. ,       3.,   40.,  100.};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::IsoPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
@@ -284,8 +284,8 @@ SSDLDumper::SSDLDumper(TString configfile){
 	gSystematics["JetSmear"] = 3;
 	gSystematics["BUp"]      = 4;
 	gSystematics["BDown"]    = 5;
-	gSystematics["LepUp"]    = 6;
-	gSystematics["LepDown"]  = 7;
+	gSystematics["METUp"]    = 6;
+	gSystematics["METDown"]  = 7;
 
 }
 
@@ -327,6 +327,10 @@ void SSDLDumper::init(){
 	fRand3 = new TRandom3(50);
 	fRand3Normal = new TRandom3(10);
 
+	cout << "SEED OF THE RANDOMNUMBER: fRand3:       " << fRand3      ->GetSeed() << endl;
+	cout << "SEED OF THE RANDOMNUMBER: fRand3Normal: " << fRand3Normal->GetSeed() << endl;
+
+
 	resetHypLeptons();
 	initCutNames();
 	
@@ -334,7 +338,7 @@ void SSDLDumper::init(){
 
  	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 15.;
-//	fC_maxMt_Control  = 20.;
+	//fC_maxMt_Control  = 20.;
 	
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
@@ -577,33 +581,28 @@ void SSDLDumper::loopEvents(Sample *S){
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 1);
- 		// fillYields(S, gRegion["TTbarWSelJU"]);
 		fillSigEventTree(S, gSystematics["JetUp"]);
 
 		// Jet pts scaled down
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 2);
- 		// fillYields(S, gRegion["TTbarWSelJD"]);
 		fillSigEventTree(S, gSystematics["JetDown"]);
 
 		// Jet pts smeared
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags(); // reset to scaled btag values
 		smearJetPts(S, 3);
- 		// fillYields(S, gRegion["TTbarWSelJS"]);
 		fillSigEventTree(S, gSystematics["JetSmear"]);
 
 		// Btags scaled up
 		fChain->GetEntry(jentry); // reset tree vars
 		scaleBTags(S, 1);
- 		// fillYields(S, gRegion["TTbarWSelBU"]);
 		fillSigEventTree(S, gSystematics["BUp"]);
 
 		// Btags scaled down
 		fChain->GetEntry(jentry); // reset tree vars
 		scaleBTags(S, 2);
- 		// fillYields(S, gRegion["TTbarWSelBD"]);
 		fillSigEventTree(S, gSystematics["BDown"]);
 
 		// Lepton pts scaled up
@@ -1414,7 +1413,8 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 }
 void SSDLDumper::fillTLRatios(Sample *S){
         // Fill TL Ratio plots only once
-        setRegionCuts(gRegion["Baseline"]);
+        // setRegionCuts(gRegion["Baseline"]);
+        setRegionCuts(gRegion[gBaseRegion]);
 	resetHypLeptons();
 
 	fCurrentChannel = Muon;
@@ -1602,7 +1602,8 @@ void SSDLDumper::fillTLRatios(Sample *S){
 }
 void SSDLDumper::fillChMisIDProb(Sample *S){
         // Fill TL Ratio plots only once
-        setRegionCuts(gRegion["Baseline"]);
+        // setRegionCuts(gRegion["Baseline"]);
+        setRegionCuts(gRegion[gBaseRegion]);
 	resetHypLeptons();
          
         fCurrentChannel = Elec;
@@ -1653,11 +1654,14 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	// Set custom event selections here:
 	setRegionCuts(gRegion[gBaseRegion]);
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
+	fC_minMu2pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
+	fC_minEl2pt  = 10.;
 	fC_minNjets  = 0;
+	fC_minHT     = 0.;
 	fC_minMet    = 0.;
-	fC_app3rdVet  = 0;
-	fC_chargeVeto = 0;
+	// fC_app3rdVet  = 0;
+	// fC_chargeVeto = 0;
 	gApplyZVeto   = true;
 
 	fSETree_SystFlag = flag;
@@ -1676,7 +1680,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	fSETree_NM = getNTightMuons();
 	fSETree_NE = getNTightElectrons();
 
-//	fChargeSwitch = 1;
+	// for testing!!!! fChargeSwitch = 1;
 	
 	if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 
@@ -2420,7 +2424,7 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 		if(!isLooseMuon(muind1)) return;
 		if(MuPt[muind1] < fC_minMu2pt) return;
 		if(MuPt[muind1] > gMuFPtBins[gNMuFPtBins]) return;
-		if(MuPt[muind1] > 35.) return;
+		//if(MuPt[muind1] > 35.) return;
  
 		////////////////////////////////////////////////////
 		// MOST LOOSE SELECTION
@@ -2591,7 +2595,8 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 }
 void SSDLDumper::fillPileUpPlots(Sample *S){
    
-        setRegionCuts(gRegion["Baseline"]);
+	// setRegionCuts(gRegion["Baseline"]);
+	setRegionCuts(gRegion[gBaseRegion]);
   	PuPlots *pu0 = &S->puplots[0]; // mu
   	PuPlots *pu1 = &S->puplots[1]; // el
 
@@ -4592,33 +4597,33 @@ bool SSDLDumper::elmuSignalTrigger(){
 bool SSDLDumper::singleMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return ( HLT_MU17 > 0  );
-	// marc return ( (HLT_MU8 > 0 || HLT_MU17 > 0 ) );
+	// return ( HLT_MU17 > 0  );
+	return ( (HLT_MU8 > 0 || HLT_MU17 > 0 ) );
 }
 float SSDLDumper::singleMuPrescale(){
 	// Pretend MC samples have prescale 1.
 	if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	// marc if(HLT_MU8_PS > 0) return HLT_MU8_PS;
+	if(HLT_MU8_PS > 0) return HLT_MU8_PS;
 	if(HLT_MU17_PS > 0) return HLT_MU17_PS;
 	return 1;
 }
 bool SSDLDumper::singleElTrigger(){
   // Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return (HLT_ELE17_JET30_TIGHT > 0);
-	// marc return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
+	// return (HLT_ELE17_JET30_TIGHT > 0);
+	return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
   if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
+	if( HLT_ELE8_TIGHT_PS > 0 )        return HLT_ELE8_TIGHT_PS;
+	if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_TIGHT_PS;
+	if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE17_TIGHT_PS;
 	if( HLT_ELE17_JET30_TIGHT_PS > 0 ) return HLT_ELE17_JET30_TIGHT_PS;
-	// marc if( HLT_ELE8_JET30_TIGHT_PS > 0 )  return HLT_ELE8_JET30_TIGHT_PS;
-	// marc if( HLT_ELE17_TIGHT_PS > 0 )       return HLT_ELE17_TIGHT_PS;
-	// marc if( HLT_ELE8_TIGHT_PS > 0 ) return HLT_ELE8_TIGHT_PS;
 	return 1.;
 }
 
@@ -4792,11 +4797,11 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 	std::vector<int>::const_iterator it = cleanJets.begin();
 	
 	for( it = cleanJets.begin(); it != cleanJets.end(); ++it) {
-		if (Event == 45978937) {
+		if (flag==3 && Event == 15713329) {
 			cout << "at jet: " << *it<< endl;
 			cout << "---------------------------" << endl;
 			cout << Form("before: jeti: %d jetpt: %.2f jeteta %.2f jetphi: %.2f", *it, JetPt[*it], JetEta[*it], JetPhi[*it]) << endl;
-			cout << Form("  JEC-uncertainty: %.7f", JetCorrUnc[*it]) << endl;
+			//cout << Form("  JEC-uncertainty: %.7f", JetCorrUnc[*it]) << endl;
 		}
 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set temp to the jet
 		ojets += tmp;                                                           // add jet to the old jets vector
@@ -4805,11 +4810,18 @@ void SSDLDumper::smearJetPts(Sample *S, int flag){
 		if(flag == 3){
 			float sigmaMC  = getErrPt(JetPt[*it], JetEta[*it])/JetPt[*it];      // get the resolution
 			float jerScale = getJERScale(*it);                                  // get JER scale factors
-			JetPt[*it] = JetPt[*it] * fRand3->Gaus(1., sqrt(jerScale*jerScale -1)*sigmaMC ); // smear for flag 3
+			float factor = fRand3->Gaus(1., sqrt(jerScale*jerScale -1.)*sigmaMC );
+			if (flag==3 && Event == 15713329) {
+				cout << Form("  jerScale: %.3f sigmaMC: %.3f", jerScale, sigmaMC) << endl;
+				cout << Form("  arg: %.3f", sqrt(jerScale*jerScale -1)*sigmaMC ) << endl;
+				cout << Form("  factor: %.3f", factor ) << endl;
+				cout << Form("  seed: %d", fRand3->GetSeed() ) << endl;
+			}
+			JetPt[*it] = JetPt[*it] * factor; // smear for flag 3
 		}
 		tmp.SetPtEtaPhiE(JetPt[*it], JetEta[*it], JetPhi[*it], JetEnergy[*it]); // set tmp to the scaled/smeared jet
 		jets += tmp;                                                            // add scaled/smeared jet to the new jets
-		if (Event == 45978937) {
+		if (flag==3 && Event == 15713329) {
 			cout << Form("after: jeti: %d jetpt: %.2f jeteta %.2f jetphi: %.2f", *it, JetPt[*it], JetEta[*it], JetPhi[*it]) << endl;
 		}
 	}
@@ -5976,6 +5988,7 @@ bool SSDLDumper::isSigSupMuEvent(int &mu1, int &mu2){
 	setHypLepton1(mu1, Muon);
 	if(!passesJet50CutdPhi(mu1, Muon))  return false;
 	if(getMT(mu1,Muon) > fC_maxMt_Control)  return false;
+	//if(getMT(mu1,Muon) > fC_maxMt_Control+5)  return false;
 	if(getMET() > fC_maxMet_Control)   return false;
 	int nmus(0);
 	for (int i=0; i< NMus; ++i){
@@ -6022,7 +6035,7 @@ bool SSDLDumper::isSigSupElEvent(int &el1, int &el2){
 	setHypLepton1(el1, Elec);
 	if(!passesJet50CutdPhi(el1, Elec))          return false;
 	if(getMT(el1,Elec) > (fC_maxMt_Control+5.)) return false;
-//	if(getMT(el1,Elec) > (fC_maxMt_Control)) return false;
+	//if(getMT(el1,Elec) > (fC_maxMt_Control)) return false;
 	if(getMET() > fC_maxMet_Control)  return false;
 	int nels(0);
 	for (int i = 0; i < NEls; i++) {
@@ -6914,6 +6927,41 @@ float SSDLDumper::getLeptonSFEl(float pt, float eta){
 //////////////////////////////////////////////////////////////////////////////
 // HLT Scale Factors
 //____________________________________________________________________________
+float SSDLDumper::getLeptonSystematic(float pt1, float pt2, gChannel chan){
+	float tp1, tp2, ec1, ec2;
+	if (chan == Muon) {
+		if (pt1 < 15.) tp1 = 0.05;
+		else tp1 = 0.03;
+		if (pt1 < 30.) ec1 = 0.05;
+		else ec1 = 0.03;
+		if (pt2 < 15.) tp2 = 0.05;
+		else tp2 = 0.03;
+		if (pt2 < 30.) ec2 = 0.05;
+		else ec2 = 0.03;
+	}
+	if (chan == ElMu) {
+		if (pt1 < 15.) tp1 = 0.05;
+		else tp1 = 0.03;
+		if (pt1 < 30.) ec1 = 0.05;
+		else ec1 = 0.03;
+		if (pt2 < 15.) tp2 = 0.10;
+		else tp2 = 0.05;
+		if (pt2 < 30.) ec2 = 0.03;
+		else ec2 = 0.03;
+	}
+	if (chan == Elec) {
+		if (pt1 < 15.) tp1 = 0.10;
+		else tp1 = 0.05;
+		if (pt1 < 30.) ec1 = 0.03;
+		else ec1 = 0.03;
+		if (pt2 < 15.) tp2 = 0.10;
+		else tp2 = 0.05;
+		if (pt2 < 30.) ec2 = 0.03;
+		else ec2 = 0.03;
+	}
+	float syst = sqrt( (tp1+tp2)*(tp1+tp2) + (ec1+ec2)*(ec1+ec2));
+	return syst;
+}
 float SSDLDumper::getTriggerSFMuMuLowpt(float eta){
 	// Pt of the trailing lepton needed 
 	float aeta = fabs(eta);

@@ -331,7 +331,7 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuNSiLayers[index] < 6) return false;
     if(fTR->MuNPxHits[index] < 1)   return false;
     // if(fTR->MuNMuHits [index] < 2)   return false;
-    // if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
+    // if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits()
 	if(fTR->MuNGlMuHits [index] < 1) return false;
 	// if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
 	if(fTR->MuNMatchedStations.size() > 0) { 	 

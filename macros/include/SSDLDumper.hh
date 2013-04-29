@@ -866,6 +866,7 @@ public:
         float getTriggerSFMuMu(float);
         float getTriggerSFElEl(float);
         float getTriggerSFMuEl();
+        float getLeptonSystematic(float, float, gChannel);
 	float diMuonHLTSF2012();
 	float muEleHLTSF2012();
 	float diEleHLTSF2012();

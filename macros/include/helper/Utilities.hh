@@ -393,6 +393,8 @@ namespace Util {
 
 		if(!success)
 		{
+			// std::cout<<"there were " << collectionSize << " elements in this vector" << std::endl;
+			// for (int i=0;i<collectionSize;++i){std::cout << vec[i]<< "  " << vecClone[i] << "  " << ind[i]<<std::endl;}
 			std::cout<<"problem with the sorting"<<std::endl;
 			std::vector<int> dummy; 
 			return dummy;

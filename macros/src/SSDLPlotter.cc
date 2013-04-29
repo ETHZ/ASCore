@@ -34,7 +34,6 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-static const bool gEWKino = false;
 static const bool gRunSMSscan = false;
 static const bool gRatiosFromTTbar = false;
 static const bool gFullDataBlind = false;
@@ -165,7 +164,7 @@ void SSDLPlotter::init(TString filename){
 	// fMCBG.push_back(QCDEM20);
 	fMCBG.push_back(QCDEM30);
 	fMCBG.push_back(QCDEM80);
-	//	fMCBG.push_back(QCDEM170);
+	//fMCBG.push_back(QCDEM170);
 	fMCBG.push_back(QCDEM250);
 	fMCBG.push_back(QCD50);
 	fMCBG.push_back(QCD80);
@@ -308,7 +307,7 @@ void SSDLPlotter::init(TString filename){
 	// fMCBGEMEnr.push_back(QCDEM20);
 	fMCBGEMEnr.push_back(QCDEM30);
 	fMCBGEMEnr.push_back(QCDEM80);
-	//	fMCBGEMEnr.push_back(QCDEM170);
+	//fMCBGEMEnr.push_back(QCDEM170);
 	fMCBGEMEnr.push_back(QCDEM250);
 	fMCBGEMEnr.push_back(QCD50);
 	fMCBGEMEnr.push_back(QCD80);
@@ -324,7 +323,7 @@ void SSDLPlotter::init(TString filename){
 	// fEMEnr.push_back(QCDEM20);
 	fEMEnr.push_back(QCDEM30);
 	fEMEnr.push_back(QCDEM80);
-	//	fEMEnr.push_back(QCDEM170);
+	//fEMEnr.push_back(QCDEM170);
 	fEMEnr.push_back(QCDEM250);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
@@ -335,10 +334,11 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(WGstarMu);
 	fMCRareSM.push_back(WGstarTau);
 	fMCRareSM.push_back(DPSWW);
-	// if(gEWKino || gTTHBG)  fMCRareSM.push_back(TTbarH);
-	if(gEWKino || gTTHBG)  { fMCRareSM.push_back(HWW); fMCRareSM.push_back(HZZ); fMCRareSM.push_back(HTauTau); }
-	if(gEWKino)  fMCRareSM.push_back(TTbarW);
-	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
+	fMCRareSM.push_back(HWW);
+	fMCRareSM.push_back(HZZ);
+	fMCRareSM.push_back(HTauTau);
+	fMCRareSM.push_back(TTbarW);
+	fMCRareSM.push_back(TTbarZ);
 	fMCRareSM.push_back(TTbarG);
 	fMCRareSM.push_back(TbZ);
 	fMCRareSM.push_back(WpWp);
@@ -413,7 +413,7 @@ void SSDLPlotter::doSMSscans(TString region, TString file, TString model){
 	// TString filename   = "/shome//mdunser/xsecfiles/output_38.root";  
 
 	// bool for the low-pt analysis...
-	bool lowpt = true;
+	bool lowpt = false;
 	
 	cout << "Running Over region: " << region << endl;
 	cout << "On file: " << file << endl;
@@ -469,41 +469,41 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	// makeMuIsolationPlots(true); // if true, loops on TTbar sample
+	// makeElIsolationPlots(true); // if true, loops on TTbar sample
 	// makeElIdPlots();
-//	makeNT2KinPlots(false);
-//	makeNT2KinPlots(true);
-	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeNT2KinPlots(false);
+	// makeNT2KinPlots(true);
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
 	// makeMETvsHTPlotPRL();
 	//	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-//	makeRatioPlots(Muon);
-//	makeRatioPlots(Elec);
-//	make2DRatioPlots(Muon);
-//	make2DRatioPlots(Elec);
-//	// // makeNTightLoosePlots(Muon);
-//	// // makeNTightLoosePlots(Elec);
-//	// 
-//	makeFRvsPtPlots(Muon, SigSup);
-//	makeFRvsPtPlots(Elec, SigSup);
-//	makeFRvsPtPlots(Muon, ZDecay);
-//	makeFRvsPtPlots(Elec, ZDecay);
-//	makeFRvsNVPlots(Muon, ZDecay); 
-//	makeFRvsNVPlots(Elec, ZDecay);
-//	makeFRvsEtaPlots(Muon);
-//	makeFRvsEtaPlots(Elec);
-//	makeChMidvsPtPlots();
-//
-//	makeAllClosureTestsTTW();
-//	makeAllIntPredictions();
-//	makeAllClosureTests();
-//
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	// make2DRatioPlots(Muon);
+	// make2DRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
+
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsNVPlots(Muon, ZDecay); 
+	// makeFRvsNVPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
+	// makeChMidvsPtPlots();
+
+	// makeAllClosureTestsTTW();
+	makeAllIntPredictions();
+	makeAllClosureTests();
+
 	// makeDiffPrediction();
-//	makeTTWDiffPredictions();
-//	makeTTWIntPredictions();
+	// makeTTWDiffPredictions();
+	// makeTTWIntPredictions();
 	// printAllYieldTables();
 	
 
@@ -520,9 +520,9 @@ void SSDLPlotter::doAnalysis(){
 // 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
 	
 	// optimized selection March 20
- 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
- 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
- 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+ 	// makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+ 	// makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
+ 	// makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
 	
 	
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
@@ -5419,18 +5419,18 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(fp == SigSup){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNFPtBins(chan), getFPtBins(chan));
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));
-		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNFPtBins(chan), getFPtBins(chan));
-		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNFPtBins(chan), getFPtBins(chan));
-		h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNFPtBins(chan), getFPtBins(chan));
+		//h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNFPtBins(chan), getFPtBins(chan));
+		//h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNFPtBins(chan), getFPtBins(chan));
+		//h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNFPtBins(chan), getFPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
 	if(fp == ZDecay){
 		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPPtBins(chan), getPPtBins(chan));
 		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));
-		h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNPPtBins(chan), getPPtBins(chan));
-		h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNPPtBins(chan), getPPtBins(chan));
-		h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNPPtBins(chan), getPPtBins(chan));
+		//h_ptratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNPPtBins(chan), getPPtBins(chan));
+		//h_ptratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNPPtBins(chan), getPPtBins(chan));
+		//h_ptratio_ttbar= new TH1D("Ratio_ttbar","Tight/Loose Ratio in ttbar",getNPPtBins(chan), getPPtBins(chan));
 		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 	}
@@ -5462,9 +5462,9 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
-	calculateRatio(qcdsamples,  chan, fp, h_dummy2, h_ptratio_qcd,   h_dummy1);
-	calculateRatio(wjetssamples,  chan, fp, h_dummy2, h_ptratio_wjets,   h_dummy1);
-	calculateRatio(ttbarsamples,  chan, fp, h_dummy2, h_ptratio_ttbar,   h_dummy1, false, true);
+	//calculateRatio(qcdsamples,  chan, fp, h_dummy2, h_ptratio_qcd,   h_dummy1);
+	//calculateRatio(wjetssamples,  chan, fp, h_dummy2, h_ptratio_wjets,   h_dummy1);
+	//calculateRatio(ttbarsamples,  chan, fp, h_dummy2, h_ptratio_ttbar,   h_dummy1, false, true);
 
 	//////////////
 	float linewidth = 1.;
@@ -5487,16 +5487,16 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	float maximum = 0.2; //0.4;
 	if(fp == ZDecay) maximum = 1.1;
-	h_ptratio_data->SetMaximum(maximum);
-	h_ptratio_mc  ->SetMaximum(maximum);
-	h_ptratio_qcd  ->SetMaximum(maximum);
-	h_ptratio_wjets  ->SetMaximum(maximum);
-	h_ptratio_ttbar  ->SetMaximum(maximum);
-	h_ptratio_data->SetMinimum(0.0);
-	h_ptratio_mc  ->SetMinimum(0.0);
-	h_ptratio_qcd ->SetMinimum(0.0);
-	h_ptratio_wjets ->SetMinimum(0.0);
-	h_ptratio_ttbar ->SetMinimum(0.0);
+	h_ptratio_data  -> SetMaximum(maximum);
+	h_ptratio_mc    -> SetMaximum(maximum);
+	//h_ptratio_qcd   -> SetMaximum(maximum);
+	//h_ptratio_wjets -> SetMaximum(maximum);
+	//h_ptratio_ttbar -> SetMaximum(maximum);
+	h_ptratio_data  -> SetMinimum(0.0);
+	h_ptratio_mc    -> SetMinimum(0.0);
+	//h_ptratio_qcd   -> SetMinimum(0.0);
+	//h_ptratio_wjets -> SetMinimum(0.0);
+	//h_ptratio_ttbar -> SetMinimum(0.0);
 
 	if(chan == Muon) h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
 	if(chan == Elec) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
@@ -5518,29 +5518,29 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_mc  ->SetFillColor(kRed);
 	h_ptratio_mc  ->GetXaxis()->SetRangeUser(0.,50.);
 	
-	h_ptratio_qcd  ->SetMarkerColor(kGreen);
-	h_ptratio_qcd  ->SetMarkerStyle(23);
-	h_ptratio_qcd  ->SetMarkerSize(1.5);
-	h_ptratio_qcd  ->SetLineWidth(linewidth);
-	h_ptratio_qcd  ->SetLineColor(kGreen);
-	h_ptratio_qcd  ->SetFillColor(kGreen);
-	h_ptratio_qcd  ->GetXaxis()->SetRangeUser(0.,50.);
+	// h_ptratio_qcd  ->SetMarkerColor(kGreen);
+	// h_ptratio_qcd  ->SetMarkerStyle(23);
+	// h_ptratio_qcd  ->SetMarkerSize(1.5);
+	// h_ptratio_qcd  ->SetLineWidth(linewidth);
+	// h_ptratio_qcd  ->SetLineColor(kGreen);
+	// h_ptratio_qcd  ->SetFillColor(kGreen);
+	// h_ptratio_qcd  ->GetXaxis()->SetRangeUser(0.,50.);
 	
-	h_ptratio_wjets  ->SetMarkerColor(kOrange);
-	h_ptratio_wjets  ->SetMarkerStyle(23);
-	h_ptratio_wjets  ->SetMarkerSize(1.5);
-	h_ptratio_wjets  ->SetLineWidth(2);
-	h_ptratio_wjets  ->SetLineColor(kOrange);
-	h_ptratio_wjets  ->SetFillColor(kOrange);
-	h_ptratio_wjets  ->GetXaxis()->SetRangeUser(0.,50.);
+	// h_ptratio_wjets  ->SetMarkerColor(kOrange);
+	// h_ptratio_wjets  ->SetMarkerStyle(23);
+	// h_ptratio_wjets  ->SetMarkerSize(1.5);
+	// h_ptratio_wjets  ->SetLineWidth(2);
+	// h_ptratio_wjets  ->SetLineColor(kOrange);
+	// h_ptratio_wjets  ->SetFillColor(kOrange);
+	// h_ptratio_wjets  ->GetXaxis()->SetRangeUser(0.,50.);
 	
-	h_ptratio_ttbar  ->SetMarkerColor(kBlue);
-	h_ptratio_ttbar  ->SetMarkerStyle(23);
-	h_ptratio_ttbar  ->SetMarkerSize(1.5);
-	h_ptratio_ttbar  ->SetLineWidth(2);
-	h_ptratio_ttbar  ->SetLineColor(kBlue);
-	h_ptratio_ttbar  ->SetFillColor(kBlue);
-	h_ptratio_ttbar  ->GetXaxis()->SetRangeUser(0.,50.);
+	// h_ptratio_ttbar  ->SetMarkerColor(kBlue);
+	// h_ptratio_ttbar  ->SetMarkerStyle(23);
+	// h_ptratio_ttbar  ->SetMarkerSize(1.5);
+	// h_ptratio_ttbar  ->SetLineWidth(2);
+	// h_ptratio_ttbar  ->SetLineColor(kBlue);
+	// h_ptratio_ttbar  ->SetFillColor(kBlue);
+	// h_ptratio_ttbar  ->GetXaxis()->SetRangeUser(0.,50.);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -5552,9 +5552,9 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.37);
 	leg->AddEntry(h_ptratio_data, "Data",            "p");
 	leg->AddEntry(h_ptratio_mc,   "Simulation",      "p");
-	leg->AddEntry(h_ptratio_qcd,  "QCD",             "p");
-	leg->AddEntry(h_ptratio_wjets,"WJets",           "p");
-	leg->AddEntry(h_ptratio_ttbar,"ttbar (matched)", "p");
+	//leg->AddEntry(h_ptratio_qcd,  "QCD",             "p");
+	//leg->AddEntry(h_ptratio_wjets,"WJets",           "p");
+	//leg->AddEntry(h_ptratio_ttbar,"ttbar (matched)", "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -5564,8 +5564,8 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	c_temp->cd();
 	// MARC h_ptratio_mc->DrawCopy("axis");
 	h_ptratio_mc->DrawCopy("PE 0");
-	h_ptratio_qcd->Draw("PE 0 same");
-	h_ptratio_ttbar->Draw("PE 0 same");
+	// h_ptratio_qcd->Draw("PE 0 same");
+	// h_ptratio_ttbar->Draw("PE 0 same");
 	// MARC eff_mc->Draw("P same");
 	// MARC h_ptratio_data->Draw("PE X0 same");
 	eff_data->Draw("PZ 0 same");
@@ -5586,7 +5586,8 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	
 	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets, h_ptratio_ttbar;
+	delete h_ptratio_mc, h_ptratio_data;
+	//delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets, h_ptratio_ttbar;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
@@ -5791,8 +5792,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	TH1D *h_etaratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNEtaBins(chan), getEtaBins(chan));
 	TH1D *h_etaratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_etaratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_etaratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNEtaBins(chan), getEtaBins(chan));
+	//TH1D *h_etaratio_qcd  = new TH1D("Ratio_qcd",  "Tight/Loose Ratio in QCD",  getNEtaBins(chan), getEtaBins(chan));
+	//TH1D *h_etaratio_wjets= new TH1D("Ratio_wjets","Tight/Loose Ratio in WJets",getNEtaBins(chan), getEtaBins(chan));
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
@@ -5818,8 +5819,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
 	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
-	calculateRatio(qcdsamples,  chan, SigSup, h_dummy2, h_dummy1, h_etaratio_qcd);
-	calculateRatio(wjetssamples,chan, SigSup, h_dummy2, h_dummy1, h_etaratio_wjets);
+	//calculateRatio(qcdsamples,  chan, SigSup, h_dummy2, h_dummy1, h_etaratio_qcd);
+	//calculateRatio(wjetssamples,chan, SigSup, h_dummy2, h_dummy1, h_etaratio_wjets);
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, SigSup, 1);
@@ -5832,12 +5833,12 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	//	if(chan==Elec) max = 0.8;
 	h_etaratio_data->SetMaximum(max);
 	h_etaratio_mc  ->SetMaximum(max);
-	h_etaratio_qcd  ->SetMaximum(max);
-	h_etaratio_wjets  ->SetMaximum(max);
+	//h_etaratio_qcd  ->SetMaximum(max);
+	// h_etaratio_wjets  ->SetMaximum(max);
 	h_etaratio_data->SetMinimum(0.0);
 	h_etaratio_mc  ->SetMinimum(0.0);
-	h_etaratio_qcd  ->SetMinimum(0.0);
-	h_etaratio_wjets  ->SetMinimum(0.0);
+	//h_etaratio_qcd  ->SetMinimum(0.0);
+	// h_etaratio_wjets  ->SetMinimum(0.0);
 
 	if(chan == Muon) h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
 	if(chan == Elec) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
@@ -5858,19 +5859,19 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	h_etaratio_mc  ->SetLineColor(kRed);
 	h_etaratio_mc  ->SetFillColor(kRed);
 	
-	h_etaratio_qcd  ->SetMarkerColor(kBlue);
-	h_etaratio_qcd  ->SetMarkerStyle(23);
-	h_etaratio_qcd  ->SetMarkerSize(1.5);
-	h_etaratio_qcd  ->SetLineWidth(2);
-	h_etaratio_qcd  ->SetLineColor(kBlue);
-	h_etaratio_qcd  ->SetFillColor(kBlue);
+	// h_etaratio_qcd  ->SetMarkerColor(kBlue);
+	// h_etaratio_qcd  ->SetMarkerStyle(23);
+	// h_etaratio_qcd  ->SetMarkerSize(1.5);
+	// h_etaratio_qcd  ->SetLineWidth(2);
+	// h_etaratio_qcd  ->SetLineColor(kBlue);
+	// h_etaratio_qcd  ->SetFillColor(kBlue);
 	
-	h_etaratio_wjets  ->SetMarkerColor(kYellow);
-	h_etaratio_wjets  ->SetMarkerStyle(23);
-	h_etaratio_wjets  ->SetMarkerSize(1.5);
-	h_etaratio_wjets  ->SetLineWidth(2);
-	h_etaratio_wjets  ->SetLineColor(kYellow);
-	h_etaratio_wjets  ->SetFillColor(kYellow);
+	// h_etaratio_wjets  ->SetMarkerColor(kYellow);
+	// h_etaratio_wjets  ->SetMarkerStyle(23);
+	// h_etaratio_wjets  ->SetMarkerSize(1.5);
+	// h_etaratio_wjets  ->SetLineWidth(2);
+	// h_etaratio_wjets  ->SetLineColor(kYellow);
+	// h_etaratio_wjets  ->SetFillColor(kYellow);
 
 	// // h_etaratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
 	// h_etaratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
@@ -5889,8 +5890,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 	leg->AddEntry(h_etaratio_data, "Data",       "p");
 	leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
-	leg->AddEntry(h_etaratio_qcd,   "QCD", "p");
-	leg->AddEntry(h_etaratio_wjets,   "WJets", "p");
+	// leg->AddEntry(h_etaratio_qcd,   "QCD", "p");
+	// leg->AddEntry(h_etaratio_wjets,   "WJets", "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.04);
@@ -5912,8 +5913,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	h_etaratio_mc->DrawCopy("PE 0");
 	// MARC h_etaratio_mc->DrawCopy("axis");
 	// MARC eff_data->Draw("P same");
-	h_etaratio_qcd->Draw("PE 0 same");
-	h_etaratio_wjets->Draw("PE 0 same");
+	// h_etaratio_qcd->Draw("PE 0 same");
+	// h_etaratio_wjets->Draw("PE 0 same");
 	eff_data->Draw("PZ 0 same");
 	leg->Draw();
 	drawTopLine();
@@ -5926,7 +5927,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	
 	// Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
-	delete h_etaratio_mc, h_etaratio_data, h_etaratio_qcd, h_etaratio_wjets;
+	delete h_etaratio_mc, h_etaratio_data;
+	// delete h_etaratio_mc, h_etaratio_data, h_etaratio_qcd, h_etaratio_wjets;
 	// delete c_temp;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
@@ -8667,8 +8669,8 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
 	calculateChMisIdProb(fMCBG, EB, feb_mc, febE_mc);
 	calculateChMisIdProb(fMCBG, EE, fee_mc, feeE_mc);
 	
-	cout << " this is the number of OS events in EE, BB, and EB from the old intpredictions function: " << nt2_ee_EE_os << " " << nt2_ee_BB_os << " " << nt2_ee_EB_os << endl;
-	cout << "this is the charge mis ID probabilities: fee, fbb, feb: " << fee << " " << fbb << " " << feb << endl;
+	// cout << " this is the number of OS events in EE, BB, and EB from the old intpredictions function: " << nt2_ee_EE_os << " " << nt2_ee_BB_os << " " << nt2_ee_EB_os << endl;
+	// cout << "this is the charge mis ID probabilities: fee, fbb, feb: " << fee << " " << fbb << " " << feb << endl;
 
   	// Simple error propagation assuming error on number of events is sqrt(N)
  	nt2_ee_chmid    = 2*fbb*nt2_ee_BB_os                           + 2*fee*nt2_ee_EE_os                      + 2*feb*nt2_ee_EB_os;
@@ -14349,6 +14351,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, int re
  	for(size_t i = 0; i < fMCRareSM.size(); ++i){
  		Sample *S = fSamples[fMCRareSM[i]];
  		float scale = fLumiNorm/S->getLumi();
+		OUT << Form("for sample %d adding: mumu %.2f  emu: %.2f  ee: %.2f", i, scale*S->numbers[reg][Muon].nt2, scale*S->numbers[reg][ElMu].nt2, scale*S->numbers[reg][Elec].nt2)<<endl;
  		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
  		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
  		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
@@ -14528,43 +14531,44 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, int re
  	OUT << "==========================================================================================================================" << endl;
  	OUT << endl;
  	
- 	OUT << "==========================================================================================================================" << endl;
- 	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
- 	OUT << "     TRUTH IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
- 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
- 	for(size_t i = 0; i < nsamples; ++i){
- 		OUT << setw(16) << names[i] << " || ";
- 		OUT << setw(7)  << Form("%6.3f", mp*mp*scales[i]*npp_mm[i]) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", mp*mf*scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", mf*mf*scales[i]*nff_mm[i]) << " || ";
- 		OUT << setw(7)  << Form("%6.3f", mp*ep*scales[i]*npp_em[i]) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", mp*ef*scales[i]*npf_em[i]) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
- 		OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
- 		OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
- 		OUT << endl;
- 	}
- 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
- 	OUT << setw(16) << "Npf Sum"  << " || ";
- 	OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
- 	OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
- 	OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
- 	OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
- 	OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
- 	OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
- 	OUT << endl;
- 	OUT << "==========================================================================================================================" << endl;
- 	OUT << endl;
+ 	// this is truth matched OUT << "==========================================================================================================================" << endl;
+ 	// this is truth matched OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// this is truth matched OUT << "     TRUTH IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	// this is truth matched OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// this is truth matched for(size_t i = 0; i < nsamples; ++i){
+ 	// this is truth matched 	OUT << setw(16) << names[i] << " || ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mp*mp*scales[i]*npp_mm[i]) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mp*mf*scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mf*mf*scales[i]*nff_mm[i]) << " || ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mp*ep*scales[i]*npp_em[i]) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mp*ef*scales[i]*npf_em[i]) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
+ 	// this is truth matched 	OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
+ 	// this is truth matched 	OUT << endl;
+ 	// this is truth matched }
+ 	// this is truth matched OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// this is truth matched OUT << setw(16) << "Npf Sum"  << " || ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
+ 	// this is truth matched OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
+ 	// this is truth matched OUT << endl;
+ 	// this is truth matched OUT << "==========================================================================================================================" << endl;
+ 	// this is truth matched OUT << endl;
  	
+	// the following are the values coming from the storeWeightedPred function
  	OUT << "==========================================================================================================================" << endl;
  	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
- 	OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	OUT << "     PREDICTED   ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
  	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
  	for(size_t i = 0; i < nsamples; ++i){
  		OUT << setw(16) << names[i] << " || ";
@@ -14660,13 +14664,18 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, int re
  	ntt_sum,    sqrt(ntt_sum_e1)) << endl;
  	OUT << Form(" Pred./Obs.      || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
  	tot_bg_mm/ntt_sum_mm,
- 	sqrt(nF_pred_sum_mm_e1                  +  ntt_rare_mm_e1 * pow(((ntt_sum_mm-tot_bg_mm)/tot_bg_mm),2) + (tot_bg_mm_e1 - ntt_rare_mm_e1) * pow(tot_bg_mm/ntt_sum_mm,2)  )/ntt_sum_mm,
+	tot_bg_mm/ntt_sum_mm * fabs( ( sqrt(tot_bg_mm_e1)/tot_bg_mm - sqrt(ntt_sum_mm_e1)/ntt_sum_mm) ),
+ 	//sqrt(nF_pred_sum_mm_e1                  +  ntt_rare_mm_e1 * pow(((ntt_sum_mm-tot_bg_mm)/tot_bg_mm),2) + (tot_bg_mm_e1 - ntt_rare_mm_e1) * pow(tot_bg_mm/ntt_sum_mm,2)  )/ntt_sum_mm,
  	tot_bg_em/ntt_sum_em,
- 	sqrt(nF_pred_sum_em_e1+ntt_cm_sum_em_e1 +  ntt_rare_em_e1 * pow(((ntt_sum_em-tot_bg_em)/tot_bg_em),2) + (tot_bg_em_e1 - ntt_rare_em_e1) * pow(tot_bg_em/ntt_sum_em,2)  )/ntt_sum_em,
+	tot_bg_em/ntt_sum_em * fabs( ( sqrt(tot_bg_em_e1)/tot_bg_em - sqrt(ntt_sum_em_e1)/ntt_sum_em) ),
+ 	//sqrt(nF_pred_sum_em_e1+ntt_cm_sum_em_e1 +  ntt_rare_em_e1 * pow(((ntt_sum_em-tot_bg_em)/tot_bg_em),2) + (tot_bg_em_e1 - ntt_rare_em_e1) * pow(tot_bg_em/ntt_sum_em,2)  )/ntt_sum_em,
  	tot_bg_ee/ntt_sum_ee,
- 	sqrt(nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1 +  ntt_rare_ee_e1 * pow(((ntt_sum_ee-tot_bg_ee)/tot_bg_ee),2) + (tot_bg_ee_e1 - ntt_rare_ee_e1) * pow(tot_bg_ee/ntt_sum_ee,2)  )/ntt_sum_ee,
+	tot_bg_ee/ntt_sum_ee * fabs( ( sqrt(tot_bg_ee_e1)/tot_bg_ee - sqrt(ntt_sum_ee_e1)/ntt_sum_ee) ),
+ 	//sqrt(nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1 +  ntt_rare_ee_e1 * pow(((ntt_sum_ee-tot_bg_ee)/tot_bg_ee),2) + (tot_bg_ee_e1 - ntt_rare_ee_e1) * pow(tot_bg_ee/ntt_sum_ee,2)  )/ntt_sum_ee,
  	tot_bg/ntt_sum,
- 	sqrt(fakesum_e1 + ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1 +  (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1) * pow(((ntt_sum-tot_bg)/tot_bg),2) + (tot_bg_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) * pow(tot_bg/ntt_sum,2)  )/ntt_sum
+//this error is a bit odd
+ 	//sqrt(fakesum_e1 + ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1 +  (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1) * pow(((ntt_sum-tot_bg)/tot_bg),2) + (tot_bg_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) * pow(tot_bg/ntt_sum,2)  )/ntt_sum
+	tot_bg/ntt_sum * fabs( ( sqrt(tot_bg_e1)/tot_bg - sqrt(ntt_sum_e1)/ntt_sum) )
  	) << endl;
  
  	OUT << Form(" Pred.-Obs./Pred || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
@@ -16510,6 +16519,9 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 		tree_opt->Branch( "MET",         &MET,         "MET/F" );
 	}
 
+	ofstream debugOUTSTREAM;
+	debugOUTSTREAM.open("debugOUTSTREAM.txt", ios::trunc);
+
 	
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
@@ -16529,12 +16541,16 @@ void SSDLPlotter::storeWeightedPred(int baseRegion){
 			p1 = getPRatio(Muon, pT1, S->datamc);
 			p2 = getPRatio(Elec, pT2, S->datamc);
 		}
-				
+
 		// Get the weights (don't depend on event selection)
 		npp = FR->getWpp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
 		npf = FR->getWpf(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
 		nfp = FR->getWfp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
-		nff = FR->getWff(FakeRatios::gTLCat(cat), f1, f2, p1, p2);			
+		nff = FR->getWff(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
+
+		if (datamc == 0) {
+			debugOUTSTREAM << Form("Event: %12d tlcat: %d pT1: %5.1f f1: %.3f pT2: %5.1f f2: %.3f npp: %.4f npf: %.4f nfp: %.4f nff: %.4f", event, cat, pT1, f2, pT2, f2, npp, npf, nfp, nff) << endl;
+		}
 
 		// Store them in the right places for the different purposes
 		// Integrated predictions
@@ -16696,8 +16712,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
 
-	const float mu_flatout = 30.;
-	const float el_flatout = 30.;
+	const float mu_flatout = 40.;
+	const float el_flatout = 40.;
 	
 	if(chan == Muon){
 		TH1D *histo          = fH1D_MufRatio;
@@ -16731,8 +16747,8 @@ float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 float SSDLPlotter::getFRatio(gChannel chan, float pt, float eta, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
-	const float mu_flatout = 30.;
-	const float el_flatout = 30.;
+	const float mu_flatout = 40.;
+	const float el_flatout = 40.;
 	
 	eta = fabs(eta); // make sure we take the absolute value
 
@@ -18584,6 +18600,7 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 	TH2D  * Model_nPass_noScale_[nSyst];
 	TH2D  * Model_nPass_        [nSyst];
 	TH2D  * Model_eff_          [nSyst];
+	TH2D  * Model_lepSyst_      [nSyst];
 	for (int j = 0; j<nSyst; j++) {
 		Model_nPass_         [j] = new TH2D(model+"_nPass_"+systs[j]         , model+"_nPass_"+systs[j]         , nbins, min, max, nbins, min, max);
 		Model_nPass_         [j]->Sumw2();
@@ -18591,6 +18608,8 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 		Model_nPass_noScale_ [j]->Sumw2();
 		Model_eff_           [j] = new TH2D(model+"_eff_"+systs[j]           , model+"_eff_"+systs[j]           , nbins, min, max, nbins, min, max);
 		Model_eff_           [j]->Sumw2();
+		Model_lepSyst_       [j] = new TH2D(model+"_lepSyst_"+systs[j]       , model+"_lepSyst_"+systs[j]       , nbins, min, max, nbins, min, max);
+		Model_lepSyst_       [j]->Sumw2();
 	}
 	TH2D * Model_yield_ ;
 	Model_yield_  = new TH2D(model+"_yield"      , model+"_yield"  , nbins, min, max, nbins, min, max);
@@ -18624,6 +18643,7 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 	// need to initialize the TRandom object for the systematic studies
 	SSDLDumper::fRand3       = new TRandom3(10);
 	SSDLDumper::fRand3Normal = new TRandom3(10);
+	TString btagCorrection = "T1tttt";
 
 	float xvar(-1);
 	float yvar(-1);
@@ -18632,68 +18652,11 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 		if (lowpt) setLowPtCuts();
 		printProgress(jentry, tot_events, model+" Scan "+gRegions[reg]->sname);
 		for (int i = 0; i<nSyst; i++) {
-			if (Event == 45978937) cout << filestring << endl;
-			if (Event == 45978937) cout << "AT SYSTEMATIC " << i << endl;
-			if (Event == 45978937) cout << "======================================================================"<< endl;
 			tree_->GetEntry(jentry); // have to reload the entry for each systematic
-			if (Event == 45978937) cout << Form("before systematics: ht: %.2f  met %.2f ", getHT(), getMET())<< endl;
 			fRand3       ->SetSeed(Event);
 			fRand3Normal ->SetSeed(Event);
-			if (i==0) {
-				if (Event == 16104387) {
-					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
-					fOUTSTREAM << "-------------------------" << endl;
-					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), ElPt[0], ElPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
-					for (int ij=0; ij<NJets; ++ij){
-						if (!isGoodJet(ij)) continue;
-						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
-					}
-					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
-					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sig1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", ElPt[0], ElEta[0], IsSignalElectron[0], ElPt[1], ElEta[1], IsSignalElectron[1], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 2)) << endl;
-				}
-				if (Event == 16380983) {
-					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
-					fOUTSTREAM << "-------------------------" << endl;
-					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], ElPt[0], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
-					for (int ij=0; ij<NJets; ++ij){
-						if (!isGoodJet(ij)) continue;
-						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
-					}
-					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
-					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], IsSignalMuon[0], ElPt[0], ElEta[0], IsSignalElectron[0], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
-				}
-			}
 			saveBTags();      // save the values of the new btag
-			scaleBTags(S, 0, "T2tt"); // this applies the bTagSF
-			if (i==0) {
-				if (Event == 16104387) {
-					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
-					fOUTSTREAM << "-------------------------" << endl;
-					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), ElPt[0], ElPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
-					for (int ij=0; ij<NJets; ++ij){
-						if (!isGoodJet(ij)) continue;
-						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
-					}
-					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
-					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sig1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", ElPt[0], ElEta[0], IsSignalElectron[0], ElPt[1], ElEta[1], IsSignalElectron[1], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 2)) << endl;
-				}
-				if (Event == 16380983) {
-					fOUTSTREAM << "DEBUG AFTER B-TAG SCALING" << endl;
-					fOUTSTREAM << "-------------------------" << endl;
-					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], ElPt[0], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
-					for (int ij=0; ij<NJets; ++ij){
-						if (!isGoodJet(ij)) continue;
-						fOUTSTREAM << Form(" j%dpt: %.2f j%dbt: %.2f", ij, JetPt[ij], ij, JetCSVBTag[ij]) << endl;
-					}
-					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
-					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f sig2: %d eSCeta: %.2f passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], IsSignalMuon[0], ElPt[0], ElEta[0], IsSignalElectron[0], ElSCEta[0], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
-				}
-				if (Event == 45978937) {
-					fOUTSTREAM << Form("%d DEBUG nte: %d ntm: %d l1pt: %.2f l2pt: %.2f njets: %d nbjets: %d met: %.2f ht: %.2f", Event, getNTightElectrons(), getNTightMuons(), MuPt[0], MuPt[1], getNJets(), getNBTagsMed(), getMET(), getHT()) << endl;
-					fOUTSTREAM << "leptons:" << endl << "-----------" << endl;
-					fOUTSTREAM << Form("l1pt: %.2f l1eta: %.2f l1phi: %.2f sgi1: %d l2pt: %.2f l2eta: %.2f l2phi: %.2f sig2: %d passesZ: %d passesGstar: %d", MuPt[0], MuEta[0], MuPhi[0], IsSignalMuon[0], MuPt[1], MuEta[1], MuPhi[1], IsSignalMuon[1], passesZVeto(), passesGammaStarVeto(0, 1, 1)) << endl;
-				}
-			}
+			scaleBTags(S, 0, btagCorrection); // this applies the bTagSF
 			 
 			// if ( (i == 0 || i == 4 || i == 5 ) && Event==45001){
 			// 	for (int ij = 0; ij<NJets; ++ij){
@@ -18704,17 +18667,19 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 			if (i == 1) smearJetPts(S, 1);
 			if (i == 2) smearJetPts(S, 2);
 			if (i == 3) smearJetPts(S, 3);
-			if (i == 4) {resetBTags(); scaleBTags(S, 1, "T2tt");}
-			if (i == 5) {resetBTags(); scaleBTags(S, 2, "T2tt");}
+			if (i == 4) {resetBTags(); scaleBTags(S, 1, btagCorrection);}
+			if (i == 5) {resetBTags(); scaleBTags(S, 2, btagCorrection);}
 			if (i == 6) scaleMET(S, 0);
 			if (i == 7) scaleMET(S, 1);
-			if (Event == 45978937) cout << Form("after systematic #%d: ht: %.2f  met %.2f ", i, getHT(), getMET())<< endl;
 
 			// T6ttWW     scan: xvar = mGlu and yvar = mChi
 			// T6ttWW x05 scan: xvar = mGlu and yvar = mLSP
+			// T6ttWW x08 scan: xvar = mGlu and yvar = mLSP
 			// T5tttt     scan: xvar = mGlu and yvar = mChi
+			// T7btw      scan: xvar = mGlu and yvar = mChi
+			// T1tttt     scan: xvar = mGlu and yvar = mLSP
 			xvar = mGlu;
-			yvar = mLSP;
+			yvar = mChi;
 
 			// int m1(-1),m2(-1),m3(-1),e3(-1),e1(-1),e2(-1);
 			// cleanedJetIndices(15.);
@@ -18735,6 +18700,7 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 			float nGen         = Model_nTot_->GetBinContent(nGenBin);
 			float weight       = fLumiNorm * nloXsec / nGen;
 			float idsf(-999.), trigsf(-999.);
+			float lepsyst(0.);
 
 			int mu1(-1), mu2(-1);
 			if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
@@ -18745,8 +18711,10 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 					idsf   = getLeptonSFMu(MuPt[mu1], MuEta[mu1])*getLeptonSFMu(MuPt[mu2], MuEta[mu2]);
 					trigsf = getTriggerSFMuMu(MuEta[mu2]);
 					if (lowpt) trigsf =  getTriggerSFMuMuLowpt(MuEta[mu2]);
+					lepsyst = getLeptonSystematic(MuPt[mu1], MuPt[mu2], Muon);
 					Model_nPass_         [i]-> Fill(xvar, yvar, idsf*trigsf); // fill weighted by SFs
 					Model_nPass_noScale_ [i]-> Fill(xvar, yvar);
+					Model_lepSyst_       [i]-> Fill(xvar, yvar, lepsyst);
 					if (i==0) {
 						Model_yield_-> Fill(xvar, yvar, weight * gMMTrigScale);
 					}
@@ -18767,8 +18735,10 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 					idsf   = getLeptonSFMu(MuPt[mu], MuEta[mu])*getLeptonSFEl(ElPt[el], ElEta[el]);
 					trigsf = getTriggerSFMuEl();
 					if (lowpt) trigsf =  getTriggerSFMuElLowpt();
+					lepsyst = getLeptonSystematic(MuPt[mu], ElPt[el], ElMu);
 					Model_nPass_         [i]-> Fill(xvar, yvar, idsf*trigsf); // fill weighted by SFs
 					Model_nPass_noScale_ [i]-> Fill(xvar, yvar);
+					Model_lepSyst_       [i]-> Fill(xvar, yvar, lepsyst);
 					if (i==0) {
 						Model_yield_-> Fill(xvar, yvar, weight * gEMTrigScale);
 					}
@@ -18789,8 +18759,10 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 					idsf   = getLeptonSFEl(ElPt[el1], ElEta[el1])*getLeptonSFEl(ElPt[el2], ElEta[el2]);
 					trigsf = getTriggerSFElEl(ElPt[el2]);
 					if (lowpt) trigsf =  getTriggerSFElElLowpt();
+					lepsyst = getLeptonSystematic(ElPt[el1], ElPt[el2], Elec);
 					Model_nPass_         [i]-> Fill(xvar, yvar, idsf*trigsf); // fill weighted by SFs
 					Model_nPass_noScale_ [i]-> Fill(xvar, yvar);
+					Model_lepSyst_       [i]-> Fill(xvar, yvar, lepsyst);
 					if (i==0) {
 						Model_yield_-> Fill(xvar, yvar, weight * gEETrigScale);
 					}
@@ -18824,6 +18796,7 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 		Model_eff_           [i]->Write();
 		Model_nPass_         [i]->Write();
 		Model_nPass_noScale_ [i]->Write();
+		Model_lepSyst_ [i]->Write();
 	}
 	file_->Close();
 	res_->Close();
