@@ -1,0 +1,15 @@
+<flags CXXFLAGS="-I$(CMSSW_RELEASE_BASE)/src/PhysicsTools/KinFitter/interface/"/>
+
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/FWLite"/>
+<use name="DataFormats/Candidate"/>
+<use name="CommonTools/CandUtils"/>
+<use name="rootcore"/>                                                         
+<use name="rootrflx"/>
+<use name="roofit"/>
+
+
+<export>
+  <lib   name="1"/>
+</export>
