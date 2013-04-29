@@ -41,7 +41,7 @@ public:
 
 	static const int gNDiffHTBins   = 6;
 	static const int gNDiffMETBins  = 6;
-	static const int gNDiffMET3Bins = 9;
+	static const int gNDiffMET3Bins = 6;
 	static const int gNDiffNJBins   = 6;
 	static const int gNDiffMT2Bins  = 3;
 	static const int gNDiffPT1Bins  = 9;
@@ -78,9 +78,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu1a, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
-		DoubleEle1              , DoubleEle1a, DoubleEle2, DoubleEle3, DoubleEle4,
-		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     ,
+		DoubleMu1 = sample_begin, DoubleMu2 , DoubleMu3 , DoubleMu4 ,
+		DoubleEle1              , DoubleEle2, DoubleEle3, DoubleEle4,
+		MuEG1                   , MuEG2     , MuEG3     , MuEG4     ,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
@@ -94,8 +94,7 @@ public:
 		WpWp, WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
-		EMEnr20, 
-// EMEnr30,
+		EMEnr20, EMEnr30,
 		// QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		// QCD1000, QCD1400, QCD1800,
 		gNSAMPLES

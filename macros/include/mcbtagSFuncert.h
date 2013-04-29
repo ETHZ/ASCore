@@ -39,7 +39,7 @@ double btagEff(double jetpt);
 // pt4    = pt of the fourth btegged jet
 // (note: these do not need to be truth matched)
 // Returns a negative number if something goes wrong
-double btagEventWeight(int nbjets, double pt1, double pt2, double pt3=0., double pt4=0., bool useFastSim = false);
+double btagEventWeight(int nbjets, double pt1, double pt2   , double pt3=0., double pt4=0., bool useFastSim = false);
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------

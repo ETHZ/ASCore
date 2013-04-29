@@ -94,7 +94,7 @@ int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,   
 float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,  30.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
 float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 330.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
-                                                                   "Particle Flow ME_{T} [GeV]",
+                                                                   "E_{T}^{miss} [GeV]",
                                                                    "Jet Multiplicity",
                                                                    "Leading Lepton p_{T} [GeV]",
                                                                    "Subleading Lepton p_{T} [GeV]",
@@ -115,7 +115,7 @@ double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100.,
 double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.      };
 double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
 double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.    };
-double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
+double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {80., 100., 120., 160., 200., 250., 300.};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"};
@@ -218,14 +218,14 @@ SSDLDumper::SSDLDumper(TString configfile){
 
 
 			SSDLDumper::gRegions.push_back(tmp_region);
-			cout << "----------------  LOADING REGION  ------------------------------" << endl;
-				cout << Form("%13s/%3.0f/%4.0f/%3.0f/%3.0f",
-				tmp_region->sname.Data()       ,
-				tmp_region->minHT       ,
-				tmp_region->maxHT       ,
-				tmp_region->minMet      ,
-				tmp_region->maxMet  ) << endl;
-			cout << "--------------------------------------------------------" << endl;
+			//			cout << "----------------  LOADING REGION  ------------------------------" << endl;
+			cout << Form("%13s/%3.0f/%4.0f/%3.0f/%3.0f",
+				     tmp_region->sname.Data()       ,
+				     tmp_region->minHT       ,
+				     tmp_region->maxHT       ,
+				     tmp_region->minMet      ,
+				     tmp_region->maxMet  ) << endl;
+			//			cout << "--------------------------------------------------------" << endl;
 			//delete tmp_region;
 		}
 		else{

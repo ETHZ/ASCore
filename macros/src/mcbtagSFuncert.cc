@@ -170,7 +170,7 @@ double btagEventWeight(int nbjets, double pt1, double pt2, double pt3, double pt
 		       bool useFastSim){
 
   // protect against bad input values
-  if (nbjets < 2 || nbjets > 4) {
+  if (nbjets > 4) {
     std::cout << "Illegal nbjets = " << nbjets << " in btagEventWeight" << std::endl;
     return -1.;
   }
@@ -180,6 +180,9 @@ double btagEventWeight(int nbjets, double pt1, double pt2, double pt3, double pt
   double sf2 = btagScaleFactor(pt2, "CSVM", useFastSim);
   double sf3 = btagScaleFactor(pt3, "CSVM", useFastSim);
   double sf4 = btagScaleFactor(pt4, "CSVM", useFastSim);
+
+  // calculate the event weight for the one jet case
+  if (nbjets == 1) return sf1;
 
   // calculate the event weight for the two jet case
   if (nbjets == 2) return sf1*sf2;
