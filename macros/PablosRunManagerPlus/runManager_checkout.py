@@ -44,7 +44,7 @@ WorkPath path
 HPName path
 ---------------------------------------"""
 parser = OptionParser(usage=usage)
-parser.add_option("-n","--dry-run",dest="dryrun",action="store_true",default=False,
+parser.add_option("-n","--dry-run",dest="dryrun",action="store_true",default=True,
                   help="Do not actually submit the jobs: just creates file to submit")
 parser.add_option("-v","--verbose",dest="verbose",action="store_true",default=False,
                   help="Turn verbosity on")
@@ -475,19 +475,19 @@ if __name__ == '__main__' :
                 po.join()
 
 
-        if options.dryrun: sys.exit(0) # We're done for the dry run
-
-        totaljobnumber=len(jobnumbers)
-        counter=0
-        print 'Total number of jobs:',totaljobnumber
-        while(len(jobnumbers)>0 and counter<10000) :
-                time.sleep(60)
-                counter+=1
-                currlist=[]
-                pipe=popen("qstat | grep `whoami` | awk '{print $1}'")
-                for line in pipe.readlines():
-                        currlist.append(int(line))
-                checklist(jobnumbers,currlist)
+#        if options.dryrun: sys.exit(0) # We're done for the dry run
+#
+#        totaljobnumber=len(jobnumbers)
+#        counter=0
+#        print 'Total number of jobs:',totaljobnumber
+#        while(len(jobnumbers)>0 and counter<10000) :
+#                time.sleep(60)
+#                counter+=1
+#                currlist=[]
+#                pipe=popen("qstat | grep `whoami` | awk '{print $1}'")
+#                for line in pipe.readlines():
+#                        currlist.append(int(line))
+#                checklist(jobnumbers,currlist)
         print "All jobs have finished - need to merge everything and place it in your scratch directory!"
         check_directory(fusepath,uname)
 	if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
