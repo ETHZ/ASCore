@@ -17,12 +17,15 @@ process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
+
+process.MessageLogger.suppressWarning.append('TriggerResultsFilter')
+process.MessageLogger.suppressInfo.append('TriggerResultsFilter')
+
+
+
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                       fileMode = cms.untracked.string("NOMERGE")
                                     )
-
-
-
 
 
 ### Parsing of command line parameters #############################################
@@ -71,7 +74,6 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_4_2
-#    process.GlobalTag.globaltag = "GR_R_42_V19::All"
     process.GlobalTag.globaltag = "FT42_V24_AN1::All"
 else:
     # CMSSW_4_2_X:
@@ -116,6 +118,20 @@ process.kt6PFJets.doRhoFastjet = True
 # Turn-on the FastJet jet area calculation 
 process.ak5PFJets.doAreaFastjet = True
 process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
+
+process.cleanPfCandidates = cms.EDFilter(
+        "GenericPFCandidateSelector",
+            src = cms.InputTag("particleFlow"),
+            cut = cms.string("pdgId()!=22 || ( (eta>-1.4442 && eta<1.4442 && pt>0.5) || ((eta<-1.4442 || eta>1.4442) && pt>0.5 && energy>0.9) )")
+        )
+
+process.cleanedkt6PFJets = process.kt6PFJets.clone()
+process.cleanedkt6PFJets.src = cms.InputTag('cleanPfCandidates')
+process.cleanedkt6PFJets.Rho_EtaMax   = cms.double(2.5)
+process.cleanedkt6PFJets.doOutputJets = False
+process.cleanedkt6PFJets.doRhoFastjet = True
+process.cleanedkt6PFJets.doAreaFastjet = False
+
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
@@ -668,13 +684,73 @@ process.newPFBtaggingSequence = cms.Sequence(
     process.newPFJetTracksAssociator *
        process.newPFJetBtagging )
 
+process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
+                                         triggerConditions = cms.vstring(
+    'HLT_Photon20_R9Id_Photon18_R9Id OR HLT_Photon20_R9Id_Photon18_R9Id_v*',
+    'HLT_Photon26_CaloIdL_IsoVL_Photon18 OR HLT_Photon26_CaloIdL_IsoVL_Photon18_v*',
+    'HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL OR HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*',
+    'HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id OR HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v*',
+    'HLT_Photon26_CaloIdXL_IsoXL_Photon18_CaloIdXL_IsoXL OR HLT_Photon26_CaloIdXL_IsoXL_Photon18_CaloIdXL_IsoXL_v*',
+    'HLT_Photon26_CaloIdXL_IsoXL_Photon18_R9Id OR HLT_Photon26_CaloIdXL_IsoXL_Photon18_R9Id_v*',
+    'HLT_Photon26_IsoVL_Photon18 OR HLT_Photon26_IsoVL_Photon18_v*',
+    'HLT_Photon26_IsoVL_Photon18_IsoVL OR HLT_Photon26_IsoVL_Photon18_IsoVL_v*',
+    'HLT_Photon26_Photon18 OR HLT_Photon26_Photon18_v*',
+    'HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL OR HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v*',
+    'HLT_Photon26_R9Id_Photon18_CaloIdXL_IsoXL OR HLT_Photon26_R9Id_Photon18_CaloIdXL_IsoXL_v*',
+    'HLT_Photon26_R9Id_Photon18_R9Id OR HLT_Photon26_R9Id_Photon18_R9Id_v*',
+    'HLT_Photon32_CaloIdL_Photon26_CaloIdL OR HLT_Photon32_CaloIdL_Photon26_CaloIdL_v*',
+    'HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL OR HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v*',
+    'HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id OR HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v*',
+    'HLT_Photon36_CaloIdL_Photon22_CaloIdL OR HLT_Photon36_CaloIdL_Photon22_CaloIdL_v*',
+    'HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL OR HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v*',
+    'HLT_Photon36_R9Id_Photon22_R9Id OR HLT_Photon36_R9Id_Photon22_R9Id_v*' ),
+                                         hltResults = cms.InputTag( "TriggerResults", "", "HLT" ),
+                                         l1tResults = cms.InputTag( "gtDigis" ),
+                                         l1tIgnoreMask = cms.bool( False ),
+                                         l1techIgnorePrescales = cms.bool( False ),
+                                         daqPartitions = cms.uint32( 1 ),
+                                         throw = cms.bool( False )
+                                         )
 
 
+
+MUON_CUT=("pt > 10 && abs(eta)<2.5 && (isGlobalMuon || isTrackerMuon)")
+DIMUON_CUT=("mass > 60 && mass < 120 && daughter(0).pt>20 && daughter(1).pt()>10")
+
+
+process.goodHzzMuons = cms.EDFilter("MuonRefSelector",
+                            src = cms.InputTag("muons"),
+                            cut = cms.string(MUON_CUT)
+                            )
+process.diHzzMuons = cms.EDProducer("CandViewShallowCloneCombiner",
+                            decay       = cms.string("goodHzzMuons goodHzzMuons"),
+                            checkCharge = cms.bool(False),
+                            cut         = cms.string(DIMUON_CUT)
+                            )
+process.diHzzMuonsFilter = cms.EDFilter("CandViewCountFilter",
+                                src = cms.InputTag("diHzzMuons"),
+                                minNumber = cms.uint32(1)
+                                )
+
+PHOTON_CUT=("pt > 20 && abs(eta)<2.5")
+
+process.singlephotons = cms.EDFilter("PhotonSelector",
+                             src = cms.InputTag("photons"),
+                             cut = cms.string(PHOTON_CUT)
+                             )
+
+process.singlephotonFilter = cms.EDFilter("CandViewCountFilter",
+                                  src = cms.InputTag("singlephotons"),
+                                  minNumber = cms.uint32(1)
+                                  )
 
 
 #### Path ######################################################################
 
 process.p = cms.Path(
+#        process.triggerSelection*
+#        process.goodHzzMuons * process.diHzzMuons * process.diHzzMuonsFilter *
+#        process.singlephotons * process.singlephotonFilter *
 	process.scrapingVeto*(
 	process.goodVertices
 	+ (process.photonPartonMatch
@@ -686,6 +762,8 @@ process.p = cms.Path(
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
 	+ process.ak5PFJets
+#        + process.cleanPfCandidates
+#        + process.cleanedkt6PFJets
 	+ process.newBtaggingSequence
 	+ process.newPFBtaggingSequence
        	+ process.mygenjets
