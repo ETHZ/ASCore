@@ -24,7 +24,6 @@ import os
 from os import popen
 import commands
 import time
-from sys import stdout
 try:
         from multiprocessing import Pool
 except ImportError:
@@ -80,8 +79,7 @@ def checklist(joblist,currlist):
       jobfinished.append(int(i)) 
   for job in jobfinished:
     joblist.remove(int(job))
-  stdout.write("\r Jobs left: "+str(len(joblist))+" / " +str(totaljobnumber))
-  stdout.flush()
+  print "Jobs left:"+str(len(joblist))+" / "+str(totaljobnumber)
 
 #-------------------------------------------------------------#
 # getFiles method: Obtains a list with the name of the files  #
@@ -177,8 +175,9 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   
   thisjobnumber=0
 
+  #cmd = " ".join(['qsub','-q short.q','-N',"RMG"+str(step)+taskName,'-o',stdout,'-e',stderr,nameOfDirectory+taskName+'/'+nameOfConf2+' '+str(step)])
   cmd = " ".join(['qsub','-q all.q','-N',"RMG"+str(step)+taskName,'-o',stdout,'-e',stderr,nameOfDirectory+taskName+'/'+nameOfConf2+' '+str(step)])
-#  print cmd
+  print cmd
   if options.dryrun: return thisjobnumber
 
   pipe=popen(cmd)#"qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
@@ -309,7 +308,7 @@ def process(task, conf):
   if not options.renew and os.path.isfile(cacheFile):
       print "Reading from cached file"
       f = open(cacheFile)
-      showMessage('Reading files pertaining to '+dataset+'from cache file '+cacheFile)
+      showMessage('Reading files pertaining to '+dataset+' from cache file '+cacheFile)
       allmyfiles = f.readlines()
       f.close()
   else:
@@ -339,6 +338,7 @@ def process(task, conf):
     FilesPerJob = int(float(numberOfFiles)/int(task[2]))
     OverloadedJobs = numberOfFiles + 1 - FilesPerJob * int(task[2])
     NumberOfJobs = int(task[2])
+    ## we come in here, which is good.
   else:
     FilesPerJob = int(task[3])
     NumberOfJobs = int(numberOfFiles/FilesPerJob) + 1
@@ -352,13 +352,31 @@ def process(task, conf):
   #FR FIXME: this part is tricky and might be fragile
   # Task[0] is now a dataset: /DATASET/USER-TAG_DATASET-TYPE-AOD-HASH/USER
   # Extract useful information (DATASET-TYPE-AOD)
-  primaryDataset = dataset.lstrip('/').split('/')[0]
-  fullName = dataset.lstrip('/').split('/')[1]
+
+
+  ### FOR NORMAL RUNNING:
+  primaryDataset = dataset.lstrip('/').replace('_','-').split('/')[0]
+  fullName = dataset.lstrip('/').replace('_','-').split('/')[1]
+  primaryDataset2 = dataset.lstrip('/').split('/')[0]
+  fullName2 = dataset.lstrip('/').split('/')[1]
   index1 = fullName.index(primaryDataset)
   index2 = fullName.rindex('-')
   nameOfFolder = fullName[index1:index2]
   taskName = nameOfFolder
   os.system("mkdir -p " + taskName)
+# ## ##  os.system("mkdir -p ../" + taskName)
+
+  ## ### FOR RUNNING WITH PRESET FILES ETC. SMSs mostly
+  ## primaryDataset = dataset.lstrip('/').replace('_','-').split('/')[0]
+  ## print 'foooooooooooooooooooooooooooooooooo', primaryDataset
+  ## ## fullName = dataset.lstrip('/').replace('_','-').split('/')[1]
+  ## ## primaryDataset2 = dataset.lstrip('/').split('/')[0]
+  ## ## fullName2 = dataset.lstrip('/').split('/')[1]
+  ## ## index1 = fullName.index(primaryDataset)
+  ## ## index2 = fullName.rindex('-')
+  ## nameOfFolder = primaryDataset
+  ## taskName = primaryDataset
+  ## os.system("mkdir -p " + taskName)
 #  os.system("mkdir -p ../" + taskName)
 
   showMessage(str(NumberOfJobs) + " jobs with " + str(FilesPerJob) + " files each will be created")
@@ -388,9 +406,9 @@ def join_directory(path,filelist,username) :
 	cleanpath=path;
 	if (cleanpath[len(cleanpath)-1]=="/") : # remove trailing slash
 		cleanpath=cleanpath[0:len(cleanpath)-2]
-	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root "
+	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root > /dev/null "
 	for item in filelist:
-		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/ProcessedTrees/"+item+" /scratch/"+username+"/ntuples/"+item
+		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/ntuples/"+item
 		commands.getstatusoutput(copycommand)
 		fusecommand=fusecommand+" /scratch/"+username+"/ntuples/"+item
 	print commands.getoutput(fusecommand)
@@ -399,7 +417,7 @@ def join_directory(path,filelist,username) :
 		
 
 def check_directory(path,username) :
-	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/ProcessedTrees/"+path
+	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+path
 	print "\033[1;34m Going to checkout the subdirectory "+complete_path+" \033[0m "
 	listoffiles=[]
 	supposedtobejoined=False;
@@ -413,8 +431,8 @@ def check_directory(path,username) :
 			if(currentline.count(path) > 0) :
 				supposedtobejoined=True
 				listoffiles.append(currentline[currentline.find(path):])
-	if supposedtobejoined==True:
-	 	join_directory(path,listoffiles,username)
+	## MARC don't join on /scratch if supposedtobejoined==True:
+	## MARC don't join on /scratch 	join_directory(path,listoffiles,username)
 
 
 ##################################################################################
@@ -450,6 +468,8 @@ if __name__ == '__main__' :
 		print "Proxy lifetime is acceptable (more than "+str(timeleft)+" hours)"
         
         result = parseInputFile(args[0])
+        print result
+        print result[0]
         if(result == "Error"):
                 showMessage("Error parsing input file")
                 sys.exit(-1)

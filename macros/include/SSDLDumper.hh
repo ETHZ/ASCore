@@ -915,6 +915,7 @@ public:
 	
 	// old void setRegionCuts(gRegion reg = Baseline);
 	void setRegionCuts(int reg);
+	void printRegionCuts(int reg);
 	void setLowPtCuts();
 	
 	const int     getNFPtBins(gChannel); // fake ratios

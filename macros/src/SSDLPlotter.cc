@@ -482,10 +482,10 @@ void SSDLPlotter::doAnalysis(){
 
 	makeRatioPlots(Muon);
 	makeRatioPlots(Elec);
-	// make2DRatioPlots(Muon);
-	// make2DRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Elec);
 
 	makeFRvsPtPlots(Muon, SigSup);
 	makeFRvsPtPlots(Elec, SigSup);
@@ -501,44 +501,13 @@ void SSDLPlotter::doAnalysis(){
 	makeAllIntPredictions();
 	makeAllClosureTests();
 
+	// makeKinematicPlotsPaper();
 	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
 	// makeTTWIntPredictions();
 	// printAllYieldTables();
 	
 
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
-	
-	// presel
-//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20., 0, true);
-//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20.,-1, true);
-//	makeTTWIntPredictionsSigEvent(0., 8000., 0., 8000., 3, 0, 0, 20., 20.,+1, true);
-	
-	// optimized selection
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
-// 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 31., 31.,-1, true);
-// 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
-	
-	// optimized selection March 20
- 	// makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
- 	// makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
- 	// makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
-	
-	
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
-	
-	
-// 	makeTTWIntPredictionsSigEvent(268.235, 8000., 0., 8000., 3, 1, 1, 35.5956, 35.5956, 0, true);
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
-// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
-//	makePredictionSignalEvents(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
-//	makePredictionSignalEvents(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,+1, true);
-//	makePredictionSignalEvents(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
-//	makePredictionSignalEvents(100., 8000., 0., 8000., 3, 1, 1, 55., 35., 0, true);
-//	makePredictionSignalEvents(175., 8000., 0., 7000., 3, 1, 1, 35., 35., 0, true);
-	//makePredictionSignalEvents(280., 8000., 0., 7000., 3, 1, 1, 40., 40., 0, true);
-	// makeRelIsoTTSigPlots();
 	
 //	makeFakeGenIDTables();
 //	makeMIDIsolationPlots(Muon, SigSup);
@@ -11056,6 +11025,1639 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	makeSystPlot("Syst_Bg_JER"   + chargeString, "JER",          h_bg_nom, h_bg_js);
 	
 }
+
+void SSDLPlotter::makeKinematicPlotsPaper(){
+	fOutputSubDir = "KinPlotsPaper/";
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	const float RareESyst  = 0.5;
+	const float RareESyst2 = RareESyst*RareESyst;
+	
+	const float FakeESyst  = 0.5;
+	const float FakeESyst2 = FakeESyst*FakeESyst;
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// THE FINAL HISTOGRAMS ///////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+
+	int   htbins( 13 ), metbins( 10 ), njbins(7), nbjbins(5);
+	float htmin ( 80.), metmin (  0.), njmin (2), nbjmin (0);
+	float htmax (600.), metmax (250.), njmax (9), nbjmax (5);
+
+	// FAKES
+	TH1F* fake_loht_histoHT  = new TH1F("eo_fa_histoHT" , "eo_fa_histoHT" , htbins, htmin, htmax);
+	TH1F* fake_loht_histoMET = new TH1F("eo_fa_histoMET", "eo_fa_histoMET", metbins, metmin, metmax);
+	TH1F* fake_loht_histoNJ  = new TH1F("eo_fa_histoNJ" , "eo_fa_histoNJ" , njbins, njmin, njmax);
+	TH1F* fake_loht_histoNBJ = new TH1F("eo_fa_histoNBJ", "eo_fa_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      fake_loht_histoHT  ->Sumw2();
+	      fake_loht_histoMET ->Sumw2();
+	      fake_loht_histoNJ  ->Sumw2();
+	      fake_loht_histoNBJ ->Sumw2();
+
+	TH1F* fake_hiht_histoHT  = new TH1F("eo_fa_histoHT" , "eo_fa_histoHT" , htbins, htmin, htmax);
+	TH1F* fake_hiht_histoMET = new TH1F("eo_fa_histoMET", "eo_fa_histoMET", metbins, metmin, metmax);
+	TH1F* fake_hiht_histoNJ  = new TH1F("eo_fa_histoNJ" , "eo_fa_histoNJ" , njbins, njmin, njmax);
+	TH1F* fake_hiht_histoNBJ = new TH1F("eo_fa_histoNBJ", "eo_fa_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      fake_hiht_histoHT  ->Sumw2();
+	      fake_hiht_histoMET ->Sumw2();
+	      fake_hiht_histoNJ  ->Sumw2();
+	      fake_hiht_histoNBJ ->Sumw2();
+	
+	// MM CHANNEL
+
+	TH1F* mmNTT_loht_histoHT  = new TH1F("mmNTT_loht_histoHT" , "mmNTT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNTT_loht_histoMET = new TH1F("mmNTT_loht_histoMET", "mmNTT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNTT_loht_histoNJ  = new TH1F("mmNTT_loht_histoNJ" , "mmNTT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNTT_loht_histoNBJ = new TH1F("mmNTT_loht_histoNBJ", "mmNTT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNTT_loht_histoHT  ->Sumw2();
+	      mmNTT_loht_histoMET ->Sumw2();
+	      mmNTT_loht_histoNJ  ->Sumw2();
+	      mmNTT_loht_histoNBJ ->Sumw2();
+
+	TH1F* mmNTT_hiht_histoHT  = new TH1F("mmNTT_hiht_histoHT" , "mmNTT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNTT_hiht_histoMET = new TH1F("mmNTT_hiht_histoMET", "mmNTT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNTT_hiht_histoNJ  = new TH1F("mmNTT_hiht_histoNJ" , "mmNTT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNTT_hiht_histoNBJ = new TH1F("mmNTT_hiht_histoNBJ", "mmNTT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNTT_hiht_histoHT  ->Sumw2();
+	      mmNTT_hiht_histoMET ->Sumw2();
+	      mmNTT_hiht_histoNJ  ->Sumw2();
+	      mmNTT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* mmNTL_loht_histoHT  = new TH1F("mmNTL_loht_histoHT" , "mmNTL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNTL_loht_histoMET = new TH1F("mmNTL_loht_histoMET", "mmNTL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNTL_loht_histoNJ  = new TH1F("mmNTL_loht_histoNJ" , "mmNTL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNTL_loht_histoNBJ = new TH1F("mmNTL_loht_histoNBJ", "mmNTL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNTL_loht_histoHT  ->Sumw2();
+	      mmNTL_loht_histoMET ->Sumw2();
+	      mmNTL_loht_histoNJ  ->Sumw2();
+	      mmNTL_loht_histoNBJ ->Sumw2();
+
+	TH1F* mmNTL_hiht_histoHT  = new TH1F("mmNTL_hiht_histoHT" , "mmNTL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNTL_hiht_histoMET = new TH1F("mmNTL_hiht_histoMET", "mmNTL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNTL_hiht_histoNJ  = new TH1F("mmNTL_hiht_histoNJ" , "mmNTL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNTL_hiht_histoNBJ = new TH1F("mmNTL_hiht_histoNBJ", "mmNTL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNTL_hiht_histoHT  ->Sumw2();
+	      mmNTL_hiht_histoMET ->Sumw2();
+	      mmNTL_hiht_histoNJ  ->Sumw2();
+	      mmNTL_hiht_histoNBJ ->Sumw2();
+
+	TH1F* mmNLT_loht_histoHT  = new TH1F("mmNLT_loht_histoHT" , "mmNLT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNLT_loht_histoMET = new TH1F("mmNLT_loht_histoMET", "mmNLT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNLT_loht_histoNJ  = new TH1F("mmNLT_loht_histoNJ" , "mmNLT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNLT_loht_histoNBJ = new TH1F("mmNLT_loht_histoNBJ", "mmNLT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNLT_loht_histoHT  ->Sumw2();
+	      mmNLT_loht_histoMET ->Sumw2();
+	      mmNLT_loht_histoNJ  ->Sumw2();
+	      mmNLT_loht_histoNBJ ->Sumw2();
+
+	TH1F* mmNLT_hiht_histoHT  = new TH1F("mmNLT_hiht_histoHT" , "mmNLT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNLT_hiht_histoMET = new TH1F("mmNLT_hiht_histoMET", "mmNLT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNLT_hiht_histoNJ  = new TH1F("mmNLT_hiht_histoNJ" , "mmNLT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNLT_hiht_histoNBJ = new TH1F("mmNLT_hiht_histoNBJ", "mmNLT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNLT_hiht_histoHT  ->Sumw2();
+	      mmNLT_hiht_histoMET ->Sumw2();
+	      mmNLT_hiht_histoNJ  ->Sumw2();
+	      mmNLT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* mmNLL_loht_histoHT  = new TH1F("mmNLL_loht_histoHT" , "mmNLL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNLL_loht_histoMET = new TH1F("mmNLL_loht_histoMET", "mmNLL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNLL_loht_histoNJ  = new TH1F("mmNLL_loht_histoNJ" , "mmNLL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNLL_loht_histoNBJ = new TH1F("mmNLL_loht_histoNBJ", "mmNLL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNLL_loht_histoHT  ->Sumw2();
+	      mmNLL_loht_histoMET ->Sumw2();
+	      mmNLL_loht_histoNJ  ->Sumw2();
+	      mmNLL_loht_histoNBJ ->Sumw2();
+
+	TH1F* mmNLL_hiht_histoHT  = new TH1F("mmNLL_hiht_histoHT" , "mmNLL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* mmNLL_hiht_histoMET = new TH1F("mmNLL_hiht_histoMET", "mmNLL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* mmNLL_hiht_histoNJ  = new TH1F("mmNLL_hiht_histoNJ" , "mmNLL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* mmNLL_hiht_histoNBJ = new TH1F("mmNLL_hiht_histoNBJ", "mmNLL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      mmNLL_hiht_histoHT  ->Sumw2();
+	      mmNLL_hiht_histoMET ->Sumw2();
+	      mmNLL_hiht_histoNJ  ->Sumw2();
+	      mmNLL_hiht_histoNBJ ->Sumw2();
+
+	// EM CHANNEL
+
+	TH1F* emNTT_loht_histoHT  = new TH1F("emNTT_loht_histoHT" , "emNTT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNTT_loht_histoMET = new TH1F("emNTT_loht_histoMET", "emNTT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* emNTT_loht_histoNJ  = new TH1F("emNTT_loht_histoNJ" , "emNTT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNTT_loht_histoNBJ = new TH1F("emNTT_loht_histoNBJ", "emNTT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNTT_loht_histoHT  ->Sumw2();
+	      emNTT_loht_histoMET ->Sumw2();
+	      emNTT_loht_histoNJ  ->Sumw2();
+	      emNTT_loht_histoNBJ ->Sumw2();
+
+	TH1F* emNTT_hiht_histoHT  = new TH1F("emNTT_hiht_histoHT" , "emNTT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNTT_hiht_histoMET = new TH1F("emNTT_hiht_histoMET", "emNTT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* emNTT_hiht_histoNJ  = new TH1F("emNTT_hiht_histoNJ" , "emNTT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNTT_hiht_histoNBJ = new TH1F("emNTT_hiht_histoNBJ", "emNTT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNTT_hiht_histoHT  ->Sumw2();
+	      emNTT_hiht_histoMET ->Sumw2();
+	      emNTT_hiht_histoNJ  ->Sumw2();
+	      emNTT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* emNTL_loht_histoHT  = new TH1F("emNTL_loht_histoHT" , "emNTL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNTL_loht_histoMET = new TH1F("emNTL_loht_histoMET", "emNTL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* emNTL_loht_histoNJ  = new TH1F("emNTL_loht_histoNJ" , "emNTL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNTL_loht_histoNBJ = new TH1F("emNTL_loht_histoNBJ", "emNTL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNTL_loht_histoHT  ->Sumw2();
+	      emNTL_loht_histoMET ->Sumw2();
+	      emNTL_loht_histoNJ  ->Sumw2();
+	      emNTL_loht_histoNBJ ->Sumw2();
+
+	TH1F* emNTL_hiht_histoHT  = new TH1F("emNTL_hiht_histoHT" , "emNTL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNTL_hiht_histoMET = new TH1F("emNTL_hiht_histoMET", "emNTL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* emNTL_hiht_histoNJ  = new TH1F("emNTL_hiht_histoNJ" , "emNTL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNTL_hiht_histoNBJ = new TH1F("emNTL_hiht_histoNBJ", "emNTL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNTL_hiht_histoHT  ->Sumw2();
+	      emNTL_hiht_histoMET ->Sumw2();
+	      emNTL_hiht_histoNJ  ->Sumw2();
+	      emNTL_hiht_histoNBJ ->Sumw2();
+
+	TH1F* emNLT_loht_histoHT  = new TH1F("emNLT_loht_histoHT" , "emNLT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNLT_loht_histoMET = new TH1F("emNLT_loht_histoMET", "emNLT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* emNLT_loht_histoNJ  = new TH1F("emNLT_loht_histoNJ" , "emNLT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNLT_loht_histoNBJ = new TH1F("emNLT_loht_histoNBJ", "emNLT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNLT_loht_histoHT  ->Sumw2();
+	      emNLT_loht_histoMET ->Sumw2();
+	      emNLT_loht_histoNJ  ->Sumw2();
+	      emNLT_loht_histoNBJ ->Sumw2();
+
+	TH1F* emNLT_hiht_histoHT  = new TH1F("emNLT_hiht_histoHT" , "emNLT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNLT_hiht_histoMET = new TH1F("emNLT_hiht_histoMET", "emNLT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* emNLT_hiht_histoNJ  = new TH1F("emNLT_hiht_histoNJ" , "emNLT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNLT_hiht_histoNBJ = new TH1F("emNLT_hiht_histoNBJ", "emNLT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNLT_hiht_histoHT  ->Sumw2();
+	      emNLT_hiht_histoMET ->Sumw2();
+	      emNLT_hiht_histoNJ  ->Sumw2();
+	      emNLT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* emNLL_loht_histoHT  = new TH1F("emNLL_loht_histoHT" , "emNLL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNLL_loht_histoMET = new TH1F("emNLL_loht_histoMET", "emNLL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* emNLL_loht_histoNJ  = new TH1F("emNLL_loht_histoNJ" , "emNLL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNLL_loht_histoNBJ = new TH1F("emNLL_loht_histoNBJ", "emNLL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNLL_loht_histoHT  ->Sumw2();
+	      emNLL_loht_histoMET ->Sumw2();
+	      emNLL_loht_histoNJ  ->Sumw2();
+	      emNLL_loht_histoNBJ ->Sumw2();
+
+	TH1F* emNLL_hiht_histoHT  = new TH1F("emNLL_hiht_histoHT" , "emNLL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* emNLL_hiht_histoMET = new TH1F("emNLL_hiht_histoMET", "emNLL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* emNLL_hiht_histoNJ  = new TH1F("emNLL_hiht_histoNJ" , "emNLL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* emNLL_hiht_histoNBJ = new TH1F("emNLL_hiht_histoNBJ", "emNLL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      emNLL_hiht_histoHT  ->Sumw2();
+	      emNLL_hiht_histoMET ->Sumw2();
+	      emNLL_hiht_histoNJ  ->Sumw2();
+	      emNLL_hiht_histoNBJ ->Sumw2();
+
+	// EE CHANNEL
+
+	TH1F* eeNTT_loht_histoHT  = new TH1F("eeNTT_loht_histoHT" , "eeNTT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNTT_loht_histoMET = new TH1F("eeNTT_loht_histoMET", "eeNTT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNTT_loht_histoNJ  = new TH1F("eeNTT_loht_histoNJ" , "eeNTT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNTT_loht_histoNBJ = new TH1F("eeNTT_loht_histoNBJ", "eeNTT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNTT_loht_histoHT  ->Sumw2();
+	      eeNTT_loht_histoMET ->Sumw2();
+	      eeNTT_loht_histoNJ  ->Sumw2();
+	      eeNTT_loht_histoNBJ ->Sumw2();
+
+	TH1F* eeNTT_hiht_histoHT  = new TH1F("eeNTT_hiht_histoHT" , "eeNTT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNTT_hiht_histoMET = new TH1F("eeNTT_hiht_histoMET", "eeNTT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNTT_hiht_histoNJ  = new TH1F("eeNTT_hiht_histoNJ" , "eeNTT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNTT_hiht_histoNBJ = new TH1F("eeNTT_hiht_histoNBJ", "eeNTT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNTT_hiht_histoHT  ->Sumw2();
+	      eeNTT_hiht_histoMET ->Sumw2();
+	      eeNTT_hiht_histoNJ  ->Sumw2();
+	      eeNTT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* eeNTL_loht_histoHT  = new TH1F("eeNTL_loht_histoHT" , "eeNTL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNTL_loht_histoMET = new TH1F("eeNTL_loht_histoMET", "eeNTL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNTL_loht_histoNJ  = new TH1F("eeNTL_loht_histoNJ" , "eeNTL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNTL_loht_histoNBJ = new TH1F("eeNTL_loht_histoNBJ", "eeNTL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNTL_loht_histoHT  ->Sumw2();
+	      eeNTL_loht_histoMET ->Sumw2();
+	      eeNTL_loht_histoNJ  ->Sumw2();
+	      eeNTL_loht_histoNBJ ->Sumw2();
+
+	TH1F* eeNTL_hiht_histoHT  = new TH1F("eeNTL_hiht_histoHT" , "eeNTL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNTL_hiht_histoMET = new TH1F("eeNTL_hiht_histoMET", "eeNTL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNTL_hiht_histoNJ  = new TH1F("eeNTL_hiht_histoNJ" , "eeNTL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNTL_hiht_histoNBJ = new TH1F("eeNTL_hiht_histoNBJ", "eeNTL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNTL_hiht_histoHT  ->Sumw2();
+	      eeNTL_hiht_histoMET ->Sumw2();
+	      eeNTL_hiht_histoNJ  ->Sumw2();
+	      eeNTL_hiht_histoNBJ ->Sumw2();
+
+	TH1F* eeNLT_loht_histoHT  = new TH1F("eeNLT_loht_histoHT" , "eeNLT_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNLT_loht_histoMET = new TH1F("eeNLT_loht_histoMET", "eeNLT_loht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNLT_loht_histoNJ  = new TH1F("eeNLT_loht_histoNJ" , "eeNLT_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNLT_loht_histoNBJ = new TH1F("eeNLT_loht_histoNBJ", "eeNLT_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNLT_loht_histoHT  ->Sumw2();
+	      eeNLT_loht_histoMET ->Sumw2();
+	      eeNLT_loht_histoNJ  ->Sumw2();
+	      eeNLT_loht_histoNBJ ->Sumw2();
+
+	TH1F* eeNLT_hiht_histoHT  = new TH1F("eeNLT_hiht_histoHT" , "eeNLT_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNLT_hiht_histoMET = new TH1F("eeNLT_hiht_histoMET", "eeNLT_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNLT_hiht_histoNJ  = new TH1F("eeNLT_hiht_histoNJ" , "eeNLT_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNLT_hiht_histoNBJ = new TH1F("eeNLT_hiht_histoNBJ", "eeNLT_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNLT_hiht_histoHT  ->Sumw2();
+	      eeNLT_hiht_histoMET ->Sumw2();
+	      eeNLT_hiht_histoNJ  ->Sumw2();
+	      eeNLT_hiht_histoNBJ ->Sumw2();
+
+	TH1F* eeNLL_loht_histoHT  = new TH1F("eeNLL_loht_histoHT" , "eeNLL_loht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNLL_loht_histoMET = new TH1F("eeNLL_loht_histoMET", "eeNLL_loht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNLL_loht_histoNJ  = new TH1F("eeNLL_loht_histoNJ" , "eeNLL_loht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNLL_loht_histoNBJ = new TH1F("eeNLL_loht_histoNBJ", "eeNLL_loht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNLL_loht_histoHT  ->Sumw2();
+	      eeNLL_loht_histoMET ->Sumw2();
+	      eeNLL_loht_histoNJ  ->Sumw2();
+	      eeNLL_loht_histoNBJ ->Sumw2();
+
+	TH1F* eeNLL_hiht_histoHT  = new TH1F("eeNLL_hiht_histoHT" , "eeNLL_hiht_histoHT" , htbins, htmin, htmax);
+	TH1F* eeNLL_hiht_histoMET = new TH1F("eeNLL_hiht_histoMET", "eeNLL_hiht_histoMET", metbins, metmin, metmax);
+	TH1F* eeNLL_hiht_histoNJ  = new TH1F("eeNLL_hiht_histoNJ" , "eeNLL_hiht_histoNJ" , njbins, njmin, njmax);
+	TH1F* eeNLL_hiht_histoNBJ = new TH1F("eeNLL_hiht_histoNBJ", "eeNLL_hiht_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      eeNLL_hiht_histoHT  ->Sumw2();
+	      eeNLL_hiht_histoMET ->Sumw2();
+	      eeNLL_hiht_histoNJ  ->Sumw2();
+	      eeNLL_hiht_histoNBJ ->Sumw2();
+
+
+
+	// RARES
+	TH1F* rare_loht_histoHT  = new TH1F("eo_ra_histoHT" , "eo_ra_histoHT" , htbins, htmin, htmax);
+	TH1F* rare_loht_histoMET = new TH1F("eo_ra_histoMET", "eo_ra_histoMET", metbins, metmin, metmax);
+	TH1F* rare_loht_histoNJ  = new TH1F("eo_ra_histoNJ" , "eo_ra_histoNJ" , njbins, njmin, njmax);
+	TH1F* rare_loht_histoNBJ = new TH1F("eo_ra_histoNBJ", "eo_ra_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      rare_loht_histoHT  ->Sumw2();
+	      rare_loht_histoMET ->Sumw2();
+	      rare_loht_histoNJ  ->Sumw2();
+	      rare_loht_histoNBJ ->Sumw2();
+
+	TH1F* rare_hiht_histoHT  = new TH1F("eo_ra_histoHT" , "eo_ra_histoHT" , htbins, htmin, htmax);
+	TH1F* rare_hiht_histoMET = new TH1F("eo_ra_histoMET", "eo_ra_histoMET", metbins, metmin, metmax);
+	TH1F* rare_hiht_histoNJ  = new TH1F("eo_ra_histoNJ" , "eo_ra_histoNJ" , njbins, njmin, njmax);
+	TH1F* rare_hiht_histoNBJ = new TH1F("eo_ra_histoNBJ", "eo_ra_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      rare_hiht_histoHT  ->Sumw2();
+	      rare_hiht_histoMET ->Sumw2();
+	      rare_hiht_histoNJ  ->Sumw2();
+	      rare_hiht_histoNBJ ->Sumw2();
+
+	// FLIPS
+	TH1F* flip_loht_histoHT  = new TH1F("eo_ch_histoHT" , "eo_ch_histoHT" , htbins, htmin, htmax);
+	TH1F* flip_loht_histoMET = new TH1F("eo_ch_histoMET", "eo_ch_histoMET", metbins, metmin, metmax);
+	TH1F* flip_loht_histoNJ  = new TH1F("eo_ch_histoNJ" , "eo_ch_histoNJ" , njbins, njmin, njmax);
+	TH1F* flip_loht_histoNBJ = new TH1F("eo_ch_histoNBJ", "eo_ch_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      flip_loht_histoHT  ->Sumw2();
+	      flip_loht_histoMET ->Sumw2();
+	      flip_loht_histoNJ  ->Sumw2();
+	      flip_loht_histoNBJ ->Sumw2();
+
+	TH1F* flip_hiht_histoHT  = new TH1F("eo_ch_histoHT" , "eo_ch_histoHT" , htbins, htmin, htmax);
+	TH1F* flip_hiht_histoMET = new TH1F("eo_ch_histoMET", "eo_ch_histoMET", metbins, metmin, metmax);
+	TH1F* flip_hiht_histoNJ  = new TH1F("eo_ch_histoNJ" , "eo_ch_histoNJ" , njbins, njmin, njmax);
+	TH1F* flip_hiht_histoNBJ = new TH1F("eo_ch_histoNBJ", "eo_ch_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      flip_hiht_histoHT  ->Sumw2();
+	      flip_hiht_histoMET ->Sumw2();
+	      flip_hiht_histoNJ  ->Sumw2();
+	      flip_hiht_histoNBJ ->Sumw2();
+
+	// EM channel
+
+	TH1F* flipsemBB_loht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipsemBB_loht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipsemBB_loht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipsemBB_loht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipsemBB_loht_histoHT  ->Sumw2();
+	      flipsemBB_loht_histoMET ->Sumw2();
+	      flipsemBB_loht_histoNJ  ->Sumw2();
+	      flipsemBB_loht_histoNBJ ->Sumw2();
+
+	TH1F* flipsemEE_loht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipsemEE_loht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipsemEE_loht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipsemEE_loht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipsemEE_loht_histoHT  ->Sumw2();
+	      flipsemEE_loht_histoMET ->Sumw2();
+	      flipsemEE_loht_histoNJ  ->Sumw2();
+	      flipsemEE_loht_histoNBJ ->Sumw2();
+
+	TH1F* flipsemBB_hiht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipsemBB_hiht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipsemBB_hiht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipsemBB_hiht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipsemBB_hiht_histoHT  ->Sumw2();
+	      flipsemBB_hiht_histoMET ->Sumw2();
+	      flipsemBB_hiht_histoNJ  ->Sumw2();
+	      flipsemBB_hiht_histoNBJ ->Sumw2();
+
+	TH1F* flipsemEE_hiht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipsemEE_hiht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipsemEE_hiht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipsemEE_hiht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipsemEE_hiht_histoHT  ->Sumw2();
+	      flipsemEE_hiht_histoMET ->Sumw2();
+	      flipsemEE_hiht_histoNJ  ->Sumw2();
+	      flipsemEE_hiht_histoNBJ ->Sumw2();
+
+	// EE channel
+
+	TH1F* flipseeBB_loht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeBB_loht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeBB_loht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeBB_loht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeBB_loht_histoHT  ->Sumw2();
+	      flipseeBB_loht_histoMET ->Sumw2();
+	      flipseeBB_loht_histoNJ  ->Sumw2();
+	      flipseeBB_loht_histoNBJ ->Sumw2();
+
+	TH1F* flipseeEB_loht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeEB_loht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeEB_loht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeEB_loht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeEB_loht_histoHT  ->Sumw2();
+	      flipseeEB_loht_histoMET ->Sumw2();
+	      flipseeEB_loht_histoNJ  ->Sumw2();
+	      flipseeEB_loht_histoNBJ ->Sumw2();
+
+	TH1F* flipseeEE_loht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeEE_loht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeEE_loht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeEE_loht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeEE_loht_histoHT  ->Sumw2();
+	      flipseeEE_loht_histoMET ->Sumw2();
+	      flipseeEE_loht_histoNJ  ->Sumw2();
+	      flipseeEE_loht_histoNBJ ->Sumw2();
+
+	TH1F* flipseeBB_hiht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeBB_hiht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeBB_hiht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeBB_hiht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeBB_hiht_histoHT  ->Sumw2();
+	      flipseeBB_hiht_histoMET ->Sumw2();
+	      flipseeBB_hiht_histoNJ  ->Sumw2();
+	      flipseeBB_hiht_histoNBJ ->Sumw2();
+
+	TH1F* flipseeEB_hiht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeEB_hiht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeEB_hiht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeEB_hiht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeEB_hiht_histoHT  ->Sumw2();
+	      flipseeEB_hiht_histoMET ->Sumw2();
+	      flipseeEB_hiht_histoNJ  ->Sumw2();
+	      flipseeEB_hiht_histoNBJ ->Sumw2();
+
+	TH1F* flipseeEE_hiht_histoHT  = new TH1F("foobar", "foobar", htbins, htmin, htmax);
+	TH1F* flipseeEE_hiht_histoMET = new TH1F("foobar", "foobar", metbins, metmin, metmax);
+	TH1F* flipseeEE_hiht_histoNJ  = new TH1F("foobar", "foobar", njbins, njmin, njmax);
+	TH1F* flipseeEE_hiht_histoNBJ = new TH1F("foobar", "foobar", nbjbins, nbjmin, nbjmax);
+	      flipseeEE_hiht_histoHT  ->Sumw2();
+	      flipseeEE_hiht_histoMET ->Sumw2();
+	      flipseeEE_hiht_histoNJ  ->Sumw2();
+	      flipseeEE_hiht_histoNBJ ->Sumw2();
+
+	// OBSERVED
+	TH1F* obs_loht_histoHT  = new TH1F("eo_da_histoHT" , "eo_da_histoHT" , htbins, htmin, htmax);
+	TH1F* obs_loht_histoMET = new TH1F("eo_da_histoMET", "eo_da_histoMET", metbins, metmin, metmax);
+	TH1F* obs_loht_histoNJ  = new TH1F("eo_da_histoNJ" , "eo_da_histoNJ" , njbins, njmin, njmax);
+	TH1F* obs_loht_histoNBJ = new TH1F("eo_da_histoNBJ", "eo_da_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      obs_loht_histoHT  ->Sumw2();
+	      obs_loht_histoMET ->Sumw2();
+	      obs_loht_histoNJ  ->Sumw2();
+	      obs_loht_histoNBJ ->Sumw2();
+
+	TH1F* obs_hiht_histoHT  = new TH1F("eo_da_histoHT" , "eo_da_histoHT" , htbins, htmin, htmax);
+	TH1F* obs_hiht_histoMET = new TH1F("eo_da_histoMET", "eo_da_histoMET", metbins, metmin, metmax);
+	TH1F* obs_hiht_histoNJ  = new TH1F("eo_da_histoNJ" , "eo_da_histoNJ" , njbins, njmin, njmax);
+	TH1F* obs_hiht_histoNBJ = new TH1F("eo_da_histoNBJ", "eo_da_histoNBJ", nbjbins, nbjmin, nbjmax);
+	      obs_hiht_histoHT  ->Sumw2();
+	      obs_hiht_histoMET ->Sumw2();
+	      obs_hiht_histoNJ  ->Sumw2();
+	      obs_hiht_histoNBJ ->Sumw2();
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// RATIOS /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float mufratio_data(0.),  mufratio_data_e(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.);
+
+	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
+	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
+
+	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
+	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float nt2_mm(0.), nt10_mm(0.), nt0_mm(0.);
+	float nt2_em(0.), nt10_em(0.), nt01_em(0.), nt0_em(0.);
+	float nt2_ee(0.), nt10_ee(0.), nt0_ee(0.);
+
+	// FR Predictions from event-by-event weights (pre stored)
+	float npp_mm(0.), npf_mm(0.), nff_mm(0.);
+	float npp_em(0.), npf_em(0.), nfp_em(0.), nff_em(0.);
+	float npp_ee(0.), npf_ee(0.), nff_ee(0.);
+
+	// OS yields
+	float nt2_ee_BB_os(0.), nt2_ee_EE_os(0.), nt2_ee_EB_os(0.);
+	float nt2_em_BB_os(0.), nt2_em_EE_os(0.);
+
+	// only take half the events for ++/--
+	// float chargeFactor = chVeto ? 0.5:1.;
+
+	// rare SM yields
+	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
+	float nt2_rare_mc_mm_e2(0.), nt2_rare_mc_em_e2(0.), nt2_rare_mc_ee_e2(0.);
+
+	float nt2_wz_mc_mm(0.),    nt2_wz_mc_em(0.),    nt2_wz_mc_ee(0.);
+	float nt2_wz_mc_mm_e2(0.), nt2_wz_mc_em_e2(0.), nt2_wz_mc_ee_e2(0.);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+	
+	string *sname = 0;
+	int flag;
+	int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
+	float puweight, pT1, pT2, HT, MET, MT2, SLumi;
+	float eta1, eta2, mll;
+	int   event, run;
+	int charge;
+	int passZVeto, passes3rdSFLepVeto;
+
+	sigtree->SetBranchAddress("SystFlag", &flag);
+	sigtree->SetBranchAddress("Event",    &event);
+	sigtree->SetBranchAddress("Run",      &run);
+	sigtree->SetBranchAddress("SName",    &sname);
+	sigtree->SetBranchAddress("SType",    &SType);
+	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("SLumi",    &SLumi);
+	sigtree->SetBranchAddress("Flavor",   &Flavor);
+	sigtree->SetBranchAddress("Charge",   &charge);
+	sigtree->SetBranchAddress("pT1",      &pT1);
+	sigtree->SetBranchAddress("pT2",      &pT2);
+	sigtree->SetBranchAddress("eta1",     &eta1);
+	sigtree->SetBranchAddress("eta2",     &eta2);
+	sigtree->SetBranchAddress("TLCat",    &TLCat);
+	sigtree->SetBranchAddress("HT",       &HT);
+	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("MT2",      &MT2);
+	sigtree->SetBranchAddress("NJ",       &NJ);
+	sigtree->SetBranchAddress("NbJ",      &NbJ);
+	sigtree->SetBranchAddress("NbJmed",   &NbJmed);
+	sigtree->SetBranchAddress("Mll",      &mll);
+	sigtree->SetBranchAddress("PassZVeto",&passZVeto);
+	sigtree->SetBranchAddress("Pass3rdSFLepVeto",&passes3rdSFLepVeto);
+
+	FakeRatios *FR = new FakeRatios();
+
+	std::map< std::string, float > rareMapMM;
+	std::map< std::string, float > rareMapEM;
+	std::map< std::string, float > rareMapEE;
+
+	std::map< std::string, int > rareMapMM_npass;
+	std::map< std::string, int > rareMapEM_npass;
+	std::map< std::string, int > rareMapEE_npass;
+
+	for(size_t i = 0; i < fMCRareSM.size(); ++i){
+		Sample *S = fSamples[fMCRareSM[i]];
+		std::string name = (string) S->sname;
+		rareMapMM[name] = 0.; rareMapMM_npass[name] = 0;
+		rareMapEM[name] = 0.; rareMapEM_npass[name] = 0;
+		rareMapEE[name] = 0.; rareMapEE_npass[name] = 0;
+	}
+
+	float trigScale[3] = {gMMTrigScale, gEMTrigScale, gEETrigScale};
+
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		
+		// if( flag != systflag ) continue;
+		
+		if ( mll < 8.) continue;
+		// if ( HT  < minHT  || HT  > maxHT)  continue;
+		// if ( MET < minMET || MET > maxMET) continue;
+		if ( NJ  < 2)      continue;
+		// if ( NbJ < minNbjetsL)    continue;
+		// if ( NbJmed < minNbjetsM) continue;
+
+		gChannel chan = gChannel(Flavor);
+		if(chan == ElMu || Flavor == 4){
+			if(pT1 > pT2){
+				if(pT1 < 20.) continue;
+				if(pT2 < 20.) continue;
+			}
+			if(pT1 < pT2){
+				if(pT1 < 20.) continue;
+				if(pT2 < 20.) continue;
+			}
+		}
+		else{
+			if(pT1 < 20.) continue;
+			if(pT2 < 20.) continue;
+		}
+		
+		// GET ALL DATA EVENTS
+		if(SType < 3) {             // 0,1,2 are DoubleMu, DoubleEle, MuEG
+			if (Flavor < 3) {
+				if (gApplyZVeto && passZVeto == 0)  continue;
+				// if (chVeto && charge != chVeto ) continue;
+				Sample *S = fSampleMap[TString(*sname)];
+
+				float npp(0.) , npf(0.) , nfp(0.) , nff(0.);
+				float f1(0.)  , f2(0.)  , p1(0.)  , p2(0.);
+				f1 = getFRatio(chan, pT1, eta1, S->datamc);
+				f2 = getFRatio(chan, pT2, eta2, S->datamc);
+				p1 = getPRatio(chan, pT1, S->datamc);
+				p2 = getPRatio(chan, pT2, S->datamc);
+				if(chan == ElMu){
+					f1 = getFRatio(Muon, pT1, eta1, S->datamc);
+					f2 = getFRatio(Elec, pT2, eta2, S->datamc);
+					p1 = getPRatio(Muon, pT1, S->datamc);
+					p2 = getPRatio(Elec, pT2, S->datamc);
+				}
+				// Get the weights (don't depend on event selection)
+				npp = FR->getWpp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				npf = FR->getWpf(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				nfp = FR->getWfp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				nff = FR->getWff(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);			
+
+				if (Flavor == 0 ){
+					if (HT < 200.) {
+						fake_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							mmNTT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNTT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNTT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNTT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							mmNTL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNTL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNTL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNTL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							mmNLT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNLT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNLT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNLT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							mmNLL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNLL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNLL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNLL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+					else{
+						fake_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							mmNTT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNTT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNTT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNTT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							mmNTL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNTL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNTL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNTL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							mmNLT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNLT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNLT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNLT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							mmNLL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							mmNLL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							mmNLL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							mmNLL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+				}
+				if (Flavor == 1 ){
+					if (HT < 200.) {
+						fake_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							emNTT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNTT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNTT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNTT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							emNTL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNTL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNTL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNTL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							emNLT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNLT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNLT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNLT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							emNLL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNLL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNLL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNLL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+					else{
+						fake_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							emNTT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNTT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNTT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNTT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							emNTL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNTL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNTL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNTL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							emNLT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNLT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNLT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNLT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							emNLL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							emNLL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							emNLL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							emNLL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+				}
+				if (Flavor == 2 ){
+					if (HT < 200.) {
+						fake_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							eeNTT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNTT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNTT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNTT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							eeNTL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNTL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNTL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNTL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							eeNLT_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNLT_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNLT_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNLT_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							eeNLL_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNLL_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNLL_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNLL_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+					else{
+						fake_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , npf+nfp+nff);
+						fake_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , npf+nfp+nff);
+						fake_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , npf+nfp+nff);
+						fake_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, npf+nfp+nff);
+						if (TLCat == 0){
+							obs_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , 1);
+							obs_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , 1);
+							obs_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , 1);
+							obs_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, 1);
+							eeNTT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNTT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNTT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNTT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 1){
+							eeNTL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNTL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNTL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNTL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 2){
+							eeNLT_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNLT_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNLT_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNLT_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+						else if( TLCat == 3){
+							eeNLL_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+							eeNLL_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+							eeNLL_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+							eeNLL_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+						}
+					}
+				}
+			}
+
+			if (HT < 200.) {
+				if(Flavor == 4) {       // E-MU OS
+					if (TLCat == 0) {
+						flipsemBB_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipsemBB_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipsemBB_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipsemBB_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 1) {
+						flipsemEE_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipsemEE_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipsemEE_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipsemEE_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+				}
+				if(Flavor == 5) {       // E-E OS
+					if (TLCat == 0) {
+						flipseeBB_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeBB_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeBB_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeBB_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 1 || TLCat == 2) {
+						flipseeEB_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeEB_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeEB_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeEB_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 3) {
+						flipseeEE_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeEE_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeEE_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeEE_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+				} // end flavor 4
+			} // end HT < 200 
+			else {  // HT > 200 GeV
+				if(Flavor == 4) {       // E-MU OS
+					if (TLCat == 0) {
+						flipsemBB_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipsemBB_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipsemBB_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipsemBB_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 1) {
+						flipsemEE_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipsemEE_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipsemEE_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipsemEE_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+				}
+				if(Flavor == 5) {       // E-E OS
+					if (TLCat == 0) {
+						flipseeBB_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeBB_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeBB_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeBB_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 1 || TLCat == 2) {
+						flipseeEB_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeEB_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeEB_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeEB_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+					if (TLCat == 3) {
+						flipseeEE_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    );
+						flipseeEE_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   );
+						flipseeEE_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    );
+						flipseeEE_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed);
+					}
+				} // end flavor 5
+			} // end HT > 200
+		} // end data events
+
+
+		// GET RARE MC EVENTS
+		if (SType == 15 && TLCat == 0) { // tight-tight rare MC events
+			if (*sname == "WWTo2L2Nu") continue;
+			if (Flavor > 2) continue;
+			// if (chVeto && charge != chVeto ) continue;
+			// make sure here to get the lumi from the sample and not from the Slumi variable. Doesn't work otherwise
+			Sample *S = fSampleMap[*sname];
+			float scale = fLumiNorm / S->getLumi();
+			float trig(0.), id(0.);
+			if (Flavor == 0) {
+				trig = getTriggerSFMuMu(eta2);
+				id   = getLeptonSFMu(pT1, eta1)*getLeptonSFMu(pT2, eta2);
+			}
+			if (Flavor == 1) {
+				trig = getTriggerSFMuEl();
+  				id   = getLeptonSFMu(pT1, eta1)*getLeptonSFEl(pT2, eta2);
+			}
+			if (Flavor == 2) {
+				trig = getTriggerSFElEl(pT2);
+				id   = getLeptonSFEl(pT1, eta1)*getLeptonSFEl(pT2, eta2);
+			}
+			scale*=trig*id;
+			if (HT < 200.) {
+				rare_loht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , scale);
+				rare_loht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , scale);
+				rare_loht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , scale);
+				rare_loht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, scale);
+			}
+			else{
+				rare_hiht_histoHT  ->Fill(HT     >  htmax ?  htmax-0.5 : HT    , scale);
+				rare_hiht_histoMET ->Fill(MET    > metmax ? metmax-0.5 : MET   , scale);
+				rare_hiht_histoNJ  ->Fill(NJ     >  njmax ?  njmax-0.5 : NJ    , scale);
+				rare_hiht_histoNBJ ->Fill(NbJmed > nbjmax ? nbjmax-0.5 : NbJmed, scale);
+			}
+		} // end rare mc events
+		
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// MET /////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+
+	for(size_t i = 0; i < metbins; ++i){
+		const float FakeESyst2 = 0.25;
+		FakeRatios *FRhi = new FakeRatios();
+		FakeRatios *FRlo = new FakeRatios();
+		FRhi->setNToyMCs(100);  // speedup
+		FRhi->setAddESyst(0.5); // additional systematics
+		FRlo->setNToyMCs(100);  // speedup
+		FRlo->setAddESyst(0.5); // additional systematics
+
+		FRhi->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRhi->setEFRatio(elfratio_data, elfratio_data_e);
+		FRhi->setMPRatio(mupratio_data, mupratio_data_e);
+		FRhi->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRlo->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRlo->setEFRatio(elfratio_data, elfratio_data_e);
+		FRlo->setMPRatio(mupratio_data, mupratio_data_e);
+		FRlo->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRhi->setMMNtl( mmNTT_hiht_histoMET->GetBinContent(i+1), mmNTL_hiht_histoMET->GetBinContent(i+1) + mmNLT_hiht_histoMET->GetBinContent(i+1), mmNLL_hiht_histoMET->GetBinContent(i+1) );
+		FRhi->setEENtl( eeNTT_hiht_histoMET->GetBinContent(i+1), eeNTL_hiht_histoMET->GetBinContent(i+1) + eeNLT_hiht_histoMET->GetBinContent(i+1), eeNLL_hiht_histoMET->GetBinContent(i+1) );
+		FRhi->setEMNtl( emNTT_hiht_histoMET->GetBinContent(i+1), emNTL_hiht_histoMET->GetBinContent(i+1) , emNLT_hiht_histoMET->GetBinContent(i+1), emNLL_hiht_histoMET->GetBinContent(i+1) );
+		FRlo->setMMNtl( mmNTT_loht_histoMET->GetBinContent(i+1), mmNTL_loht_histoMET->GetBinContent(i+1) + mmNLT_loht_histoMET->GetBinContent(i+1), mmNLL_loht_histoMET->GetBinContent(i+1) );
+		FRlo->setEENtl( eeNTT_loht_histoMET->GetBinContent(i+1), eeNTL_loht_histoMET->GetBinContent(i+1) + eeNLT_loht_histoMET->GetBinContent(i+1), eeNLL_loht_histoMET->GetBinContent(i+1) );
+		FRlo->setEMNtl( emNTT_loht_histoMET->GetBinContent(i+1), emNTL_loht_histoMET->GetBinContent(i+1) , emNLT_loht_histoMET->GetBinContent(i+1), emNLL_loht_histoMET->GetBinContent(i+1) );
+		
+		// float mm_tot_fakes = fake_hiht_histoMET->GetBinContent(i+1);
+		// float ee_tot_fakes = fake_hiht_histoMET->GetBinContent(i+1);
+		// float em_tot_fakes = fake_hiht_histoMET->GetBinContent(i+1);
+		float tot_fakes_hi = fake_hiht_histoMET->GetBinContent(i+1);
+		float tot_fakes_lo = fake_loht_histoMET->GetBinContent(i+1);
+		
+		// Errors (add total errors of fakes)
+		//  float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+		//  float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+		//  float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+		//  float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+		float estat2_mm_hi  = FRhi->getMMTotEStat()*FRhi->getMMTotEStat();
+		float estat2_ee_hi  = FRhi->getEETotEStat()*FRhi->getEETotEStat();
+		float estat2_em_hi  = FRhi->getEMTotEStat()*FRhi->getEMTotEStat();
+		float estat2_tot_hi = FRhi->getTotEStat()  *FRhi->getTotEStat();
+
+		float estat2_mm_lo  = FRlo->getMMTotEStat()*FRlo->getMMTotEStat();
+		float estat2_ee_lo  = FRlo->getEETotEStat()*FRlo->getEETotEStat();
+		float estat2_em_lo  = FRlo->getEMTotEStat()*FRlo->getEMTotEStat();
+		float estat2_tot_lo = FRlo->getTotEStat()  *FRlo->getTotEStat();
+
+		//  float prev    = totbg   ->GetBinError(i+1);
+		//  float prev_mm = totbg_mm->GetBinError(i+1);
+		//  float prev_em = totbg_em->GetBinError(i+1);
+		//  float prev_ee = totbg_ee->GetBinError(i+1);
+
+		cout << Form("this is the error in high-HT bin %2d : %.2f", i, estat2_tot_hi) << endl;
+		cout << endl << endl;
+		cout << Form("this is the error in low -HT bin %2d : %.2f", i, estat2_tot_lo) << endl;
+		//  totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		//  totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		//  totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		//  totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		fake_hiht_histoMET->SetBinError(i+1, estat2_tot_hi);
+		fake_loht_histoMET->SetBinError(i+1, estat2_tot_lo);
+		// fake_hiht_histoMET->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		// fake_hiht_histoMET->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		// fake_hiht_histoMET->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		
+		delete FRhi, FRlo;
+
+		// FLIPS
+	
+		// Abbreviations
+		float fbb(0.),fee(0.),feb(0.);
+		float fbbE(0.),feeE(0.),febE(0.);
+		
+		calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+		calculateChMisIdProb(fEGData, EB, feb, febE);
+		calculateChMisIdProb(fEGData, EE, fee, feeE);
+
+		float nt2_ee_BB_os_loht = flipseeBB_loht_histoMET->GetBinContent(i+1);
+		float nt2_ee_EB_os_loht = flipseeEB_loht_histoMET->GetBinContent(i+1);
+		float nt2_ee_EE_os_loht = flipseeEE_loht_histoMET->GetBinContent(i+1);
+		float nt2_em_BB_os_loht = flipsemBB_loht_histoMET->GetBinContent(i+1);
+		float nt2_em_EE_os_loht = flipsemEE_loht_histoMET->GetBinContent(i+1);
+
+		float nt2_ee_BB_os_hiht = flipseeBB_hiht_histoMET->GetBinContent(i+1);
+		float nt2_ee_EB_os_hiht = flipseeEB_hiht_histoMET->GetBinContent(i+1);
+		float nt2_ee_EE_os_hiht = flipseeEE_hiht_histoMET->GetBinContent(i+1);
+		float nt2_em_BB_os_hiht = flipsemBB_hiht_histoMET->GetBinContent(i+1);
+		float nt2_em_EE_os_hiht = flipsemEE_hiht_histoMET->GetBinContent(i+1);
+
+		// Errors
+		FakeRatios *FR = new FakeRatios();
+
+		// // Simple error propagation assuming error on number of events is FR->getEStat2()
+		// nt11_ee_cm->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os + 2*fee*nt2_ee_EE_os + 2*feb*nt2_ee_EB_os);
+		// float nt11_ee_cm_e1 = sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+		// float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + 4*(febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+		// nt11_em_cm->SetBinContent(i+i, fbb*nt2_em_BB_os + fee*nt2_em_EE_os);
+		// float nt11_em_cm_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+		// float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os * feeE*feeE );
+
+
+		flip_loht_histoMET->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_loht + 2*fee*nt2_ee_EE_os_loht + 2*feb*nt2_ee_EB_os_loht
+		                                     +  fbb*nt2_em_BB_os_loht +   fee*nt2_em_EE_os_loht                          );
+
+		flip_loht_histoMET->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_loht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_loht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_loht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_loht) + fee*fee*FR->getEStat2(nt2_em_EE_os_loht) ) );
+
+
+		flip_hiht_histoMET->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_hiht + 2*fee*nt2_ee_EE_os_hiht + 2*feb*nt2_ee_EB_os_hiht
+		                                     +  fbb*nt2_em_BB_os_hiht +   fee*nt2_em_EE_os_hiht                          );
+		flip_hiht_histoMET->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_hiht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_hiht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_hiht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_hiht) + fee*fee*FR->getEStat2(nt2_em_EE_os_hiht) ) );
+
+
+		
+		
+		// float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+		// float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+		// float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+		// float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+		// float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+		// float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+		// float prev    = totbg   ->GetBinError(i+1);
+		// float prev_em = totbg_em->GetBinError(i+1);
+		// float prev_ee = totbg_ee->GetBinError(i+1);
+
+		// totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		// totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+		// totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+
+		delete FR;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// HT //////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+
+	for(size_t i = 0; i < htbins; ++i){
+		const float FakeESyst2 = 0.25;
+		FakeRatios *FRhi = new FakeRatios();
+		FakeRatios *FRlo = new FakeRatios();
+		FRhi->setNToyMCs(100);  // speedup
+		FRhi->setAddESyst(0.5); // additional systematics
+		FRlo->setNToyMCs(100);  // speedup
+		FRlo->setAddESyst(0.5); // additional systematics
+
+		FRhi->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRhi->setEFRatio(elfratio_data, elfratio_data_e);
+		FRhi->setMPRatio(mupratio_data, mupratio_data_e);
+		FRhi->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRlo->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRlo->setEFRatio(elfratio_data, elfratio_data_e);
+		FRlo->setMPRatio(mupratio_data, mupratio_data_e);
+		FRlo->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRhi->setMMNtl( mmNTT_hiht_histoHT->GetBinContent(i+1), mmNTL_hiht_histoHT->GetBinContent(i+1) + mmNLT_hiht_histoHT->GetBinContent(i+1), mmNLL_hiht_histoHT->GetBinContent(i+1) );
+		FRhi->setEENtl( eeNTT_hiht_histoHT->GetBinContent(i+1), eeNTL_hiht_histoHT->GetBinContent(i+1) + eeNLT_hiht_histoHT->GetBinContent(i+1), eeNLL_hiht_histoHT->GetBinContent(i+1) );
+		FRhi->setEMNtl( emNTT_hiht_histoHT->GetBinContent(i+1), emNTL_hiht_histoHT->GetBinContent(i+1) , emNLT_hiht_histoHT->GetBinContent(i+1), emNLL_hiht_histoHT->GetBinContent(i+1) );
+		FRlo->setMMNtl( mmNTT_loht_histoHT->GetBinContent(i+1), mmNTL_loht_histoHT->GetBinContent(i+1) + mmNLT_loht_histoHT->GetBinContent(i+1), mmNLL_loht_histoHT->GetBinContent(i+1) );
+		FRlo->setEENtl( eeNTT_loht_histoHT->GetBinContent(i+1), eeNTL_loht_histoHT->GetBinContent(i+1) + eeNLT_loht_histoHT->GetBinContent(i+1), eeNLL_loht_histoHT->GetBinContent(i+1) );
+		FRlo->setEMNtl( emNTT_loht_histoHT->GetBinContent(i+1), emNTL_loht_histoHT->GetBinContent(i+1) , emNLT_loht_histoHT->GetBinContent(i+1), emNLL_loht_histoHT->GetBinContent(i+1) );
+		
+		// float mm_tot_fakes = fake_hiht_histoHT->GetBinContent(i+1);
+		// float ee_tot_fakes = fake_hiht_histoHT->GetBinContent(i+1);
+		// float em_tot_fakes = fake_hiht_histoHT->GetBinContent(i+1);
+		float tot_fakes_hi = fake_hiht_histoHT->GetBinContent(i+1);
+		float tot_fakes_lo = fake_loht_histoHT->GetBinContent(i+1);
+		
+		// Errors (add total errors of fakes)
+		//  float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+		//  float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+		//  float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+		//  float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+		float estat2_mm_hi  = FRhi->getMMTotEStat()*FRhi->getMMTotEStat();
+		float estat2_ee_hi  = FRhi->getEETotEStat()*FRhi->getEETotEStat();
+		float estat2_em_hi  = FRhi->getEMTotEStat()*FRhi->getEMTotEStat();
+		float estat2_tot_hi = FRhi->getTotEStat()  *FRhi->getTotEStat();
+
+		float estat2_mm_lo  = FRlo->getMMTotEStat()*FRlo->getMMTotEStat();
+		float estat2_ee_lo  = FRlo->getEETotEStat()*FRlo->getEETotEStat();
+		float estat2_em_lo  = FRlo->getEMTotEStat()*FRlo->getEMTotEStat();
+		float estat2_tot_lo = FRlo->getTotEStat()  *FRlo->getTotEStat();
+
+		//  float prev    = totbg   ->GetBinError(i+1);
+		//  float prev_mm = totbg_mm->GetBinError(i+1);
+		//  float prev_em = totbg_em->GetBinError(i+1);
+		//  float prev_ee = totbg_ee->GetBinError(i+1);
+
+		cout << Form("this is the error in high-HT bin %2d : %.2f", i, estat2_tot_hi) << endl;
+		cout << endl << endl;
+		cout << Form("this is the error in low -HT bin %2d : %.2f", i, estat2_tot_lo) << endl;
+		//  totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		//  totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		//  totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		//  totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		fake_hiht_histoHT->SetBinError(i+1, estat2_tot_hi);
+		fake_loht_histoHT->SetBinError(i+1, estat2_tot_lo);
+		// fake_hiht_histoHT->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		// fake_hiht_histoHT->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		// fake_hiht_histoHT->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		
+		delete FRhi, FRlo;
+
+		// FLIPS
+	
+		// Abbreviations
+		float fbb(0.),fee(0.),feb(0.);
+		float fbbE(0.),feeE(0.),febE(0.);
+		
+		calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+		calculateChMisIdProb(fEGData, EB, feb, febE);
+		calculateChMisIdProb(fEGData, EE, fee, feeE);
+
+		float nt2_ee_BB_os_loht = flipseeBB_loht_histoHT->GetBinContent(i+1);
+		float nt2_ee_EB_os_loht = flipseeEB_loht_histoHT->GetBinContent(i+1);
+		float nt2_ee_EE_os_loht = flipseeEE_loht_histoHT->GetBinContent(i+1);
+		float nt2_em_BB_os_loht = flipsemBB_loht_histoHT->GetBinContent(i+1);
+		float nt2_em_EE_os_loht = flipsemEE_loht_histoHT->GetBinContent(i+1);
+
+		float nt2_ee_BB_os_hiht = flipseeBB_hiht_histoHT->GetBinContent(i+1);
+		float nt2_ee_EB_os_hiht = flipseeEB_hiht_histoHT->GetBinContent(i+1);
+		float nt2_ee_EE_os_hiht = flipseeEE_hiht_histoHT->GetBinContent(i+1);
+		float nt2_em_BB_os_hiht = flipsemBB_hiht_histoHT->GetBinContent(i+1);
+		float nt2_em_EE_os_hiht = flipsemEE_hiht_histoHT->GetBinContent(i+1);
+
+		// Errors
+		FakeRatios *FR = new FakeRatios();
+
+		// // Simple error propagation assuming error on number of events is FR->getEStat2()
+		// nt11_ee_cm->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os + 2*fee*nt2_ee_EE_os + 2*feb*nt2_ee_EB_os);
+		// float nt11_ee_cm_e1 = sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+		// float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + 4*(febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+		// nt11_em_cm->SetBinContent(i+i, fbb*nt2_em_BB_os + fee*nt2_em_EE_os);
+		// float nt11_em_cm_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+		// float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os * feeE*feeE );
+
+
+		flip_loht_histoHT->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_loht + 2*fee*nt2_ee_EE_os_loht + 2*feb*nt2_ee_EB_os_loht
+		                                     +  fbb*nt2_em_BB_os_loht +   fee*nt2_em_EE_os_loht                          );
+
+		flip_loht_histoHT->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_loht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_loht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_loht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_loht) + fee*fee*FR->getEStat2(nt2_em_EE_os_loht) ) );
+
+
+		flip_hiht_histoHT->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_hiht + 2*fee*nt2_ee_EE_os_hiht + 2*feb*nt2_ee_EB_os_hiht
+		                                     +  fbb*nt2_em_BB_os_hiht +   fee*nt2_em_EE_os_hiht                          );
+		flip_hiht_histoHT->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_hiht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_hiht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_hiht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_hiht) + fee*fee*FR->getEStat2(nt2_em_EE_os_hiht) ) );
+
+
+		
+		
+		// float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+		// float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+		// float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+		// float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+		// float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+		// float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+		// float prev    = totbg   ->GetBinError(i+1);
+		// float prev_em = totbg_em->GetBinError(i+1);
+		// float prev_ee = totbg_ee->GetBinError(i+1);
+
+		// totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		// totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+		// totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+
+		delete FR;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// NJ  /////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+
+	for(size_t i = 0; i < njbins; ++i){
+		const float FakeESyst2 = 0.25;
+		FakeRatios *FRhi = new FakeRatios();
+		FakeRatios *FRlo = new FakeRatios();
+		FRhi->setNToyMCs(100);  // speedup
+		FRhi->setAddESyst(0.5); // additional systematics
+		FRlo->setNToyMCs(100);  // speedup
+		FRlo->setAddESyst(0.5); // additional systematics
+
+		FRhi->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRhi->setEFRatio(elfratio_data, elfratio_data_e);
+		FRhi->setMPRatio(mupratio_data, mupratio_data_e);
+		FRhi->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRlo->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRlo->setEFRatio(elfratio_data, elfratio_data_e);
+		FRlo->setMPRatio(mupratio_data, mupratio_data_e);
+		FRlo->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRhi->setMMNtl( mmNTT_hiht_histoNJ->GetBinContent(i+1), mmNTL_hiht_histoNJ->GetBinContent(i+1) + mmNLT_hiht_histoNJ->GetBinContent(i+1), mmNLL_hiht_histoNJ->GetBinContent(i+1) );
+		FRhi->setEENtl( eeNTT_hiht_histoNJ->GetBinContent(i+1), eeNTL_hiht_histoNJ->GetBinContent(i+1) + eeNLT_hiht_histoNJ->GetBinContent(i+1), eeNLL_hiht_histoNJ->GetBinContent(i+1) );
+		FRhi->setEMNtl( emNTT_hiht_histoNJ->GetBinContent(i+1), emNTL_hiht_histoNJ->GetBinContent(i+1) , emNLT_hiht_histoNJ->GetBinContent(i+1), emNLL_hiht_histoNJ->GetBinContent(i+1) );
+		FRlo->setMMNtl( mmNTT_loht_histoNJ->GetBinContent(i+1), mmNTL_loht_histoNJ->GetBinContent(i+1) + mmNLT_loht_histoNJ->GetBinContent(i+1), mmNLL_loht_histoNJ->GetBinContent(i+1) );
+		FRlo->setEENtl( eeNTT_loht_histoNJ->GetBinContent(i+1), eeNTL_loht_histoNJ->GetBinContent(i+1) + eeNLT_loht_histoNJ->GetBinContent(i+1), eeNLL_loht_histoNJ->GetBinContent(i+1) );
+		FRlo->setEMNtl( emNTT_loht_histoNJ->GetBinContent(i+1), emNTL_loht_histoNJ->GetBinContent(i+1) , emNLT_loht_histoNJ->GetBinContent(i+1), emNLL_loht_histoNJ->GetBinContent(i+1) );
+		
+		// float mm_tot_fakes = fake_hiht_histoNJ->GetBinContent(i+1);
+		// float ee_tot_fakes = fake_hiht_histoNJ->GetBinContent(i+1);
+		// float em_tot_fakes = fake_hiht_histoNJ->GetBinContent(i+1);
+		float tot_fakes_hi = fake_hiht_histoNJ->GetBinContent(i+1);
+		float tot_fakes_lo = fake_loht_histoNJ->GetBinContent(i+1);
+		
+		// Errors (add total errors of fakes)
+		//  float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+		//  float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+		//  float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+		//  float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+		float estat2_mm_hi  = FRhi->getMMTotEStat()*FRhi->getMMTotEStat();
+		float estat2_ee_hi  = FRhi->getEETotEStat()*FRhi->getEETotEStat();
+		float estat2_em_hi  = FRhi->getEMTotEStat()*FRhi->getEMTotEStat();
+		float estat2_tot_hi = FRhi->getTotEStat()  *FRhi->getTotEStat();
+
+		float estat2_mm_lo  = FRlo->getMMTotEStat()*FRlo->getMMTotEStat();
+		float estat2_ee_lo  = FRlo->getEETotEStat()*FRlo->getEETotEStat();
+		float estat2_em_lo  = FRlo->getEMTotEStat()*FRlo->getEMTotEStat();
+		float estat2_tot_lo = FRlo->getTotEStat()  *FRlo->getTotEStat();
+
+		//  float prev    = totbg   ->GetBinError(i+1);
+		//  float prev_mm = totbg_mm->GetBinError(i+1);
+		//  float prev_em = totbg_em->GetBinError(i+1);
+		//  float prev_ee = totbg_ee->GetBinError(i+1);
+
+		cout << Form("this is the error in high-HT bin %2d : %.2f", i, estat2_tot_hi) << endl;
+		cout << endl << endl;
+		cout << Form("this is the error in low -HT bin %2d : %.2f", i, estat2_tot_lo) << endl;
+		//  totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		//  totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		//  totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		//  totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		fake_hiht_histoNJ->SetBinError(i+1, estat2_tot_hi);
+		fake_loht_histoNJ->SetBinError(i+1, estat2_tot_lo);
+		// fake_hiht_histoNJ->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		// fake_hiht_histoNJ->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		// fake_hiht_histoNJ->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		
+		delete FRhi, FRlo;
+
+		// FLIPS
+	
+		// Abbreviations
+		float fbb(0.),fee(0.),feb(0.);
+		float fbbE(0.),feeE(0.),febE(0.);
+		
+		calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+		calculateChMisIdProb(fEGData, EB, feb, febE);
+		calculateChMisIdProb(fEGData, EE, fee, feeE);
+
+		float nt2_ee_BB_os_loht = flipseeBB_loht_histoNJ->GetBinContent(i+1);
+		float nt2_ee_EB_os_loht = flipseeEB_loht_histoNJ->GetBinContent(i+1);
+		float nt2_ee_EE_os_loht = flipseeEE_loht_histoNJ->GetBinContent(i+1);
+		float nt2_em_BB_os_loht = flipsemBB_loht_histoNJ->GetBinContent(i+1);
+		float nt2_em_EE_os_loht = flipsemEE_loht_histoNJ->GetBinContent(i+1);
+
+		float nt2_ee_BB_os_hiht = flipseeBB_hiht_histoNJ->GetBinContent(i+1);
+		float nt2_ee_EB_os_hiht = flipseeEB_hiht_histoNJ->GetBinContent(i+1);
+		float nt2_ee_EE_os_hiht = flipseeEE_hiht_histoNJ->GetBinContent(i+1);
+		float nt2_em_BB_os_hiht = flipsemBB_hiht_histoNJ->GetBinContent(i+1);
+		float nt2_em_EE_os_hiht = flipsemEE_hiht_histoNJ->GetBinContent(i+1);
+
+		// Errors
+		FakeRatios *FR = new FakeRatios();
+
+		// // Simple error propagation assuming error on number of events is FR->getEStat2()
+		// nt11_ee_cm->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os + 2*fee*nt2_ee_EE_os + 2*feb*nt2_ee_EB_os);
+		// float nt11_ee_cm_e1 = sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+		// float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + 4*(febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+		// nt11_em_cm->SetBinContent(i+i, fbb*nt2_em_BB_os + fee*nt2_em_EE_os);
+		// float nt11_em_cm_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+		// float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os * feeE*feeE );
+
+
+		flip_loht_histoNJ->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_loht + 2*fee*nt2_ee_EE_os_loht + 2*feb*nt2_ee_EB_os_loht
+		                                     +  fbb*nt2_em_BB_os_loht +   fee*nt2_em_EE_os_loht                          );
+
+		flip_loht_histoNJ->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_loht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_loht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_loht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_loht) + fee*fee*FR->getEStat2(nt2_em_EE_os_loht) ) );
+
+
+		flip_hiht_histoNJ->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_hiht + 2*fee*nt2_ee_EE_os_hiht + 2*feb*nt2_ee_EB_os_hiht
+		                                     +  fbb*nt2_em_BB_os_hiht +   fee*nt2_em_EE_os_hiht                          );
+		flip_hiht_histoNJ->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_hiht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_hiht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_hiht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_hiht) + fee*fee*FR->getEStat2(nt2_em_EE_os_hiht) ) );
+
+
+		
+		
+		// float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+		// float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+		// float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+		// float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+		// float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+		// float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+		// float prev    = totbg   ->GetBinError(i+1);
+		// float prev_em = totbg_em->GetBinError(i+1);
+		// float prev_ee = totbg_ee->GetBinError(i+1);
+
+		// totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		// totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+		// totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+
+		delete FR;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+	// NBJ  ////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+
+	for(size_t i = 0; i < nbjbins; ++i){
+		const float FakeESyst2 = 0.25;
+		FakeRatios *FRhi = new FakeRatios();
+		FakeRatios *FRlo = new FakeRatios();
+		FRhi->setNToyMCs(100);  // speedup
+		FRhi->setAddESyst(0.5); // additional systematics
+		FRlo->setNToyMCs(100);  // speedup
+		FRlo->setAddESyst(0.5); // additional systematics
+
+		FRhi->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRhi->setEFRatio(elfratio_data, elfratio_data_e);
+		FRhi->setMPRatio(mupratio_data, mupratio_data_e);
+		FRhi->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRlo->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FRlo->setEFRatio(elfratio_data, elfratio_data_e);
+		FRlo->setMPRatio(mupratio_data, mupratio_data_e);
+		FRlo->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FRhi->setMMNtl( mmNTT_hiht_histoNBJ->GetBinContent(i+1), mmNTL_hiht_histoNBJ->GetBinContent(i+1) + mmNLT_hiht_histoNBJ->GetBinContent(i+1), mmNLL_hiht_histoNBJ->GetBinContent(i+1) );
+		FRhi->setEENtl( eeNTT_hiht_histoNBJ->GetBinContent(i+1), eeNTL_hiht_histoNBJ->GetBinContent(i+1) + eeNLT_hiht_histoNBJ->GetBinContent(i+1), eeNLL_hiht_histoNBJ->GetBinContent(i+1) );
+		FRhi->setEMNtl( emNTT_hiht_histoNBJ->GetBinContent(i+1), emNTL_hiht_histoNBJ->GetBinContent(i+1) , emNLT_hiht_histoNBJ->GetBinContent(i+1), emNLL_hiht_histoNBJ->GetBinContent(i+1) );
+		FRlo->setMMNtl( mmNTT_loht_histoNBJ->GetBinContent(i+1), mmNTL_loht_histoNBJ->GetBinContent(i+1) + mmNLT_loht_histoNBJ->GetBinContent(i+1), mmNLL_loht_histoNBJ->GetBinContent(i+1) );
+		FRlo->setEENtl( eeNTT_loht_histoNBJ->GetBinContent(i+1), eeNTL_loht_histoNBJ->GetBinContent(i+1) + eeNLT_loht_histoNBJ->GetBinContent(i+1), eeNLL_loht_histoNBJ->GetBinContent(i+1) );
+		FRlo->setEMNtl( emNTT_loht_histoNBJ->GetBinContent(i+1), emNTL_loht_histoNBJ->GetBinContent(i+1) , emNLT_loht_histoNBJ->GetBinContent(i+1), emNLL_loht_histoNBJ->GetBinContent(i+1) );
+		
+		// float mm_tot_fakes = fake_hiht_histoNBJ->GetBinContent(i+1);
+		// float ee_tot_fakes = fake_hiht_histoNBJ->GetBinContent(i+1);
+		// float em_tot_fakes = fake_hiht_histoNBJ->GetBinContent(i+1);
+		float tot_fakes_hi = fake_hiht_histoNBJ->GetBinContent(i+1);
+		float tot_fakes_lo = fake_loht_histoNBJ->GetBinContent(i+1);
+		
+		// Errors (add total errors of fakes)
+		//  float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+		//  float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+		//  float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+		//  float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+		float estat2_mm_hi  = FRhi->getMMTotEStat()*FRhi->getMMTotEStat();
+		float estat2_ee_hi  = FRhi->getEETotEStat()*FRhi->getEETotEStat();
+		float estat2_em_hi  = FRhi->getEMTotEStat()*FRhi->getEMTotEStat();
+		float estat2_tot_hi = FRhi->getTotEStat()  *FRhi->getTotEStat();
+
+		float estat2_mm_lo  = FRlo->getMMTotEStat()*FRlo->getMMTotEStat();
+		float estat2_ee_lo  = FRlo->getEETotEStat()*FRlo->getEETotEStat();
+		float estat2_em_lo  = FRlo->getEMTotEStat()*FRlo->getEMTotEStat();
+		float estat2_tot_lo = FRlo->getTotEStat()  *FRlo->getTotEStat();
+
+		//  float prev    = totbg   ->GetBinError(i+1);
+		//  float prev_mm = totbg_mm->GetBinError(i+1);
+		//  float prev_em = totbg_em->GetBinError(i+1);
+		//  float prev_ee = totbg_ee->GetBinError(i+1);
+
+		cout << Form("this is the error in high-HT bin %2d : %.2f", i, estat2_tot_hi) << endl;
+		cout << endl << endl;
+		cout << Form("this is the error in low -HT bin %2d : %.2f", i, estat2_tot_lo) << endl;
+		//  totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		//  totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		//  totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		//  totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		fake_hiht_histoNBJ->SetBinError(i+1, estat2_tot_hi);
+		fake_loht_histoNBJ->SetBinError(i+1, estat2_tot_lo);
+		// fake_hiht_histoNBJ->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		// fake_hiht_histoNBJ->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		// fake_hiht_histoNBJ->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		
+		delete FRhi, FRlo;
+
+		// FLIPS
+	
+		// Abbreviations
+		float fbb(0.),fee(0.),feb(0.);
+		float fbbE(0.),feeE(0.),febE(0.);
+		
+		calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+		calculateChMisIdProb(fEGData, EB, feb, febE);
+		calculateChMisIdProb(fEGData, EE, fee, feeE);
+
+		float nt2_ee_BB_os_loht = flipseeBB_loht_histoNBJ->GetBinContent(i+1);
+		float nt2_ee_EB_os_loht = flipseeEB_loht_histoNBJ->GetBinContent(i+1);
+		float nt2_ee_EE_os_loht = flipseeEE_loht_histoNBJ->GetBinContent(i+1);
+		float nt2_em_BB_os_loht = flipsemBB_loht_histoNBJ->GetBinContent(i+1);
+		float nt2_em_EE_os_loht = flipsemEE_loht_histoNBJ->GetBinContent(i+1);
+
+		float nt2_ee_BB_os_hiht = flipseeBB_hiht_histoNBJ->GetBinContent(i+1);
+		float nt2_ee_EB_os_hiht = flipseeEB_hiht_histoNBJ->GetBinContent(i+1);
+		float nt2_ee_EE_os_hiht = flipseeEE_hiht_histoNBJ->GetBinContent(i+1);
+		float nt2_em_BB_os_hiht = flipsemBB_hiht_histoNBJ->GetBinContent(i+1);
+		float nt2_em_EE_os_hiht = flipsemEE_hiht_histoNBJ->GetBinContent(i+1);
+
+		// Errors
+		FakeRatios *FR = new FakeRatios();
+
+		// // Simple error propagation assuming error on number of events is FR->getEStat2()
+		// nt11_ee_cm->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os + 2*fee*nt2_ee_EE_os + 2*feb*nt2_ee_EB_os);
+		// float nt11_ee_cm_e1 = sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+		// float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + 4*(febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+		// nt11_em_cm->SetBinContent(i+i, fbb*nt2_em_BB_os + fee*nt2_em_EE_os);
+		// float nt11_em_cm_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+		// float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os * feeE*feeE );
+
+
+		flip_loht_histoNBJ->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_loht + 2*fee*nt2_ee_EE_os_loht + 2*feb*nt2_ee_EB_os_loht
+		                                     +  fbb*nt2_em_BB_os_loht +   fee*nt2_em_EE_os_loht                          );
+
+		flip_loht_histoNBJ->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_loht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_loht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_loht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_loht) + fee*fee*FR->getEStat2(nt2_em_EE_os_loht) ) );
+
+
+		flip_hiht_histoNBJ->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os_hiht + 2*fee*nt2_ee_EE_os_hiht + 2*feb*nt2_ee_EB_os_hiht
+		                                     +  fbb*nt2_em_BB_os_hiht +   fee*nt2_em_EE_os_hiht                          );
+		flip_hiht_histoNBJ->SetBinError  (i+1,  sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os_hiht)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os_hiht)) + 4*(feb)*(feb)*FR->getEStat2(nt2_ee_EB_os_hiht) )
+		                                     + sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os_hiht) + fee*fee*FR->getEStat2(nt2_em_EE_os_hiht) ) );
+
+
+		
+		
+		// float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+		// float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+		// float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+		// float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+		// float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+		// float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+		// float prev    = totbg   ->GetBinError(i+1);
+		// float prev_em = totbg_em->GetBinError(i+1);
+		// float prev_ee = totbg_ee->GetBinError(i+1);
+
+		// totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		// totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+		// totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+
+		delete FR;
+	}
+
+	
+	Util::MakeOutputDir(fOutputDir+fOutputSubDir);
+	TFile * res_hi = new TFile(fOutputDir+fOutputSubDir+"ethfile_highpt_highHT.root", "RECREATE", "res_hi");
+	TFile * res_lo = new TFile(fOutputDir+fOutputSubDir+"ethfile_highpt_lowHT.root" , "RECREATE", "res_lo");
+
+	res_hi->cd();
+
+	fake_hiht_histoHT  ->Write();
+	fake_hiht_histoMET ->Write();
+	fake_hiht_histoNJ  ->Write();
+	fake_hiht_histoNBJ ->Write();
+
+	rare_hiht_histoHT  ->Write();
+	rare_hiht_histoMET ->Write();
+	rare_hiht_histoNJ  ->Write();
+	rare_hiht_histoNBJ ->Write();
+
+	flip_hiht_histoHT  ->Write();
+	flip_hiht_histoMET ->Write();
+	flip_hiht_histoNJ  ->Write();
+	flip_hiht_histoNBJ ->Write();
+
+	obs_hiht_histoHT  ->Write();
+	obs_hiht_histoMET ->Write();
+	obs_hiht_histoNJ  ->Write();
+	obs_hiht_histoNBJ ->Write();
+	res_hi->Close();
+
+	res_lo->cd();
+	fake_loht_histoHT  ->Write();
+	fake_loht_histoMET ->Write();
+	fake_loht_histoNJ  ->Write();
+	fake_loht_histoNBJ ->Write();
+
+	rare_loht_histoHT  ->Write();
+	rare_loht_histoMET ->Write();
+	rare_loht_histoNJ  ->Write();
+	rare_loht_histoNBJ ->Write();
+
+	flip_loht_histoHT  ->Write();
+	flip_loht_histoMET ->Write();
+	flip_loht_histoNJ  ->Write();
+	flip_loht_histoNBJ ->Write();
+
+	obs_loht_histoHT  ->Write();
+	obs_loht_histoMET ->Write();
+	obs_loht_histoNJ  ->Write();
+	obs_loht_histoNBJ ->Write();
+
+	res_lo->Close();
+
+	delete
+	fake_loht_histoHT ,
+	fake_loht_histoMET,
+	fake_loht_histoNJ ,
+	fake_loht_histoNBJ,
+	fake_hiht_histoHT ,
+	fake_hiht_histoMET,
+	fake_hiht_histoNJ ,
+	fake_hiht_histoNBJ,
+
+	rare_loht_histoHT ,
+	rare_loht_histoMET,
+	rare_loht_histoNJ ,
+	rare_loht_histoNBJ,
+	rare_hiht_histoHT ,
+	rare_hiht_histoMET,
+	rare_hiht_histoNJ ,
+	rare_hiht_histoNBJ,
+
+	flip_loht_histoHT ,
+	flip_loht_histoMET,
+	flip_loht_histoNJ ,
+	flip_loht_histoNBJ,
+	flip_hiht_histoHT ,
+	flip_hiht_histoMET,
+	flip_hiht_histoNJ ,
+	flip_hiht_histoNBJ,
+
+	obs_loht_histoHT ,
+	obs_loht_histoMET,
+	obs_loht_histoNJ ,
+	obs_loht_histoNBJ,
+	obs_hiht_histoHT ,
+	obs_hiht_histoMET,
+	obs_hiht_histoNJ ,
+	obs_hiht_histoNBJ;
+
+	// float nt2_rare_mc_mm_e1 = sqrt(nt2_rare_mc_mm_e2);
+	// float nt2_rare_mc_em_e1 = sqrt(nt2_rare_mc_em_e2);
+	// float nt2_rare_mc_ee_e1 = sqrt(nt2_rare_mc_ee_e2);
+
+	// float nt2_wz_mc_mm_e1 = sqrt(nt2_wz_mc_mm_e2);
+	// float nt2_wz_mc_em_e1 = sqrt(nt2_wz_mc_em_e2);
+	// float nt2_wz_mc_ee_e1 = sqrt(nt2_wz_mc_ee_e2);
+
+	//////      ///////////////////////////////////////////////////////////////////////////////////
+	//////      // PREDICTIONS ////////////////////////////////////////////////////////////////////
+	//////      ///////////////////////////////////////////////////////////////////////////////////
+	//////      // FakeRatios *FR = new FakeRatios();
+	//////      FR->setNToyMCs(100);
+	//////      FR->setAddESyst(0.5);
+
+	//////      FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+	//////      FR->setEFRatio(elfratio_data, elfratio_data_e);
+	//////      FR->setMPRatio(mupratio_data, mupratio_data_e);
+	//////      FR->setEPRatio(elpratio_data, elpratio_data_e);
+
+	//////      FR->setMMNtl(nt2_mm, nt10_mm, nt0_mm);
+	//////      FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
+	//////      FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
+
+	//////      // Event-by-event differential ratios:
+	//////      float nF_mm = npf_mm + nff_mm;
+	//////      float nF_em = npf_em + nfp_em + nff_em;
+	//////      float nF_ee = npf_ee + nff_ee;
+	//////      float nSF   = npf_mm + npf_em + nfp_em + npf_ee;
+	//////      float nDF   = nff_mm + nff_em + nff_ee;
+	//////      float nF    = nF_mm + nF_em + nF_ee;
+
+	//////      OUT << endl << endl << endl;
+ 	//////      OUT << "  Fake Predictions:" << endl;
+ 	//////      OUT << "------------------------------------------------------------------------------------------" << endl;
+ 	//////      OUT << "                 |          Mu/Mu        |         El/El         |          El/Mu        |" << endl;
+ 	//////      OUT << "------------------------------------------------------------------------------------------" << endl;
+ 	//////      OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+ 	//////      npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
+ 	//////      npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
+ 	//////      npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
+ 	//////      OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+ 	//////      npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
+ 	//////      npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
+ 	//////      npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
+ 	//////      OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
+ 	//////      nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
+ 	//////      OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+ 	//////      nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
+ 	//////      nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
+ 	//////      nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
+ 	//////      OUT << "------------------------------------------------------------------------------------------" << endl;
+ 	//////      OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+ 	//////      nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
+ 	//////      nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
+ 	//////      nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
+ 	//////      OUT << "------------------------------------------------------------------------------------------" << endl;
+ 	//////      OUT << " (Value ± E_stat ± E_syst) " << endl;
+ 	//////      OUT << "//////////////////////////////////////////////////////////////////////////////////////////" << endl;
+ 	//////      OUT << endl;
+	//////      ///////////////////////////////////////////////////////////////////////////////////
+	//////      // E-CHARGE MISID /////////////////////////////////////////////////////////////////
+	//////      ///////////////////////////////////////////////////////////////////////////////////
+	//////      float nt2_ee_chmid(0.), nt2_ee_chmid_e1(0.), nt2_ee_chmid_e2(0.);
+	//////      float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
+	//////      
+	//////      // Abbreviations
+	//////      float fbb(0.),fee(0.),feb(0.);
+	//////      float fbbE(0.),feeE(0.),febE(0.);
+	//////      float fbb_mc(0.),fee_mc(0.),feb_mc(0.);
+	//////      float fbbE_mc(0.),feeE_mc(0.),febE_mc(0.);
+	//////      
+	//////      calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+	//////      calculateChMisIdProb(fEGData, EB, feb, febE);
+	//////      calculateChMisIdProb(fEGData, EE, fee, feeE);
+	//////      
+	//////      calculateChMisIdProb(fMCBG, BB, fbb_mc, fbbE_mc);
+	//////      calculateChMisIdProb(fMCBG, EB, feb_mc, febE_mc);
+	//////      calculateChMisIdProb(fMCBG, EE, fee_mc, feeE_mc);
+	//////      
+	//////      cout << "this is the number of OS events in EE, BB, and EB from the SigEventsTree: " << nt2_ee_EE_os << " " << nt2_ee_BB_os << " " << nt2_ee_EB_os << endl;
+	//////      cout << "this is the charge mis ID probabilities: fee, fbb, feb: " << fee << " " << fbb << " " << feb << endl;
+	//////      // Simple error propagation assuming error on number of events is sqrt(N)
+	//////      nt2_ee_chmid    = 2*fbb*nt2_ee_BB_os                           + 2*fee*nt2_ee_EE_os                      + 2*feb*nt2_ee_EB_os;
+	//////      nt2_ee_chmid_e1 = sqrt( 4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)  + 4*fee*fee*FR->getEStat2(nt2_ee_EE_os)   + 4*feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+	//////      nt2_ee_chmid_e2 = sqrt( 4*fbbE*fbbE*nt2_ee_BB_os*nt2_ee_BB_os  + 4*feeE*feeE*nt2_ee_EE_os*nt2_ee_EE_os   + 4*febE*febE*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+	//////      
+	//////      nt2_em_chmid    = fbb*nt2_em_BB_os + fee*nt2_em_EE_os;
+	//////      nt2_em_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+	//////      nt2_em_chmid_e2 = fbbE*fbbE*sqrt( nt2_em_BB_os*nt2_em_BB_os + feeE*feeE*nt2_em_EE_os*nt2_em_EE_os );
+
+
+}
+
+
 TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag){
 	fOutputSubDir = "IntPredictionsSigEventTree/";
 	TString jvString = "";
@@ -18643,7 +20245,7 @@ void SSDLPlotter::scanModelGeneric( const char * filestring, int reg, TString mo
 	// need to initialize the TRandom object for the systematic studies
 	SSDLDumper::fRand3       = new TRandom3(10);
 	SSDLDumper::fRand3Normal = new TRandom3(10);
-	TString btagCorrection = "T1tttt";
+	TString btagCorrection = "T1";
 
 	float xvar(-1);
 	float yvar(-1);

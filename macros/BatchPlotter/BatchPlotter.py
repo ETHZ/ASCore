@@ -32,10 +32,10 @@ def read_config(config_name):
 		elif opt == 'ReleaseDir'   : info['release_dir']      = arg
 		elif opt == 'DataCard'     : info['datacard_location']= arg
 		elif opt == 'SELocation'   : info['storage_location'] = arg
-		elif opt == 'OutdirNode':
-			if not arg[-1]== '/':
-				arg+='/'
-			info['output_node'] = arg
+		elif opt == 'ModelName'    : info['model_name'] = arg
+		elif opt == 'Date':
+			info['output_node'] = '/scratch/mdunser/'+arg+'/'
+			info['date']        = arg
 		elif opt == 'OutputLocation':
 			if not arg[-1]== '/':
 				arg+='/'
@@ -148,6 +148,7 @@ def merge_and_clean():
 		os.system(hstring+' >& /dev/null')
 	os.system('rm -rf '+output_location+'/output_*')
 					
+	## os.system('rm -r tmp/ ; rm sgejob-* -rf')
 	os.system('rm -r tmp/ ; rm plot_* ; rm sgejob-* -rf')
 	#os.system('rm sgejob-* -rf') # no cleaning up, for debugging puposes
 	## for ls in os.listdir(output_location):
@@ -156,8 +157,8 @@ def merge_and_clean():
 def do_stuff(config_name):
 	print '[status] starting script...'
 
-	global srm_path, dcap_path, plotter_location, dumper_config, output_location, user, noj, release_dir, output_node, storage_location
-	global regions
+	global srm_path, dcap_path, plotter_location, dumper_config, output_location, user, noj, release_dir, date, output_node, storage_location
+	global regions, model_name
 	
 	print '[status] reading config...'
 	info_dict = read_config(config_name)
@@ -167,10 +168,13 @@ def do_stuff(config_name):
 	dumper_config     = info_dict['dumper_config']
 	output_location   = info_dict['output_location']
 	output_node       = info_dict['output_node']
+	date              = info_dict['date']
 	batch_script      = info_dict['batch_script']
 	storage_location  = info_dict['storage_location']
 	release_dir       = info_dict['release_dir']
 	regions           = getRegions(info_dict['region_file'])
+	model_name        = info_dict['model_name']
+	output_location  += date+'_'+model_name+'/'
 
 	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/'
 	dcap_path = 'dcap://t3se01.psi.ch:22125/'
@@ -200,7 +204,7 @@ def do_stuff(config_name):
 		os.system('mkdir '+output_location+'/'+astring)
 		for region in regions:
 			outloc = output_node + astring
-			commit_strings.append(plotter_location + ' -v 1 -c '+datacard_location+' -p '+dumper_config+' -s ' + region + ' -i '+ f + ' -d '+outloc)
+			commit_strings.append(plotter_location + ' -v 1 -c '+datacard_location+' -p '+dumper_config+' -s ' + region + ' -i '+ f + ' -m '+model_name+' -d '+outloc)
 			## print plotter_location + ' -v 1 -c '+datacard_location+' -p '+dumper_config+' -s ' + region + ' -i '+ f + ' -d '+outloc
 		
 	print '[status] starting to submit jobs...'
@@ -239,7 +243,7 @@ def do_stuff(config_name):
 			## os.system('qsub -q short.q  -N '+jn+' '+tmpScript_name+' > /dev/null')
 			## os.system('sleep 1')
 	if not dryrun:
-		print '[status] i\'m going to slowly submit', len(commit_strings), '...'
+		print '[status] i\'m going to slowly submit', len(commit_strings), 'jobs ...'
 		slowSubmit()
 	print '[status] submitted', len(commit_strings), 'jobs'
 

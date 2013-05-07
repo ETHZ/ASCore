@@ -327,10 +327,6 @@ void SSDLDumper::init(){
 	fRand3 = new TRandom3(50);
 	fRand3Normal = new TRandom3(10);
 
-	cout << "SEED OF THE RANDOMNUMBER: fRand3:       " << fRand3      ->GetSeed() << endl;
-	cout << "SEED OF THE RANDOMNUMBER: fRand3Normal: " << fRand3Normal->GetSeed() << endl;
-
-
 	resetHypLeptons();
 	initCutNames();
 	
@@ -605,19 +601,17 @@ void SSDLDumper::loopEvents(Sample *S){
 		scaleBTags(S, 2);
 		fillSigEventTree(S, gSystematics["BDown"]);
 
-		// Lepton pts scaled up
+		// scale the unclustered MET up
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags(); // reset to scaled btag values
-		scaleLeptons(S, 1);
- 		// fillYields(S, gRegion["TTbarWSelLU"]);
-		fillSigEventTree(S, gSystematics["LepUp"]);
+		scaleMET(S, 0);
+		fillSigEventTree(S, gSystematics["METUp"]);
 
-		// Lepton pts scaled down
+		// scale the unclustered MET down
 		fChain->GetEntry(jentry); // reset tree vars
 		resetBTags(); // reset to scaled btag values
-		scaleLeptons(S, 2);
- 		// fillYields(S, gRegion["TTbarWSelLD"]);
-		fillSigEventTree(S, gSystematics["LepDown"]);
+		scaleMET(S, 2);
+		fillSigEventTree(S, gSystematics["METDown"]);
 	}
 	//FOR PABLO	cout << "--------------------------------------------------" << endl;
 	//FOR PABLO	cout << "--------------------------------------------------" << endl;
@@ -5259,6 +5253,29 @@ void SSDLDumper::setLowPtCuts(){
 	fC_minEl1pt = 10.;
 	fC_minEl2pt = 10.;
 }
+void SSDLDumper::printRegionCuts(int reg){
+	cout << "fC_minMu1pt  : " << fC_minMu1pt   << endl;
+	cout << "fC_minMu2pt  : " << fC_minMu2pt   << endl;
+	cout << "fC_minEl1pt  : " << fC_minEl1pt   << endl;
+	cout << "fC_minEl2pt  : " << fC_minEl2pt   << endl;
+	cout << "fC_minHT     : " << fC_minHT      << endl;
+	cout << "fC_maxHT     : " << fC_maxHT      << endl;
+	cout << "fC_minMet    : " << fC_minMet     << endl;
+	cout << "fC_maxMet    : " << fC_maxMet     << endl;
+	cout << "fC_minJetPt  : " << fC_minJetPt   << endl;
+	cout << "fC_minNjets  : " << fC_minNjets   << endl;
+	cout << "fC_maxNjets  : " << fC_maxNjets   << endl;
+	cout << "fC_minNbjets : " << fC_minNbjets  << endl;
+	cout << "fC_maxNbjets : " << fC_maxNbjets  << endl;
+	cout << "fC_minNbjmed : " << fC_minNbjmed  << endl;
+	cout << "fC_maxNbjmed : " << fC_maxNbjmed  << endl;
+	cout << "fC_app3rdVet : " << fC_app3rdVet  << endl;
+	cout << "fC_vetoTTZSel: " << fC_vetoTTZSel << endl;
+	cout << "fC_chargeVeto: " << fC_chargeVeto << endl;
+
+	if(reg == gRegion["WZEnriched"])  gInvertZVeto = true;
+	else                              gInvertZVeto = false;
+}
 
 //____________________________________________________________________________
 bool SSDLDumper::isGoodEvent(){
@@ -5496,10 +5513,22 @@ bool SSDLDumper::passesJet50CutdPhi(int ind, gChannel chan){
 	if (jetinds.size() != 1) return false;
 	// check type of lepton
 	float lepphi = (chan == Muon) ? MuPhi[ind] : ElPhi[ind];
+	// float lepeta = (chan == Muon) ? MuEta[ind] : ElEta[ind];
+	// float leppt  = (chan == Muon) ? MuPt[ind]  : ElPt[ind];
+	// float lepm   = (chan == Muon) ? gMMU       : gMEL;
 	// get dphi to only jet with pt > 50
 	float dphi = fabs(JetPhi[jetinds[0]] - lepphi);
-	// cout << "dphi: " << dphi << endl;
-	if (fabs(JetPhi[jetinds[0]] - lepphi) > 2.) return true;
+	// TLorentzVector lep, jet;
+	// lep.SetPtEtaPhiM(leppt, lepeta, lepphi, lepm);
+	// jet.SetPtEtaPhiE(JetPt[jetinds[0]], JetEta[jetinds[0]], JetPhi[jetinds[0]], JetEnergy[jetinds[0]]);
+	// float realdphi = Util::DeltaPhi(lepphi, JetPhi[jetinds[0]]);
+	// cout << Form("lepphi: %.2f   -    jetphi: %.2f", lepphi, JetPhi[jetinds[0]]) << endl;
+	// cout << "-----------------------" << endl;
+	// cout << "our    deltaphi: "  << dphi << endl;
+	// cout << "vactor deltaphi: " << lep.DeltaPhi(jet) << endl;
+	// cout << "util   deltaphi: " << realdphi << endl;
+	// cout << "-----------------------" << endl;
+	if (fabs(dphi) > 2.) return true;
 	return false;
 }
 bool SSDLDumper::passesJet50Cut(){
@@ -5999,6 +6028,7 @@ bool SSDLDumper::isSigSupMuEvent(int &mu1, int &mu2){
 		else			mu2 = mu1 - 1;
 	}
 	if (NMus > 1)	return false;
+
 	return true;
 }
 bool SSDLDumper::isSigSupMuEvent(int &mu1){
