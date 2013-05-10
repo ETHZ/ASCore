@@ -20,7 +20,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.120 $";
+string sjzbversion="$Revision: 1.70.2.125 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -36,7 +36,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.120 2013/02/28 14:45:33 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.125 2013/04/20 13:04:06 buchmann Exp $
 */
 
 
@@ -194,8 +194,13 @@ public:
   float bTagProbCSVBP[jMax];
   float bTagProbCSVMVA[jMax];
   
+  int MC_pfJetGoodNumBTag40;
+  int MC_pfJetGoodNumBTag40dn;
+  int MC_pfJetGoodNumBTag40up;
   int pfJetGoodNumBtag30;
   int pfJetGoodNumBtag40;
+  int pfJetGoodNumBtag40up;
+  int pfJetGoodNumBtag40dn;
   int pfJetGoodNumBtag30_Tight;
   int pfJetGoodNumBtag40_Tight;
   int pfJetGoodNumBtag30_Loose;
@@ -251,6 +256,7 @@ public:
   float sumJetPt[jzbtype_max];
 
   float weight;
+  float weight_2BJets;
   float weightEffDown;
   float weightEffUp;
   float Efficiencyweightonly;
@@ -667,6 +673,9 @@ void nanoEvent::reset()
   pfJetGoodNumID=0;
   pfJetGoodNumBtag30=0;
   pfJetGoodNumBtag40=0;
+  MC_pfJetGoodNumBTag40=0;
+  MC_pfJetGoodNumBTag40up=0;
+  MC_pfJetGoodNumBTag40dn=0;
   pfJetGoodNumBtag30_Tight=0;
   pfJetGoodNumBtag40_Tight=0;
   pfJetGoodNumBtag30_Loose=0;
@@ -678,6 +687,8 @@ void nanoEvent::reset()
   pfJetGoodNum40n1sigma=0;
   pfJetGoodNum50p1sigma=0;
   pfJetGoodNum50n1sigma=0;
+  pfJetGoodNumBtag40up=0;
+  pfJetGoodNumBtag40dn=0;
 
   pfJetGoodNum30Fwd=0;
   
@@ -1225,6 +1236,11 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   L5corr_qJ->SetParameters(0.691709,0.176237,-0.026105,4.94774,1.00526); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_qJ_AK5PFchs.txt
   L5corr_gJ = new TF1("L5corr_gJ","[0]+log10((x-[3])/[4])*([1]+[2]*log10((x-[3])/[4]))",10,3650);
   L5corr_gJ->SetParameters(1.08381,-0.044501,0.006947,3.00346,0.974058); //values from /shome/buchmann/material/JEStxtfiles/GR_R_50_V9_L5Flavor_gJ_AK5PFchs.txt
+  
+  fBTagSF = new BTagSF();
+  fBTagSFup = new BTagSF();
+  fBTagSFdn = new BTagSF();
+  fRand3Normal = new TRandom3(10);
 }
 
 //________________________________________________________________________________________
@@ -1449,6 +1465,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
   myTree->Branch("pfJetGoodNumBtag30",&nEvent.pfJetGoodNumBtag30,"pfJetGoodNumBtag30/I");
   myTree->Branch("pfJetGoodNumBtag40",&nEvent.pfJetGoodNumBtag40,"pfJetGoodNumBtag40/I");
+  myTree->Branch("pfJetGoodNumBtag40up",&nEvent.pfJetGoodNumBtag40up,"pfJetGoodNumBtag40up/I");
+  myTree->Branch("pfJetGoodNumBtag40dn",&nEvent.pfJetGoodNumBtag40dn,"pfJetGoodNumBtag40dn/I");
   myTree->Branch("pfJetGoodNumBtag30_Tight",&nEvent.pfJetGoodNumBtag30_Tight,"pfJetGoodNumBtag30_Tight/I");
   myTree->Branch("pfJetGoodNumBtag40_Tight",&nEvent.pfJetGoodNumBtag40_Tight,"pfJetGoodNumBtag40_Tight/I");
   myTree->Branch("pfJetGoodNumBtag30_Loose",&nEvent.pfJetGoodNumBtag30_Loose,"pfJetGoodNumBtag30_Loose/I");
@@ -1510,7 +1528,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
 
-  
   myTree->Branch("ZbCHS3010_LeadingJetIsPu",&nEvent.ZbCHS3010_LeadingJetIsPu,"ZbCHS3010_LeadingJetIsPu/O");
   myTree->Branch("ZbCHS3010_SubLeadingJetIsPu",&nEvent.ZbCHS3010_SubLeadingJetIsPu,"ZbCHS3010_SubLeadingJetIsPu/O");
   
@@ -2617,6 +2634,7 @@ void JZBAnalysis::Analyze() {
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
   unsigned int mjlcounter=0;
+  
   for(int i =0 ; i<fTR->NJets;i++) // PF jet loop
     {
       counters[PJ].fill("All PF jets");
@@ -2789,7 +2807,20 @@ void JZBAnalysis::Analyze() {
         
         nEvent.pfJetGoodNum40++;
 	
+	if(fDataType_ == "mc") {
+		bool is_tagged_med = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i] > 0.679;
+		float random(-1.);
+		random = fRand3Normal->Uniform(0,1); // get random number from uniform distribution
+		nEvent.MC_pfJetGoodNumBTag40   +=fBTagSF->modifyBTagsWithSF(is_tagged_med, fTR->JPt[i], fTR->JEta[i], fTR->JPartonFlavour[i], "mean", random);
+		random = fRand3Normal->Uniform(0,1); // get random number from uniform distribution
+		nEvent.MC_pfJetGoodNumBTag40dn+=fBTagSFup->modifyBTagsWithSF(is_tagged_med, fTR->JPt[i], fTR->JEta[i], fTR->JPartonFlavour[i], "max", random);
+		random = fRand3Normal->Uniform(0,1); // get random number from uniform distribution
+		nEvent.MC_pfJetGoodNumBTag40up+=fBTagSFdn->modifyBTagsWithSF(is_tagged_med, fTR->JPt[i], fTR->JEta[i], fTR->JPartonFlavour[i], "min", random);
+	}
       }
+      
+      
+      
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
       if ( jpt*(jesC+unc)/jesC>40 )  nEvent.pfJetGoodNum40p1sigma++;
@@ -2808,8 +2839,6 @@ void JZBAnalysis::Analyze() {
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
     }
-    
-    
     
     if(nEvent.ZbCHS3010_pfJetGoodNum>0) {
       nEvent.ZbCHS3010_alpha=nEvent.ZbCHS3010_pfJetGoodPt[1]/nEvent.pt;
@@ -2848,6 +2877,11 @@ void JZBAnalysis::Analyze() {
 
     }
 
+  if(fDataType_== "mc") {
+    nEvent.pfJetGoodNumBtag40=nEvent.MC_pfJetGoodNumBTag40;
+    nEvent.pfJetGoodNumBtag40up=nEvent.MC_pfJetGoodNumBTag40up;
+    nEvent.pfJetGoodNumBtag40dn=nEvent.MC_pfJetGoodNumBTag40dn;
+  }
   
   Mpx.push_back(sortedGoodLeptons[PosLepton1].p.Px());
   Mpy.push_back(sortedGoodLeptons[PosLepton1].p.Py());
