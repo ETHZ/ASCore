@@ -442,13 +442,19 @@ if __name__ == '__main__' :
                 parser.print_usage()
                 sys.exit(-1)
         
-        timeleft=commands.getoutput("timeleft=`voms-proxy-info -valid -timeleft | grep timeleft | awk '{ print $3 }'` && pos=`expr index "+'"$timeleft" :`&& timelefth=${timeleft:0:$pos-1} && echo $timelefth');
-        if(timeleft<2): 
-		print "You need to refresh your proxy! (will run voms-proxy-init -voms cms for you)"
-		os.system("voms-proxy-init -voms cms");
-	else:
-		print "Proxy lifetime is acceptable (more than "+str(timeleft)+" hours)"
+        timeleft=commands.getoutput("voms-proxy-info -valid -timeleft | grep timeleft | awk '{ print $3 }'")
+        timeleft=float(timeleft[:timeleft.find(':')])
         
+        print "Seems like your proxy will be alive for another "+str(timeleft)+" hours"
+        if timeleft>5 and timeleft<96:
+	  print "You should be ok, your proxy is still valid for a long time."
+	else:
+	  print "You need to refresh your proxy! (will run voms-proxy-init -voms cms for you)"
+	  os.system("voms-proxy-init -voms cms");
+	  
+	  
+	
+	
         result = parseInputFile(args[0])
         if(result == "Error"):
                 showMessage("Error parsing input file")
