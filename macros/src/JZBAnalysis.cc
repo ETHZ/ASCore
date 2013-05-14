@@ -20,7 +20,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.125 $";
+string sjzbversion="$Revision: 1.70.2.126 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -36,7 +36,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.125 2013/04/20 13:04:06 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.126 2013/05/10 06:49:51 buchmann Exp $
 */
 
 
@@ -1958,7 +1958,7 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
-
+  
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
       if(fisModelScan) {

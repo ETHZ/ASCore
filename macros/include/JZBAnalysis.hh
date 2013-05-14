@@ -17,6 +17,7 @@
 #include "base/TreeReader.hh"
 #include "base/UserAnalysisBase.hh"
 #include "helper/Monitor.hh"
+#include "helper/BTagSF.hh"
 #include "helper/Davismt2.h"
 #include "SolveTTbarNew.hh"
 
@@ -126,6 +127,11 @@ private:
   TH2F *CSVL_MisTagCorrection;
   TH2F *CSVL_EfficiencyCorrectionUncert;
   TH2F *CSVL_MisTagCorrectionUncert;
+  
+  BTagSF *fBTagSF;
+  BTagSF *fBTagSFup;
+  BTagSF *fBTagSFdn;
+  TRandom3 *fRand3Normal;
   
   std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths, meTriggerPaths, metTriggerPaths, htTriggerPaths, singleElTriggerPaths, singleMuTriggerPaths;
 
