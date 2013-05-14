@@ -34,7 +34,7 @@ GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/slc5_a
 
 
 SRCS           = src/base/TreeClassBase.cc src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/helper/Davismt2.cc src/SolveTTbarNew.cc
+                 src/helper/Davismt2.cc src/SolveTTbarNew.cc src/helper/Hemisphere.cc src/helper/BTagSF.cc
                  #src/helper/PUWeight.C src/helper/Lumi3DReWeighting_standalone.cc\
                  
 
