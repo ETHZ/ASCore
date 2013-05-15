@@ -23,6 +23,7 @@ TreeClassBase::~TreeClassBase()
 
 //____________________________________________________________________
 // Retrieve all branches ("getByLabel")
+// Returns false if any branch fails to load
 const bool TreeClassBase::GetAllByLabel(void) {
 
     const edm::EventBase* event = fEvent;
