@@ -13,20 +13,23 @@
     
 class TreeReader : public TreeClassBase {
 public:
-    TreeReader(const std::vector<std::string>& fileList) : TreeClassBase(fileList) {}
-    virtual ~TreeReader() {}
+  TreeReader(const std::vector<std::string>& fileList) : TreeClassBase(fileList) {}
+  virtual ~TreeReader() {}
 
-    // Load information
-    virtual const Int_t GetEntry(const Long64_t entry);
-    virtual const bool LoadAll(void);
+  // Load information
+  virtual const Int_t GetEntry(const Long64_t entry);
+  virtual const bool LoadAll(void);
 
-    // Getters
-    inline virtual const Long64_t GetEntries() const { return fEvent->size(); };
+  // Getters
+  inline virtual const Long64_t GetEntries() const { return fEvent->size(); };
 
-    // Looping interface
-    virtual const TreeReader& ToBegin();
-    inline virtual bool AtEnd() { return fEvent->atEnd(); }
-    virtual const TreeReader &operator++();
+  // Looping interface
+  virtual const TreeReader& ToBegin();
+  inline virtual bool AtEnd() { return fEvent->atEnd(); }
+  virtual const TreeReader &operator++();
+  inline virtual const bool CheckLoading() const {
+    return (Run>0)&&(LumiSection>0)&&(Event>0); 
+  }
 
     
 };

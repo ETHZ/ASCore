@@ -6,8 +6,11 @@
 const TreeReader& TreeReader::ToBegin() {
 
     fwlite::ChainEvent result = fEvent->toBegin();
-    // In case first event doesn't load correctly, go to next healthy event
-    while ( !( AtEnd() || LoadAll() ) ) ++(*this);
+    LoadAll();
+    while ( !(AtEnd() || CheckLoading()) ) { // Go to the first healthy event
+      ++(*this);
+      LoadAll();
+    }
     return *this;
 
 }
@@ -17,10 +20,12 @@ const TreeReader& TreeReader::ToBegin() {
 const TreeReader& TreeReader::operator++() {
 
     fwlite::ChainEvent result = ++(*fEvent);
-    // Load new event until we find one that loads correctly (or reach end)
-    while ( !(AtEnd() || LoadAll()) ) {
-      fwlite::ChainEvent result = ++(*fEvent);
+    LoadAll();
+    while ( !(AtEnd() || CheckLoading()) ) {
+      result = ++(*fEvent);
+      LoadAll();
     }
+    
     return *this;
 
 }
@@ -41,7 +46,7 @@ const Int_t TreeReader::GetEntry(const Long64_t entry)
 // Retrieve all branches ("getByLabel")
 const bool TreeReader::LoadAll(void) {
 
-  if ( AtEnd() ) return false;
+  if ( AtEnd() ) return false; 
 
   return GetAllByLabel();
     

@@ -28,6 +28,11 @@ const bool TreeClassBase::GetAllByLabel(void) {
     const edm::EventBase* event = fEvent;
     bool result(true);
 
+    // Initialize key variables
+    Run         = 0;
+    Event       = 0;
+    LumiSection = 0;
+
     // Load run information if run has changed
     if ( fCurRun != event->id().run() ) {
       fCurRun = event->id().run();
