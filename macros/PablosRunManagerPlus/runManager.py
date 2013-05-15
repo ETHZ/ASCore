@@ -446,7 +446,7 @@ if __name__ == '__main__' :
         timeleft=float(timeleft[:timeleft.find(':')])
         
         print "Seems like your proxy will be alive for another "+str(timeleft)+" hours"
-        if timeleft>5 and timeleft<96:
+        if timeleft>5 and timeleft<500:
 	  print "You should be ok, your proxy is still valid for a long time."
 	else:
 	  print "You need to refresh your proxy! (will run voms-proxy-init -voms cms for you)"
