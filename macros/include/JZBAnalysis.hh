@@ -49,7 +49,7 @@ public:
   const float EffArea(float); //Used for the calculation of Electron isolation
   const float IndividualEffArea(float abseta, string type);
   const bool IsCustomJet(const int);
-  const bool IsConvertedPhoton( const int eIndex );
+//  const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
   const bool passFilters(int& bits);
   const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);

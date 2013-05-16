@@ -20,7 +20,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.126 $";
+string sjzbversion="$Revision: 1.70.2.127 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -36,7 +36,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.126 2013/05/10 06:49:51 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.127 2013/05/14 14:39:02 buchmann Exp $
 */
 
 
@@ -3707,7 +3707,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   return true;
 }
 
-// Check if electron is from photon conversion
+/*// Check if electron is from photon conversion
 const bool JZBAnalysis::IsConvertedPhoton( const int eIndex ) {
  
   int elIDWP90 = fTR->ElIDsimpleWP90relIso[eIndex];
@@ -3715,7 +3715,7 @@ const bool JZBAnalysis::IsConvertedPhoton( const int eIndex ) {
   counters[EL].fill(" ... passes conversion rejection");
   return false;
  
-}
+}*/
 
 const bool JZBAnalysis::IsCustomJet(const int index){
   // Basic Jet ID cuts (loose Jet ID)
