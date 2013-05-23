@@ -261,7 +261,11 @@ public:
   float weightEffUp;
   float Efficiencyweightonly;
 
-  
+  float lheV_pt;
+  float lheV_mll;
+  float lheHT;
+  float lheNj;
+
   int NPdfs;
   float pdfW[100];
   float pdfWsum;
@@ -508,6 +512,12 @@ void nanoEvent::reset()
   is_data=false;
   NPdfs=0;
   pdfWsum=0;
+  
+  lheV_pt=0;
+  lheV_mll=0;
+  lheHT=0;
+  lheNj=0;
+
 
   process=0;
 
@@ -1339,6 +1349,11 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
   myTree->Branch("softMuon",&nEvent.softMuon,"softMuon/O");
   myTree->Branch("softMuonMC",&nEvent.softMuonMC,"softMuonMC/O");
+  
+  myTree->Branch("lheV_pt",&nEvent.lheV_pt,"lheV_pt/F");
+  myTree->Branch("lheV_mll",&nEvent.lheV_mll,"lheV_mll/F");
+  myTree->Branch("lheHT",&nEvent.lheHT,"lheHT/F");
+  myTree->Branch("lheNj",&nEvent.lheNj,"lheNj/F");
 
   myTree->Branch("NgenZs",&nEvent.NgenZs,"NgenZs/I");
   myTree->Branch("NgenLeps",&nEvent.NgenLeps,"NgenLeps/I");
@@ -1945,6 +1960,52 @@ bool is_charged_lepton(const int code) {
   return false;
 }
 
+void JZBAnalysis::FillLHEInfo() {
+  bool lCheck=false;
+  bool lbarCheck=false;
+  bool vlCheck=false;
+  bool vlbarCheck=false;
+  int idl, idlbar;
+  float lheHT=0.;
+  float lheNj=0;
+  TLorentzVector l,lbar,vl,vlbar,V_tlv;
+  
+  for(unsigned int i=0; i<fTR->LHEEventID.size(); ++i) {
+	    int id=fTR->LHEEventID[i]; //pdgId
+	    int status = fTR->LHEEventStatus[i];
+	    int idabs=TMath::Abs(id); 
+	    if( status == 1 && ( ( idabs == 21 ) || (idabs > 0 && idabs < 7) ) ){ // gluons and quarks
+	      lheHT += TMath::Sqrt( pow(fTR->LHEEventPx[i],2) + pow(fTR->LHEEventPy[i],2) ); // first entry is px, second py
+	      lheNj++;
+	    }	    
+
+	    if(id==11){ l.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lCheck=true;}
+	    if(id==-11){ lbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lbarCheck=true;}
+	    if(id==12){ vl.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlCheck=true;}
+	    if(id==-12){ vlbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlbarCheck=true;}
+	    
+	    if(id==13){ l.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lCheck=true;}
+	    if(id==-13){ lbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lbarCheck=true;}
+	    if(id==14){ vl.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlCheck=true;}
+	    if(id==-14){ vlbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlbarCheck=true;}
+	    
+	    if(id==15){ l.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lCheck=true;}
+	    if(id==-15){ lbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lbarCheck=true;}
+	    if(id==16){ vl.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlCheck=true;}
+	    if(id==-16){ vlbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlbarCheck=true;}
+  }
+  
+  if( lCheck && lbarCheck ) V_tlv = l + lbar; // ZtoLL
+  if( vlCheck && vlbarCheck ) V_tlv = vl + vlbar; // ZtoNuNu
+  if( lCheck && vlbarCheck ) V_tlv = l + vlbar; // WToLNu
+  if( lbarCheck && vlCheck ) V_tlv = lbar + vl; // WToLNu       
+
+  nEvent.lheV_pt  = V_tlv.Pt();
+  nEvent.lheV_mll = V_tlv.M();
+  nEvent.lheHT    = lheHT;
+  nEvent.lheNj    = lheNj;
+}
+
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
   minuit = new TMinuit();
@@ -1982,7 +2043,9 @@ void JZBAnalysis::Analyze() {
 	nEvent.weight     = nEvent.PUweight;
 	weight_histo->Fill(1,nEvent.PUweight);
       }
-      
+     
+      FillLHEInfo();
+     
       nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
       nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
       
@@ -2689,10 +2752,7 @@ void JZBAnalysis::Analyze() {
       }
       
       //Get Uncertainty
-      fJECUnc->setJetEta(jeta);
-      fJECUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
-      
-      float unc = fJECUnc->getUncertainty(true); 
+      float unc = fMetCorrector->getJECUncertainty(jpt,jeta); //fJECUnc->getUncertainty(true);
       //removing jet from residual met
       ResidualMet=ResidualMet+aJet;
       Type1ResidualMet=Type1ResidualMet+aJet;
