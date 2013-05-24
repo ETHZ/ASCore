@@ -438,7 +438,6 @@ void SSDLDumper::loopEvents(Sample *S){
 	if(S->datamc == 0){
 		TString eventfilename  = fOutputDir + S->sname + "_SignalEvents.txt";
 		fOUTSTREAM.open(eventfilename.Data(), ios::trunc);		
-		
 //SIGEVENTS PRINTOUT		for(regIt = gRegions.begin(); regIt != gRegions.end(); regIt++) {
 //SIGEVENTS PRINTOUT			TString allRegionSigEvents  = fOutputDir + S->sname + "_SignalEvents_"+(*regIt)->sname+".txt";
 //SIGEVENTS PRINTOUT			(*regIt)->regionOutstream.open(allRegionSigEvents.Data(), ios::trunc);		
@@ -453,8 +452,6 @@ void SSDLDumper::loopEvents(Sample *S){
 	
 	TTree *tree = S->getTree();
 	S->evcount->Add(S->getEvCount());	
-	//cout << "MARC: evcount: " << S->getEvCount()->GetEntries() << endl;
-	// MARC nov 29 S->ngen = S->getEvCount()->GetEntries();
 	
 	// Stuff to execute for each sample BEFORE looping on the events
 	initCounters();
@@ -476,7 +473,6 @@ void SSDLDumper::loopEvents(Sample *S){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-//		if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		//   APPLY JSON
 		/////////////////////////////////////////////
@@ -485,21 +481,9 @@ void SSDLDumper::loopEvents(Sample *S){
 		// reset hypothesis leptons
 		resetHypLeptons();
 		
-		// FOR PABLO // FOR PABLO
-		// FOR PABLO int mu1(-1), mu2(-1);
-		// FOR PABLO if(mumuSignalTrigger()){ // Trigger selection
-		// FOR PABLO 	ntrigger++;
-		// FOR PABLO 	if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-		// FOR PABLO 	nused++;
-		// FOR PABLO 	resetHypLeptons();
-		// FOR PABLO 	}
-		// FOR PABLO }
-		// if (S->datamc == 0 && Run > 200991) continue; // ATTENTION HERE, THIS IS JUST FOR TTWZ AND TEMPORARY
 		/////////////////////////////////////////////
 		// DEBUG
-		//		if (Run!=gDEBUG_RUNNUMBER_) continue;
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
-		// if(jentry > 10000) break;
 		/////////////////////////////////////////////
 		
 		/////////////////////////////////////////////
@@ -702,7 +686,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
 				if(S->datamc == 0 ){
-//SIGEVENTS PRINTOUT				  gRegions[reg]->regionOutstream << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+				  //SIGEVENTS PRINTOUT	gRegions[reg]->regionOutstream << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 					if(reg == gRegion[gBaseRegion]){
 					  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 					}
@@ -757,7 +741,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
 				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
 				if(S->datamc == 0 ){
-//SIGEVENTS PRINTOUT					gRegions[reg]->regionOutstream << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+				  //SIGEVENTS PRINTOUT	gRegions[reg]->regionOutstream << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 					if(reg == gRegion[gBaseRegion]){
 						fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 					}
@@ -822,7 +806,7 @@ void SSDLDumper::fillYields(Sample *S, int reg){
 				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
 				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
 				if(S->datamc == 0){
-//SIGEVENTS PRINTOUT					gRegions[reg]->regionOutstream << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+				  //SIGEVENTS PRINTOUT	gRegions[reg]->regionOutstream << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 					if(reg == gRegion[gBaseRegion]){
 						fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 					}
@@ -4591,7 +4575,7 @@ bool SSDLDumper::elmuSignalTrigger(){
 bool SSDLDumper::singleMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	// return ( HLT_MU17 > 0  );
+	//	return ( HLT_MU17 > 0  );
 	return ( (HLT_MU8 > 0 || HLT_MU17 > 0 ) );
 }
 float SSDLDumper::singleMuPrescale(){
@@ -4606,12 +4590,12 @@ float SSDLDumper::singleMuPrescale(){
 bool SSDLDumper::singleElTrigger(){
   // Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	// return (HLT_ELE17_JET30_TIGHT > 0);
+	//	return (HLT_ELE17_JET30_TIGHT > 0);
 	return ((HLT_ELE8_TIGHT > 0) || (HLT_ELE8_JET30_TIGHT > 0) || (HLT_ELE17_JET30_TIGHT > 0) || (HLT_ELE17_TIGHT > 0));
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
-  if(fSample->datamc > 0) return 1.;
+        if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
 	if( HLT_ELE8_TIGHT_PS > 0 )        return HLT_ELE8_TIGHT_PS;
@@ -6019,15 +6003,17 @@ bool SSDLDumper::isSigSupMuEvent(int &mu1, int &mu2){
 	if(getMT(mu1,Muon) > fC_maxMt_Control)  return false;
 	//if(getMT(mu1,Muon) > fC_maxMt_Control+5)  return false;
 	if(getMET() > fC_maxMet_Control)   return false;
-	int nmus(0);
+	int nmus(0),nvetomu(0);
 	for (int i=0; i< NMus; ++i){
 	 	if (isLooseMuon(i)) nmus++;
+		if (isGoodMuonForZVeto(i)) nvetomu++;
 	}
 	if (NMus > 1 && nmus == 1) {
 		if (mu1 == 0)	mu2 = mu1 + 1;
-		else			mu2 = mu1 - 1;
+		else		mu2 = mu1 - 1;
 	}
 	if (NMus > 1)	return false;
+	//	if (nvetomu > 1)	return false;
 
 	return true;
 }
@@ -6067,15 +6053,17 @@ bool SSDLDumper::isSigSupElEvent(int &el1, int &el2){
 	if(getMT(el1,Elec) > (fC_maxMt_Control+5.)) return false;
 	//if(getMT(el1,Elec) > (fC_maxMt_Control)) return false;
 	if(getMET() > fC_maxMet_Control)  return false;
-	int nels(0);
+	int nels(0),nvetoels(0);
 	for (int i = 0; i < NEls; i++) {
 		if (isLooseElectron(i)) nels++;
+		if (isGoodEleForZVeto(i)) nvetoels++;
 	}
 	if (NEls > 1 && nels == 1) {
 		if (el1 == 0)	el2 = el1 + 1;
 		else			el2 = el1 - 1;
 	}
 	if (NEls > 1) return false;
+	//	if (nvetoels > 1) return false;
 	return true;
 }
 bool SSDLDumper::isSigSupElEvent(int &el1){
@@ -6318,7 +6306,7 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 	}
 
 	// this is a cross-flavor same sign mass cut. wtf.
-	if(getMll(mu, el, ElMu) < 8.)      return false; // no low mass cross flavor, same sign lepton pair
+	if(getMll(mu, el, ElMu) < 8.)       return false; // no low mass cross flavor, same sign lepton pair
 	if(!passesGammaStarVeto(mu, el, 1)) return false; // reject GStar
 
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
@@ -6436,6 +6424,7 @@ bool SSDLDumper::isLooseMuon(int muon){
 	else {
 		if(MuPFIso[muon] > 1.00) return false;
 	}
+	
 	if (fabs(MuD0[muon]) > 0.005) return false; // this is for testing only!!!
 	return true;
 }
@@ -6448,7 +6437,8 @@ bool SSDLDumper::isTightMuon(int muon){
 	else {
 		if(MuPFIso[muon] > gMuMaxIso) return false;
 	}
-
+	
+	if (fabs(MuD0[muon]) > 0.005) return false; // this is for testing only!!!
 	return true;
 }
 bool SSDLDumper::isGoodPrimMuon(int muon, float ptcut){
@@ -6627,6 +6617,7 @@ bool SSDLDumper::isLooseElectron(int ele){
 		if(ElPFIso[ele] > 0.6) return false;
 		if(ElIsGoodTriggerEl[ele] != 1) return false; // trigger ID cuts
 	}
+	
 	if (fabs(ElD0[ele]) > 0.01) return false; // this is for testing!!!!
 
 
@@ -6669,6 +6660,8 @@ bool SSDLDumper::isTightElectron(int ele){
 		if(ElPFIso[ele] > gElMaxIso) return false;
 		if(ElIsGoodElId_MediumWP[ele] != 1) return false;
 	}
+
+	if (fabs(ElD0[ele]) > 0.01) return false; // this is for testing!!!!
 
 	// JUST FOR FUTURE REFERENCE, THOSE ARE THE VALUES FOR MVA-ID WE USED
 	// tight MVA-ID values if(fabs(ElEta[ele]) < 0.8   &&                             ElMVAIDTrig[ele] < 0.956) return false;

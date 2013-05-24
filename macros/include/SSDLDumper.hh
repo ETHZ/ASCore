@@ -89,8 +89,7 @@ public:
 		MuEG1                   , MuEG1a     , MuEG2     , MuEG3     , MuEG4     , MuEG5     ,
 		// fake samples
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleT_s, SingleTbar_s,
-		WJets,
-		DYJets,
+		WJets, DYJets,
 		// no longer needed GVJets,
 		// not here yet GJets200, GJets400, 
 		WGstarMu, WGstarTau, WW,
@@ -98,10 +97,8 @@ public:
 		WZ,ZZ,
 		HWW, HZZ, HTauTau, 
 		TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
-		WWZ, WZZ, 
-		WWG, ZZZ, WWW,
-		TTbarWW,
-		WpWp, WmWm,
+		WWZ, WZZ, WWG, ZZZ, WWW,
+		TTbarWW, WpWp, WmWm,
 		// QCD samples
 		QCDMuEnr15,
 		QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
@@ -532,7 +529,8 @@ public:
 			    (sname) == "ZZZ"       ||
 			    (sname) == "WWW"       ||
 			    (sname) == "W+W+"      ||
-			    (sname) == "W-W-")     return 4;
+			    (sname) == "W-W-"      ||
+			    (sname) == "TTbarWW")     return 4;
 			if( (sname.Contains("GVJets"))    || 
 			    (sname.Contains("WGstarMu"))  || 
 			    (sname.Contains("WGstarTau")) ||
@@ -576,10 +574,11 @@ public:
 			   sname == "EMEnr20"    ||
 			   sname == "EMEnr30")                          return 17;
 			if(sname == "TbZ")                              return 18;
-			if(sname == "TTJets_matchingdown")				return 19;
-			if(sname == "TTJets_matchingup")				return 20;
-			if(sname == "TTJets_scaledown")					return 21;
-			if(sname == "TTJets_scaleup")					return 22;
+			if(sname == "TTbarWW")                          return 19;
+			if(sname == "TTJets_matchingdown")				return 20;
+			if(sname == "TTJets_matchingup")				return 21;
+			if(sname == "TTJets_scaledown")					return 22;
+			if(sname == "TTJets_scaleup")					return 23;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
