@@ -12,6 +12,9 @@
 #include <cstdlib>
 using namespace std;
 
+bool UseForZPlusB=false;
+
+
 
 #define jMax 30  // do not touch this
 #define rMax 30
@@ -243,6 +246,7 @@ public:
   int badJet;
 
   float jzb[jzbtype_max];
+  float chs_jzb;
   float d2;
   float mt2;
   float mt2j;
@@ -264,7 +268,7 @@ public:
   float lheV_pt;
   float lheV_mll;
   float lheHT;
-  float lheNj;
+  int lheNj;
 
   int NPdfs;
   float pdfW[100];
@@ -1345,19 +1349,14 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("l1l2dR",&nEvent.l1l2dR,"l1l2dR/F");
   myTree->Branch("iso1",&nEvent.iso1,"iso1/F");
   myTree->Branch("iso2",&nEvent.iso2,"iso2/F");
-  myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
-  myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
   myTree->Branch("softMuon",&nEvent.softMuon,"softMuon/O");
   myTree->Branch("softMuonMC",&nEvent.softMuonMC,"softMuonMC/O");
   
   myTree->Branch("lheV_pt",&nEvent.lheV_pt,"lheV_pt/F");
   myTree->Branch("lheV_mll",&nEvent.lheV_mll,"lheV_mll/F");
   myTree->Branch("lheHT",&nEvent.lheHT,"lheHT/F");
-  myTree->Branch("lheNj",&nEvent.lheNj,"lheNj/F");
+  myTree->Branch("lheNj",&nEvent.lheNj,"lheNj/I");
 
-  myTree->Branch("NgenZs",&nEvent.NgenZs,"NgenZs/I");
-  myTree->Branch("NgenLeps",&nEvent.NgenLeps,"NgenLeps/I");
-  
   myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
   myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
   myTree->Branch("genDRll",&nEvent.genDRll,"genDRll/F");
@@ -1418,8 +1417,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ch2",&nEvent.ch2,"ch2/I");
   myTree->Branch("chid1",&nEvent.chid1,"chid1/I");
   myTree->Branch("chid2",&nEvent.chid2,"chid2/I");
-  myTree->Branch("process",&nEvent.process,"process/I");
-
+  
   myTree->Branch("leptonNum",&nEvent.leptonNum,"leptonNum/I");
   myTree->Branch("leptonPt",nEvent.leptonPt,"leptonPt[leptonNum]/F");
   myTree->Branch("leptonEta",nEvent.leptonEta,"leptonEta[leptonNum]/F");
@@ -1449,8 +1447,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("goodVtx",&nEvent.goodVtx,"goodVtx/I");
   myTree->Branch("numVtx",&nEvent.numVtx,"numVtx/I");
   myTree->Branch("badJet",&nEvent.badJet,"badJet/I");
-  myTree->Branch("totEvents",&nEvent.totEvents,"totEvents/F");
 
+  
   myTree->Branch("pfJetNum",&nEvent.pfJetNum,"pfJetNum/I");
   myTree->Branch("pfJetPt",nEvent.pfJetPt,"pfJetPt[pfJetNum]/F");
   myTree->Branch("pfJetEta",nEvent.pfJetEta,"pfJetEta[pfJetNum]/F");
@@ -1470,14 +1468,14 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("type1metUncertainty",&nEvent.type1metUncertainty,"type1metUncertainty/F");
 
   myTree->Branch("pfJetGoodNum40CHS",&nEvent.pfJetGoodNum40CHS,"pfJetGoodNum40CHS/I");
-  myTree->Branch("pfJetGoodNum30Fwd",&nEvent.pfJetGoodNum30Fwd,"pfJetGoodNum30Fwd/I");
-  myTree->Branch("pfJetGoodNum40Fwd",&nEvent.pfJetGoodNum40Fwd,"pfJetGoodNum40Fwd/I");
-  myTree->Branch("pfJetGoodNum50Fwd",&nEvent.pfJetGoodNum50Fwd,"pfJetGoodNum50Fwd/I");
-  myTree->Branch("pfJetGoodNum60Fwd",&nEvent.pfJetGoodNum60Fwd,"pfJetGoodNum60Fwd/I");
+//  myTree->Branch("pfJetGoodNum30Fwd",&nEvent.pfJetGoodNum30Fwd,"pfJetGoodNum30Fwd/I");
+//  myTree->Branch("pfJetGoodNum40Fwd",&nEvent.pfJetGoodNum40Fwd,"pfJetGoodNum40Fwd/I");
+//  myTree->Branch("pfJetGoodNum50Fwd",&nEvent.pfJetGoodNum50Fwd,"pfJetGoodNum50Fwd/I");
+//  myTree->Branch("pfJetGoodNum60Fwd",&nEvent.pfJetGoodNum60Fwd,"pfJetGoodNum60Fwd/I");
   myTree->Branch("pfJetGoodNum30",&nEvent.pfJetGoodNum30,"pfJetGoodNum30/I");
   myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
   myTree->Branch("pfJetGoodNum50",&nEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
-  myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
+//  myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
   myTree->Branch("pfJetGoodNumBtag30",&nEvent.pfJetGoodNumBtag30,"pfJetGoodNumBtag30/I");
   myTree->Branch("pfJetGoodNumBtag40",&nEvent.pfJetGoodNumBtag40,"pfJetGoodNumBtag40/I");
   myTree->Branch("pfJetGoodNumBtag40up",&nEvent.pfJetGoodNumBtag40up,"pfJetGoodNumBtag40up/I");
@@ -1488,8 +1486,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNumBtag40_Loose",&nEvent.pfJetGoodNumBtag40_Loose,"pfJetGoodNumBtag40_Loose/I");
   myTree->Branch("pfJetGoodNumIDBtag",&nEvent.pfJetGoodNumIDBtag,"pfJetGoodNumIDBtag/I");
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
-  myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
-  myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
+//  myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
+//  myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
   myTree->Branch("pfJetGoodNum40p1sigma",&nEvent.pfJetGoodNum40p1sigma,"pfJetGoodNum40p1sigma/I");
   myTree->Branch("pfJetGoodNum40n1sigma",&nEvent.pfJetGoodNum40n1sigma,"pfJetGoodNum40n1sigma/I");
   myTree->Branch("pfJetGoodNum50p1sigma",&nEvent.pfJetGoodNum50p1sigma,"pfJetGoodNum50p1sigma/I");
@@ -1520,6 +1518,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("bTagProbCSVMVA", nEvent.bTagProbCSVMVA,"bTagProbCSVMVA[pfJetGoodNum40]/F");
 
 
+  myTree->Branch("chs_jzb",&nEvent.chs_jzb,"chs_jzb/F");
   myTree->Branch("jzb",nEvent.jzb,Form("jzb[%d]/F",int(jzbtype_max)));
   myTree->Branch("sjzb",nEvent.sjzb,Form("sjzb[%d]/F",int(jzbtype_max)));
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,Form("dphi_sumJetVSZ[%d]/F",int(jzbtype_max)));
@@ -1543,73 +1542,98 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
 
-  myTree->Branch("ZbCHS3010_LeadingJetIsPu",&nEvent.ZbCHS3010_LeadingJetIsPu,"ZbCHS3010_LeadingJetIsPu/O");
-  myTree->Branch("ZbCHS3010_SubLeadingJetIsPu",&nEvent.ZbCHS3010_SubLeadingJetIsPu,"ZbCHS3010_SubLeadingJetIsPu/O");
-  
-  myTree->Branch("ZbCHS1010_LeadingJetIsPu",&nEvent.ZbCHS1010_LeadingJetIsPu,"ZbCHS1010_LeadingJetIsPu/O");
-  myTree->Branch("ZbCHS1010_SubLeadingJetIsPu",&nEvent.ZbCHS1010_SubLeadingJetIsPu,"ZbCHS1010_SubLeadingJetIsPu/O");
+  if(UseForZPlusB) {
+	myTree->Branch("ZbCHS3010_LeadingJetIsPu",&nEvent.ZbCHS3010_LeadingJetIsPu,"ZbCHS3010_LeadingJetIsPu/O");
+	myTree->Branch("ZbCHS3010_SubLeadingJetIsPu",&nEvent.ZbCHS3010_SubLeadingJetIsPu,"ZbCHS3010_SubLeadingJetIsPu/O");
 
-  myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtT,"ZbCHS3010_BTagWgtT/F");
-  myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtT,"ZbCHS1010_BTagWgtT/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtTUp",&nEvent.ZbCHS3010_BTagWgtTUp,"ZbCHS3010_BTagWgtTUp/F");
-  myTree->Branch("ZbCHS1010_BTagWgtTUp",&nEvent.ZbCHS1010_BTagWgtTUp,"ZbCHS1010_BTagWgtTUp/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtTDown",&nEvent.ZbCHS3010_BTagWgtTDown,"ZbCHS3010_BTagWgtTDown/F");
-  myTree->Branch("ZbCHS1010_BTagWgtTDown",&nEvent.ZbCHS1010_BTagWgtTDown,"ZbCHS1010_BTagWgtTDown/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtM,"ZbCHS3010_BTagWgtM/F");
-  myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtM,"ZbCHS1010_BTagWgtM/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtMUp",&nEvent.ZbCHS3010_BTagWgtMUp,"ZbCHS3010_BTagWgtMUp/F");
-  myTree->Branch("ZbCHS1010_BTagWgtMUp",&nEvent.ZbCHS1010_BTagWgtMUp,"ZbCHS1010_BTagWgtMUp/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtMDown,"ZbCHS3010_BTagWgtMDown/F");
-  myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtMDown,"ZbCHS1010_BTagWgtMDown/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtL,"ZbCHS3010_BTagWgtL/F");
-  myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtL,"ZbCHS1010_BTagWgtL/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtLUp",&nEvent.ZbCHS3010_BTagWgtLUp,"ZbCHS3010_BTagWgtLUp/F");
-  myTree->Branch("ZbCHS1010_BTagWgtLUp",&nEvent.ZbCHS1010_BTagWgtLUp,"ZbCHS1010_BTagWgtLUp/F");
-  
-  myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtLDown,"ZbCHS3010_BTagWgtLDown/F");
-  myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtLDown,"ZbCHS1010_BTagWgtLDown/F");
+	myTree->Branch("ZbCHS1010_LeadingJetIsPu",&nEvent.ZbCHS1010_LeadingJetIsPu,"ZbCHS1010_LeadingJetIsPu/O");
+	myTree->Branch("ZbCHS1010_SubLeadingJetIsPu",&nEvent.ZbCHS1010_SubLeadingJetIsPu,"ZbCHS1010_SubLeadingJetIsPu/O");
+
+	myTree->Branch("ZbCHS3010_BTagWgtT",&nEvent.ZbCHS3010_BTagWgtT,"ZbCHS3010_BTagWgtT/F");
+	myTree->Branch("ZbCHS1010_BTagWgtT",&nEvent.ZbCHS1010_BTagWgtT,"ZbCHS1010_BTagWgtT/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtTUp",&nEvent.ZbCHS3010_BTagWgtTUp,"ZbCHS3010_BTagWgtTUp/F");
+	myTree->Branch("ZbCHS1010_BTagWgtTUp",&nEvent.ZbCHS1010_BTagWgtTUp,"ZbCHS1010_BTagWgtTUp/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtTDown",&nEvent.ZbCHS3010_BTagWgtTDown,"ZbCHS3010_BTagWgtTDown/F");
+	myTree->Branch("ZbCHS1010_BTagWgtTDown",&nEvent.ZbCHS1010_BTagWgtTDown,"ZbCHS1010_BTagWgtTDown/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtM,"ZbCHS3010_BTagWgtM/F");
+	myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtM,"ZbCHS1010_BTagWgtM/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtMUp",&nEvent.ZbCHS3010_BTagWgtMUp,"ZbCHS3010_BTagWgtMUp/F");
+	myTree->Branch("ZbCHS1010_BTagWgtMUp",&nEvent.ZbCHS1010_BTagWgtMUp,"ZbCHS1010_BTagWgtMUp/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtM",&nEvent.ZbCHS3010_BTagWgtMDown,"ZbCHS3010_BTagWgtMDown/F");
+	myTree->Branch("ZbCHS1010_BTagWgtM",&nEvent.ZbCHS1010_BTagWgtMDown,"ZbCHS1010_BTagWgtMDown/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtL,"ZbCHS3010_BTagWgtL/F");
+	myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtL,"ZbCHS1010_BTagWgtL/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtLUp",&nEvent.ZbCHS3010_BTagWgtLUp,"ZbCHS3010_BTagWgtLUp/F");
+	myTree->Branch("ZbCHS1010_BTagWgtLUp",&nEvent.ZbCHS1010_BTagWgtLUp,"ZbCHS1010_BTagWgtLUp/F");
+
+	myTree->Branch("ZbCHS3010_BTagWgtL",&nEvent.ZbCHS3010_BTagWgtLDown,"ZbCHS3010_BTagWgtLDown/F");
+	myTree->Branch("ZbCHS1010_BTagWgtL",&nEvent.ZbCHS1010_BTagWgtLDown,"ZbCHS1010_BTagWgtLDown/F");
+
+	myTree->Branch("ZbCHS3010_pfJetGoodNum",&nEvent.ZbCHS3010_pfJetGoodNum,"ZbCHS3010_pfJetGoodNum/I");
+	myTree->Branch("ZbCHS3010_pfJetGoodNumBtag",&nEvent.ZbCHS3010_pfJetGoodNumBtag,"ZbCHS3010_pfJetGoodNumBtag/I");
+	myTree->Branch("ZbCHS3010_bTagProbCSVBP",nEvent.ZbCHS3010_bTagProbCSVBP,"ZbCHS3010_bTagProbCSVBP[ZbCHS3010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS3010_pfJetGoodEta",nEvent.ZbCHS3010_pfJetGoodEta,"ZbCHS3010_pfJetGoodEta[ZbCHS3010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS3010_pfJetDphiZ",nEvent.ZbCHS3010_pfJetDphiZ,"ZbCHS3010_pfJetDphiZ[ZbCHS3010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS3010_pfJetGoodPt",nEvent.ZbCHS3010_pfJetGoodPt,"ZbCHS3010_pfJetGoodPt[ZbCHS3010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS3010_pfBJetDphiZ",nEvent.ZbCHS3010_pfBJetDphiZ,"ZbCHS3010_pfBJetDphiZ[ZbCHS3010_pfJetGoodNumBtag]/F");
+
+	myTree->Branch("ZbCHS1010_pfJetGoodNum",&nEvent.ZbCHS1010_pfJetGoodNum,"ZbCHS1010_pfJetGoodNum/I");
+	myTree->Branch("ZbCHS1010_pfJetGoodNumBtag",&nEvent.ZbCHS1010_pfJetGoodNumBtag,"ZbCHS1010_pfJetGoodNumBtag/I");
+	myTree->Branch("ZbCHS1010_bTagProbCSVBP",nEvent.ZbCHS1010_bTagProbCSVBP,"ZbCHS1010_bTagProbCSVBP[ZbCHS1010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS1010_pfJetGoodEta",nEvent.ZbCHS1010_pfJetGoodEta,"ZbCHS1010_pfJetGoodEta[ZbCHS1010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS1010_pfJetDphiZ",nEvent.ZbCHS1010_pfJetDphiZ,"ZbCHS1010_pfJetDphiZ[ZbCHS1010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS1010_pfJetGoodPt",nEvent.ZbCHS1010_pfJetGoodPt,"ZbCHS1010_pfJetGoodPt[ZbCHS1010_pfJetGoodNum]/F");
+	myTree->Branch("ZbCHS1010_pfBJetDphiZ",nEvent.ZbCHS1010_pfBJetDphiZ,"ZbCHS1010_pfBJetDphiZ[ZbCHS1010_pfJetGoodNumBtag]/F");
+
+	//Z+b variables
+	myTree->Branch("ZbCHS3010_alpha",&nEvent.ZbCHS3010_alpha,"ZbCHS3010_alpha/F");
+	myTree->Branch("ZbCHS3010_alphaL5",&nEvent.ZbCHS3010_alphaL5,"ZbCHS3010_alphaL5/F");
+	myTree->Branch("ZbCHS3010_L5corr",&nEvent.ZbCHS3010_L5corr,"ZbCHS3010_L5corr/F");
+	myTree->Branch("ZbCHS1010_alpha",&nEvent.ZbCHS1010_alpha,"ZbCHS1010_alpha/F");
+	myTree->Branch("ZbCHS3010_alphaUp",&nEvent.ZbCHS3010_alphaUp,"ZbCHS3010_alphaUp/F");
+	myTree->Branch("ZbCHS1010_alphaUp",&nEvent.ZbCHS1010_alphaUp,"ZbCHS1010_alphaUp/F");
+	myTree->Branch("ZbCHS3010_alphaDown",&nEvent.ZbCHS3010_alphaDown,"ZbCHS3010_alphaDown/F");
+	myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
+	myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
+	myTree->Branch("fake_mpf",&nEvent.fake_mpf,"fake_mpf/F");
+
+	myTree->Branch("HasSoftLepton",&nEvent.HasSoftLepton,"HasSoftLepton/O");
+    myTree->Branch("SoftLeptonPt",&nEvent.SoftLeptonPt,"SoftLeptonPt/F");
+
+  }
   
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
   myTree->Branch("passed_filters", &nEvent.passed_filters,"passed_filters/O");
   myTree->Branch("filter_bit", &nEvent.filter_bit,"filter_bit/I");
 
-  myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
-  myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
-  myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
-  myTree->Branch("xSMS",&nEvent.xSMS,"xSMS/F");
-  myTree->Branch("xbarSMS",&nEvent.xbarSMS,"xbarSMS/F");
-  myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
-  myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
-  myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
-  myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
-  myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
-  myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
+  if(fisModelScan) {
+	myTree->Branch("realx",&nEvent.realx,"realx/F");
+	myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
+	myTree->Branch("process",&nEvent.process,"process/I");
+	myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
+	myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
+	myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+	myTree->Branch("xSMS",&nEvent.xSMS,"xSMS/F");
+	myTree->Branch("xbarSMS",&nEvent.xbarSMS,"xbarSMS/F");
+	myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
+	myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
+	myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
+	myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
+	myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
+	myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
+  }
+
   myTree->Branch("EventFlavor",&nEvent.EventFlavor,"EventFlavor/I");
   myTree->Branch("EventZToTaus",&nEvent.EventZToTaus,"EventZToTaus/O");
 
-  myTree->Branch("ZbCHS3010_pfJetGoodNum",&nEvent.ZbCHS3010_pfJetGoodNum,"ZbCHS3010_pfJetGoodNum/I");
-  myTree->Branch("ZbCHS3010_pfJetGoodNumBtag",&nEvent.ZbCHS3010_pfJetGoodNumBtag,"ZbCHS3010_pfJetGoodNumBtag/I");
-  myTree->Branch("ZbCHS3010_bTagProbCSVBP",nEvent.ZbCHS3010_bTagProbCSVBP,"ZbCHS3010_bTagProbCSVBP[ZbCHS3010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS3010_pfJetGoodEta",nEvent.ZbCHS3010_pfJetGoodEta,"ZbCHS3010_pfJetGoodEta[ZbCHS3010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS3010_pfJetDphiZ",nEvent.ZbCHS3010_pfJetDphiZ,"ZbCHS3010_pfJetDphiZ[ZbCHS3010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS3010_pfJetGoodPt",nEvent.ZbCHS3010_pfJetGoodPt,"ZbCHS3010_pfJetGoodPt[ZbCHS3010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS3010_pfBJetDphiZ",nEvent.ZbCHS3010_pfBJetDphiZ,"ZbCHS3010_pfBJetDphiZ[ZbCHS3010_pfJetGoodNumBtag]/F");
-
-  myTree->Branch("ZbCHS1010_pfJetGoodNum",&nEvent.ZbCHS1010_pfJetGoodNum,"ZbCHS1010_pfJetGoodNum/I");
-  myTree->Branch("ZbCHS1010_pfJetGoodNumBtag",&nEvent.ZbCHS1010_pfJetGoodNumBtag,"ZbCHS1010_pfJetGoodNumBtag/I");
-  myTree->Branch("ZbCHS1010_bTagProbCSVBP",nEvent.ZbCHS1010_bTagProbCSVBP,"ZbCHS1010_bTagProbCSVBP[ZbCHS1010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS1010_pfJetGoodEta",nEvent.ZbCHS1010_pfJetGoodEta,"ZbCHS1010_pfJetGoodEta[ZbCHS1010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS1010_pfJetDphiZ",nEvent.ZbCHS1010_pfJetDphiZ,"ZbCHS1010_pfJetDphiZ[ZbCHS1010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS1010_pfJetGoodPt",nEvent.ZbCHS1010_pfJetGoodPt,"ZbCHS1010_pfJetGoodPt[ZbCHS1010_pfJetGoodNum]/F");
-  myTree->Branch("ZbCHS1010_pfBJetDphiZ",nEvent.ZbCHS1010_pfBJetDphiZ,"ZbCHS1010_pfBJetDphiZ[ZbCHS1010_pfJetGoodNumBtag]/F");
     
   myTree->Branch("MetFactor",&nEvent.fact,"MetFactor/F");
   myTree->Branch("tri_pt1",&nEvent.tri_pt1,"tri_pt1/F");
@@ -1767,37 +1791,7 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("SumLSPPhi",&nEvent.SumLSPPhi,"SumLSPPhi/F");
   }
 
-  myTree->Branch("realx",&nEvent.realx,"realx/F");
-  myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
   
-    //Z+b variables
-  myTree->Branch("ZbCHS3010_alpha",&nEvent.ZbCHS3010_alpha,"ZbCHS3010_alpha/F");
-  myTree->Branch("ZbCHS3010_alphaL5",&nEvent.ZbCHS3010_alphaL5,"ZbCHS3010_alphaL5/F");
-  myTree->Branch("ZbCHS3010_L5corr",&nEvent.ZbCHS3010_L5corr,"ZbCHS3010_L5corr/F");
-  myTree->Branch("ZbCHS1010_alpha",&nEvent.ZbCHS1010_alpha,"ZbCHS1010_alpha/F");
-  myTree->Branch("ZbCHS3010_alphaUp",&nEvent.ZbCHS3010_alphaUp,"ZbCHS3010_alphaUp/F");
-  myTree->Branch("ZbCHS1010_alphaUp",&nEvent.ZbCHS1010_alphaUp,"ZbCHS1010_alphaUp/F");
-  myTree->Branch("ZbCHS3010_alphaDown",&nEvent.ZbCHS3010_alphaDown,"ZbCHS3010_alphaDown/F");
-  myTree->Branch("ZbCHS1010_alphaDown",&nEvent.ZbCHS1010_alphaDown,"ZbCHS1010_alphaDown/F");
-  myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
-  myTree->Branch("fake_mpf",&nEvent.fake_mpf,"fake_mpf/F");
-  
-  myTree->Branch("HasSoftLepton",&nEvent.HasSoftLepton,"HasSoftLepton/O");
-  myTree->Branch("SoftLeptonPt",&nEvent.SoftLeptonPt,"SoftLeptonPt/F");
-  
-  myTree->Branch("dRmerged",&nEvent.dRmerged,"dRmerged/F");
-  myTree->Branch("merged",&nEvent.merged,"merged/I");
-  myTree->Branch("mergedPt",&nEvent.mergedPt,"mergedPt/F");
-  myTree->Branch("mergedEta",&nEvent.mergedEta,"mergedEta/F");
-  myTree->Branch("mergedPhoHCalIso2012ConeDR03",&nEvent.mergedPhoHCalIso2012ConeDR03,"mergedPhoHCalIso2012ConeDR03/F");
-  myTree->Branch("mergedPhoSigmaIetaIeta",&nEvent.mergedPhoSigmaIetaIeta,"mergedPhoSigmaIetaIeta/F");
-  myTree->Branch("mergedpfchargedhadiso",&nEvent.mergedpfchargedhadiso,"mergedpfchargedhadiso/F");
-  myTree->Branch("mergedpfneutralhadiso",&nEvent.mergedpfneutralhadiso,"mergedpfneutralhadiso/F");
-  myTree->Branch("mergedpfphotoniso",&nEvent.mergedpfphotoniso,"mergedpfphotoniso/F");
-
-
-  
-
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
   counters[MU].setName("Muons");
@@ -1970,6 +1964,7 @@ void JZBAnalysis::FillLHEInfo() {
   float lheNj=0;
   TLorentzVector l,lbar,vl,vlbar,V_tlv;
   
+  cout << "LHE information: " << fTR->LHEEventID.size() << " hits " << endl;
   for(unsigned int i=0; i<fTR->LHEEventID.size(); ++i) {
 	    int id=fTR->LHEEventID[i]; //pdgId
 	    int status = fTR->LHEEventStatus[i];
@@ -2004,6 +1999,7 @@ void JZBAnalysis::FillLHEInfo() {
   nEvent.lheV_mll = V_tlv.M();
   nEvent.lheHT    = lheHT;
   nEvent.lheNj    = lheNj;
+  
 }
 
 //______________________________________________________________________________
@@ -2018,7 +2014,6 @@ void JZBAnalysis::Analyze() {
   nEvent.eventNum  = fTR->Event;
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
-  nEvent.totEvents = fTR->GetEntries();
   
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
@@ -2540,6 +2535,9 @@ void JZBAnalysis::Analyze() {
   float type1METpx = fTR->PFType1METpx;
   float type1METpy = fTR->PFType1METpy;
   
+  float CHSMETpx = fTR->PFType1METpx;  // BUG BUG BUG BUG BUG
+  float CHSMETpy = fTR->PFType1METpy; // BUG BUG BUG BUG BUG
+  
   //Use this factor to stretch MET and, consequently, also JZB.
   nEvent.fact = 1.0;
   if(isMC && fIsDY && ! nEvent.EventZToTaus) nEvent.fact = r->Gaus(1.08,0.1); // only apply this to Z->ee and Z->mm (i.e. only a PART of DY)
@@ -2549,6 +2547,7 @@ void JZBAnalysis::Analyze() {
   TLorentzVector pfMETvector(nEvent.fact*pfMETpx,nEvent.fact*pfMETpy,0,0);
   TLorentzVector tcMETvector(nEvent.fact*tcMETpx,nEvent.fact*tcMETpy,0,0);
   TLorentzVector type1METvector(nEvent.fact*type1METpx,nEvent.fact*type1METpy,0,0);
+  TLorentzVector CHSMetvector(nEvent.fact*CHSMETpx,nEvent.fact*CHSMETpy,0,0);
   TLorentzVector Cleantype1METvector(type1METpx,type1METpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
   float ScalarSumOfJets=0;
@@ -2671,7 +2670,6 @@ void JZBAnalysis::Analyze() {
       
       //JZB case!!!
       if(jpt>40 && isJetID) nEvent.pfJetGoodNum40CHS++;
-      
     }
 
   nEvent.pfJetNum=0;
@@ -3049,6 +3047,8 @@ void JZBAnalysis::Analyze() {
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered)
   TLorentzVector type1NoCutsJetVector(0,0,0,0); // same as pf, but type1 corrected
+  TLorentzVector CHSNoCutsJetVector(0,0,0,0); // using CHS
+  
   TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
   nEvent.metPhi[RAW]=0.;//kicked! caloMETvector.Phi();
   nEvent.metPhi[T1PFMET]=type1METvector.Phi();
@@ -3060,6 +3060,7 @@ void JZBAnalysis::Analyze() {
   // remove the leptons from PFMET and tcMET
   pfNoCutsJetVector = -pfMETvector - s1 - s2;
   type1NoCutsJetVector = -type1METvector - s1 - s2;
+  CHSNoCutsJetVector   = -CHSMetvector -s1 -s2;
   tcNoCutsJetVector = -tcMETvector - s1 - s2;
 
   // #--- different versions of JZB
@@ -3082,6 +3083,8 @@ void JZBAnalysis::Analyze() {
   nEvent.dphi_sumJetVSZ[TCJZB] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
   nEvent.sumJetPt[TCJZB] = tcNoCutsJetVector.Pt(); 
   nEvent.jzb[TCJZB] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
+  
+  nEvent.chs_jzb = CHSNoCutsJetVector.Pt() - (s1+s2).Pt();
 
   // --- recoil met and pf recoil met
   nEvent.met[PFRECOILMET] = (sumOfPFJets + s1 + s2).Pt(); 
