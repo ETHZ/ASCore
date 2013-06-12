@@ -10585,6 +10585,11 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	const float match_syst_dn = 0.989;
 	const float scale_syst_up = 1.046;
 	const float scale_syst_dn = 0.961;
+	const float nlo_syst_plpl = 1.038;
+	const float nlo_syst_mimi = 1.270;
+	float nlo_syst = 1.13;
+	if (chVeto == +1) nlo_syst = nlo_syst_plpl;
+	if (chVeto == -1) nlo_syst = nlo_syst_mimi;
 	TString lumiError = "1.044";
 	
 	datacard = outputdir + "datacard_TTWZ" + chargeString + ".txt";
@@ -10720,7 +10725,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	fOUTSTREAM << Form("scale    lnN\t%5.3f/%5.3f\t%5.3f/%5.3f\t-\t\t-\t\t%5.3f/%5.3f\t%5.3f/%5.3f",
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << Form("NLO      lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-",
-					   1.130) << endl; // old numbers for the moment
+					   nlo_syst) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
@@ -11184,7 +11189,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn,
 					   scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn, scale_syst_up, scale_syst_dn) << endl;
 	fOUTSTREAM << Form("NLO      lnN\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-\t\t%5.3f\t\t-\t\t-\t\t-\t\t-\t\t-",
-					   1.130, 1.130, 1.130) << endl; // old numbers for the moment
+					   nlo_syst, nlo_syst, nlo_syst) << endl;
 	fOUTSTREAM << endl;
 	fOUTSTREAM.close();
 	
