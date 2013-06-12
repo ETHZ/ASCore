@@ -469,7 +469,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT0MET120lV);
 	// printOrigins(HT0MET120lV);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
+//	makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
 //	makeNT2KinPlots(false);
@@ -491,8 +491,8 @@ void SSDLPlotter::doAnalysis(){
 //	makeFRvsPtPlots(Elec, SigSup);
 //	makeFRvsPtPlots(Muon, ZDecay);
 //	makeFRvsPtPlots(Elec, ZDecay);
-//	makeFRvsNVPlots(Muon, ZDecay); 
-//	makeFRvsNVPlots(Elec, ZDecay);
+	makeFRvsNVPlots(Muon, ZDecay);
+	makeFRvsNVPlots(Elec, ZDecay);
 //	makeFRvsEtaPlots(Muon);
 //	makeFRvsEtaPlots(Elec);
 //	makeChMidvsPtPlots();
@@ -520,9 +520,23 @@ void SSDLPlotter::doAnalysis(){
 // 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
 	
 	// optimized selection March 20
- 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
- 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
- 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+// 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+// 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
+// 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
+	
+	//makeTTWNLOPlots(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag)
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            0,              0,              0,           0.,           0.,          0,     true,            0);
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            0,              0,              0,           0.,           0.,          1,     true,            0);
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            0,              0,              0,           0.,           0.,         -1,     true,            0);
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,          0,     true,            0);
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,          1,     true,            0);
+//	makeTTWNLOPlots(           0.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,         -1,     true,            0);
+//	makeTTWNLOPlots(         175.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,          0,     true,            0);
+//	makeTTWNLOPlots(         260.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,          0,     true,            0);
+//	makeTTWNLOPlots(         175.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,          1,     true,            0);
+//	makeTTWNLOPlots(         260.,       8000.,           0.,        8000.,            3,              1,              1,          33.,          33.,         -1,     true,            0);
+//	makeTTWNLOPlots(           0.,        300.,           0.,        8000.,            3,              1,              1,          33.,          33.,          0,     true,            0);
+//	makeTTWNLOPlots(           0.,        300.,           0.,        8000.,            0,              0,              0,           0.,           0.,          0,     true,            0);
 	
 	
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40.,-1, true);
@@ -2383,7 +2397,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 //		cout << "Apply weights to MC histos" << endl;
 		for(size_t j = 0; j < gNSAMPLES; ++j){
 			Sample *S = fSamples[j];
-//			cout << "at sample: " << S->sname << "\txsec: " << S->xsec << "\tget lumi of this sample: " << S->getLumi() << "\tintegral of the iso histo: " << S->isoplots[0].hiso[i]->Integral() << endl;
+//			cout << "at sample: " << setw(20) << S->sname << "\txsec: " << setw(12) << S->xsec << "\tget lumi of this sample: " << setw(12) << S->getLumi()/* << "\tintegral of the iso histo: " << S->isoplots[0].hiso[i]->Integral()*/ << endl;
 
 			float lumiscale = fLumiNorm / S->getLumi();
 			if(S->datamc == 0) continue;
@@ -5637,6 +5651,15 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_dummy3, h_dummy1, h_nvratio_data);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_dummy3, h_dummy1, h_nvratio_mc);
+	
+	// flat ratios
+//	float ratio_data(0.), ratio_dataE(0.), ratio_mc(0.), ratio_mcE(0.);
+//	calculateRatio(datasamples, chan, fp, ratio_data, ratio_dataE);
+//	calculateRatio(mcsamples,   chan, fp, ratio_mc,   ratio_mcE);
+//	
+//	cout << "p ratio data: " << ratio_data << endl;
+//	cout << "p ratio mc:   " << ratio_mc   << endl;
+//	cout << "rel diff:     " << (1.-ratio_mc/ratio_data)*100 << " %" << endl;
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, fp, 2);
@@ -6436,6 +6459,273 @@ void SSDLPlotter::drawMIDIsolationPlots(TString title, gChannel chan, gFPSwitch 
 	Util::PrintPDF(c_temp, title, fOutputDir + fOutputSubDir);
 //	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets;
 	delete c_temp, lat, leg;
+}
+void SSDLPlotter::makeTTWNLOPlots(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag){
+//	TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag){
+		fOutputSubDir = "TTWNLOPlots/";
+		TString jvString = "";
+		TString sysString = "";
+		TString chargeString = "";
+		
+		for( gsystIt = gSystematics.begin(); gsystIt != gSystematics.end(); ++gsystIt) {
+			if (gsystIt->second == systflag) { sysString = gsystIt->first; break; }
+		}
+		if (chVeto == -1) chargeString = "_mm";
+		if (chVeto == +1) chargeString = "_pp";
+		
+		if (maxHT < 20.) jvString = "JV";
+		ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f_"+sysString+chargeString+".txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2), ios::trunc);
+		
+//		TLatex *lat = new TLatex();
+//		lat->SetNDC(kTRUE);
+//		lat->SetTextColor(kBlack);
+//		lat->SetTextSize(0.04);
+		
+		OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+		OUT << " Producing predictions " ;
+		OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
+		OUT << "-----------------------------------------------------------------------------" << endl;
+		OUT << " These are the cuts: " << endl;
+		OUT << Form("  minHT:    %4.0f  || maxHT:     %4.0f", minHT   , maxHT    ) << endl;
+		OUT << Form("  minMET:   %4.0f  || maxMET:    %4.0f", minMET  , maxMET   ) << endl;
+		OUT << Form("  minNjets:   %2i  ", minNjets) << endl;
+		OUT << Form("  minNbjetsL: %2i  ", minNbjetsL) << endl;
+		OUT << Form("  minNbjetsM: %2i  ", minNbjetsM) << endl;
+		OUT << Form("  minpT1:     %2.0f  ", minPt1) << endl;
+		OUT << Form("  minpT2:     %2.0f  ", minPt2) << endl;
+		OUT << "-----------------------------------------------------------------------------" << endl;
+		
+		// only take half the events for ++/--
+		float chargeFactor = chVeto ? 0.5:1.;
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		TFile *pFile = TFile::Open(fOutputFileName);
+		TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+		
+		string *sname = 0;
+		int flag;
+		int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
+		float puweight, pT1, pT2, HT, MET, MT2, SLumi;
+		float eta1, eta2, mll;
+		int   event, run;
+		int charge;
+		int passZVeto, passes3rdSFLepVeto;
+		
+		sigtree->SetBranchAddress("SystFlag", &flag);
+		sigtree->SetBranchAddress("Event",    &event);
+		sigtree->SetBranchAddress("Run",      &run);
+		sigtree->SetBranchAddress("SName",    &sname);
+		sigtree->SetBranchAddress("SType",    &SType);
+		sigtree->SetBranchAddress("PUWeight", &puweight);
+		sigtree->SetBranchAddress("SLumi",    &SLumi);
+		sigtree->SetBranchAddress("Flavor",   &Flavor);
+		sigtree->SetBranchAddress("Charge",   &charge);
+		sigtree->SetBranchAddress("pT1",      &pT1);
+		sigtree->SetBranchAddress("pT2",      &pT2);
+		sigtree->SetBranchAddress("eta1",     &eta1);
+		sigtree->SetBranchAddress("eta2",     &eta2);
+		sigtree->SetBranchAddress("TLCat",    &TLCat);
+		sigtree->SetBranchAddress("HT",       &HT);
+		sigtree->SetBranchAddress("MET",      &MET);
+		sigtree->SetBranchAddress("MT2",      &MT2);
+		sigtree->SetBranchAddress("NJ",       &NJ);
+		sigtree->SetBranchAddress("NbJ",      &NbJ);
+		sigtree->SetBranchAddress("NbJmed",   &NbJmed);
+		sigtree->SetBranchAddress("Mll",      &mll);
+		sigtree->SetBranchAddress("PassZVeto",&passZVeto);
+		sigtree->SetBranchAddress("Pass3rdSFLepVeto",&passes3rdSFLepVeto);
+	
+	
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
+//	float binwidthscale[gNDiffVars] = {100., 20., 1., 25., 20., 10., 1., 10., 1., 1.};
+//	TH1D *h_TTWLO[gNDiffVars];
+//	TH1D *h_TTWNLO[gNDiffVars];
+	
+	// Loop on the different variables
+//	for (size_t i = 0; i < gNDiffVars; ++i) {
+//		int varbin = i;
+//		TString varname    = DiffPredYields::var_name[varbin];
+//		const int nbins    = DiffPredYields::nbins[varbin];
+//		const double *bins = DiffPredYields::bins[varbin];
+//		
+//		
+//		h_TTWLO  = new TH1D(Form("TTW_LO_%s" , varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
+//		h_TTWNLO = new TH1D(Form("TTW_NLO_%s", varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
+//	}
+	
+//	TH1D *h_TTWLO_HT  = new TH1D("TTW_LO_HT" , "HT", DiffPredYields::nbins[0], DiffPredYields::bins[0]); h_TTWLO_HT ->Sumw2();
+//	TH1D *h_TTWNLO_HT = new TH1D("TTW_NLO_HT", "HT", DiffPredYields::nbins[0], DiffPredYields::bins[0]); h_TTWNLO_HT->Sumw2();
+//	TH1D *h_HT_ratio  = new TH1D("TTW_LO_to_NLO_Ratio" , "HT", DiffPredYields::nbins[0], DiffPredYields::bins[0]); h_HT_ratio->Sumw2();
+	TH1D *h_TTWLO_HT  = new TH1D("TTW_LO_HT" , "HT", 32, 0., 800.); h_TTWLO_HT ->Sumw2();
+	TH1D *h_TTWNLO_HT = new TH1D("TTW_NLO_HT", "HT", 32, 0., 800.); h_TTWNLO_HT->Sumw2();
+	TH1D *h_HT_ratio  = new TH1D("TTW_LO_to_NLO_Ratio" , "HT", 32, 0., 800.); h_HT_ratio->Sumw2();
+	
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		
+		if( flag != systflag ) continue;
+		if (*sname != "TTbarW" && *sname != "TTbarWNLO") continue;
+		
+		if (chVeto && charge != chVeto ) continue;
+		
+		if (TLCat != 0) continue;
+		
+		if ( mll < 8.) continue;
+		if ( HT  < minHT  || HT  > maxHT)  continue;
+		if ( MET < minMET || MET > maxMET) continue;
+		if ( NJ  < minNjets)      continue;
+		if ( NbJ < minNbjetsL)    continue;
+		if ( NbJmed < minNbjetsM) continue;
+		
+		gChannel chan = gChannel(Flavor);
+		if(chan == ElMu || Flavor == 4){
+			if(pT1 > pT2){
+				if(pT1 < minPt1) continue;
+				if(pT2 < minPt2) continue;
+			}
+			if(pT1 < pT2){
+				if(pT1 < minPt2) continue;
+				if(pT2 < minPt1) continue;
+			}
+		}
+		else{
+			if(pT1 < minPt1) continue;
+			if(pT2 < minPt2) continue;
+		}
+		
+		if (*sname == "TTbarW") {
+			h_TTWLO_HT->Fill(HT);
+		}
+		if (*sname == "TTbarWNLO") {
+			h_TTWNLO_HT->Fill(HT);
+		}
+	}
+	
+	
+	float border = 0.3;
+	float scale = (1-border)/border;
+	
+	
+	h_HT_ratio->SetXTitle("H_{T}");
+	h_HT_ratio->SetYTitle("");
+	h_HT_ratio->GetXaxis()->SetTitleSize(scale * 0.04);
+	h_HT_ratio->GetXaxis()->SetLabelSize(scale * h_HT_ratio->GetXaxis()->GetLabelSize());
+	h_HT_ratio->GetYaxis()->SetLabelSize(scale * h_HT_ratio->GetYaxis()->GetLabelSize());
+	h_HT_ratio->GetXaxis()->SetTickLength(scale * h_HT_ratio->GetXaxis()->GetTickLength());
+	h_HT_ratio->GetYaxis()->SetTickLength(h_HT_ratio->GetYaxis()->GetTickLength());
+	
+	h_HT_ratio->SetFillStyle(1001);
+	h_HT_ratio->SetLineWidth(1);
+	h_HT_ratio->SetFillColor(  kGray+1);
+	h_HT_ratio->SetLineColor(  kGray+1);
+	h_HT_ratio->SetMarkerColor(kGray+1);
+	
+	h_TTWLO_HT->SetMarkerColor(kBlue);
+	h_TTWLO_HT->SetMarkerStyle(20);
+	h_TTWLO_HT->SetMarkerSize(1.5);
+	h_TTWLO_HT->SetLineWidth(2);
+	h_TTWLO_HT->SetLineColor(kBlue);
+	h_TTWLO_HT->SetFillColor(kBlue);
+	
+	h_TTWNLO_HT->SetMarkerColor(kRed);
+	h_TTWNLO_HT->SetMarkerStyle(20);
+	h_TTWNLO_HT->SetMarkerSize(1.5);
+	h_TTWNLO_HT->SetLineWidth(2);
+	h_TTWNLO_HT->SetLineColor(kRed);
+	h_TTWNLO_HT->SetFillColor(kRed);
+//	h_TTWNLO_HT->SetYTitle("N_{pass}/N_{gen}");
+	
+	// Remove bin labels for plot pad
+	for(size_t j = 1; j <= h_TTWLO_HT ->GetNbinsX(); ++j) h_TTWLO_HT ->GetXaxis()->SetBinLabel(j, "");
+	for(size_t j = 1; j <= h_TTWNLO_HT->GetNbinsX(); ++j) h_TTWNLO_HT->GetXaxis()->SetBinLabel(j, "");
+	
+	OUT << "\n\n";
+	OUT << "LO:\n";
+	OUT << "nPass / nGen = " << h_TTWLO_HT->Integral() << " / " << fSampleMap["TTbarW"]->ngen << " = " << h_TTWLO_HT->Integral()/fSampleMap["TTbarW"]->ngen << endl;
+	
+	OUT << "\n\n";
+	OUT << "NLO:\n";
+	OUT << "nPass / nGen = " << h_TTWNLO_HT->Integral() << " / " << fSampleMap["TTbarWNLO"]->ngen << " = " << h_TTWNLO_HT->Integral()/fSampleMap["TTbarWNLO"]->ngen << endl;
+	
+	OUT << "diff: " << h_TTWNLO_HT->Integral()/fSampleMap["TTbarWNLO"]->ngen / (h_TTWLO_HT->Integral()/fSampleMap["TTbarW"]->ngen) * 100. << " %" << endl;
+	
+	OUT.close();
+	
+	h_TTWLO_HT ->Scale(fLumiNorm / fSampleMap["TTbarW"]   ->getLumi());
+	h_TTWNLO_HT->Scale(fLumiNorm / fSampleMap["TTbarWNLO"]->getLumi());
+//	h_TTWLO_HT ->Scale(1. / fSampleMap["TTbarW"]   ->ngen);
+//	h_TTWNLO_HT->Scale(1. / fSampleMap["TTbarWNLO"]->ngen);
+	h_HT_ratio->Divide(h_TTWNLO_HT, h_TTWLO_HT);
+	
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	
+//	h_TTWLO_HT ->SetLineColor(kBlue);
+//	h_TTWNLO_HT->SetLineColor(kRed);
+	
+	TLegend *leg;
+	leg = new TLegend(0.65,0.75,0.85,0.88);
+	leg->AddEntry(h_TTWLO_HT,  "TTW madgraph", "p");
+	leg->AddEntry(h_TTWNLO_HT, "TTW aMCatNLO", "p");
+	leg->SetTextSize(0.04);
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_HTPlot", "HT", 0, 0, 800, 600);
+	c_temp->cd();
+	
+	
+	
+	TPad *p_plot  = new TPad("plotpad",  "Pad containing the plot", 0.00, border, 1.00, 1.00, 0, 0);
+	p_plot->SetBottomMargin(0.015);
+	p_plot->Draw();
+	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio", 0.00, 0.00, 1.00, border, 0, 0);
+	p_ratio->SetTopMargin(0.025);
+	p_ratio->SetBottomMargin(0.35);
+	p_ratio->Draw();
+	
+	
+	p_ratio->cd();
+	h_HT_ratio->DrawCopy("E2 ");
+	TLine *l3 = new TLine(h_HT_ratio->GetXaxis()->GetXmin(), 1.00, h_HT_ratio->GetXaxis()->GetXmax(), 1.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+	gPad->RedrawAxis();
+	p_ratio->Draw();
+	
+	
+	
+	
+	p_plot->cd();
+	h_TTWNLO_HT->DrawCopy("PE 0");
+	h_TTWLO_HT ->DrawCopy("PE 0 same");
+	leg->Draw();
+	//	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+	//	lat->SetTextSize(0.04);
+	//	lat->DrawLatex(0.62,0.85, title);
+	//	if(fp == SigSup) lat->DrawLatex(0.62,0.85, pfname + name);
+	//	if(fp == ZDecay) lat->DrawLatex(0.67,0.15, pfname + name);
+	//	double ymean(0.), yrms(0.);
+	//	getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
+	drawTopLine();
+//	lat->SetTextSize(0.03);
+	c_temp->Update();
+	//	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	
+	//	TString fpname = "F";
+	//	if(fp == ZDecay) fpname = "P";
+	
+	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
+	//	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, Form("HT_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f_"+sysString+chargeString, minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2), fOutputDir + fOutputSubDir);
+	//	delete h_ptratio_mc, h_ptratio_data, h_ptratio_qcd, h_ptratio_wjets;
+	delete c_temp, lat, leg;
+	
 }
 void SSDLPlotter::makePRLPlot1(){
 	FakeRatios *FR = new FakeRatios();
@@ -8793,16 +9083,16 @@ SSPrediction SSDLPlotter::makeIntPrediction(TString filename, int reg){
  		if (mcbkg[i] == TTbarG && useTTGSF && SR<29){ //Change TTbarG estimation by TTbar with SF
 			std::pair<float,float> ttG;
 			
-			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_mm, ttG_SR0.err_mm);
-			temp_nt2_mm    = ttG.first;  
+//			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_mm, ttG_SR0.err_mm);
+			temp_nt2_mm    = ttG.first;
 			temp_nt2_mm_e1 = ttG.second;
 
-			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_em, ttG_SR0.err_em);
-			temp_nt2_em    = ttG.first;  
+//			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_em, ttG_SR0.err_em);
+			temp_nt2_em    = ttG.first;
 			temp_nt2_em_e1 = ttG.second;
 			
-			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_ee, ttG_SR0.err_ee);
-			temp_nt2_ee    = ttG.first;  
+//			ttG = ApplyTTGammaScaleFactor(SR,0,ttG_SR0.val_ee, ttG_SR0.err_ee);
+			temp_nt2_ee    = ttG.first;
 			temp_nt2_ee_e1 = ttG.second;
 		}
 		else {
@@ -10295,7 +10585,7 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	const float match_syst_dn = 0.989;
 	const float scale_syst_up = 1.046;
 	const float scale_syst_dn = 0.961;
-	TString lumiError = "1.045";
+	TString lumiError = "1.044";
 	
 	datacard = outputdir + "datacard_TTWZ" + chargeString + ".txt";
 	fOUTSTREAM.open(datacard.Data(), ios::trunc);

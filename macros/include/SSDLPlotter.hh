@@ -304,6 +304,7 @@ public:
 	void makeMIDIsolationPlots(gChannel chan, gFPSwitch);
 	void getMIDIsolationPlots(vector<int>, gChannel, gFPSwitch, TH1D*&, TH1D*&, TH1D*&, TH1D*&);
 	void drawMIDIsolationPlots(TString, gChannel, gFPSwitch, TH1D*, TH1D*, TH1D*, TH1D*);
+	void makeTTWNLOPlots(float, float, float, float, int, int, int, float, float, int, bool, int);
 
 	void makeOriginPlots(int);
 	// old void makeOriginPlots(gRegion);
