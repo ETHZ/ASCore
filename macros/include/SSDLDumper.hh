@@ -97,7 +97,7 @@ public:
 		// start of the rares
 		WZ,ZZ,
 		HWW, HZZ, HTauTau, 
-		TTbarW, TTbarZ, TTbarG, TbZ, DPSWW,
+		TTbarW, TTbarWNLO, TTbarZ, TTbarG, TbZ, DPSWW,
 		WWZ, WZZ, 
 		WWG, ZZZ, WWW,
 		TTbarWW,
@@ -984,6 +984,7 @@ public:
 	float		fSETree_MVAID2;
 	float		fSETree_medWP1;
 	float		fSETree_medWP2;
+	int			fSETree_NVrtx;
 //	float		fSETree_Ml1l3; // invariant mass of 3rd lepton pair
 //	float		fSETree_Ml2l3; // invariant mass of 3rd lepton pair
 //	int			fSETree_Charge3rdLep;
