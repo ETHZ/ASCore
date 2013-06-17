@@ -506,7 +506,9 @@ void SSDLPlotter::doAnalysis(){
 //	makeTTWIntPredictions();
 	// printAllYieldTables();
 	
-
+	
+	makeTTWDiffPredictionsSigEvent();
+	
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
 	
 	// presel
@@ -520,8 +522,8 @@ void SSDLPlotter::doAnalysis(){
 // 	makeTTWIntPredictionsSigEvent(175, 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
 	
 	// optimized selection March 20
- 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
- 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
+// 	makeTTWIntPredictionsSigEvent(260., 8000., 0., 8000., 3, 1, 1, 33., 33.,-1, true);
+// 	makeTTWIntPredictionsSigEvent(175., 8000., 0., 8000., 3, 1, 1, 33., 33.,+1, true);
 // 	makeTTWIntPredictionsSigEvent(285., 8000., 0., 8000., 3, 1, 1, 40., 40., 0, true);
 	
 	//makeTTWNLOPlots(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag)
@@ -11348,6 +11350,353 @@ void SSDLPlotter::makeTTWIntPredictionsSigEvent(float minHT, float maxHT, float 
 	makeSystPlot("Syst_Bg_Lept"  + chargeString, "Lepton Scale", h_bg_nom, h_bg_lu, h_bg_ld);
 	makeSystPlot("Syst_Bg_JER"   + chargeString, "JER",          h_bg_nom, h_bg_js);
 	
+}
+void SSDLPlotter::makeTTWDiffPredictionsSigEvent() {
+	makeTTWDiffPredictionSigEvent("HT"    , gNDiffHTBins  , SSDLDumper::gDiffHTBins  );
+	makeTTWDiffPredictionSigEvent("MET"   , gNDiffMETBins , SSDLDumper::gDiffMETBins );
+	makeTTWDiffPredictionSigEvent("NJ"    , gNDiffNJBins  , SSDLDumper::gDiffNJBins  );
+	makeTTWDiffPredictionSigEvent("NbJmed", gNDiffNBJMBins, SSDLDumper::gDiffNBJMBins);
+	makeTTWDiffPredictionSigEvent("pT1"   , gNDiffPT1Bins , SSDLDumper::gDiffPT1Bins );
+	makeTTWDiffPredictionSigEvent("pT2"   , gNDiffPT2Bins , SSDLDumper::gDiffPT2Bins );
+}
+void SSDLPlotter::makeTTWDiffPredictionSigEvent(TString diffVarName, int nbins, double* bins){
+	fOutputSubDir = "DiffPredictionSigEventTree/";
+	
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	
+	const float RareESyst  = 0.5;
+	const float RareESyst2 = RareESyst*RareESyst;
+	
+	const float FakeESyst  = 0.5;
+	const float FakeESyst2 = FakeESyst*FakeESyst;
+	
+	const float WZESyst  = 0.15;
+	const float WZESyst2 = WZESyst*WZESyst;
+	
+	const float TTZESyst  = 0.5;
+	const float TTZESyst2 = TTZESyst*TTZESyst;
+	
+	const float TTWESyst  = 0.5;
+	const float TTWESyst2 = TTWESyst*TTWESyst;
+	
+	// only take half the events for ++/--
+	int chVeto(0);
+	float chargeFactor = chVeto ? 0.5:1.;
+	int systflag(0);
+	float minHT(0.), maxHT(8000.), minMET(0.), maxMET(8000.);
+	int minNjets(3), minNbjetsL(0), minNbjetsM(0);
+	float minPt1(20.), minPt2(20);
+	TString sysString = "";
+	TString chargeString = "";
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// RATIOS /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float mufratio_data(0.),  mufratio_data_e(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.);
+	
+	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
+	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
+	
+	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
+	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
+	
+	FakeRatios *FR = new FakeRatios();
+	
+	float fbb(0.),fee(0.),feb(0.);
+	float fbbE(0.),feeE(0.),febE(0.);
+	float fbb_mc(0.),fee_mc(0.),feb_mc(0.);
+	float fbbE_mc(0.),feeE_mc(0.),febE_mc(0.);
+	
+	calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+	calculateChMisIdProb(fEGData, EB, feb, febE);
+	calculateChMisIdProb(fEGData, EE, fee, feeE);
+	
+	calculateChMisIdProb(fMCBG, BB, fbb_mc, fbbE_mc);
+	calculateChMisIdProb(fMCBG, EB, feb_mc, febE_mc);
+	calculateChMisIdProb(fMCBG, EE, fee_mc, feeE_mc);
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// THE FINAL HISTOGRAMS ///////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	
+	int   htbins( 13 ), metbins( 10 ), njbins(7), nbjbins(5), ptbins(  9 );
+	float htmin ( 80.), metmin (  0.), njmin (2), nbjmin (0), ptmin ( 20.);
+	float htmax (600.), metmax (250.), njmax (9), nbjmax (5), ptmax (200.);
+	
+	
+	
+	// FAKES
+	TH1F* h_pred_fake  = new TH1F("h_pred_fake" , "h_pred_fake" , nbins,  bins );	h_pred_fake   ->Sumw2();
+	// CHARGE MISID
+	TH1F* h_pred_chmid  = new TH1F("h_pred_chmid" , "h_pred_chmid" , nbins,  bins );	h_pred_chmid  ->Sumw2();
+	// RARES
+	TH1F* h_pred_rare  = new TH1F("h_pred_rare" , "h_pred_rare" , nbins,  bins );	h_pred_rare   ->Sumw2();
+	// WZ
+	TH1F* h_pred_wz  = new TH1F("h_pred_wz" , "h_pred_wz" , nbins,  bins );			h_pred_wz     ->Sumw2();
+	// TTZ
+	TH1F* h_pred_ttz  = new TH1F("h_pred_ttz" , "h_pred_ttz" , nbins,  bins );		h_pred_ttz    ->Sumw2();
+	// TTW
+	TH1F* h_pred_ttw  = new TH1F("h_pred_ttw" , "h_pred_ttw" , nbins,  bins );		h_pred_ttw    ->Sumw2();
+	// TOT
+	TH1F* h_pred_tot  = new TH1F("h_pred_tot" , "h_pred_tot" , nbins,  bins );		h_pred_tot    ->Sumw2();
+	THStack *hs_pred    = new THStack("hs_predicted", "Predicted number of events");
+	// OBSERVED
+	TH1D* h_obs  = new TH1D("h_obs" , "h_obs" , nbins,  bins );	h_obs  ->Sumw2();
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// SIGEVENT TREE //////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+	
+	string *sname = 0;
+	int flag(0);
+	int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
+	float puweight, pT1, pT2, HT, MET, MT2, SLumi;
+	float eta1, eta2, mll;
+	int   event, run;
+	int charge;
+	int passZVeto, passes3rdSFLepVeto;
+	float diffVar(-9999.);
+	
+	sigtree->SetBranchAddress("SystFlag", &flag);
+	sigtree->SetBranchAddress("Event",    &event);
+	sigtree->SetBranchAddress("Run",      &run);
+	sigtree->SetBranchAddress("SName",    &sname);
+	sigtree->SetBranchAddress("SType",    &SType);
+	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("SLumi",    &SLumi);
+	sigtree->SetBranchAddress("Flavor",   &Flavor);
+	sigtree->SetBranchAddress("Charge",   &charge);
+	sigtree->SetBranchAddress("pT1",      &pT1);
+	sigtree->SetBranchAddress("pT2",      &pT2);
+	sigtree->SetBranchAddress("eta1",     &eta1);
+	sigtree->SetBranchAddress("eta2",     &eta2);
+	sigtree->SetBranchAddress("TLCat",    &TLCat);
+	sigtree->SetBranchAddress("HT",       &HT);
+	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("MT2",      &MT2);
+	sigtree->SetBranchAddress("NJ",       &NJ);
+	sigtree->SetBranchAddress("NbJ",      &NbJ);
+	sigtree->SetBranchAddress("NbJmed",   &NbJmed);
+	sigtree->SetBranchAddress("Mll",      &mll);
+	sigtree->SetBranchAddress("PassZVeto",&passZVeto);
+	sigtree->SetBranchAddress("Pass3rdSFLepVeto",&passes3rdSFLepVeto);
+	
+	float trigScale[3] = {gMMTrigScale, gEMTrigScale, gEETrigScale};
+	
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		
+		if      (diffVarName == "HT"    ) diffVar = HT;
+		else if (diffVarName == "MET"   ) diffVar = MET;
+		else if (diffVarName == "NJ"    ) diffVar = NJ;
+		else if (diffVarName == "NbJmed") diffVar = NbJmed;
+		else if (diffVarName == "pT1"   ) diffVar = pT1;
+		else if (diffVarName == "pT2"   ) diffVar = pT2;
+		else                              diffVar = -9999.;
+		
+		if( flag != systflag ) continue;
+		
+		if ( mll < 8.) continue;
+		if ( HT  < minHT  || HT  > maxHT)  continue;
+		if ( MET < minMET || MET > maxMET) continue;
+		if ( NJ  < minNjets)      continue;
+		if ( NbJ < minNbjetsL)    continue;
+		if ( NbJmed < minNbjetsM) continue;
+		
+		gChannel chan = gChannel(Flavor);
+		if(chan == ElMu || Flavor == 4){
+			if(pT1 > pT2){
+				if(pT1 < minPt1) continue;
+				if(pT2 < minPt2) continue;
+			}
+			if(pT1 < pT2){
+				if(pT1 < minPt2) continue;
+				if(pT2 < minPt1) continue;
+			}
+		}
+		else{
+			if(pT1 < minPt1) continue;
+			if(pT2 < minPt2) continue;
+		}
+		
+		//		if (passes3rdSFLepVeto == 0) continue;
+		
+		// GET ALL DATA EVENTS
+		if(SType < 3) {             // 0,1,2 are DoubleMu, DoubleEle, MuEG
+			if (Flavor < 3) {
+				if (gApplyZVeto && passZVeto == 0)  continue;
+				if (chVeto && charge != chVeto ) continue;
+				Sample *S = fSampleMap[TString(*sname)];
+				
+				float npp(0.) , npf(0.) , nfp(0.) , nff(0.);
+				float f1(0.)  , f2(0.)  , p1(0.)  , p2(0.);
+				f1 = getFRatio(chan, pT1, eta1, S->datamc);
+				f2 = getFRatio(chan, pT2, eta2, S->datamc);
+				p1 = getPRatio(chan, pT1, S->datamc);
+				p2 = getPRatio(chan, pT2, S->datamc);
+				if(chan == ElMu){
+					f1 = getFRatio(Muon, pT1, eta1, S->datamc);
+					f2 = getFRatio(Elec, pT2, eta2, S->datamc);
+					p1 = getPRatio(Muon, pT1, S->datamc);
+					p2 = getPRatio(Elec, pT2, S->datamc);
+				}
+				// Get the weights (don't depend on event selection)
+				npp = FR->getWpp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				npf = FR->getWpf(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				nfp = FR->getWfp(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				nff = FR->getWff(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);
+				
+				if (Flavor == 0 || Flavor == 1 || Flavor == 2) {	// MU-MU || E-MU || E-E
+					h_pred_fake  ->Fill(diffVar    , npf+nfp+nff);
+					
+					if (TLCat == 0) {
+						h_obs  ->Fill(diffVar    , 1);
+					}
+				}
+			} // end Flavor < 3
+			
+			if(Flavor == 4) {       // E-MU OS
+				if (TLCat == 0) {
+					h_pred_chmid  ->Fill(diffVar    , chargeFactor*fbb);
+				}
+				if (TLCat == 1) {
+					h_pred_chmid  ->Fill(diffVar    , chargeFactor*fee);
+				}
+			}
+			if(Flavor == 5) {       // E-E OS
+				if (TLCat == 0) {
+					h_pred_chmid  ->Fill(diffVar    , chargeFactor*2*fbb);
+				}
+				if (TLCat == 1 || TLCat == 2) {
+					h_pred_chmid  ->Fill(diffVar    , chargeFactor*2*feb);
+				}
+				if (TLCat == 3) {
+					h_pred_chmid  ->Fill(diffVar    , chargeFactor*2*fee);
+				}
+			}
+		} // end data events
+		
+		
+		// GET RARE MC EVENTS
+		if (SType == 15 && TLCat == 0) { // tight-tight rare MC events
+			if (*sname == "WWTo2L2Nu") continue;
+			if (Flavor > 2) continue;
+			if (chVeto && charge != chVeto ) continue;
+			// make sure here to get the lumi from the sample and not from the Slumi variable. Doesn't work otherwise
+			Sample *S = fSampleMap[*sname];
+			float scale = fLumiNorm / S->getLumi();
+			float weight = puweight*trigScale[Flavor]*scale;
+			// float tmp_nt2_rare_mc_e2 = tmp_nt2_rare_mc*tmp_nt2_rare_mc;
+			if (Flavor == 0 || Flavor == 1 || Flavor == 2) {	// MU-MU || E-MU || E-E
+				if (*sname == "WZTo3LNu") {
+					h_pred_wz  ->Fill(diffVar    , weight);
+				}
+				else if (*sname == "TTbarW") {
+					h_pred_ttw  ->Fill(diffVar    , weight);
+				}
+				else if (*sname == "TTbarZ") {
+					h_pred_ttz  ->Fill(diffVar    , weight);
+				}
+				else {
+					h_pred_rare  ->Fill(diffVar    , weight);
+				}
+			}
+		} // end rare mc events
+		
+	} // end sigevent tree
+	
+	h_obs  ->SetMarkerColor(kBlack);
+	h_obs  ->SetMarkerStyle(20);
+	h_obs  ->SetMarkerSize(2.5);
+	h_obs  ->SetLineWidth(2);
+	h_obs  ->SetLineColor(kBlack);
+	h_obs  ->SetFillColor(kBlack);
+	
+	h_pred_fake   ->SetLineWidth(1);
+	h_pred_chmid  ->SetLineWidth(1);
+	h_pred_rare   ->SetLineWidth(1);
+	h_pred_wz     ->SetLineWidth(1);
+	h_pred_ttz    ->SetLineWidth(1);
+	h_pred_ttw    ->SetLineWidth(1);
+	
+	h_pred_fake   ->SetFillColor(46);
+	h_pred_chmid  ->SetFillColor(49);
+	h_pred_rare   ->SetFillColor(38);
+	h_pred_wz     ->SetFillColor(39);
+	h_pred_ttz    ->SetFillColor(42);
+	h_pred_ttw    ->SetFillColor(44);
+	
+	h_pred_tot    ->SetLineWidth(3);
+	h_pred_tot    ->SetFillColor(12);
+	h_pred_tot    ->SetFillStyle(3005);
+	
+	TGraphAsymmErrors* gr_obs  = FR->getGraphPoissonErrors( h_obs  );
+	gr_obs ->SetMarkerColor(kBlack);
+	gr_obs ->SetMarkerStyle(20);
+	gr_obs ->SetMarkerSize(2.5);
+	gr_obs ->SetLineWidth(2);
+	gr_obs ->SetLineColor(kBlack);
+	gr_obs ->SetFillColor(kBlack);
+	
+	h_pred_tot    ->Add(h_pred_fake   );
+	h_pred_tot    ->Add(h_pred_chmid  );
+	h_pred_tot    ->Add(h_pred_rare   );
+	h_pred_tot    ->Add(h_pred_wz     );
+	h_pred_tot    ->Add(h_pred_ttz    );
+	
+	hs_pred  ->Add(h_pred_fake  );
+	hs_pred  ->Add(h_pred_chmid );
+	hs_pred  ->Add(h_pred_rare  );
+	hs_pred  ->Add(h_pred_wz    );
+	hs_pred  ->Add(h_pred_ttz   );
+	hs_pred  ->Add(h_pred_ttw   );
+		
+	h_pred_tot->Draw("goff");
+//	h_pred_tot_HT->GetXaxis()
+	
+	TLegend *leg = new TLegend(0.55,0.62,0.90,0.88);
+	leg->AddEntry(h_obs       , "Observed","p");
+	leg->AddEntry(h_pred_fake , "Fakes","f");
+	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
+	leg->AddEntry(h_pred_rare , "Irreducible (MC)","f");
+	leg->AddEntry(h_pred_wz   , "WZ Production","f");
+	leg->AddEntry(h_pred_ttz  , "ttZ Production","f");
+	leg->AddEntry(h_pred_ttw  , "ttW Production","f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
+	c_temp->cd();
+	
+	hs_pred->Draw("hist");
+	leg->Draw();
+	h_pred_tot->DrawCopy("0 E2 same");
+	h_pred_tot->SetFillStyle(0);
+	h_pred_tot->DrawCopy("hist same");
+	gr_obs->Draw("P same");
+	
+	lat->SetTextSize(0.03);
+	
+	drawTopLine(0.56, 0.8);
+	
+	gPad->RedrawAxis();
+	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF (c_temp,   diffVarName+sysString+chargeString , fOutputDir + fOutputSubDir);
+	Util::PrintROOT(c_temp,   diffVarName+sysString+chargeString , fOutputDir + fOutputSubDir);
+
+	delete c_temp;
+	delete h_obs , gr_obs , h_pred_fake , h_pred_chmid , h_pred_rare , h_pred_tot , h_pred_ttz , h_pred_ttw , h_pred_wz , hs_pred ;
+	delete FR;
 }
 TTWZPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, int chVeto, bool ttw, int systflag){
 	fOutputSubDir = "IntPredictionsSigEventTree/";
