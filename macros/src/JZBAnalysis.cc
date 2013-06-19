@@ -17,13 +17,13 @@ bool UseForZPlusB=false;
 
 
 #define jMax 30  // do not touch this
-#define rMax 30
-#define Zmax 30
+#define lMax 10
+#define Zmax 5
 
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.127 $";
+string sjzbversion="$Revision: 1.70.2.130 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -39,7 +39,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.127 2013/05/14 14:39:02 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.130 2013/06/06 15:33:30 buchmann Exp $
 */
 
 
@@ -144,11 +144,11 @@ public:
   int process;
 
   int leptonNum; // store all leptons (reduntant for the 2 leptons that form the Z)
-  float leptonPt[jMax]; 
-  float leptonEta[jMax];
-  float leptonPhi[jMax];
-  int leptonId[jMax];
-  int leptonCharge[jMax];
+  float leptonPt[lMax]; 
+  float leptonEta[lMax];
+  float leptonPhi[lMax];
+  int leptonId[lMax];
+  int leptonCharge[lMax];
 
   int leptonPairNum;
   int leptonPairId[jMax];
@@ -269,6 +269,8 @@ public:
   float lheV_mll;
   float lheHT;
   int lheNj;
+  float genTopPt;
+  float genAntiTopPt;
 
   int NPdfs;
   float pdfW[100];
@@ -521,6 +523,9 @@ void nanoEvent::reset()
   lheV_mll=0;
   lheHT=0;
   lheNj=0;
+  genTopPt=0;
+  genAntiTopPt=0;
+  
 
 
   process=0;
@@ -606,7 +611,7 @@ void nanoEvent::reset()
 
   for(int i=0;i<100;i++) pdfW[i]=1.0;
 
-  for(int jCounter=0;jCounter<jMax;jCounter++){
+  for(int jCounter=0;jCounter<lMax;jCounter++){
     leptonPt[jCounter]=0; 
     leptonEta[jCounter]=0;
     leptonPhi[jCounter]=0;
@@ -1356,6 +1361,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("lheV_mll",&nEvent.lheV_mll,"lheV_mll/F");
   myTree->Branch("lheHT",&nEvent.lheHT,"lheHT/F");
   myTree->Branch("lheNj",&nEvent.lheNj,"lheNj/I");
+  myTree->Branch("genTopPt",&nEvent.genTopPt,"genTopPt/F");
+  myTree->Branch("genAntiTopPt",&nEvent.genAntiTopPt,"genAntiTopPt/F");
 
   myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
   myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
@@ -1964,7 +1971,6 @@ void JZBAnalysis::FillLHEInfo() {
   float lheNj=0;
   TLorentzVector l,lbar,vl,vlbar,V_tlv;
   
-  cout << "LHE information: " << fTR->LHEEventID.size() << " hits " << endl;
   for(unsigned int i=0; i<fTR->LHEEventID.size(); ++i) {
 	    int id=fTR->LHEEventID[i]; //pdgId
 	    int status = fTR->LHEEventStatus[i];
@@ -1973,7 +1979,7 @@ void JZBAnalysis::FillLHEInfo() {
 	      lheHT += TMath::Sqrt( pow(fTR->LHEEventPx[i],2) + pow(fTR->LHEEventPy[i],2) ); // first entry is px, second py
 	      lheNj++;
 	    }	    
-
+	    
 	    if(id==11){ l.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); lbarCheck=true;}
 	    if(id==12){ vl.SetPxPyPzE(fTR->LHEEventPx[i],fTR->LHEEventPy[i],fTR->LHEEventPz[i],fTR->LHEEventE[i]); vlCheck=true;}
@@ -2015,9 +2021,9 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   
-  if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
+  if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1
     {
-      if(fisModelScan) {
+     if(fisModelScan) {
         nEvent.process=fTR->process;
         nEvent.mGlu=fTR->MassGlu;
         nEvent.mChi=fTR->MassChi;
@@ -2029,20 +2035,21 @@ void JZBAnalysis::Analyze() {
         nEvent.xbarSMS=fTR->xbarSMS;
         nEvent.NPdfs=fTR->NPdfs;
         for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i];
-	nEvent.pdfWsum=fTR->pdfWsum; 
-      } else {
-	//don't attempt to do PURW for model scans
-	nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
-	nEvent.PUweightUP   = GetPUWeightUp(fTR->PUnumTrueInteractions);
-	nEvent.PUweightDOWN = GetPUWeightDown(fTR->PUnumTrueInteractions);
-	nEvent.weight     = nEvent.PUweight;
-	weight_histo->Fill(1,nEvent.PUweight);
-      }
+	    nEvent.pdfWsum=fTR->pdfWsum;
+     } else {
+	    //don't attempt to do PURW for model scans
+	    nEvent.PUweight     = GetPUWeight(fTR->PUnumTrueInteractions);
+	    nEvent.PUweightUP   = GetPUWeightUp(fTR->PUnumTrueInteractions);
+	    nEvent.PUweightDOWN = GetPUWeightDown(fTR->PUnumTrueInteractions);
+	    nEvent.weight     = nEvent.PUweight;
+	    weight_histo->Fill(1,nEvent.PUweight);
+     }
      
-      FillLHEInfo();
      
-      nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
-      nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
+    FillLHEInfo();
+     
+    nEvent.EventFlavor=DetermineFlavor(fdoGenInfo,fTR);
+    nEvent.EventZToTaus=DecaysToTaus(fdoGenInfo,fTR);
       
      // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
 	float chimass=0;
@@ -2075,14 +2082,19 @@ void JZBAnalysis::Analyze() {
 
 
 	bool wecare=false;
-	for(int i=0;i<nGenParticles&&fdoGenInfo;i++) {
+	for(int i=0;i<nGenParticles;i++) {
 	  int thisParticleId = fTR->genInfoId[i];
-	  if(fTR->genInfoStatus[i]!=3) continue;
+	  if(abs(fTR->genInfoStatus[i]-3)>0.1) continue;
+      if(thisParticleId==6) nEvent.genTopPt=fTR->genInfoPt[i];
+      if(thisParticleId==-6) nEvent.genAntiTopPt=fTR->genInfoPt[i];
+        
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {
 	    //dealing with a Z
 	    int motherIndex=fTR->genInfoMo1[i];
 	    if(motherIndex>=0) nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoId[motherIndex];
-	    nEvent.nZ++;
+	    if(!(nEvent.nZ<Zmax)) cerr << " *******    TOO MANY Z'S IN THIS EVENT !!!!!!! WILL OVERWRITE THE LAST ONE!!!!" << endl;
+	    else nEvent.nZ++;
+	    
 	    for(int da=i+1;da<fTR->nGenParticles;da++) {
 	      if(fTR->genInfoMo1[da]==i) {
 		//dealing with a daughter
