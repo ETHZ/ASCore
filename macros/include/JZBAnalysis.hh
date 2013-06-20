@@ -75,6 +75,7 @@ public:
   float smearedJetPt(float pt, float eta, float phi);
   int FindGenJetIndex(float jpt, float jeta, float jphi);
   bool IsThisDY(vector<string>);
+  bool IsThisTTbar(vector<string>);
   void FillLHEInfo();
   
   string outputFileName_; // public name of the output file name
@@ -110,6 +111,7 @@ private:
   bool fmakeSmall;
   int fFile;
   bool fIsDY;
+  bool fIsTTbar;
 
   TFile *CSVT_CorrectionFile;
   TFile *CSVM_CorrectionFile;

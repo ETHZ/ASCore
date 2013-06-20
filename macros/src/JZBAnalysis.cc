@@ -23,7 +23,7 @@ bool UseForZPlusB=false;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.131 $";
+string sjzbversion="$Revision: 1.70.2.132 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -39,7 +39,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.131 2013/06/19 14:16:04 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.132 2013/06/20 06:59:05 buchmann Exp $
 */
 
 
@@ -1218,20 +1218,32 @@ int JZBAnalysis::ExtractFileNumber(string pathname) {
 }
 
 bool JZBAnalysis::IsThisDY(vector<string> fileList) {
-  bool isDY=false;
-  for(int ifile=0;ifile<fileList.size();ifile++) {
-    if((int)fileList[ifile].find("/DY")>-1) isDY=true;
-  }
-  if(isDY) return true;
-  else return false;
+    bool isDY=false;
+    for(int ifile=0;ifile<fileList.size();ifile++) {
+        if((int)fileList[ifile].find("/DY")>-1) isDY=true;
+    }
+    if(isDY) return true;
+    else return false;
 }
 
+
+bool JZBAnalysis::IsThisTTbar(vector<string> fileList) {
+    bool isTTbar=false;
+    for(int ifile=0;ifile<fileList.size();ifile++) {
+        if((int)fileList[ifile].find("/TTJets")>-1) isTTbar=true;
+        if((int)fileList[ifile].find("/TT_CT10")>-1) isTTbar=true;
+        if((int)fileList[ifile].find("/TT_8TeV-mcatnlo")>-1) isTTbar=true;
+    }
+    if(isTTbar) return true;
+    else return false;
+}
 JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo, vector<string> fileList) :
   UserAnalysisBase(tr,dataType!="mc"), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
     
   if(fileList.size()==1) fFile=ExtractFileNumber(fileList[0]);
   else fFile=-1;
   fIsDY=IsThisDY(fileList);
+  fIsTTbar=IsThisTTbar(fileList);
   // Define trigger paths to check
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",10,30);
 
@@ -2183,7 +2195,7 @@ void JZBAnalysis::Analyze() {
 	}// done with gen info loop
         
         
-    GetTopWeights();
+    if(fIsTTbar) GetTopWeights();
 
 	if(fdoGenInfo&&fisModelScan) {
 		TLorentzVector pureGenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
