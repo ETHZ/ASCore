@@ -23,7 +23,7 @@ bool UseForZPlusB=false;
 enum METTYPE { mettype_min, RAW = mettype_min, T1PFMET, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.130 $";
+string sjzbversion="$Revision: 1.70.2.131 $";
 string sjzbinfo="";
 TRandom3 *r;
 TF1 *L5corr_bJ;
@@ -39,7 +39,7 @@ float secondLeptonPtCut = 10.0;
 TMinuit *minuit;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.130 2013/06/06 15:33:30 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.131 2013/06/19 14:16:04 buchmann Exp $
 */
 
 
@@ -271,6 +271,8 @@ public:
   int lheNj;
   float genTopPt;
   float genAntiTopPt;
+  float benWeight;
+  float topWeight;
 
   int NPdfs;
   float pdfW[100];
@@ -525,7 +527,9 @@ void nanoEvent::reset()
   lheNj=0;
   genTopPt=0;
   genAntiTopPt=0;
-  
+  benWeight=1.0;
+  topWeight=1.0;
+
 
 
   process=0;
@@ -1363,7 +1367,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("lheNj",&nEvent.lheNj,"lheNj/I");
   myTree->Branch("genTopPt",&nEvent.genTopPt,"genTopPt/F");
   myTree->Branch("genAntiTopPt",&nEvent.genAntiTopPt,"genAntiTopPt/F");
-
+  myTree->Branch("benWeight",&nEvent.benWeight,"benWeight/F");
+  myTree->Branch("topWeight",&nEvent.topWeight,"topWeight/F");
+  
   myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
   myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
   myTree->Branch("genDRll",&nEvent.genDRll,"genDRll/F");
@@ -2008,6 +2014,28 @@ void JZBAnalysis::FillLHEInfo() {
   
 }
 
+float BenWeight(float topPt) {
+    if( topPt<0 ) return 1;
+    
+    double p0 = 1.18246e+00;
+    double p1 = 4.63312e+02;
+    double p2 = 2.10061e-06;
+    
+    if( topPt>p1 ) topPt = p1;
+    
+    double result = p0 + p2 * topPt * ( topPt - 2 * p1 );
+    return result;
+}
+
+float topRW_f(float pt) {
+    return exp(0.156 - 0.00137*pt);
+}
+
+void GetTopWeights() {
+    nEvent.benWeight=BenWeight(nEvent.genTopPt);
+    nEvent.topWeight=sqrt(topRW_f(nEvent.genTopPt) * topRW_f(nEvent.genAntiTopPt));
+}
+
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
   minuit = new TMinuit();
@@ -2153,6 +2181,9 @@ void JZBAnalysis::Analyze() {
 	    LSPMothervecs.push_back(thismom);
 	  }
 	}// done with gen info loop
+        
+        
+    GetTopWeights();
 
 	if(fdoGenInfo&&fisModelScan) {
 		TLorentzVector pureGenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
