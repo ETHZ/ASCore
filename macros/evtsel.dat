@@ -1,7 +1,0 @@
-##########################################
-# These are event selection cuts         #
-##########################################
-# NJets           0          1e15
-# PrimVtxNChi2    0          10
-# PrimVtxNTracks  4          1e15
-# PrimVtxz        -15        15
