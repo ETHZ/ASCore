@@ -1,4 +1,16 @@
-alias mygitaddpkg='source ETHZGitAddPkg.sh'
+mygitaddpkg()
+{
+REMOTE=git://github.com/ETHZ
+PACKNAME=$1
+VERSION=$2
+PACKNAME_GIT=$(echo ${PACKNAME} | sed 's,/,-,g').git
+
+echo Checking out from the ETHZ github area the package ${PACKNAME} version ${VERSION}
+git clone ${REMOTE}/${PACKNAME_GIT} ${PACKNAME}
+cd ${PACKNAME}
+git checkout --detach ${VERSION}
+cd ${OLDPWD}
+}
 
 mygitaddpkg RecoLuminosity/LumiDB RecoLuminosity-LumiDB-V03-00-00
 mygitaddpkg MuonAnalysis/MuonAssociators MuonAnalysis-MuonAssociators-V01-13-00 
