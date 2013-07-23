@@ -1856,7 +1856,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
         if ((*fTElSCindex)[eqi]!=-1)
           if (fabs((*fTSCEta)[(*fTElSCindex)[eqi]]-electron.superCluster()->eta())>0.1 || 
-              reco::deltaPhi((*fTSCPhi)[(*fTElSCindex)[eqi]],electron.superCluster()->phi())>0.1){
+              fabs(reco::deltaPhi((*fTSCPhi)[(*fTElSCindex)[eqi]],electron.superCluster()->phi()))>0.1){
             (*fTElSCindex)[eqi] = -1;			    
           }
 
@@ -2159,7 +2159,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         for(int i=0; i<*fTNGenPhotons; ++i){
           if ( (fabs((*fTGenPhotonPt)[i]-matched[0]->pt())<0.01*matched[0]->pt()) 
                && (fabs((*fTGenPhotonEta)[i]-matched[0]->eta())<0.01) 
-               && ( reco::deltaPhi((*fTGenPhotonPhi)[i],matched[0]->phi())<0.01 ) ) {
+               && ( fabs(reco::deltaPhi((*fTGenPhotonPhi)[i],matched[0]->phi()))<0.01 ) ) {
             (*fTPhoMCmatchindex)[phoqi] = i;
           }
         }
@@ -2187,7 +2187,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       if ((*fTPhotSCindex)[phoqi]!=-1)
         if (fabs((*fTSCEta)[(*fTPhotSCindex)[phoqi]]-photon.superCluster()->eta())>0.1 ||
-            reco::deltaPhi((*fTSCPhi)[(*fTPhotSCindex)[phoqi]],photon.superCluster()->phi())>0.1){
+            fabs(reco::deltaPhi((*fTSCPhi)[(*fTPhotSCindex)[phoqi]],photon.superCluster()->phi()))>0.1){
           (*fTPhotSCindex)[phoqi] = -1;	    
         }
 
