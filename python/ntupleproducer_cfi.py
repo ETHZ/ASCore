@@ -75,7 +75,7 @@ analyze = cms.EDFilter('NTupleProducer',
 	sel_mintrknhits   = cms.int32(0),
 	# Photons
 	sel_minphopt      = cms.double(5.0),
-	sel_maxphoeta     = cms.double(2.5),
+	sel_maxphoeta     = cms.double(2.8),
         # SC
         sel_minSCraw      = cms.double(5.0),
 	# GenLeptons
