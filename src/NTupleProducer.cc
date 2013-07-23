@@ -2008,6 +2008,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::vector<int> storethispfcand(pfCandidates->size(),0);
   std::vector<int> PhotonToPFPhotonMatchingArray(gMaxNPhotons,-999);
   std::vector<int> PhotonToPFElectronMatchingArray(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFPhotonMatchingArrayTranslator(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFElectronMatchingArrayTranslator(gMaxNPhotons,-999);
 
   for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
        it != phoOrdered.end(); ++it, ++phoqi ) {
@@ -2834,8 +2836,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
 
     for (int j=0; j<(*fTNPhotons); j++){
-      if (PhotonToPFPhotonMatchingArray[j]==(int)i) fTPhoMatchedPFPhotonCand->push_back(pfcandIndex); else fTPhoMatchedPFPhotonCand->push_back(-999);
-      if (PhotonToPFElectronMatchingArray[j]==(int)i) fTPhoMatchedPFElectronCand->push_back(pfcandIndex); else fTPhoMatchedPFElectronCand->push_back(-999);
+      if (PhotonToPFPhotonMatchingArray[j]==(int)i) PhotonToPFPhotonMatchingArrayTranslator[j]=pfcandIndex;
+      if (PhotonToPFElectronMatchingArray[j]==(int)i) PhotonToPFElectronMatchingArrayTranslator[j]=pfcandIndex;
     }
 
     if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
@@ -2852,6 +2854,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
   *fTNPfCand=pfcandIndex;
 
+  for (int j=0; j<(*fTNPhotons); j++){
+    fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
+    fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
+  }
 
 
 
