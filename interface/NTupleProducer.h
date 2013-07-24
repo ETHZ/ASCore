@@ -859,6 +859,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoS4OverS1;
   // ID
   std::auto_ptr<std::vector<float> >  fTPhoSigmaEtaEta;
+  std::auto_ptr<std::vector<float> >  fTPhoSigmaRR;
   std::auto_ptr<std::vector<float> >  fTPhoHCalIso2012ConeDR03;
   std::auto_ptr<std::vector<float> >  fTPhoNewIsoPFCharged;
   std::auto_ptr<std::vector<float> >  fTPhoNewIsoPFPhoton;

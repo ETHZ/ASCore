@@ -2055,6 +2055,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoHoverE2012      ->push_back(photon.hadTowOverEm());
     fTPhoSigmaIetaIeta   ->push_back(photon.sigmaIetaIeta());
     fTPhoSigmaEtaEta     ->push_back(photon.sigmaEtaEta());
+    fTPhoSigmaRR         ->push_back(lazyTools.eseffsirir(*photon.superCluster()));
     fTPhoVx             ->push_back(photon.vx());
     fTPhoVy             ->push_back(photon.vy());
     fTPhoVz             ->push_back(photon.vz());
@@ -4154,6 +4155,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PhoE1OverE9");
   produces<std::vector<float> >("PhoS4OverS1");
   produces<std::vector<float> >("PhoSigmaEtaEta");
+  produces<std::vector<float> >("PhoSigmaRR");
   produces<std::vector<float> >("PhoNewIsoPFCharged");
   produces<std::vector<float> >("PhoNewIsoPFPhoton");
   produces<std::vector<float> >("PhoNewIsoPFNeutral");
@@ -4914,6 +4916,7 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoE1OverE9.reset(new std::vector<float> );
   fTPhoS4OverS1.reset(new std::vector<float> );
   fTPhoSigmaEtaEta.reset(new std::vector<float> );
+  fTPhoSigmaRR.reset(new std::vector<float> );
   fTPhoHCalIso2012ConeDR03.reset(new std::vector<float> );
   fTPhoNewIsoPFCharged.reset(new std::vector<float> );
   fTPhoNewIsoPFPhoton.reset(new std::vector<float> );
@@ -5737,6 +5740,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoE1OverE9, "PhoE1OverE9");
   event.put(fTPhoS4OverS1, "PhoS4OverS1");
   event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
+  event.put(fTPhoSigmaRR, "PhoSigmaRR");
   event.put(fTPhoHCalIso2012ConeDR03, "PhoHCalIso2012ConeDR03");
   event.put(fTPhoNewIsoPFCharged, "PhoNewIsoPFCharged");
   event.put(fTPhoNewIsoPFPhoton, "PhoNewIsoPFPhoton");
