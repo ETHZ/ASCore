@@ -100,6 +100,9 @@
 #include "h2gglobe/VertexAnalysis/interface/VertexAlgoParameters.h"
 #include "TMVA/Reader.h"
 
+#include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
+#include <sys/stat.h>
+
 typedef math::XYZTLorentzVector LorentzVector;
 using namespace reco;
 
@@ -153,6 +156,9 @@ private:
   
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
+  EGEnergyCorrector ecorr_;
+  std::string energyRegFilename;
+  int fexist(char*);
 
   std::string perVtxMvaWeights, perVtxMvaMethod;
   std::string perEvtMvaWeights, perEvtMvaMethod;
@@ -1165,6 +1171,8 @@ std::auto_ptr<std::vector<int> > fTPhoMatchedPFElectronCand;
 std::auto_ptr<std::vector<float> > fTPhoVx;
 std::auto_ptr<std::vector<float> > fTPhoVy;
 std::auto_ptr<std::vector<float> > fTPhoVz;
+std::auto_ptr<std::vector<float> > fTPhoRegrEnergy;
+std::auto_ptr<std::vector<float> > fTPhoRegrEnergyErr;
 std::auto_ptr<std::vector<float> > fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx;
 std::auto_ptr<std::vector<float> > fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx;
 std::auto_ptr<std::vector<float> > fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx;

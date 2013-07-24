@@ -60,6 +60,8 @@ cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorr
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
 rm -rf Patches-OldReleases
 
+mygitaddpkg RecoEgamma/EgammaTools RecoEgamma-EgammaTools-V09-00-00
+
 mygitaddpkg h2gglobe vertex_mva_v4
 mv h2gglobe/VertexAnalysis .
 rm -rf h2gglobe/*
@@ -90,3 +92,5 @@ mkdir DiLeptonAnalysis
 mv ASCore DiLeptonAnalysis/NTupleProducer
 
 
+wget http://cern.ch/sani/gbrv3ph_52x.root .
+mv gbrv3ph_52x.root DiLeptonAnalysis/NTupleProducer/data/gbrv3ph_52x.root

@@ -98,7 +98,9 @@ analyze = cms.EDFilter('NTupleProducer',
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
 	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')
-	pu_mc   = cms.vstring('', '')  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
+	pu_mc   = cms.vstring('', ''),  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
+
+        energyCorrectionsFileNamePho = cms.string("gbrv3ph_52x.root")
 
 )
 

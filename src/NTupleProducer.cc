@@ -197,6 +197,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   perVtxMvaMethod  = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
   perEvtMvaWeights = iConfig.getParameter<std::string>("tag_perEvtMvaWeights");
   perEvtMvaMethod  = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
+  energyRegFilename = iConfig.getParameter<std::string> ("energyCorrectionsFileNamePho"); 
 
   doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
   if (fIsModelScan) doVertexingFlag=false;
@@ -596,6 +597,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   CrackCorrFunc->init(iSetup);
   LocalCorrFunc->init(iSetup);
+
+  EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
 
   // type-I corrected MET for 2012 analyses
   edm::Handle<View<PFMET> > typeICorMET;
@@ -1837,7 +1840,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       // 			}
 
 
-      EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
       const TransientTrackBuilder thebuilder = *(theB.product());
 
       fTElIDMVATrig          ->push_back( electronIDMVATrig_->mvaValue( electron, vertices->front(), thebuilder, lazyTools, false ) );
@@ -1969,8 +1971,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       (*fTNEBhits)++;
     }
 
-	
 
+  // Initialize the photon energy regression
+  if (!ecorr_.IsInitialized())  {
+    char filename[500];
+    char* descr = getenv("CMSSW_BASE");
+    sprintf(filename, "%s/src/DiLeptonAnalysis/NTupleProducer/data/%s", descr, energyRegFilename.c_str());    
+    ecorr_.Initialize(iSetup, filename);
+  }
 
   ////////////////////////////////////////////////////////
   // Photon Variables:
@@ -2050,6 +2058,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoVx             ->push_back(photon.vx());
     fTPhoVy             ->push_back(photon.vy());
     fTPhoVz             ->push_back(photon.vz());
+
+    {
+      std::pair<double,double> cor;
+      if (fIsRealData) cor = ecorr_.CorrectedEnergyWithErrorV3(photon, *vertices, *rho, lazyTools, iSetup);
+      else cor = ecorr_.CorrectedEnergyWithErrorV3(photon, *vertices, *rho, lazyTools, iSetup, true);
+      fTPhoRegrEnergy     ->push_back(cor.first);
+      fTPhoRegrEnergyErr  ->push_back(cor.second);
+    }
+
 
   /*  
   the following lines are from:
@@ -4426,6 +4443,8 @@ produces<std::vector<int> >("PhoMatchedPFElectronCand");
 produces<std::vector<float> >("PhoVx");
 produces<std::vector<float> >("PhoVy");
 produces<std::vector<float> >("PhoVz");
+produces<std::vector<float> >("PhoRegrEnergy");
+produces<std::vector<float> >("PhoRegrEnergyErr");
 produces<std::vector<float> >("PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
 produces<std::vector<float> >("PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
 produces<std::vector<float> >("PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
@@ -5194,6 +5213,8 @@ fTPhoMatchedPFElectronCand.reset(new std::vector<int>  );
 fTPhoVx.reset(new std::vector<float>  );
 fTPhoVy.reset(new std::vector<float>  );
 fTPhoVz.reset(new std::vector<float>  );
+fTPhoRegrEnergy.reset(new std::vector<float>  );
+fTPhoRegrEnergyErr.reset(new std::vector<float>  );
 fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
 fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
 fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
@@ -6004,6 +6025,8 @@ event.put(fTPhoMatchedPFElectronCand,"PhoMatchedPFElectronCand");
 event.put(fTPhoVx,"PhoVx");
 event.put(fTPhoVy,"PhoVy");
 event.put(fTPhoVz,"PhoVz");
+event.put(fTPhoRegrEnergy,"PhoRegrEnergy");
+event.put(fTPhoRegrEnergyErr,"PhoRegrEnergyErr");
 event.put(fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx,"PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
 event.put(fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx,"PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
 event.put(fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx,"PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
@@ -6798,6 +6821,13 @@ double NTupleProducer::GenPartonicIso_allpart(const reco::GenParticle & photon, 
 
 }
 
+
+int NTupleProducer::fexist(char *filename) {
+  struct stat buffer ;
+  if (stat( filename, &buffer ))
+    return 1;
+  return 0;
+}
 
 
 //define this as a plug-in
