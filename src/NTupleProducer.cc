@@ -1722,7 +1722,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			  if (fTElSCindex[eqi]!=-1)
 			  if (fabs(fTSCeta[fTElSCindex[eqi]]-electron.superCluster()->eta())>0.1 || \
-			      reco::deltaPhi(fTSCphi[fTElSCindex[eqi]],electron.superCluster()->phi())>0.1){
+			      fabs(reco::deltaPhi(fTSCphi[fTElSCindex[eqi]],electron.superCluster()->phi()))>0.1){
 			    // 			    std::cout << fTSCraw[fTElSCindex[eqi]] << " " << electron.superCluster()->rawEnergy() << std::endl;
 // 			    			    std::cout << fTSCeta[fTElSCindex[eqi]] << " " << electron.superCluster()->eta() << std::endl;
 // 			    			    std::cout << fTSCphi[fTElSCindex[eqi]] << " " << electron.superCluster()->phi() << std::endl;
@@ -2008,7 +2008,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
            for(int i=0; i<fTngenphotons; ++i){
              if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.01*matched[0]->pt()) \
                   && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.01) \
-                  && ( reco::deltaPhi(fTGenPhotonPhi[i],matched[0]->phi())<0.01 ) ) {
+                  && ( fabs(reco::deltaPhi(fTGenPhotonPhi[i],matched[0]->phi()))<0.01 ) ) {
                fTPhotMCmatchindex[phoqi]=i;
              }
            }
@@ -2037,7 +2037,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 if (fTPhotSCindex[phoqi]!=-1)
 	   if (fabs(fTSCeta[fTPhotSCindex[phoqi]]-photon.superCluster()->eta())>0.1 || \
-	       reco::deltaPhi(fTSCphi[fTPhotSCindex[phoqi]],photon.superCluster()->phi())>0.1){
+	       fabs(reco::deltaPhi(fTSCphi[fTPhotSCindex[phoqi]],photon.superCluster()->phi()))>0.1){
 	     //			    std::cout << fTSCraw[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->rawEnergy() << std::endl;
 	     //			    std::cout << fTSCeta[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->eta() << std::endl;
 	     //			    std::cout << fTSCphi[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->phi() << std::endl;
@@ -5530,13 +5530,13 @@ void NTupleProducer::resetInt(int *v, unsigned int size){
 	}
 }
 
-double NTupleProducer::DeltaR(double phi1, double phi2, double eta1, double eta2){
-
-  double dphi = reco::deltaPhi(phi1,phi2);
-  double dR=sqrt(dphi*dphi+(eta2-eta1)*(eta2-eta1));
-
-  return dR;
-}
+//double NTupleProducer::DeltaR(double phi1, double phi2, double eta1, double eta2){
+//
+//  double dphi = reco::deltaPhi(phi1,phi2);
+//  double dR=sqrt(dphi*dphi+(eta2-eta1)*(eta2-eta1));
+//
+//  return dR;
+//}
 /*
 void NTupleProducer::FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi){
 
@@ -6048,7 +6048,7 @@ double NTupleProducer::GenPartonicIso_allpart(const reco::GenParticle & photon, 
 //      if (isDoubleCounted==true) continue;
 
       if (mygenpart.pdgId()!=22 || (fabs(mygenpart.pt()-photon.pt())>0.01 && mygenpart.pdgId()==22)){
-        dR = DeltaR(photon.phi(), mygenpart.phi(), photon.eta(), mygenpart.eta());
+        dR = reco::deltaR(photon.eta(), photon.phi(), mygenpart.eta(), mygenpart.phi());
         if (dR<dRcone && dR>1e-05){
           etsum += mygenpart.et();
         }

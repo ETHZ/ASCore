@@ -140,7 +140,7 @@ private:
 		}
 	};
 
-  double DeltaR(double phi1, double phi2, double eta1, double eta2);
+  //  double DeltaR(double phi1, double phi2, double eta1, double eta2);
   void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
 //   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
 //   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
