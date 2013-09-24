@@ -877,6 +877,8 @@ private:
   float fTPhoSCRemovalPFIsoChargedPrimVtx_RCone[gMaxnphos];
   float fTPhoSCRemovalPFIsoNeutral_RCone[gMaxnphos];
   float fTPhoSCRemovalPFIsoPhoton_RCone[gMaxnphos];
+  float fTPhoSCRemoval_RCone_Eta[gMaxnphos];
+  float fTPhoSCRemoval_RCone_Phi[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
   int fT_pho_matchedPFPhotonCand[gMaxnphos];

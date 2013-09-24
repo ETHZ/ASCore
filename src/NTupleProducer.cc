@@ -1959,11 +1959,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        fTPhotisStandardPhoton[phoqi]= photon.isStandardPhoton();
 
        {
-	 SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup);
+	 SuperClusterFootprintRemoval remover(iEvent,iSetup);
 	 fTPhoSCRemovalPFIsoCharged[phoqi] = (remover.PFIsolation("charged",photon.superCluster(),-1));
 	 fTPhoSCRemovalPFIsoChargedPrimVtx[phoqi] = (vertices.size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged[phoqi];
 	 fTPhoSCRemovalPFIsoNeutral[phoqi] = (remover.PFIsolation("neutral",photon.superCluster()));
 	 fTPhoSCRemovalPFIsoPhoton[phoqi] = (remover.PFIsolation("photon",photon.superCluster()));
+	 PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),-1);
+	 fTPhoSCRemovalPFIsoCharged_RCone[phoqi] = risos.chargediso;
+	 fTPhoSCRemovalPFIsoChargedPrimVtx_RCone[phoqi] = risos.chargediso_primvtx;
+	 fTPhoSCRemovalPFIsoNeutral_RCone[phoqi] = risos.neutraliso;
+	 fTPhoSCRemovalPFIsoPhoton_RCone[phoqi] = risos.photoniso;
+	 fTPhoSCRemoval_RCone_Eta[phoqi]=risos.randomcone_eta;
+	 fTPhoSCRemoval_RCone_Phi[phoqi]=risos.randomcone_phi;
        }
 
        if (doVertexingFlag && photon.hasConversionTracks()) { // photon conversions
@@ -3927,6 +3934,12 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("PhoSCRemovalPFIsoChargedPrimVtx",&fTPhoSCRemovalPFIsoChargedPrimVtx,"PhoSCRemovalPFIsoChargedPrimVtx[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoNeutral",&fTPhoSCRemovalPFIsoNeutral,"PhoSCRemovalPFIsoNeutral[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoPhoton",&fTPhoSCRemovalPFIsoPhoton,"PhoSCRemovalPFIsoPhoton[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoCharged_RCone",&fTPhoSCRemovalPFIsoCharged_RCone,"PhoSCRemovalPFIsoCharged_RCone[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoChargedPrimVtx_RCone",&fTPhoSCRemovalPFIsoChargedPrimVtx_RCone,"PhoSCRemovalPFIsoChargedPrimVtx_RCone[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoNeutral_RCone",&fTPhoSCRemovalPFIsoNeutral_RCone,"PhoSCRemovalPFIsoNeutral_RCone[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoPhoton_RCone",&fTPhoSCRemovalPFIsoPhoton_RCone,"PhoSCRemovalPFIsoPhoton_RCone[NPhotons]/F");
+       fEventTree->Branch("fTPhoSCRemoval_RCone_Eta",&fTfTPhoSCRemoval_RCone_Eta,"fTPhoSCRemoval_RCone_Eta[NPhotons]/F");
+       fEventTree->Branch("fTPhoSCRemoval_RCone_Phi",&fTfTPhoSCRemoval_RCone_Phi,"fTPhoSCRemoval_RCone_Phi[NPhotons]/F");
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
@@ -4854,6 +4867,12 @@ void NTupleProducer::resetTree(){
        resetFloat( fTPhoSCRemovalPFIsoChargedPrimVtx, gMaxnphos);
        resetFloat( fTPhoSCRemovalPFIsoNeutral, gMaxnphos);
        resetFloat( fTPhoSCRemovalPFIsoPhoton, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoCharged_RCone, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoChargedPrimVtx_RCone, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoNeutral_RCone, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoPhoton_RCone, gMaxnphos);
+       resetFloat( fTPhoSCRemoval_RCone_Eta, gMaxnphos);
+       resetFloat( fTPhoSCRemoval_RCone_Phi, gMaxnphos);
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
