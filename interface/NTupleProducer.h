@@ -199,7 +199,7 @@ private:
 	static const int gMaxnmus     = 30;
 	static const int gMaxneles    = 20;
 	static const int gMaxntaus    = 20;
-	static const int gMaxnjets    = 100;
+	static const int gMaxnjets    = 200;
 	static const int gMaxntrks    = 800;
 	static const int gMaxnphos    = 50;
         static const int gMaxnconv    = 50;
@@ -208,9 +208,9 @@ private:
 	static const int gMaxngenphot = 100;
 	static const int gMaxngenjets = 100;
 	static const int gMaxnvrtx    = 50;
-	static const int gMaxnpileup  = 50;
+	static const int gMaxnpileup  = 100;
 	static const int gMaxnEBhits  = 20;
-        static const int gMaxngenvtx = 60;
+        static const int gMaxngenvtx = 100;
         static const int nStoredGenParticles = 2000;
         static const int gMaxnpfcand = 2000;
         static const int gMaxnSCxtals = 200;
@@ -870,8 +870,13 @@ private:
   float fT_pho_NeutralHadronIso[gMaxnphos];
   float fT_pho_PhotonIso[gMaxnphos];
   float fTPhoSCRemovalPFIsoCharged[gMaxnphos];
+  float fTPhoSCRemovalPFIsoChargedPrimVtx[gMaxnphos];
   float fTPhoSCRemovalPFIsoNeutral[gMaxnphos];
   float fTPhoSCRemovalPFIsoPhoton[gMaxnphos];
+  float fTPhoSCRemovalPFIsoCharged_RCone[gMaxnphos];
+  float fTPhoSCRemovalPFIsoChargedPrimVtx_RCone[gMaxnphos];
+  float fTPhoSCRemovalPFIsoNeutral_RCone[gMaxnphos];
+  float fTPhoSCRemovalPFIsoPhoton_RCone[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
   int fT_pho_matchedPFPhotonCand[gMaxnphos];

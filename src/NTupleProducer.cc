@@ -233,8 +233,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fHhltstat        = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
 	fHl1physstat     = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
 	fHl1techstat     = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
-        fHpileupstat     = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
-        fHtruepileupstat = fTFileService->make<TH1I>("TruePileUpStats", "TruePileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
+        fHpileupstat     = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 100, 0, 100 ); // Keep track of pileup distribution
+        fHtruepileupstat = fTFileService->make<TH1I>("TruePileUpStats", "TruePileUpStats", 100, 0, 100 ); // Keep track of pileup distribution
 
 	fRunTree         = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
 	fEventTree       = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
@@ -1961,6 +1961,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        {
 	 SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup);
 	 fTPhoSCRemovalPFIsoCharged[phoqi] = (remover.PFIsolation("charged",photon.superCluster(),-1));
+	 fTPhoSCRemovalPFIsoChargedPrimVtx[phoqi] = (vertices.size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged[phoqi];
 	 fTPhoSCRemovalPFIsoNeutral[phoqi] = (remover.PFIsolation("neutral",photon.superCluster()));
 	 fTPhoSCRemovalPFIsoPhoton[phoqi] = (remover.PFIsolation("photon",photon.superCluster()));
        }
@@ -2052,36 +2053,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        }
 
 
-
-
-
-       
-       { // start PF stuff from Nicolas
-
-	 reco::PhotonCollection::const_iterator gamIterSl;
-
-	 const Photon* gamIter = &photon;
+       { //Look for associated PF objects
 	 
-	 //e/gammma agreed recommandation
-	 
-	 fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
-	 fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
-	 fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
-	 fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
-
-	 fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] = 0;
-	 fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] = 0;
-	 fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] = 0;
-	 fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] = 0;
-
-	 fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
-	 fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
-	 fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
-	 fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
-
-
-
-	 //Look for associated PF objects
 	 bool FoundPFPhoton=false;
 	 bool FoundPFElectron=false;
 
@@ -2135,7 +2108,33 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   fT_pho_isPFElectron[phoqi] = 1;
 	   PhotonToPFElectronMatchingArray[phoqi] = iel;
 	 }
+
+       }
+
+
+       /*       
+       { // start PF stuff from Nicolas
+
+	 reco::PhotonCollection::const_iterator gamIterSl;
+
+	 const Photon* gamIter = &photon;
 	 
+	 //e/gammma agreed recommandation
+	 
+	 fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+
+	 fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] = 0;
+
+	 fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0; 
 
 	 int PfCandType[10000];
 	 float PfCandPt[10000];
@@ -2244,7 +2243,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     if (type==1 && dR<0.4) storethispfcand[i]=true;
 	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
 
-
 	     { // determination of distance for footprint removal method
 	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
 	       bool isbarrel = gamIter->isEB();
@@ -2275,14 +2273,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       }
 	       if (good && ecalpfhit.Perp()!=0 && photon_scposition.Perp()!=0){
 		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
-//		 std::cout << "---" << std::endl;
-//		 std::cout << "sc " << std::endl;
-//		 photon_scposition.Print();
-//		 std::cout << "pfcand " << std::endl;
-//		 pfvertex.Print();
-//		 pfmomentum.Print();
-//		 ecalpfhit.Print();
-//		 std::cout << "---" << std::endl;
 	       }
 	     }
 
@@ -2332,7 +2322,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
        }     // end PF stuff from Nicolas
-
+       */
 
 
 		
@@ -2350,6 +2340,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // 		fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
 //      } else
 // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
+
+
+
  	} // end photon loop
 
 
@@ -2366,11 +2359,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        */
 
+	/*
 	std::vector<int> diphotons_first;
 	std::vector<int> diphotons_second;
 	std::vector<std::vector<int> > vtx_dipho_h2gglobe;
 	std::vector<std::vector<int> > vtx_dipho_mva;
 	std::vector<std::vector<int> > vtx_dipho_productrank;
+
+
 
        if (doVertexingFlag) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
 
@@ -2672,6 +2668,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
        //       cout << "end vertex selection MVA" << endl;
 
+       */
 
 
 
@@ -2693,26 +2690,27 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    break;
 	  }
 
-	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
+//	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
+	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
 	  fTPfCandEta[pfcandIndex] = (*pfCandidates)[i].eta();
 	  fTPfCandPhi[pfcandIndex] = (*pfCandidates)[i].phi();
-	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
-	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
-	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
-	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
-	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
+//	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
+//	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
+//	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
+//	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
 	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
 	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
 	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
-	  fTPfCandMomX[pfcandIndex] = (*pfCandidates)[i].momentum().x();
-	  fTPfCandMomY[pfcandIndex] = (*pfCandidates)[i].momentum().y();
-	  fTPfCandMomZ[pfcandIndex] = (*pfCandidates)[i].momentum().z();
+//	  fTPfCandMomX[pfcandIndex] = (*pfCandidates)[i].momentum().x();
+//	  fTPfCandMomY[pfcandIndex] = (*pfCandidates)[i].momentum().y();
+//	  fTPfCandMomZ[pfcandIndex] = (*pfCandidates)[i].momentum().z();
 
 	  for (int j=0; j<fTnphotons; j++){
 	    if (PhotonToPFPhotonMatchingArray[j]==(int)i) fT_pho_matchedPFPhotonCand[j]=pfcandIndex;
 	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
 	  }
 
+	  /*
 	  if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
 	  reco::HitPattern pattern; 
 	  if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
@@ -2723,6 +2721,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	  fTPfCandTrackRefVx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vx() : -999;
 	  fTPfCandTrackRefVy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vy() : -999;
 	  fTPfCandTrackRefVz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vz() : -999;
+	  */
 
 	  pfcandIndex++;
 
@@ -3835,24 +3834,24 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	//PfCandidates:
 	
 	fEventTree->Branch("NPfCand"                     ,&fTNPfCand         ,"NPfCand/I");
-	fEventTree->Branch("PfCandPdgId"                 ,&fTPfCandPdgId     ,"PfCandPdgId[NPfCand]/F");
+//	fEventTree->Branch("PfCandPdgId"                 ,&fTPfCandPdgId     ,"PfCandPdgId[NPfCand]/F");
+	fEventTree->Branch("PfCandPt"                    ,&fTPfCandPt        ,"PfCandPt[NPfCand]/F");
 	fEventTree->Branch("PfCandEta"                   ,&fTPfCandEta       ,"PfCandEta[NPfCand]/F");
 	fEventTree->Branch("PfCandPhi"                   ,&fTPfCandPhi       ,"PfCandPhi[NPfCand]/F");
-	fEventTree->Branch("PfCandPx"                    ,&fTPfCandPx        ,"PfCandPx[NPfCand]/F");
-	fEventTree->Branch("PfCandPy"                    ,&fTPfCandPy        ,"PfCandPy[NPfCand]/F");
-	fEventTree->Branch("PfCandPz"                    ,&fTPfCandPz        ,"PfCandPz[NPfCand]/F");
-	fEventTree->Branch("PfCandEnergy"                ,&fTPfCandEnergy    ,"PfCandEnergy[NPfCand]/F");
-	fEventTree->Branch("PfCandPt"                    ,&fTPfCandPt        ,"PfCandPt[NPfCand]/F");
+//	fEventTree->Branch("PfCandPx"                    ,&fTPfCandPx        ,"PfCandPx[NPfCand]/F");
+//	fEventTree->Branch("PfCandPy"                    ,&fTPfCandPy        ,"PfCandPy[NPfCand]/F");
+//	fEventTree->Branch("PfCandPz"                    ,&fTPfCandPz        ,"PfCandPz[NPfCand]/F");
+//	fEventTree->Branch("PfCandEnergy"                ,&fTPfCandEnergy    ,"PfCandEnergy[NPfCand]/F");
 	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
 	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
 	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");
 //	fEventTree->Branch("PfCandMomX"                  ,&fTPfCandMomX      ,"PfCandMomX[NPfCand]/F");
 //	fEventTree->Branch("PfCandMomY"                  ,&fTPfCandMomY      ,"PfCandMomY[NPfCand]/F");
 //	fEventTree->Branch("PfCandMomZ"                  ,&fTPfCandMomZ      ,"PfCandMomZ[NPfCand]/F");
-	fEventTree->Branch("PfCandHasHitInFirstPixelLayer", &fTPfCandHasHitInFirstPixelLayer, "PfCandHasHitInFirstPixelLayer[NPfCand]/I");
-	fEventTree->Branch("PfCandTrackRefPx", &fTPfCandTrackRefPx, "PfCandTrackRefPx[NPfCand]/F");
-	fEventTree->Branch("PfCandTrackRefPy", &fTPfCandTrackRefPy, "PfCandTrackRefPy[NPfCand]/F");
-	fEventTree->Branch("PfCandTrackRefPz", &fTPfCandTrackRefPz, "PfCandTrackRefPz[NPfCand]/F");
+//	fEventTree->Branch("PfCandHasHitInFirstPixelLayer", &fTPfCandHasHitInFirstPixelLayer, "PfCandHasHitInFirstPixelLayer[NPfCand]/I");
+//	fEventTree->Branch("PfCandTrackRefPx", &fTPfCandTrackRefPx, "PfCandTrackRefPx[NPfCand]/F");
+//	fEventTree->Branch("PfCandTrackRefPy", &fTPfCandTrackRefPy, "PfCandTrackRefPy[NPfCand]/F");
+//	fEventTree->Branch("PfCandTrackRefPz", &fTPfCandTrackRefPz, "PfCandTrackRefPz[NPfCand]/F");
 //	fEventTree->Branch("PfCandTrackRefVx", &fTPfCandTrackRefVx, "PfCandTrackRefVx[NPfCand]/F");
 //	fEventTree->Branch("PfCandTrackRefVy", &fTPfCandTrackRefVy, "PfCandTrackRefVy[NPfCand]/F");
 //	fEventTree->Branch("PfCandTrackRefVz", &fTPfCandTrackRefVz, "PfCandTrackRefVz[NPfCand]/F");
@@ -3925,6 +3924,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("Pho_NeutralHadronIso",&fT_pho_NeutralHadronIso,"Pho_NeutralHadronIso[NPhotons]/F");
        fEventTree->Branch("Pho_PhotonIso",&fT_pho_PhotonIso,"Pho_PhotonIso[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoCharged",&fTPhoSCRemovalPFIsoCharged,"PhoSCRemovalPFIsoCharged[NPhotons]/F");
+       fEventTree->Branch("PhoSCRemovalPFIsoChargedPrimVtx",&fTPhoSCRemovalPFIsoChargedPrimVtx,"PhoSCRemovalPFIsoChargedPrimVtx[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoNeutral",&fTPhoSCRemovalPFIsoNeutral,"PhoSCRemovalPFIsoNeutral[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoPhoton",&fTPhoSCRemovalPFIsoPhoton,"PhoSCRemovalPFIsoPhoton[NPhotons]/F");
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
@@ -3936,23 +3936,23 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("PhoVy",&fTPhotVy,"PhoVy[NPhotons]/F");
        fEventTree->Branch("PhoVz",&fTPhotVz,"PhoVz[NPhotons]/F");
 
-       fEventTree->Branch("pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
-
-       fEventTree->Branch("pho_Cone01NeutralHadronIso_mvVtx",&fT_pho_Cone01NeutralHadronIso_mvVtx,"pho_Cone01NeutralHadronIso_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone02NeutralHadronIso_mvVtx",&fT_pho_Cone02NeutralHadronIso_mvVtx,"pho_Cone02NeutralHadronIso_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone03NeutralHadronIso_mvVtx",&fT_pho_Cone03NeutralHadronIso_mvVtx,"pho_Cone03NeutralHadronIso_mvVtx[NPhotons]/F");
-       fEventTree->Branch("pho_Cone04NeutralHadronIso_mvVtx",&fT_pho_Cone04NeutralHadronIso_mvVtx,"pho_Cone04NeutralHadronIso_mvVtx[NPhotons]/F");
-
-       fEventTree->Branch("pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
-       fEventTree->Branch("pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
-       fEventTree->Branch("pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
-       fEventTree->Branch("pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
-
-       fEventTree->Branch("pho_Cone03PFCombinedIso",&fT_pho_Cone03PFCombinedIso,"pho_Cone03CombinedIso[NPhotons]/F");
-       fEventTree->Branch("pho_Cone04PFCombinedIso",&fT_pho_Cone04PFCombinedIso,"pho_Cone04CombinedIso[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[NPhotons]/F");
+//
+//       fEventTree->Branch("pho_Cone01NeutralHadronIso_mvVtx",&fT_pho_Cone01NeutralHadronIso_mvVtx,"pho_Cone01NeutralHadronIso_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone02NeutralHadronIso_mvVtx",&fT_pho_Cone02NeutralHadronIso_mvVtx,"pho_Cone02NeutralHadronIso_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone03NeutralHadronIso_mvVtx",&fT_pho_Cone03NeutralHadronIso_mvVtx,"pho_Cone03NeutralHadronIso_mvVtx[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone04NeutralHadronIso_mvVtx",&fT_pho_Cone04NeutralHadronIso_mvVtx,"pho_Cone04NeutralHadronIso_mvVtx[NPhotons]/F");
+//
+//       fEventTree->Branch("pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[NPhotons]/F");
+//
+//       fEventTree->Branch("pho_Cone03PFCombinedIso",&fT_pho_Cone03PFCombinedIso,"pho_Cone03CombinedIso[NPhotons]/F");
+//       fEventTree->Branch("pho_Cone04PFCombinedIso",&fT_pho_Cone04PFCombinedIso,"pho_Cone04CombinedIso[NPhotons]/F");
 
 
        /*
@@ -4022,12 +4022,12 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 // fEventTree->Branch("Gv_nTkHi",&gv_nTkHi,"Gv_nTkHi[Gvn]/I");
 // fEventTree->Branch("Gv_nTkLo",&gv_nTkLo,"Gv_nTkLo[Gvn]/I");
 
- fEventTree->Branch("diphotons_first", &f_diphotons_first, Form("diphotons_first[%d]/I",gMax_vertexing_diphoton_pairs));
- fEventTree->Branch("diphotons_second", &f_diphotons_second, Form("diphotons_second[%d]/I",gMax_vertexing_diphoton_pairs));
+// fEventTree->Branch("diphotons_first", &f_diphotons_first, Form("diphotons_first[%d]/I",gMax_vertexing_diphoton_pairs));
+// fEventTree->Branch("diphotons_second", &f_diphotons_second, Form("diphotons_second[%d]/I",gMax_vertexing_diphoton_pairs));
 
- fEventTree->Branch("vtx_dipho_h2gglobe", &f_vtx_dipho_h2gglobe, Form("vtx_dipho_h2gglobe[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
- fEventTree->Branch("vtx_dipho_mva", &f_vtx_dipho_mva, Form("vtx_dipho_mva[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
- fEventTree->Branch("vtx_dipho_productrank", &f_vtx_dipho_productrank, Form("vtx_dipho_productrank[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
+// fEventTree->Branch("vtx_dipho_h2gglobe", &f_vtx_dipho_h2gglobe, Form("vtx_dipho_h2gglobe[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
+// fEventTree->Branch("vtx_dipho_mva", &f_vtx_dipho_mva, Form("vtx_dipho_mva[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
+// fEventTree->Branch("vtx_dipho_productrank", &f_vtx_dipho_productrank, Form("vtx_dipho_productrank[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -4851,6 +4851,7 @@ void NTupleProducer::resetTree(){
        resetFloat( fT_pho_NeutralHadronIso, gMaxnphos);
        resetFloat( fT_pho_PhotonIso, gMaxnphos);
        resetFloat( fTPhoSCRemovalPFIsoCharged, gMaxnphos);
+       resetFloat( fTPhoSCRemovalPFIsoChargedPrimVtx, gMaxnphos);
        resetFloat( fTPhoSCRemovalPFIsoNeutral, gMaxnphos);
        resetFloat( fTPhoSCRemovalPFIsoPhoton, gMaxnphos);
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
