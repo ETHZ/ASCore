@@ -1961,7 +1961,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        {
 	 SuperClusterFootprintRemoval remover(iEvent,iSetup);
 	 fTPhoSCRemovalPFIsoCharged[phoqi] = (remover.PFIsolation("charged",photon.superCluster(),-1));
-	 fTPhoSCRemovalPFIsoChargedPrimVtx[phoqi] = (vertices.size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged[phoqi];
+	 fTPhoSCRemovalPFIsoChargedPrimVtx[phoqi] = (vertices->size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged[phoqi];
 	 fTPhoSCRemovalPFIsoNeutral[phoqi] = (remover.PFIsolation("neutral",photon.superCluster()));
 	 fTPhoSCRemovalPFIsoPhoton[phoqi] = (remover.PFIsolation("photon",photon.superCluster()));
 	 PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),-1);
@@ -2074,7 +2074,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 for( int i=0; i<ncand; ++i ) {
 	   if ((*pfCandidates)[i].particleId()==reco::PFCandidate::gamma){
 	     if ((*pfCandidates)[i].mva_nothing_gamma()>0){
-	       if( (*pfCandidates)[i].superClusterRef()==gamIter->superCluster()) {
+	       if( (*pfCandidates)[i].superClusterRef()==photon.superCluster()) {
 		 iphot = i;
 	       }
 	     }
@@ -2091,7 +2091,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 int iel = -1;
 	 reco::GsfElectronCollection::const_iterator elIterSl;
 	 for (reco::GsfElectronCollection::const_iterator elIter = electronHandle->begin(); elIter != electronHandle->end(); ++elIter){
-	   if (gamIter->superCluster()==elIter->superCluster()) {
+	   if (photon.superCluster()==elIter->superCluster()) {
 	     elIterSl = elIter;
 	     foundEgSC = true;
 	   }
@@ -3938,8 +3938,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("PhoSCRemovalPFIsoChargedPrimVtx_RCone",&fTPhoSCRemovalPFIsoChargedPrimVtx_RCone,"PhoSCRemovalPFIsoChargedPrimVtx_RCone[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoNeutral_RCone",&fTPhoSCRemovalPFIsoNeutral_RCone,"PhoSCRemovalPFIsoNeutral_RCone[NPhotons]/F");
        fEventTree->Branch("PhoSCRemovalPFIsoPhoton_RCone",&fTPhoSCRemovalPFIsoPhoton_RCone,"PhoSCRemovalPFIsoPhoton_RCone[NPhotons]/F");
-       fEventTree->Branch("fTPhoSCRemoval_RCone_Eta",&fTfTPhoSCRemoval_RCone_Eta,"fTPhoSCRemoval_RCone_Eta[NPhotons]/F");
-       fEventTree->Branch("fTPhoSCRemoval_RCone_Phi",&fTfTPhoSCRemoval_RCone_Phi,"fTPhoSCRemoval_RCone_Phi[NPhotons]/F");
+       fEventTree->Branch("fTPhoSCRemoval_RCone_Eta",&fTPhoSCRemoval_RCone_Eta,"fTPhoSCRemoval_RCone_Eta[NPhotons]/F");
+       fEventTree->Branch("fTPhoSCRemoval_RCone_Phi",&fTPhoSCRemoval_RCone_Phi,"fTPhoSCRemoval_RCone_Phi[NPhotons]/F");
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");

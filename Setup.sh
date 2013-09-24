@@ -34,10 +34,13 @@ mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 mygitaddpkg Patches-OldReleases master
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
-mkdir -p SandBox/Skims
+mkdir -p SandBox/Skims/plugins
+mkdir -p SandBox/Skims/python
 cp Patches-OldReleases/SandBox/Skims/plugins/BuildFile.xml SandBox/Skims/plugins/BuildFile.xml
 cp Patches-OldReleases/SandBox/Skims/plugins/RecovRecHitFilter.cc SandBox/Skims/plugins/RecovRecHitFilter.cc
 cp Patches-OldReleases/SandBox/Skims/python/recovRecHitFilter_cfi.py SandBox/Skims/python/recovRecHitFilter_cfi.py
+cp Patches-OldReleases/SandBox/Skims/python/trackingFailureFilter_cfi.py SandBox/Skims/python/trackingFailureFilter_cfi.py
+cp Patches-OldReleases/SandBox/Skims/plugins/TrackingFailureFilter.cc SandBox/Skims/plugins/TrackingFailureFilter.cc
 rm -rf Patches-OldReleases
 
 mygitaddpkg ASCore branch_42X_noEDM
