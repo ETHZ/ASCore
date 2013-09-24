@@ -27,7 +27,7 @@ mv h2gglobe/VertexAnalysis .
 rm -rf h2gglobe/*
 mv VertexAnalysis h2gglobe/VertexAnalysis
 
-mygitaddpkg SCFootprintRemoval V00-02d
+mygitaddpkg SCFootprintRemoval V01-01
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 
