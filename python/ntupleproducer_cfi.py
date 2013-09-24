@@ -67,7 +67,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_minelpt       = cms.double(5.0),
 	sel_maxeleta      = cms.double(2.5),
 	# Jets:
-	sel_mincorjpt     = cms.double(20.0),
+	sel_mincorjpt     = cms.double(15.0),
 	sel_minrawjpt     = cms.double(0.0),
 	sel_maxjeta       = cms.double(10.0),
 	sel_minjemfrac    = cms.double(0.0),
@@ -77,16 +77,16 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxtrknchi2   = cms.double(1e15),
 	sel_mintrknhits   = cms.int32(0),
 	# Photons
-	sel_minphopt      = cms.double(5.0),
-	sel_maxphoeta     = cms.double(2.5),
+	sel_minphopt      = cms.double(15.0),
+	sel_maxphoeta     = cms.double(3.0),
         # SC
-        sel_minSCraw      = cms.double(5.0),
+        sel_minSCraw      = cms.double(15.0),
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(0.0),
 	sel_maxgenlepteta = cms.double(100),
 	# GenPhotons
 	sel_mingenphotpt = cms.double(5.0),
-	sel_maxgenphoteta = cms.double(2.5),
+	sel_maxgenphoteta = cms.double(3.0),
 	# GenJets
 	sel_mingenjetpt  = cms.double(10.0),
 	sel_maxgenjeteta = cms.double(6.0),
