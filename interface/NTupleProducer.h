@@ -282,6 +282,7 @@ private:
 	float fMinphopt;
 	float fMaxphoeta;
         float fMinSCraw;
+        float fMinSCrawPt;
 
 	float fMingenleptpt; 
 	float fMaxgenlepteta;
@@ -326,6 +327,7 @@ private:
 	float fRTMinphopt;
 	float fRTMaxphoeta;
         float fRTMinSCraw;
+        float fRTMinSCrawPt;
 
 
 	int fRTmaxnmu;

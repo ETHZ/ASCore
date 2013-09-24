@@ -211,6 +211,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
 	fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
 	fMinSCraw       = iConfig.getParameter<double>("sel_minSCraw");
+	fMinSCrawPt     = iConfig.getParameter<double>("sel_minSCrawPt");
 	fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
 	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
 	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
@@ -1361,7 +1362,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnSC=0;
 	for (SuperClusterCollection::const_iterator sc = BarrelSuperClusters->begin(); sc!=BarrelSuperClusters->end(); ++sc){
 
-	  if (sc->rawEnergy()<fRTMinSCraw) continue;
+	  if (sc->rawEnergy()<fMinSCraw) continue;
+	  if (sc->rawEnergy()/TMath::CosH(sc->eta())<fMinSCrawPt) continue;
 
 	  if (fTnSC>=gMaxnSC) {
 	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
@@ -1455,7 +1457,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	for (SuperClusterCollection::const_iterator sc = EndcapSuperClusters->begin(); sc!=EndcapSuperClusters->end(); ++sc){
 
-	  if (sc->rawEnergy()<fRTMinSCraw) continue;
+	  if (sc->rawEnergy()<fMinSCraw) continue;
+	  if (sc->rawEnergy()/TMath::CosH(sc->eta())<fMinSCrawPt) continue;
 
 	  if (fTnSC>=gMaxnSC) {
 	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
@@ -1861,7 +1864,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			break;
 		}
 		// Preselection
-		if(ip->pt() < fMinphopt) continue;
+		if(ip->superCluster()->rawEnergy()/TMath::CosH(ip->superCluster()->eta()) < fMinphopt) continue;
 		if(fabs(ip->eta()) > fMaxphoeta) continue;
 
 		phoqi++; // Count how many we'll eventually store
@@ -2054,6 +2057,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 if (fTPhotSCindex[phoqi]==-1) {
 	   edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for photon"; 
+	   cout << photon.superCluster()->rawEnergy() << " " << photon.superCluster()->eta() << " " << photon.superCluster()->rawEnergy()/TMath::CosH(photon.superCluster()->eta()) << endl;
 	   //			    fTgoodevent = 1; 
 	   //			    break;
 	 }
@@ -4254,6 +4258,7 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMinphopt      = -999.99;
 	fRTMaxphoeta     = -999.99;
 	fRTMinSCraw      = -999.99;
+	fRTMinSCrawPt    = -999.99;
 
 	fRTmaxnmu   = -999;
 	fRTmaxnel   = -999;
@@ -4288,6 +4293,7 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMaxphoeta     = fMaxphoeta;
 
 	fRTMinSCraw      = fMinSCraw;
+	fRTMinSCrawPt    = fMinSCrawPt;
 
 	fRTmaxnmu   = gMaxnmus;
 	fRTmaxnel   = gMaxneles;
