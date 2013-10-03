@@ -780,6 +780,7 @@ private:
   float  fTPfCandVx[gMaxnpfcand];
   float  fTPfCandVy[gMaxnpfcand];
   float  fTPfCandVz[gMaxnpfcand];
+  int    fTPfCandBelongsToJet[gMaxnpfcand];
   float  fTPfCandMomX[gMaxnpfcand];
   float  fTPfCandMomY[gMaxnpfcand];
   float  fTPfCandMomZ[gMaxnpfcand];

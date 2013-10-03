@@ -2682,67 +2682,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
        */
 
 
-
-	////////////////////////////////////////////////////////
-	// PfCandidates Variables:
-
-	int pfcandIndex(0);
-	for (unsigned int i=0; i<pfCandidates->size(); i++){
-
-	  int type = FindPFCandType((*pfCandidates)[i].pdgId());
-	  if (type==2) storethispfcand[i]=true;
-
-	  if (storethispfcand[i]==0) continue;
-
-	  if (pfcandIndex >= gMaxnpfcand){
-	    edm::LogWarning("NTP") << "@SUB=analyze"
-				   << "Maximum number of pf candidates exceeded";
-	    fTgoodevent = 1;
-	    break;
-	  }
-
-	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
-	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
-	  fTPfCandEta[pfcandIndex] = (*pfCandidates)[i].eta();
-	  fTPfCandPhi[pfcandIndex] = (*pfCandidates)[i].phi();
-//	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
-//	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
-//	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
-	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
-	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
-	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
-	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
-//	  fTPfCandMomX[pfcandIndex] = (*pfCandidates)[i].momentum().x();
-//	  fTPfCandMomY[pfcandIndex] = (*pfCandidates)[i].momentum().y();
-//	  fTPfCandMomZ[pfcandIndex] = (*pfCandidates)[i].momentum().z();
-
-	  for (int j=0; j<fTnphotons; j++){
-	    if (PhotonToPFPhotonMatchingArray[j]==(int)i) fT_pho_matchedPFPhotonCand[j]=pfcandIndex;
-	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
-	  }
-
-	  /*
-	  if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
-	  reco::HitPattern pattern; 
-	  if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
-	  fTPfCandHasHitInFirstPixelLayer[pfcandIndex] = (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999;
-	  fTPfCandTrackRefPx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999;
-	  fTPfCandTrackRefPy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999;
-	  fTPfCandTrackRefPz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999;
-	  fTPfCandTrackRefVx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vx() : -999;
-	  fTPfCandTrackRefVy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vy() : -999;
-	  fTPfCandTrackRefVz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vz() : -999;
-	  */
-
-	  pfcandIndex++;
-
-	}
-	fTNPfCand=pfcandIndex;
-
-
-
-	  
-
+	std::vector<std::vector<int> > Jets_PfCand_content;
 
 	////////////////////////////////////////////////////////
 	// Jet Variables:
@@ -2828,7 +2768,9 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		fTjHFEMFrac      [jqi] = jet->HFEMEnergy()/uncorr_energy;   // also contained in neutralEmEnergy
 		// see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
 
-		vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
+		vector<PFCandidatePtr> JetpfCandidates = jet->getPFConstituents();
+		assert((int)(Jets_PfCand_content.size())==jqi);
+		Jets_PfCand_content.push_back(std::vector<int>());
 		
 		float sumPt_cands=0.;
 		float sumPt2_cands=0.;
@@ -2837,7 +2779,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		TLorentzVector jetp4;
 		jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
 
-		for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
+		for (vector<PFCandidatePtr>::const_iterator jCand = JetpfCandidates.begin(); jCand != JetpfCandidates.end(); ++jCand) {
 		  
 		  math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
 		  TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
@@ -2848,6 +2790,10 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		    float deltaR = pCand.DeltaR(jetp4);
 		    rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
 
+		  }
+
+		  for (int j=0; j<(int)(pfCandidates->size()); j++){
+		    if ((*jCand) == edm::Ptr<reco::PFCandidate>(pfCandidates,j)) Jets_PfCand_content.back().push_back(j);
 		  }
 
 		} //for PFCandidates
@@ -2996,6 +2942,74 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	// ElJetOverlap(jetPtr, elecPtr, calotowers);
 	// Check photon/jet duplication
 	// PhotonJetOverlap(jetPtr, photSCs, calotowers);
+
+
+	////////////////////////////////////////////////////////
+	// PfCandidates Variables:
+
+	int pfcandIndex(0);
+	for (unsigned int i=0; i<pfCandidates->size(); i++){
+
+	  int type = FindPFCandType((*pfCandidates)[i].pdgId());
+	  if (type==2) storethispfcand[i]=true;
+
+	  if (storethispfcand[i]==0) continue;
+
+	  if (pfcandIndex >= gMaxnpfcand){
+	    edm::LogWarning("NTP") << "@SUB=analyze"
+				   << "Maximum number of pf candidates exceeded";
+	    fTgoodevent = 1;
+	    break;
+	  }
+
+	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
+	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
+	  fTPfCandEta[pfcandIndex] = (*pfCandidates)[i].eta();
+	  fTPfCandPhi[pfcandIndex] = (*pfCandidates)[i].phi();
+//	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
+//	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
+//	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
+	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
+	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
+	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
+	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
+//	  fTPfCandMomX[pfcandIndex] = (*pfCandidates)[i].momentum().x();
+//	  fTPfCandMomY[pfcandIndex] = (*pfCandidates)[i].momentum().y();
+//	  fTPfCandMomZ[pfcandIndex] = (*pfCandidates)[i].momentum().z();
+
+	  for (int j=0; j<fTnphotons; j++){
+	    if (PhotonToPFPhotonMatchingArray[j]==(int)i) fT_pho_matchedPFPhotonCand[j]=pfcandIndex;
+	    if (PhotonToPFElectronMatchingArray[j]==(int)i) fT_pho_matchedPFElectronCand[j]=pfcandIndex;
+	  }
+
+	  for (int jet=0; jet<(int)(Jets_PfCand_content.size()); jet++){
+	    for (int k=0; k<(int)(Jets_PfCand_content.at(jet).size()); k++){
+	      if (Jets_PfCand_content.at(jet).at(k)==(int)i){
+		if (fTPfCandBelongsToJet[pfcandIndex]>=0) {cout << "WRONG: this PFCand is already in another jet!" << endl; continue;}
+		fTPfCandBelongsToJet[pfcandIndex]=jet;
+	      }
+	    }
+	  }
+
+
+	  /*
+	  if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
+	  reco::HitPattern pattern; 
+	  if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
+	  fTPfCandHasHitInFirstPixelLayer[pfcandIndex] = (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999;
+	  fTPfCandTrackRefPx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999;
+	  fTPfCandTrackRefPy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999;
+	  fTPfCandTrackRefPz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999;
+	  fTPfCandTrackRefVx[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vx() : -999;
+	  fTPfCandTrackRefVy[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vy() : -999;
+	  fTPfCandTrackRefVz[pfcandIndex] = (type==1) ? (*pfCandidates)[i].trackRef()->vz() : -999;
+	  */
+
+	  pfcandIndex++;
+
+	}
+	fTNPfCand=pfcandIndex;
+
 
 
 
@@ -3856,6 +3870,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
 	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
 	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");
+	fEventTree->Branch("PfCandBelongsToJet"          ,&fTPfCandBelongsToJet,"PfCandBelongsToJet[NPfCand]/I");
 //	fEventTree->Branch("PfCandMomX"                  ,&fTPfCandMomX      ,"PfCandMomX[NPfCand]/F");
 //	fEventTree->Branch("PfCandMomY"                  ,&fTPfCandMomY      ,"PfCandMomY[NPfCand]/F");
 //	fEventTree->Branch("PfCandMomZ"                  ,&fTPfCandMomZ      ,"PfCandMomZ[NPfCand]/F");
@@ -4782,6 +4797,7 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPfCandVx        ,gMaxnpfcand);
 	resetFloat(fTPfCandVy        ,gMaxnpfcand);
 	resetFloat(fTPfCandVz        ,gMaxnpfcand);
+	resetInt(fTPfCandBelongsToJet,gMaxnpfcand);
 	resetFloat(fTPfCandMomX      ,gMaxnpfcand);
 	resetFloat(fTPfCandMomY      ,gMaxnpfcand);
 	resetFloat(fTPfCandMomZ      ,gMaxnpfcand);
