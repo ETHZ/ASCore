@@ -294,9 +294,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 		}
 	}
 
-	vAna = new HggVertexAnalyzer(vtxAlgoParams);
-	vConv= new HggVertexFromConversions(vtxAlgoParams);
-	if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
+//	vAna = new HggVertexAnalyzer(vtxAlgoParams);
+//	vConv= new HggVertexFromConversions(vtxAlgoParams);
+//	if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 
 }
 
@@ -5011,7 +5011,7 @@ void NTupleProducer::resetTree(){
 	 gv_p3[i]=TVector3();
        }
        
-       vAna->clear();
+       //       vAna->clear();
 
 	resetFloat(fTSCraw,gMaxnSC);
 	resetFloat(fTSCpre,gMaxnSC);
