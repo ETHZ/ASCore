@@ -77,11 +77,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxtrknchi2   = cms.double(1e15),
 	sel_mintrknhits   = cms.int32(0),
 	# Photons
-	sel_minphopt      = cms.double(15.0),
+	sel_minphopt      = cms.double(10.0),
 	sel_maxphoeta     = cms.double(3.0),
         # SC
-        sel_minSCraw      = cms.double(15.0),
-        sel_minSCrawPt    = cms.double(15.0),
+        sel_minSCraw      = cms.double(10.0),
+        sel_minSCrawPt    = cms.double(10.0),
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(0.0),
 	sel_maxgenlepteta = cms.double(100),

@@ -2701,14 +2701,14 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    break;
 	  }
 
-//	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
+	  fTPfCandPdgId[pfcandIndex] = (*pfCandidates)[i].pdgId();
 	  fTPfCandPt[pfcandIndex] = (*pfCandidates)[i].pt();
 	  fTPfCandEta[pfcandIndex] = (*pfCandidates)[i].eta();
 	  fTPfCandPhi[pfcandIndex] = (*pfCandidates)[i].phi();
 //	  fTPfCandPx[pfcandIndex] = (*pfCandidates)[i].px();
 //	  fTPfCandPy[pfcandIndex] = (*pfCandidates)[i].py();
 //	  fTPfCandPz[pfcandIndex] = (*pfCandidates)[i].pz();	  
-//	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
+	  fTPfCandEnergy[pfcandIndex] = (*pfCandidates)[i].energy();
 	  fTPfCandVx[pfcandIndex] = (*pfCandidates)[i].vx();
 	  fTPfCandVy[pfcandIndex] = (*pfCandidates)[i].vy();
 	  fTPfCandVz[pfcandIndex] = (*pfCandidates)[i].vz();
@@ -3458,7 +3458,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 
 	// Event information:
 	fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
-	fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/I");
+	fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/L");
 	fEventTree->Branch("LumiSection"      ,&fTlumisection     ,"LumiSection/I");
 	fEventTree->Branch("PtHat"            ,&fTpthat           ,"PtHat/F");
 	fEventTree->Branch("QCDPartonicHT"    ,&fTqcdPartonicHT   ,"QCDPartonicHT/F");
@@ -3845,14 +3845,14 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	//PfCandidates:
 	
 	fEventTree->Branch("NPfCand"                     ,&fTNPfCand         ,"NPfCand/I");
-//	fEventTree->Branch("PfCandPdgId"                 ,&fTPfCandPdgId     ,"PfCandPdgId[NPfCand]/F");
+	fEventTree->Branch("PfCandPdgId"                 ,&fTPfCandPdgId     ,"PfCandPdgId[NPfCand]/F");
 	fEventTree->Branch("PfCandPt"                    ,&fTPfCandPt        ,"PfCandPt[NPfCand]/F");
 	fEventTree->Branch("PfCandEta"                   ,&fTPfCandEta       ,"PfCandEta[NPfCand]/F");
 	fEventTree->Branch("PfCandPhi"                   ,&fTPfCandPhi       ,"PfCandPhi[NPfCand]/F");
 //	fEventTree->Branch("PfCandPx"                    ,&fTPfCandPx        ,"PfCandPx[NPfCand]/F");
 //	fEventTree->Branch("PfCandPy"                    ,&fTPfCandPy        ,"PfCandPy[NPfCand]/F");
 //	fEventTree->Branch("PfCandPz"                    ,&fTPfCandPz        ,"PfCandPz[NPfCand]/F");
-//	fEventTree->Branch("PfCandEnergy"                ,&fTPfCandEnergy    ,"PfCandEnergy[NPfCand]/F");
+	fEventTree->Branch("PfCandEnergy"                ,&fTPfCandEnergy    ,"PfCandEnergy[NPfCand]/F");
 	fEventTree->Branch("PfCandVx"                    ,&fTPfCandVx        ,"PfCandVx[NPfCand]/F");
 	fEventTree->Branch("PfCandVy"                    ,&fTPfCandVy        ,"PfCandVy[NPfCand]/F");
 	fEventTree->Branch("PfCandVz"                    ,&fTPfCandVz        ,"PfCandVz[NPfCand]/F");

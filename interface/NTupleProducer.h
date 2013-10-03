@@ -342,7 +342,7 @@ private:
 
 	// General event information
 	int fTrunnumber;
-	unsigned int fTeventnumber;
+	Long64_t fTeventnumber;
 	int fTlumisection;
 	float fTpthat;
 	float fTqcdPartonicHT;
