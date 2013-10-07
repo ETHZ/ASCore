@@ -200,6 +200,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   energyRegFilename = iConfig.getParameter<std::string> ("energyCorrectionsFileNamePho"); 
 
   doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
+  doStorePFCandidates = iConfig.getParameter<bool>("tag_doStorePFCandidates");
   if (fIsModelScan) doVertexingFlag=false;
 
   // Event Selection
@@ -220,6 +221,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMinPhotonPt    = iConfig.getParameter<double>("sel_minphopt");
   fMaxPhotonEta   = iConfig.getParameter<double>("sel_maxphoeta");
   fMinSCraw       = iConfig.getParameter<double>("sel_minSCraw");
+  fMinSCrawPt     = iConfig.getParameter<double>("sel_minSCrawPt");
   fMinEBRechitE   = iConfig.getParameter<double>("sel_fminebrechitE");
 
   fMinGenLeptPt   = iConfig.getParameter<double>("sel_mingenleptpt");
@@ -383,10 +385,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
 
-  // initialize diphoton vertex MVA
-  vAna  = new HggVertexAnalyzer(vtxAlgoParams);
-  vConv = new HggVertexFromConversions(vtxAlgoParams);
-  if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
+//  // initialize diphoton vertex MVA
+//  vAna  = new HggVertexAnalyzer(vtxAlgoParams);
+//  vConv = new HggVertexFromConversions(vtxAlgoParams);
+//  if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 
 }
 
@@ -756,7 +758,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       *fTprocess = process;
     }
   }
-*fTPUWeightTotal  = MyWeightTotal;
+  *fTPUWeightTotal  = MyWeightTotal;
   *fTPUWeightInTime = MyWeightInTime;
 	
 	
@@ -840,6 +842,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   ////////////////////////////////////////////////////////////////////////////////
   // Dump tree variables /////////////////////////////////////////////////////////
   *fTRun   = iEvent.id().run();
+  if (iEvent.id().event()>std::numeric_limits<unsigned int>::max()) {cout << "WARNING: DATA FORMAT LONG NOT ENOUGH TO CONTAIN EVENT NUMBER" << endl;}
   *fTEvent = iEvent.id().event();
   *fTLumiSection = iEvent.luminosityBlock();
 
@@ -1438,6 +1441,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for (SuperClusterCollection::const_iterator sc = BarrelSuperClusters->begin(); sc!=BarrelSuperClusters->end(); ++sc){
 
     if (sc->rawEnergy()<fMinSCraw) continue;
+    if (sc->rawEnergy()/TMath::CosH(sc->eta())<fMinSCrawPt) continue;
 
     if (*fTNSuperClusters>=gMaxNSC) {
       edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
@@ -1524,6 +1528,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for (SuperClusterCollection::const_iterator sc = EndcapSuperClusters->begin(); sc!=EndcapSuperClusters->end(); ++sc){
 
     if (sc->rawEnergy()<fMinSCraw) continue;
+    if (sc->rawEnergy()/TMath::CosH(sc->eta())<fMinSCrawPt) continue;
 
     if (*fTNSuperClusters>=gMaxNSC) {
       edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
@@ -2093,10 +2098,18 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoHCalIso2012ConeDR03->push_back(PhoHCalIso2012ConeDR03);
 
     {
-      SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup);
+      SuperClusterFootprintRemoval remover(iEvent,iSetup);
       fTPhoSCRemovalPFIsoCharged->push_back(remover.PFIsolation("charged",photon.superCluster(),-1));
+      fTPhoSCRemovalPFIsoChargedPrimVtx->push_back((vertices->size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged->back());
       fTPhoSCRemovalPFIsoNeutral->push_back(remover.PFIsolation("neutral",photon.superCluster()));
       fTPhoSCRemovalPFIsoPhoton->push_back(remover.PFIsolation("photon",photon.superCluster()));
+      PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),-1);
+      fTPhoSCRemovalPFIsoChargedRCone->push_back(risos.chargediso);
+      fTPhoSCRemovalPFIsoChargedPrimVtxRCone->push_back(risos.chargediso_primvtx);
+      fTPhoSCRemovalPFIsoNeutralRCone->push_back(risos.neutraliso);
+      fTPhoSCRemovalPFIsoPhotonRCone->push_back(risos.photoniso);
+      fTPhoSCRemovalRConeEta->push_back(risos.randomcone_eta);
+      fTPhoSCRemovalRConePhi->push_back(risos.randomcone_phi);
     }
 
     fTPhoE1x5 ->push_back(photon.e1x5());
@@ -2216,16 +2229,70 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
     }
 
-       { // start PF stuff from Nicolas
+    { //Look for associated PF objects
+
+      // Initialization
+      fTPhoisPFPhoton  ->push_back(0);
+      fTPhoisPFElectron->push_back(0);
+
+      //Find PFPhoton
+      int iphot=-1;
+      int ncand=pfCandidates->size();
+      for( int i=0; i<ncand; ++i ) {
+        if ((*pfCandidates)[i].particleId()==reco::PFCandidate::gamma){
+          if ((*pfCandidates)[i].mva_nothing_gamma()>0){
+            if( (*pfCandidates)[i].superClusterRef()==photon.superCluster()) {
+              iphot = i;
+            }
+          }
+        }
+      }    
+
+      if (iphot!=-1) {
+	(*fTPhoisPFPhoton)[phoqi] = 1;
+	PhotonToPFPhotonMatchingArray[phoqi] = iphot;
+      }
+      
+      //Find PFElectron
+      bool foundEgSC = false;
+      int iel = -1;
+      reco::GsfElectronCollection::const_iterator elIterSl;
+      for (reco::GsfElectronCollection::const_iterator elIter = electronHandle->begin(); elIter != electronHandle->end(); ++elIter){
+        if (photon.superCluster()==elIter->superCluster()) {
+          elIterSl = elIter;
+          foundEgSC = true;
+        }
+
+        if (foundEgSC){
+          int iid = 0;
+          double MVACut_ = -0.1; //42X
+          //double MVACut_ = -1.; //44X
+          int ncand=pfCandidates->size();
+          for( int i=0; i<ncand; ++i ) {
+            if ((*pfCandidates)[i].particleId()==reco::PFCandidate::e && (*pfCandidates)[i].gsfTrackRef().isNull()==false && (*pfCandidates)[i].mva_e_pi()>MVACut_ && (*pfCandidates)[i].gsfTrackRef()==elIterSl->gsfTrack()){
+              iel = i;
+              iid++;
+            }
+          }
+        }
+     
+      }
+
+      if (iel!=-1) {
+	(*fTPhoisPFElectron)[phoqi] = 1;
+	PhotonToPFElectronMatchingArray[phoqi] = iel;
+      }
+
+    }
+
+
+    /*
+    { // start PF stuff from Nicolas
 
       reco::PhotonCollection::const_iterator gamIterSl;
 
       const Photon* gamIter = &photon;
 	 
-      // Initialization
-      fTPhoisPFPhoton  ->push_back(0);
-      fTPhoisPFElectron->push_back(0);
-
       fTPhoChargedHadronIso->push_back(0);
       fTPhoNeutralHadronIso->push_back(0);
       fTPhoPhotonIso       ->push_back(0);
@@ -2248,61 +2315,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTPhoCone03PFCombinedIso->push_back(0);
       fTPhoCone04PFCombinedIso->push_back(0);
 
-      //Look for associated PF objects
-      bool FoundPFPhoton   = false;
-      bool FoundPFElectron = false;
 
 
 
-      //Find PFPhoton
-      int iphot=-1;
-      int ncand=pfCandidates->size();
-      for( int i=0; i<ncand; ++i ) {
-        if ((*pfCandidates)[i].particleId()==reco::PFCandidate::gamma){
-          if ((*pfCandidates)[i].mva_nothing_gamma()>0){
-            if( (*pfCandidates)[i].superClusterRef()==gamIter->superCluster()) {
-              iphot = i;
-            }
-          }
-        }
-      }    
-
-      if (iphot!=-1) {
-        FoundPFPhoton=true;
-	(*fTPhoisPFPhoton)[phoqi] = 1;
-	PhotonToPFPhotonMatchingArray[phoqi] = iphot;
-      }
-      
-      //Find PFElectron
-      bool foundEgSC = false;
-      int iel = -1;
-      reco::GsfElectronCollection::const_iterator elIterSl;
-      for (reco::GsfElectronCollection::const_iterator elIter = electronHandle->begin(); elIter != electronHandle->end(); ++elIter){
-        if (gamIter->superCluster()==elIter->superCluster()) {
-          elIterSl = elIter;
-          foundEgSC = true;
-        }
-
-        if (foundEgSC){
-          int iid = 0;
-          double MVACut_ = -0.1; //42X
-          //double MVACut_ = -1.; //44X
-          int ncand=pfCandidates->size();
-          for( int i=0; i<ncand; ++i ) {
-            if ((*pfCandidates)[i].particleId()==reco::PFCandidate::e && (*pfCandidates)[i].gsfTrackRef().isNull()==false && (*pfCandidates)[i].mva_e_pi()>MVACut_ && (*pfCandidates)[i].gsfTrackRef()==elIterSl->gsfTrack()){
-              iel = i;
-              iid++;
-            }
-          }
-        }
-     
-      }
-
-      if (iel!=-1) {
-	FoundPFElectron=true;
-	(*fTPhoisPFElectron)[phoqi] = 1;
-	PhotonToPFElectronMatchingArray[phoqi] = iel;
-      }
 
       int PfCandType[10000];
       float PfCandPt[10000];
@@ -2494,7 +2509,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 
        }     // end PF stuff from Nicolas
-
+    */
 
 
 
@@ -2512,9 +2527,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // 		fTPhotS4OverS1 ->push_back(1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits ));
     //      } else
     // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
-  } // end photons
 
 
+  } // end photon loop
+
+
+  /*
 
   ///////////////////////////////////////////////////////
   // USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
@@ -2825,62 +2843,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //       cout << "end vertex selection MVA" << endl;
 
+  */
 
-  ////////////////////////////////////////////////////////
-  // PfCandidates Variables:
-
-  int pfcandIndex(0);
-  for (unsigned int i=0; i<pfCandidates->size(); i++){
-
-    int type = FindPFCandType((*pfCandidates)[i].pdgId());
-    if (type==2) storethispfcand[i]=true;
-
-    if (storethispfcand[i]==0) continue;
-
-    if (pfcandIndex >= gMaxNPfCand){
-      edm::LogWarning("NTP") << "@SUB=analyze"
-			     << "Maximum number of pf candidates exceeded";
-      *fTGoodEvent = 1;
-      break;
-    }
-
-    fTPfCandPdgId->push_back( (*pfCandidates)[i].pdgId() );
-    fTPfCandEta->push_back( (*pfCandidates)[i].eta() );
-    fTPfCandPhi->push_back( (*pfCandidates)[i].phi() );
-    fTPfCandEnergy->push_back( (*pfCandidates)[i].energy() );
-    fTPfCandPt->push_back( (*pfCandidates)[i].pt() );
-    fTPfCandVx->push_back( (*pfCandidates)[i].vx() );
-    fTPfCandVy->push_back( (*pfCandidates)[i].vy() );
-    fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
-
-    for (int j=0; j<(*fTNPhotons); j++){
-      if (PhotonToPFPhotonMatchingArray[j]==(int)i) PhotonToPFPhotonMatchingArrayTranslator[j]=pfcandIndex;
-      if (PhotonToPFElectronMatchingArray[j]==(int)i) PhotonToPFElectronMatchingArrayTranslator[j]=pfcandIndex;
-    }
-
-    if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
-    reco::HitPattern pattern; 
-    if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
-    fTPfCandHasHitInFirstPixelLayer->push_back( (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999 );
-    fTPfCandTrackRefPx->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999 );
-    fTPfCandTrackRefPy->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999 );
-    fTPfCandTrackRefPz->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999 );
-
-
-    pfcandIndex++;
-
-  }
-  *fTNPfCand=pfcandIndex;
-
-  for (int j=0; j<(*fTNPhotons); j++){
-    fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
-    fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
-  }
-
-
-
-
-
+  std::vector<std::vector<int> > Jets_PfCand_content;
 
   ////////////////////////////////////////////////////////
   // Jet Variables:
@@ -2957,8 +2922,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTJHFEMFrac           ->push_back(jet->HFEMEnergy()/uncorr_energy);   // also contained in neutralEmEnergy
     // see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
 
-    vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
-		
+    vector<PFCandidatePtr> JetpfCandidates = jet->getPFConstituents();
+    Jets_PfCand_content.push_back(std::vector<int>());
+
     float sumPt_cands=0.;
     float sumPt2_cands=0.;
     float rms_cands=0.;
@@ -2966,7 +2932,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     TLorentzVector jetp4;
     jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
 
-    for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
+    for (vector<PFCandidatePtr>::const_iterator jCand = JetpfCandidates.begin(); jCand != JetpfCandidates.end(); ++jCand) {
 		  
       math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
       TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
@@ -2977,6 +2943,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         float deltaR = pCand.DeltaR(jetp4);
         rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
 
+      }
+
+      for (int j=0; j<(int)(pfCandidates->size()); j++){
+	if ((*jCand) == edm::Ptr<reco::PFCandidate>(pfCandidates,j)) Jets_PfCand_content.back().push_back(j);
       }
 
     } //for PFCandidates
@@ -3203,6 +3173,73 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
   (*fTNJets) = jqi+1;
   corrIndices.clear();
+
+
+
+
+  ////////////////////////////////////////////////////////
+  // PfCandidates Variables:
+
+  int pfcandIndex(0);
+  for (unsigned int i=0; i<pfCandidates->size(); i++){
+
+    if (!doStorePFCandidates) continue;
+
+    int type = FindPFCandType((*pfCandidates)[i].pdgId());
+    if (type==2) storethispfcand[i]=true;
+
+    if (storethispfcand[i]==0) continue;
+
+    if (pfcandIndex >= gMaxNPfCand){
+      edm::LogWarning("NTP") << "@SUB=analyze"
+			     << "Maximum number of pf candidates exceeded";
+      *fTGoodEvent = 1;
+      break;
+    }
+
+    fTPfCandPdgId->push_back( (*pfCandidates)[i].pdgId() );
+    fTPfCandPt->push_back( (*pfCandidates)[i].pt() );
+    fTPfCandEta->push_back( (*pfCandidates)[i].eta() );
+    fTPfCandPhi->push_back( (*pfCandidates)[i].phi() );
+    fTPfCandEnergy->push_back( (*pfCandidates)[i].energy() );
+    fTPfCandVx->push_back( (*pfCandidates)[i].vx() );
+    fTPfCandVy->push_back( (*pfCandidates)[i].vy() );
+    fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
+
+    for (int j=0; j<(*fTNPhotons); j++){
+      if (PhotonToPFPhotonMatchingArray[j]==(int)i) PhotonToPFPhotonMatchingArrayTranslator[j]=pfcandIndex;
+      if (PhotonToPFElectronMatchingArray[j]==(int)i) PhotonToPFElectronMatchingArrayTranslator[j]=pfcandIndex;
+    }
+
+//    if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
+//    reco::HitPattern pattern; 
+//    if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
+//    fTPfCandHasHitInFirstPixelLayer->push_back( (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999 );
+//    fTPfCandTrackRefPx->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999 );
+//    fTPfCandTrackRefPy->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999 );
+//    fTPfCandTrackRefPz->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999 );
+
+    fTPfCandBelongsToJet->push_back(-999);
+    for (int jet=0; jet<(int)(Jets_PfCand_content.size()); jet++){
+      for (int k=0; k<(int)(Jets_PfCand_content.at(jet).size()); k++){
+	if (Jets_PfCand_content.at(jet).at(k)==(int)i) {
+	  if (fTPfCandBelongsToJet->back()>=0) {cout << "WRONG: this PFCand is already in another jet!" << endl; continue;}
+	  fTPfCandBelongsToJet->back()=jet;
+	}
+      }
+    }
+
+    pfcandIndex++;
+
+  }
+  *fTNPfCand=pfcandIndex;
+  
+  for (int j=0; j<(*fTNPhotons); j++){
+    fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
+    fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
+  }
+
+
 
   ////////////////////////////////////////////////////////
   // Get and Dump (M)E(T) Variables:
@@ -3683,6 +3720,7 @@ void NTupleProducer::declareProducts(void) {
   produces<float,edm::InRun>("MinPhotonPt"   );
   produces<float,edm::InRun>("MaxPhotonEta"  );
   produces<float,edm::InRun>("MinSCraw"      );
+  produces<float,edm::InRun>("MinSCrawPt"    );
   produces<float,edm::InRun>("MinEBRechitE"  );
   
   produces<float,edm::InRun>("MinGenLeptPt"  );
@@ -3717,7 +3755,7 @@ void NTupleProducer::declareProducts(void) {
 
   // Event products
   produces<int>("Run");
-  produces<int>("Event");
+  produces<unsigned int>("Event");
   produces<int>("LumiSection");
   produces<float>("PtHat");
   produces<float>("QCDPartonicHT");
@@ -4189,52 +4227,52 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("PhoisPFPhoton");
   produces<std::vector<int> >("PhoisPFElectron");
   produces<std::vector<int> >("PhotSCindex");
-  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt0");
-  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt5");
-  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt0");
-  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt5");
-  produces<std::vector<float> >("PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  produces<std::vector<float> >("PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  produces<std::vector<float> >("PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  produces<std::vector<float> >("PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt0");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt5");
-  produces<std::vector<float> >("PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
-  produces<std::vector<float> >("PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
-  produces<std::vector<float> >("PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
-  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt0");
+//  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt5");
+//  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt0");
+//  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt5");
+//  produces<std::vector<float> >("PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  produces<std::vector<float> >("PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  produces<std::vector<float> >("PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  produces<std::vector<float> >("PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt0");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt5");
+//  produces<std::vector<float> >("PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
+//  produces<std::vector<float> >("PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
+//  produces<std::vector<float> >("PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
+//  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
   produces<std::vector<bool> > ("PhoConvValidVtx");
   produces<std::vector<bool> > ("ElPassConversionVeto");
   produces<std::vector<bool> > ("PhoPassConversionVeto");
@@ -4436,10 +4474,11 @@ produces<std::vector<float> >("PfCandPt");
 produces<std::vector<float> >("PfCandVx");
 produces<std::vector<float> >("PfCandVy");
 produces<std::vector<float> >("PfCandVz");
-produces<std::vector<int> >("PfCandHasHitInFirstPixelLayer");
-produces<std::vector<float> >("PfCandTrackRefPx");
-produces<std::vector<float> >("PfCandTrackRefPy");
-produces<std::vector<float> >("PfCandTrackRefPz");
+produces<std::vector<int> >("PfCandBelongsToJet");
+//produces<std::vector<int> >("PfCandHasHitInFirstPixelLayer");
+//produces<std::vector<float> >("PfCandTrackRefPx");
+//produces<std::vector<float> >("PfCandTrackRefPy");
+//produces<std::vector<float> >("PfCandTrackRefPz");
 produces<std::vector<int> >("PhoMatchedPFPhotonCand");
 produces<std::vector<int> >("PhoMatchedPFElectronCand");
 produces<std::vector<float> >("PhoVx");
@@ -4447,28 +4486,35 @@ produces<std::vector<float> >("PhoVy");
 produces<std::vector<float> >("PhoVz");
 produces<std::vector<float> >("PhoRegrEnergy");
 produces<std::vector<float> >("PhoRegrEnergyErr");
-produces<std::vector<float> >("PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
-produces<std::vector<float> >("PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
-produces<std::vector<float> >("PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
-produces<std::vector<float> >("PhoCone04PhotonIsodEta015EBdR070EEmvVtx");
-produces<std::vector<float> >("PhoCone01NeutralHadronIsomvVtx");
-produces<std::vector<float> >("PhoCone02NeutralHadronIsomvVtx");
-produces<std::vector<float> >("PhoCone03NeutralHadronIsomvVtx");
-produces<std::vector<float> >("PhoCone04NeutralHadronIsomvVtx");
-produces<std::vector<float> >("PhoCone01ChargedHadronIsodR02dz02dxy01");
-produces<std::vector<float> >("PhoCone02ChargedHadronIsodR02dz02dxy01");
-produces<std::vector<float> >("PhoCone03ChargedHadronIsodR02dz02dxy01");
-produces<std::vector<float> >("PhoCone04ChargedHadronIsodR02dz02dxy01");
-produces<std::vector<float> >("PhoCone03PFCombinedIso");
-produces<std::vector<float> >("PhoCone04PFCombinedIso");
-produces<std::vector<int> >("Diphotonsfirst");
-produces<std::vector<int> >("Diphotonssecond");
-produces<std::vector<int> >("Vtxdiphoh2gglobe");
-produces<std::vector<int> >("Vtxdiphomva");
-produces<std::vector<int> >("Vtxdiphoproductrank");
+//produces<std::vector<float> >("PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
+//produces<std::vector<float> >("PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
+//produces<std::vector<float> >("PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
+//produces<std::vector<float> >("PhoCone04PhotonIsodEta015EBdR070EEmvVtx");
+//produces<std::vector<float> >("PhoCone01NeutralHadronIsomvVtx");
+//produces<std::vector<float> >("PhoCone02NeutralHadronIsomvVtx");
+//produces<std::vector<float> >("PhoCone03NeutralHadronIsomvVtx");
+//produces<std::vector<float> >("PhoCone04NeutralHadronIsomvVtx");
+//produces<std::vector<float> >("PhoCone01ChargedHadronIsodR02dz02dxy01");
+//produces<std::vector<float> >("PhoCone02ChargedHadronIsodR02dz02dxy01");
+//produces<std::vector<float> >("PhoCone03ChargedHadronIsodR02dz02dxy01");
+//produces<std::vector<float> >("PhoCone04ChargedHadronIsodR02dz02dxy01");
+//produces<std::vector<float> >("PhoCone03PFCombinedIso");
+//produces<std::vector<float> >("PhoCone04PFCombinedIso");
+//produces<std::vector<int> >("Diphotonsfirst");
+//produces<std::vector<int> >("Diphotonssecond");
+//produces<std::vector<int> >("Vtxdiphoh2gglobe");
+//produces<std::vector<int> >("Vtxdiphomva");
+//produces<std::vector<int> >("Vtxdiphoproductrank");
 produces<std::vector<float> >("PhoSCRemovalPFIsoCharged");
+produces<std::vector<float> >("PhoSCRemovalPFIsoChargedPrimVtx");
 produces<std::vector<float> >("PhoSCRemovalPFIsoNeutral");
 produces<std::vector<float> >("PhoSCRemovalPFIsoPhoton");
+produces<std::vector<float> >("PhoSCRemovalPFIsoChargedRCone");
+produces<std::vector<float> >("PhoSCRemovalPFIsoChargedPrimVtxRCone");
+produces<std::vector<float> >("PhoSCRemovalPFIsoNeutralRCone");
+produces<std::vector<float> >("PhoSCRemovalPFIsoPhotonRCone");
+produces<std::vector<float> >("PhoSCRemovalRConeEta");
+produces<std::vector<float> >("PhoSCRemovalRConePhi");
 
 
 }
@@ -4478,7 +4524,7 @@ produces<std::vector<float> >("PhoSCRemovalPFIsoPhoton");
 void NTupleProducer::resetProducts( void ) {
   
   fTRun.reset(new int(-999));
-  fTEvent.reset(new int(-999));
+  fTEvent.reset(new unsigned int(0));
   fTLumiSection.reset(new int(-999));
   fTPtHat.reset(new float(-999.99));
   fTQCDPartonicHT.reset(new float(-999.99));
@@ -4951,52 +4997,52 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoisPFPhoton.reset(new std::vector<int> );
   fTPhoisPFElectron.reset(new std::vector<int> );
   fTPhotSCindex.reset(new std::vector<int> );
-  fTPhoCone04PhotonIsodR0dEta0pt0.reset(new std::vector<float> );
-  fTPhoCone04PhotonIsodR0dEta0pt5.reset(new std::vector<float> );
-  fTPhoCone04PhotonIsodR8dEta0pt0.reset(new std::vector<float> );
-  fTPhoCone04PhotonIsodR8dEta0pt5.reset(new std::vector<float> );
-  fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-  fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-  fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-  fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR0dEta0pt0.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR0dEta0pt5.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR7dEta0pt0.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR7dEta0pt5.reset(new std::vector<float> );
-  fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-  fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-  fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-  fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone04PhotonIsodR0dEta0pt0.reset(new std::vector<float> );
+//  fTPhoCone04PhotonIsodR0dEta0pt5.reset(new std::vector<float> );
+//  fTPhoCone04PhotonIsodR8dEta0pt0.reset(new std::vector<float> );
+//  fTPhoCone04PhotonIsodR8dEta0pt5.reset(new std::vector<float> );
+//  fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+//  fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+//  fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+//  fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR0dEta0pt0.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR0dEta0pt5.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR7dEta0pt0.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR7dEta0pt5.reset(new std::vector<float> );
+//  fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+//  fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+//  fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+//  fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+//  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
   fTPhoConvValidVtx.reset(new std::vector<bool>);
   fTPhoConvNtracks.reset(new std::vector<int>);
   fTPhoConvChi2Probability.reset(new std::vector<float>);
@@ -5207,10 +5253,11 @@ fTPfCandPt.reset(new std::vector<float>  );
 fTPfCandVx.reset(new std::vector<float>  );
 fTPfCandVy.reset(new std::vector<float>  );
 fTPfCandVz.reset(new std::vector<float>  );
-fTPfCandHasHitInFirstPixelLayer.reset(new std::vector<int>  );
-fTPfCandTrackRefPx.reset(new std::vector<float>  );
-fTPfCandTrackRefPy.reset(new std::vector<float>  );
-fTPfCandTrackRefPz.reset(new std::vector<float>  );
+fTPfCandBelongsToJet.reset(new std::vector<int>  );
+//fTPfCandHasHitInFirstPixelLayer.reset(new std::vector<int>  );
+//fTPfCandTrackRefPx.reset(new std::vector<float>  );
+//fTPfCandTrackRefPy.reset(new std::vector<float>  );
+//fTPfCandTrackRefPz.reset(new std::vector<float>  );
 fTPhoMatchedPFPhotonCand.reset(new std::vector<int>  );
 fTPhoMatchedPFElectronCand.reset(new std::vector<int>  );
 fTPhoVx.reset(new std::vector<float>  );
@@ -5218,29 +5265,35 @@ fTPhoVy.reset(new std::vector<float>  );
 fTPhoVz.reset(new std::vector<float>  );
 fTPhoRegrEnergy.reset(new std::vector<float>  );
 fTPhoRegrEnergyErr.reset(new std::vector<float>  );
-fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
-fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
-fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
-fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
-fTPhoCone01NeutralHadronIsomvVtx.reset(new std::vector<float>  );
-fTPhoCone02NeutralHadronIsomvVtx.reset(new std::vector<float>  );
-fTPhoCone03NeutralHadronIsomvVtx.reset(new std::vector<float>  );
-fTPhoCone04NeutralHadronIsomvVtx.reset(new std::vector<float>  );
-fTPhoCone01ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
-fTPhoCone02ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
-fTPhoCone03ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
-fTPhoCone04ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
-fTPhoCone03PFCombinedIso.reset(new std::vector<float>  );
-fTPhoCone04PFCombinedIso.reset(new std::vector<float>  );
-fTDiphotonsfirst.reset(new std::vector<int>  );
-fTDiphotonssecond.reset(new std::vector<int>  );
-fTVtxdiphoh2gglobe.reset(new std::vector<int>  );
-fTVtxdiphomva.reset(new std::vector<int>  );
-fTVtxdiphoproductrank.reset(new std::vector<int>  );
+//fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
+//fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
+//fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
+//fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx.reset(new std::vector<float>  );
+//fTPhoCone01NeutralHadronIsomvVtx.reset(new std::vector<float>  );
+//fTPhoCone02NeutralHadronIsomvVtx.reset(new std::vector<float>  );
+//fTPhoCone03NeutralHadronIsomvVtx.reset(new std::vector<float>  );
+//fTPhoCone04NeutralHadronIsomvVtx.reset(new std::vector<float>  );
+//fTPhoCone01ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
+//fTPhoCone02ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
+//fTPhoCone03ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
+//fTPhoCone04ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
+//fTPhoCone03PFCombinedIso.reset(new std::vector<float>  );
+//fTPhoCone04PFCombinedIso.reset(new std::vector<float>  );
+//fTDiphotonsfirst.reset(new std::vector<int>  );
+//fTDiphotonssecond.reset(new std::vector<int>  );
+//fTVtxdiphoh2gglobe.reset(new std::vector<int>  );
+//fTVtxdiphomva.reset(new std::vector<int>  );
+//fTVtxdiphoproductrank.reset(new std::vector<int>  );
 fTPhoSCRemovalPFIsoCharged.reset(new std::vector<float>  );
+fTPhoSCRemovalPFIsoChargedPrimVtx.reset(new std::vector<float>  );
 fTPhoSCRemovalPFIsoNeutral.reset(new std::vector<float>  );
 fTPhoSCRemovalPFIsoPhoton.reset(new std::vector<float>  );
-
+fTPhoSCRemovalPFIsoChargedRCone.reset(new std::vector<float>  );
+fTPhoSCRemovalPFIsoChargedPrimVtxRCone.reset(new std::vector<float>  );
+fTPhoSCRemovalPFIsoNeutralRCone.reset(new std::vector<float>  );
+fTPhoSCRemovalPFIsoPhotonRCone.reset(new std::vector<float>  );
+fTPhoSCRemovalRConeEta.reset(new std::vector<float>  );
+fTPhoSCRemovalRConePhi.reset(new std::vector<float>  );
 
 }
 
@@ -5269,6 +5322,7 @@ void NTupleProducer::resetRunProducts( void ) {
   fRMinPhotonPt .reset(new float(-999.99));
   fRMaxPhotonEta.reset(new float(-999.99));
   fRMinSCraw    .reset(new float(-999.99));                                         
+  fRMinSCrawPt  .reset(new float(-999.99));                                         
   fRMinEBRechitE.reset(new float(-999.99)); 
 
   fRMinGenLeptPt .reset(new float(-999.99)); 
@@ -5775,52 +5829,52 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPhoisPFPhoton, "PhoisPFPhoton");
   event.put(fTPhoisPFElectron, "PhoisPFElectron");
   event.put(fTPhotSCindex, "PhotSCindex");
-  event.put(fTPhoCone04PhotonIsodR0dEta0pt0, "PhoCone04PhotonIsodR0dEta0pt0");
-  event.put(fTPhoCone04PhotonIsodR0dEta0pt5, "PhoCone04PhotonIsodR0dEta0pt5");
-  event.put(fTPhoCone04PhotonIsodR8dEta0pt0, "PhoCone04PhotonIsodR8dEta0pt0");
-  event.put(fTPhoCone04PhotonIsodR8dEta0pt5, "PhoCone04PhotonIsodR8dEta0pt5");
-  event.put(fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  event.put(fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  event.put(fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  event.put(fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0, "PhoCone04NeutralHadronIsodR0dEta0pt0");
-  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5, "PhoCone04NeutralHadronIsodR0dEta0pt5");
-  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
-  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
-  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt0, "PhoCone04NeutralHadronIsodR7dEta0pt0");
-  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt5, "PhoCone04NeutralHadronIsodR7dEta0pt5");
-  event.put(fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
-  event.put(fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
-  event.put(fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
-  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
-  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
-  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
-  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
-  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
-  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0, "PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
-  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
-  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0, "PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
-  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
-  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0, "PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
-  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
-  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0, "PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
-  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
-  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0, "PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
-  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
-  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0, "PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
-  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
-  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
-  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
-  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
-  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
-  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
-  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  event.put(fTPhoCone04PhotonIsodR0dEta0pt0, "PhoCone04PhotonIsodR0dEta0pt0");
+//  event.put(fTPhoCone04PhotonIsodR0dEta0pt5, "PhoCone04PhotonIsodR0dEta0pt5");
+//  event.put(fTPhoCone04PhotonIsodR8dEta0pt0, "PhoCone04PhotonIsodR8dEta0pt0");
+//  event.put(fTPhoCone04PhotonIsodR8dEta0pt5, "PhoCone04PhotonIsodR8dEta0pt5");
+//  event.put(fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  event.put(fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  event.put(fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  event.put(fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+//  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0, "PhoCone04NeutralHadronIsodR0dEta0pt0");
+//  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5, "PhoCone04NeutralHadronIsodR0dEta0pt5");
+//  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
+//  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
+//  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt0, "PhoCone04NeutralHadronIsodR7dEta0pt0");
+//  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt5, "PhoCone04NeutralHadronIsodR7dEta0pt5");
+//  event.put(fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
+//  event.put(fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
+//  event.put(fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
+//  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
+//  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
+//  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
+//  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
+//  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
+//  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0, "PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
+//  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0, "PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
+//  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0, "PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
+//  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0, "PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
+//  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0, "PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
+//  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0, "PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
+//  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
+//  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
+//  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
+//  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
+//  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
+//  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
   event.put(fTPhoConvValidVtx, "PhoConvValidVtx");
   event.put(fTPhoConvNtracks, "PhoConvNtracks");
   event.put(fTPhoConvChi2Probability, "PhoConvChi2Probability");
@@ -6020,10 +6074,11 @@ event.put(fTPfCandPt,"PfCandPt");
 event.put(fTPfCandVx,"PfCandVx");
 event.put(fTPfCandVy,"PfCandVy");
 event.put(fTPfCandVz,"PfCandVz");
-event.put(fTPfCandHasHitInFirstPixelLayer,"PfCandHasHitInFirstPixelLayer");
-event.put(fTPfCandTrackRefPx,"PfCandTrackRefPx");
-event.put(fTPfCandTrackRefPy,"PfCandTrackRefPy");
-event.put(fTPfCandTrackRefPz,"PfCandTrackRefPz");
+event.put(fTPfCandBelongsToJet,"PfCandBelongsToJet");
+//event.put(fTPfCandHasHitInFirstPixelLayer,"PfCandHasHitInFirstPixelLayer");
+//event.put(fTPfCandTrackRefPx,"PfCandTrackRefPx");
+//event.put(fTPfCandTrackRefPy,"PfCandTrackRefPy");
+//event.put(fTPfCandTrackRefPz,"PfCandTrackRefPz");
 event.put(fTPhoMatchedPFPhotonCand,"PhoMatchedPFPhotonCand");
 event.put(fTPhoMatchedPFElectronCand,"PhoMatchedPFElectronCand");
 event.put(fTPhoVx,"PhoVx");
@@ -6031,28 +6086,35 @@ event.put(fTPhoVy,"PhoVy");
 event.put(fTPhoVz,"PhoVz");
 event.put(fTPhoRegrEnergy,"PhoRegrEnergy");
 event.put(fTPhoRegrEnergyErr,"PhoRegrEnergyErr");
-event.put(fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx,"PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
-event.put(fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx,"PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
-event.put(fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx,"PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
-event.put(fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx,"PhoCone04PhotonIsodEta015EBdR070EEmvVtx");
-event.put(fTPhoCone01NeutralHadronIsomvVtx,"PhoCone01NeutralHadronIsomvVtx");
-event.put(fTPhoCone02NeutralHadronIsomvVtx,"PhoCone02NeutralHadronIsomvVtx");
-event.put(fTPhoCone03NeutralHadronIsomvVtx,"PhoCone03NeutralHadronIsomvVtx");
-event.put(fTPhoCone04NeutralHadronIsomvVtx,"PhoCone04NeutralHadronIsomvVtx");
-event.put(fTPhoCone01ChargedHadronIsodR02dz02dxy01,"PhoCone01ChargedHadronIsodR02dz02dxy01");
-event.put(fTPhoCone02ChargedHadronIsodR02dz02dxy01,"PhoCone02ChargedHadronIsodR02dz02dxy01");
-event.put(fTPhoCone03ChargedHadronIsodR02dz02dxy01,"PhoCone03ChargedHadronIsodR02dz02dxy01");
-event.put(fTPhoCone04ChargedHadronIsodR02dz02dxy01,"PhoCone04ChargedHadronIsodR02dz02dxy01");
-event.put(fTPhoCone03PFCombinedIso,"PhoCone03PFCombinedIso");
-event.put(fTPhoCone04PFCombinedIso,"PhoCone04PFCombinedIso");
-event.put(fTDiphotonsfirst,"Diphotonsfirst");
-event.put(fTDiphotonssecond,"Diphotonssecond");
-event.put(fTVtxdiphoh2gglobe,"Vtxdiphoh2gglobe");
-event.put(fTVtxdiphomva,"Vtxdiphomva");
-event.put(fTVtxdiphoproductrank,"Vtxdiphoproductrank");
+//event.put(fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx,"PhoCone01PhotonIsodEta015EBdR070EEmvVtx");
+//event.put(fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx,"PhoCone02PhotonIsodEta015EBdR070EEmvVtx");
+//event.put(fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx,"PhoCone03PhotonIsodEta015EBdR070EEmvVtx");
+//event.put(fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx,"PhoCone04PhotonIsodEta015EBdR070EEmvVtx");
+//event.put(fTPhoCone01NeutralHadronIsomvVtx,"PhoCone01NeutralHadronIsomvVtx");
+//event.put(fTPhoCone02NeutralHadronIsomvVtx,"PhoCone02NeutralHadronIsomvVtx");
+//event.put(fTPhoCone03NeutralHadronIsomvVtx,"PhoCone03NeutralHadronIsomvVtx");
+//event.put(fTPhoCone04NeutralHadronIsomvVtx,"PhoCone04NeutralHadronIsomvVtx");
+//event.put(fTPhoCone01ChargedHadronIsodR02dz02dxy01,"PhoCone01ChargedHadronIsodR02dz02dxy01");
+//event.put(fTPhoCone02ChargedHadronIsodR02dz02dxy01,"PhoCone02ChargedHadronIsodR02dz02dxy01");
+//event.put(fTPhoCone03ChargedHadronIsodR02dz02dxy01,"PhoCone03ChargedHadronIsodR02dz02dxy01");
+//event.put(fTPhoCone04ChargedHadronIsodR02dz02dxy01,"PhoCone04ChargedHadronIsodR02dz02dxy01");
+//event.put(fTPhoCone03PFCombinedIso,"PhoCone03PFCombinedIso");
+//event.put(fTPhoCone04PFCombinedIso,"PhoCone04PFCombinedIso");
+//event.put(fTDiphotonsfirst,"Diphotonsfirst");
+//event.put(fTDiphotonssecond,"Diphotonssecond");
+//event.put(fTVtxdiphoh2gglobe,"Vtxdiphoh2gglobe");
+//event.put(fTVtxdiphomva,"Vtxdiphomva");
+//event.put(fTVtxdiphoproductrank,"Vtxdiphoproductrank");
 event.put(fTPhoSCRemovalPFIsoCharged,"PhoSCRemovalPFIsoCharged");
+event.put(fTPhoSCRemovalPFIsoChargedPrimVtx,"PhoSCRemovalPFIsoChargedPrimVtx");
 event.put(fTPhoSCRemovalPFIsoNeutral,"PhoSCRemovalPFIsoNeutral");
 event.put(fTPhoSCRemovalPFIsoPhoton,"PhoSCRemovalPFIsoPhoton");
+event.put(fTPhoSCRemovalPFIsoChargedRCone,"PhoSCRemovalPFIsoChargedRCone");
+event.put(fTPhoSCRemovalPFIsoChargedPrimVtxRCone,"PhoSCRemovalPFIsoChargedPrimVtxRCone");
+event.put(fTPhoSCRemovalPFIsoNeutralRCone,"PhoSCRemovalPFIsoNeutralRCone");
+event.put(fTPhoSCRemovalPFIsoPhotonRCone,"PhoSCRemovalPFIsoPhotonRCone");
+event.put(fTPhoSCRemovalRConeEta, "PhoSCRemovalRConeEta");
+event.put(fTPhoSCRemovalRConePhi, "PhoSCRemovalRConePhi");
 
 }
 
@@ -6111,6 +6173,7 @@ bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
   *fRMinPhotonPt   = fMinPhotonPt;
   *fRMaxPhotonEta  = fMaxPhotonEta;
   *fRMinSCraw      = fMinSCraw;
+  *fRMinSCrawPt    = fMinSCrawPt;
   *fRMinEBRechitE  = fMinEBRechitE;
   
   *fRMinGenLeptPt  = fMinGenLeptPt;
@@ -6164,6 +6227,7 @@ bool NTupleProducer::endRun(edm::Run& r, const edm::EventSetup&){
   r.put(fRMinPhotonPt   ,"MinPhotonPt"   );
   r.put(fRMaxPhotonEta  ,"MaxPhotonEta"  );
   r.put(fRMinSCraw      ,"MinSCraw"      );
+  r.put(fRMinSCrawPt    ,"MinSCrawPt"    );
   r.put(fRMinEBRechitE  ,"MinEBRechitE"  );
                                                                         
   r.put(fRMinGenLeptPt  ,"MinGenLeptPt"  );

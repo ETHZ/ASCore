@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <limits>
 
 // ROOT includes
 #include "TH1.h"
@@ -194,10 +195,11 @@ private:
   int fNFillTree;
 
   bool doVertexingFlag;
+  bool doStorePFCandidates;
 
   static const int gMaxNMus     = 30;
   static const int gMaxNEles    = 20;
-  static const int gMaxNJets    = 100;
+  static const int gMaxNJets    = 200;
   static const int gMaxNTrks    = 800;
   static const int gMaxNPhotons = 50;
   static const int gMaxNConv    = 50;
@@ -206,9 +208,9 @@ private:
   static const int gMaxNGenPhot = 100;
   static const int gMaxNGenJets = 100;
   static const int gMaxNVrtx    = 50;
-  static const int gMaxNPileup  = 60;
+  static const int gMaxNPileup  = 100;
   static const int gMaxNEBhits  = 20;
-  static const int gMaxNGenVtx = 60;
+  static const int gMaxNGenVtx = 100;
   static const int gMaxNGenParticles = 2000;
   static const int gMaxNPfCand = 2000;
   static const int gMaxNXtals = 2000;
@@ -293,6 +295,7 @@ private:
   float fMinPhotonPt;
   float fMaxPhotonEta;
   float fMinSCraw;
+  float fMinSCrawPt;
   float fMinEBRechitE; 
   
   float fMinGenLeptPt; 
@@ -333,6 +336,7 @@ private:
   std::auto_ptr<float> fRMinPhotonPt;
   std::auto_ptr<float> fRMaxPhotonEta;
   std::auto_ptr<float> fRMinSCraw;
+  std::auto_ptr<float> fRMinSCrawPt;
   std::auto_ptr<float> fRMinEBRechitE;
 
   std::auto_ptr<float> fRMinGenLeptPt;
@@ -376,7 +380,7 @@ private:
   // Event information:
   // General event information
   std::auto_ptr<int>   fTRun;
-  std::auto_ptr<int>   fTEvent;
+  std::auto_ptr<unsigned int>  fTEvent;
   std::auto_ptr<int>   fTLumiSection;
 
   std::auto_ptr<std::vector<float> >  fTpdfW;
@@ -1163,6 +1167,7 @@ std::auto_ptr<std::vector<float> > fTPfCandPt;
 std::auto_ptr<std::vector<float> > fTPfCandVx;
 std::auto_ptr<std::vector<float> > fTPfCandVy;
 std::auto_ptr<std::vector<float> > fTPfCandVz;
+std::auto_ptr<std::vector<int> > fTPfCandBelongsToJet;
 std::auto_ptr<std::vector<int> > fTPfCandHasHitInFirstPixelLayer;
 std::auto_ptr<std::vector<float> > fTPfCandTrackRefPx;
 std::auto_ptr<std::vector<float> > fTPfCandTrackRefPy;
@@ -1194,8 +1199,15 @@ std::auto_ptr<std::vector<int> > fTVtxdiphoh2gglobe;
 std::auto_ptr<std::vector<int> > fTVtxdiphomva;
 std::auto_ptr<std::vector<int> > fTVtxdiphoproductrank;
 std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoCharged;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoChargedPrimVtx;
 std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoNeutral;
 std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoPhoton;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoChargedRCone;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoChargedPrimVtxRCone;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoNeutralRCone;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalPFIsoPhotonRCone;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalRConeEta;
+std::auto_ptr<std::vector<float> > fTPhoSCRemovalRConePhi;
 
 
 

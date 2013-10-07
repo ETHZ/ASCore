@@ -83,7 +83,7 @@ git checkout V00-00-22 PFIsolationEstimator.cc
 cd ${OLDPWD}
 
 
-mygitaddpkg SCFootprintRemoval V00-02d
+mygitaddpkg SCFootprintRemoval V01-01
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 
@@ -92,5 +92,5 @@ mkdir DiLeptonAnalysis
 mv ASCore DiLeptonAnalysis/NTupleProducer
 
 
-wget http://cern.ch/sani/gbrv3ph_52x.root .
+wget http://cern.ch/sani/gbrv3ph_52x.root 
 mv gbrv3ph_52x.root DiLeptonAnalysis/NTupleProducer/data/gbrv3ph_52x.root

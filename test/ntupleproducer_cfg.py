@@ -38,6 +38,11 @@ options.register ('FastSim', # register 'runon' option
                                     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                                     VarParsing.VarParsing.varType.bool,         # string, int, or float
                                     "If you are dealing with a FastSim (but not a model scan!), set this to True, otherwise to False (default)")
+options.register ('doStorePFCandidates',
+                  False,
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you want to store the PF candidates as selected in the source file, set to True, otherwise False (default)")
 options.register ('doVertexing',
                   False,
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -233,6 +238,7 @@ process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData      = (options.runon=='data')
 process.analyze.isModelScan     = options.ModelScan
 process.analyze.isFastSim     = options.FastSim
+process.analyze.tag_doStorePFCandidates = options.doStorePFCandidates
 process.analyze.tag_doVertexing = options.doVertexing
 process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
 process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights

@@ -42,6 +42,7 @@ analyze = cms.EDFilter('NTupleProducer',
         tag_SC_endcap    = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
 
         tag_doVertexing = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
+        tag_doStorePFCandidates = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
         tag_fTrackCollForVertexing = cms.InputTag("generalTracks"),
         tag_fallConversionsCollForVertexing = cms.InputTag("allConversions"),
         tag_perVtxMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
@@ -74,16 +75,17 @@ analyze = cms.EDFilter('NTupleProducer',
 	sel_maxtrknchi2   = cms.double(1e15),
 	sel_mintrknhits   = cms.int32(0),
 	# Photons
-	sel_minphopt      = cms.double(5.0),
-	sel_maxphoeta     = cms.double(2.8),
+	sel_minphopt      = cms.double(10.0),
+	sel_maxphoeta     = cms.double(3.0),
         # SC
-        sel_minSCraw      = cms.double(5.0),
+        sel_minSCraw      = cms.double(10.0),
+        sel_minSCrawPt    = cms.double(10.0),
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(0.0),
 	sel_maxgenlepteta = cms.double(100),
 	# GenPhotons
 	sel_mingenphotpt = cms.double(5.0),
-	sel_maxgenphoteta = cms.double(2.5),
+	sel_maxgenphoteta = cms.double(3.0),
 	# GenJets
 	sel_mingenjetpt  = cms.double(10.0),
 	sel_maxgenjeteta = cms.double(6.0),
