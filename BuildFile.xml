@@ -48,6 +48,8 @@
 <use   name="DataFormats/EcalRecHit"/>
 <use   name="root"/>
 <use   name="PFIsolation/SuperClusterFootprintRemoval"/>
+<use   name="HiggsAnalysis/GBRLikelihood"/>
+<use   name="HiggsAnalysis/GBRLikelihoodEGTools"/>
 <lib   name="Geom"/>
 <flags   EDM_PLUGIN="1"/>
 <flags   CXXFLAGS="-g -fno-var-tracking-assignments"/>

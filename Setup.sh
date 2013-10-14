@@ -69,10 +69,10 @@ mv VertexAnalysis h2gglobe/VertexAnalysis
 
 mygitaddpkg emanuele/MyAnalysis/IsolationTools V04-00-01
 mv emanuele/MyAnalysis .
-rm -rf emanuele
+rmdir emanuele
 mygitaddpkg sixie/Muon/MuonAnalysisTools V00-00-10
 mv sixie/Muon .
-rm -rf sixie
+rmdir sixie
 
 mygitaddpkg EGamma/EGammaAnalysisTools V00-00-21
 cd EGamma/EGammaAnalysisTools/interface
@@ -82,6 +82,18 @@ cd EGamma/EGammaAnalysisTools/src
 git checkout V00-00-22 PFIsolationEstimator.cc
 cd ${OLDPWD}
 
+mygitaddpkg bendavid/GBRLikelihood hggpaperV6
+mkdir HiggsAnalysis
+mv bendavid/GBRLikelihood HiggsAnalysis
+rmdir bendavid
+
+wget --no-check-certificate https://github.com/ETHZ/bendavid-GBRLikelihoodEGTools/archive/hggpaperV6.zip
+unzip hggpaperV6
+rm hggpaperV6
+mv bendavid-GBRLikelihoodEGTools-hggpaperV6 HiggsAnalysis/GBRLikelihoodEGTools
+mv HiggsAnalysis/GBRLikelihoodEGTools/data/{regweights_v5_forest_ph.root,regweights_v8_7TeV_forest_ph.root} .
+rm HiggsAnalysis/GBRLikelihoodEGTools/data/regweights*.root
+mv regweights*.root HiggsAnalysis/GBRLikelihoodEGTools/data
 
 mygitaddpkg SCFootprintRemoval V01-01
 mkdir PFIsolation
@@ -91,6 +103,3 @@ mygitaddpkg ASCore EDMdev
 mkdir DiLeptonAnalysis
 mv ASCore DiLeptonAnalysis/NTupleProducer
 
-
-wget http://cern.ch/sani/gbrv3ph_52x.root 
-mv gbrv3ph_52x.root DiLeptonAnalysis/NTupleProducer/data/gbrv3ph_52x.root

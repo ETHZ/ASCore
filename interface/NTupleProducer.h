@@ -101,6 +101,9 @@
 #include "h2gglobe/VertexAnalysis/interface/VertexAlgoParameters.h"
 #include "TMVA/Reader.h"
 
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "HiggsAnalysis/GBRLikelihoodEGTools/interface/EGEnergyCorrectorSemiParm.h"
+
 #include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
 #include <sys/stat.h>
 
@@ -157,8 +160,6 @@ private:
   
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
-  EGEnergyCorrector ecorr_;
-  std::string energyRegFilename;
   int fexist(char*);
 
   std::string perVtxMvaWeights, perVtxMvaMethod;
@@ -276,6 +277,8 @@ private:
   HggVertexAnalyzer *vAna;
   HggVertexFromConversions *vConv;
    
+  int regrVersion;
+  EGEnergyCorrectorSemiParm corSemiParm;
 
   // Selection cuts
   float fMinMuPt;

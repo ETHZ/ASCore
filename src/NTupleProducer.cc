@@ -197,7 +197,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   perVtxMvaMethod  = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
   perEvtMvaWeights = iConfig.getParameter<std::string>("tag_perEvtMvaWeights");
   perEvtMvaMethod  = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
-  energyRegFilename = iConfig.getParameter<std::string> ("energyCorrectionsFileNamePho"); 
+  regrVersion      = iConfig.getParameter<int>("tag_regressionVersion");
 
   doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
   doStorePFCandidates = iConfig.getParameter<bool>("tag_doStorePFCandidates");
@@ -601,6 +601,28 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   LocalCorrFunc->init(iSetup);
 
   EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
+
+  if (!corSemiParm.IsInitialized() && (regrVersion==5 || regrVersion==8)) {
+    char filename[500];
+    char* descr = getenv("CMSSW_BASE");
+    std::string energyRegFilename;
+    if (regrVersion==8) {
+      energyRegFilename="regweights_v8_7TeV_forest_ph.root";
+      sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
+      corSemiParm.Initialize(filename,8);
+    }
+    if (regrVersion==5) {
+      energyRegFilename="regweights_v5_forest_ph.root";
+      sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
+      corSemiParm.Initialize(filename,5);
+    }
+  }
+
+  Handle<reco::VertexCollection> hVertexProductBS;
+  iEvent.getByLabel("offlinePrimaryVerticesWithBS", hVertexProductBS); 
+
+  Handle<double> hRhoRegr;
+  iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
 
   // type-I corrected MET for 2012 analyses
   edm::Handle<View<PFMET> > typeICorMET;
@@ -1977,14 +1999,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
 
 
-  // Initialize the photon energy regression
-  if (!ecorr_.IsInitialized())  {
-    char filename[500];
-    char* descr = getenv("CMSSW_BASE");
-    sprintf(filename, "%s/src/DiLeptonAnalysis/NTupleProducer/data/%s", descr, energyRegFilename.c_str());    
-    ecorr_.Initialize(iSetup, filename);
-  }
-
   ////////////////////////////////////////////////////////
   // Photon Variables:
   // Keep pointers to superclusters for cross cleaning
@@ -2066,11 +2080,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoVz             ->push_back(photon.vz());
 
     {
-      std::pair<double,double> cor;
-      if (fIsRealData) cor = ecorr_.CorrectedEnergyWithErrorV3(photon, *vertices, *rho, lazyTools, iSetup);
-      else cor = ecorr_.CorrectedEnergyWithErrorV3(photon, *vertices, *rho, lazyTools, iSetup, true);
-      fTPhoRegrEnergy     ->push_back(cor.first);
-      fTPhoRegrEnergyErr  ->push_back(cor.second);
+      double ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval;
+      ecor=-999;
+      sigeovere=-999;
+      sigma=-999;
+      if (regrVersion==8) corSemiParm.CorrectedEnergyWithErrorV8(photon, *hVertexProductBS, *hRhoRegr, lazyTools, iSetup, ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval);
+      else if (regrVersion==5) corSemiParm.CorrectedEnergyWithErrorV5(photon, *hVertexProductBS, *hRhoRegr, lazyTools, iSetup, ecor, sigma, alpha1, n1, alpha2, n2, pdfval);
+      fTPhoRegrEnergy     ->push_back(ecor);
+      fTPhoRegrEnergyErr  ->push_back((regrVersion==8) ? sigeovere : sigma);
     }
 
 

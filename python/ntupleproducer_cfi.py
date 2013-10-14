@@ -49,6 +49,7 @@ analyze = cms.EDFilter('NTupleProducer',
         tag_perVtxMvaMethod = cms.string("BDTCat"),
         tag_perEvtMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
         tag_perEvtMvaMethod = cms.string("evtBDTG"),
+        tag_regressionVersion = cms.int32(-1), # turned off by default; use version number 5 for 2012 @ 8 TeV, number 8 for 2011 @ 7 TeV
 
                          
 	# Trigger paths to store the triggering object information of
@@ -100,9 +101,7 @@ analyze = cms.EDFilter('NTupleProducer',
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
 	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')
-	pu_mc   = cms.vstring('', ''),  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
-
-        energyCorrectionsFileNamePho = cms.string("gbrv3ph_52x.root")
+	pu_mc   = cms.vstring('', '')  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
 
 )
 
