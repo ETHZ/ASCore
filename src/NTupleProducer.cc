@@ -1889,11 +1889,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
             (*fTElSCindex)[eqi] = -1;			    
           }
 
-        if ((*fTElSCindex)[eqi]==-1) {
-          //edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for electron"; 
-          //	*fTGoodEvent = 1; 
-          //	break;
-        }
+//        if ((*fTElSCindex)[eqi]==-1) {
+//          //edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for electron"; 
+//          //	*fTGoodEvent = 1; 
+//          //	break;
+//        }
       }
 
 
@@ -2239,11 +2239,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           (*fTPhotSCindex)[phoqi] = -1;	    
         }
 
-      if ( (*fTPhotSCindex)[phoqi]==-1) {
-        edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for photon"; 
-        // *fTGoodEvent = 1; 
-        // break;
-      }
+//      if ( (*fTPhotSCindex)[phoqi]==-1) {
+//        edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for photon"; 
+//        // *fTGoodEvent = 1; 
+//        // break;
+//      }
     }
 
     { //Look for associated PF objects
