@@ -62,7 +62,7 @@ rm -rf Patches-OldReleases
 
 mygitaddpkg RecoEgamma/EgammaTools RecoEgamma-EgammaTools-V09-00-00
 
-mygitaddpkg h2gglobe vertex_mva_v4
+mygitaddpkg h2gglobe vertexing_for2012
 mv h2gglobe/VertexAnalysis .
 rm -rf h2gglobe/*
 mv VertexAnalysis h2gglobe/VertexAnalysis
@@ -98,6 +98,11 @@ mv regweights*.root HiggsAnalysis/GBRLikelihoodEGTools/data
 mygitaddpkg SCFootprintRemoval V01-01
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
+
+mygitaddpkg CMGTools/External V00-03-04
+
+mygitaddpkg amarini-QuarkGluonTagger QGtag_forETHntuple
+mv amarini-QuarkGluonTagger QuarkGluonTagger
 
 mygitaddpkg ASCore EDMdev
 mkdir DiLeptonAnalysis

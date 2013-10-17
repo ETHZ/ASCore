@@ -123,6 +123,8 @@
 #include "DiLeptonAnalysis/NTupleProducer/interface/ETHVertexInfo.h"
 #include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
 
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
+
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
 
@@ -193,10 +195,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fSCTagEndcap = iConfig.getParameter<edm::InputTag>("tag_SC_endcap");
   fTrackCollForVertexing          = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
   fAllConversionsCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
-  perVtxMvaWeights = iConfig.getParameter<std::string>("tag_perVtxMvaWeights");
-  perVtxMvaMethod  = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
-  perEvtMvaWeights = iConfig.getParameter<std::string>("tag_perEvtMvaWeights");
-  perEvtMvaMethod  = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
   regrVersion      = iConfig.getParameter<int>("tag_regressionVersion");
 
   doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
@@ -385,11 +383,32 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
 
-//  // initialize diphoton vertex MVA
-//  vAna  = new HggVertexAnalyzer(vtxAlgoParams);
-//  vConv = new HggVertexFromConversions(vtxAlgoParams);
-//  if (doVertexingFlag) vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 
+
+  {  // initialize diphoton vertex MVA
+
+    SetupVtxAlgoParams2012(vtxAlgoParams);
+
+    vAna  = new HggVertexAnalyzer(vtxAlgoParams);
+    vConv = new HggVertexFromConversions(vtxAlgoParams);
+    rankVariables.push_back("ptbal"); rankVariables.push_back("ptasym"); rankVariables.push_back("logsumpt2");
+
+    perVtxVariables = rankVariables;
+    if( addConversionToMva ) {
+      perVtxVariables.push_back("limPullToConv");
+      perVtxVariables.push_back("nConv");
+    }
+    
+    perVtxReader = new TMVA::Reader( "!Color:!Silent" );
+    HggVertexAnalyzer::bookVariables( *perVtxReader, perVtxVariables );
+    perVtxReader->BookMVA( perVtxMvaMethod, perVtxMvaWeights );
+    
+    perEvtReader = new TMVA::Reader( "!Color:!Silent" );
+    HggVertexAnalyzer::bookPerEventVariables( *perEvtReader );
+    perEvtReader->BookMVA( perEvtMvaMethod, perEvtMvaWeights );
+    
+  }
+  
 }
 
 //________________________________________________________________________________________
@@ -460,6 +479,20 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<double> rhoForIso;
   iEvent.getByLabel(fSrcRhoForIso,rhoForIso);
   *fTRhoForIso = *rhoForIso;
+
+  // rho for QG tagger systematics 
+  edm::Handle<double> rhoForQG;
+  iEvent.getByLabel("kt6PFJetsForQGSyst","rho",rhoForQG);
+
+  {
+    TString descr = getenv("CMSSW_BASE");
+    std::string systDB_fullPath = Form("%s/src/QuarkGluonTagger/EightTeV/data/SystDatabase.txt",descr.Data()); // for Pythia
+    //    std::string systDB_fullPath = Form("%s/src/QuarkGluonTagger/EightTeV/data/SystDatabase_Hpp.txt",descr.Data()); // for Herwig++
+    qgsyst.ReadDatabaseDoubleMin(systDB_fullPath);
+  }
+
+  edm::Handle<reco::GenParticleCollection> GlobalGenParticles;
+  if (!fIsRealData) iEvent.getByLabel(fGenPartTag, GlobalGenParticles);
 
   // beam halo
   if(!fIsFastSim){
@@ -624,6 +657,16 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   Handle<double> hRhoRegr;
   iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
 
+  Handle<ValueMap<int> > puJetIdFlag_cut;
+  Handle<ValueMap<int> > puJetIdFlag_mva;
+  iEvent.getByLabel("recoPuJetMva","cutbasedId",puJetIdFlag_cut);
+  iEvent.getByLabel("recoPuJetMva","full53xId",puJetIdFlag_mva);
+
+  edm::Handle<edm::ValueMap<float> >  QGTagsHandleMLP;
+  edm::Handle<edm::ValueMap<float> >  QGTagsHandleLikelihood;
+  iEvent.getByLabel("QGTagger","qgMLP", QGTagsHandleMLP);
+  iEvent.getByLabel("QGTagger","qgLikelihood", QGTagsHandleLikelihood);
+
   // type-I corrected MET for 2012 analyses
   edm::Handle<View<PFMET> > typeICorMET;
   iEvent.getByLabel("pfType1CorrectedMet",typeICorMET);
@@ -741,12 +784,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         return false;
       }
 		
-      float Q = pdfstuff->pdf()->scalePDF;
-      int id1 = pdfstuff->pdf()->id.first;
-      double x1 = pdfstuff->pdf()->x.first;
+//      float Q = pdfstuff->pdf()->scalePDF;
+//      int id1 = pdfstuff->pdf()->id.first;
+//      double x1 = pdfstuff->pdf()->x.first;
       //       double pdf1 = pdfstuff->pdf()->xPDF.first;
-      int id2 = pdfstuff->pdf()->id.second;
-      double x2 = pdfstuff->pdf()->x.second;
+//      int id2 = pdfstuff->pdf()->id.second;
+//      double x2 = pdfstuff->pdf()->x.second;
       //       double pdf2 = pdfstuff->pdf()->xPDF.second;
 
       fTpdfW->push_back(1);
@@ -1130,11 +1173,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
     // Steve Mrenna's status 2 parton jets
     edm::Handle<GenJetCollection> partonGenJets;
-    bool partonGenJets_found = iEvent.getByLabel("partonGenJets", partonGenJets);
+    iEvent.getByLabel("partonGenJets", partonGenJets);
     GenJetCollection::const_iterator pGenJet;
 
     edm::Handle<View<Candidate> > partons;
-    bool partons_found = iEvent.getByLabel("partons", partons);
+    iEvent.getByLabel("partons", partons);
 	 
     std::vector<const GenParticle*> gen_photons;
     std::vector<const GenParticle*> gen_photons_mothers;
@@ -2086,6 +2129,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       sigma=-999;
       if (regrVersion==8) corSemiParm.CorrectedEnergyWithErrorV8(photon, *hVertexProductBS, *hRhoRegr, lazyTools, iSetup, ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval);
       else if (regrVersion==5) corSemiParm.CorrectedEnergyWithErrorV5(photon, *hVertexProductBS, *hRhoRegr, lazyTools, iSetup, ecor, sigma, alpha1, n1, alpha2, n2, pdfval);
+
       fTPhoRegrEnergy     ->push_back(ecor);
       fTPhoRegrEnergyErr  ->push_back((regrVersion==8) ? sigeovere : sigma);
     }
@@ -2164,16 +2208,18 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoisPFlowPhoton->push_back(photon.isPFlowPhoton());
     fTPhoisStandardPhoton->push_back(photon.isStandardPhoton());
 
+    fTPhoConvValidVtx->push_back(false);
+    fTPhoConvChi2Probability->push_back(-999.);
+    fTPhoConvNtracks->push_back(-999.);
+    fTPhoConvEoverP->push_back(-999.);
+
     if (doVertexingFlag && photon.hasConversionTracks()) { // photon conversions
 
       reco::ConversionRefVector conversions = photon.conversions();
       if (conversions.size()<1) { std::cout << "something wrong here" << std::endl; }
       reco::ConversionRef conv = conversions[0];
-      fTPhoConvValidVtx->push_back(conv->conversionVertex().isValid());
+      (*fTPhoConvValidVtx)[phoqi]=conv->conversionVertex().isValid();
 
-      fTPhoConvChi2Probability->push_back(-999.);
-      fTPhoConvNtracks->push_back(-999.);
-      fTPhoConvEoverP->push_back(-999.);
       if ((*fTPhoConvValidVtx)[phoqi] && ConversionsCut(*conv)) {
         reco::Vertex vtx=conv->conversionVertex();
         pho_conv_vtx[phoqi].SetXYZ(vtx.x(), vtx.y(), vtx.z());
@@ -2549,7 +2595,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   } // end photon loop
 
 
-  /*
+  
 
   ///////////////////////////////////////////////////////
   // USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
@@ -2574,21 +2620,18 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     edm::Handle<VertexCollection> vtxH = vertices;
     
-    int tk_n = 0; 
-    
-    float tk_px[__TRK_AUX_ARRAYS_DIM__];
-    float tk_py[__TRK_AUX_ARRAYS_DIM__];
-    float tk_pz[__TRK_AUX_ARRAYS_DIM__];
-    float tk_d0[__TRK_AUX_ARRAYS_DIM__];
-    float tk_dz[__TRK_AUX_ARRAYS_DIM__];
-    float tk_d0err[__TRK_AUX_ARRAYS_DIM__];
-    float tk_dzerr[__TRK_AUX_ARRAYS_DIM__];
-    float tk_pterr[__TRK_AUX_ARRAYS_DIM__];
-    bool tk_ishighpurity[__TRK_AUX_ARRAYS_DIM__];
+    std::vector<TVector3> vtxes;
+    std::vector<TVector3> tracks_p3;
+    std::vector<int> tkVtxId;
+    std::vector<float> tk_d0;
+    std::vector<float> tk_d0Err;
+    std::vector<float> tk_dz;
+    std::vector<float> tk_dzErr;
+    std::vector<float> tk_PtErr;
+    std::vector<bool> tk_ishighpurity;
     std::vector<std::vector<unsigned short> > vtx_std_tkind;
-    std::vector<std::vector<float> > vtx_std_tkweight;
-    int vtx_std_ntks[__VTX_AUX_ARRAYS_DIM__];
-    int tkVtxId[__TRK_AUX_ARRAYS_DIM__];
+    std::vector<std::vector<float> > vtx_std_tkweight; // remember: [vertex][track]
+    std::vector<int> vtx_std_ntks;
     
     
     { // tracks
@@ -2599,11 +2642,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
         if (VTX_MVA_DEBUG) cout << "working on vtx " << i << endl;
 
-        if (vtxH->size()>__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
+        if (i>=__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
 
         reco::VertexRef vtx(vtxH, i);
 	  
-        vtx_std_ntks[i]=vtx->tracksSize();
         if (VTX_MVA_DEBUG)	     	     cout << "vtx tracks " << vtx->tracksSize() << endl;
 	     
         std::vector<unsigned short> temp;
@@ -2613,7 +2655,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
             if (VTX_MVA_DEBUG)		 		 cout << "processing vtx track (out of " << vtx->tracksSize() << ")" << endl;
             int index = 0;
-            bool ismatched = false; 
             for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
               if (VTX_MVA_DEBUG)		   		   std::cout << j << std::endl;
               reco::TrackRef track(tkH, j);
@@ -2621,29 +2662,23 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
               if (&(**tk) == &(*track)) {
                 temp.push_back(index);
                 temp_float.push_back(vtx->trackWeight(track));
-                ismatched = true;
                 if (VTX_MVA_DEBUG)		     		     cout << "matching found index" << index << " weight " << vtx->trackWeight(track) << endl;
                 break;
               }
               index++;
             }
-            if(!ismatched) {
-              temp.push_back(-9999);
-              temp_float.push_back(-9999);
-            }
           }
         }
         else {
           if (VTX_MVA_DEBUG)	       	       cout << "no vertex tracks found" << endl;
-          temp = std::vector<unsigned short>(0);
-          temp_float = std::vector<float>(0);
         }
-      
-        //	      for (std::vector<unsigned short>::const_iterator it=temp.begin(); it!=temp.end(); it++) {int k=0; vtx_std_tkind[i][k]=*it; k++;}
-        //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
+
+	vtxes.push_back(TVector3(vtx->x(),vtx->y(),vtx->z()));
+	vtx_std_ntks.push_back(temp.size());
         vtx_std_tkind.push_back(temp);
         vtx_std_tkweight.push_back(temp_float);
         if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << std::endl;
+
       }	  
 
       if (VTX_MVA_DEBUG){
@@ -2655,25 +2690,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       for(unsigned int i=0; i<tkH->size(); i++) {
 
-        if (tkH->size()>__TRK_AUX_ARRAYS_DIM__) std::cout << "Too many tracks in the event; please enlarge the value of __TRK_AUX_ARRAYS_DIM__" << std::endl;
+        if (i>=__TRK_AUX_ARRAYS_DIM__) std::cout << "Too many tracks in the event; please enlarge the value of __TRK_AUX_ARRAYS_DIM__" << std::endl;
 
         reco::TrackRef tk(tkH, i);
 
         if(TrackCut(tk))continue; 
 	
-        tk_px[tk_n] = tk->px();
-        tk_py[tk_n] = tk->py();
-        tk_pz[tk_n] = tk->pz();
-        tk_d0[tk_n] = tk->d0();
-        tk_dz[tk_n] = tk->dz();
-        tk_dzerr[tk_n] = tk->dzError();
-        tk_d0err[tk_n] = tk->d0Error();   
-        tk_pterr[tk_n] = tk->ptError();
-        tk_ishighpurity[tk_n] = tkIsHighPurity(tk);
-        tkVtxId[tk_n] = -1; 
+	tracks_p3.push_back(TVector3(tk->px(),tk->py(),tk->pz()));
+        tk_d0.push_back(tk->d0());
+        tk_dz.push_back(tk->dz());
+        tk_dzErr.push_back(tk->dzError());
+        tk_d0Err.push_back(tk->d0Error());   
+        tk_PtErr.push_back(tk->ptError());
+        tk_ishighpurity.push_back(tkIsHighPurity(tk));
+        tkVtxId.push_back(-1); 
 	 
-
-        tk_n++;
       } // for i (loop over all tracks)
 
       if (VTX_MVA_DEBUG)	  cout << "done tracks" << endl;
@@ -2699,159 +2730,157 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  break;
 	}
 
-	fTConvValidVtx->push_back( localConv.conversionVertex().isValid() );
+	fTConvValidVtx->push_back(false);
+	fTConvNtracks           ->push_back(-999);
+	fTConvChi2Probability   ->push_back(-999);
+	fTConvEoverP            ->push_back(-999);
+	fTConvZofPrimVtxFromTrks->push_back(-999);
+	conv_refitted_momentum[*fTNconv].SetXYZ(-999,-999,-999);
+	conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
 
-
+	fTConvValidVtx->at(*fTNconv)=localConv.conversionVertex().isValid();
         if ( localConv.conversionVertex().isValid() ) {
 	  reco::Vertex vtx=localConv.conversionVertex();
 	  conv_vtx[*fTNconv].SetXYZ(vtx.x(), vtx.y(), vtx.z());
-	  fTConvNtracks           ->push_back(localConv.nTracks());	  
-	  fTConvChi2Probability   ->push_back(ChiSquaredProbability(vtx.chi2(), vtx.ndof()));
-	  fTConvEoverP            ->push_back(localConv.EoverPrefittedTracks());
-	  fTConvZofPrimVtxFromTrks->push_back(localConv.zOfPrimaryVertexFromTracks());
+	  fTConvNtracks           ->at(*fTNconv)=(localConv.nTracks());	  
+	  fTConvChi2Probability   ->at(*fTNconv)=(ChiSquaredProbability(vtx.chi2(), vtx.ndof()));
+	  fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks());
+	  fTConvZofPrimVtxFromTrks->at(*fTNconv)=(localConv.zOfPrimaryVertexFromTracks());
 	  conv_refitted_momentum[*fTNconv].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
+	  conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
 	}
 
         (*fTNconv)++;  
       }
 
+
+      for (edm::View<reco::Photon>::const_iterator  localPho=photons->begin(); localPho!=photons->end(); localPho++) {
+	for (std::vector<reco::Photon>::const_iterator  iPfCand=pfPhotonHandle->begin(); iPfCand!=pfPhotonHandle->end(); iPfCand++) {
+      if (localPho->superCluster()!=iPfCand->superCluster()) continue;
+      reco::ConversionRefVector convsingleleg = iPfCand->conversionsOneLeg();
+      for (unsigned int iconvoneleg=0; iconvoneleg<convsingleleg.size(); iconvoneleg++){
+      
+      reco::Conversion localConv = reco::Conversion(*convsingleleg[iconvoneleg]);
+
+      if(ConversionsCut(localConv)) continue;
+
+        if (*fTNconv >= gMaxNConv){
+          edm::LogWarning("NTP") << "@SUB=analyze"
+                                 << "Maximum number of conversions exceeded";
+				 *fTGoodEvent = 1;
+          break;
+        }
+
+	fTConvValidVtx->push_back(false);
+	fTConvNtracks           ->push_back(-999);
+	fTConvChi2Probability   ->push_back(-999);
+	fTConvEoverP            ->push_back(-999);
+	fTConvZofPrimVtxFromTrks->push_back(-999);
+	conv_refitted_momentum[*fTNconv].SetXYZ(-999,-999,-999);
+	conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
+
+	fTConvValidVtx->at(*fTNconv)=localConv.conversionVertex().isValid();
+        if ( localConv.conversionVertex().isValid() ) {
+          reco::Vertex vtx=localConv.conversionVertex();
+          conv_vtx[*fTNconv].SetXYZ(vtx.x(), vtx.y(), vtx.z());
+          fTConvNtracks           ->at(*fTNconv)=(localConv.nTracks());
+          fTConvChi2Probability   ->at(*fTNconv)=(ChiSquaredProbability(vtx.chi2(), vtx.ndof()));
+          fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks());
+          fTConvZofPrimVtxFromTrks->at(*fTNconv)=(localConv.zOfPrimaryVertexFromTracks());
+          conv_refitted_momentum[*fTNconv].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
+	  conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
+	  if( localConv.nTracks()) {
+	    const std::vector<edm::RefToBase<reco::Track> > tracks = localConv.tracks();
+	    conv_singleleg_momentum[*fTNconv].SetXYZ(tracks[0]->px(), tracks[0]->py(), tracks[0]->pz());
+	  }
+        }
+
+        (*fTNconv)++;
+	
+	}
+	
+	}
+	}
+	
+
     }
 
     if (VTX_MVA_DEBUG)       cout << "done convs" << endl;
 
-    std::vector<std::string> vtxVarNames;
-    vtxVarNames.push_back("ptbal"), vtxVarNames.push_back("ptasym"), vtxVarNames.push_back("logsumpt2");
+    ETHVertexInfo vinfo(vtxes.size(),&vtxes,tracks_p3.size(),&tracks_p3,&tk_PtErr,&tkVtxId,&tk_d0,&tk_d0Err,&tk_dz,&tk_dzErr,&tk_ishighpurity,&vtx_std_tkind,&vtx_std_tkweight,&vtx_std_ntks);
+    
+    if (VTX_MVA_DEBUG)	 cout << "ready" << endl;	 
+    
+    // fully combinatorial vertex selection
+    for (int ip=0; ip<(*fTNPhotons); ++ip) {
+    for (int jp=ip+1; jp<(*fTNPhotons); ++jp) {
+    diphotons_first.push_back(ip);
+    diphotons_second.push_back(jp);
+    }
+    }
+    
+    
+    for(unsigned int id=0; id<diphotons_first.size(); ++id ) {
+    
+    if (VTX_MVA_DEBUG)	     cout << "processing diphoton pair " << id << endl;
+    
+    int ipho1 = diphotons_first[id];
+    int ipho2 = diphotons_second[id];
+    
+    PhotonInfo pho1=fillPhotonInfos(ipho1,vtxAlgoParams.useAllConversions,(*fTPhoRegrEnergy)[ipho1]);
+    PhotonInfo pho2=fillPhotonInfos(ipho2,vtxAlgoParams.useAllConversions,(*fTPhoRegrEnergy)[ipho2]);
 
-    if (VTX_MVA_DEBUG)	 cout << "ready: remember delete readers" << endl;	 
+    if (VTX_MVA_DEBUG)	     cout << "filled photon/tuplevertex info" << endl;
+    if (VTX_MVA_DEBUG)	     cout << vinfo.nvtx() << " vertices" << endl;
+
+    vAna->analyze(vinfo,pho1,pho2);
+
+    if (VTX_MVA_DEBUG)	     cout << "initialized vAna" << endl;
+
+    // make sure that vertex analysis indexes are in synch 
+    assert( int(id) == vAna->pairID(ipho1,ipho2) );
+
+    if (VTX_MVA_DEBUG)	     cout << "starting rankings" << endl;
+
+    if (VTX_MVA_DEBUG)	     cout << "rankprod" << endl;
+    /// rank product vertex selection. Including pre-selection based on conversions information.
+    vtx_dipho_productrank.push_back(vAna->rankprod(rankVariables));
 
 
-    if( (*fTNPhotons) < 2 ) {
-
-      vtx_dipho_h2gglobe.push_back( std::vector<int>() );
-      vtx_dipho_mva.push_back( std::vector<int>() );
-      vtx_dipho_productrank.push_back( std::vector<int>() );
-	   
-      for(int ii=0;ii<(*fTNVrtx); ++ii) {vtx_dipho_h2gglobe.back().push_back(ii); }
-      for(int ii=0;ii<(*fTNVrtx); ++ii) {vtx_dipho_mva.back().push_back(ii); }
-      for(int ii=0;ii<(*fTNVrtx); ++ii) {vtx_dipho_productrank.back().push_back(ii); }
-
-    } else {
-
-      if (VTX_MVA_DEBUG)	   cout << "temp" << endl;
-
-      // fully combinatorial vertex selection
-      for(int ip=0; ip<(*fTNPhotons); ++ip) {
-        for(int jp=ip+1; jp<(*fTNPhotons); ++jp) {
-          diphotons_first.push_back(ip);
-          diphotons_second.push_back(jp);
-        }
-      }
+    if (VTX_MVA_DEBUG)	     cout << "mva pasquale" << endl;
+    /// MVA vertex selection
+    vtx_dipho_mva.push_back(vAna->rank(*perVtxReader,perVtxMvaMethod));
 
 
-      for(unsigned int id=0; id<diphotons_first.size(); ++id ) {
-			
-        if (VTX_MVA_DEBUG)	     cout << "processing diphoton pair " << id << endl;
-
-        int ipho1 = diphotons_first[id];
-        int ipho2 = diphotons_second[id];
-
-		  
-        PhotonInfo pho1=fillPhotonInfos(ipho1,vtxAlgoParams.useAllConversions);
-        PhotonInfo pho2=fillPhotonInfos(ipho2,vtxAlgoParams.useAllConversions);
+    // vertex probability through per-event MVA (not used so far)
+    // float vtxEvtMva = vAna->perEventMva( *perEvtReader,  perEvtMvaMethod, vtx_dipho_mva->back() );
+    // float vtxProb = vAna->vertexProbability( vtxEvtMva );
 	     
-        ETHVertexInfo vinfo(int((*fTNVrtx)),
-                            (*fTVrtxX),
-                            (*fTVrtxY),
-                            (*fTVrtxZ),
-                            int(tk_n),
-                            tk_px+0,
-                            tk_py+0,
-                            tk_pz+0,
-                            tk_pterr+0,
-                            tkVtxId+0,
-                            tk_d0+0,
-                            tk_d0err+0,
-                            tk_dz+0,
-                            tk_dzerr+0,
-                            tk_ishighpurity+0,
-                            vtx_std_tkind,
-                            vtx_std_tkweight,
-                            vtx_std_ntks+0
-                            );
+    if (VTX_MVA_DEBUG)	     cout << "mva hgg globe" << endl;
+    // Globe vertex selection with conversions
+    vtx_dipho_h2gglobe.push_back(HggVertexSelection(*vAna, *vConv, pho1, pho2, perVtxVariables, mvaVertexSelection, perVtxReader, perVtxMvaMethod));
 
-
-        if (VTX_MVA_DEBUG)	     cout << "filled photon/tuplevertex info" << endl;
-        if (VTX_MVA_DEBUG)	     cout << vinfo.nvtx() << " vertices" << endl;
-
-        vAna->analyze(vinfo,pho1,pho2);
-
-        if (VTX_MVA_DEBUG)	     cout << "initialized vAna" << endl;
-
-        // make sure that vertex analysis indexes are in synch 
-        assert( int(id) == vAna->pairID(ipho1,ipho2) );
-
-        if (VTX_MVA_DEBUG)	     cout << "starting rankings" << endl;
-
-        if (VTX_MVA_DEBUG)	     cout << "rankprod" << endl;
-        /// rank product vertex selection. Including pre-selection based on conversions information.
-        vtx_dipho_productrank.push_back(vAna->rankprod(rankVariables));
-
-
-        if (VTX_MVA_DEBUG)	     cout << "mva pasquale" << endl;
-        /// MVA vertex selection
-        vtx_dipho_mva.push_back(vAna->rank(*perVtxReader,perVtxMvaMethod));
-
-
-        // vertex probability through per-event MVA (not used so far)
-        // float vtxEvtMva = vAna->perEventMva( *perEvtReader,  perEvtMvaMethod, vtx_dipho_mva->back() );
-        // float vtxProb = vAna->vertexProbability( vtxEvtMva );
-	     
-        if (VTX_MVA_DEBUG)	     cout << "mva hgg globe" << endl;
-        // Globe vertex selection with conversions
-        vtx_dipho_h2gglobe.push_back(HggVertexSelection(*vAna, *vConv, pho1, pho2, vtxVarNames,false,0,""));
-
-
-        if (VTX_MVA_DEBUG){
-          cout << "ranking : ";
-          for (std::vector<int>::const_iterator it=vtx_dipho_productrank.at(id).begin(); it!=vtx_dipho_productrank.at(id).end(); it++) cout << *it;
-          cout << endl;
-          cout << "pasquale : ";
-          for (std::vector<int>::const_iterator it=vtx_dipho_mva.at(id).begin(); it!=vtx_dipho_mva.at(id).end(); it++) cout << *it;
-          cout << endl;
-          cout << "globe : ";
-          for (std::vector<int>::const_iterator it=vtx_dipho_h2gglobe.at(id).begin(); it!=vtx_dipho_h2gglobe.at(id).end(); it++) cout << *it;
-          cout << endl;
-        }
+    if (VTX_MVA_DEBUG){
+    cout << "ranking : ";
+    for (std::vector<int>::const_iterator it=vtx_dipho_productrank.at(id).begin(); it!=vtx_dipho_productrank.at(id).end(); it++) cout << *it;
+    cout << endl;
+    cout << "pasquale : ";
+    for (std::vector<int>::const_iterator it=vtx_dipho_mva.at(id).begin(); it!=vtx_dipho_mva.at(id).end(); it++) cout << *it;
+    cout << endl;
+    cout << "globe : ";
+    for (std::vector<int>::const_iterator it=vtx_dipho_h2gglobe.at(id).begin(); it!=vtx_dipho_h2gglobe.at(id).end(); it++) cout << *it;
+    cout << endl;
+    }
 	     
 
-      } // end diphoton loop
+    } // end diphoton loop
  
-
-    } // end else
-	
-
-    { // write output of vertexing
-
-      int i1;
-      int i2;
-
-      // [diphoton_pair][ranking_of_vertices]
-
-      i1=0;
-      for (std::vector<int>::const_iterator it=diphotons_first.begin(); it!=diphotons_first.end() && i1<gMax_vertexing_diphoton_pairs; it++) {fTDiphotonsfirst->push_back(*it); i1++;}
-      i2=0;
-      for (std::vector<int>::const_iterator it=diphotons_second.begin(); it!=diphotons_second.end() && i2<gMax_vertexing_diphoton_pairs; it++) {fTDiphotonssecond->push_back(*it); i2++;}
-
-      for (i1=0; i1<(int)vtx_dipho_h2gglobe.size() && i1<gMax_vertexing_diphoton_pairs; i1++){
-	fTVtxdiphoh2gglobe->push_back(vtx_dipho_h2gglobe.at(i1).at(0));
-      }
-      for (i1=0; i1<(int)vtx_dipho_mva.size() && i1<gMax_vertexing_diphoton_pairs; i1++){
-	fTVtxdiphomva->push_back(vtx_dipho_mva.at(i1).at(0));
-      }
-      for (i1=0; i1<(int)vtx_dipho_productrank.size() && i1<gMax_vertexing_diphoton_pairs; i1++){
-	fTVtxdiphoproductrank->push_back(vtx_dipho_productrank.at(i1).at(0));
-      }
-
+    for (int i=0; i<(int)diphotons_first.size() && i<gMax_vertexing_diphoton_pairs; i++) { // write output of vertexing
+      fTDiphotonsfirst->push_back(diphotons_first.at(i));
+      fTDiphotonssecond->push_back(diphotons_second.at(i));
+      fTVtxdiphoh2gglobe->push_back(vtx_dipho_h2gglobe.at(i).at(0));
+      fTVtxdiphomva->push_back(vtx_dipho_mva.at(i).at(0));
+      fTVtxdiphoproductrank->push_back(vtx_dipho_productrank.at(i).at(0));
     }
 
     vAna->clear();
@@ -2860,7 +2889,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //       cout << "end vertex selection MVA" << endl;
 
-  */
+
 
   std::vector<std::vector<int> > Jets_PfCand_content;
 
@@ -3187,6 +3216,73 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // GenJet matching
     if (!fIsRealData && (*fTNGenJets) > 0) fTJGenJetIndex->push_back( matchJet(&(*jet)) );
     fTJGood->push_back( 0 );
+
+    fTJPassPileupIDCutBasedLoose ->push_back(false);
+    fTJPassPileupIDCutBasedMedium->push_back(false);
+    fTJPassPileupIDCutBasedTight ->push_back(false);
+    fTJPassPileupIDMvaBasedLoose ->push_back(false);
+    fTJPassPileupIDMvaBasedMedium->push_back(false);
+    fTJPassPileupIDMvaBasedTight ->push_back(false);
+
+    int    idflag_cut = (*puJetIdFlag_cut)[jets->refAt(index)];
+    int    idflag_mva = (*puJetIdFlag_mva)[jets->refAt(index)];
+    if( PileupJetIdentifier::passJetId( idflag_cut, PileupJetIdentifier::kLoose )) {
+      fTJPassPileupIDCutBasedLoose->back()=true;
+    }
+    if( PileupJetIdentifier::passJetId( idflag_cut, PileupJetIdentifier::kMedium )) {
+      fTJPassPileupIDCutBasedMedium->back()=true;
+    }
+    if( PileupJetIdentifier::passJetId( idflag_cut, PileupJetIdentifier::kTight )) {
+      fTJPassPileupIDCutBasedTight->back()=true;
+    }
+    if( PileupJetIdentifier::passJetId( idflag_mva, PileupJetIdentifier::kLoose )) {
+      fTJPassPileupIDMvaBasedLoose->back()=true;
+    }
+    if( PileupJetIdentifier::passJetId( idflag_mva, PileupJetIdentifier::kMedium )) {
+      fTJPassPileupIDMvaBasedMedium->back()=true;
+    }
+    if( PileupJetIdentifier::passJetId( idflag_mva, PileupJetIdentifier::kTight )) {
+      fTJPassPileupIDMvaBasedTight->back()=true;
+    }
+
+    { // QG tagging
+      edm::RefToBase<reco::Jet> jetRef(jets->refAt(index));
+      fTJQGTagLD->push_back(-999);
+      fTJQGTagMLP->push_back(-999);
+      fTJSmearedQGL->push_back(-999);
+      if (QGTagsHandleLikelihood.isValid()) {
+	fTJQGTagLD->back()=(*QGTagsHandleLikelihood)[jetRef];
+
+	// see https://twiki.cern.ch/twiki/bin/viewauth/CMS/GluonTag for further information
+	// type is the jet flavor and must be either "quark" or "gluon" or "all"
+	// (to be matched at parton level, i.e. status 3; if no match or pileup set to all)
+
+	fTJSmearedQGL->back()=fTJQGTagLD->back();
+	
+	if (!fIsRealData){
+	  std::string jet_type = "all";
+	  for (reco::GenParticleCollection::const_iterator gpart = GlobalGenParticles->begin(); gpart != GlobalGenParticles->end(); gpart++){
+	    if( gpart->status() != 3 ) continue;
+	    if( (gpart->pdgId()<-4) || (gpart->pdgId()>4 && gpart->pdgId()!=21)) continue;
+	    double dr = reco::deltaR(gpart->eta(), gpart->phi(), fTJEta->back(), fTJPhi->back());
+	    if(dr > 0.3) continue;
+	    double ndpt = fabs(gpart->pt() - fTJPt->back())/gpart->pt();
+	    if(ndpt > 2.) continue;
+	    if (gpart->pdgId()==21) jet_type="gluon";
+	    else jet_type="quark";
+	    break;
+	  }
+	  fTJSmearedQGL->back() = qgsyst.Smear(fTJPt->back(), fTJEta->back(), *rhoForQG, fTJQGTagLD->back(), jet_type);
+	}
+
+      }
+
+      if (QGTagsHandleMLP.isValid()) {
+	fTJQGTagMLP->back()=(*QGTagsHandleMLP)[jetRef];
+      }
+
+    }
+
   }
   (*fTNJets) = jqi+1;
   corrIndices.clear();
@@ -3418,7 +3514,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if(!fIsRealData&&fIsModelScan && !fIsFastSim) {
     
     Handle<LHEEventProduct> product;
-    bool LHEEventProduct_found = iEvent.getByLabel("source", product);
+    iEvent.getByLabel("source", product);
     LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
     LHEEventProduct::comments_const_iterator c_end = product->comments_end();
 
@@ -4392,6 +4488,15 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("JMetCorrRawPt");  
   produces<std::vector<float> >("JMetCorrEMF"); 
   produces<std::vector<float> >("JMetCorrArea");
+  produces<std::vector<bool> >("JPassPileupIDCutBasedLoose");
+  produces<std::vector<bool> >("JPassPileupIDCutBasedMedium");
+  produces<std::vector<bool> >("JPassPileupIDCutBasedTight");
+  produces<std::vector<bool> >("JPassPileupIDMvaBasedLoose");
+  produces<std::vector<bool> >("JPassPileupIDMvaBasedMedium");
+  produces<std::vector<bool> >("JPassPileupIDMvaBasedTight");
+  produces<std::vector<float> >("JQGTagLD");
+  produces<std::vector<float> >("JQGTagMLP");
+  produces<std::vector<float> >("JSmearedQGL");
   produces<int>("NTracks");
   produces<int>("NTracksTot");
   produces<std::vector<int> >("TrkGood");
@@ -4517,11 +4622,11 @@ produces<std::vector<float> >("PhoRegrEnergyErr");
 //produces<std::vector<float> >("PhoCone04ChargedHadronIsodR02dz02dxy01");
 //produces<std::vector<float> >("PhoCone03PFCombinedIso");
 //produces<std::vector<float> >("PhoCone04PFCombinedIso");
-//produces<std::vector<int> >("Diphotonsfirst");
-//produces<std::vector<int> >("Diphotonssecond");
-//produces<std::vector<int> >("Vtxdiphoh2gglobe");
-//produces<std::vector<int> >("Vtxdiphomva");
-//produces<std::vector<int> >("Vtxdiphoproductrank");
+produces<std::vector<int> >("Diphotonsfirst");
+produces<std::vector<int> >("Diphotonssecond");
+produces<std::vector<int> >("Vtxdiphoh2gglobe");
+produces<std::vector<int> >("Vtxdiphomva");
+produces<std::vector<int> >("Vtxdiphoproductrank");
 produces<std::vector<float> >("PhoSCRemovalPFIsoCharged");
 produces<std::vector<float> >("PhoSCRemovalPFIsoChargedPrimVtx");
 produces<std::vector<float> >("PhoSCRemovalPFIsoNeutral");
@@ -5080,6 +5185,7 @@ void NTupleProducer::resetProducts( void ) {
     pho_conv_refitted_momentum[i]=TVector3();
     conv_vtx[i]=TVector3();
     conv_refitted_momentum[i]=TVector3();
+    conv_singleleg_momentum[i]=TVector3();
   }
   for (int i=0; i<gMaxNGenVtx; i++) {
     gv_pos[i]=TVector3();
@@ -5170,6 +5276,15 @@ void NTupleProducer::resetProducts( void ) {
   fTJMetCorrRawPt.reset(new std::vector<float> );
   fTJMetCorrEMF.reset(new std::vector<float> );
   fTJMetCorrArea.reset(new std::vector<float> );
+  fTJPassPileupIDCutBasedLoose.reset(new std::vector<bool> );
+  fTJPassPileupIDCutBasedMedium.reset(new std::vector<bool> );
+  fTJPassPileupIDCutBasedTight.reset(new std::vector<bool> );
+  fTJPassPileupIDMvaBasedLoose.reset(new std::vector<bool> );
+  fTJPassPileupIDMvaBasedMedium.reset(new std::vector<bool> );
+  fTJPassPileupIDMvaBasedTight.reset(new std::vector<bool> );
+  fTJQGTagLD.reset(new std::vector<float> );
+  fTJQGTagMLP.reset(new std::vector<float> );
+  fTJSmearedQGL.reset(new std::vector<float> );
   fTNTracks.reset(new int(0));
   fTNTracksTot.reset(new int(0));
   fTTrkGood.reset(new std::vector<int> );
@@ -5296,11 +5411,11 @@ fTPhoRegrEnergyErr.reset(new std::vector<float>  );
 //fTPhoCone04ChargedHadronIsodR02dz02dxy01.reset(new std::vector<float>  );
 //fTPhoCone03PFCombinedIso.reset(new std::vector<float>  );
 //fTPhoCone04PFCombinedIso.reset(new std::vector<float>  );
-//fTDiphotonsfirst.reset(new std::vector<int>  );
-//fTDiphotonssecond.reset(new std::vector<int>  );
-//fTVtxdiphoh2gglobe.reset(new std::vector<int>  );
-//fTVtxdiphomva.reset(new std::vector<int>  );
-//fTVtxdiphoproductrank.reset(new std::vector<int>  );
+fTDiphotonsfirst.reset(new std::vector<int>  );
+fTDiphotonssecond.reset(new std::vector<int>  );
+fTVtxdiphoh2gglobe.reset(new std::vector<int>  );
+fTVtxdiphomva.reset(new std::vector<int>  );
+fTVtxdiphoproductrank.reset(new std::vector<int>  );
 fTPhoSCRemovalPFIsoCharged.reset(new std::vector<float>  );
 fTPhoSCRemovalPFIsoChargedPrimVtx.reset(new std::vector<float>  );
 fTPhoSCRemovalPFIsoNeutral.reset(new std::vector<float>  );
@@ -5892,16 +6007,16 @@ void NTupleProducer::putProducts( edm::Event& event ) {
 //  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
 //  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
 //  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
-  event.put(fTPhoConvValidVtx, "PhoConvValidVtx");
-  event.put(fTPhoConvNtracks, "PhoConvNtracks");
-  event.put(fTPhoConvChi2Probability, "PhoConvChi2Probability");
-  event.put(fTPhoConvEoverP, "PhoConvEoverP");
-  event.put(fTNconv, "Nconv");
-  event.put(fTConvValidVtx, "ConvValidVtx");
-  event.put(fTConvNtracks, "ConvNtracks");
-  event.put(fTConvChi2Probability, "ConvChi2Probability");
-  event.put(fTConvEoverP, "ConvEoverP");
-  event.put(fTConvZofPrimVtxFromTrks, "ConvZofPrimVtxFromTrks");
+//  event.put(fTPhoConvValidVtx, "PhoConvValidVtx");
+//  event.put(fTPhoConvNtracks, "PhoConvNtracks");
+//  event.put(fTPhoConvChi2Probability, "PhoConvChi2Probability");
+//  event.put(fTPhoConvEoverP, "PhoConvEoverP");
+//  event.put(fTNconv, "Nconv");
+//  event.put(fTConvValidVtx, "ConvValidVtx");
+//  event.put(fTConvNtracks, "ConvNtracks");
+//  event.put(fTConvChi2Probability, "ConvChi2Probability");
+//  event.put(fTConvEoverP, "ConvEoverP");
+//  event.put(fTConvZofPrimVtxFromTrks, "ConvZofPrimVtxFromTrks");
   event.put(fTNgv, "Ngv");
   event.put(fTgvSumPtHi, "gvSumPtHi");
   event.put(fTgvSumPtLo, "gvSumPtLo");
@@ -5992,6 +6107,15 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTJMetCorrPhi,  "JMetCorrPhi");  
   event.put(fTJMetCorrEMF, "JMetCorrEMF"); 
   event.put(fTJMetCorrArea,"JMetCorrArea");
+  event.put(fTJPassPileupIDCutBasedLoose,"JPassPileupIDCutBasedLoose");
+  event.put(fTJPassPileupIDCutBasedMedium,"JPassPileupIDCutBasedMedium");
+  event.put(fTJPassPileupIDCutBasedTight,"JPassPileupIDCutBasedTight");
+  event.put(fTJPassPileupIDMvaBasedLoose,"JPassPileupIDMvaBasedLoose");
+  event.put(fTJPassPileupIDMvaBasedMedium,"JPassPileupIDMvaBasedMedium");
+  event.put(fTJPassPileupIDMvaBasedTight,"JPassPileupIDMvaBasedTight");
+  event.put(fTJQGTagLD,"JQGTagLD");
+  event.put(fTJQGTagMLP,"JQGTagMLP");
+  event.put(fTJSmearedQGL,"JSmearedQGL");
   event.put(fTNTracks, "NTracks");
   event.put(fTNTracksTot, "NTracksTot");
   event.put(fTTrkGood, "TrkGood");
@@ -6117,11 +6241,11 @@ event.put(fTPhoRegrEnergyErr,"PhoRegrEnergyErr");
 //event.put(fTPhoCone04ChargedHadronIsodR02dz02dxy01,"PhoCone04ChargedHadronIsodR02dz02dxy01");
 //event.put(fTPhoCone03PFCombinedIso,"PhoCone03PFCombinedIso");
 //event.put(fTPhoCone04PFCombinedIso,"PhoCone04PFCombinedIso");
-//event.put(fTDiphotonsfirst,"Diphotonsfirst");
-//event.put(fTDiphotonssecond,"Diphotonssecond");
-//event.put(fTVtxdiphoh2gglobe,"Vtxdiphoh2gglobe");
-//event.put(fTVtxdiphomva,"Vtxdiphomva");
-//event.put(fTVtxdiphoproductrank,"Vtxdiphoproductrank");
+event.put(fTDiphotonsfirst,"Diphotonsfirst");
+event.put(fTDiphotonssecond,"Diphotonssecond");
+event.put(fTVtxdiphoh2gglobe,"Vtxdiphoh2gglobe");
+event.put(fTVtxdiphomva,"Vtxdiphomva");
+event.put(fTVtxdiphoproductrank,"Vtxdiphoproductrank");
 event.put(fTPhoSCRemovalPFIsoCharged,"PhoSCRemovalPFIsoCharged");
 event.put(fTPhoSCRemovalPFIsoChargedPrimVtx,"PhoSCRemovalPFIsoChargedPrimVtx");
 event.put(fTPhoSCRemovalPFIsoNeutral,"PhoSCRemovalPFIsoNeutral");
@@ -6620,19 +6744,22 @@ bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
-PhotonInfo NTupleProducer::fillPhotonInfos(int p1, bool useAllConvs) 
+PhotonInfo NTupleProducer::fillPhotonInfos(int p1, int useAllConvs, float correnergy) 
 {
 	
-  int iConv1 = useAllConvs ? matchPhotonToConversion(p1) : -1;
+
+  assert(fTPhotSCindex->at(p1)>=0);
+
+  int iConv1 = useAllConvs>0 ? matchPhotonToConversion(p1,useAllConvs) : -1;
 	
   if ( iConv1 >= 0) {
     // conversions infos
     return PhotonInfo(p1,
-                      TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
+		      TVector3(fTSCX->at(fTPhotSCindex->at(p1)),fTSCY->at(fTPhotSCindex->at(p1)),fTSCZ->at(fTPhotSCindex->at(p1))),
                       TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
                       conv_vtx[iConv1],
-                      conv_refitted_momentum[iConv1],
-                      (*fTPhoEnergy)[p1],
+		      (*fTConvNtracks)[iConv1]==1 ? conv_singleleg_momentum[iConv1] : conv_refitted_momentum[iConv1],
+                      correnergy<=0 ? (*fTPhoEnergy)[p1] : correnergy,
                       (*fTPhoisEB)[p1],
                       (*fTConvNtracks)[iConv1],
                       (*fTPhoConvValidVtx)[iConv1],
@@ -6641,18 +6768,17 @@ PhotonInfo NTupleProducer::fillPhotonInfos(int p1, bool useAllConvs)
                       );
   } 
 
-	
   return PhotonInfo(p1, 
-                    TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
+		    TVector3(fTSCX->at(fTPhotSCindex->at(p1)),fTSCY->at(fTPhotSCindex->at(p1)),fTSCZ->at(fTPhotSCindex->at(p1))),
                     TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
                     pho_conv_vtx[p1],
                     pho_conv_refitted_momentum[p1],
-                    (*fTPhoEnergy)[p1],
-                    (*fTPhoisEB)[p1],
-                    (*fTPhoConvNtracks)[p1],                                                                                                                             
-                    (*fTPhoConvValidVtx)[p1],                                                                                                                            
-                    (*fTPhoConvChi2Probability)[p1] ,                                                                                                                   
-                    (*fTPhoConvEoverP)[p1]                                                                                                                               
+		    correnergy<=0 ? fTPhoEnergy->at(p1) : correnergy,
+                    fTPhoisEB->at(p1),
+		    0,
+		    0,
+		    0,
+                    fTPhoConvEoverP->at(p1)                                                                                                                               
                     );
 }
 
@@ -6664,6 +6790,7 @@ std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, 
   int p1 = pho1.id(), p2 = pho2.id();
   // assert( p1 == vtxAna.pho1() && p2 == vtxAna.pho2() );
   vtxAna.setPairID(p1,p2);
+  if( useMva ) { return vtxAna.rank(*tmvaReader,tmvaMethod); }
 	
   // preselect vertices : all vertices
   std::vector<int> preselAll;
@@ -6705,22 +6832,8 @@ std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, 
         preselConv.push_back(i); 
     }
 	  
-  }
+  } // end if at least one photon is a conversion
 	
-  // ---- METHOD 1 	
-  // preselection 
-  //	if ( preselConv.size()==0 )
-  //  vtxAna.preselection(preselAll);
-  //else
-  //  vtxAna.preselection(preselConv);
-	
-  //std::vector<int> rankprod = vtxAna.rankprod(vtxVarNames);
-	
-  // ---- METHOD 1 
-
-	
-  // ---- NEW METHOD 2 (suggested by MarcoP) : first use ranking, then conversions info, e.g. on the N vtxs with best rank
-  // preselection  : all vtxs
   std::vector<int> rankprodAll = useMva ? vtxAna.rank(*tmvaReader,tmvaMethod) : vtxAna.rankprod(vtxVarNames);
   int iClosestConv = -1;
   float dminconv = 9999999;
@@ -6749,75 +6862,51 @@ std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, 
     if ( iClosestConv == rankprodAll[kk] ) continue;
     else rankprod.push_back(rankprodAll[kk]);
   }
-  // ---- METHOD 2
-
-
  
   return rankprod;
 }
 
-int  NTupleProducer::matchPhotonToConversion( int lpho) {
+int NTupleProducer::matchPhotonToConversion( int lpho, int useAllConvs) {
 
-  int result=-99;
-  double conv_eta=-999.;
-  double conv_phi=-999.;
-             
-  int p1=lpho;
-  
-  float sc_eta  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Eta();
-  float  phi  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Phi();
-  double sc_phi = phiNorm(phi);
+  int iMatch=-1;
+  TVector3 Photonxyz = TVector3((*fTSCX)[(*fTPhotSCindex)[lpho]],(*fTSCY)[(*fTPhotSCindex)[lpho]],(*fTSCZ)[(*fTPhotSCindex)[lpho]]);
 
-  // FIXME: Not used anywhere
-  //   TLorentzVector * p4 = new TLorentzVector((*fTPhoPx)[p1],(*fTPhoPy)[p1],(*fTPhoPz)[p1],(*fTPhoEnergy)[p1]);
-  //   float et = (*fTPhoPt)[p1];
-  
-  float detaMin=999.;
-  float dphiMin=999.;   
+//  float detaMin=999.;
+//  float dphiMin=999.;   
   float dRMin = 999.;
 
-  float mconv_pt=-999999;
-  int iMatch=-1;     
-  float conv_pt = -9999;
-
-  // if(LDEBUG)  cout << "   LoopAll::matchPhotonToConversion conv_n " << conv_n << endl; 
   for(int iconv=0; iconv<(*fTNconv); iconv++) {
-    TVector3 refittedPairMomentum= conv_refitted_momentum[iconv];
-    conv_pt =  refittedPairMomentum.Pt();
-    if (conv_pt < 1 ) continue;    
-    if ( !(*fTPhoConvValidVtx)[iconv] || (*fTConvNtracks)[iconv]!=2 || (*fTConvChi2Probability)[iconv]<0.000001) continue;
 
-    phi  = conv_refitted_momentum[iconv].Phi();
-    conv_phi  = phiNorm(phi);
-    float eta  = conv_refitted_momentum[iconv].Eta();
-    conv_eta = etaTransformation(eta, (*fTConvZofPrimVtxFromTrks)[iconv] );
+    TVector3 refittedPairMomentum= (*fTConvNtracks)[iconv]==1 ? conv_singleleg_momentum[iconv] : conv_refitted_momentum[iconv];
 
-    double delta_phi = acos( cos(conv_phi - sc_phi) );       
-    double delta_eta = conv_eta - sc_eta;
+    //Conversion Selection
+    if ( refittedPairMomentum.Pt() < 10 ) continue;
+    if ( useAllConvs==1 && (*fTConvNtracks)[iconv]!=1 ) continue;
+    if ( useAllConvs==2 && (*fTConvNtracks)[iconv]!=2 ) continue;
+    if ( useAllConvs==3 && (*fTConvNtracks)[iconv]!=1 && (*fTConvNtracks)[iconv]!=2 ) continue;
+    if ( (*fTConvNtracks)[iconv]==2 && (!(*fTPhoConvValidVtx)[iconv] || (*fTConvChi2Probability)[iconv]<0.000001) ) continue; // Changed back based on meeting on 21.03.2012
 
-    delta_phi*=delta_phi;
-    delta_eta*=delta_eta;
-    float dR = sqrt( delta_phi + delta_eta ); 
-    
-    if ( fabs(delta_eta) < detaMin && fabs(delta_phi) < dphiMin ) {
-      // if ( dR < dRMin ) {
-      detaMin=  fabs(delta_eta);
-      dphiMin=  fabs(delta_phi);
+    //New matching technique from meeting on 06.08.12
+    TVector3 ConversionVertex = conv_vtx[iconv];
+    TVector3 NewPhotonxyz = Photonxyz-ConversionVertex;
+    double dR = NewPhotonxyz.DeltaR(refittedPairMomentum);
+//    double delta_eta = NewPhotonxyz.Eta()-refittedPairMomentum.Eta();
+//    double delta_phi = NewPhotonxyz.DeltaPhi(refittedPairMomentum);
+
+    if ( dR < dRMin ) {
+//      detaMin=fabs(delta_eta);
+//      dphiMin=fabs(delta_phi);
       dRMin=dR;
       iMatch=iconv;
-      mconv_pt = conv_pt;
     }
     
   }
-  
-  if ( detaMin < 0.1 && dphiMin < 0.1 ) {
-    result = iMatch;
-  } else {
-    result = -1;
-  }
-  
-  return result;
+
+  if ( dRMin< 0.1 ) return iMatch;
+  else return -1;
+    
 }
+
 
 //________________________________________________________________________________________
 bool NTupleProducer::tkIsHighPurity(reco::TrackRef tk) const { return ( tk->qualityMask() & (1<<2) ) >> 2; }
@@ -6914,6 +7003,66 @@ int NTupleProducer::fexist(char *filename) {
   return 0;
 }
 
+void NTupleProducer::SetupVtxAlgoParams2012(VertexAlgoParameters &p){
+
+  // Taken from h2gglobe upstream commit 0ab06402a23a441285c2404bac96963e6c4118c2, Oct 17th 2013
+  // AnalysisScripts/common/photonanalysis.dat  and AnalysisScripts/common/vertex_selection.dat
+
+  p.fixTkIndex=0;
+
+  p.rescaleTkPtByError=0;
+  p.trackCountThr=0;
+  p.highPurityOnly=0;
+
+  p.maxD0Signif=999.;
+  p.maxDzSignif=999.;
+
+  p.removeTracksInCone=1;
+  p.coneSize=0.05;
+
+  // Conversion Flag: 0 is no conversions. 1 is single leg conversions. 2 is double leg conversions. 3 is both single and double leg conversions.
+  p.useAllConversions=2;
+
+  p.sigma1Pix=0.011;
+  p.sigma1Tib=0.491;
+  p.sigma1Tob=4.196;
+  p.sigma1PixFwd=0.057;
+  p.sigma1Tid=0.316;
+  p.sigma1Tec=1.064;
+
+  p.sigma2Pix=0.023;
+  p.sigma2Tib=0.301;
+  p.sigma2Tob=1.603;
+  p.sigma2PixFwd=0.158;
+  p.sigma2Tid=0.413;
+  p.sigma2Tec=1.026;
+
+  p.singlelegsigma1Pix=0.007;
+  p.singlelegsigma1Tib=0.946;
+  p.singlelegsigma1Tob=2.495;
+  p.singlelegsigma1PixFwd=0.039;
+  p.singlelegsigma1Tid=0.349;
+  p.singlelegsigma1Tec=1.581;
+
+  p.singlelegsigma2Pix=0.017;
+  p.singlelegsigma2Tib=0.472;
+  p.singlelegsigma2Tob=0.540;
+  p.singlelegsigma2PixFwd=0.119;
+  p.singlelegsigma2Tid=0.392;
+  p.singlelegsigma2Tec=1.022;
+
+  p.vtxProbFormula="1.-0.49*(x+1)*(y>0.)";
+
+  mvaVertexSelection=true;
+  addConversionToMva=true;
+
+  TString descr = getenv("CMSSW_BASE");
+  perVtxMvaWeights=Form("%s/src/h2gglobe/VertexAnalysis/data/%s",descr.Data(),"TMVAClassification_BDTCat_conversions_tmva_407.weights.xml");
+  perVtxMvaMethod="BDTCat";
+  perEvtMvaWeights=Form("%s/src/h2gglobe/VertexAnalysis/data/%s",descr.Data(),"TMVAClassification_BDTvtxprob2012.weights.xml");
+  perEvtMvaMethod="BDTvtxprob2012";
+
+}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(NTupleProducer);

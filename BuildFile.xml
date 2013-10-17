@@ -50,6 +50,8 @@
 <use   name="PFIsolation/SuperClusterFootprintRemoval"/>
 <use   name="HiggsAnalysis/GBRLikelihood"/>
 <use   name="HiggsAnalysis/GBRLikelihoodEGTools"/>
+<use   name="CMGTools/External"/>
+<use   name="QuarkGluonTagger/EightTeV"/>
 <lib   name="Geom"/>
 <flags   EDM_PLUGIN="1"/>
 <flags   CXXFLAGS="-g -fno-var-tracking-assignments"/>

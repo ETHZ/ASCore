@@ -104,6 +104,8 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "HiggsAnalysis/GBRLikelihoodEGTools/interface/EGEnergyCorrectorSemiParm.h"
 
+#include "QuarkGluonTagger/EightTeV/interface/QGSyst.h"
+
 #include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
 #include <sys/stat.h>
 
@@ -148,7 +150,7 @@ private:
 
   typedef std::map<edm::RefToBase<reco::Jet>, unsigned int, JetRefCompare> FlavourMap;
 
-  PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
+  PhotonInfo fillPhotonInfos(int p1, int useAllConvs, float correnergy=0);
   reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;  
 
   int FindPFCandType(int id);
@@ -165,12 +167,17 @@ private:
   std::string perVtxMvaWeights, perVtxMvaMethod;
   std::string perEvtMvaWeights, perEvtMvaMethod;
   VertexAlgoParameters vtxAlgoParams;
+  void SetupVtxAlgoParams2012(VertexAlgoParameters &p);
   std::vector<std::string> rankVariables;
+  std::vector<std::string> perVtxVariables;
+
+  bool mvaVertexSelection;
+  bool addConversionToMva;
 
   std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
 				      PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
 				      bool useMva, TMVA::Reader * tmvaReader, std::string tmvaMethod);
-  int  matchPhotonToConversion(int lpho);
+  int  matchPhotonToConversion(int lpho, int useall);
   bool tkIsHighPurity(reco::TrackRef tk) const;
   bool TrackCut(reco::TrackRef tk) const;
   bool ConversionsCut(const reco::Conversion &conv);
@@ -279,6 +286,8 @@ private:
    
   int regrVersion;
   EGEnergyCorrectorSemiParm corSemiParm;
+
+  QGSyst qgsyst;
 
   // Selection cuts
   float fMinMuPt;
@@ -952,6 +961,7 @@ private:
   TVector3 pho_conv_refitted_momentum[gMaxNPhotons];
   TVector3 conv_vtx[gMaxNPhotons];
   TVector3 conv_refitted_momentum[gMaxNPhotons];
+  TVector3 conv_singleleg_momentum[gMaxNPhotons];
 
   std::auto_ptr<std::vector<bool> >  fTPhoConvValidVtx;
   std::auto_ptr<std::vector<int> >   fTPhoConvNtracks;
@@ -1067,6 +1077,16 @@ private:
   std::auto_ptr<std::vector<float> >  fTJMetCorrRawPt;
   std::auto_ptr<std::vector<float> >  fTJMetCorrEMF;
   std::auto_ptr<std::vector<float> >  fTJMetCorrArea;
+
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedLoose;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedMedium;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedTight;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedLoose;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedMedium;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedTight;
+  std::auto_ptr<std::vector<float> > fTJQGTagLD;
+  std::auto_ptr<std::vector<float> > fTJQGTagMLP;
+  std::auto_ptr<std::vector<float> > fTJSmearedQGL;
 
   //- Tracks:
   std::auto_ptr<int>  fTNTracks;

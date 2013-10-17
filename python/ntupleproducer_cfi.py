@@ -45,11 +45,7 @@ analyze = cms.EDFilter('NTupleProducer',
         tag_doStorePFCandidates = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
         tag_fTrackCollForVertexing = cms.InputTag("generalTracks"),
         tag_fallConversionsCollForVertexing = cms.InputTag("allConversions"),
-        tag_perVtxMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
-        tag_perVtxMvaMethod = cms.string("BDTCat"),
-        tag_perEvtMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
-        tag_perEvtMvaMethod = cms.string("evtBDTG"),
-        tag_regressionVersion = cms.int32(-1), # turned off by default; use version number 5 for 2012 @ 8 TeV, number 8 for 2011 @ 7 TeV
+        tag_regressionVersion = cms.int32(5), # turned off by default; use version number 5 for 2012 @ 8 TeV, number 8 for 2011 @ 7 TeV
 
                          
 	# Trigger paths to store the triggering object information of

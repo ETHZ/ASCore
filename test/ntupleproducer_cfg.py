@@ -48,16 +48,6 @@ options.register ('doVertexing',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you want to run the vertex improved choice (MVA) for diphoton events, set to True, otherwise False (default)")
-options.register ('perVtxMvaWeights',
-                  '',
-                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                  VarParsing.VarParsing.varType.string,         # string, int, or float
-                  "Input weights for vertexing perVtx MVA")
-options.register ('perEvtMvaWeights',
-                  '',
-                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                  VarParsing.VarParsing.varType.string,         # string, int, or float
-                  "Input weights for vertexing perEvt MVA")
 options.register ('GlobalTag',
                   '',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -127,11 +117,6 @@ process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring() # Will be overwritten by PAT: we overwrite at the end
                                )
 
-if options.doVertexing==True:
-    if options.perVtxMvaWeights=='':
-        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perVtxMvaWeights)')
-    if options.perEvtMvaWeights=='':
-        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perEvtMvaWeights)')
     
 ### Jet/MET Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
@@ -240,8 +225,6 @@ process.analyze.isModelScan     = options.ModelScan
 process.analyze.isFastSim     = options.FastSim
 process.analyze.tag_doStorePFCandidates = options.doStorePFCandidates
 process.analyze.tag_doVertexing = options.doVertexing
-process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
-process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights
 process.analyze.tag_vertex = 'goodVertices'
 
 # Add some jet collections
@@ -587,6 +570,31 @@ process.sc_sequence = cms.Sequence(
     process.goodSuperClustersClean
 )
 
+# Pileup jet ID
+from CMGTools.External.pujetidsequence_cff import puJetId,puJetMva
+process.recoPuJetId = puJetId.clone(
+   jets = cms.InputTag("ak5PFJets"),
+   applyJec = cms.bool(True),
+   inputIsCorrected = cms.bool(False),
+   )
+process.recoPuJetMva = puJetMva.clone(
+   jets = cms.InputTag("ak5PFJets"),
+   jetids = cms.InputTag("recoPuJetId"),
+   applyJec = cms.bool(True),
+   inputIsCorrected = cms.bool(False),
+   )
+process.recoPuJetIdSequence = cms.Sequence(process.recoPuJetId * process.recoPuJetMva )
+
+# Quark/gluon discrimination
+process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff')
+process.QGTagger.srcJets = cms.InputTag("ak5PFJets")
+if options.runon == 'data':
+   process.QGTagger.jec = cms.untracked.string('ak5PFL1FastL2L3Residual')
+else:
+   process.QGTagger.jec = cms.untracked.string('ak5PFL1FastL2L3')
+process.kt6PFJetsForQGSyst = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+process.kt6PFJetsForQGSyst.Rho_EtaMax = cms.double(2.4)
+   
 
 #### Path ######################################################################
 
@@ -624,6 +632,9 @@ process.p = cms.Path(
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
         + process.sc_sequence
+        + process.recoPuJetIdSequence
+        + process.kt6PFJetsForQGSyst
+        + process.QuarkGluonTagger
  	+ process.analyze
        	)
    )
