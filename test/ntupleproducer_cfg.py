@@ -570,21 +570,6 @@ process.sc_sequence = cms.Sequence(
     process.goodSuperClustersClean
 )
 
-# Pileup jet ID
-from CMGTools.External.pujetidsequence_cff import puJetId,puJetMva
-process.recoPuJetId = puJetId.clone(
-   jets = cms.InputTag("ak5PFJets"),
-   applyJec = cms.bool(True),
-   inputIsCorrected = cms.bool(False),
-   )
-process.recoPuJetMva = puJetMva.clone(
-   jets = cms.InputTag("ak5PFJets"),
-   jetids = cms.InputTag("recoPuJetId"),
-   applyJec = cms.bool(True),
-   inputIsCorrected = cms.bool(False),
-   )
-process.recoPuJetIdSequence = cms.Sequence(process.recoPuJetId * process.recoPuJetMva )
-
 # Quark/gluon discrimination
 process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff')
 process.QGTagger.srcJets = cms.InputTag("ak5PFJets")
@@ -632,7 +617,6 @@ process.p = cms.Path(
 	+ process.newTaus
         + process.patPF2PATSequencePFCHS
         + process.sc_sequence
-        + process.recoPuJetIdSequence
         + process.kt6PFJetsForQGSyst
         + process.QuarkGluonTagger
  	+ process.analyze

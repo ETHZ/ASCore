@@ -104,6 +104,8 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "HiggsAnalysis/GBRLikelihoodEGTools/interface/EGEnergyCorrectorSemiParm.h"
 
+#include "CMGTools/External/interface/PileupJetIdAlgo.h"
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
 #include "QuarkGluonTagger/EightTeV/interface/QGSyst.h"
 
 #include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
@@ -148,10 +150,29 @@ private:
     { return j1.id() < j2.id() || (j1.id() == j2.id() && j1.key() < j2.key()); }
   };
 
+  typedef struct {
+    float pfchargedisogood03;
+    float pfchargedisobad03;
+    float pfphotoniso03;
+    float pfneutraliso03;
+    float sieie;
+    float sieip;
+    float etawidth;
+    float scrawe;
+    float phiwidth;
+    float r9;
+    float lambdaratio;
+    float s4ratio;
+    float eventrho;
+    float sceta;
+    float ESEffSigmaRR;
+    bool isrescaled;
+  } struct_photonIDMVA_variables;
+
   typedef std::map<edm::RefToBase<reco::Jet>, unsigned int, JetRefCompare> FlavourMap;
 
   PhotonInfo fillPhotonInfos(int p1, int useAllConvs, float correnergy=0);
-  reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;  
+  //  reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;  
 
   int FindPFCandType(int id);
   bool isInPhiCracks(double phi, double eta);
@@ -170,9 +191,15 @@ private:
   void SetupVtxAlgoParams2012(VertexAlgoParameters &p);
   std::vector<std::string> rankVariables;
   std::vector<std::string> perVtxVariables;
-
   bool mvaVertexSelection;
   bool addConversionToMva;
+
+  TMVA::Reader * photonIDMVA_reader_EB;
+  TMVA::Reader * photonIDMVA_reader_EE;
+  std::string WeightsPhotonIDMVA_EB;
+  std::string WeightsPhotonIDMVA_EE;
+  struct_photonIDMVA_variables photonIDMVA_variables;
+  void rescaleClusterShapes(struct_photonIDMVA_variables &str, bool isEB);
 
   std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
 				      PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
@@ -183,6 +210,10 @@ private:
   bool ConversionsCut(const reco::Conversion &conv);
 
   double GenPartonicIso_allpart(const reco::GenParticle & photon, edm::Handle <reco::GenParticleCollection> & genparticles, double dRcone);
+
+  static const unsigned int gMaxNPileupJetIDAlgos = 5;
+  std::vector<PileupJetIdAlgo*> PileupJetIdAlgos;
+  std::vector<edm::ParameterSet> jetMVAAlgos;
 
   // ----------member data ---------------------------
   AdaptiveVertexFitter avFitter;
@@ -252,6 +283,7 @@ private:
   edm::InputTag fCorrCaloMETTag;
   edm::InputTag fGenMETTag;
   edm::InputTag fVertexTag;
+  edm::InputTag fVertexTagNoBS;
   edm::InputTag fTrackTag;
   edm::InputTag fPhotonTag;
   edm::InputTag fCalTowTag;
@@ -288,6 +320,13 @@ private:
   EGEnergyCorrectorSemiParm corSemiParm;
 
   QGSyst qgsyst;
+  std::string QGSystString;
+
+  TLorentzVector get_pho_p4(int phoindex, int vtxInd, float energy=0);
+  float pfTkIsoWithVertexCiC(int phoindex, int vtxInd, const reco::PFCandidateCollection &pfcands, int pfToUse,
+					  float dRmax, float dRvetoBarrel, float dRvetoEndcap, float ptMin, float dzMax, float dxyMax);
+  float pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollection &pfcands, int pfToUse, float dRmax, float dRVetoBarrel,
+			   float dRVetoEndcap, float etaStripBarrel, float etaStripEndcap, float thrBarrel, float thrEndcaps);
 
   // Selection cuts
   float fMinMuPt;
@@ -533,14 +572,19 @@ private:
   std::auto_ptr<std::vector<int> >  fTL1PhysResults;
   std::auto_ptr<std::vector<int> >  fTL1TechResults;
 
-  static const unsigned int gMaxHltNObjs  = 10;
+  static const unsigned int gMaxHltNPaths  = 3;
   std::auto_ptr<std::vector<int> >  fTNHLTObjs;
-  std::auto_ptr<std::vector<int> >  fTHLTObjectID[10];
-  std::auto_ptr<std::vector<float> >  fTHLTObjectPt[10];
-  std::auto_ptr<std::vector<float> >  fTHLTObjectEta[10];
-  std::auto_ptr<std::vector<float> >  fTHLTObjectPhi[10];
+  std::auto_ptr<std::vector<int> >  fTHLTObjectID[gMaxHltNPaths];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectPt[gMaxHltNPaths];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectEta[gMaxHltNPaths];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectPhi[gMaxHltNPaths];
 
   unsigned int fTNpaths;
+
+  // Array structure information for storing 2D-indexed information
+  // Convention: if name is fTObj1Obj2ListStart it means that Qty_Obj1[Obj2] = Qty[fTObj1Obj2ListStart[Obj1]+Obj2]
+  std::auto_ptr<std::vector<int> > fTPhoVrtxListStart;
+  std::auto_ptr<std::vector<int> > fTJVrtxListStart;
 
   // Flags
   std::auto_ptr<int>  fTGoodEvent;         // 0 for good events, 1 for bad events                     
@@ -864,6 +908,10 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoH2overE;
   std::auto_ptr<std::vector<float> >  fTPhoHoverE2012;
   std::auto_ptr<std::vector<float> >  fTPhoSigmaIetaIeta;
+  std::auto_ptr<std::vector<float> >  fTPhoSigmaIetaIphi;
+  std::auto_ptr<std::vector<float> >  fTPhoSigmaIphiIphi;
+  std::auto_ptr<std::vector<float> >  fTPhoS4Ratio;
+  std::auto_ptr<std::vector<float> >  fTPhoLambdaRatio;
   std::auto_ptr<std::vector<float> >  fTPhoSCRawEnergy;
   std::auto_ptr<std::vector<float> >  fTPhoSCEtaWidth;
   std::auto_ptr<std::vector<float> >  fTPhoSCSigmaPhiPhi;
@@ -956,6 +1004,17 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0;
   std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01;
   std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU;
+
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoChargedDR03;
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoNeutralDR03;
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoPhotonDR03;
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoChargedDR04;
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoNeutralDR04;
+  std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoPhotonDR04;
+
+  std::auto_ptr<std::vector<float> >  fTPhoSCEta;
+  std::auto_ptr<std::vector<float> >  fTPhoSCPhiWidth;
+  std::auto_ptr<std::vector<float> >  fTPhoIDMVA;
 
   TVector3 pho_conv_vtx[gMaxNPhotons];
   TVector3 pho_conv_refitted_momentum[gMaxNPhotons];
@@ -1078,12 +1137,9 @@ private:
   std::auto_ptr<std::vector<float> >  fTJMetCorrEMF;
   std::auto_ptr<std::vector<float> >  fTJMetCorrArea;
 
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedLoose;
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedMedium;
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDCutBasedTight;
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedLoose;
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedMedium;
-  std::auto_ptr<std::vector<bool> > fTJPassPileupIDMvaBasedTight;
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDL[gMaxNPileupJetIDAlgos];
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDM[gMaxNPileupJetIDAlgos];
+  std::auto_ptr<std::vector<bool> > fTJPassPileupIDT[gMaxNPileupJetIDAlgos];
   std::auto_ptr<std::vector<float> > fTJQGTagLD;
   std::auto_ptr<std::vector<float> > fTJQGTagMLP;
   std::auto_ptr<std::vector<float> > fTJSmearedQGL;

@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from CMGTools.External.puJetIDAlgo_cff import full_53x,cutbased
 
 analyze = cms.EDFilter('NTupleProducer',
 	# Main settings
@@ -23,7 +24,8 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_pfmet        = cms.InputTag('pfMet'),
 	tag_corrcalomet  = cms.InputTag('metMuonJESCorAK5'),
 	tag_genmet       = cms.InputTag('genMetTrue'),
-	tag_vertex       = cms.InputTag('offlinePrimaryVertices'),
+	tag_vertex       = cms.InputTag('offlinePrimaryVerticesWithBS'),
+	tag_vertex_nobs  = cms.InputTag('offlinePrimaryVertices'),
 	tag_tracks       = cms.InputTag('generalTracks'),
 	tag_photons      = cms.InputTag('photons'),
 	tag_caltow       = cms.InputTag('towerMaker'),
@@ -50,7 +52,8 @@ analyze = cms.EDFilter('NTupleProducer',
                          
 	# Trigger paths to store the triggering object information of
         hlt_labels = cms.vstring('HLT_IsoMu24_eta2p1_v',
-                                 'HLT_Ele27_WP80_v'),
+                                 'HLT_Ele27_WP80_v',
+                                 'HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v'),
 	# Event Selection Criteria
 	# Muons:
 	sel_minmupt       = cms.double(5.0),
@@ -97,7 +100,12 @@ analyze = cms.EDFilter('NTupleProducer',
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
 	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')
-	pu_mc   = cms.vstring('', '')  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
+	pu_mc   = cms.vstring('', ''), # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
+
+        tag_QGSyst = cms.string("pythia"),
+        tag_puJetIDAlgos = cms.VPSet(cutbased,full_53x),
+        tag_WeightsPhotonIDMVA_EB = cms.string("2013FinalPaper_PhotonID_Barrel_BDT_TrainRangePT15.weights.xml"),
+        tag_WeightsPhotonIDMVA_EE = cms.string("2013FinalPaper_PhotonID_Endcap_BDT_TrainRangePT15.weights.xml"),
 
 )
 
