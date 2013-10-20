@@ -75,6 +75,9 @@ rmdir emanuele
 mygitaddpkg sixie/Muon/MuonAnalysisTools V00-00-10
 mv sixie/Muon .
 rmdir sixie
+rm Muon/MuonAnalysisTools/MuonID*xml
+rm Muon/MuonAnalysisTools/MuonIso*santi*xml
+rm Muon/MuonAnalysisTools/MuonIsoMVA_sixie*V1*xml
 
 mygitaddpkg EGamma/EGammaAnalysisTools V00-00-21
 cd EGamma/EGammaAnalysisTools/interface
