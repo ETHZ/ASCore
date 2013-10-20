@@ -2228,6 +2228,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoIso04nTrksHollow->push_back(photon.nTrkHollowConeDR04());
 
     fTPhoSCRawEnergy       ->push_back(photon.superCluster()->rawEnergy());
+    fTPhoSCX            ->push_back(photon.superCluster()->x());
+    fTPhoSCY            ->push_back(photon.superCluster()->y());
+    fTPhoSCZ            ->push_back(photon.superCluster()->z());
     fTPhoSCEta          ->push_back(photon.superCluster()->eta());
     fTPhoSCEtaWidth     ->push_back(photon.superCluster()->etaWidth());
     fTPhoSCPhiWidth     ->push_back(photon.superCluster()->phiWidth());
@@ -5303,6 +5306,9 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoCiCPFIsoChargedDR04.reset(new std::vector<float> );
   fTPhoCiCPFIsoNeutralDR04.reset(new std::vector<float> );
   fTPhoCiCPFIsoPhotonDR04.reset(new std::vector<float> );
+  fTPhoSCX.reset(new std::vector<float> );
+  fTPhoSCY.reset(new std::vector<float> );
+  fTPhoSCZ.reset(new std::vector<float> );
   fTPhoSCEta.reset(new std::vector<float> );
   fTPhoSCPhiWidth.reset(new std::vector<float> );
   fTPhoIDMVA.reset(new std::vector<float> );
@@ -6903,15 +6909,12 @@ bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::
 PhotonInfo NTupleProducer::fillPhotonInfos(int p1, int useAllConvs, float correnergy) 
 {
 	
-
-  assert(fTPhotSCindex->at(p1)>=0);
-
   int iConv1 = useAllConvs>0 ? matchPhotonToConversion(p1,useAllConvs) : -1;
 	
   if ( iConv1 >= 0) {
     // conversions infos
     return PhotonInfo(p1,
-		      TVector3(fTSCX->at(fTPhotSCindex->at(p1)),fTSCY->at(fTPhotSCindex->at(p1)),fTSCZ->at(fTPhotSCindex->at(p1))),
+		      TVector3(fTPhoSCX->at(p1),fTPhoSCY->at(p1),fTPhoSCZ->at(p1)),
                       TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
                       conv_vtx[iConv1],
 		      (*fTConvNtracks)[iConv1]==1 ? conv_singleleg_momentum[iConv1] : conv_refitted_momentum[iConv1],
@@ -6925,7 +6928,7 @@ PhotonInfo NTupleProducer::fillPhotonInfos(int p1, int useAllConvs, float corren
   } 
 
   return PhotonInfo(p1, 
-		    TVector3(fTSCX->at(fTPhotSCindex->at(p1)),fTSCY->at(fTPhotSCindex->at(p1)),fTSCZ->at(fTPhotSCindex->at(p1))),
+		    TVector3(fTPhoSCX->at(p1),fTPhoSCY->at(p1),fTPhoSCZ->at(p1)),
                     TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
                     pho_conv_vtx[p1],
                     pho_conv_refitted_momentum[p1],
@@ -7025,7 +7028,7 @@ std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, 
 int NTupleProducer::matchPhotonToConversion( int lpho, int useAllConvs) {
 
   int iMatch=-1;
-  TVector3 Photonxyz = TVector3((*fTSCX)[(*fTPhotSCindex)[lpho]],(*fTSCY)[(*fTPhotSCindex)[lpho]],(*fTSCZ)[(*fTPhotSCindex)[lpho]]);
+  TVector3 Photonxyz = TVector3(fTPhoSCX->at(lpho),fTPhoSCY->at(lpho),fTPhoSCZ->at(lpho));
 
 //  float detaMin=999.;
 //  float dphiMin=999.;   
@@ -7221,9 +7224,8 @@ void NTupleProducer::SetupVtxAlgoParams2012(VertexAlgoParameters &p){
 }
 
 TLorentzVector NTupleProducer::get_pho_p4(int phoindex, int vtxInd, float energy){
-  assert (!(fTPhotSCindex->at(phoindex)<0));
   assert (vtxInd<(*fTNVrtx));
-  PhotonInfo pho(phoindex, TVector3(fTSCX->at(fTPhotSCindex->at(phoindex)),fTSCY->at(fTPhotSCindex->at(phoindex)),fTSCZ->at(fTPhotSCindex->at(phoindex))), (energy>0) ? energy : fTPhoEnergy->at(phoindex));
+  PhotonInfo pho(phoindex, TVector3(fTPhoSCX->at(phoindex),fTPhoSCY->at(phoindex),fTPhoSCZ->at(phoindex)), (energy>0) ? energy : fTPhoEnergy->at(phoindex));
   return pho.p4(fTVrtxX->at(vtxInd),fTVrtxY->at(vtxInd),fTVrtxZ->at(vtxInd));
 }
 
@@ -7231,8 +7233,6 @@ float NTupleProducer::pfTkIsoWithVertexCiC(int phoindex, int vtxInd, const reco:
 					float dRmax, float dRvetoBarrel, float dRvetoEndcap, float ptMin, float dzMax, float dxyMax) {
   
   assert (pfToUse==1); // protection
-
-  if (fTPhotSCindex->at(phoindex)<0) return 999;
 
   float dRveto;
   if ((*fTPhoisEB)[phoindex])
@@ -7285,8 +7285,6 @@ float NTupleProducer::pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollecti
   
   assert (pfToUse==0 || pfToUse==2); // protection
 
-  if (fTPhotSCindex->at(phoindex)<0) return 999;
-  
   float dRVeto, etaStrip, thr;
   if ((*fTPhoisEB)[phoindex]) {
     dRVeto = dRVetoBarrel;
@@ -7306,7 +7304,7 @@ float NTupleProducer::pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollecti
       if (!(pf->pt()>0)) continue;
 
       TVector3 pfvtx(pf->vx(),pf->vy(),pf->vz());
-      TVector3 phoEcalPos(fTSCX->at(fTPhotSCindex->at(phoindex)),fTSCY->at(fTPhotSCindex->at(phoindex)),fTSCZ->at(fTPhotSCindex->at(phoindex)));
+      TVector3 phoEcalPos(fTPhoSCX->at(phoindex),fTPhoSCY->at(phoindex),fTPhoSCZ->at(phoindex));
       
       TVector3 photonDirectionWrtVtx = TVector3(phoEcalPos.X() - pfvtx.X(),
 						phoEcalPos.Y() - pfvtx.Y(),

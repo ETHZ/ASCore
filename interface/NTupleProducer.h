@@ -1012,6 +1012,9 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoNeutralDR04;
   std::auto_ptr<std::vector<float> >  fTPhoCiCPFIsoPhotonDR04;
 
+  std::auto_ptr<std::vector<float> >  fTPhoSCX;
+  std::auto_ptr<std::vector<float> >  fTPhoSCY;
+  std::auto_ptr<std::vector<float> >  fTPhoSCZ;
   std::auto_ptr<std::vector<float> >  fTPhoSCEta;
   std::auto_ptr<std::vector<float> >  fTPhoSCPhiWidth;
   std::auto_ptr<std::vector<float> >  fTPhoIDMVA;
