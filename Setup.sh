@@ -58,6 +58,7 @@ mygitaddpkg RecoEcal/EgammaCoreTools RecoEcal-EgammaCoreTools-V05-08-26
 mygitaddpkg Patches-OldReleases master
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
+cp Patches-OldReleases/Buildfile_forvertexing.xml .
 rm -rf Patches-OldReleases
 
 mygitaddpkg RecoEgamma/EgammaTools RecoEgamma-EgammaTools-V09-00-00
@@ -66,6 +67,7 @@ mygitaddpkg h2gglobe vertexing_for2012
 mv h2gglobe/VertexAnalysis .
 rm -rf h2gglobe/*
 mv VertexAnalysis h2gglobe/VertexAnalysis
+mv Buildfile_forvertexing.xml h2gglobe/VertexAnalysis/BuildFile.xml
 
 mygitaddpkg emanuele/MyAnalysis/IsolationTools V04-00-01
 mv emanuele/MyAnalysis .
