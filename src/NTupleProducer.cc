@@ -177,7 +177,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fCorrCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_corrcalomet");
   fGenMETTag           = iConfig.getParameter<edm::InputTag>("tag_genmet");
   fVertexTag           = iConfig.getParameter<edm::InputTag>("tag_vertex");
-  fVertexTagNoBS       = iConfig.getParameter<edm::InputTag>("tag_vertex_nobs");
+  fVertexTagWithBS     = iConfig.getParameter<edm::InputTag>("tag_vertex_withbs");
   fTrackTag            = iConfig.getParameter<edm::InputTag>("tag_tracks");
   fPhotonTag           = iConfig.getParameter<edm::InputTag>("tag_photons");
   fCalTowTag           = iConfig.getParameter<edm::InputTag>("tag_caltow");
@@ -194,15 +194,18 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   pfProducerTag        = iConfig.getParameter<edm::InputTag>("tag_pfProducer");
   fSCTagBarrel = iConfig.getParameter<edm::InputTag>("tag_SC_barrel");
   fSCTagEndcap = iConfig.getParameter<edm::InputTag>("tag_SC_endcap");
-  fTrackCollForVertexing          = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
-  fAllConversionsCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
-  regrVersion      = iConfig.getParameter<int>("tag_regressionVersion");
-  jetMVAAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("tag_puJetIDAlgos");
-  QGSystString = iConfig.getParameter<std::string>("tag_QGSyst");
+  doPhotonStuff   = iConfig.getParameter<bool>("tag_doPhotonStuff");
+  if (fIsModelScan) doPhotonStuff=false;
 
-  doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
-  doStorePFCandidates = iConfig.getParameter<bool>("tag_doStorePFCandidates");
-  if (fIsModelScan) doVertexingFlag=false;
+  if (doPhotonStuff){
+    fIsModelScan = false;
+    fVertexTag = fVertexTagWithBS;
+    fTrackCollForVertexing          = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
+    fAllConversionsCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
+    regrVersion      = iConfig.getParameter<int>("tag_regressionVersion");
+    jetMVAAlgos = iConfig.getParameter<std::vector<edm::ParameterSet> >("tag_puJetIDAlgos");
+    QGSystString = iConfig.getParameter<std::string>("tag_QGSyst");
+  }
 
   // Event Selection
   fMinMuPt        = iConfig.getParameter<double>("sel_minmupt");
@@ -262,6 +265,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
   edm::LogVerbatim("NTP") << iConfig;
 
+  if (!doPhotonStuff) {
   // Create additional jet fillers
   std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
   for (size_t i=0; i<jConfigs.size(); ++i)
@@ -283,6 +287,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Create PF candidate fillers
   std::vector<edm::ParameterSet> pfConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("pfCandidates");
   for (size_t i=0; i<pfConfigs.size(); ++i) pfFillers.push_back( new PFFiller(pfConfigs[i], fIsRealData) );
+  }
 
   // Get list of trigger paths to store the triggering object info. of
   //std::vector<std::string> v(iConfig.getParameter<std::vector<std::string> >("hlt_labels"));
@@ -342,6 +347,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   isolator. setConeSize(0.3);
 
 
+  if (!doPhotonStuff) {
   // instantiate and initialize the electron ID MVA classes:
 
   std::vector<std::string> myManualCatWeigths;
@@ -390,10 +396,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
                           true,
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
+  }
 
 
-
-  {  // initialize diphoton vertex MVA
+  if (doPhotonStuff) {  // initialize diphoton vertex MVA
 
     SetupVtxAlgoParams2012(vtxAlgoParams);
 
@@ -417,9 +423,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     
   }
 
+  if (doPhotonStuff) {
   for (uint i=0; i<jetMVAAlgos.size(); i++) PileupJetIdAlgos.push_back(new PileupJetIdAlgo(jetMVAAlgos.at(i)));
   if (PileupJetIdAlgos.size()>gMaxNPileupJetIDAlgos) PileupJetIdAlgos.resize(gMaxNPileupJetIDAlgos);
+  }
 
+  if (doPhotonStuff){
   photonIDMVA_reader_EB = new TMVA::Reader("!Color:Silent");
   photonIDMVA_reader_EB->AddVariable("ph.scrawe",   &(photonIDMVA_variables.scrawe) );
   photonIDMVA_reader_EB->AddVariable("ph.r9",   &(photonIDMVA_variables.r9) );
@@ -455,6 +464,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     TString descr = getenv("CMSSW_BASE");
     photonIDMVA_reader_EB->BookMVA("AdaBoost",Form("%s/src/DiLeptonAnalysis/NTupleProducer/data/%s",descr.Data(),WeightsPhotonIDMVA_EB.c_str()));
     photonIDMVA_reader_EE->BookMVA("AdaBoost",Form("%s/src/DiLeptonAnalysis/NTupleProducer/data/%s",descr.Data(),WeightsPhotonIDMVA_EE.c_str()));
+  }
   }
 
 }
@@ -530,9 +540,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   // rho for QG tagger systematics 
   edm::Handle<double> rhoForQG;
-  iEvent.getByLabel("kt6PFJetsForQGSyst","rho",rhoForQG);
 
-  {
+  if (doPhotonStuff)  {
+    iEvent.getByLabel("kt6PFJetsForQGSyst","rho",rhoForQG);
     TString descr = getenv("CMSSW_BASE");
     std::string systDB_fullPath;
     if (QGSystString=="pythia") systDB_fullPath = Form("%s/src/QuarkGluonTagger/EightTeV/data/SystDatabase.txt",descr.Data()); // for Pythia
@@ -641,9 +651,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(fVertexTag, vertices);
   const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
 
-  edm::Handle<VertexCollection> vertices_noBS;
-  iEvent.getByLabel(fVertexTagNoBS, vertices_noBS);
-
   // Get Muon IsoDeposits
   // ECAL:
   edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepECValueMap;
@@ -681,6 +688,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   EcalClusterLazyTools lazyTools( iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE") );
 
+  if (doPhotonStuff) {
   if (!corSemiParm.IsInitialized() && (regrVersion==5 || regrVersion==8)) {
     char filename[500];
     char* descr = getenv("CMSSW_BASE");
@@ -696,19 +704,17 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       corSemiParm.Initialize(filename,5);
     }
   }
+  }
 
   Handle<double> hRhoRegr;
   iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
 
-  Handle<ValueMap<int> > puJetIdFlag_cut;
-  Handle<ValueMap<int> > puJetIdFlag_mva;
-  iEvent.getByLabel("recoPuJetMva","cutbasedId",puJetIdFlag_cut);
-  iEvent.getByLabel("recoPuJetMva","full53xId",puJetIdFlag_mva);
-
   edm::Handle<edm::ValueMap<float> >  QGTagsHandleMLP;
   edm::Handle<edm::ValueMap<float> >  QGTagsHandleLikelihood;
-  iEvent.getByLabel("QGTagger","qgMLP", QGTagsHandleMLP);
-  iEvent.getByLabel("QGTagger","qgLikelihood", QGTagsHandleLikelihood);
+  if (doPhotonStuff){
+    iEvent.getByLabel("QGTagger","qgMLP", QGTagsHandleMLP);
+    iEvent.getByLabel("QGTagger","qgLikelihood", QGTagsHandleLikelihood);
+  }
 
   // type-I corrected MET for 2012 analyses
   edm::Handle<View<PFMET> > typeICorMET;
@@ -1005,7 +1011,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   /////////////////////////////////////////
   /// GenVertices 
-  if (!fIsRealData && doVertexingFlag){
+  if (!fIsRealData && doPhotonStuff){
 
     edm::Handle<reco::GenParticleCollection> gpH;
     iEvent.getByLabel(fGenPartTag, gpH);
@@ -1396,6 +1402,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // mva iso:
     const reco::GsfElectronCollection dummyIdentifiedEleCollection;
     const reco::MuonCollection dummyIdentifiedMuCollection;
+    if (!doPhotonStuff){
     double isomva = fMuonIsoMVA->mvaValue( muon,
                                         vertices->front(),
                                         *pfCandidates,
@@ -1404,6 +1411,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
                                         dummyIdentifiedEleCollection,
                                         dummyIdentifiedMuCollection);
     fTMuIsoMVA->push_back( isomva );
+    }
 
     fTMuCaloComp->push_back( muon.caloCompatibility() );
     fTMuSegmComp->push_back( muon::segmentCompatibility(muon) );
@@ -1588,7 +1596,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTSClocalcorr->push_back(localcorrenergy/sc->rawEnergy());
     }
 
-    {
+    if (doPhotonStuff) {
       std::vector<DetId> cristalli;
       for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
 	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
@@ -1604,13 +1612,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       int added=0;      
       for (unsigned int i=0; i<cristalli.size(); i++){
 
-	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
-	  *fTGoodEvent = 1;
-	  break;
-	}
-	
-	
 	if (cristalli.at(i).subdetId()!=EcalBarrel) {
 	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
 	  continue;
@@ -1675,7 +1676,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTSClocalcorr->push_back(localcorrenergy/sc->rawEnergy());
     }
 
-    {
+    if (doPhotonStuff) {
       std::vector<DetId> cristalli;
       for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
 	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
@@ -1690,13 +1691,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       int added=0;
       for (unsigned int i=0; i<cristalli.size(); i++){
-
-	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
-	  *fTGoodEvent = 1;
-	  break;
-	}
-	
 
 	if (cristalli.at(i).subdetId()!=EcalEndcap) {
 	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
@@ -1718,6 +1712,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   ////// Xtal position information
 
+  if (doPhotonStuff) {
   (*fTNXtals)=cristalli_tokeep.size();  
   for (unsigned int i=0; i<cristalli_tokeep.size(); i++){
     bool isEB = (cristalli_tokeep.at(i).subdetId()==EcalBarrel);
@@ -1762,7 +1757,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTXtalFront4Z->push_back(cell_corners[3].z());
  
   }
-  
+  }
    
 
   ////////////////////////////////////////////////////////
@@ -1950,9 +1945,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       const TransientTrackBuilder thebuilder = *(theB.product());
 
+      if (!doPhotonStuff) {
       fTElIDMVATrig          ->push_back( electronIDMVATrig_->mvaValue( electron, vertices->front(), thebuilder, lazyTools, false ) );
       fTElIDMVANoTrig        ->push_back( electronIDMVANonTrig_->mvaValue( electron, vertices->front(), thebuilder, lazyTools, false ) );
-
+      }
 
       {
         fTElSCindex->push_back( -1 ); // Initialize
@@ -2162,7 +2158,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoVy             ->push_back(photon.vy());
     fTPhoVz             ->push_back(photon.vz());
 
-    {
+    if (doPhotonStuff) {
       double ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval;
       ecor=-999;
       sigeovere=-999;
@@ -2274,7 +2270,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoConvNtracks->push_back(-999.);
     fTPhoConvEoverP->push_back(-999.);
 
-    if (doVertexingFlag && photon.hasConversionTracks()) { // photon conversions
+    if (doPhotonStuff && photon.hasConversionTracks()) { // photon conversions
 
       reco::ConversionRefVector conversions = photon.conversions();
       if (conversions.size()<1) { std::cout << "something wrong here" << std::endl; }
@@ -2418,11 +2414,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTPhoCiCPFIsoPhotonDR04->push_back(pfEcalIsoCiC(phoqi,*pfCandidates,2,0.4,0.,0.070,0.015,0.,0.,0.));
       for (int i=0; i<(*fTNVrtx); i++) {
 	fTPhoCiCPFIsoChargedDR03->push_back(pfTkIsoWithVertexCiC(phoqi,i,*pfCandidates,1,0.3,0.02,0.02,0.0,0.2,0.1));
-      fTPhoCiCPFIsoChargedDR04->push_back(pfTkIsoWithVertexCiC(phoqi,i,*pfCandidates,1,0.4,0.02,0.02,0.0,0.2,0.1));
+	fTPhoCiCPFIsoChargedDR04->push_back(pfTkIsoWithVertexCiC(phoqi,i,*pfCandidates,1,0.4,0.02,0.02,0.0,0.2,0.1));
       }
     }
 
-    { // Photon ID MVA
+    if (doPhotonStuff) { // Photon ID MVA
 
       photonIDMVA_variables.isrescaled = false;
 
@@ -2455,251 +2451,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
 
 
-
-
-    /*
-    { // start PF stuff from Nicolas
-
-      reco::PhotonCollection::const_iterator gamIterSl;
-
-      const Photon* gamIter = &photon;
-	 
-      fTPhoChargedHadronIso->push_back(0);
-      fTPhoNeutralHadronIso->push_back(0);
-      fTPhoPhotonIso       ->push_back(0);
-
-      fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx->push_back(0);
-      fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx->push_back(0);
-      fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->push_back(0);
-      fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->push_back(0);
-      
-      fTPhoCone01NeutralHadronIsomvVtx->push_back(0);
-      fTPhoCone02NeutralHadronIsomvVtx->push_back(0);
-      fTPhoCone03NeutralHadronIsomvVtx->push_back(0);
-      fTPhoCone04NeutralHadronIsomvVtx->push_back(0);
-      
-      fTPhoCone01ChargedHadronIsodR02dz02dxy01->push_back(0);
-      fTPhoCone02ChargedHadronIsodR02dz02dxy01->push_back(0);
-      fTPhoCone03ChargedHadronIsodR02dz02dxy01->push_back(0);
-      fTPhoCone04ChargedHadronIsodR02dz02dxy01->push_back(0);
-
-      fTPhoCone03PFCombinedIso->push_back(0);
-      fTPhoCone04PFCombinedIso->push_back(0);
-
-
-
-
-
-      int PfCandType[10000];
-      float PfCandPt[10000];
-      float PfCandPx[10000];
-      float PfCandPy[10000];
-      float PfCandPz[10000];
-      float PfCandPtAtVtx[10000];
-      float PfCandPxAtVtx[10000];
-      float PfCandPyAtVtx[10000];
-      float PfCandPzAtVtx[10000];
-      float PfCandVx[10000];
-      float PfCandVy[10000];
-      float PfCandVz[10000];
-      float PfCandDxy[10000];
-      float PfCandDz[10000];
-      int PfCandIsFromPU[10000]; 
-      float PfCandDeltaRrecomputed[10000];
-      float PfCandDeltaEtarecomputed[10000];
-      float PfCandDeltaPhirecomputed[10000];
-
-
-
-	 
-
-	 //Recompute pflow isolation keeping all the pfcandidates in a 0.4 cone
-
-	     
-	 float photonVx = gamIter->vx();
-	 float photonVy = gamIter->vy();
-	 float photonVz = gamIter->vz();
-	     
-	 for( int i=0; i<ncand; ++i ) {
-	   
-	   int type = FindPFCandType((*pfCandidates)[i].pdgId());
-
-	   if ((FoundPFPhoton && i==iphot) || (FoundPFElectron && i==iel)) {
-	     storethispfcand[i]=1;
-	     continue;
-	   }
-	   
-	   if (type==0 || type==1 || type==2){
-	   
-	     PfCandType[i] = type;
-
-	     PfCandPt[i] = (*pfCandidates)[i].pt();
-	     PfCandPx[i] = (*pfCandidates)[i].px();
-	     PfCandPy[i] = (*pfCandidates)[i].py();
-	     PfCandPz[i] = (*pfCandidates)[i].pz();
-	     PfCandVx[i] = (*pfCandidates)[i].vx();
-	     PfCandVy[i] = (*pfCandidates)[i].vy();
-	     PfCandVz[i] = (*pfCandidates)[i].vz();
-
-	     math::XYZVector photon_direction = math::XYZVector(gamIter->superCluster()->x()-PfCandVx[i], \
-								gamIter->superCluster()->y()-PfCandVy[i], \
-								gamIter->superCluster()->z()-PfCandVz[i]);
-	     float photon_eta = photon_direction.eta();
-	     float photon_phi = photon_direction.phi();
-	 
-	     float pfcand_eta = (*pfCandidates)[i].eta();
-	     float pfcand_phi = (*pfCandidates)[i].phi();
-	     
-	     PfCandDeltaRrecomputed[i] = reco::deltaR(photon_eta,photon_phi,pfcand_eta,pfcand_phi);
-	     PfCandDeltaEtarecomputed[i] = photon_eta-pfcand_eta;
-	     PfCandDeltaPhirecomputed[i] = reco::deltaPhi(photon_phi,pfcand_phi);
-
-	     bool usetrackref=false;
-	     if (type==1 && (*pfCandidates)[i].trackRef().isNonnull()) usetrackref=true;
-
-	     if (usetrackref){ // use momentum (and vtx) of the track for dxy and dz calculation
-	       PfCandPtAtVtx[i] = (*pfCandidates)[i].trackRef()->pt();
-	       PfCandPxAtVtx[i] = (*pfCandidates)[i].trackRef()->px();
-	       PfCandPyAtVtx[i] = (*pfCandidates)[i].trackRef()->py();
-	       PfCandPzAtVtx[i] = (*pfCandidates)[i].trackRef()->pz();
-
-	       bool bad=false;
-	       if ((*pfCandidates)[i].vx()!=(*pfCandidates)[i].trackRef()->vx()) bad=true;
-	       if ((*pfCandidates)[i].vy()!=(*pfCandidates)[i].trackRef()->vy()) bad=true;
-	       if ((*pfCandidates)[i].vz()!=(*pfCandidates)[i].trackRef()->vz()) bad=true;
-	       if (bad) edm::LogWarning("NTP") << "@SUB=analyze"
-					       << "Something wrong with trackRef vertex for charged hadron pfcandidate";
-	     }
-	     else {
-	       PfCandPtAtVtx[i] = PfCandPt[i];
-               PfCandPxAtVtx[i] = PfCandPx[i];
-               PfCandPyAtVtx[i] = PfCandPy[i];
-               PfCandPzAtVtx[i] = PfCandPz[i];
-	     }
-	  
-	     PfCandDxy[i] =  ( -(PfCandVx[i]-photonVx)*PfCandPyAtVtx[i] +(PfCandVy[i]-photonVy)*PfCandPxAtVtx[i] ) / PfCandPtAtVtx[i];
-	     PfCandDz[i] = (PfCandVz[i]-photonVz) - ( (PfCandVx[i]-photonVx)*PfCandPxAtVtx[i]+(PfCandVy[i]-photonVy)*PfCandPyAtVtx[i] )/PfCandPtAtVtx[i] * PfCandPzAtVtx[i]/PfCandPtAtVtx[i];
-	     PfCandDxy[i] = fabs(PfCandDxy[i]);
-	     PfCandDz[i] = fabs(PfCandDz[i]);
- 
-
-	     PfCandIsFromPU[i] = -1;
-	     if (type==1){
-	       reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
-	       if (chvtx.isNull() || chvtx.key()==0) PfCandIsFromPU[i] = 0;
-	       else PfCandIsFromPU[i] = 1;
-	     }
-
-	     double pt = PfCandPt[i];
-	     double dEta = PfCandDeltaEtarecomputed[i];
-	     double dPhi = PfCandDeltaPhirecomputed[i];
-	     double dR = PfCandDeltaRrecomputed[i];
-	     double dz = PfCandDz[i];
-	     double dxy = PfCandDxy[i];
-
-	     if (type==1 && dR<0.4) storethispfcand[i]=true;
-	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
-
-
-	     { // determination of distance for footprint removal method
-	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
-	       bool isbarrel = gamIter->isEB();
-	       TVector3 pfvertex(PfCandVx[i],PfCandVy[i],PfCandVz[i]);
-	       TVector3 pfmomentum(PfCandPx[i],PfCandPy[i],PfCandPz[i]);
-	       pfmomentum = pfmomentum.Unit();
-	       TVector3 ecalpfhit(0,0,0);
-	       bool good=false;
-	       if (isbarrel){
-		 TGeoTube ebgeom(0,photon_scposition.Perp(),1e+10);
- 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
-		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-		 if (ebgeom.Contains(p)){
-		   double dist = ebgeom.DistFromInside(p,d);
-		   ecalpfhit = pfvertex + dist*pfmomentum;
-		   good=true;
-		 }
-	       }
-	       else { // EE
-		 TGeoPara eegeom(1e+10,1e+10,fabs(photon_scposition.z()),0,0,0);
- 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
-		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-		 if (eegeom.Contains(p)){
-		   double dist = eegeom.DistFromInside(p,d);
-		   ecalpfhit = pfvertex + dist*pfmomentum;
-		   good=true;
-		 }
-	       }
-	       if (good && ecalpfhit.Perp()>0 && photon_scposition.Perp()>0){
-		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
-	       }
-	     }
-
-	       
-	     if (type==0){ //Neutral Hadron
-	       if (dR<0.1) fTPhoCone01NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.2) fTPhoCone02NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.3) fTPhoCone03NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.4) fTPhoCone04NeutralHadronIsomvVtx->at(phoqi) += pt;
-	     }
-
-	     if (type==2) { //Photon
-	       bool vetoed=false;
-	       if (fabs(dEta)<0.015 && gamIter->isEB()) vetoed=true;
-	       else if (gamIter->isEE()){
-		 float sceta = gamIter->superCluster()->eta();
-		 float limit_dR = 0.00864*fabs(sinh(sceta))*4;
-		 if (dR<limit_dR) vetoed=true;
-	       }
-	       if (!vetoed){
-		 if (dR<0.1) fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-		 if (dR<0.2) fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-		 if (dR<0.3) fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;  
-		 if (dR<0.4) fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-	       }
-	     }
-	   
-	     if (type==1){ //Charged Hadron
-	       //dz/dxy
-	       if (fabs(dz)<0.2 && fabs(dxy)<0.1 && dR>0.02){
-		 if (dR<0.1) fTPhoCone01ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.2) fTPhoCone02ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.3) fTPhoCone03ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.4) fTPhoCone04ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-	       }
-		 
-	     }
-	       
-	       
-	   }
-
-	 }
-	     
-	 
-	 fTPhoCone03PFCombinedIso->at(phoqi) = (fTPhoCone03ChargedHadronIsodR02dz02dxy01->at(phoqi)+fTPhoCone03NeutralHadronIsomvVtx->at(phoqi)+fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->at(phoqi)) / fTPhoPt->at(phoqi);
-	 fTPhoCone04PFCombinedIso->at(phoqi) = (fTPhoCone04ChargedHadronIsodR02dz02dxy01->at(phoqi)+fTPhoCone04NeutralHadronIsomvVtx->at(phoqi)+fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->at(phoqi)) / fTPhoPt->at(phoqi);
-
-
-       }     // end PF stuff from Nicolas
-    */
-
-
-
-
-    
-    // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
-    // 	// Spike removal information
-    // 	if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
-    // 		fTPhotScSeedSeverity ->push_back(EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *ebRecHits, *channelStatus ));
-    // 		fTPhotE1OverE9 ->push_back(EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *ebRecHits ));
-    // 		fTPhotS4OverS1 ->push_back(EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *ebRecHits ));
-    // 	} else if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
-    // 		fTPhotScSeedSeverity ->push_back(EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *eeRecHits, *channelStatus ));
-    // 		fTPhotE1OverE9 ->push_back(EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *eeRecHits ));
-    // 		fTPhotS4OverS1 ->push_back(1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits ));
-    //      } else
-    // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
-
-
   } // end photon loop
 
 
@@ -2719,7 +2470,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::vector<std::vector<int> > vtx_dipho_mva;
   std::vector<std::vector<int> > vtx_dipho_productrank;
   
-  if (doVertexingFlag) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
+  if (doPhotonStuff) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
     
     bool VTX_MVA_DEBUG = false;
     
@@ -2908,7 +2659,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 	
 	}
-	}
+      }
 	
 
     }
@@ -3325,8 +3076,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!fIsRealData && (*fTNGenJets) > 0) fTJGenJetIndex->push_back( matchJet(&(*jet)) );
     fTJGood->push_back( 0 );
 
-    {
-      fTJVrtxListStart->push_back(fTJPassPileupIDL[0]->size());
+    fTJVrtxListStart->push_back(fTJPassPileupIDL[0]->size());
+
+    if (doPhotonStuff){
+
       assert ((*fTNVrtx) == vertices->size());
       reco::VertexCollection vtxColl = *(vertices.product());
 
@@ -3356,7 +3109,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
     }
     
-    { // QG tagging
+    if (doPhotonStuff) { // QG tagging
       edm::RefToBase<reco::Jet> jetRef(jets->refAt(index));
       fTJQGTagLD->push_back(-999);
       fTJQGTagMLP->push_back(-999);
@@ -3405,9 +3158,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // PfCandidates Variables:
 
   int pfcandIndex(0);
-  for (unsigned int i=0; i<pfCandidates->size(); i++){
-
-    if (!doStorePFCandidates) continue;
+  for (unsigned int i=0; i<pfCandidates->size() && doPhotonStuff; i++){
 
     int type = FindPFCandType((*pfCandidates)[i].pdgId());
     if (type==2) storethispfcand[i]=true;
@@ -3458,7 +3209,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
   *fTNPfCand=pfcandIndex;
   
-  for (int j=0; j<(*fTNPhotons); j++){
+  for (int j=0; j<(*fTNPhotons) && doPhotonStuff; j++){
     fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
     fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
   }
@@ -7333,6 +7084,10 @@ float NTupleProducer::pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollecti
 }
 
 void NTupleProducer::rescaleClusterShapes(struct_photonIDMVA_variables &str, bool isEB){
+
+  return;
+
+  //  cout << "WARNING: ARE YOU SURE THAT V7N HAS TO BE RESCALED?" << endl;
 
   if (str.isrescaled) {
     cout << "ERROR: rescaling same variables twice" << endl;

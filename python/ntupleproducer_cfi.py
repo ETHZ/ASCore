@@ -24,8 +24,8 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_pfmet        = cms.InputTag('pfMet'),
 	tag_corrcalomet  = cms.InputTag('metMuonJESCorAK5'),
 	tag_genmet       = cms.InputTag('genMetTrue'),
-	tag_vertex       = cms.InputTag('offlinePrimaryVerticesWithBS'),
-	tag_vertex_nobs  = cms.InputTag('offlinePrimaryVertices'),
+	tag_vertex       = cms.InputTag('offlinePrimaryVertices'), # WARNING: overwritten by default with 'goodVertices' in _cfg.py
+	tag_vertex_withbs= cms.InputTag('offlinePrimaryVerticesWithBS'),
 	tag_tracks       = cms.InputTag('generalTracks'),
 	tag_photons      = cms.InputTag('photons'),
 	tag_caltow       = cms.InputTag('towerMaker'),
@@ -42,13 +42,6 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_pfProducer = cms.InputTag("particleFlow"),
         tag_SC_barrel    = cms.InputTag("correctedHybridSuperClusters"),
         tag_SC_endcap    = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
-
-        tag_doVertexing = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
-        tag_doStorePFCandidates = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
-        tag_fTrackCollForVertexing = cms.InputTag("generalTracks"),
-        tag_fallConversionsCollForVertexing = cms.InputTag("allConversions"),
-        tag_regressionVersion = cms.int32(5), # turned off by default; use version number 5 for 2012 @ 8 TeV, number 8 for 2011 @ 7 TeV
-
                          
 	# Trigger paths to store the triggering object information of
         hlt_labels = cms.vstring('HLT_IsoMu24_eta2p1_v',
@@ -101,6 +94,12 @@ analyze = cms.EDFilter('NTupleProducer',
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
 	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')
 	pu_mc   = cms.vstring('', ''), # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
+
+        tag_doPhotonStuff = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
+
+        tag_fTrackCollForVertexing = cms.InputTag("generalTracks"),
+        tag_fallConversionsCollForVertexing = cms.InputTag("allConversions"),
+        tag_regressionVersion = cms.int32(5), # turned off by default; use version number 5 for 2012 @ 8 TeV, number 8 for 2011 @ 7 TeV
 
         tag_QGSyst = cms.string("pythia"),
         tag_puJetIDAlgos = cms.VPSet(cutbased,full_53x),

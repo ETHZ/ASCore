@@ -34,20 +34,15 @@ options.register ('ModelScan', # register 'runon' option
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
 options.register ('FastSim', # register 'runon' option
-                                    False,  # the default value
-                                    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                                    VarParsing.VarParsing.varType.bool,         # string, int, or float
-                                    "If you are dealing with a FastSim (but not a model scan!), set this to True, otherwise to False (default)")
-options.register ('doStorePFCandidates',
+                  False,  # the default value
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you are dealing with a FastSim (but not a model scan!), set this to True, otherwise to False (default)")
+options.register ('doPhotonStuff',
                   False,
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
-                  "If you want to store the PF candidates as selected in the source file, set to True, otherwise False (default)")
-options.register ('doVertexing',
-                  False,
-                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                  VarParsing.VarParsing.varType.bool,         # string, int, or float
-                  "If you want to run the vertex improved choice (MVA) for diphoton events, set to True, otherwise False (default)")
+                  "If you want to run the photon-analyses specific configuration, set to True, otherwise False (default)")
 options.register ('GlobalTag',
                   '',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -223,9 +218,10 @@ process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData      = (options.runon=='data')
 process.analyze.isModelScan     = options.ModelScan
 process.analyze.isFastSim     = options.FastSim
-process.analyze.tag_doStorePFCandidates = options.doStorePFCandidates
-process.analyze.tag_doVertexing = options.doVertexing
+process.analyze.tag_doPhotonStuff = options.doPhotonStuff
 process.analyze.tag_vertex = 'goodVertices'
+if options.doPhotonStuff==True:
+   process.analyze.tag_vertex = process.analyze.tag_vertex_withbs
 
 # Add some jet collections
 glist_btags = cms.vstring('trackCountingHighEffBJetTags','trackCountingHighPurBJetTags',
@@ -653,4 +649,10 @@ if options.ModelScan==True:
 if options.FastSim==True:
     process.p.remove(process.hcalLaserEventFilter)
     process.p.remove(process.HBHENoiseFilterResultProducer)
-        
+if options.doPhotonStuff==True:
+   process.p.remove(process.PFTau)
+   process.p.remove(process.newTaus)
+   process.p.remove(process.patPF2PATSequencePFCHS)
+else:
+   process.p.remove(process.kt6PFJetsForQGSyst)
+   process.p.remove(process.QuarkGluonTagger)

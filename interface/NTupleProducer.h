@@ -233,8 +233,7 @@ private:
   int fNTotEvents;
   int fNFillTree;
 
-  bool doVertexingFlag;
-  bool doStorePFCandidates;
+  bool doPhotonStuff;
 
   static const int gMaxNMus     = 30;
   static const int gMaxNEles    = 20;
@@ -283,7 +282,7 @@ private:
   edm::InputTag fCorrCaloMETTag;
   edm::InputTag fGenMETTag;
   edm::InputTag fVertexTag;
-  edm::InputTag fVertexTagNoBS;
+  edm::InputTag fVertexTagWithBS;
   edm::InputTag fTrackTag;
   edm::InputTag fPhotonTag;
   edm::InputTag fCalTowTag;
