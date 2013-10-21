@@ -2444,7 +2444,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       for (int ivtx=0; ivtx<*fTNVrtx; ivtx++){
 	photonIDMVA_variables.pfchargedisogood03=fTPhoCiCPFIsoChargedDR03->at(fTPhoVrtxListStart->at(phoqi)+ivtx);
-	assert(photonIDMVA_variables.isrescaled);
 	fTPhoIDMVA->push_back((fTPhoisEB->at(phoqi)) ? photonIDMVA_reader_EB->EvaluateMVA("AdaBoost") : photonIDMVA_reader_EE->EvaluateMVA("AdaBoost"));
       }
 
