@@ -1,83 +1,96 @@
-#! /bin/bash
+mygitaddpkg()
+{
+REMOTE=git://github.com/ETHZ
+PACKNAME=$1
+VERSION=$2
+PACKNAME_GIT=$(echo ${PACKNAME} | sed 's,/,-,g').git
 
-export SCRAM_ARCH=slc5_amd64_gcc462
-eval `scramv1 ru -sh`
-
-cd $CMSSW_BASE/src/
-
-#####################################################################################################################################
-################################################                      ###############################################################
-################################################     <recipe>         ###############################################################
-################################################                      ###############################################################
-#####################################################################################################################################
-
-
+echo Checking out from the ETHZ github area the package ${PACKNAME} version ${VERSION}
+git clone ${REMOTE}/${PACKNAME_GIT} ${PACKNAME}
+cd ${PACKNAME}
+git checkout --detach ${VERSION}
+cd ${OLDPWD}
+}
 
 # Pat: from SWGuidePATRecipes
 # tags from SWGuidePATReleaseNotes V08-09-11-00
-addpkg DataFormats/PatCandidates   V06-05-06-03
-addpkg PhysicsTools/PatAlgos       V08-09-47
-addpkg CommonTools/ParticleFlow    V00-03-16
+mygitaddpkg DataFormats/PatCandidates   DataFormats-PatCandidates-V06-05-06-03
+mygitaddpkg PhysicsTools/PatAlgos       PhysicsTools-PatAlgos-V08-09-47
+mygitaddpkg CommonTools/ParticleFlow    CommonTools-ParticleFlow-V00-03-16
 
 # revert back to the tag we proposed originally and is in the official recipe:
-addpkg RecoParticleFlow/PFProducer V15-02-06
+mygitaddpkg RecoParticleFlow/PFProducer RecoParticleFlow-PFProducer-V15-02-06
 
 # Type1MET
-addpkg JetMETCorrections/Type1MET  V04-06-09
-addpkg PhysicsTools/PatUtils V03-09-26
-addpkg CommonTools/RecoUtils V00-00-13
-cvs co -r  V00-02-15 DataFormats/StdDictionaries
+mygitaddpkg JetMETCorrections/Type1MET  JetMETCorrections-Type1MET-V04-06-09
+mygitaddpkg PhysicsTools/PatUtils PhysicsTools-PatUtils-V03-09-26
+mygitaddpkg CommonTools/RecoUtils CommonTools-RecoUtils-V00-00-13
+mygitaddpkg DataFormats/StdDictionaries DataFormats-StdDictionaries-V00-02-15 
 
 # Updated Tau discriminators (not including advanced MVA isolation: breaks CHS postfix)
-cvs co -r V01-04-23 RecoTauTag/RecoTau       
-cvs co -r V01-04-10 RecoTauTag/Configuration 
-cvs co -r V00-04-01 CondFormats/EgammaObjects
+mygitaddpkg  RecoTauTag/RecoTau         RecoTauTag-RecoTau-V01-04-23
+mygitaddpkg  RecoTauTag/Configuration 	RecoTauTag-Configuration-V01-04-10
+mygitaddpkg  CondFormats/EgammaObjects	CondFormats-EgammaObjects-V00-04-01
+
 #needed at the moment for AgainstMuonXXX2 --> will be in PhysicsTools/PatAlgos       V08-09-51
-cvs up -r 1.31.6.4 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cfi.py
-cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
+cd PhysicsTools/PatAlgos/python/producersLayer1
+git checkout PhysicsTools-PatAlgos-V08-09-51 tauProducer_cfi.py
+cd ${OLDPWD}
+cd PhysicsTools/PatAlgos/python/tools
+git checkout PhysicsTools-PatAlgos-V08-09-51 tauTools.py
+cd ${OLDPWD}
 
 #  MET Filters (including tracking POG filters)
-cvs co -r V00-00-08      RecoMET/METAnalyzers
-cvs co -r V00-00-13      RecoMET/METFilters
-cvs co -r V00-03-23      CommonTools/RecoAlgos
-cvs co -r V01-00-11-01   DPGAnalysis/Skims
-cvs co -r V00-11-17      DPGAnalysis/SiStripTools
-cvs co -r V00-00-08      DataFormats/TrackerCommon
-cvs co -r V01-09-05      RecoLocalTracker/SubCollectionProducers
-cvs co -r V01-02-10      EventFilter/HcalRawToDigi
+mygitaddpkg    RecoMET/METAnalyzers                     V00-00-08   
+mygitaddpkg    RecoMET/METFilters			RecoMET-METFilters-V00-00-13   
+mygitaddpkg    CommonTools/RecoAlgos			CommonTools-RecoAlgos-V00-03-23   
+mygitaddpkg    DPGAnalysis/Skims			DPGAnalysis-Skims-V01-00-11-01
+mygitaddpkg    DPGAnalysis/SiStripTools			DPGAnalysis-SiStripTools-V00-11-17   
+mygitaddpkg    DataFormats/TrackerCommon		DataFormats-TrackerCommon-V00-00-08   
+mygitaddpkg    RecoLocalTracker/SubCollectionProducers	RecoLocalTracker-SubCollectionProducers-V01-09-05   
+mygitaddpkg    EventFilter/HcalRawToDigi		EventFilter-HcalRawToDigi-V01-02-10   
 
 # Parton Flavour
-cvs co -r V00-13-10 PhysicsTools/JetMCAlgos
+mygitaddpkg PhysicsTools/JetMCAlgos PhysicsTools-JetMCAlgos-V00-13-10
 
 # ECAL
-addpkg RecoEcal/EgammaCoreTools V05-08-26
-cvs export -d tmpexportdir -rHEAD UserCode/peruzzi/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
-cvs export -d tmpexportdir -rHEAD UserCode/peruzzi/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
-mv -f tmpexportdir/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins
-mv -f tmpexportdir/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins
-rmdir tmpexportdir
-cvs co -r vertex_mva_v4 -d h2gglobe/VertexAnalysis UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis
+mygitaddpkg RecoEcal/EgammaCoreTools RecoEcal-EgammaCoreTools-V05-08-26
+mygitaddpkg Patches-OldReleases master
+cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
+cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
+rm -rf Patches-OldReleases
 
-# Isolation
-cvs co -r V04-00-01 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
+mygitaddpkg RecoEgamma/EgammaTools RecoEgamma-EgammaTools-V09-00-00
 
-# alternate code for photon isolation
-# https://twiki.cern.ch/twiki/bin/view/CMS/EgammaPFBasedIsolation#Alternate_code_to_calculate_PF_I
-cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
-cvs up -r 1.13 EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h
-cvs up -r 1.20 EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc
+mygitaddpkg h2gglobe vertex_mva_v4
+mv h2gglobe/VertexAnalysis .
+rm -rf h2gglobe/*
+mv VertexAnalysis h2gglobe/VertexAnalysis
 
-# SC footprint removal
-cvs co -r V00-02d -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
+mygitaddpkg emanuele/MyAnalysis/IsolationTools V04-00-01
+mv emanuele/MyAnalysis .
+rm -rf emanuele
+mygitaddpkg sixie/Muon/MuonAnalysisTools V00-00-10
+mv sixie/Muon .
+rm -rf sixie
 
-#####################################################################################################################################
-################################################                      ###############################################################
-################################################     </recipe>        ###############################################################
-################################################                      ###############################################################
-#####################################################################################################################################
+mygitaddpkg EGamma/EGammaAnalysisTools V00-00-21
+cd EGamma/EGammaAnalysisTools/interface
+git checkout V00-00-22 PFIsolationEstimator.h
+cd ${OLDPWD}
+cd EGamma/EGammaAnalysisTools/src
+git checkout V00-00-22 PFIsolationEstimator.cc
+cd ${OLDPWD}
 
-echo "Everything has been set up. You can compile now (scramv1 b -j2) or modify the recipe to your likings"
-echo "Maybe you need to do a 'scramv1 b clean' first due to new DataFormats/StdDictionaries"
 
-exit 0
+mygitaddpkg SCFootprintRemoval V00-02d
+mkdir PFIsolation
+mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
+
+mygitaddpkg ASCore EDMdev
+mkdir DiLeptonAnalysis
+mv ASCore DiLeptonAnalysis/NTupleProducer
+
+
+wget http://cern.ch/sani/gbrv3ph_52x.root
+mv gbrv3ph_52x.root DiLeptonAnalysis/NTupleProducer/data/gbrv3ph_52x.root

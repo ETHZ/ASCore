@@ -1474,42 +1474,42 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTSClocalcorr->push_back(localcorrenergy/sc->rawEnergy());
     }
 
-    {
-      std::vector<DetId> cristalli;
-      for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
-	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
-	for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
-	sort(cristalli.begin(),cristalli.end());
-	std::vector<DetId>::iterator it;
-	it = unique(cristalli.begin(),cristalli.end());
-	cristalli.resize(it-cristalli.begin());
-      }
-
-      fTSCXtalListStart->push_back(cristalli_tokeep.size());
-
-      int added=0;      
-      for (unsigned int i=0; i<cristalli.size(); i++){
-
-	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
-	  *fTGoodEvent = 1;
-	  break;
-	}
-	
-	
-	if (cristalli.at(i).subdetId()!=EcalBarrel) {
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
-	  continue;
-	}
-
-	cristalli_tokeep.push_back(cristalli.at(i));	
-	added++;
-
-      }
-
-      fTSCNXtals->push_back(added);
-
-    }
+//    {
+//      std::vector<DetId> cristalli;
+//      for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
+//	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
+//	for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
+//	sort(cristalli.begin(),cristalli.end());
+//	std::vector<DetId>::iterator it;
+//	it = unique(cristalli.begin(),cristalli.end());
+//	cristalli.resize(it-cristalli.begin());
+//      }
+//
+//      fTSCXtalListStart->push_back(cristalli_tokeep.size());
+//
+//      int added=0;      
+//      for (unsigned int i=0; i<cristalli.size(); i++){
+//
+//	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
+//	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
+//	  *fTGoodEvent = 1;
+//	  break;
+//	}
+//	
+//	
+//	if (cristalli.at(i).subdetId()!=EcalBarrel) {
+//	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
+//	  continue;
+//	}
+//
+//	cristalli_tokeep.push_back(cristalli.at(i));	
+//	added++;
+//
+//      }
+//
+//      fTSCNXtals->push_back(added);
+//
+//    }
 
     (*fTNSuperClusters)++;
   }
@@ -1560,42 +1560,42 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTSClocalcorr->push_back(localcorrenergy/sc->rawEnergy());
     }
 
-    {
-      std::vector<DetId> cristalli;
-      for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
-	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
-	for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
-	sort(cristalli.begin(),cristalli.end());
-	std::vector<DetId>::iterator it;
-	it = unique(cristalli.begin(),cristalli.end());
-	cristalli.resize(it-cristalli.begin());
-      }
-      
-      fTSCXtalListStart->push_back(cristalli_tokeep.size());
-
-      int added=0;
-      for (unsigned int i=0; i<cristalli.size(); i++){
-
-	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
-	  *fTGoodEvent = 1;
-	  break;
-	}
-	
-
-	if (cristalli.at(i).subdetId()!=EcalEndcap) {
-	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
-	  continue;
-	}
-
-	cristalli_tokeep.push_back(cristalli.at(i));	
-	added++;
-
-      }
-
-      fTSCNXtals->push_back(added);
-
-    }
+//    {
+//      std::vector<DetId> cristalli;
+//      for (reco::CaloCluster_iterator bc=sc->clustersBegin(); bc!=sc->clustersEnd(); ++bc){
+//	const std::vector< std::pair<DetId, float> > & seedrechits = (*bc)->hitsAndFractions();
+//	for (uint i=0; i<seedrechits.size(); i++) cristalli.push_back(seedrechits[i].first);
+//	sort(cristalli.begin(),cristalli.end());
+//	std::vector<DetId>::iterator it;
+//	it = unique(cristalli.begin(),cristalli.end());
+//	cristalli.resize(it-cristalli.begin());
+//      }
+//      
+//      fTSCXtalListStart->push_back(cristalli_tokeep.size());
+//
+//      int added=0;
+//      for (unsigned int i=0; i<cristalli.size(); i++){
+//
+//	if ((int)cristalli_tokeep.size()>=gMaxNXtals){
+//	  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of SC xtals exceeded!";
+//	  *fTGoodEvent = 1;
+//	  break;
+//	}
+//	
+//
+//	if (cristalli.at(i).subdetId()!=EcalEndcap) {
+//	  edm::LogWarning("NTP") << "@SUB=analyze" << "Problem with xtals subdetId()";
+//	  continue;
+//	}
+//
+//	cristalli_tokeep.push_back(cristalli.at(i));	
+//	added++;
+//
+//      }
+//
+//      fTSCNXtals->push_back(added);
+//
+//    }
 
     (*fTNSuperClusters)++;
   }
@@ -2303,167 +2303,167 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	 
 
-	 //Recompute pflow isolation keeping all the pfcandidates in a 0.4 cone
-
-	     
-	 float photonVx = gamIter->vx();
-	 float photonVy = gamIter->vy();
-	 float photonVz = gamIter->vz();
-	     
-	 for( int i=0; i<ncand; ++i ) {
-	   
-	   int type = FindPFCandType((*pfCandidates)[i].pdgId());
-
-	   if ((FoundPFPhoton && i==iphot) || (FoundPFElectron && i==iel)) {
-	     storethispfcand[i]=1;
-	     continue;
-	   }
-	   
-	   if (type==0 || type==1 || type==2){
-	   
-	     PfCandType[i] = type;
-
-	     PfCandPt[i] = (*pfCandidates)[i].pt();
-	     PfCandPx[i] = (*pfCandidates)[i].px();
-	     PfCandPy[i] = (*pfCandidates)[i].py();
-	     PfCandPz[i] = (*pfCandidates)[i].pz();
-	     PfCandVx[i] = (*pfCandidates)[i].vx();
-	     PfCandVy[i] = (*pfCandidates)[i].vy();
-	     PfCandVz[i] = (*pfCandidates)[i].vz();
-
-	     math::XYZVector photon_direction = math::XYZVector(gamIter->superCluster()->x()-PfCandVx[i], \
-								gamIter->superCluster()->y()-PfCandVy[i], \
-								gamIter->superCluster()->z()-PfCandVz[i]);
-	     float photon_eta = photon_direction.eta();
-	     float photon_phi = photon_direction.phi();
-	 
-	     float pfcand_eta = (*pfCandidates)[i].eta();
-	     float pfcand_phi = (*pfCandidates)[i].phi();
-	     
-	     PfCandDeltaRrecomputed[i] = reco::deltaR(photon_eta,photon_phi,pfcand_eta,pfcand_phi);
-	     PfCandDeltaEtarecomputed[i] = photon_eta-pfcand_eta;
-	     PfCandDeltaPhirecomputed[i] = reco::deltaPhi(photon_phi,pfcand_phi);
-
-	     bool usetrackref=false;
-	     if (type==1 && (*pfCandidates)[i].trackRef().isNonnull()) usetrackref=true;
-
-	     if (usetrackref){ // use momentum (and vtx) of the track for dxy and dz calculation
-	       PfCandPtAtVtx[i] = (*pfCandidates)[i].trackRef()->pt();
-	       PfCandPxAtVtx[i] = (*pfCandidates)[i].trackRef()->px();
-	       PfCandPyAtVtx[i] = (*pfCandidates)[i].trackRef()->py();
-	       PfCandPzAtVtx[i] = (*pfCandidates)[i].trackRef()->pz();
-
-	       bool bad=false;
-	       if ((*pfCandidates)[i].vx()!=(*pfCandidates)[i].trackRef()->vx()) bad=true;
-	       if ((*pfCandidates)[i].vy()!=(*pfCandidates)[i].trackRef()->vy()) bad=true;
-	       if ((*pfCandidates)[i].vz()!=(*pfCandidates)[i].trackRef()->vz()) bad=true;
-	       if (bad) edm::LogWarning("NTP") << "@SUB=analyze"
-					       << "Something wrong with trackRef vertex for charged hadron pfcandidate";
-	     }
-	     else {
-	       PfCandPtAtVtx[i] = PfCandPt[i];
-               PfCandPxAtVtx[i] = PfCandPx[i];
-               PfCandPyAtVtx[i] = PfCandPy[i];
-               PfCandPzAtVtx[i] = PfCandPz[i];
-	     }
-	  
-	     PfCandDxy[i] =  ( -(PfCandVx[i]-photonVx)*PfCandPyAtVtx[i] +(PfCandVy[i]-photonVy)*PfCandPxAtVtx[i] ) / PfCandPtAtVtx[i];
-	     PfCandDz[i] = (PfCandVz[i]-photonVz) - ( (PfCandVx[i]-photonVx)*PfCandPxAtVtx[i]+(PfCandVy[i]-photonVy)*PfCandPyAtVtx[i] )/PfCandPtAtVtx[i] * PfCandPzAtVtx[i]/PfCandPtAtVtx[i];
-	     PfCandDxy[i] = fabs(PfCandDxy[i]);
-	     PfCandDz[i] = fabs(PfCandDz[i]);
- 
-
-	     PfCandIsFromPU[i] = -1;
-	     if (type==1){
-	       reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
-	       if (chvtx.isNull() || chvtx.key()==0) PfCandIsFromPU[i] = 0;
-	       else PfCandIsFromPU[i] = 1;
-	     }
-
-	     double pt = PfCandPt[i];
-	     double dEta = PfCandDeltaEtarecomputed[i];
-	     double dPhi = PfCandDeltaPhirecomputed[i];
-	     double dR = PfCandDeltaRrecomputed[i];
-	     double dz = PfCandDz[i];
-	     double dxy = PfCandDxy[i];
-
-	     if (type==1 && dR<0.4) storethispfcand[i]=true;
-	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
-
-
-	     { // determination of distance for footprint removal method
-	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
-	       bool isbarrel = gamIter->isEB();
-	       TVector3 pfvertex(PfCandVx[i],PfCandVy[i],PfCandVz[i]);
-	       TVector3 pfmomentum(PfCandPx[i],PfCandPy[i],PfCandPz[i]);
-	       pfmomentum = pfmomentum.Unit();
-	       TVector3 ecalpfhit(0,0,0);
-	       bool good=false;
-	       if (isbarrel){
-		 TGeoTube ebgeom(0,photon_scposition.Perp(),1e+10);
- 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
-		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-		 if (ebgeom.Contains(p)){
-		   double dist = ebgeom.DistFromInside(p,d);
-		   ecalpfhit = pfvertex + dist*pfmomentum;
-		   good=true;
-		 }
-	       }
-	       else { // EE
-		 TGeoPara eegeom(1e+10,1e+10,fabs(photon_scposition.z()),0,0,0);
- 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
-		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
-		 if (eegeom.Contains(p)){
-		   double dist = eegeom.DistFromInside(p,d);
-		   ecalpfhit = pfvertex + dist*pfmomentum;
-		   good=true;
-		 }
-	       }
-	       if (good && ecalpfhit.Perp()>0 && photon_scposition.Perp()>0){
-		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
-	       }
-	     }
-
-	       
-	     if (type==0){ //Neutral Hadron
-	       if (dR<0.1) fTPhoCone01NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.2) fTPhoCone02NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.3) fTPhoCone03NeutralHadronIsomvVtx->at(phoqi) += pt;
-	       if (dR<0.4) fTPhoCone04NeutralHadronIsomvVtx->at(phoqi) += pt;
-	     }
-
-	     if (type==2) { //Photon
-	       bool vetoed=false;
-	       if (fabs(dEta)<0.015 && gamIter->isEB()) vetoed=true;
-	       else if (gamIter->isEE()){
-		 float sceta = gamIter->superCluster()->eta();
-		 float limit_dR = 0.00864*fabs(sinh(sceta))*4;
-		 if (dR<limit_dR) vetoed=true;
-	       }
-	       if (!vetoed){
-		 if (dR<0.1) fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-		 if (dR<0.2) fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-		 if (dR<0.3) fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;  
-		 if (dR<0.4) fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
-	       }
-	     }
-	   
-	     if (type==1){ //Charged Hadron
-	       //dz/dxy
-	       if (fabs(dz)<0.2 && fabs(dxy)<0.1 && dR>0.02){
-		 if (dR<0.1) fTPhoCone01ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.2) fTPhoCone02ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.3) fTPhoCone03ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-		 if (dR<0.4) fTPhoCone04ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
-	       }
-		 
-	     }
-	       
-	       
-	   }
-
-	 }
-	     
+//	 //Recompute pflow isolation keeping all the pfcandidates in a 0.4 cone
+//
+//	     
+//	 float photonVx = gamIter->vx();
+//	 float photonVy = gamIter->vy();
+//	 float photonVz = gamIter->vz();
+//	     
+//	 for( int i=0; i<ncand; ++i ) {
+//	   
+//	   int type = FindPFCandType((*pfCandidates)[i].pdgId());
+//
+//	   if ((FoundPFPhoton && i==iphot) || (FoundPFElectron && i==iel)) {
+//	     storethispfcand[i]=1;
+//	     continue;
+//	   }
+//	   
+//	   if (type==0 || type==1 || type==2){
+//	   
+//	     PfCandType[i] = type;
+//
+//	     PfCandPt[i] = (*pfCandidates)[i].pt();
+//	     PfCandPx[i] = (*pfCandidates)[i].px();
+//	     PfCandPy[i] = (*pfCandidates)[i].py();
+//	     PfCandPz[i] = (*pfCandidates)[i].pz();
+//	     PfCandVx[i] = (*pfCandidates)[i].vx();
+//	     PfCandVy[i] = (*pfCandidates)[i].vy();
+//	     PfCandVz[i] = (*pfCandidates)[i].vz();
+//
+//	     math::XYZVector photon_direction = math::XYZVector(gamIter->superCluster()->x()-PfCandVx[i], \
+//								gamIter->superCluster()->y()-PfCandVy[i], \
+//								gamIter->superCluster()->z()-PfCandVz[i]);
+//	     float photon_eta = photon_direction.eta();
+//	     float photon_phi = photon_direction.phi();
+//	 
+//	     float pfcand_eta = (*pfCandidates)[i].eta();
+//	     float pfcand_phi = (*pfCandidates)[i].phi();
+//	     
+//	     PfCandDeltaRrecomputed[i] = reco::deltaR(photon_eta,photon_phi,pfcand_eta,pfcand_phi);
+//	     PfCandDeltaEtarecomputed[i] = photon_eta-pfcand_eta;
+//	     PfCandDeltaPhirecomputed[i] = reco::deltaPhi(photon_phi,pfcand_phi);
+//
+//	     bool usetrackref=false;
+//	     if (type==1 && (*pfCandidates)[i].trackRef().isNonnull()) usetrackref=true;
+//
+//	     if (usetrackref){ // use momentum (and vtx) of the track for dxy and dz calculation
+//	       PfCandPtAtVtx[i] = (*pfCandidates)[i].trackRef()->pt();
+//	       PfCandPxAtVtx[i] = (*pfCandidates)[i].trackRef()->px();
+//	       PfCandPyAtVtx[i] = (*pfCandidates)[i].trackRef()->py();
+//	       PfCandPzAtVtx[i] = (*pfCandidates)[i].trackRef()->pz();
+//
+//	       bool bad=false;
+//	       if ((*pfCandidates)[i].vx()!=(*pfCandidates)[i].trackRef()->vx()) bad=true;
+//	       if ((*pfCandidates)[i].vy()!=(*pfCandidates)[i].trackRef()->vy()) bad=true;
+//	       if ((*pfCandidates)[i].vz()!=(*pfCandidates)[i].trackRef()->vz()) bad=true;
+//	       if (bad) edm::LogWarning("NTP") << "@SUB=analyze"
+//					       << "Something wrong with trackRef vertex for charged hadron pfcandidate";
+//	     }
+//	     else {
+//	       PfCandPtAtVtx[i] = PfCandPt[i];
+//               PfCandPxAtVtx[i] = PfCandPx[i];
+//               PfCandPyAtVtx[i] = PfCandPy[i];
+//               PfCandPzAtVtx[i] = PfCandPz[i];
+//	     }
+//	  
+//	     PfCandDxy[i] =  ( -(PfCandVx[i]-photonVx)*PfCandPyAtVtx[i] +(PfCandVy[i]-photonVy)*PfCandPxAtVtx[i] ) / PfCandPtAtVtx[i];
+//	     PfCandDz[i] = (PfCandVz[i]-photonVz) - ( (PfCandVx[i]-photonVx)*PfCandPxAtVtx[i]+(PfCandVy[i]-photonVy)*PfCandPyAtVtx[i] )/PfCandPtAtVtx[i] * PfCandPzAtVtx[i]/PfCandPtAtVtx[i];
+//	     PfCandDxy[i] = fabs(PfCandDxy[i]);
+//	     PfCandDz[i] = fabs(PfCandDz[i]);
+// 
+//
+//	     PfCandIsFromPU[i] = -1;
+//	     if (type==1){
+//	       reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
+//	       if (chvtx.isNull() || chvtx.key()==0) PfCandIsFromPU[i] = 0;
+//	       else PfCandIsFromPU[i] = 1;
+//	     }
+//
+//	     double pt = PfCandPt[i];
+//	     double dEta = PfCandDeltaEtarecomputed[i];
+//	     double dPhi = PfCandDeltaPhirecomputed[i];
+//	     double dR = PfCandDeltaRrecomputed[i];
+//	     double dz = PfCandDz[i];
+//	     double dxy = PfCandDxy[i];
+//
+//	     if (type==1 && dR<0.4) storethispfcand[i]=true;
+//	     if (fabs(dEta)<0.4) storethispfcand[i]=true;
+//
+//
+//	     { // determination of distance for footprint removal method
+//	       TVector3 photon_scposition(gamIter->superCluster()->x(),gamIter->superCluster()->y(),gamIter->superCluster()->z());
+//	       bool isbarrel = gamIter->isEB();
+//	       TVector3 pfvertex(PfCandVx[i],PfCandVy[i],PfCandVz[i]);
+//	       TVector3 pfmomentum(PfCandPx[i],PfCandPy[i],PfCandPz[i]);
+//	       pfmomentum = pfmomentum.Unit();
+//	       TVector3 ecalpfhit(0,0,0);
+//	       bool good=false;
+//	       if (isbarrel){
+//		 TGeoTube ebgeom(0,photon_scposition.Perp(),1e+10);
+// 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
+//		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
+//		 if (ebgeom.Contains(p)){
+//		   double dist = ebgeom.DistFromInside(p,d);
+//		   ecalpfhit = pfvertex + dist*pfmomentum;
+//		   good=true;
+//		 }
+//	       }
+//	       else { // EE
+//		 TGeoPara eegeom(1e+10,1e+10,fabs(photon_scposition.z()),0,0,0);
+// 		 double p[3] = {pfvertex.x(),pfvertex.y(),pfvertex.z()};
+//		 double d[3] = {pfmomentum.x(),pfmomentum.y(),pfmomentum.z()};
+//		 if (eegeom.Contains(p)){
+//		   double dist = eegeom.DistFromInside(p,d);
+//		   ecalpfhit = pfvertex + dist*pfmomentum;
+//		   good=true;
+//		 }
+//	       }
+//	       if (good && ecalpfhit.Perp()>0 && photon_scposition.Perp()>0){
+//		 if (fabs(ecalpfhit.Eta()-photon_scposition.Eta())<0.4) storethispfcand[i]=true;
+//	       }
+//	     }
+//
+//	       
+//	     if (type==0){ //Neutral Hadron
+//	       if (dR<0.1) fTPhoCone01NeutralHadronIsomvVtx->at(phoqi) += pt;
+//	       if (dR<0.2) fTPhoCone02NeutralHadronIsomvVtx->at(phoqi) += pt;
+//	       if (dR<0.3) fTPhoCone03NeutralHadronIsomvVtx->at(phoqi) += pt;
+//	       if (dR<0.4) fTPhoCone04NeutralHadronIsomvVtx->at(phoqi) += pt;
+//	     }
+//
+//	     if (type==2) { //Photon
+//	       bool vetoed=false;
+//	       if (fabs(dEta)<0.015 && gamIter->isEB()) vetoed=true;
+//	       else if (gamIter->isEE()){
+//		 float sceta = gamIter->superCluster()->eta();
+//		 float limit_dR = 0.00864*fabs(sinh(sceta))*4;
+//		 if (dR<limit_dR) vetoed=true;
+//	       }
+//	       if (!vetoed){
+//		 if (dR<0.1) fTPhoCone01PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
+//		 if (dR<0.2) fTPhoCone02PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
+//		 if (dR<0.3) fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;  
+//		 if (dR<0.4) fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->at(phoqi) += pt;
+//	       }
+//	     }
+//	   
+//	     if (type==1){ //Charged Hadron
+//	       //dz/dxy
+//	       if (fabs(dz)<0.2 && fabs(dxy)<0.1 && dR>0.02){
+//		 if (dR<0.1) fTPhoCone01ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
+//		 if (dR<0.2) fTPhoCone02ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
+//		 if (dR<0.3) fTPhoCone03ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
+//		 if (dR<0.4) fTPhoCone04ChargedHadronIsodR02dz02dxy01->at(phoqi) += pt;
+//	       }
+//		 
+//	     }
+//	       
+//	       
+//	   }
+//
+//	 }
+          
 	 
 	 fTPhoCone03PFCombinedIso->at(phoqi) = (fTPhoCone03ChargedHadronIsodR02dz02dxy01->at(phoqi)+fTPhoCone03NeutralHadronIsomvVtx->at(phoqi)+fTPhoCone03PhotonIsodEta015EBdR070EEmvVtx->at(phoqi)) / fTPhoPt->at(phoqi);
 	 fTPhoCone04PFCombinedIso->at(phoqi) = (fTPhoCone04ChargedHadronIsodR02dz02dxy01->at(phoqi)+fTPhoCone04NeutralHadronIsomvVtx->at(phoqi)+fTPhoCone04PhotonIsodEta015EBdR070EEmvVtx->at(phoqi)) / fTPhoPt->at(phoqi);
@@ -2806,46 +2806,46 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // PfCandidates Variables:
 
   int pfcandIndex(0);
-  for (unsigned int i=0; i<pfCandidates->size(); i++){
-
-    int type = FindPFCandType((*pfCandidates)[i].pdgId());
-    if (type==2) storethispfcand[i]=true;
-
-    if (storethispfcand[i]==0) continue;
-
-    if (pfcandIndex >= gMaxNPfCand){
-      edm::LogWarning("NTP") << "@SUB=analyze"
-			     << "Maximum number of pf candidates exceeded";
-      *fTGoodEvent = 1;
-      break;
-    }
-
-    fTPfCandPdgId->push_back( (*pfCandidates)[i].pdgId() );
-    fTPfCandEta->push_back( (*pfCandidates)[i].eta() );
-    fTPfCandPhi->push_back( (*pfCandidates)[i].phi() );
-    fTPfCandEnergy->push_back( (*pfCandidates)[i].energy() );
-    fTPfCandPt->push_back( (*pfCandidates)[i].pt() );
-    fTPfCandVx->push_back( (*pfCandidates)[i].vx() );
-    fTPfCandVy->push_back( (*pfCandidates)[i].vy() );
-    fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
-
-    for (int j=0; j<(*fTNPhotons); j++){
-      if (PhotonToPFPhotonMatchingArray[j]==(int)i) fTPhoMatchedPFPhotonCand->push_back(pfcandIndex); else fTPhoMatchedPFPhotonCand->push_back(-999);
-      if (PhotonToPFElectronMatchingArray[j]==(int)i) fTPhoMatchedPFElectronCand->push_back(pfcandIndex); else fTPhoMatchedPFElectronCand->push_back(-999);
-    }
-
-    if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
-    reco::HitPattern pattern; 
-    if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
-    fTPfCandHasHitInFirstPixelLayer->push_back( (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999 );
-    fTPfCandTrackRefPx->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999 );
-    fTPfCandTrackRefPy->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999 );
-    fTPfCandTrackRefPz->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999 );
-
-
-    pfcandIndex++;
-
-  }
+//  for (unsigned int i=0; i<pfCandidates->size(); i++){
+//
+//    int type = FindPFCandType((*pfCandidates)[i].pdgId());
+//    if (type==2) storethispfcand[i]=true;
+//
+//    if (storethispfcand[i]==0) continue;
+//
+//    if (pfcandIndex >= gMaxNPfCand){
+//      edm::LogWarning("NTP") << "@SUB=analyze"
+//			     << "Maximum number of pf candidates exceeded";
+//      *fTGoodEvent = 1;
+//      break;
+//    }
+//
+//    fTPfCandPdgId->push_back( (*pfCandidates)[i].pdgId() );
+//    fTPfCandEta->push_back( (*pfCandidates)[i].eta() );
+//    fTPfCandPhi->push_back( (*pfCandidates)[i].phi() );
+//    fTPfCandEnergy->push_back( (*pfCandidates)[i].energy() );
+//    fTPfCandPt->push_back( (*pfCandidates)[i].pt() );
+//    fTPfCandVx->push_back( (*pfCandidates)[i].vx() );
+//    fTPfCandVy->push_back( (*pfCandidates)[i].vy() );
+//    fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
+//
+//    for (int j=0; j<(*fTNPhotons); j++){
+//      if (PhotonToPFPhotonMatchingArray[j]==(int)i) fTPhoMatchedPFPhotonCand->push_back(pfcandIndex); else fTPhoMatchedPFPhotonCand->push_back(-999);
+//      if (PhotonToPFElectronMatchingArray[j]==(int)i) fTPhoMatchedPFElectronCand->push_back(pfcandIndex); else fTPhoMatchedPFElectronCand->push_back(-999);
+//    }
+//
+//    if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
+//    reco::HitPattern pattern; 
+//    if (type==1) pattern=(*pfCandidates)[i].trackRef()->hitPattern(); 
+//    fTPfCandHasHitInFirstPixelLayer->push_back( (type==1) ? (pattern.hasValidHitInFirstPixelBarrel() || pattern.hasValidHitInFirstPixelEndcap()) : -999 );
+//    fTPfCandTrackRefPx->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->px() : -999 );
+//    fTPfCandTrackRefPy->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->py() : -999 );
+//    fTPfCandTrackRefPz->push_back( (type==1) ? (*pfCandidates)[i].trackRef()->pz() : -999 );
+//
+//
+//    pfcandIndex++;
+//
+//  }
   *fTNPfCand=pfcandIndex;
 
 
