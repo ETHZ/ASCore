@@ -649,7 +649,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // Primary vertex
   edm::Handle<VertexCollection> vertices;
   iEvent.getByLabel(fVertexTag, vertices);
-  const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
+  const reco::Vertex *primVtx = (vertices->size()>0) ? &(*(vertices.product()))[0] : NULL; // Just take first vertex ...
 
   // Get Muon IsoDeposits
   // ECAL:
@@ -957,6 +957,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   *fTWeight = 1.0; // To be filled at some point?
 
+  if (primVtx){
   // Save position of primary vertex
   *fTPrimVtxx   = primVtx->x();
   *fTPrimVtxy   = primVtx->y();
@@ -974,6 +975,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     *fTPrimVtxPtSum += (*trackit)->pt();
   }
   *fTPrimVtxGood = 0;
+  }
 
   // get all vertices
   int countVrtx = -1;
@@ -1442,16 +1444,22 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuEem->push_back( ECDep.candEnergy() );
     fTMuEhad->push_back( HCDep.candEnergy() );
 
-	// 3D impact parameter
-	TransientTrack mutt = theB->build( muon.innerTrack() );
-	Measurement1D muip3dpv = IPTools::absoluteImpactParameter3D(mutt, *(primVtx)).second;
-
-    fTMuD03DPV->push_back( muip3dpv.value() );
-    fTMuD03DE ->push_back( muip3dpv.error() );
-
+    // 3D impact parameter
+    TransientTrack mutt = theB->build( muon.innerTrack() );
+    
+    if (primVtx){
+      Measurement1D muip3dpv = IPTools::absoluteImpactParameter3D(mutt, *(primVtx)).second;      
+      fTMuD03DPV->push_back( muip3dpv.value() );
+      fTMuD03DE ->push_back( muip3dpv.error() );
+    }
+    else{
+      fTMuD03DPV->push_back( 999 );
+      fTMuD03DE ->push_back( 999 );
+    }
+    
     fTMuD0BS->push_back( -1.0*muon.innerTrack()->dxy(beamSpot.position()) );
-    fTMuD0PV->push_back( -1.0*muon.innerTrack()->dxy(primVtx->position()) );
-    fTMuDzPV->push_back( muon.innerTrack()->dz(primVtx->position()) );
+    fTMuD0PV->push_back( (primVtx) ? -1.0*muon.innerTrack()->dxy(primVtx->position()) : 999 );
+    fTMuDzPV->push_back( (primVtx) ? muon.innerTrack()->dz(primVtx->position()) : 999);
     fTMuInnerTkNChi2->push_back( muon.innerTrack()->normalizedChi2() );
     fTMuNSiLayers->push_back (muon.innerTrack()->hitPattern().trackerLayersWithMeasurement());
 
@@ -1831,19 +1839,25 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElE                      ->push_back(electron.energy());
       fTElEt                     ->push_back(electron.et());
       fTElD0BS                   ->push_back(-1.0*electron.gsfTrack()->dxy(beamSpot.position()));
-      fTElD0PV                   ->push_back(-1.0*electron.gsfTrack()->dxy(primVtx->position()));
+      fTElD0PV                   ->push_back((primVtx) ? -1.0*electron.gsfTrack()->dxy(primVtx->position()) : 999);
       fTElD0E                    ->push_back(electron.gsfTrack()->dxyError());
       fTElDzBS                   ->push_back(electron.gsfTrack()->dz(beamSpot.position()));
-      fTElDzPV                   ->push_back(electron.gsfTrack()->dz(primVtx->position()));
+      fTElDzPV                   ->push_back((primVtx) ? electron.gsfTrack()->dz(primVtx->position()) : 999);
       fTElDzE                    ->push_back(electron.gsfTrack()->dzError());
       fTElNChi2                  ->push_back(electron.gsfTrack()->normalizedChi2());
 
       // 3D impact parameter
       TransientTrack eltt = theB->build( electron.gsfTrack() );
-      Measurement1D elip3dpv = IPTools::absoluteImpactParameter3D(eltt, *(primVtx)).second;
-      
-      fTElD03DPV->push_back( elip3dpv.value() );
-      fTElD03DE ->push_back( elip3dpv.error() );
+
+      if (primVtx){
+	Measurement1D elip3dpv = IPTools::absoluteImpactParameter3D(eltt, *(primVtx)).second;
+	fTElD03DPV->push_back( elip3dpv.value() );
+	fTElD03DE ->push_back( elip3dpv.error() );
+      }
+      else{
+	fTElD03DPV->push_back( 999 );
+	fTElD03DE ->push_back( 999 );
+      }
 
       // ctf track info:
       bool validKF= false; 
@@ -2121,7 +2135,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     int index = it->first;
     const Photon& photon = (*photons)[index];
 
-    fTPhoVrtxListStart->push_back(fTPhoCiCPFIsoChargedDR03->size());
+    fTPhoVrtxListStart->push_back((fTPhoVrtxListStart->size()==0) ? 0 : fTPhoVrtxListStart->back()+(*fTNVrtx));
 
     // Save photon supercluster position
     photSCs.push_back(&(*photon.superCluster()));
@@ -2184,13 +2198,20 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     bool passed_PhotonVeto = !ConversionTools::hasMatchedPromptElectron(photon.superCluster(), electronHandle, hConversions, beamspot.position());
     fTPhoPassConversionVeto->push_back(passed_PhotonVeto);
-     
-    isolator.fGetIsolation(&photon,&thePfColl, VertexRef(vertices,0), vertices);
-    //cout<<"PF  :  "<<isolator.getIsolationCharged()<<" : "<<isolator.getIsolationPhoton()<<" : "<<isolator.getIsolationNeutral()<<endl;
-    fTPhoNewIsoPFCharged->push_back(isolator.getIsolationCharged());
-    fTPhoNewIsoPFPhoton->push_back(isolator.getIsolationPhoton());
-    fTPhoNewIsoPFNeutral->push_back(isolator.getIsolationNeutral());
-      
+
+    if (vertices->size()>0){
+      isolator.fGetIsolation(&photon,&thePfColl, VertexRef(vertices,0), vertices);
+      fTPhoNewIsoPFCharged->push_back(isolator.getIsolationCharged());
+      fTPhoNewIsoPFPhoton->push_back(isolator.getIsolationPhoton());
+      fTPhoNewIsoPFNeutral->push_back(isolator.getIsolationNeutral());
+    }
+    else {
+      fTPhoNewIsoPFCharged->push_back(999);
+      fTPhoNewIsoPFPhoton->push_back(999);
+      fTPhoNewIsoPFNeutral->push_back(999);
+    }
+
+  
     float PhoHCalIso2012ConeDR03 = photon.hcalTowerSumEtConeDR03() + (photon.hadronicOverEm() - photon.hadTowOverEm())*photon.superCluster()->energy()/cosh(photon.superCluster()->eta());
     fTPhoHCalIso2012ConeDR03->push_back(PhoHCalIso2012ConeDR03);
 
@@ -3075,7 +3096,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!fIsRealData && (*fTNGenJets) > 0) fTJGenJetIndex->push_back( matchJet(&(*jet)) );
     fTJGood->push_back( 0 );
 
-    fTJVrtxListStart->push_back(fTJPassPileupIDL[0]->size());
+    fTJVrtxListStart->push_back((fTJVrtxListStart->size()==0) ? 0 : fTJVrtxListStart->back()+(*fTNVrtx));
 
     if (doPhotonStuff){
 
@@ -3214,7 +3235,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
 
 
-
+  if (!doPhotonStuff){
   ////////////////////////////////////////////////////////
   // Get and Dump (M)E(T) Variables:
   // Tracks:
@@ -3242,8 +3263,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTTrkPhi   ->push_back(it->phi());
     fTTrkNChi2 ->push_back(it->normalizedChi2());
     fTTrkNHits ->push_back(it->numberOfValidHits());
-    fTTrkVtxDz ->push_back(it->dz(primVtx->position()));
-    fTTrkVtxDxy->push_back(it->dxy(primVtx->position()));	
+    fTTrkVtxDz ->push_back((primVtx) ? it->dz(primVtx->position()) : 999);
+    fTTrkVtxDxy->push_back((primVtx) ? it->dxy(primVtx->position()) : 999);	
     fTTrkGood  ->push_back(0);
   }
   *fTNTracks = nqtrk+1;
@@ -3365,7 +3386,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTJMetCorrEMF    ->push_back( rawJet->chargedEmEnergyFraction() + rawJet->neutralEmEnergyFraction() );
     fTJMetCorrArea   ->push_back( rawJet->jetArea() );
   }
-
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Special stuff for Model Scans ///////////////////////////////////////////////
@@ -3461,7 +3482,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   ////////////////////////////////////////////////////////////////////////////////
   // Full generator information ///////////////////////////////////////////////
   bool blabalot=false;
-  if(!fIsRealData) {
+  if(!fIsRealData && !doPhotonStuff) {
     static const size_t maxNGenLocal = 2000;
     int genNIndex[maxNGenLocal];
     int genID[maxNGenLocal];
