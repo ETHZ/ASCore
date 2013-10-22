@@ -2623,7 +2623,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  conv_vtx[*fTNconv].SetXYZ(vtx.x(), vtx.y(), vtx.z());
 	  fTConvNtracks           ->at(*fTNconv)=(localConv.nTracks());	  
 	  fTConvChi2Probability   ->at(*fTNconv)=(ChiSquaredProbability(vtx.chi2(), vtx.ndof()));
-	  fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks());
+	  //	  fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks()); // it is commented out in globe
 	  fTConvZofPrimVtxFromTrks->at(*fTNconv)=(localConv.zOfPrimaryVertexFromTracks());
 	  conv_refitted_momentum[*fTNconv].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
 	  conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
@@ -2664,7 +2664,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           conv_vtx[*fTNconv].SetXYZ(vtx.x(), vtx.y(), vtx.z());
           fTConvNtracks           ->at(*fTNconv)=(localConv.nTracks());
           fTConvChi2Probability   ->at(*fTNconv)=(ChiSquaredProbability(vtx.chi2(), vtx.ndof()));
-          fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks());
+	  //          fTConvEoverP            ->at(*fTNconv)=(localConv.EoverPrefittedTracks()); // it is commented out in globe
           fTConvZofPrimVtxFromTrks->at(*fTNconv)=(localConv.zOfPrimaryVertexFromTracks());
           conv_refitted_momentum[*fTNconv].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
 	  conv_singleleg_momentum[*fTNconv].SetXYZ(-999,-999,-999);
@@ -6692,7 +6692,7 @@ PhotonInfo NTupleProducer::fillPhotonInfos(int p1, int useAllConvs, float corren
                       correnergy<=0 ? (*fTPhoEnergy)[p1] : correnergy,
                       (*fTPhoisEB)[p1],
                       (*fTConvNtracks)[iConv1],
-                      (*fTPhoConvValidVtx)[iConv1],
+                      (*fTConvValidVtx)[iConv1],
                       (*fTConvChi2Probability)[iConv1],
                       (*fTConvEoverP)[iConv1]
                       );
@@ -6814,7 +6814,7 @@ int NTupleProducer::matchPhotonToConversion( int lpho, int useAllConvs) {
     if ( useAllConvs==1 && (*fTConvNtracks)[iconv]!=1 ) continue;
     if ( useAllConvs==2 && (*fTConvNtracks)[iconv]!=2 ) continue;
     if ( useAllConvs==3 && (*fTConvNtracks)[iconv]!=1 && (*fTConvNtracks)[iconv]!=2 ) continue;
-    if ( (*fTConvNtracks)[iconv]==2 && (!(*fTPhoConvValidVtx)[iconv] || (*fTConvChi2Probability)[iconv]<0.000001) ) continue; // Changed back based on meeting on 21.03.2012
+    if ( (*fTConvNtracks)[iconv]==2 && (!(*fTConvValidVtx)[iconv] || (*fTConvChi2Probability)[iconv]<0.000001) ) continue; // Changed back based on meeting on 21.03.2012
 
     //New matching technique from meeting on 06.08.12
     TVector3 ConversionVertex = conv_vtx[iconv];
