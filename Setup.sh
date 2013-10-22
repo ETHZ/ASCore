@@ -85,7 +85,7 @@ mygitaddpkg SCFootprintRemoval V00-02d
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 
-mygitaddpkg ASCore EDMdev
+mygitaddpkg ASCore Zb_ReReco_Patch
 mkdir DiLeptonAnalysis
 mv ASCore DiLeptonAnalysis/NTupleProducer
 
