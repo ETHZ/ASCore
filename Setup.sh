@@ -54,7 +54,7 @@ mygitaddpkg    EventFilter/HcalRawToDigi		EventFilter-HcalRawToDigi-V01-02-10
 mygitaddpkg PhysicsTools/JetMCAlgos PhysicsTools-JetMCAlgos-V00-13-10
 
 # ECAL
-mygitaddpkg RecoEcal/EgammaCoreTools RecoEcal-EgammaCoreTools-V05-08-26
+mygitaddpkg RecoEcal/EgammaCoreTools RecoEcal-EgammaCoreTools-CMSSW_5_3_10_patch2
 mygitaddpkg Patches-OldReleases master
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.h
 cp Patches-OldReleases/RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc RecoEcal/EgammaCoreTools/plugins/EcalClusterLocalContCorrection.cc
@@ -100,7 +100,7 @@ mv HiggsAnalysis/GBRLikelihoodEGTools/data/{regweights_v5_forest_ph.root,regweig
 rm HiggsAnalysis/GBRLikelihoodEGTools/data/regweights*.root
 mv regweights*.root HiggsAnalysis/GBRLikelihoodEGTools/data
 
-mygitaddpkg SCFootprintRemoval V01-01
+mygitaddpkg SCFootprintRemoval V01-02
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 

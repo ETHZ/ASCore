@@ -2217,11 +2217,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     {
       SuperClusterFootprintRemoval remover(iEvent,iSetup);
-      fTPhoSCRemovalPFIsoCharged->push_back(remover.PFIsolation("charged",photon.superCluster(),-1));
-      fTPhoSCRemovalPFIsoChargedPrimVtx->push_back((vertices->size()>0) ? (remover.PFIsolation("charged",photon.superCluster(),0)) : fTPhoSCRemovalPFIsoCharged->at(phoqi));
+      fTPhoSCRemovalPFIsoCharged->push_back(remover.PFIsolation("charged",photon.superCluster(),edm::Ptr<Vertex>()));
+      fTPhoSCRemovalPFIsoChargedPrimVtx->push_back(remover.PFIsolation("charged",photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<Vertex>()));
       fTPhoSCRemovalPFIsoNeutral->push_back(remover.PFIsolation("neutral",photon.superCluster()));
       fTPhoSCRemovalPFIsoPhoton->push_back(remover.PFIsolation("photon",photon.superCluster()));
-      PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),-1);
+      PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<reco::Vertex>());
       fTPhoSCRemovalPFIsoChargedRCone->push_back(risos.chargediso);
       fTPhoSCRemovalPFIsoChargedPrimVtxRCone->push_back(risos.chargediso_primvtx);
       fTPhoSCRemovalPFIsoNeutralRCone->push_back(risos.neutraliso);
