@@ -275,8 +275,14 @@ if options.runon == 'data':
     for extJet in process.analyze.jets:
         if hasattr(extJet,'corrections'): extJet.corrections = extJet.corrections.value() + 'Residual'
     process.patJetCorrFactorsPFCHS.levels.extend( ['L2L3Residual'] )
-	
+
+# Corrected jet collection
+if options.runon == 'data':
+   process.ak5PFJetsCorrected = process.ak5PFJetsL2L3Residual.clone()
+else:
+   process.ak5PFJetsCorrected = process.ak5PFJetsL2L3.clone()
               
+
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
 	src = cms.InputTag("partonGenJets"),
@@ -615,7 +621,8 @@ process.p = cms.Path(
         + process.sc_sequence
         + process.kt6PFJetsForQGSyst
         + process.QuarkGluonTagger
- 	+ process.analyze
+        + process.ak5PFJetsCorrected
+        + process.analyze
        	)
    )
    

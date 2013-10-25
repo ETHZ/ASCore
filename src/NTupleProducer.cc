@@ -2216,7 +2216,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPhoHCalIso2012ConeDR03->push_back(PhoHCalIso2012ConeDR03);
 
     {
-      SuperClusterFootprintRemoval remover(iEvent,iSetup);
+      edm::ParameterSet myiConfig = edm::ParameterSet();
+      myiConfig.insert(true,"tag_jets",edm::Entry("tag_jets",edm::InputTag("ak5PFJetsCorrected"),false));
+      SuperClusterFootprintRemoval remover(iEvent,iSetup,myiConfig);
       fTPhoSCRemovalPFIsoCharged->push_back(remover.PFIsolation("charged",photon.superCluster(),edm::Ptr<Vertex>()));
       fTPhoSCRemovalPFIsoChargedPrimVtx->push_back(remover.PFIsolation("charged",photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<Vertex>()));
       fTPhoSCRemovalPFIsoNeutral->push_back(remover.PFIsolation("neutral",photon.superCluster()));
