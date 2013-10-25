@@ -6275,6 +6275,8 @@ bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
   *fRMaxNPfCand    = gMaxNPfCand;
   *fRMaxNXtals   = gMaxNXtals;
 
+  ReadEnergyScale(r.run());
+
   return true; // Not an actual filter
 }
 
@@ -7107,7 +7109,7 @@ float NTupleProducer::pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollecti
 
 void NTupleProducer::rescaleClusterShapes(struct_photonIDMVA_variables &str, bool isEB){
 
-  return;
+  return; // NOT APPLYING ANY SCALING FOR THE RUN-DEPENDENT MC
 
   //  cout << "WARNING: ARE YOU SURE THAT V7N HAS TO BE RESCALED?" << endl;
 
@@ -7134,6 +7136,46 @@ void NTupleProducer::rescaleClusterShapes(struct_photonIDMVA_variables &str, boo
     str.etawidth =  0.903254*str.etawidth + 0.001346;
     str.phiwidth =  0.99992*str.phiwidth - 0.00000048;
   }
+
+}
+
+float NTupleProducer::GetEnergyScaleCorrection(int run, float eta, float r9){
+
+  if (!fIsRealData) return 1; // apply scale correction on data only
+
+  assert (run==energy_scales.run);
+
+  eta = fabs(eta);
+  bool highr9 = (r9>0.94);
+
+  if (highr9){
+    if (eta<1) return energy_scales.EBLowEtaGold;
+    if (eta<1.5) return energy_scales.EBHighEtaGold;
+    if (eta<2) return energy_scales.EELowEtaGold;
+    if (eta<3) return energy_scales.EEHighEtaGold;
+  }
+  else {
+    if (eta<1) return energy_scales.EBLowEtaBad;
+    if (eta<1.5) return energy_scales.EBHighEtaBad;
+    if (eta<2) return energy_scales.EELowEtaBad;
+    if (eta<3) return energy_scales.EEHighEtaBad;
+  }
+
+  return 1; // protection
+
+}
+
+void NTupleProducer::ReadEnergyScale(int run){ // TO BE IMPLEMENTED
+
+  energy_scales.run=run;
+  energy_scales.EBLowEtaGold = 1;
+  energy_scales.EBHighEtaGold = 1;
+  energy_scales.EELowEtaGold = 1;
+  energy_scales.EEHighEtaGold = 1;
+  energy_scales.EBLowEtaBad = 1;
+  energy_scales.EBHighEtaBad = 1;
+  energy_scales.EELowEtaBad = 1;
+  energy_scales.EEHighEtaBad = 1;
 
 }
 

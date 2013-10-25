@@ -327,6 +327,20 @@ private:
   float pfEcalIsoCiC(int phoindex, const reco::PFCandidateCollection &pfcands, int pfToUse, float dRmax, float dRVetoBarrel,
 			   float dRVetoEndcap, float etaStripBarrel, float etaStripEndcap, float thrBarrel, float thrEndcaps);
 
+  struct {
+    int run;
+    float EBLowEtaGold;
+    float EBHighEtaGold;
+    float EELowEtaGold;
+    float EEHighEtaGold;
+    float EBLowEtaBad;
+    float EBHighEtaBad;
+    float EELowEtaBad;
+    float EEHighEtaBad;
+  } energy_scales;
+  float GetEnergyScaleCorrection(int run, float eta, float r9);
+  void ReadEnergyScale(int run);
+
   // Selection cuts
   float fMinMuPt;
   float fMaxMuEta;
