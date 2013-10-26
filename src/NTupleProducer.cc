@@ -2219,17 +2219,17 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       edm::ParameterSet myiConfig = edm::ParameterSet();
       myiConfig.insert(true,"tag_jets",edm::Entry("tag_jets",edm::InputTag("ak5PFJetsCorrected"),false));
       SuperClusterFootprintRemoval remover(iEvent,iSetup,myiConfig);
-      fTPhoSCRemovalPFIsoCharged->push_back(remover.PFIsolation("charged",photon.superCluster(),edm::Ptr<Vertex>()));
-      fTPhoSCRemovalPFIsoChargedPrimVtx->push_back(remover.PFIsolation("charged",photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<Vertex>()));
-      fTPhoSCRemovalPFIsoNeutral->push_back(remover.PFIsolation("neutral",photon.superCluster()));
-      fTPhoSCRemovalPFIsoPhoton->push_back(remover.PFIsolation("photon",photon.superCluster()));
-      PFIsolation_RandomCone_struct risos = remover.RandomConeIsolation(photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<reco::Vertex>());
-      fTPhoSCRemovalPFIsoChargedRCone->push_back(risos.chargediso);
-      fTPhoSCRemovalPFIsoChargedPrimVtxRCone->push_back(risos.chargediso_primvtx);
-      fTPhoSCRemovalPFIsoNeutralRCone->push_back(risos.neutraliso);
-      fTPhoSCRemovalPFIsoPhotonRCone->push_back(risos.photoniso);
-      fTPhoSCRemovalRConeEta->push_back(risos.randomcone_eta);
-      fTPhoSCRemovalRConePhi->push_back(risos.randomcone_phi);
+      PFIsolation_struct isos = remover.PFIsolation(photon.superCluster(),(vertices->size()>0) ? edm::Ptr<Vertex>(vertices,0) : edm::Ptr<Vertex>());
+      fTPhoSCRemovalPFIsoCharged->push_back(isos.chargediso);
+      fTPhoSCRemovalPFIsoChargedPrimVtx->push_back(isos.chargediso_primvtx);
+      fTPhoSCRemovalPFIsoNeutral->push_back(isos.neutraliso);
+      fTPhoSCRemovalPFIsoPhoton->push_back(isos.photoniso);
+      fTPhoSCRemovalPFIsoChargedRCone->push_back(isos.chargediso_rcone);
+      fTPhoSCRemovalPFIsoChargedPrimVtxRCone->push_back(isos.chargediso_primvtx_rcone);
+      fTPhoSCRemovalPFIsoNeutralRCone->push_back(isos.neutraliso_rcone);
+      fTPhoSCRemovalPFIsoPhotonRCone->push_back(isos.photoniso_rcone);
+      fTPhoSCRemovalRConeEta->push_back(isos.eta_rcone);
+      fTPhoSCRemovalRConePhi->push_back(isos.phi_rcone);
     }
 
     fTPhoE1x5 ->push_back(photon.e1x5());
