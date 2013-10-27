@@ -226,6 +226,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMaxPhotonEta   = iConfig.getParameter<double>("sel_maxphoeta");
   fMinSCraw       = iConfig.getParameter<double>("sel_minSCraw");
   fMinSCrawPt     = iConfig.getParameter<double>("sel_minSCrawPt");
+  fMaxPfCandEta   = iConfig.getParameter<double>("sel_maxpfcandeta");
   fMinEBRechitE   = iConfig.getParameter<double>("sel_fminebrechitE");
 
   fMinGenLeptPt   = iConfig.getParameter<double>("sel_mingenleptpt");
@@ -3182,6 +3183,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   int pfcandIndex(0);
   for (unsigned int i=0; i<pfCandidates->size() && doPhotonStuff; i++){
 
+    if(fabs((*pfCandidates)[i].eta()) > fMaxPfCandEta) continue;
+
     int type = FindPFCandType((*pfCandidates)[i].pdgId());
     if (type==2) storethispfcand[i]=true;
 
@@ -3718,6 +3721,7 @@ void NTupleProducer::declareProducts(void) {
   produces<float,edm::InRun>("MaxPhotonEta"  );
   produces<float,edm::InRun>("MinSCraw"      );
   produces<float,edm::InRun>("MinSCrawPt"    );
+  produces<float,edm::InRun>("MaxPfCandEta"  );
   produces<float,edm::InRun>("MinEBRechitE"  );
   
   produces<float,edm::InRun>("MinGenLeptPt"  );
@@ -5373,7 +5377,8 @@ void NTupleProducer::resetRunProducts( void ) {
   fRMinPhotonPt .reset(new float(-999.99));
   fRMaxPhotonEta.reset(new float(-999.99));
   fRMinSCraw    .reset(new float(-999.99));                                         
-  fRMinSCrawPt  .reset(new float(-999.99));                                         
+  fRMinSCrawPt  .reset(new float(-999.99));
+  fRMaxPfCandEta.reset(new float(-999.99));                                         
   fRMinEBRechitE.reset(new float(-999.99)); 
 
   fRMinGenLeptPt .reset(new float(-999.99)); 
@@ -6250,6 +6255,7 @@ bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
   *fRMaxPhotonEta  = fMaxPhotonEta;
   *fRMinSCraw      = fMinSCraw;
   *fRMinSCrawPt    = fMinSCrawPt;
+  *fRMaxPfCandEta  = fMaxPfCandEta;
   *fRMinEBRechitE  = fMinEBRechitE;
   
   *fRMinGenLeptPt  = fMinGenLeptPt;
@@ -6306,6 +6312,7 @@ bool NTupleProducer::endRun(edm::Run& r, const edm::EventSetup&){
   r.put(fRMaxPhotonEta  ,"MaxPhotonEta"  );
   r.put(fRMinSCraw      ,"MinSCraw"      );
   r.put(fRMinSCrawPt    ,"MinSCrawPt"    );
+  r.put(fRMaxPfCandEta  ,"MaxPfCandEta"  );
   r.put(fRMinEBRechitE  ,"MinEBRechitE"  );
                                                                         
   r.put(fRMinGenLeptPt  ,"MinGenLeptPt"  );

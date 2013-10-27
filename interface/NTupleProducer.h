@@ -360,6 +360,7 @@ private:
   float fMaxPhotonEta;
   float fMinSCraw;
   float fMinSCrawPt;
+  float fMaxPfCandEta;
   float fMinEBRechitE; 
   
   float fMinGenLeptPt; 
@@ -401,6 +402,7 @@ private:
   std::auto_ptr<float> fRMaxPhotonEta;
   std::auto_ptr<float> fRMinSCraw;
   std::auto_ptr<float> fRMinSCrawPt;
+  std::auto_ptr<float> fRMaxPfCandEta;
   std::auto_ptr<float> fRMinEBRechitE;
 
   std::auto_ptr<float> fRMinGenLeptPt;

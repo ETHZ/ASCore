@@ -82,6 +82,8 @@ analyze = cms.EDFilter('NTupleProducer',
 	# GenJets
 	sel_mingenjetpt  = cms.double(10.0),
 	sel_maxgenjeteta = cms.double(6.0),
+        # PFCandidates
+        sel_maxpfcandeta = cms.double(3.0),
 
 	# EB rechits
         sel_fminebrechitE = cms.double(20.),
