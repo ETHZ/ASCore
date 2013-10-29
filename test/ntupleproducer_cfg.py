@@ -278,9 +278,9 @@ if options.runon == 'data':
 
 # Corrected jet collection
 if options.runon == 'data':
-   process.ak5PFJetsCorrected = process.ak5PFJetsL2L3Residual.clone()
+   process.ak5PFJetsCorrected = process.ak5PFJetsL1FastL2L3Residual.clone()
 else:
-   process.ak5PFJetsCorrected = process.ak5PFJetsL2L3.clone()
+   process.ak5PFJetsCorrected = process.ak5PFJetsL1FastL2L3.clone()
               
 
 #### Steve Mrenna's Photon - Parton DR match #######################	      
