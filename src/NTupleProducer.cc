@@ -1774,6 +1774,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // Keep pointers to electron superCluster in original collections
   std::vector<const SuperCluster*> elecPtr;
   std::vector<const GsfTrack*> trckPtr;
+  std::vector<edm::Ptr<GsfElectron> > elPtrVector;
   int eqi(0);                    // Index of qualified electrons
   (*fTNElesTot) = electrons->size(); // Total number of electrons
 
@@ -1819,6 +1820,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       // Save the electron SuperCluster pointer
       elecPtr.push_back(&(*electron.superCluster()));
       trckPtr.push_back(&(*electron.gsfTrack()));
+      elPtrVector.push_back(edm::Ptr<GsfElectron>(electrons,index));
 
       fTElPx                     ->push_back(electron.px());
       fTElPy                     ->push_back(electron.py());
@@ -1969,23 +1971,13 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         fTElSCindex->push_back( -1 ); // Initialize
         float diff=1e+4;
         for (int scind=0; scind<*fTNSuperClusters; scind++){
-          if (fabs((*fTSCRaw)[scind]-electron.superCluster()->rawEnergy())<diff) {
+	  if (fabs((*fTSCEta)[scind]-electron.superCluster()->eta())>0.1) continue;
+	  if (fabs((*fTSCPhi)[scind]-electron.superCluster()->phi())>0.1) continue;
+	  if (fabs((*fTSCRaw)[scind]-electron.superCluster()->rawEnergy())<diff && fabs((*fTSCRaw)[scind]/electron.superCluster()->rawEnergy()-1)<0.5) {
             (*fTElSCindex)[eqi]=scind;
             diff=fabs((*fTSCRaw)[scind]-electron.superCluster()->rawEnergy());
           }
         }
-
-        if ((*fTElSCindex)[eqi]!=-1)
-          if (fabs((*fTSCEta)[(*fTElSCindex)[eqi]]-electron.superCluster()->eta())>0.1 || 
-              fabs(reco::deltaPhi((*fTSCPhi)[(*fTElSCindex)[eqi]],electron.superCluster()->phi()))>0.1){
-            (*fTElSCindex)[eqi] = -1;			    
-          }
-
-//        if ((*fTElSCindex)[eqi]==-1) {
-//          //edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for electron"; 
-//          //	*fTGoodEvent = 1; 
-//          //	break;
-//        }
       }
 
 
@@ -2125,10 +2117,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   phoqi = 0;
 
   std::vector<int> storethispfcand(pfCandidates->size(),0);
-  std::vector<int> PhotonToPFPhotonMatchingArray(gMaxNPhotons,-999);
-  std::vector<int> PhotonToPFElectronMatchingArray(gMaxNPhotons,-999);
-  std::vector<int> PhotonToPFPhotonMatchingArrayTranslator(gMaxNPhotons,-999);
-  std::vector<int> PhotonToPFElectronMatchingArrayTranslator(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFPhotonOrElectronMatchingArray(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFPhotonOrElectronMatchingArrayTranslator(gMaxNPhotons,-999);
 
   for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
        it != phoOrdered.end(); ++it, ++phoqi ) {
@@ -2313,7 +2303,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
     
 
-    // FIXME: TO BE REMOVED ONCE WE ARE HAPPY WITH THE FULL GEN. INFO
     if (!fIsRealData){
 
       edm::Handle<GenParticleCollection> gen;
@@ -2394,37 +2383,35 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       if (iphot!=-1) {
 	(*fTPhoisPFPhoton)[phoqi] = 1;
-	PhotonToPFPhotonMatchingArray[phoqi] = iphot;
+	PhotonToPFPhotonOrElectronMatchingArray[phoqi] = iphot;
       }
       
+
       //Find PFElectron
       bool foundEgSC = false;
       int iel = -1;
-      reco::GsfElectronCollection::const_iterator elIterSl;
-      for (reco::GsfElectronCollection::const_iterator elIter = electronHandle->begin(); elIter != electronHandle->end(); ++elIter){
-        if (photon.superCluster()==elIter->superCluster()) {
-          elIterSl = elIter;
-          foundEgSC = true;
-        }
 
-        if (foundEgSC){
-          int iid = 0;
-          double MVACut_ = -0.1; //42X
-          //double MVACut_ = -1.; //44X
-          int ncand=pfCandidates->size();
-          for( int i=0; i<ncand; ++i ) {
-            if ((*pfCandidates)[i].particleId()==reco::PFCandidate::e && (*pfCandidates)[i].gsfTrackRef().isNull()==false && (*pfCandidates)[i].mva_e_pi()>MVACut_ && (*pfCandidates)[i].gsfTrackRef()==elIterSl->gsfTrack()){
-              iel = i;
-              iid++;
-            }
-          }
-        }
-     
+      edm::Ptr<GsfElectron> elPtrSl;
+      for (int i=0; i<(*fTNEles); i++){
+	if (fTElSCindex->at(i)>=0 && fTElSCindex->at(i)==fTPhotSCindex->at(phoqi)) {
+	  elPtrSl = elPtrVector.at(i);
+	  foundEgSC = true;
+	  break; 
+	}
+      }
+
+      if (foundEgSC){
+	double MVACut_ = -0.1; //42X                                                                                                                                                                                                                             
+	//double MVACut_ = -1.; //44X 
+	for( int i=0; i<ncand; ++i ) {
+	  if ((*pfCandidates)[i].particleId()==reco::PFCandidate::e && (*pfCandidates)[i].gsfTrackRef().isNull()==false && (*pfCandidates)[i].mva_e_pi()>MVACut_ && (*pfCandidates)[i].gsfTrackRef()==elPtrSl->gsfTrack())
+	    iel = i;
+	}
       }
 
       if (iel!=-1) {
 	(*fTPhoisPFElectron)[phoqi] = 1;
-	PhotonToPFElectronMatchingArray[phoqi] = iel;
+	PhotonToPFPhotonOrElectronMatchingArray[phoqi] = iel;
       }
 
     }
@@ -3188,6 +3175,13 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     int type = FindPFCandType((*pfCandidates)[i].pdgId());
     if (type==2) storethispfcand[i]=true;
 
+    for (int j=0; j<(*fTNPhotons); j++){
+      if (PhotonToPFPhotonOrElectronMatchingArray[j]==(int)i) {
+	PhotonToPFPhotonOrElectronMatchingArrayTranslator[j]=pfcandIndex;
+	storethispfcand[i]=true;
+      }
+    }
+
     if (storethispfcand[i]==0) continue;
 
     if (pfcandIndex >= gMaxNPfCand){
@@ -3205,11 +3199,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTPfCandVx->push_back( (*pfCandidates)[i].vx() );
     fTPfCandVy->push_back( (*pfCandidates)[i].vy() );
     fTPfCandVz->push_back( (*pfCandidates)[i].vz() );
-
-    for (int j=0; j<(*fTNPhotons); j++){
-      if (PhotonToPFPhotonMatchingArray[j]==(int)i) PhotonToPFPhotonMatchingArrayTranslator[j]=pfcandIndex;
-      if (PhotonToPFElectronMatchingArray[j]==(int)i) PhotonToPFElectronMatchingArrayTranslator[j]=pfcandIndex;
-    }
 
 //    if ( (type==1) && ( !((*pfCandidates)[i].trackRef()) ) ) type=-1;
 //    reco::HitPattern pattern; 
@@ -3235,8 +3224,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTNPfCand=pfcandIndex;
   
   for (int j=0; j<(*fTNPhotons) && doPhotonStuff; j++){
-    fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
-    fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
+    fTPhoMatchedPFPhotonOrElectronCand->push_back(PhotonToPFPhotonOrElectronMatchingArrayTranslator[j]);
   }
 
 
@@ -4506,8 +4494,7 @@ produces<std::vector<int> >("PfCandBelongsToJet");
 //produces<std::vector<float> >("PfCandTrackRefPx");
 //produces<std::vector<float> >("PfCandTrackRefPy");
 //produces<std::vector<float> >("PfCandTrackRefPz");
-produces<std::vector<int> >("PhoMatchedPFPhotonCand");
-produces<std::vector<int> >("PhoMatchedPFElectronCand");
+produces<std::vector<int> >("PhoMatchedPFPhotonOrElectronCand");
 produces<std::vector<float> >("PhoVx");
 produces<std::vector<float> >("PhoVy");
 produces<std::vector<float> >("PhoVz");
@@ -5313,8 +5300,7 @@ fTPfCandBelongsToJet.reset(new std::vector<int>  );
 //fTPfCandTrackRefPx.reset(new std::vector<float>  );
 //fTPfCandTrackRefPy.reset(new std::vector<float>  );
 //fTPfCandTrackRefPz.reset(new std::vector<float>  );
-fTPhoMatchedPFPhotonCand.reset(new std::vector<int>  );
-fTPhoMatchedPFElectronCand.reset(new std::vector<int>  );
+fTPhoMatchedPFPhotonOrElectronCand.reset(new std::vector<int>  );
 fTPhoVx.reset(new std::vector<float>  );
 fTPhoVy.reset(new std::vector<float>  );
 fTPhoVz.reset(new std::vector<float>  );
@@ -6160,8 +6146,7 @@ event.put(fTPfCandBelongsToJet,"PfCandBelongsToJet");
 //event.put(fTPfCandTrackRefPx,"PfCandTrackRefPx");
 //event.put(fTPfCandTrackRefPy,"PfCandTrackRefPy");
 //event.put(fTPfCandTrackRefPz,"PfCandTrackRefPz");
-event.put(fTPhoMatchedPFPhotonCand,"PhoMatchedPFPhotonCand");
-event.put(fTPhoMatchedPFElectronCand,"PhoMatchedPFElectronCand");
+event.put(fTPhoMatchedPFPhotonOrElectronCand,"PhoMatchedPFPhotonOrElectronCand");
 event.put(fTPhoVx,"PhoVx");
 event.put(fTPhoVy,"PhoVy");
 event.put(fTPhoVz,"PhoVz");
