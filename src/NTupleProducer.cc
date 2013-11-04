@@ -2116,7 +2116,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   (*fTNPhotons) = phoOrdered.size();
   phoqi = 0;
 
-  std::vector<int> storethispfcand(pfCandidates->size(),0);
+  std::vector<bool> storethispfcand(pfCandidates->size(),false);
   std::vector<int> PhotonToPFPhotonOrElectronMatchingArray(gMaxNPhotons,-999);
   std::vector<int> PhotonToPFPhotonOrElectronMatchingArrayTranslator(gMaxNPhotons,-999);
 
@@ -2221,6 +2221,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTPhoSCRemovalPFIsoPhotonRCone->push_back(isos.photoniso_rcone);
       fTPhoSCRemovalRConeEta->push_back(isos.eta_rcone);
       fTPhoSCRemovalRConePhi->push_back(isos.phi_rcone);
+      for (size_t i=0; i<isos.pfcandindex_footprint.size(); i++) storethispfcand[i]=true;
     }
 
     fTPhoE1x5 ->push_back(photon.e1x5());
@@ -3182,7 +3183,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
     }
 
-    if (storethispfcand[i]==0) continue;
+    if (storethispfcand[i]==false) continue;
 
     if (pfcandIndex >= gMaxNPfCand){
       edm::LogWarning("NTP") << "@SUB=analyze"
