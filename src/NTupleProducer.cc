@@ -2223,7 +2223,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTPhoSCRemovalPFIsoPhotonRCone->push_back(isos.photoniso_rcone);
       fTPhoSCRemovalRConeEta->push_back(isos.eta_rcone);
       fTPhoSCRemovalRConePhi->push_back(isos.phi_rcone);
-      for (size_t i=0; i<isos.pfcandindex_footprint.size(); i++) list_pfcand_footprint.at(phoqi).push_back(i);
+      for (size_t i=0; i<isos.pfcandindex_footprint.size(); i++) list_pfcand_footprint.at(phoqi).push_back(isos.pfcandindex_footprint.at(i));
     }
 
     fTPhoE1x5 ->push_back(photon.e1x5());
