@@ -2119,6 +2119,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::vector<bool> storethispfcand(pfCandidates->size(),false);
   std::vector<int> PhotonToPFPhotonOrElectronMatchingArray(gMaxNPhotons,-999);
   std::vector<int> PhotonToPFPhotonOrElectronMatchingArrayTranslator(gMaxNPhotons,-999);
+  std::vector<std::vector<int> > list_pfcand_footprint(gMaxNPhotons,std::vector<int>());
+  std::vector<std::vector<int> > list_pfcand_footprintTranslator(gMaxNPhotons,std::vector<int>());
 
   for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
        it != phoOrdered.end(); ++it, ++phoqi ) {
@@ -2221,7 +2223,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTPhoSCRemovalPFIsoPhotonRCone->push_back(isos.photoniso_rcone);
       fTPhoSCRemovalRConeEta->push_back(isos.eta_rcone);
       fTPhoSCRemovalRConePhi->push_back(isos.phi_rcone);
-      for (size_t i=0; i<isos.pfcandindex_footprint.size(); i++) storethispfcand[i]=true;
+      for (size_t i=0; i<isos.pfcandindex_footprint.size(); i++) list_pfcand_footprint.at(phoqi).push_back(i);
     }
 
     fTPhoE1x5 ->push_back(photon.e1x5());
@@ -3183,6 +3185,16 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
     }
 
+    for (int j=0; j<(*fTNPhotons); j++){
+      for (size_t k=0; k<list_pfcand_footprint.at(j).size(); k++){
+	if (list_pfcand_footprint.at(j).at(k)==(int)i){
+	  list_pfcand_footprintTranslator.at(j).push_back(pfcandIndex);
+	  storethispfcand[i]=true;
+	}
+      }
+    }
+  
+
     if (storethispfcand[i]==false) continue;
 
     if (pfcandIndex >= gMaxNPfCand){
@@ -3226,6 +3238,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   for (int j=0; j<(*fTNPhotons) && doPhotonStuff; j++){
     fTPhoMatchedPFPhotonOrElectronCand->push_back(PhotonToPFPhotonOrElectronMatchingArrayTranslator[j]);
+    fTPhoFootprintPfCandsListStart->push_back(fTPhoFootprintPfCands->size());
+    for (size_t k=0; k<list_pfcand_footprintTranslator.at(j).size(); k++) fTPhoFootprintPfCands->push_back(list_pfcand_footprintTranslator.at(j).at(k));
   }
 
 
@@ -4496,6 +4510,8 @@ produces<std::vector<int> >("PfCandBelongsToJet");
 //produces<std::vector<float> >("PfCandTrackRefPy");
 //produces<std::vector<float> >("PfCandTrackRefPz");
 produces<std::vector<int> >("PhoMatchedPFPhotonOrElectronCand");
+produces<std::vector<int> >("PhoFootprintPfCandsListStart");
+produces<std::vector<int> >("PhoFootprintPfCands");
 produces<std::vector<float> >("PhoVx");
 produces<std::vector<float> >("PhoVy");
 produces<std::vector<float> >("PhoVz");
@@ -5302,6 +5318,8 @@ fTPfCandBelongsToJet.reset(new std::vector<int>  );
 //fTPfCandTrackRefPy.reset(new std::vector<float>  );
 //fTPfCandTrackRefPz.reset(new std::vector<float>  );
 fTPhoMatchedPFPhotonOrElectronCand.reset(new std::vector<int>  );
+fTPhoFootprintPfCandsListStart.reset(new std::vector<int>  );
+fTPhoFootprintPfCands.reset(new std::vector<int>  );
 fTPhoVx.reset(new std::vector<float>  );
 fTPhoVy.reset(new std::vector<float>  );
 fTPhoVz.reset(new std::vector<float>  );
@@ -6148,6 +6166,8 @@ event.put(fTPfCandBelongsToJet,"PfCandBelongsToJet");
 //event.put(fTPfCandTrackRefPy,"PfCandTrackRefPy");
 //event.put(fTPfCandTrackRefPz,"PfCandTrackRefPz");
 event.put(fTPhoMatchedPFPhotonOrElectronCand,"PhoMatchedPFPhotonOrElectronCand");
+event.put(fTPhoFootprintPfCandsListStart,"PhoFootprintPfCandsListStart");
+event.put(fTPhoFootprintPfCands,"PhoFootprintPfCands");
 event.put(fTPhoVx,"PhoVx");
 event.put(fTPhoVy,"PhoVy");
 event.put(fTPhoVz,"PhoVz");

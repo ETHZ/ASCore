@@ -1270,6 +1270,8 @@ std::auto_ptr<std::vector<float> > fTPfCandTrackRefPx;
 std::auto_ptr<std::vector<float> > fTPfCandTrackRefPy;
 std::auto_ptr<std::vector<float> > fTPfCandTrackRefPz;
 std::auto_ptr<std::vector<int> > fTPhoMatchedPFPhotonOrElectronCand;
+std::auto_ptr<std::vector<int> > fTPhoFootprintPfCandsListStart;
+std::auto_ptr<std::vector<int> > fTPhoFootprintPfCands;
 std::auto_ptr<std::vector<float> > fTPhoVx;
 std::auto_ptr<std::vector<float> > fTPhoVy;
 std::auto_ptr<std::vector<float> > fTPhoVz;
