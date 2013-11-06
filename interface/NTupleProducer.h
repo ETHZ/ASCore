@@ -1260,6 +1260,7 @@ std::auto_ptr<std::vector<int> > fTPfCandPdgId;
 std::auto_ptr<std::vector<float> > fTPfCandEta;
 std::auto_ptr<std::vector<float> > fTPfCandPhi;
 std::auto_ptr<std::vector<float> > fTPfCandEnergy;
+std::auto_ptr<std::vector<float> > fTPfCandEcalEnergy;
 std::auto_ptr<std::vector<float> > fTPfCandPt;
 std::auto_ptr<std::vector<float> > fTPfCandVx;
 std::auto_ptr<std::vector<float> > fTPfCandVy;

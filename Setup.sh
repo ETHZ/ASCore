@@ -100,7 +100,7 @@ mv HiggsAnalysis/GBRLikelihoodEGTools/data/{regweights_v5_forest_ph.root,regweig
 rm HiggsAnalysis/GBRLikelihoodEGTools/data/regweights*.root
 mv regweights*.root HiggsAnalysis/GBRLikelihoodEGTools/data
 
-mygitaddpkg SCFootprintRemoval V01-06b
+mygitaddpkg SCFootprintRemoval V01-07
 mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 
