@@ -75,9 +75,9 @@ rmdir emanuele
 mygitaddpkg sixie/Muon/MuonAnalysisTools V00-00-10
 mv sixie/Muon .
 rmdir sixie
-rm Muon/MuonAnalysisTools/MuonID*xml
-rm Muon/MuonAnalysisTools/MuonIso*santi*xml
-rm Muon/MuonAnalysisTools/MuonIsoMVA_sixie*V1*xml
+rm Muon/MuonAnalysisTools/data/MuonID*xml
+rm Muon/MuonAnalysisTools/data/MuonIso*santi*xml
+rm Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie*V1*xml
 
 mygitaddpkg EGamma/EGammaAnalysisTools V00-00-21
 cd EGamma/EGammaAnalysisTools/interface
@@ -105,6 +105,8 @@ mkdir PFIsolation
 mv SCFootprintRemoval PFIsolation/SuperClusterFootprintRemoval
 
 mygitaddpkg CMGTools/External V00-03-04
+# Remove useless and very large files
+rm -r CMGTools/External/data
 
 mygitaddpkg amarini-QuarkGluonTagger QGtag_forETHntuple
 mv amarini-QuarkGluonTagger QuarkGluonTagger
