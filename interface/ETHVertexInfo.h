@@ -66,7 +66,7 @@ private:
   std::vector<std::vector<float> > * vtx_std_tkweight_;
   std::vector<int> * vtx_std_ntks_;
 
-  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 4000;
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 10000;
   static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 500;
 
   unsigned short vtx_std_tkind_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];

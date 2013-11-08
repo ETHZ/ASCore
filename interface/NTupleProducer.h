@@ -257,8 +257,8 @@ private:
   static const unsigned int gMaxNPfIsoTags  = 20;
   static const unsigned int gMaxNBtags      = 10;
 
-  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
-  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 10000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 500;
 
   static const int gMax_vertexing_diphoton_pairs = 10;
   static const int gMax_vertexing_vtxes = 5;
