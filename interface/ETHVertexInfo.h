@@ -22,9 +22,9 @@ public:
   virtual int ntracks() const { return ntracks_; };
 
   virtual bool hasVtxTracks()  const { return true; };
-  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_helper_)[ii][0]; };
+  virtual const unsigned short * vtxTracks(int ii) const { return vtx_std_tkind_helper_.at(ii); };
   virtual int vtxNTracks(int ii) const { return vtx_std_ntks_->at(ii); };
-  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_helper_)[ii][0]; };
+  virtual const float * vtxTkWeights(int ii) const { return vtx_std_tkweight_helper_.at(ii); };
 
   virtual float tkpx(int ii) const { return tracks_p3_->at(ii).X(); };
   virtual float tkpy(int ii) const { return tracks_p3_->at(ii).Y(); };
@@ -33,7 +33,7 @@ public:
   virtual float tkPtErr(int ii) const { return tkPtErr_->at(ii); };
   virtual int   tkVtxId(int ii) const { return -1; };
 
-  virtual float tkWeight(int ii, int jj) const { return vtx_std_tkweight_helper_[jj][ii]; };
+  virtual float tkWeight(int ii, int jj) const { return (vtx_std_tkweight_helper_.at(jj))[ii]; };
 	
   virtual float vtxx(int ii) const { return vtxes_->at(ii).X(); };
   virtual float vtxy(int ii) const { return vtxes_->at(ii).Y(); };
@@ -47,7 +47,7 @@ public:
 
   virtual bool tkIsHighPurity(int ii) const { return tkIsHighPurity_->at(ii); };
 
-  virtual ~ETHVertexInfo() {}
+  ~ETHVertexInfo();
        	
 private:
 
@@ -66,11 +66,8 @@ private:
   std::vector<std::vector<float> > * vtx_std_tkweight_;
   std::vector<int> * vtx_std_ntks_;
 
-  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 10000;
-  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 500;
-
-  unsigned short vtx_std_tkind_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
-  float vtx_std_tkweight_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
+  std::vector<unsigned short *> vtx_std_tkind_helper_;
+  std::vector<float *> vtx_std_tkweight_helper_;
 
 
 };

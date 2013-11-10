@@ -1150,8 +1150,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       const GenParticle* gen_gmom=NULL;
       if(GenMomExists) gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
       if(gen_gmom==NULL){
-        edm::LogWarning("NTP") << "@SUB=analyze"
-                               << " WARNING: GenParticle (" << m_id << ") does not have a GrandMother ";
+        if (abs(m_id)!=2212) edm::LogWarning("NTP") << "@SUB=analyze"
+						    << " WARNING: GenParticle (" << m_id << ") does not have a GrandMother ";
         GenGrMomExists=false;
       }
       int gm_id=-999;
@@ -2514,8 +2514,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
         if (VTX_MVA_DEBUG) cout << "working on vtx " << i << endl;
 
-        if (i>=__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
-
         reco::VertexRef vtx(vtxH, i);
 	  
         if (VTX_MVA_DEBUG)	     	     cout << "vtx tracks " << vtx->tracksSize() << endl;
@@ -2561,8 +2559,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 
       for(unsigned int i=0; i<tkH->size(); i++) {
-
-        if (i>=__TRK_AUX_ARRAYS_DIM__) std::cout << "Too many tracks in the event; please enlarge the value of __TRK_AUX_ARRAYS_DIM__" << std::endl;
 
         reco::TrackRef tk(tkH, i);
 

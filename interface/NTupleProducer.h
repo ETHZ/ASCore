@@ -239,8 +239,8 @@ private:
   static const int gMaxNEles    = 20;
   static const int gMaxNJets    = 200;
   static const int gMaxNTrks    = 800;
-  static const int gMaxNPhotons = 50;
-  static const int gMaxNConv    = 50;
+  static const int gMaxNPhotons = 100;
+  static const int gMaxNConv    = 100;
   static const int gMaxNSC      = 100;
   static const int gMaxNGenLept = 100;
   static const int gMaxNGenPhot = 100;
@@ -257,8 +257,8 @@ private:
   static const unsigned int gMaxNPfIsoTags  = 20;
   static const unsigned int gMaxNBtags      = 10;
 
-  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 10000;
-  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 500;
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
   static const int gMax_vertexing_diphoton_pairs = 10;
   static const int gMax_vertexing_vtxes = 5;

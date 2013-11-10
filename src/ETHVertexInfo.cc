@@ -23,18 +23,34 @@ ETHVertexInfo::ETHVertexInfo(int nvtx, std::vector<TVector3> * vtxes,
   vtx_std_ntks_(vtx_std_ntks)
   
 {
-  assert (vtxes_->size()<__VTX_AUX_ARRAYS_DIM__);
-  assert (tracks_p3_->size()<__TRK_AUX_ARRAYS_DIM__);
+
+  vtx_std_tkind_helper_.resize(vtx_std_tkind_->size(),NULL);
+  vtx_std_tkweight_helper_.resize(vtx_std_tkweight_->size(),NULL);
   
-  for (unsigned int i=0; i<vtx_std_tkind_->size();i++){
-    for (unsigned int j=0; j<vtx_std_tkind_->at(i).size();j++){
-      vtx_std_tkind_helper_[i][j]=vtx_std_tkind_->at(i).at(j);
+  for (size_t i=0; i<vtx_std_tkind_->size();i++){
+    vtx_std_tkind_helper_.at(i) = new unsigned short[vtx_std_tkind_->at(i).size()];
+    for (size_t j=0; j<vtx_std_tkind_->at(i).size();j++){
+      (vtx_std_tkind_helper_.at(i))[j] = vtx_std_tkind_->at(i).at(j);
     }
   }
   
-  for (unsigned int i=0; i<vtx_std_tkweight_->size();i++){
-    for (unsigned int j=0; j<vtx_std_tkweight_->at(i).size();j++){
-      vtx_std_tkweight_helper_[i][j]=vtx_std_tkweight_->at(i).at(j);
+  for (size_t i=0; i<vtx_std_tkweight_->size();i++){
+    vtx_std_tkweight_helper_.at(i) = new float[vtx_std_tkweight_->at(i).size()];
+    for (size_t j=0; j<vtx_std_tkweight_->at(i).size();j++){
+      (vtx_std_tkweight_helper_.at(i))[j]=vtx_std_tkweight_->at(i).at(j);
     }
   }
+
+}
+
+ETHVertexInfo::~ETHVertexInfo(){
+
+  for (size_t i=0; i<vtx_std_tkind_helper_.size();i++){
+    if (vtx_std_tkind_helper_.at(i)) delete[] vtx_std_tkind_helper_.at(i);
+  }
+
+  for (size_t i=0; i<vtx_std_tkweight_helper_.size();i++){
+    if (vtx_std_tkweight_helper_.at(i)) delete[] vtx_std_tkweight_helper_.at(i);
+  }
+
 }
