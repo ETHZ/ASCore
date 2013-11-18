@@ -18,7 +18,8 @@ process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False))
-
+process.MessageLogger.suppressWarning.append('TriggerResultsFilter')
+process.MessageLogger.suppressInfo.append('TriggerResultsFilter')
 
 ### Parsing of command line parameters #############################################
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
@@ -39,10 +40,15 @@ options.register ('FastSim', # register 'runon' option
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you are dealing with a FastSim (but not a model scan!), set this to True, otherwise to False (default)")
 options.register ('doPhotonStuff',
-                  False,
+                  True,
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you want to run the photon-analyses specific configuration, set to True, otherwise False (default)")
+options.register ('is2011',
+                  False,
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you are running on the 2011 data or MC rerecoes, set to True, otherwise False (default)")
 options.register ('GlobalTag',
                   '',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -61,6 +67,8 @@ options.files= 'file:////scratch/mdunser/files/pickevents.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
+if (options.runon!="data"):
+   options.runon="MC"
 options.output='NTupleProducer_53X_'+options.runon+'.root'
 
 ### Running conditions #########################################################
@@ -77,19 +85,15 @@ if options.GlobalTag!='':
    process.GlobalTag.globaltag = options.GlobalTag
 else:
    if options.runon=='data':
-       process.GlobalTag.globaltag = "FT_P_V42_AN3::All" ## Global Tag for Run2012D prompt reco
-   # The following are the Global Tags for 2012 datataking. Processing with 536 is required.
-   # 2012A,B   July13        FT_53_V6_AN3:All
-   # 2012A,B   Aug06         FT_53_V6C_AN3:All (or FT_53_V6_AN3: difference only for low PU runs)
-   # 2012B     July13    FT_53_V6C_AN3:All (or FT_53_V6_AN3: difference only for low PU runs)
-   # 2012Cv1   Aug24     FT53_V10A_AN3:All
-   # 2012Cv2   prompt    FT_P_V42C_AN3:All
-   # 2012D     prompt    FT_P_V42_AN3:All
-   # see this twiki for more details:
-   # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Summary_of_Global_Tags_used_in_o
+      if (options.is2011):
+         process.GlobalTag.globaltag = "FT_R_53_LV3::All" 
+      else:
+         process.GlobalTag.globaltag = "FT53_V21A_AN6::All"
    else:
-       # CMSSW_5_2_X:
-       process.GlobalTag.globaltag = "START53_V7G::All"
+      if (options.is2011):
+         process.GlobalTag.globaltag = "START53_LV4::All"
+      else:
+         process.GlobalTag.globaltag = "START53_V7N::All"
 
 
 ### Input/Output ###############################################################
@@ -222,6 +226,10 @@ process.analyze.tag_doPhotonStuff = options.doPhotonStuff
 process.analyze.tag_vertex = 'goodVertices'
 if options.doPhotonStuff==True:
    process.analyze.tag_vertex = process.analyze.tag_vertex_withbs
+if (options.is2011):
+   process.analyze.tag_regressionVersion = cms.int32(8)
+else:
+   process.analyze.tag_regressionVersion = cms.int32(5)
 
 # Add some jet collections
 glist_btags = cms.vstring('trackCountingHighEffBJetTags','trackCountingHighPurBJetTags',
@@ -581,16 +589,96 @@ else:
    process.QGTagger.jec = cms.untracked.string('ak5PFL1FastL2L3')
 process.kt6PFJetsForQGSyst = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
 process.kt6PFJetsForQGSyst.Rho_EtaMax = cms.double(2.4)
-   
+
+# Beam scraping veto
+process.scrapingVeto = cms.EDFilter("FilterOutScraping",
+                                    applyfilter = cms.untracked.bool  (True),
+                                    debugOn     = cms.untracked.bool  (False),
+                                    numtrack    = cms.untracked.uint32(10),
+                                    thresh      = cms.untracked.double(0.25)
+                                    )
+
+
+# Diphoton trigger filter
+process.diphotonTriggerSelection2012 = cms.EDFilter( "TriggerResultsFilter",
+                                                     triggerConditions = cms.vstring(
+   'HLT_Photon36_R9Id85_OR_CaloId10_Iso50_Photon22_R9Id85_OR_CaloId10_Iso50_v*'
+   ),
+                                                     hltResults = cms.InputTag( "TriggerResults", "", "HLT" ),
+                                                     l1tResults = cms.InputTag( "gtDigis" ),
+                                                     l1tIgnoreMask = cms.bool( False ),
+                                                     l1techIgnorePrescales = cms.bool( False ),
+                                                     daqPartitions = cms.uint32( 1 ),
+                                                     throw = cms.bool( False )
+                                                     )
+
+# Diphoton trigger filter
+process.diphotonTriggerSelection2011 = cms.EDFilter( "TriggerResultsFilter",
+                                                     triggerConditions = cms.vstring(
+   'HLT_Photon20_R9Id_Photon18_R9Id OR HLT_Photon20_R9Id_Photon18_R9Id_v*',
+   'HLT_Photon26_CaloIdL_IsoVL_Photon18 OR HLT_Photon26_CaloIdL_IsoVL_Photon18_v*',
+   'HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL OR HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v*',
+   'HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id OR HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v*',
+   'HLT_Photon26_CaloIdXL_IsoXL_Photon18_CaloIdXL_IsoXL OR HLT_Photon26_CaloIdXL_IsoXL_Photon18_CaloIdXL_IsoXL_v*',
+   'HLT_Photon26_CaloIdXL_IsoXL_Photon18_R9Id OR HLT_Photon26_CaloIdXL_IsoXL_Photon18_R9Id_v*',
+   'HLT_Photon26_IsoVL_Photon18 OR HLT_Photon26_IsoVL_Photon18_v*',
+   'HLT_Photon26_IsoVL_Photon18_IsoVL OR HLT_Photon26_IsoVL_Photon18_IsoVL_v*',
+   'HLT_Photon26_Photon18 OR HLT_Photon26_Photon18_v*',
+   'HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL OR HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v*',
+   'HLT_Photon26_R9Id_Photon18_CaloIdXL_IsoXL OR HLT_Photon26_R9Id_Photon18_CaloIdXL_IsoXL_v*',
+   'HLT_Photon26_R9Id_Photon18_R9Id OR HLT_Photon26_R9Id_Photon18_R9Id_v*',
+   'HLT_Photon32_CaloIdL_Photon26_CaloIdL OR HLT_Photon32_CaloIdL_Photon26_CaloIdL_v*',
+   'HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL OR HLT_Photon36_CaloIdL_IsoVL_Photon22_CaloIdL_IsoVL_v*',
+   'HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id OR HLT_Photon36_CaloIdL_IsoVL_Photon22_R9Id_v*',
+   'HLT_Photon36_CaloIdL_Photon22_CaloIdL OR HLT_Photon36_CaloIdL_Photon22_CaloIdL_v*',
+   'HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL OR HLT_Photon36_R9Id_Photon22_CaloIdL_IsoVL_v*',
+   'HLT_Photon36_R9Id_Photon22_R9Id OR HLT_Photon36_R9Id_Photon22_R9Id_v*' ),
+                                                     hltResults = cms.InputTag( "TriggerResults", "", "HLT" ),
+                                                     l1tResults = cms.InputTag( "gtDigis" ),
+                                                     l1tIgnoreMask = cms.bool( False ),
+                                                     l1techIgnorePrescales = cms.bool( False ),
+                                                     daqPartitions = cms.uint32( 1 ),
+                                                     throw = cms.bool( False )
+                                                     )
+
+if (options.is2011):
+   process.diphotonTriggerSelection = process.diphotonTriggerSelection2011
+else:
+   process.diphotonTriggerSelection = process.diphotonTriggerSelection2012
+
+
+# Preselection: at least one photon passing preselection
+
+process.preselPhotons = cms.EDFilter(
+   "PhotonRefSelector",
+   src = cms.InputTag( "photons" ),
+   cut = cms.string(
+   "(hadronicOverEm<0.15 && (abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.566) && (superCluster.energy*sin(superCluster.position.theta)>15))"
+   " && ((abs(superCluster.eta)>1.5) || (sigmaIetaIeta<0.017)) "
+   " && ((abs(superCluster.eta)<1.5) || (sigmaIetaIeta<0.040)) "
+   )
+   )
+process.photonFilter = cms.EDFilter("CandViewCountFilter",
+                                    src = cms.InputTag("preselPhotons"),
+                                    minNumber = cms.uint32(1)
+                                    )
+process.photonPreselFilter = cms.Sequence(process.preselPhotons*process.photonFilter)
+
+
+
+
 
 #### Path ######################################################################
 
 process.p = cms.Path(
         process.myPartons *
+        process.scrapingVeto *
         process.AK5PFbyRef *
         process.AK5PFbyValAlgo *
         process.goodVertices * # Filter
         process.hcallasereventfilter2012 * # Filter
+        process.diphotonTriggerSelection *
+#        process.photonPreselFilter *
         (
          (process.photonPartonMatch
 #	*process.printGenParticles*process.printPhotons*process.printPartons
@@ -651,6 +739,9 @@ if options.runon=='data':
     process.p.remove(process.myPartons)
     process.p.remove(process.AK5PFbyRef)
     process.p.remove(process.AK5PFbyValAlgo)
+else:
+   process.p.remove(process.scrapingVeto)
+   process.p.remove(process.diphotonTriggerSelection)
 if options.ModelScan==True:
     process.p.remove(process.hcalLaserEventFilter)
 if options.FastSim==True:
