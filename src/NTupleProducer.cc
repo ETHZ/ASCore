@@ -1002,7 +1002,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTVrtxSumPt ->push_back( vertexit->p4().pt() );
     fTVrtxIsFake->push_back( vertexit->isFake() );
   }
-  *fTNVrtx = countVrtx+1;
+  *fTNVrtx = fTVrtxX->size();
 
 
   // Save position of beamspot
@@ -3089,7 +3089,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if (doPhotonStuff){
 
-      assert ((*fTNVrtx) == vertices->size());
+      assert ((*fTNVrtx) == vertices->size()); // WHY???
       reco::VertexCollection vtxColl = *(vertices.product());
 
       if (PileupJetIdAlgos.size()>0) for (int ivtx=0; ivtx<(*fTNVrtx); ivtx++){

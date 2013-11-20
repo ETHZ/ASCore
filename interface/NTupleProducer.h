@@ -245,7 +245,7 @@ private:
   static const int gMaxNGenLept = 100;
   static const int gMaxNGenPhot = 100;
   static const int gMaxNGenJets = 100;
-  static const int gMaxNVrtx    = 50;
+  static const int gMaxNVrtx    = 100;
   static const int gMaxNPileup  = 100;
   static const int gMaxNEBhits  = 20;
   static const int gMaxNGenVtx = 100;
