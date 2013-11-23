@@ -677,7 +677,7 @@ process.p = cms.Path(
         process.AK5PFbyValAlgo *
         process.goodVertices * # Filter
         process.hcallasereventfilter2012 * # Filter
-        process.diphotonTriggerSelection *
+#        process.diphotonTriggerSelection *
 #        process.photonPreselFilter *
         (
          (process.photonPartonMatch
@@ -741,7 +741,7 @@ if options.runon=='data':
     process.p.remove(process.AK5PFbyValAlgo)
 else:
    process.p.remove(process.scrapingVeto)
-   process.p.remove(process.diphotonTriggerSelection)
+#   process.p.remove(process.diphotonTriggerSelection)
 if options.ModelScan==True:
     process.p.remove(process.hcalLaserEventFilter)
 if options.FastSim==True:
