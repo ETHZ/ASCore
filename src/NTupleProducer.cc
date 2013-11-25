@@ -3089,7 +3089,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if (doPhotonStuff){
 
-      assert ((*fTNVrtx) == vertices->size()); // WHY???
       reco::VertexCollection vtxColl = *(vertices.product());
 
       if (PileupJetIdAlgos.size()>0) for (int ivtx=0; ivtx<(*fTNVrtx); ivtx++){
