@@ -2117,8 +2117,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   phoqi = 0;
 
   std::vector<bool> storethispfcand(pfCandidates->size(),false);
-  std::vector<int> PhotonToPFPhotonOrElectronMatchingArray(gMaxNPhotons,-999);
-  std::vector<int> PhotonToPFPhotonOrElectronMatchingArrayTranslator(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFPhotonMatchingArray(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFPhotonMatchingArrayTranslator(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFElectronMatchingArray(gMaxNPhotons,-999);
+  std::vector<int> PhotonToPFElectronMatchingArrayTranslator(gMaxNPhotons,-999);
   std::vector<std::vector<int> > list_pfcand_footprint(gMaxNPhotons,std::vector<int>());
   std::vector<std::vector<int> > list_pfcand_footprintTranslator(gMaxNPhotons,std::vector<int>());
 
@@ -2386,7 +2388,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       if (iphot!=-1) {
 	(*fTPhoisPFPhoton)[phoqi] = 1;
-	PhotonToPFPhotonOrElectronMatchingArray[phoqi] = iphot;
+	PhotonToPFPhotonMatchingArray[phoqi] = iphot;
       }
       
 
@@ -2414,7 +2416,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       if (iel!=-1) {
 	(*fTPhoisPFElectron)[phoqi] = 1;
-	PhotonToPFPhotonOrElectronMatchingArray[phoqi] = iel;
+	PhotonToPFElectronMatchingArray[phoqi] = iel;
       }
 
     }
@@ -3174,8 +3176,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (type==2) storethispfcand[i]=true;
 
     for (int j=0; j<(*fTNPhotons); j++){
-      if (PhotonToPFPhotonOrElectronMatchingArray[j]==(int)i) {
-	PhotonToPFPhotonOrElectronMatchingArrayTranslator[j]=pfcandIndex;
+      if (PhotonToPFPhotonMatchingArray[j]==(int)i) {
+	PhotonToPFPhotonMatchingArrayTranslator[j]=pfcandIndex;
+	storethispfcand[i]=true;
+      }
+    }
+    for (int j=0; j<(*fTNPhotons); j++){
+      if (PhotonToPFElectronMatchingArray[j]==(int)i) {
+	PhotonToPFElectronMatchingArrayTranslator[j]=pfcandIndex;
 	storethispfcand[i]=true;
       }
     }
@@ -3233,7 +3241,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   *fTNPfCand=pfcandIndex;
   
   for (int j=0; j<(*fTNPhotons) && doPhotonStuff; j++){
-    fTPhoMatchedPFPhotonOrElectronCand->push_back(PhotonToPFPhotonOrElectronMatchingArrayTranslator[j]);
+    fTPhoMatchedPFPhotonCand->push_back(PhotonToPFPhotonMatchingArrayTranslator[j]);
+    fTPhoMatchedPFElectronCand->push_back(PhotonToPFElectronMatchingArrayTranslator[j]);
     fTPhoFootprintPfCandsListStart->push_back(fTPhoFootprintPfCands->size());
     for (size_t k=0; k<list_pfcand_footprintTranslator.at(j).size(); k++) fTPhoFootprintPfCands->push_back(list_pfcand_footprintTranslator.at(j).at(k));
   }
@@ -4506,7 +4515,8 @@ produces<std::vector<int> >("PfCandBelongsToJet");
 //produces<std::vector<float> >("PfCandTrackRefPx");
 //produces<std::vector<float> >("PfCandTrackRefPy");
 //produces<std::vector<float> >("PfCandTrackRefPz");
-produces<std::vector<int> >("PhoMatchedPFPhotonOrElectronCand");
+produces<std::vector<int> >("PhoMatchedPFPhotonCand");
+produces<std::vector<int> >("PhoMatchedPFElectronCand");
 produces<std::vector<int> >("PhoFootprintPfCandsListStart");
 produces<std::vector<int> >("PhoFootprintPfCands");
 produces<std::vector<float> >("PhoVx");
@@ -5315,7 +5325,8 @@ fTPfCandBelongsToJet.reset(new std::vector<int>  );
 //fTPfCandTrackRefPx.reset(new std::vector<float>  );
 //fTPfCandTrackRefPy.reset(new std::vector<float>  );
 //fTPfCandTrackRefPz.reset(new std::vector<float>  );
-fTPhoMatchedPFPhotonOrElectronCand.reset(new std::vector<int>  );
+fTPhoMatchedPFPhotonCand.reset(new std::vector<int>  );
+fTPhoMatchedPFElectronCand.reset(new std::vector<int>  );
 fTPhoFootprintPfCandsListStart.reset(new std::vector<int>  );
 fTPhoFootprintPfCands.reset(new std::vector<int>  );
 fTPhoVx.reset(new std::vector<float>  );
@@ -6164,7 +6175,8 @@ event.put(fTPfCandBelongsToJet,"PfCandBelongsToJet");
 //event.put(fTPfCandTrackRefPx,"PfCandTrackRefPx");
 //event.put(fTPfCandTrackRefPy,"PfCandTrackRefPy");
 //event.put(fTPfCandTrackRefPz,"PfCandTrackRefPz");
-event.put(fTPhoMatchedPFPhotonOrElectronCand,"PhoMatchedPFPhotonOrElectronCand");
+event.put(fTPhoMatchedPFPhotonCand,"PhoMatchedPFPhotonCand");
+event.put(fTPhoMatchedPFElectronCand,"PhoMatchedPFElectronCand");
 event.put(fTPhoFootprintPfCandsListStart,"PhoFootprintPfCandsListStart");
 event.put(fTPhoFootprintPfCands,"PhoFootprintPfCands");
 event.put(fTPhoVx,"PhoVx");
