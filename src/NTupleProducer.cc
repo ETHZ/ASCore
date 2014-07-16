@@ -1134,14 +1134,22 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       if(m_id != gen_id || !GenMomExists);
       else{
         int id= m_id;
+	int loop_counter = 0;
         while(id == gen_id && GenMomExists){
+	  loop_counter++;
           gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
           if(gen_mom==NULL){
             edm::LogWarning("NTP") << "@SUB=analyze"
                                    << " WARNING: GenParticle does not have a mother ";
             GenMomExists=false;
           }
-          if(GenMomExists) id=gen_mom->pdgId();
+	  if(GenMomExists && loop_counter>=10){
+            edm::LogWarning("NTP") << "@SUB=analyze"
+                                   << " WARNING: accessing GenParticle mother results in loop";
+	    gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+	    break;
+	  }
+          if(GenMomExists) id = gen_mom->pdgId();
         }
       }
       if(GenMomExists) m_id = gen_mom->pdgId();
@@ -1159,13 +1167,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       if (m_id != gm_id || !GenGrMomExists);
       else{
         int id=gm_id;
+	int loop_counter = 0;
         while(id == m_id && GenGrMomExists){
+	  loop_counter++;
           gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
           if(gen_gmom==NULL){
             edm::LogWarning("NTP") << "@SUB=analyze"
                                    << " WARNING: GenParticle does not have a GrandMother ";
             GenGrMomExists=false;
           }
+	  if(GenGrMomExists && loop_counter>=10){
+            edm::LogWarning("NTP") << "@SUB=analyze"
+                                   << " WARNING: accessing GenParticle grand-mother results in loop";
+	    gen_gmom = static_cast<const GenParticle*> (gen_mom->mother());
+	    break;
+	  }
           if(GenGrMomExists) id = gen_gmom->pdgId();
         }
       }
@@ -6446,7 +6462,15 @@ std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::
     if(mid != id); // do nothing
     else{
       int tempid = mid;
+      int loop_counter = 0;
       while(tempid == id){
+	loop_counter++;
+	if(loop_counter>=10){
+	  edm::LogWarning("NTP") << "@SUB=analyze"
+				 << " WARNING: accessing GenParticle mother results in loop";
+	  GenMom = static_cast<const GenParticle*>(GenCand->mother());
+	  break;
+	}
         GenMom = static_cast<const GenParticle*>(GenMom->mother());
         tempid = GenMom->pdgId();
       }
@@ -6463,7 +6487,15 @@ std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::
     if(gmid != mid); // do nothing
     else{
       int tempid = gmid;
+      int loop_counter = 0;
       while(tempid == mid){
+	loop_counter++;
+	if(loop_counter>=10){
+	  edm::LogWarning("NTP") << "@SUB=analyze"
+				 << " WARNING: accessing GenParticle grand-mother results in loop";
+	  GenGMom = static_cast<const GenParticle*>(GenMom->mother());
+	  break;
+	}
         GenGMom = static_cast<const GenParticle*>(GenGMom->mother());
         tempid = GenGMom->pdgId();
       }
